@@ -1,0 +1,396 @@
+---
+# Worked Annual Budget Example
+# 200-unit multifamily, complete line-item budget with component-specific
+# escalators, IREM benchmarks, NOI sensitivity, budget-to-value linkage,
+# and reserve adequacy testing.
+# Market: Northern NJ, Q1 2026 budget cycle for CY2026 operating year.
+---
+
+property:
+  name: "Riverside Gardens"
+  type: multifamily
+  units: 200
+  year_built: 2001
+  location: "Hackensack, NJ"
+  submarket: "Bergen County"
+  current_appraised_value: 52_000_000
+  in_place_cap_rate: 0.0528
+  budget_year: 2026
+
+# =============================================================================
+# REVENUE BUDGET
+# =============================================================================
+revenue:
+  unit_mix:
+    - type: Studio
+      count: 30
+      avg_sf: 475
+      current_rent: 1_650
+      market_rent: 1_750
+      loss_to_lease_pct: 0.057
+      budget_rent: 1_725           # 4.5% increase on renewals
+      renewal_rate: 0.65
+
+    - type: 1BR
+      count: 90
+      avg_sf: 700
+      current_rent: 2_100
+      market_rent: 2_200
+      loss_to_lease_pct: 0.045
+      budget_rent: 2_175
+      renewal_rate: 0.60
+
+    - type: 2BR
+      count: 60
+      avg_sf: 950
+      current_rent: 2_650
+      market_rent: 2_800
+      loss_to_lease_pct: 0.054
+      budget_rent: 2_750
+      renewal_rate: 0.55
+
+    - type: 3BR
+      count: 20
+      avg_sf: 1_200
+      current_rent: 3_200
+      market_rent: 3_350
+      loss_to_lease_pct: 0.045
+      budget_rent: 3_300
+      renewal_rate: 0.70
+
+  gross_potential_rent:
+    calculation: >
+      Studio: 30 * $1,725 * 12 = $621,000
+      1BR: 90 * $2,175 * 12 = $2,349,000
+      2BR: 60 * $2,750 * 12 = $1,980,000
+      3BR: 20 * $3,300 * 12 = $792,000
+    total: 5_742_000
+
+  vacancy_loss:
+    physical_vacancy_rate: 0.050
+    economic_vacancy_rate: 0.065      # includes downtime, concessions, model units
+    concessions: -57_420              # 1% of GPR (1 month free on ~12% of leases)
+    model_unit_loss: -28_710          # 0.5% (1 model unit)
+    bad_debt: -28_710                 # 0.5%
+    total_vacancy_economic: -401_940  # 6.5% * 5,742,000 + concessions component
+    note: "Bergen County MF vacancy ~5.2% per REIS Q4 2025. Budget at 5.0% physical."
+
+  other_income:
+    parking:
+      spaces: 180
+      rate_per_month: 85
+      occupancy: 0.90
+      annual: 165_240                 # 180 * 85 * 12 * 0.90
+    laundry: 24_000                   # $10/unit/month
+    pet_fees:
+      pet_count: 60
+      monthly_fee: 50
+      annual: 36_000
+    late_fees: 18_000
+    application_fees: 9_600           # ~40 apps/year * $240
+    storage:
+      units_available: 25
+      rate_per_month: 100
+      occupancy: 0.80
+      annual: 24_000
+    amenity_fees: 12_000              # gym, pool access for non-residents
+    total_other: 288_840
+
+  effective_gross_income: 5_628_900   # GPR 5,742,000 - vacancy 401,940 + other 288,840
+
+# =============================================================================
+# EXPENSE BUDGET (line item with escalators)
+# =============================================================================
+expenses:
+  headers: [line_item, prior_year_actual, budget_2026, escalator_pct, escalator_basis, per_unit, irem_benchmark_per_unit, variance_to_irem]
+
+  line_items:
+    - line_item: Real estate taxes
+      prior_year_actual: 680_000
+      budget_2026: 700_400
+      escalator_pct: 0.030
+      escalator_basis: "NJ assessment cycle, 3% annual trend per Bergen County"
+      per_unit: 3_502
+      irem_benchmark_per_unit: 3_400
+      variance_to_irem: "+3.0%"
+      note: "Bergen County taxes running above IREM NJ metro benchmark"
+
+    - line_item: Insurance
+      prior_year_actual: 156_000
+      budget_2026: 171_600
+      escalator_pct: 0.100
+      escalator_basis: "Hard market continues; 10% renewal increase per broker quote"
+      per_unit: 858
+      irem_benchmark_per_unit: 750
+      variance_to_irem: "+14.4%"
+      note: "Coastal NJ premium. IREM benchmark understates NJ insurance market."
+
+    - line_item: Utilities - water/sewer
+      prior_year_actual: 180_000
+      budget_2026: 189_000
+      escalator_pct: 0.050
+      escalator_basis: "SUEZ NJ rate increase effective April 2026"
+      per_unit: 945
+      irem_benchmark_per_unit: 920
+      variance_to_irem: "+2.7%"
+
+    - line_item: Utilities - electric (common)
+      prior_year_actual: 96_000
+      budget_2026: 100_800
+      escalator_pct: 0.050
+      escalator_basis: "PSE&G rate case, 5% projected"
+      per_unit: 504
+      irem_benchmark_per_unit: 480
+      variance_to_irem: "+5.0%"
+
+    - line_item: Utilities - gas/heating
+      prior_year_actual: 72_000
+      budget_2026: 73_440
+      escalator_pct: 0.020
+      escalator_basis: "Natural gas forward curve flat; 2% conservative"
+      per_unit: 367
+      irem_benchmark_per_unit: 400
+      variance_to_irem: "-8.3%"
+
+    - line_item: Management fee
+      prior_year_actual: 265_200
+      budget_2026: 281_445
+      escalator_pct: null
+      escalator_basis: "5.0% of EGI (contractual)"
+      per_unit: 1_407
+      irem_benchmark_per_unit: 1_350
+      variance_to_irem: "+4.2%"
+
+    - line_item: Payroll & benefits
+      prior_year_actual: 380_000
+      budget_2026: 399_000
+      escalator_pct: 0.050
+      escalator_basis: "5 FTE. NJ minimum wage increase + 3% merit. Benefits +8%."
+      per_unit: 1_995
+      irem_benchmark_per_unit: 1_900
+      variance_to_irem: "+5.0%"
+      detail:
+        property_manager: 85_000
+        assistant_manager: 62_000
+        maintenance_tech_1: 58_000
+        maintenance_tech_2: 55_000
+        porter: 45_000
+        benefits_taxes: 94_000        # ~31% of base wages
+
+    - line_item: Repairs & maintenance
+      prior_year_actual: 220_000
+      budget_2026: 231_000
+      escalator_pct: 0.050
+      escalator_basis: "Material costs +5%, labor +4%, blended 5%"
+      per_unit: 1_155
+      irem_benchmark_per_unit: 1_100
+      variance_to_irem: "+5.0%"
+      detail:
+        plumbing: 42_000
+        electrical: 28_000
+        hvac: 55_000
+        appliance_repair: 32_000
+        painting_turnover: 38_000
+        general_carpentry: 22_000
+        flooring: 14_000
+
+    - line_item: Contract services
+      prior_year_actual: 108_000
+      budget_2026: 113_400
+      escalator_pct: 0.050
+      escalator_basis: "New landscaping contract +6%, elevator flat, pest +3%"
+      per_unit: 567
+      irem_benchmark_per_unit: 550
+      variance_to_irem: "+3.1%"
+      detail:
+        landscaping: 42_000
+        snow_removal: 24_000
+        elevator_maintenance: 22_000
+        pest_control: 12_000
+        fire_alarm_monitoring: 7_200
+        pool_maintenance: 6_200
+
+    - line_item: Administrative & general
+      prior_year_actual: 48_000
+      budget_2026: 49_440
+      escalator_pct: 0.030
+      escalator_basis: "Office supplies, legal, accounting -- CPI-linked"
+      per_unit: 247
+      irem_benchmark_per_unit: 250
+      variance_to_irem: "-1.2%"
+
+    - line_item: Marketing & advertising
+      prior_year_actual: 36_000
+      budget_2026: 38_880
+      escalator_pct: 0.080
+      escalator_basis: "ILS platform cost increases (Apartments.com, Zillow)"
+      per_unit: 194
+      irem_benchmark_per_unit: 180
+      variance_to_irem: "+7.8%"
+
+    - line_item: Turnover costs
+      prior_year_actual: 60_000
+      budget_2026: 63_000
+      escalator_pct: 0.050
+      escalator_basis: "Assume 40% turnover * 200 units = 80 turns * $788/turn"
+      per_unit: 315
+      irem_benchmark_per_unit: 300
+      variance_to_irem: "+5.0%"
+
+  total_expenses:
+    prior_year_actual: 2_301_200
+    budget_2026: 2_411_405
+    escalator_weighted_avg: 0.048     # 4.8% blended expense growth
+    per_unit: 12_057
+    irem_benchmark_per_unit: 11_580
+    variance_to_irem: "+4.1%"
+
+# =============================================================================
+# NOI SUMMARY
+# =============================================================================
+noi_summary:
+  effective_gross_income: 5_628_900
+  total_operating_expenses: 2_411_405
+  net_operating_income: 3_217_495
+  opex_ratio: 0.428                   # 42.8%
+  noi_per_unit: 16_087
+  noi_margin: 0.572
+
+  year_over_year:
+    prior_year_noi: 3_098_800
+    budget_noi: 3_217_495
+    noi_growth: 0.038                 # 3.8% YoY
+    revenue_growth: 0.045             # 4.5%
+    expense_growth: 0.048             # 4.8%
+    note: "Expense growth outpacing revenue by 30bps. Monitor insurance and payroll."
+
+# =============================================================================
+# NOI SENSITIVITY GRID
+# =============================================================================
+sensitivity:
+  description: "Budget NOI ($000s) by vacancy rate (rows) and expense growth (cols)"
+  expense_growth_cols: [0.02, 0.03, 0.048, 0.06, 0.08]
+  vacancy_rate_rows:
+    0.03: [3_498, 3_475, 3_434, 3_406, 3_360]
+    0.05: [3_383, 3_360, 3_320, 3_291, 3_245]
+    0.065: [3_297, 3_274, 3_217, 3_206, 3_160]   # base row
+    0.08: [3_211, 3_188, 3_148, 3_120, 3_074]
+    0.10: [3_096, 3_073, 3_033, 3_005, 2_959]
+  base_case: "vacancy=0.065, expense_growth=0.048 -> NOI $3,217K"
+  worst_case: "vacancy=0.10, expense_growth=0.08 -> NOI $2,959K (8.0% below budget)"
+  note: >
+    10% vacancy + 8% expense growth scenario reduces NOI $258K from budget.
+    At in-place cap rate of 5.28%, that translates to $4.9M value destruction.
+
+# =============================================================================
+# BUDGET-TO-VALUE LINKAGE TABLE
+# =============================================================================
+budget_to_value:
+  description: "Implied property value at budget NOI across cap rates"
+  budget_noi: 3_217_495
+  cap_rate_grid:
+    - cap_rate: 0.0475
+      implied_value: 67_737_000
+      per_unit: 338_684
+      delta_from_current: 15_737_000
+
+    - cap_rate: 0.0500
+      implied_value: 64_350_000
+      per_unit: 321_750
+      delta_from_current: 12_350_000
+
+    - cap_rate: 0.0528
+      implied_value: 60_936_000       # current cap rate
+      per_unit: 304_680
+      delta_from_current: 8_936_000
+      note: "Current appraised value is $52M at in-place NOI. Budget NOI implies $60.9M at same cap."
+
+    - cap_rate: 0.0550
+      implied_value: 58_500_000
+      per_unit: 292_500
+      delta_from_current: 6_500_000
+
+    - cap_rate: 0.0600
+      implied_value: 53_625_000
+      per_unit: 268_125
+      delta_from_current: 1_625_000
+
+    - cap_rate: 0.0650
+      implied_value: 49_500_000
+      per_unit: 247_500
+      delta_from_current: -2_500_000
+      note: "65bps cap expansion from current wipes out all budget NOI gains"
+
+  value_sensitivity_note: >
+    Each $100K of NOI improvement translates to $1.89M of value at 5.28% cap.
+    The insurance line ($171K budget, +$15.6K YoY) alone represents $295K of value.
+    Management should prioritize controllable expense lines with highest value impact.
+
+  noi_impact_per_line:
+    - line: "Insurance (-$15K savings)"
+      noi_impact: 15_000
+      value_impact_at_5_28: 284_000
+    - line: "Vacancy improve 50bps"
+      noi_impact: 28_710
+      value_impact_at_5_28: 544_000
+    - line: "Payroll hold flat"
+      noi_impact: 19_000
+      value_impact_at_5_28: 360_000
+    - line: "Marketing reduce 20%"
+      noi_impact: 7_776
+      value_impact_at_5_28: 147_000
+
+# =============================================================================
+# RESERVE ADEQUACY TEST
+# =============================================================================
+reserve_adequacy:
+  replacement_reserve:
+    budget_annual: 60_000             # $300/unit
+    irem_benchmark: 50_000            # $250/unit for 2001 vintage
+    adequacy: "Above benchmark by $50/unit. Adequate."
+    reserve_balance_start: 142_000
+    projected_draws: -85_000          # planned: boiler repair $45K, parking reseal $40K
+    projected_balance_end: 117_000
+
+  capital_expenditure_reserve:
+    funded_from_operations: true
+    annual_capex_budget: 200_000      # $1,000/unit -- above-the-line capital improvements
+    five_year_capex_plan_total: 1_250_000
+    items:
+      - year: 2026
+        description: "Boiler replacement (2 of 4), parking lot reseal"
+        amount: 200_000
+      - year: 2027
+        description: "Roof sections A/B, hallway refresh floors 1-5"
+        amount: 280_000
+      - year: 2028
+        description: "Elevator modernization (1 of 2)"
+        amount: 320_000
+      - year: 2029
+        description: "Common area renovation, unit appliance cycle"
+        amount: 250_000
+      - year: 2030
+        description: "Facade repair, pool renovation"
+        amount: 200_000
+
+  operating_reserve:
+    target_months: 3
+    monthly_opex: 200_950             # 2,411,405 / 12
+    target_balance: 602_851
+    current_balance: 580_000
+    shortfall: 22_851
+    recommendation: "Fund $23K shortfall from Q1 cash flow to reach 3-month target"
+
+  debt_service_reserve:
+    monthly_ds: 198_000               # assumed from current financing
+    months_required: 6                # lender covenant
+    target_balance: 1_188_000
+    current_balance: 1_200_000
+    adequacy: "Adequate. $12K surplus."
+
+  overall_reserve_assessment: >
+    Total reserves: $1,922,000 ($580K operating + $142K replacement + $1,200K DS).
+    Target: $1,933,000. Shortfall: $11K. Rating: ADEQUATE with minor funding needed.
+    The 5-year capex plan of $1.25M ($6,250/unit) is consistent with 2001-vintage
+    Bergen County product. Year 3 elevator modernization ($320K) is the peak year
+    and should be funded from a combination of reserves and operating cash flow.

@@ -1,0 +1,439 @@
+# Data Room Structure for CRE Fund Raise
+# Organized by folder hierarchy. Each item includes:
+# - required: must be present before LP diligence begins
+# - recommended: nice to have; sophisticated LPs will ask for these
+# - description: what the document contains
+# - owner: who is responsible for preparing it
+# - timing: when it should be ready relative to fundraise kickoff
+
+---
+
+metadata:
+  version: "1.0"
+  last_updated: "2025-03-15"
+  purpose: >
+    Standard data room folder structure for a CRE fund capital raise.
+    Covers Fund I through Fund III stage managers. Institutional LPs
+    (pensions, endowments, FoFs) expect this level of organization.
+    A disorganized data room signals an undisciplined GP.
+  naming_convention: >
+    All files named: [FolderNumber]-[DocName]-[Date].pdf
+    Example: 01-PPM-20250315.pdf, 04a-TrackRecord-Realized-20250315.xlsx
+  platform_recommendations:
+    - "Intralinks (institutional standard)"
+    - "Datasite (formerly Merrill DataSite)"
+    - "Box / Egnyte (acceptable for smaller raises)"
+    - "Google Drive (not recommended for institutional LPs -- permission model is weak)"
+
+---
+
+folders:
+
+  01_offering_documents:
+    description: "Core legal documents governing the fund"
+    items:
+      - name: "Private Placement Memorandum (PPM)"
+        required: true
+        description: "Full offering document including strategy, terms, risk factors, tax considerations"
+        owner: "Fund counsel"
+        timing: "Ready at fundraise kickoff"
+        format: "PDF, final executed version"
+
+      - name: "Limited Partnership Agreement (LPA)"
+        required: true
+        description: "Definitive agreement: economics, governance, GP authority, LP rights"
+        owner: "Fund counsel"
+        timing: "Ready at fundraise kickoff"
+        format: "PDF, final or near-final draft"
+
+      - name: "Subscription Agreement"
+        required: true
+        description: "LP commitment form with representations, tax elections, AML/KYC"
+        owner: "Fund counsel"
+        timing: "Ready at fundraise kickoff"
+        format: "PDF and Word (editable for LP counsel)"
+
+      - name: "Side Letter Template"
+        recommended: true
+        description: "Standard side letter provisions: MFN, co-invest, fee discount, reporting"
+        owner: "Fund counsel"
+        timing: "Ready at first close"
+        format: "Word"
+
+      - name: "Investor Questionnaire"
+        required: true
+        description: "AML/KYC/ERISA/OFAC compliance questionnaire"
+        owner: "Fund counsel / compliance"
+        timing: "Ready at fundraise kickoff"
+        format: "PDF and Word"
+
+  02_fund_overview:
+    description: "Marketing and strategy materials"
+    items:
+      - name: "Pitch Deck / Investor Presentation"
+        required: true
+        description: "25-35 slide presentation covering strategy, track record, team, terms"
+        owner: "GP / Investor Relations"
+        timing: "Ready at fundraise kickoff; update quarterly"
+        format: "PDF (not editable)"
+
+      - name: "One-Pager / Teaser"
+        required: true
+        description: "Single-page fund summary for initial outreach"
+        owner: "GP / Investor Relations"
+        timing: "Ready at fundraise kickoff"
+        format: "PDF"
+
+      - name: "FAQ Document"
+        recommended: true
+        description: "Answers to 15-20 most common LP questions from initial meetings"
+        owner: "GP"
+        timing: "After first 5-10 LP meetings"
+        format: "PDF"
+
+      - name: "ESG Policy"
+        recommended: true
+        description: "Environmental, social, governance framework. Required by many pensions."
+        owner: "GP"
+        timing: "Ready at fundraise kickoff"
+        format: "PDF"
+
+      - name: "DEI Policy"
+        recommended: true
+        description: "Diversity, equity, inclusion policy. Increasingly required by institutional LPs."
+        owner: "GP"
+        timing: "Ready at fundraise kickoff"
+        format: "PDF"
+
+  03_legal_and_regulatory:
+    description: "Legal entity structure and regulatory filings"
+    items:
+      - name: "Fund Structure Diagram"
+        required: true
+        description: "Visual showing GP entity, fund entity, SPEs, management company relationships"
+        owner: "Fund counsel"
+        timing: "Ready at fundraise kickoff"
+        format: "PDF"
+
+      - name: "Form D Filing (SEC)"
+        required: true
+        description: "Reg D filing confirming exemption from registration"
+        owner: "Fund counsel"
+        timing: "Filed within 15 days of first sale"
+        format: "PDF of filed form"
+
+      - name: "Blue Sky Filings"
+        required: true
+        description: "State-level notice filings required by each state where LPs reside"
+        owner: "Fund counsel"
+        timing: "Filed per state deadlines"
+        format: "PDF confirmations"
+
+      - name: "ADV Part 2A (if registered)"
+        required: true
+        description: "Investment adviser brochure if GP is a registered investment adviser"
+        owner: "CCO / compliance counsel"
+        timing: "Updated annually"
+        format: "PDF"
+        note: "Only if GP entity is an RIA. Most sub-$150M managers are exempt."
+
+      - name: "Compliance Manual"
+        recommended: true
+        description: "Written supervisory procedures, code of ethics, insider trading policy"
+        owner: "CCO"
+        timing: "Ready at fundraise kickoff"
+        format: "PDF"
+
+      - name: "Anti-Money Laundering (AML) Policy"
+        required: true
+        description: "KYC/AML procedures for investor onboarding"
+        owner: "CCO / fund counsel"
+        timing: "Ready at fundraise kickoff"
+        format: "PDF"
+
+      - name: "ERISA Analysis"
+        recommended: true
+        description: "Counsel opinion on whether fund is an ERISA plan asset vehicle"
+        owner: "ERISA counsel"
+        timing: "Ready before accepting pension commitments"
+        format: "PDF"
+
+  04_track_record:
+    description: "Historical performance data"
+    items:
+      - name: "Track Record Summary (Aggregate)"
+        required: true
+        description: "Gross and net IRR, EM by fund and aggregate. Realized vs. unrealized split."
+        owner: "GP / fund accountant"
+        timing: "Ready at fundraise kickoff; update quarterly"
+        format: "PDF and Excel"
+
+      - name: "Deal-Level Track Record"
+        required: true
+        description: "Each investment: entry, exit, equity, distributions, IRR, EM, status"
+        owner: "GP"
+        timing: "Ready at fundraise kickoff"
+        format: "Excel with PDF summary"
+
+      - name: "Case Studies (3-5 deals)"
+        required: true
+        description: "One-page per deal: property, strategy, execution, returns, lessons"
+        owner: "GP"
+        timing: "Ready at fundraise kickoff"
+        format: "PDF"
+
+      - name: "Attribution Analysis"
+        recommended: true
+        description: "Return decomposition: NOI growth, cap rate change, leverage, income"
+        owner: "GP"
+        timing: "Ready at fundraise kickoff"
+        format: "PDF"
+
+      - name: "Prior Fund Audited Financials"
+        required: true
+        description: "Annual audited financial statements for each prior fund"
+        owner: "Fund auditor"
+        timing: "Most recent fiscal year"
+        format: "PDF"
+
+      - name: "Prior Fund Quarterly Reports (trailing 4 quarters)"
+        recommended: true
+        description: "Quarterly investor updates demonstrating reporting quality"
+        owner: "GP / Investor Relations"
+        timing: "Trailing 4 quarters"
+        format: "PDF"
+
+      - name: "Third-Party Appraisals (unrealized assets)"
+        recommended: true
+        description: "USPAP-compliant appraisals for assets valued internally in track record"
+        owner: "Third-party appraiser"
+        timing: "Within 12 months"
+        format: "PDF"
+
+  05_team:
+    description: "Team backgrounds and organizational information"
+    items:
+      - name: "Team Bios (Detailed)"
+        required: true
+        description: "Full professional history for all investment professionals"
+        owner: "GP"
+        timing: "Ready at fundraise kickoff"
+        format: "PDF"
+
+      - name: "Organizational Chart"
+        required: true
+        description: "Reporting structure, investment committee composition"
+        owner: "GP"
+        timing: "Ready at fundraise kickoff"
+        format: "PDF"
+
+      - name: "Reference List"
+        required: true
+        description: "3-5 professional references: existing LPs, lenders, brokers, counsel"
+        owner: "GP"
+        timing: "Ready at fundraise kickoff (with permission)"
+        format: "PDF"
+
+      - name: "Key Person Disclosure"
+        required: true
+        description: "Key person identification and time commitment representations"
+        owner: "Fund counsel"
+        timing: "In LPA"
+        format: "Referenced in LPA"
+
+      - name: "Background Check Authorization"
+        recommended: true
+        description: "Pre-completed background check results or authorization forms"
+        owner: "GP"
+        timing: "Ready at fundraise kickoff"
+        format: "PDF"
+
+  06_market_research:
+    description: "Market data supporting the investment thesis"
+    items:
+      - name: "Target Market Research Reports"
+        required: true
+        description: "CoStar, CBRE, JLL or equivalent reports for each target market"
+        owner: "GP / acquisitions"
+        timing: "Within current quarter"
+        format: "PDF"
+
+      - name: "Supply Pipeline Analysis"
+        recommended: true
+        description: "Units under construction, planned, permitted in target submarkets"
+        owner: "GP / acquisitions"
+        timing: "Within current quarter"
+        format: "PDF or Excel"
+
+      - name: "Comparable Sales Data"
+        recommended: true
+        description: "Recent comp sales supporting acquisition basis and exit cap assumptions"
+        owner: "GP / acquisitions"
+        timing: "Within 6 months"
+        format: "Excel"
+
+      - name: "Rent Comparable Analysis"
+        recommended: true
+        description: "Rent comps for renovated and unrenovated units in target submarkets"
+        owner: "GP / acquisitions"
+        timing: "Within current quarter"
+        format: "Excel"
+
+  07_operations:
+    description: "Operating procedures and infrastructure"
+    items:
+      - name: "Investment Process Overview"
+        required: true
+        description: "Deal flow to closing: sourcing, screening, UW, IC, closing, asset mgmt"
+        owner: "GP"
+        timing: "Ready at fundraise kickoff"
+        format: "PDF"
+
+      - name: "Valuation Policy"
+        required: true
+        description: "How properties are valued quarterly: methodology, frequency, oversight"
+        owner: "GP / fund counsel"
+        timing: "Ready at fundraise kickoff"
+        format: "PDF"
+
+      - name: "Risk Management Framework"
+        recommended: true
+        description: "How the GP identifies, monitors, and mitigates portfolio risk"
+        owner: "GP"
+        timing: "Ready at fundraise kickoff"
+        format: "PDF"
+
+      - name: "Property Management Overview"
+        recommended: true
+        description: "In-house vs. third-party. If third-party, name the firm and terms."
+        owner: "GP / asset management"
+        timing: "Ready at fundraise kickoff"
+        format: "PDF"
+
+      - name: "Insurance Summary"
+        recommended: true
+        description: "Portfolio insurance program: carrier, coverage, premiums, umbrella"
+        owner: "GP / risk management"
+        timing: "Current policy year"
+        format: "PDF"
+
+  08_financial:
+    description: "Fund-level financial information"
+    items:
+      - name: "GP Financial Statements"
+        recommended: true
+        description: "GP entity financials demonstrating solvency and operational capacity"
+        owner: "GP / accountant"
+        timing: "Most recent fiscal year"
+        format: "PDF"
+
+      - name: "Fee Calculation Examples"
+        recommended: true
+        description: "Worked examples showing management fee, acquisition fee, carry calculation"
+        owner: "Fund counsel / GP"
+        timing: "Ready at fundraise kickoff"
+        format: "PDF"
+
+      - name: "Waterfall Illustration"
+        required: true
+        description: "Numeric example of distribution waterfall at various return levels"
+        owner: "GP / fund counsel"
+        timing: "Ready at fundraise kickoff"
+        format: "PDF"
+
+  09_pipeline:
+    description: "Current investment pipeline (if applicable)"
+    items:
+      - name: "Pipeline Summary"
+        recommended: true
+        description: "Active deals: name, type, market, price, expected IRR, stage"
+        owner: "GP / acquisitions"
+        timing: "Updated at each LP meeting"
+        format: "PDF"
+
+      - name: "Seed Asset Summary (if seeding the fund)"
+        required: true
+        description: "If the fund launches with an identified or acquired asset: full IC memo"
+        owner: "GP"
+        timing: "At fundraise kickoff"
+        format: "PDF"
+        note: "Only if the fund has a seed/anchor asset at launch"
+
+---
+
+data_room_checklist:
+  description: "Pre-launch readiness checklist"
+  items:
+    - category: "Must-have before LP meetings"
+      documents:
+        - "PPM (final or near-final)"
+        - "LPA (draft or final)"
+        - "Pitch deck"
+        - "One-pager"
+        - "Track record summary (gross and net)"
+        - "Deal-level track record"
+        - "Case studies (3+ deals)"
+        - "Team bios"
+        - "Org chart"
+        - "Fund structure diagram"
+        - "Waterfall illustration"
+        - "Market research (target markets)"
+
+    - category: "Must-have before first close"
+      documents:
+        - "Subscription agreement"
+        - "Investor questionnaire"
+        - "Form D filing"
+        - "Blue sky filings"
+        - "AML policy"
+        - "Compliance manual"
+        - "Valuation policy"
+        - "Investment process overview"
+        - "Reference list"
+        - "Prior fund audited financials"
+
+    - category: "Nice-to-have (builds credibility)"
+      documents:
+        - "Side letter template"
+        - "FAQ document"
+        - "ESG / DEI policies"
+        - "Attribution analysis"
+        - "Third-party appraisals"
+        - "Background checks"
+        - "Supply pipeline analysis"
+        - "Rent and sales comps"
+        - "GP financial statements"
+        - "Fee calculation examples"
+        - "Risk management framework"
+
+---
+
+access_control:
+  description: "Who sees what"
+  tiers:
+    - tier: "Public"
+      access: "Anyone (website, initial outreach)"
+      documents: ["One-pager / teaser"]
+
+    - tier: "NDA Required"
+      access: "After NDA execution"
+      documents:
+        - "Pitch deck"
+        - "Track record summary"
+        - "Market research"
+        - "Team bios"
+
+    - tier: "Full Data Room"
+      access: "After initial meeting and expressed interest"
+      documents:
+        - "All documents listed above"
+        - "PPM, LPA, subscription docs"
+        - "Deal-level track record"
+        - "Prior fund financials"
+
+    - tier: "Restricted"
+      access: "Upon specific request with additional NDA"
+      documents:
+        - "GP personal financial statements"
+        - "Active pipeline details (property addresses)"
+        - "Existing LP contact information (references)"

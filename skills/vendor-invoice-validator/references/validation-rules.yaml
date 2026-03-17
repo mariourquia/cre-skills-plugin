@@ -1,0 +1,483 @@
+# validation-rules.yaml
+# Invoice validation checklist and rules engine for CRE vendor invoices
+# Covers math verification, contract compliance, rate benchmarking,
+# tax, retainage, insurance/lien waivers, and dispute resolution.
+# Last updated: 2026-03-17
+
+schema_version: "1.0"
+
+# ---------------------------------------------------------------------------
+# 1. Header / Administrative Checks
+# ---------------------------------------------------------------------------
+header_validation:
+  required_fields:
+    - field: vendor_legal_name
+      rule: must_match_contract_and_w9
+      severity: critical
+    - field: vendor_tax_id
+      rule: must_match_w9_on_file
+      severity: critical
+    - field: invoice_number
+      rule: unique_no_duplicates_in_ap_system
+      severity: critical
+    - field: invoice_date
+      rule: not_future_dated_and_within_90_days
+      severity: high
+    - field: purchase_order_number
+      rule: required_if_po_system_active
+      severity: high
+    - field: property_name_and_address
+      rule: must_match_managed_property
+      severity: critical
+    - field: service_period
+      rule: dates_must_fall_within_contract_term
+      severity: high
+    - field: payment_terms
+      rule: must_match_contract_terms
+      severity: medium
+    - field: remit_to_address
+      rule: must_match_vendor_master_file
+      severity: critical
+      notes: >
+        Address change on invoice vs vendor master is a
+        fraud red flag. Requires independent verification
+        before updating.
+
+# ---------------------------------------------------------------------------
+# 2. Math Verification
+# ---------------------------------------------------------------------------
+math_verification:
+  checks:
+    - name: line_item_extensions
+      rule: quantity x unit_price = line_total
+      tolerance: 0.01
+      severity: critical
+
+    - name: subtotal
+      rule: sum_of_all_line_items = subtotal
+      tolerance: 0.01
+      severity: critical
+
+    - name: tax_calculation
+      rule: subtotal x applicable_tax_rate = tax_amount
+      tolerance: 0.05
+      severity: high
+      notes: >
+        Tax rates vary by jurisdiction and service type.
+        Some services (repairs, maintenance) may be exempt.
+        Verify against state/local tax schedules.
+
+    - name: retainage_calculation
+      rule: applicable_line_items x retainage_percent = retainage_withheld
+      tolerance: 0.01
+      severity: high
+
+    - name: credits_and_adjustments
+      rule: all_credits_properly_deducted
+      severity: medium
+
+    - name: grand_total
+      rule: subtotal + tax - retainage - credits = invoice_total
+      tolerance: 0.01
+      severity: critical
+
+    - name: cumulative_billing
+      rule: current_billed + prior_billed <= contract_total
+      severity: critical
+      notes: >
+        For progress billing (construction, TI), verify
+        cumulative billed does not exceed contract sum
+        including approved change orders.
+
+# ---------------------------------------------------------------------------
+# 3. Contract Rate Comparison
+# ---------------------------------------------------------------------------
+contract_rate_comparison:
+  fixed_price_contracts:
+    - rule: invoice_amount_matches_contract_schedule
+      tolerance_percent: 0
+      severity: critical
+    - rule: billing_milestone_matches_completion
+      verification: field_inspection_or_pm_signoff
+      severity: high
+
+  time_and_materials:
+    - rule: hourly_rates_match_contract_schedule
+      severity: critical
+    - rule: labor_categories_match_contract
+      severity: high
+    - rule: overtime_rates_verified
+      rule_detail: OT rate = 1.5x regular unless contract specifies otherwise
+      severity: high
+    - rule: material_markup_within_contract_limit
+      severity: high
+    - rule: time_records_attached
+      severity: high
+
+  unit_price_contracts:
+    - rule: unit_prices_match_contract_schedule
+      severity: critical
+    - rule: quantities_verified_by_field_measurement
+      severity: high
+    - rule: minimum_charge_applied_correctly
+      severity: medium
+
+  cost_plus_contracts:
+    - rule: cost_documentation_attached
+      required_docs:
+        - supplier_invoices
+        - payroll_records
+        - equipment_logs
+      severity: critical
+    - rule: markup_percentage_matches_contract
+      severity: critical
+    - rule: guaranteed_maximum_not_exceeded
+      severity: critical
+    - rule: fee_calculation_correct
+      severity: high
+
+  recurring_service_contracts:
+    - rule: monthly_amount_matches_contract
+      severity: critical
+    - rule: escalation_applied_correctly
+      check: anniversary_date_and_escalation_formula
+      severity: high
+    - rule: scope_additions_have_signed_change_order
+      severity: high
+
+# ---------------------------------------------------------------------------
+# 4. Scope of Work Matching
+# ---------------------------------------------------------------------------
+scope_verification:
+  checks:
+    - name: services_within_contract_scope
+      rule: every_line_item_maps_to_contracted_service
+      severity: critical
+      notes: >
+        Out-of-scope charges require separate PO or
+        change order approval before payment.
+
+    - name: work_completion_verified
+      rule: pm_or_engineer_signoff_on_file
+      required_for:
+        - capital_projects_over_5000
+        - construction_progress_billing
+        - one_time_services
+      severity: high
+
+    - name: service_frequency_matches_contract
+      rule: billed_visits_do_not_exceed_contracted_frequency
+      applies_to:
+        - janitorial
+        - landscaping
+        - pest_control
+        - elevator_maintenance
+        - hvac_pm
+      severity: high
+
+    - name: emergency_or_extra_work
+      rule: separate_authorization_required
+      required_docs:
+        - written_authorization_email_or_wo
+        - not_to_exceed_amount
+        - pm_approval
+      severity: high
+
+# ---------------------------------------------------------------------------
+# 5. Prevailing Rate Benchmarking
+# ---------------------------------------------------------------------------
+rate_benchmarking:
+  purpose: >
+    Compare invoiced rates against market benchmarks to identify
+    overcharges or opportunities to renegotiate.
+  benchmark_sources:
+    - name: BOMA Experience Exchange Report
+      covers: office operating expenses by region
+    - name: IREM Income/Expense Analysis
+      covers: multifamily and commercial by region
+    - name: RSMeans
+      covers: construction and maintenance labor/material costs
+    - name: Internal portfolio averages
+      covers: same-service costs across managed properties
+    - name: Recent competitive bids
+      covers: service-specific market rates
+
+  tolerance_thresholds:
+    labor_rates:
+      green: within_10_percent_of_benchmark
+      yellow: 10_to_25_percent_above_benchmark
+      red: over_25_percent_above_benchmark
+    material_costs:
+      green: within_15_percent_of_benchmark
+      yellow: 15_to_30_percent_above_benchmark
+      red: over_30_percent_above_benchmark
+    total_invoice:
+      green: within_10_percent_of_budget_or_estimate
+      yellow: 10_to_20_percent_above
+      red: over_20_percent_above
+
+  flagged_items:
+    - description: Rates significantly above market
+      action: request_justification_or_rebid
+    - description: Material markup exceeds contract allowance
+      action: request_credit_memo
+    - description: Invoice total exceeds approved estimate
+      action: hold_payment_pending_pm_review
+
+# ---------------------------------------------------------------------------
+# 6. Markup Verification
+# ---------------------------------------------------------------------------
+markup_verification:
+  common_markup_structures:
+    general_contractor:
+      overhead: 5_to_10_percent
+      profit: 5_to_10_percent
+      combined_typical: 10_to_18_percent
+    subcontractor:
+      overhead_and_profit: 10_to_15_percent
+    materials:
+      typical_markup: 10_to_20_percent
+    equipment_rental:
+      typical_markup: 5_to_15_percent
+
+  checks:
+    - rule: markup_percentage_matches_contract
+      severity: critical
+    - rule: markup_applied_to_correct_base
+      note: >
+        Some contracts specify markup on direct costs only,
+        excluding subcontractor markups (no markup on markup).
+      severity: high
+    - rule: no_double_markup
+      note: GC markup should not apply to sub's OH&P
+      severity: high
+
+# ---------------------------------------------------------------------------
+# 7. Tax Calculation
+# ---------------------------------------------------------------------------
+tax_verification:
+  checks:
+    - rule: correct_tax_rate_for_jurisdiction
+      severity: high
+    - rule: tax_applied_to_taxable_items_only
+      note: >
+        Labor-only services may be exempt in some states.
+        Materials are typically taxable. Mixed invoices
+        require split calculation.
+      severity: high
+    - rule: tax_exempt_certificate_on_file
+      applies_when: property_or_tenant_is_tax_exempt
+      severity: high
+    - rule: sales_tax_vs_use_tax
+      note: >
+        If vendor is out-of-state and does not collect sales
+        tax, verify whether use tax self-assessment is required.
+      severity: medium
+
+  common_exemptions:
+    - repairs_and_maintenance_labor_only (varies by state)
+    - government_owned_properties
+    - non_profit_tenants (with certificate)
+    - capital_improvements_vs_repairs (varies by state)
+
+# ---------------------------------------------------------------------------
+# 8. Retainage Tracking
+# ---------------------------------------------------------------------------
+retainage:
+  standard_rates:
+    construction: 10_percent_until_50_pct_complete_then_5_percent
+    tenant_improvement: 10_percent
+    capital_project: 5_to_10_percent
+  release_conditions:
+    - substantial_completion_certificate
+    - punch_list_completion
+    - final_lien_waiver_from_all_subs
+    - architect_or_engineer_signoff
+    - warranty_documentation_delivered
+    - as_built_drawings_delivered
+    - operations_manuals_delivered
+  tracking_fields:
+    - contract_sum
+    - total_billed_to_date
+    - retainage_withheld_to_date
+    - retainage_released_to_date
+    - retainage_balance
+
+# ---------------------------------------------------------------------------
+# 9. Insurance and Lien Waiver Requirements
+# ---------------------------------------------------------------------------
+insurance_and_lien_waivers:
+  insurance:
+    required_before_first_payment:
+      - current_acord_certificate
+      - additional_insured_endorsement
+      - workers_comp_certificate
+    ongoing_verification:
+      - certificates_not_expired
+      - limits_meet_contract_minimums
+    hold_payment_if:
+      - certificate_expired
+      - missing_endorsement
+      - limits_below_minimum
+
+  lien_waivers:
+    required_per_payment:
+      conditional:
+        timing: with_payment_application
+        covers: current_payment_amount
+        form: AIA G702A or state-specific
+      unconditional:
+        timing: prior_payment_must_have_unconditional_before_next_payment
+        covers: all_prior_payments
+        form: AIA G702A or state-specific
+    required_from:
+      - general_contractor
+      - all_subcontractors_over_threshold
+      - material_suppliers_over_threshold
+    threshold: 5_000
+    final_payment:
+      - unconditional_final_from_gc
+      - unconditional_final_from_all_subs
+      - unconditional_final_from_material_suppliers
+
+# ---------------------------------------------------------------------------
+# 10. Approval Workflow
+# ---------------------------------------------------------------------------
+approval_thresholds:
+  note: >
+    Adjust these thresholds per company policy. Values below
+    are common CRE property management standards.
+  levels:
+    - max_amount: 2_500
+      approver: property_manager
+    - max_amount: 10_000
+      approver: senior_property_manager
+    - max_amount: 25_000
+      approver: regional_manager
+    - max_amount: 100_000
+      approver: vp_operations
+    - max_amount: 500_000
+      approver: vp_operations_plus_asset_manager
+    - max_amount: null  # unlimited
+      approver: cfo_or_principal
+
+  special_approvals:
+    - type: capital_expenditure
+      additional_approver: asset_manager
+    - type: legal_fees
+      additional_approver: general_counsel
+    - type: related_party_vendor
+      additional_approver: compliance_officer
+
+# ---------------------------------------------------------------------------
+# 11. Dispute Resolution Templates
+# ---------------------------------------------------------------------------
+dispute_templates:
+
+  rate_discrepancy:
+    subject: "Invoice Dispute -- Rate Discrepancy [Invoice #]"
+    body: |
+      Dear [Vendor Contact],
+
+      We have completed our review of Invoice [NUMBER] dated [DATE]
+      for services at [PROPERTY NAME] and identified a rate
+      discrepancy requiring resolution before payment.
+
+      Contract Rate Schedule (Section [X]):
+        [Service/Labor Category]: $[CONTRACT RATE] per [unit]
+
+      Invoice Billed Rate:
+        [Service/Labor Category]: $[INVOICED RATE] per [unit]
+
+      Variance: $[AMOUNT] ([PERCENT]%)
+
+      Please provide one of the following within 10 business days:
+      1. A corrected invoice reflecting the contract rate, or
+      2. Documentation of an approved change order authorizing
+         the higher rate.
+
+      Payment will be processed upon resolution. We are prepared
+      to issue partial payment of $[UNDISPUTED AMOUNT] for
+      undisputed line items upon request.
+
+  scope_dispute:
+    subject: "Invoice Dispute -- Unauthorized Scope [Invoice #]"
+    body: |
+      Dear [Vendor Contact],
+
+      Invoice [NUMBER] includes charges for work not covered
+      under Contract [NUMBER] or any approved change order:
+
+      Disputed Line Items:
+      | Line | Description | Amount |
+      |------|-------------|--------|
+      | [#]  | [DESC]      | $[AMT] |
+
+      Total Disputed: $[AMOUNT]
+
+      Per Section [X] of the contract, all work outside the
+      original scope requires prior written authorization.
+
+      Please provide written authorization documentation or
+      issue a credit memo for the disputed amount within
+      10 business days.
+
+  math_error:
+    subject: "Invoice Correction Required -- Math Error [Invoice #]"
+    body: |
+      Dear [Vendor Contact],
+
+      Our review of Invoice [NUMBER] identified the following
+      calculation error(s):
+
+      | Item | Invoiced | Correct | Difference |
+      |------|----------|---------|------------|
+      | [DESCRIPTION] | $[AMT] | $[AMT] | $[AMT] |
+
+      Please issue a corrected invoice. We will process payment
+      within [X] business days of receipt.
+
+  duplicate_invoice:
+    subject: "Possible Duplicate Invoice [Invoice #]"
+    body: |
+      Dear [Vendor Contact],
+
+      Invoice [NUMBER] dated [DATE] appears to duplicate a
+      previously received and/or paid invoice:
+
+      | Field | Current Invoice | Prior Invoice |
+      |-------|----------------|---------------|
+      | Invoice # | [NUMBER] | [NUMBER] |
+      | Date | [DATE] | [DATE] |
+      | Amount | $[AMT] | $[AMT] |
+      | Service Period | [PERIOD] | [PERIOD] |
+      | Payment Status | Pending | [Paid/Pending] |
+
+      Please confirm whether this is a duplicate or a separate
+      charge. If duplicate, no further action is needed and
+      we will void from our system.
+
+  retainage_release_request:
+    subject: "Retainage Release Request -- [Project Name]"
+    body: |
+      Dear [Vendor Contact],
+
+      We have received your request for retainage release on
+      [PROJECT NAME]. The following items must be completed
+      before release can be processed:
+
+      | # | Requirement | Status |
+      |---|-------------|--------|
+      | 1 | Substantial completion certificate | [Received/Pending] |
+      | 2 | Punch list items completed | [X of Y complete] |
+      | 3 | Final unconditional lien waiver -- GC | [Received/Pending] |
+      | 4 | Final unconditional lien waivers -- subs | [X of Y received] |
+      | 5 | As-built drawings | [Received/Pending] |
+      | 6 | O&M manuals | [Received/Pending] |
+      | 7 | Warranty documentation | [Received/Pending] |
+
+      Retainage Balance: $[AMOUNT]
+
+      Please submit outstanding items to [CONTACT] at [EMAIL].
+      Release will be processed within [X] business days of
+      receipt of all required documentation.

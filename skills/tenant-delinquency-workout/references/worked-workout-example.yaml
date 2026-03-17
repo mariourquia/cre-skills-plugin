@@ -1,0 +1,365 @@
+# Worked Workout Example: Retail Tenant Delinquency
+# Scenario: NJ retail tenant, $8K/month, 90 days delinquent
+
+# ============================================================
+# PROPERTY & TENANT CONTEXT
+# ============================================================
+
+property:
+  address: "445 Main Street, Hackensack, NJ 07601"
+  type: "Neighborhood Retail Center"
+  total_gla_sf: 42000
+  occupancy: 91.4%
+  submarket_vacancy: 7.2%
+  submarket_trend: "Flat to slightly improving"
+
+tenant:
+  name: "Garden State Nail Spa LLC"
+  suite: "Suite 108"
+  sf: 1800
+  pct_of_property_gla: 4.3%
+  credit_type: "Local single-location operator"
+  guarantor: "Personal guarantee - owner Maria Chen"
+  business_assessment: "Marginal - revenue down 30% YoY, two competing salons opened nearby"
+
+lease:
+  commencement: "2021-06-01"
+  expiration: "2028-05-31"
+  remaining_term_months: 26
+  base_rent_monthly: 8000
+  base_rent_psf: 53.33
+  annual_escalation: "3% annually"
+  cam_reimbursement_monthly: 1200
+  real_estate_tax_reimbursement_monthly: 650
+  total_monthly_obligation: 9850
+  security_deposit: 8000
+  ti_unamortized: 12400  # $22K original, 7 years, 26 months remaining
+  options: "One 5-year renewal at market"
+
+delinquency:
+  months_delinquent: 3
+  total_arrears: 29550  # 3 months x $9,850
+  last_payment_date: "2025-12-15"
+  partial_payments: false
+  communication_status: "Tenant responsive, claiming temporary cash flow issues"
+  prior_delinquency: "Late twice in 2024, cured within 15 days each time"
+
+# ============================================================
+# DISCOUNT RATE & ASSUMPTIONS
+# ============================================================
+
+assumptions:
+  discount_rate_annual: 0.08
+  discount_rate_monthly: 0.006434  # (1.08)^(1/12) - 1
+  market_rent_psf: 48.00  # Below contract; market softened
+  market_rent_monthly: 7200  # 1,800 sf x $48/12
+  broker_commission: 0.05  # 5% of aggregate rent for new tenant
+  make_ready_cost: 18000  # Paint, floors, minor demo
+  ti_allowance_new: 25.00  # $25/sf for new retail tenant
+  ti_total_new: 45000  # 1,800 sf x $25
+  lease_up_months: 4  # Time to find and execute new lease
+  new_lease_term_months: 60  # 5-year market standard
+  property_carrying_cost_monthly: 2100  # Taxes, insurance, CAM on vacant suite
+  judgment_collection_probability: 0.15  # Low for local LLC
+  new_tenant_free_rent_months: 2  # Market concession
+
+# ============================================================
+# SCENARIO A: WORKOUT (REDUCED RENT)
+# ============================================================
+
+scenario_A:
+  description: "6-month rent modification with deferred rent payback"
+
+  negotiated_terms:
+    months_1_to_3:
+      base_rent: 4000  # 50% reduction
+      cam_and_tax: 1850  # Full reimbursements maintained
+      total_monthly: 5850
+    months_4_to_6:
+      base_rent: 6000  # 75% of contract
+      cam_and_tax: 1850
+      total_monthly: 7850
+    months_7_to_26:  # Reversion to contract + payback
+      base_rent: 8000
+      cam_and_tax: 1850
+      deferred_rent_payback: 900  # $18K deferred / 20 months
+      total_monthly: 10750
+
+  deferred_rent_calculation:
+    months_1_3_shortfall: 12000  # (8000-4000) x 3
+    months_4_6_shortfall: 6000   # (8000-6000) x 3
+    total_deferred: 18000
+    payback_term_months: 20
+    monthly_payback: 900
+
+  probability_assumptions:
+    probability_cure: 0.55  # Marginal business, 55% chance workout holds
+    probability_re_default: 0.45
+    expected_re_default_month: 9  # 3 months into reversion
+
+  legal_costs:
+    attorney_lease_modification: 3500
+    additional_security_negotiation: 500
+    total: 4000
+
+  # NPV CALCULATION - STEP BY STEP
+  cash_flows:
+    # Security deposit application: apply $8K deposit to arrears
+    month_0:
+      item: "Legal costs"
+      amount: -4000
+      pv_factor: 1.0000
+      pv: -4000
+
+    # Arrears recovery: $29,550 owed, apply $8K deposit, $21,550 remains
+    # Tenant agrees to add $21,550 to deferred balance (total deferred = $39,550)
+    # Revised payback: $39,550 / 20 months = $1,978/month
+    arrears_treatment:
+      total_owed: 29550
+      deposit_applied: 8000
+      remaining_arrears: 21550
+      added_to_deferral: true
+      revised_total_deferred: 39550
+      revised_monthly_payback: 1978
+
+    # CURE PATH (55% probability)
+    cure_path:
+      months_1_3:
+        monthly_cf: 5850
+        months: 3
+        pv_sum: 17396  # 5850/(1.006434)^1 + ^2 + ^3
+      months_4_6:
+        monthly_cf: 7850
+        months: 3
+        pv_sum: 23102  # discounted months 4-6
+      months_7_26:
+        monthly_cf: 11828  # 8000 + 1850 + 1978 payback
+        months: 20
+        pv_sum: 219864  # sum of discounted monthly CFs
+      cure_path_total_pv: 260362
+      weighted_pv: 143199  # 260,362 x 0.55
+
+    # RE-DEFAULT PATH (45% probability)
+    re_default_path:
+      months_1_9:
+        description: "Receives modified rent for 9 months then tenant stops paying"
+        months_1_3_cf: 5850
+        months_4_6_cf: 7850
+        months_7_9_cf: 11828
+        pv_sum_months_1_9: 73432
+      months_10_onward:
+        description: "Falls into Scenario B from month 10"
+        eviction_from_month_10: true
+        additional_vacancy_months: 5  # NJ eviction
+        lease_up_months: 4
+        total_dark_months: 9  # months 10-18
+        carrying_cost_pv: -17234  # 9 months x $2,100 discounted
+        re_lease_from_month_19:
+          remaining_months: 8  # months 19-26
+          market_rent_monthly: 7200
+          pv_sum: 53891
+        turnover_and_ti: -58200  # (18000 + 45000) discounted to month 10
+        eviction_legal: -15000  # discounted
+      re_default_path_total_pv: 36889
+      weighted_pv: 16600  # 36,889 x 0.45
+
+  npv_scenario_A:
+    legal_costs: -4000
+    cure_path_weighted: 143199
+    re_default_path_weighted: 16600
+    total_npv: 155799
+
+# ============================================================
+# SCENARIO B: EVICTION + RE-LEASE
+# ============================================================
+
+scenario_B:
+  description: "Pursue NJ commercial eviction, re-tenant at market"
+
+  timeline:
+    notice_to_cure_days: 30
+    filing_to_hearing_days: 60  # Bergen County typical
+    continuances_expected_days: 30
+    judgment_to_writ_days: 10
+    writ_to_lockout_days: 7
+    total_eviction_days: 137
+    total_eviction_months: 4.6
+    rounded_eviction_months: 5
+    turnover_months: 1
+    lease_up_months: 4
+    free_rent_months: 2
+    total_months_no_revenue: 12  # 5 eviction + 1 turnover + 4 lease-up + 2 free rent
+
+  costs:
+    eviction_legal:
+      attorney_fees: 12000
+      court_costs: 1500
+      service_fees: 500
+      total: 14000
+    turnover:
+      make_ready: 18000
+      ti_new_tenant: 45000
+      total: 63000
+    broker_commission:
+      new_lease_annual_rent: 86400  # $7,200 x 12
+      new_lease_aggregate: 432000  # 5-year term
+      commission_rate: 0.05
+      total: 21600
+    carrying_during_vacancy:
+      monthly: 2100
+      months: 6  # eviction + turnover
+      total: 12600
+
+  revenue_recovery:
+    judgment_amount: 29550  # Back rent
+    collection_probability: 0.15
+    expected_recovery: 4433
+    timing_months: 18  # Judgment collection lag
+
+  new_lease_cash_flows:
+    start_month: 13  # After 12 months of no revenue (incl free rent)
+    monthly_rent: 7200
+    cam_tax_recovery: 1850
+    total_monthly: 9050
+    remaining_projection_months: 14  # months 13-26
+    pv_sum_new_rent: 118972
+
+  npv_calculation:
+    legal_costs: -14000  # Month 0
+    carrying_costs_pv: -12234  # Months 1-6 discounted
+    turnover_and_ti_pv: -60284  # Month 6 discounted
+    broker_commission_pv: -19987  # Month 7 discounted
+    unamortized_ti_write_off: -12400  # Existing TI lost
+    judgment_recovery_pv: 3827  # $4,433 at month 18 discounted
+    new_lease_income_pv: 118972  # Months 13-26 discounted
+
+  npv_scenario_B:
+    total_npv: 3894
+
+# ============================================================
+# SCENARIO C: CASH-FOR-KEYS
+# ============================================================
+
+scenario_C:
+  description: "Negotiate tenant departure for lump-sum payment"
+
+  negotiation:
+    opening_offer: 8000  # 1 month rent
+    expected_settlement: 16000  # ~2 months gross rent
+    negotiation_timeline_months: 1
+    vacancy_date: "Month 2"
+    move_out_condition: "Broom clean, trade fixtures removed"
+
+  costs:
+    buyout_payment: 16000
+    legal_fees: 2500  # Surrender agreement drafting
+    turnover:
+      make_ready: 18000
+      ti_new_tenant: 45000
+      total: 63000
+    broker_commission: 21600  # Same as Scenario B
+    carrying_during_vacancy:
+      months: 5  # 1 turnover + 4 lease-up
+      monthly: 2100
+      total: 10500
+
+  timeline:
+    negotiation_months: 1
+    turnover_months: 1
+    lease_up_months: 4
+    free_rent_months: 2
+    total_months_no_revenue: 8  # Faster than eviction by 4 months
+    first_rent_month: 9
+
+  arrears_recovery:
+    total_owed: 29550
+    deposit_applied: 8000
+    forgiven_in_settlement: 21550  # Waived as part of cash-for-keys deal
+    net_recovery: -21550  # Opportunity cost of forgiving arrears
+
+  new_lease_cash_flows:
+    start_month: 9  # After 8 months no revenue
+    monthly_rent: 7200
+    cam_tax_recovery: 1850
+    total_monthly: 9050
+    remaining_projection_months: 18  # months 9-26
+    pv_sum_new_rent: 155238
+
+  npv_calculation:
+    buyout_payment_pv: -15898  # $16K at month 1
+    legal_costs: -2500
+    turnover_and_ti_pv: -61877  # Month 2 discounted
+    broker_commission_pv: -20542  # Month 3 discounted
+    carrying_costs_pv: -10104  # Months 2-6 discounted
+    deposit_applied: 8000
+    unamortized_ti_write_off: -12400
+    new_lease_income_pv: 155238
+
+  npv_scenario_C:
+    total_npv: 39917
+
+# ============================================================
+# COMPARISON & RECOMMENDATION
+# ============================================================
+
+comparison:
+  scenario_A_npv: 155799
+  scenario_B_npv: 3894
+  scenario_C_npv: 39917
+
+  npv_ranking:
+    1: {scenario: "A - Workout", npv: 155799}
+    2: {scenario: "C - Cash-for-Keys", npv: 39917}
+    3: {scenario: "B - Eviction", npv: 3894}
+
+  spread_A_over_B: 151905
+  spread_A_over_C: 115882
+  spread_C_over_B: 36023
+
+covenant_impact:
+  property_noi_before: 485000
+  annual_debt_service: 380000
+  dscr_current: 1.276
+
+  scenario_A_impact:
+    noi_reduction_year1: 18000  # Reduced rent during modification
+    dscr_during_modification: 1.229
+    dscr_post_modification: 1.276  # Reverts to normal
+    occupancy_impact: "None - tenant remains"
+    lender_consent_required: false  # Tenant < 10% of revenue
+
+  scenario_B_impact:
+    noi_reduction_during_vacancy: 118200  # 12 months lost revenue
+    dscr_during_vacancy: 0.965  # BELOW 1.0x - COVENANT BREACH
+    occupancy_drop: "91.4% -> 87.1%"
+    lender_consent_required: "N/A but covenant breach triggers reporting"
+
+  scenario_C_impact:
+    noi_reduction_during_vacancy: 78800  # 8 months lost revenue
+    dscr_during_vacancy: 1.069  # Tight but above 1.0x
+    occupancy_drop: "91.4% -> 87.1% (shorter duration)"
+    lender_consent_required: false
+
+recommendation:
+  selected_scenario: "A - Workout"
+  confidence: "High"
+  reasoning: |
+    Scenario A dominates by $116K-$152K NPV. Even at only 55% probability
+    of cure, the modified cash flow materially exceeds both alternatives.
+    NJ's slow eviction timeline (5 months) heavily penalizes Scenario B,
+    which also triggers a DSCR covenant breach below 1.0x. The soft
+    submarket (7.2% vacancy) makes re-leasing uncertain and market rent
+    is below contract rent. Keeping the tenant in place, even at reduced
+    rent, is the clear value-maximizing path.
+
+  risk_factors:
+    - "Re-default probability is 45% -- maintain monthly financial monitoring"
+    - "If business deteriorates further, pivot to Scenario C before Scenario B"
+    - "Market rent below contract rent means re-leasing captures less value"
+
+  next_steps:
+    - "Draft lease modification agreement with 6-month stepped rent schedule"
+    - "Require updated personal financial statement from guarantor"
+    - "Add monthly P&L reporting covenant to modification"
+    - "Set calendar reminder at month 4 to reassess tenant performance"
+    - "Prepare Scenario C term sheet as fallback if month 3 payment missed"

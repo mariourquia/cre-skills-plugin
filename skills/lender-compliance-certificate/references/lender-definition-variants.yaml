@@ -1,0 +1,310 @@
+# Lender-Specific Calculation Variants
+# Common differences in how lenders define and calculate compliance metrics
+
+# ============================================================
+# DSCR (Debt Service Coverage Ratio) VARIANTS
+# ============================================================
+dscr_variants:
+  standard:
+    name: "Standard DSCR"
+    formula: "NOI / Annual Debt Service"
+    noi_definition: "EGI - Operating Expenses (excluding debt service and capex)"
+    debt_service: "Scheduled P&I (or IO payment during IO period)"
+    typical_covenant: 1.20
+    notes: "Most common definition across lender types"
+
+  ncf_based:
+    name: "NCF-Based DSCR"
+    formula: "Net Cash Flow / Annual Debt Service"
+    ncf_definition: "NOI - Capital Reserves - Leasing Costs (TI/LC)"
+    capital_reserve_per_unit:
+      multifamily: 250  # $/unit/year
+      office_psf: 0.25  # $/SF/year
+      retail_psf: 0.20
+      industrial_psf: 0.15
+    typical_covenant: 1.10  # Lower than NOI-based because NCF is more conservative
+    used_by: ["CMBS", "Life companies", "Agency (Fannie/Freddie)"]
+    notes: "More conservative; captures ongoing capital needs"
+
+  amortizing_constant:
+    name: "Amortizing DSCR"
+    formula: "NOI / Debt Service at Amortizing Constant"
+    debt_service: "Uses amortizing payment even during IO period"
+    amortization_assumption: "30 years standard, some use 25"
+    typical_covenant: 1.15
+    used_by: ["Life companies", "Some banks during IO period"]
+    notes: "Tests ability to cover full amortizing payment even if currently IO"
+
+  stressed:
+    name: "Stressed DSCR"
+    formula: "NOI / Stressed Debt Service"
+    stress_methods:
+      rate_stress: "Add 200bps to current rate"
+      floor_rate: "Use higher of actual rate or 6.5-7.5%"
+      term_stress: "Assume 25-year amortization regardless of actual"
+    typical_covenant: 1.00  # Just needs to cover at stressed rate
+    used_by: ["Banks (regulatory requirement)", "OCC-regulated institutions"]
+    notes: "Bank regulators require stress testing; not a borrower covenant"
+
+  look_back:
+    name: "Trailing 12-Month DSCR"
+    formula: "T12 NOI / Annual Debt Service"
+    period: "Trailing 12 months from reporting date"
+    typical_covenant: 1.20
+    used_by: ["Most lenders for ongoing compliance"]
+
+  look_forward:
+    name: "Projected DSCR"
+    formula: "Projected 12-Month NOI / Projected Debt Service"
+    method: "Budget or underwritten projections"
+    typical_covenant: 1.25  # Higher because projections are uncertain
+    used_by: ["Construction loans", "Transitional loans"]
+    notes: "Used for future period testing, often at conversion from IO to amortizing"
+
+# ============================================================
+# NOI DEFINITION VARIANTS
+# ============================================================
+noi_variants:
+  standard:
+    name: "Accrual NOI"
+    formula: "EGI - Operating Expenses"
+    egi: "Gross Potential Rent + Other Income - Vacancy - Concessions - Bad Debt"
+    operating_expenses: "All recurring property-level expenses excluding debt service"
+    includes:
+      - "Real estate taxes"
+      - "Insurance"
+      - "Utilities"
+      - "Repairs and maintenance"
+      - "Management fee"
+      - "General and administrative"
+      - "Payroll (on-site staff)"
+    excludes:
+      - "Debt service"
+      - "Capital expenditures"
+      - "Depreciation/amortization"
+      - "Income taxes"
+      - "Leasing commissions"
+      - "Tenant improvements"
+
+  cash_basis:
+    name: "Cash Basis NOI"
+    formula: "Cash Collected - Cash Expenses Paid"
+    difference: "Uses actual cash collected vs billed revenue"
+    adjustment: "Straight-line rent adjustments removed"
+    used_by: ["Some banks", "Workout/special servicing"]
+    typical_reduction: "3-8% below accrual NOI"
+
+  underwritten:
+    name: "Underwritten NOI"
+    formula: "Stabilized revenue assumptions - normalized expenses"
+    adjustments:
+      vacancy: "Market vacancy (5-10%) even if actual is lower"
+      management_fee: "Market rate (3-5%) even if below"
+      reserves: "Standard replacement reserves included"
+      concessions: "Market concessions deducted"
+      below_market_leases: "Marked to market at expiration"
+      above_market_leases: "Marked to market at expiration"
+    used_by: ["CMBS (initial underwriting)", "Rating agencies"]
+    notes: "Usually lower than actual trailing NOI due to conservative assumptions"
+
+  in_place:
+    name: "In-Place NOI"
+    formula: "Current rent roll annualized - actual trailing expenses"
+    method: "Snapshot of current leases extrapolated to full year"
+    difference: "Does not adjust for expiring leases or market changes"
+    used_by: ["Banks for quick assessment", "Bridge lenders"]
+
+# ============================================================
+# OCCUPANCY DEFINITIONS
+# ============================================================
+occupancy_variants:
+  physical:
+    name: "Physical Occupancy"
+    formula: "Occupied SF / Total Leasable SF"
+    definition: "Tenant is in physical possession of space"
+    excludes: "Pre-leased but not yet occupied units"
+    used_by: ["Most lenders for general reporting"]
+
+  economic:
+    name: "Economic Occupancy"
+    formula: "Actual Revenue Collected / Gross Potential Revenue"
+    definition: "Revenue-based measure; captures concessions and vacancy"
+    always_lower_than_physical: true
+    gap_factors:
+      - "Free rent periods"
+      - "Delinquent tenants"
+      - "Below-market leases"
+      - "Concessions and credits"
+    typical_gap: "3-8% below physical occupancy"
+    used_by: ["CMBS", "Agency", "Sophisticated lenders"]
+    preferred: true  # More accurate measure of property performance
+
+  leased:
+    name: "Leased Occupancy"
+    formula: "Leased SF / Total Leasable SF"
+    definition: "Lease is signed regardless of physical occupancy"
+    includes: "Pre-leased space not yet occupied"
+    always_higher_than_physical: true
+    gap_factors:
+      - "Signed leases with future commencement"
+      - "Tenant buildout period"
+    used_by: ["Development/lease-up monitoring"]
+
+# ============================================================
+# DEBT YIELD VARIANTS
+# ============================================================
+debt_yield_variants:
+  standard:
+    name: "NOI Debt Yield"
+    formula: "NOI / Loan Balance"
+    typical_minimum: 0.08  # 8%
+    interpretation: "Return on loan as if lender owned property debt-free"
+    used_by: ["CMBS (primary sizing metric)", "Life companies"]
+
+  ncf:
+    name: "NCF Debt Yield"
+    formula: "NCF / Loan Balance"
+    typical_minimum: 0.07  # 7%
+    used_by: ["CMBS"]
+
+  stressed:
+    name: "Stressed Debt Yield"
+    formula: "Stressed NOI / Loan Balance"
+    stress: "Haircut NOI by 5-10%"
+    typical_minimum: 0.075
+    used_by: ["Rating agencies"]
+
+# ============================================================
+# LTV VARIANTS
+# ============================================================
+ltv_variants:
+  appraised:
+    name: "As-Is Appraised LTV"
+    formula: "Loan Balance / Appraised Value (as-is)"
+    typical_maximum: 0.75  # 75%
+    frequency: "At origination; may be retested annually or at trigger"
+    used_by: ["All lenders"]
+
+  stabilized:
+    name: "Stabilized LTV"
+    formula: "Loan Balance / Stabilized Appraised Value"
+    used_for: "Construction and transitional loans"
+    typical_maximum: 0.70
+    notes: "Based on projected value after lease-up or renovation"
+
+  dark_value:
+    name: "Dark Value LTV"
+    formula: "Loan Balance / Value assuming anchor tenant vacates"
+    used_by: ["CMBS for retail with anchor exposure"]
+    typical_maximum: 0.80
+    notes: "Conservative test for single-tenant or anchor-dependent properties"
+
+  direct_cap:
+    name: "Direct Cap LTV"
+    formula: "Loan Balance / (NOI / Market Cap Rate)"
+    notes: "Lender-derived value using NOI and assumed cap rate"
+    cap_rate_source: "Lender's market research, not appraiser"
+    used_by: ["Banks for internal risk rating"]
+
+# ============================================================
+# CASH MANAGEMENT / TRAP TRIGGERS
+# ============================================================
+cash_trap_variants:
+  dscr_trigger:
+    name: "DSCR Cash Trap"
+    trigger: "DSCR falls below [1.15-1.25x] for [1-2] consecutive quarters"
+    mechanism: "Excess cash flow swept to lender-controlled reserve"
+    release: "DSCR above [1.30-1.40x] for [2] consecutive quarters"
+    used_by: ["CMBS", "Life companies"]
+
+  debt_yield_trigger:
+    name: "Debt Yield Cash Trap"
+    trigger: "Debt yield falls below [7-8%]"
+    mechanism: "Same as DSCR trap"
+    used_by: ["CMBS"]
+
+  occupancy_trigger:
+    name: "Occupancy Cash Trap"
+    trigger: "Physical occupancy falls below [80-85%]"
+    mechanism: "Cash trapped until occupancy recovers"
+    used_by: ["CMBS", "Banks"]
+
+  major_tenant_trigger:
+    name: "Major Tenant Trigger"
+    trigger: "Tenant >X% of revenue: defaults, goes dark, or does not renew"
+    mechanism: "Cash trapped, replacement reserve funded"
+    used_by: ["CMBS", "Life companies"]
+
+  combined:
+    name: "Multi-Trigger Cash Trap"
+    description: "Many loans use OR logic: ANY trigger activates trap"
+    example: "DSCR < 1.20x OR occupancy < 82% OR major tenant default"
+    release: "ALL triggers must be cured for release"
+
+# ============================================================
+# LENDER-TYPE SPECIFIC CONVENTIONS
+# ============================================================
+lender_conventions:
+  cmbs:
+    dscr_metric: "NCF-based, typically 1.25x minimum at origination"
+    debt_yield: "8-10% minimum (primary sizing constraint)"
+    ltv: "65-75% maximum"
+    reserves: "Required replacement reserves, TI/LC reserves, tax/insurance escrows"
+    reporting: "Monthly operating statements, annual audited financials"
+    cash_management: "Hard lockbox with springing cash trap"
+    special_considerations:
+      - "Defeasance or yield maintenance prepayment"
+      - "Servicer approval for lease modifications >$X"
+      - "Annual budget approval by servicer"
+      - "Property condition assessments every 3 years"
+
+  life_company:
+    dscr_metric: "NOI-based, typically 1.30-1.40x"
+    debt_yield: "Less formal, embedded in spread"
+    ltv: "60-70% maximum (conservative)"
+    reserves: "Replacement reserves, may waive TI/LC for strong sponsors"
+    reporting: "Quarterly operating statements, annual rent roll"
+    cash_management: "Soft lockbox or springing lockbox"
+    special_considerations:
+      - "Yield maintenance or make-whole prepayment"
+      - "Relationship-driven; more flexibility on terms"
+      - "May require environmental insurance"
+
+  bank:
+    dscr_metric: "NOI-based, 1.20-1.25x"
+    stress_test: "Required by OCC/FDIC at stressed rate"
+    ltv: "65-80% (CRE concentration guidelines)"
+    reserves: "Varies; may waive for strong borrower relationship"
+    reporting: "Quarterly financial statements, annual tax returns"
+    cash_management: "Varies; relationship dependent"
+    special_considerations:
+      - "Personal/corporate recourse common"
+      - "Annual review and risk rating"
+      - "Financial covenants on borrower entity (liquidity, net worth)"
+      - "Cross-collateralization with other borrower loans"
+
+  agency_multifamily:
+    dscr_metric: "NCF-based, 1.20-1.25x (Fannie); 1.20x (Freddie)"
+    ltv: "80% maximum (reduced for higher leverage tiers)"
+    reserves: "Replacement reserves mandatory ($250-300/unit/year)"
+    reporting: "Annual operating statement, rent roll"
+    cash_management: "Varies by program tier"
+    special_considerations:
+      - "Green financing incentives (rate reduction for energy efficiency)"
+      - "Fixed-rate with yield maintenance"
+      - "Supplemental loan programs for seasoned borrowers"
+      - "Small loan programs with streamlined documentation"
+
+  debt_fund:
+    dscr_metric: "Varies; often 1.0-1.10x (transitional assets)"
+    debt_yield: "Less formal; focus on exit strategy"
+    ltv: "75-85% (higher leverage available)"
+    reserves: "Interest reserves, capex reserves"
+    reporting: "Monthly operating statements"
+    cash_management: "Hard lockbox standard"
+    special_considerations:
+      - "Floating rate with interest rate cap required"
+      - "Shorter term (2-3 years + extensions)"
+      - "Business plan milestones as covenants"
+      - "Extension tests (DSCR, occupancy, LTV at extension)"
+      - "More flexible on lease approvals and modifications"

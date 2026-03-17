@@ -1,0 +1,335 @@
+# Debt Covenant Remediation Playbook
+# Strategies organized by covenant type with timeline and cost estimates
+
+schema:
+  version: "1.0"
+  context: "Remediation strategies for CRE loan covenant breaches or near-breaches. Ordered by speed of implementation within each covenant type."
+
+general_principles:
+  timing: "Act early. Remediation is always cheaper and more effective before formal breach."
+  lender_communication: "Proactive communication with lender is almost always better than surprise. Most lenders prefer a plan to a default."
+  documentation: "Document all remediation efforts -- lenders value good faith and competent management."
+  legal_counsel: "Engage borrower's counsel before communicating covenant concerns to lender."
+  sequence: "Address cash flow (DSCR) first -- it drives all other metrics."
+
+remediation_by_covenant:
+
+  dscr_cure:
+    description: "Strategies to restore Debt Service Coverage Ratio above covenant threshold"
+    threshold_context: "Typical cash sweep trigger: 1.15-1.25x. Hard default: 1.05-1.15x."
+
+    strategies:
+
+      # Revenue Enhancement (increase NOI numerator)
+      - name: "Accelerated lease-up"
+        category: "revenue"
+        timeline: "3-6 months"
+        impact: "High (if vacancy is primary DSCR driver)"
+        cost: "$0-50,000 (leasing commissions, concessions)"
+        description: "Increase leasing velocity through broker incentives, temporary rent concessions, tenant improvement allowances."
+        execution:
+          - "Engage additional leasing brokers with performance bonuses"
+          - "Offer 1-2 months free rent (amortized over lease term for covenant calc)"
+          - "Increase TI allowance to match market or above ($30-60/SF office)"
+          - "Consider co-working/flexible space for difficult-to-lease areas"
+          - "Reduce asking rent to market or below for quick absorption"
+        risk: "Concessions reduce near-term NOI; may worsen DSCR temporarily before improving"
+        lender_view: "Generally supportive if lease terms are at or near market"
+
+      - name: "Ancillary revenue optimization"
+        category: "revenue"
+        timeline: "1-3 months"
+        impact: "Low-Moderate (typically 2-5% of NOI)"
+        cost: "Minimal"
+        description: "Maximize non-rent revenue sources."
+        execution:
+          - "Audit parking rates vs. market (increase if below)"
+          - "Implement or increase storage unit rental"
+          - "Renegotiate laundry/vending contracts (multifamily)"
+          - "License rooftop for telecom equipment ($1,000-3,000/month)"
+          - "Implement pet rent/fees (multifamily: $25-75/month)"
+          - "Install EV charging stations with usage fees"
+          - "Evaluate signage/advertising income potential"
+        risk: "Low"
+        lender_view: "Positive -- shows proactive management"
+
+      - name: "Lease renewal at higher rates"
+        category: "revenue"
+        timeline: "6-18 months (depends on lease expiration schedule)"
+        impact: "Moderate-High (if below-market leases are rolling)"
+        cost: "Commission costs, potential TI for renewals"
+        description: "Mark expiring below-market leases to current market rates."
+        execution:
+          - "Identify all leases expiring within 12-18 months"
+          - "Calculate mark-to-market potential per lease"
+          - "Begin renewal discussions 9-12 months before expiration"
+          - "Offer modest early renewal incentive to lock in higher rate sooner"
+        risk: "Tenant may not renew; creates vacancy risk"
+        lender_view: "Positive if executed without excessive vacancy gap"
+
+      # Expense Reduction (increase NOI numerator)
+      - name: "Operating expense reduction"
+        category: "expense"
+        timeline: "1-3 months"
+        impact: "Moderate (5-15% expense reduction achievable)"
+        cost: "Minimal (may require initial investment for energy projects)"
+        description: "Systematic review and reduction of controllable operating expenses."
+        execution:
+          - "Audit utility costs: LED retrofit, BMS optimization, rate renegotiation"
+          - "Rebid service contracts: janitorial, landscaping, security, waste"
+          - "Review insurance program: increase deductibles, rebid at renewal"
+          - "Consolidate vendor contracts across portfolio for volume discounts"
+          - "Reduce discretionary spending (common area enhancements, marketing)"
+          - "Renegotiate property management fee if outsourced"
+          - "Challenge property tax assessment (file appeal immediately)"
+          - "Audit CAM reconciliations for tenant recovery shortfalls"
+        risk: "Excessive cuts can reduce service quality and tenant satisfaction"
+        lender_view: "Positive -- demonstrates cost discipline"
+
+      # Debt Service Reduction (reduce DSCR denominator)
+      - name: "Interest rate cap or swap"
+        category: "debt_service"
+        timeline: "1-2 months"
+        impact: "High for floating-rate loans"
+        cost: "$50,000-500,000+ (rate cap premium, varies by term and strike)"
+        description: "Cap or fix interest rate exposure on floating-rate loans."
+        execution:
+          - "Purchase interest rate cap from approved counterparty"
+          - "Execute interest rate swap to fix all-in rate"
+          - "Negotiate with lender to reset rate cap strike price"
+        risk: "Cap premium is sunk cost; swap has mark-to-market risk"
+        lender_view: "Often required, always welcomed"
+
+      - name: "Partial prepayment"
+        category: "debt_service"
+        timeline: "1-3 months"
+        impact: "Direct -- reduces both debt service and loan balance"
+        cost: "Cash deployment + potential prepayment penalty"
+        description: "Voluntary principal reduction to lower debt service and improve DSCR/LTV/debt yield simultaneously."
+        execution:
+          - "Calculate paydown amount needed to cure DSCR"
+          - "Review loan docs for prepayment penalty (may be waived for cure)"
+          - "Source capital (cash reserves, equity call, asset sale proceeds)"
+          - "Coordinate with lender/servicer for paydown mechanics"
+        example:
+          scenario: "DSCR at 1.12x vs. 1.25x covenant on $20M loan at 6%"
+          noi: "$1,344,000"
+          current_debt_service: "$1,200,000 (I/O)"
+          required_ds_for_125: "$1,075,200 ($1,344,000 / 1.25)"
+          required_paydown: "$2,080,000 (reduce loan to $17,920,000)"
+          result: "New DSCR: $1,344,000 / $1,075,200 = 1.25x"
+        risk: "Cash outflow; may not address underlying operational issue"
+        lender_view: "Very positive -- reduces lender exposure"
+
+      - name: "Loan modification / forbearance"
+        category: "debt_service"
+        timeline: "2-6 months (negotiation)"
+        impact: "Potentially significant"
+        cost: "Modification fee (0.25-1.0% of loan balance) + legal costs ($25,000-100,000)"
+        description: "Negotiate modified loan terms with lender to improve covenant compliance."
+        modifications_available:
+          - "Temporary interest rate reduction"
+          - "Extension of interest-only period"
+          - "Re-amortization over longer period"
+          - "Temporary covenant waiver or modified thresholds"
+          - "Forbearance agreement (lender agrees not to exercise remedies)"
+          - "A/B note split (restructure into senior/subordinate tranches)"
+        risk: "Lender may impose additional covenants, cash sweep, or equity cure requirements"
+        lender_view: "Preferred over foreclosure; lender must believe in borrower's plan"
+        notes: "CMBS: modification requires special servicer involvement, more complex and slower"
+
+  ltv_cure:
+    description: "Strategies to restore Loan-to-Value ratio below covenant threshold"
+    threshold_context: "Typical cash sweep: 75-85%. Hard default: 85-95%."
+
+    strategies:
+
+      - name: "Additional collateral pledge"
+        timeline: "1-3 months"
+        impact: "Moderate-High (depends on additional collateral value)"
+        cost: "$10,000-50,000 (legal, appraisal, title)"
+        description: "Pledge additional assets as collateral to effectively reduce LTV on the combined pool."
+        execution:
+          - "Identify unencumbered assets (other properties, securities, letter of credit)"
+          - "Propose cross-collateralization or additional security interest"
+          - "Lender will require appraisal of additional collateral"
+          - "Execute mortgage/security agreement modification"
+        risk: "Additional assets now at risk; reduces borrowing capacity elsewhere"
+        lender_view: "Favorable -- increases lender security"
+
+      - name: "Partial loan paydown"
+        timeline: "1-3 months"
+        impact: "Direct and immediate"
+        cost: "Cash deployment"
+        description: "Reduce loan balance to bring LTV within threshold."
+        execution:
+          - "Calculate paydown needed: Current Balance - (Max LTV * Current Value) = Required Paydown"
+          - "Source capital"
+          - "Coordinate paydown with servicer"
+        example:
+          current_balance: "$15,000,000"
+          current_value: "$18,000,000"
+          current_ltv: "83.3%"
+          covenant_ltv: "75%"
+          required_paydown: "$15,000,000 - (0.75 * $18,000,000) = $1,500,000"
+          new_ltv: "$13,500,000 / $18,000,000 = 75.0%"
+        risk: "Significant cash outflow"
+        lender_view: "Very favorable"
+
+      - name: "Value enhancement through NOI improvement"
+        timeline: "6-18 months"
+        impact: "Indirect -- value = NOI / cap rate"
+        cost: "Varies by strategy"
+        description: "Increase NOI to increase income-implied property value, thereby reducing LTV."
+        execution:
+          - "Implement all DSCR cure revenue and expense strategies above"
+          - "Every $100K of NOI improvement at a 7% cap rate = $1.43M value increase"
+          - "Pursue green certification for valuation premium"
+          - "Complete deferred maintenance to support appraisal"
+        risk: "Cap rate may also expand, offsetting NOI gains"
+        lender_view: "Positive long-term, but slow to impact LTV"
+
+      - name: "Appraisal challenge / reappraisal request"
+        timeline: "2-4 months"
+        impact: "Potentially significant if prior appraisal was conservative"
+        cost: "$10,000-30,000 (appraisal fee)"
+        description: "Request new appraisal if market has improved or prior appraisal was below market."
+        execution:
+          - "Review prior appraisal for errors, stale comps, or conservative assumptions"
+          - "Compile recent comparable sales supporting higher value"
+          - "Request lender order new appraisal (borrower typically pays)"
+          - "Provide MAI appraiser with updated rent roll, financials, capital improvement documentation"
+        risk: "New appraisal could come in even lower"
+        lender_view: "Neutral -- lender must agree to order it"
+
+  occupancy_cure:
+    description: "Strategies to restore occupancy above covenant threshold"
+    threshold_context: "Typical minimum: 80-90% physical occupancy."
+
+    strategies:
+
+      - name: "Aggressive leasing blitz"
+        timeline: "3-9 months"
+        impact: "High (direct occupancy improvement)"
+        cost: "$50,000-200,000+ (commissions, concessions, TI)"
+        description: "Concentrated leasing effort with market-competitive or above-market incentives."
+        execution:
+          - "Engage 2-3 additional leasing brokers with enhanced commission structure"
+          - "Offer above-market broker bonuses for quick lease execution"
+          - "Reduce asking rent 5-10% below market for rapid absorption"
+          - "Increase TI budget by 10-20% above market standard"
+          - "Offer furnished/move-in-ready suites for immediate occupancy"
+          - "Run targeted marketing campaign (LinkedIn, CoStar, local business journals)"
+          - "Host broker open houses and property tours"
+        risk: "Below-market rents may worsen DSCR even as occupancy improves"
+        lender_view: "Positive if leases are at reasonable terms"
+
+      - name: "Master lease"
+        timeline: "1-3 months"
+        impact: "Immediate occupancy improvement on paper"
+        cost: "$X/SF/year (master lease rent, typically below market)"
+        description: "Sponsor or affiliate master-leases vacant space to meet occupancy covenant."
+        execution:
+          - "Sponsor entity executes lease for vacant space at market or near-market rent"
+          - "Master lease rent is paid to property (improves occupancy and NOI)"
+          - "Master lease may include subleasing rights"
+          - "Typically structured for 1-3 years with early termination provisions"
+        risk: "Cash outflow from sponsor; lender may not recognize affiliated-party leases"
+        lender_view: "Mixed -- some lenders accept, others view as artificial. Verify with lender in advance."
+        notes: "CMBS: special servicer may not accept master lease from affiliated party"
+
+      - name: "Flexible/coworking sublease"
+        timeline: "2-6 months"
+        impact: "Moderate"
+        cost: "Buildout: $20-40/SF, operating: ongoing"
+        description: "Convert vacant space to flexible workspace operated by owner or sublet to coworking operator."
+        execution:
+          - "Assess demand for flexible space in submarket"
+          - "Option A: License to coworking operator (lower risk, lower return)"
+          - "Option B: Self-operate flex space (higher risk, higher return)"
+          - "Build out spec suites in common configurations (1-5 person offices)"
+        risk: "Flex space may not qualify as 'leased' under covenant definition"
+        lender_view: "Generally acceptable if structured as traditional lease"
+
+      - name: "Lease-up plan with milestone commitments"
+        timeline: "1-2 months to present; 6-18 months to execute"
+        impact: "Buys time from lender"
+        cost: "$10,000-25,000 (plan preparation)"
+        description: "Present lender with detailed, credible lease-up plan with milestones in exchange for temporary covenant forbearance."
+        execution:
+          - "Prepare detailed market analysis supporting absorption assumptions"
+          - "Include signed LOIs and active prospect pipeline"
+          - "Propose quarterly milestones (e.g., 82% by Q2, 85% by Q3, 88% by Q4)"
+          - "Offer additional equity deposit or partial paydown as good-faith commitment"
+          - "Request temporary covenant modification or waiver contingent on hitting milestones"
+        risk: "Missing milestones triggers harder remedies"
+        lender_view: "Positive if plan is credible and supported by market data"
+
+  debt_yield_cure:
+    description: "Debt yield = NOI / Loan Balance. Cure strategies mirror DSCR (increase NOI) and LTV (reduce balance)."
+    strategies:
+      - name: "Increase NOI"
+        reference: "See DSCR cure strategies (revenue enhancement + expense reduction)"
+        note: "Every $1 of NOI improvement directly increases debt yield by $1/loan balance"
+      - name: "Reduce loan balance"
+        reference: "See LTV cure strategies (partial paydown)"
+        note: "Paydown is doubly effective: reduces denominator AND reduces debt service (improving DSCR simultaneously)"
+
+  net_worth_liquidity_cure:
+    description: "Restore guarantor financial position above covenant minimums"
+    strategies:
+      - name: "Capital call or equity infusion"
+        timeline: "1-3 months"
+        cost: "Dilution to existing investors or personal capital deployment"
+        description: "Inject equity into guarantor entity to meet net worth/liquidity requirements."
+      - name: "Asset liquidation"
+        timeline: "1-6 months"
+        cost: "Potential below-market sale price for quick liquidity"
+        description: "Sell non-core assets to increase liquidity."
+      - name: "Guarantor replacement/addition"
+        timeline: "2-4 months (requires lender approval)"
+        cost: "Legal fees, potential fee to new guarantor"
+        description: "Add a financially stronger guarantor to meet covenant requirements."
+        lender_view: "Acceptable if new guarantor meets lender's credit standards"
+
+# Remediation Priority Matrix
+priority_matrix:
+  description: "When multiple covenants are at risk, prioritize in this order"
+  order:
+    1:
+      covenant: "DSCR"
+      reason: "DSCR drives NOI, which drives value (LTV), debt yield, and demonstrates operational viability"
+    2:
+      covenant: "Occupancy"
+      reason: "Occupancy drives revenue, which drives NOI, which drives DSCR"
+    3:
+      covenant: "LTV"
+      reason: "LTV is partially market-driven (cap rates); focus on controllable NOI first"
+    4:
+      covenant: "Debt Yield"
+      reason: "Improves automatically as NOI increases and/or loan balance decreases"
+    5:
+      covenant: "Net Worth/Liquidity"
+      reason: "Guarantor-level; address after property-level metrics stabilize"
+
+# Communication Framework
+lender_communication:
+  proactive_notification:
+    when: "Covenant cushion falls below 10%"
+    how: "Written letter/email to relationship manager or servicer"
+    content:
+      - "Current metric status and trend"
+      - "Root cause analysis"
+      - "Remediation plan with specific actions and timeline"
+      - "Request for meeting to discuss"
+    tone: "Professional, fact-based, solution-oriented. Never surprise the lender."
+
+  forbearance_request:
+    when: "Breach is imminent or has occurred"
+    content:
+      - "Formal acknowledgment of covenant status"
+      - "Detailed remediation plan with milestones"
+      - "Supporting market data and financial projections"
+      - "Proposed forbearance terms (duration, conditions, reporting)"
+      - "Consideration offered (additional deposit, personal guaranty, enhanced reporting)"
+    legal: "ALWAYS engage counsel before formal forbearance discussions"

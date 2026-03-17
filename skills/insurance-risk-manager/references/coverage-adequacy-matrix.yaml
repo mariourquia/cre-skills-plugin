@@ -1,0 +1,364 @@
+# Coverage Adequacy Matrix
+# Insurance Risk Manager Reference
+# Coverage requirements by asset type with limits, premiums, and key exclusions
+
+---
+# =============================================================================
+# SECTION 1: MULTIFAMILY COVERAGE REQUIREMENTS
+# =============================================================================
+
+multifamily:
+  description: "Garden-style, mid-rise, and high-rise apartment communities"
+
+  required_coverages:
+    property:
+      type: "All-risk / Special Form"
+      valuation: "Replacement cost, agreed amount"
+      minimum_limit: "100% replacement cost"
+      deductible_range: "$10,000 - $50,000 per occurrence"
+      coinsurance: "90% or agreed amount endorsement"
+      premium_range: "$0.15 - $0.35 per $100 of insured value"
+      premium_per_unit: "$150 - $400/unit/year"
+      key_exclusions_to_watch:
+        - "Mold/fungus (sublimit, typically $25-100K)"
+        - "Water damage (check for sewer/drain backup coverage)"
+        - "Equipment breakdown (add endorsement)"
+        - "Ordinance or law (rebuilding to current code -- add coverage)"
+      required_endorsements:
+        - "Equipment breakdown"
+        - "Ordinance or law (demolition, increased cost, undamaged portion)"
+        - "Sewer/drain backup"
+        - "Service interruption (utility failure)"
+
+    general_liability:
+      occurrence_limit: 1000000
+      aggregate_limit: 2000000
+      premium_per_unit: "$35 - $75/unit/year"
+      key_considerations:
+        - "Assault and battery coverage (often excluded -- add endorsement)"
+        - "Swimming pool liability (higher limits if pool amenity)"
+        - "Dog bite exclusion (review pet policy)"
+        - "Lead paint exclusion (pre-1978 buildings)"
+
+    umbrella_excess:
+      minimum_limit: 5000000
+      institutional_target: "10,000,000 - 25,000,000"
+      premium_range: "$2,000 - $5,000 per $1M of limit"
+      notes: "Follows form over GL, auto, employer's liability"
+
+    business_interruption:
+      coverage: "Rental income loss"
+      minimum_period: "12 months actual loss sustained"
+      institutional_target: "18 months"
+      calculation: "Annual gross rental income x indemnity period / 12"
+      key_consideration: "Include extra expense for temporary relocation of tenants"
+
+    workers_compensation:
+      requirement: "Statutory (if employees on payroll)"
+      employer_liability: "$500,000 / $500,000 / $500,000 minimum"
+      notes: "If PM company employees, verify PM carries WC"
+
+    crime_fidelity:
+      coverage: "Employee dishonesty, theft"
+      minimum_limit: 250000
+      notes: "Covers PM company employees handling funds"
+
+  recommended_coverages:
+    flood:
+      zone_a_v: "Required by lender, NFIP + excess"
+      zone_b_x: "Recommended, private market"
+      limit: "At least $5M or replacement cost"
+    earthquake:
+      seismic_zone_3_4: "Required by lender in CA, recommended elsewhere"
+      deductible: "5-15% of insured value"
+    cyber_liability:
+      limit: 1000000
+      notes: "Tenant PII, online rent payment systems"
+    pollution_liability:
+      limit: 2000000
+      notes: "If underground storage tanks, older buildings, or brownfield"
+
+# =============================================================================
+# SECTION 2: OFFICE COVERAGE REQUIREMENTS
+# =============================================================================
+
+office:
+  description: "CBD and suburban office buildings, Class A through C"
+
+  required_coverages:
+    property:
+      type: "All-risk / Special Form"
+      valuation: "Replacement cost, agreed amount"
+      minimum_limit: "100% replacement cost"
+      deductible_range: "$25,000 - $100,000 per occurrence"
+      coinsurance: "90% or agreed amount"
+      premium_range: "$0.12 - $0.30 per $100 of insured value"
+      premium_per_sf: "$0.15 - $0.40/SF/year"
+      key_exclusions_to_watch:
+        - "Terrorism (accept TRIA coverage)"
+        - "Mold/fungus sublimit"
+        - "Equipment breakdown (critical for HVAC, elevator)"
+        - "Boiler and machinery"
+        - "Earth movement (in seismic zones)"
+      required_endorsements:
+        - "Equipment breakdown"
+        - "Ordinance or law"
+        - "Utility services -- direct damage and time element"
+        - "Debris removal (adequate sublimit -- 25% of loss minimum)"
+
+    general_liability:
+      occurrence_limit: 1000000
+      aggregate_limit: 2000000
+      premium_per_sf: "$0.12 - $0.30/SF/year"
+      key_considerations:
+        - "Contractual liability (must cover lease indemnity obligations)"
+        - "Garage/parking liability"
+        - "Liquor liability (if conference center serves alcohol)"
+
+    umbrella_excess:
+      minimum_limit: 10000000
+      institutional_target: "15,000,000 - 25,000,000"
+      premium_range: "$2,500 - $6,000 per $1M of limit"
+      notes: "CBD high-rise: higher limits due to occupancy density"
+
+    business_interruption:
+      coverage: "Rental income and operating expenses"
+      minimum_period: "12 months"
+      institutional_target: "18 months"
+      calculation: "Annual NOI (or gross revenue) x indemnity period / 12"
+      key_consideration: "Include tenant extra expense, loss of rents from lease cancellation"
+
+    terrorism:
+      requirement: "Strongly recommended for CBD office"
+      premium: "2-8% of base property premium"
+      notes: "Higher for iconic buildings, government tenants, gateway cities"
+
+  recommended_coverages:
+    directors_officers:
+      limit: 5000000
+      notes: "If entity has independent board or advisory committee"
+    environmental:
+      limit: 2000000
+      notes: "Older buildings, historic renovations, underground parking"
+    cyber:
+      limit: 2000000
+      notes: "Building management systems, tenant data, smart building tech"
+
+# =============================================================================
+# SECTION 3: RETAIL COVERAGE REQUIREMENTS
+# =============================================================================
+
+retail:
+  description: "Neighborhood centers, power centers, lifestyle centers, single-tenant NNN"
+
+  required_coverages:
+    property:
+      type: "All-risk / Special Form"
+      valuation: "Replacement cost"
+      deductible_range: "$10,000 - $50,000"
+      premium_per_sf: "$0.18 - $0.45/SF/year"
+      key_exclusions_to_watch:
+        - "Food spoilage (grocery-anchored)"
+        - "Sign coverage (pylon signs, monument signs)"
+        - "Outdoor property (patio furniture, landscaping hardscape)"
+        - "Glass breakage (storefronts)"
+      notes: "NNN tenants carry own property insurance on interior; landlord covers structure/roof/common area"
+
+    general_liability:
+      occurrence_limit: 1000000
+      aggregate_limit: 2000000
+      premium_per_sf: "$0.15 - $0.35/SF/year"
+      key_considerations:
+        - "Parking lot liability (slip and fall, auto incidents)"
+        - "Food court / restaurant tenant liability"
+        - "Special events coverage (holiday events, farmers markets)"
+        - "Snow/ice removal liability"
+
+    umbrella_excess:
+      minimum_limit: 10000000
+      notes: "Higher for large open-air centers with heavy foot traffic"
+
+    business_interruption:
+      coverage: "Rental income including percentage rent"
+      period: "12-18 months"
+      notes: "Include contingent BI for anchor tenant closure"
+
+  recommended_coverages:
+    sign_coverage:
+      limit: "Replacement cost of all signs"
+      notes: "Often excluded or sublimited in base property policy"
+    parking_lot_coverage:
+      type: "Auto liability for owned parking areas"
+
+# =============================================================================
+# SECTION 4: INDUSTRIAL COVERAGE REQUIREMENTS
+# =============================================================================
+
+industrial:
+  description: "Warehouse, distribution, flex, light manufacturing"
+
+  required_coverages:
+    property:
+      type: "All-risk / Special Form"
+      valuation: "Replacement cost"
+      deductible_range: "$10,000 - $25,000"
+      premium_per_sf: "$0.08 - $0.20/SF/year"
+      key_exclusions_to_watch:
+        - "Sprinkler leakage (critical for warehouse)"
+        - "Collapse (older tilt-up buildings)"
+        - "Tenant contents vs building coverage boundary"
+        - "Environmental (chemical storage tenants)"
+      notes: "Industrial typically lower premium than office/retail due to simpler construction"
+
+    general_liability:
+      occurrence_limit: 1000000
+      aggregate_limit: 2000000
+      premium_per_sf: "$0.06 - $0.15/SF/year"
+      key_considerations:
+        - "Truck traffic liability"
+        - "Environmental liability (tenant operations)"
+        - "Crane/loading dock operations"
+
+    umbrella_excess:
+      minimum_limit: 5000000
+      institutional_target: 10000000
+
+    environmental:
+      limit: 2000000
+      notes: "Phase I ESA should be current. If prior industrial use, pollution coverage is critical."
+
+  recommended_coverages:
+    equipment_breakdown:
+      notes: "Critical for cold storage, data center, manufacturing flex"
+    inland_marine:
+      notes: "For tenant improvements or owner-provided equipment"
+
+# =============================================================================
+# SECTION 5: DEVELOPMENT / CONSTRUCTION COVERAGE REQUIREMENTS
+# =============================================================================
+
+development:
+  description: "Ground-up development, major renovation, adaptive reuse"
+
+  required_coverages:
+    builders_risk:
+      type: "All-risk, replacement cost"
+      limit: "Completed value of project (hard + soft costs)"
+      deductible_range: "$10,000 - $50,000"
+      premium_range: "0.15% - 0.50% of completed value (one-time)"
+      duration: "NTP through substantial completion + 60-90 days"
+      key_sublimits:
+        named_windstorm: "$5M - $25M (or full value if coastal)"
+        flood: "$5M - $10M"
+        earthquake: "$5M - $10M (seismic zones)"
+        soft_costs: "$2M - $10M"
+        delay_in_completion: "12-18 months projected NOI"
+        materials_in_transit: "$500K - $2M"
+        materials_stored_offsite: "$1M - $5M"
+        debris_removal: "25% of loss"
+        pollutant_cleanup: "$250K - $1M"
+      required_endorsements:
+        - "Soft costs coverage"
+        - "Delay in completion"
+        - "Testing and commissioning"
+        - "Existing structures (if renovation)"
+        - "LEG 2 or LEG 3 (defective design coverage)"
+      named_insureds:
+        - "Owner entity"
+        - "General contractor"
+        - "All subcontractors of every tier"
+        - "Architect and engineer (as their interest may appear)"
+        - "Lender (loss payee)"
+
+    general_liability_during_construction:
+      source: "OCIP, CCIP, or GC's own policy"
+      occurrence_limit: 1000000
+      aggregate_limit: 2000000
+      completed_operations: "Maintain for 3-10 years after completion"
+
+    professional_liability:
+      type: "Architects and engineers errors & omissions"
+      minimum_limit: 2000000
+      notes: "Require A&E team to maintain for 3 years after completion"
+
+    contractors_pollution:
+      limit: 2000000
+      notes: "For demolition/abatement scope"
+
+    payment_performance_bonds:
+      amount: "100% of contract value"
+      surety_requirement: "A.M. Best A- or better, Treasury-listed"
+
+  transition_to_permanent:
+    trigger: "TCO or CO issuance"
+    timeline: "Builder's risk terminates, permanent coverage binds"
+    overlap: "Minimum 30 days overlap"
+    action_items:
+      - "Notify permanent insurance broker 90 days before expected TCO"
+      - "Obtain permanent property quotes 60 days before TCO"
+      - "Bind permanent coverage 30 days before TCO"
+      - "Confirm builder's risk extended if TCO delayed"
+      - "Transfer equipment breakdown and inland marine to permanent program"
+
+# =============================================================================
+# SECTION 6: CONTRACTOR COI REQUIREMENTS (DURING CONSTRUCTION)
+# =============================================================================
+
+contractor_coi_requirements:
+  general_contractor:
+    commercial_general_liability:
+      occurrence: 1000000
+      aggregate: 2000000
+      products_completed_operations: 2000000
+    automobile_liability:
+      combined_single_limit: 1000000
+    workers_compensation:
+      statutory: true
+      employers_liability: "1,000,000 / 1,000,000 / 1,000,000"
+    umbrella_excess:
+      limit: 10000000
+      notes: "Higher for large projects (>$50M)"
+    professional_liability:
+      limit: 2000000
+      notes: "Only if design-build or design-assist"
+    required_endorsements:
+      - "Additional insured -- CG 20 10 and CG 20 37"
+      - "Primary and non-contributory -- CG 20 01"
+      - "Waiver of subrogation -- CG 24 04"
+
+  subcontractors_tier_1:
+    commercial_general_liability:
+      occurrence: 1000000
+      aggregate: 2000000
+    automobile_liability:
+      combined_single_limit: 1000000
+    workers_compensation:
+      statutory: true
+      employers_liability: "500,000 / 500,000 / 500,000"
+    umbrella_excess:
+      limit: 2000000
+      notes: "$5M for critical trades (mechanical, electrical, elevator)"
+    required_endorsements:
+      - "Additional insured naming owner AND GC"
+      - "Waiver of subrogation"
+      - "Primary and non-contributory"
+
+  verification_checklist:
+    per_certificate:
+      - "Policy effective dates cover full project duration"
+      - "Carrier A.M. Best rating A- or better"
+      - "Carrier admitted in project state"
+      - "All required coverage types present"
+      - "Limits meet or exceed minimums"
+      - "Additional insured endorsement -- correct parties named"
+      - "Waiver of subrogation endorsement present"
+      - "Primary and non-contributory language present"
+      - "No restrictive endorsements limiting coverage"
+      - "Project address or 'all operations' listed"
+      - "Certificate holder matches owner entity name exactly"
+
+    deficiency_response:
+      notice_period: "5 business days to cure"
+      escalation: "10 business days -- withhold payment"
+      final_action: "15 business days -- suspend contractor from site"
+      documentation: "Maintain deficiency log with dates and cure status"

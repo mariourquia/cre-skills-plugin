@@ -1,0 +1,376 @@
+# IC Memo Adjustments by Property Type
+# Each variant specifies: key metrics, unique risk factors, underwriting nuances,
+# sensitivity priorities, and language adjustments for the IC memo template.
+
+---
+
+apartment:
+  display_name: "Multifamily / Apartment"
+  unit_of_measure: "per unit"
+  key_metrics:
+    primary_cap_rate_driver: "Rent per unit, vacancy, expense ratio"
+    replacement_cost_benchmark: "Hard cost + land per unit; compare to purchase basis"
+    occupancy_standard: "Physical occupancy and economic occupancy (loss-to-lease)"
+    revenue_granularity: "Unit mix by bedroom count; renovated vs. unrenovated rent tiers"
+
+  unique_sections:
+    unit_mix_table:
+      description: "Required. Show unit type, count, avg SF, in-place rent, market rent, delta."
+      example: |
+        | Type | Count | Avg SF | In-Place | Market | Spread |
+        |------|-------|--------|----------|--------|--------|
+        | 1BR  | 30    | 650    | $1,400   | $1,850 | 24.3%  |
+        | 2BR  | 15    | 900    | $1,650   | $2,100 | 21.4%  |
+        | 3BR  | 5     | 1,150  | $1,900   | $2,400 | 20.8%  |
+
+    renovation_program:
+      description: "If value-add, detail: units to renovate, cost/unit, timeline, rent premium."
+      required_fields:
+        - units_to_renovate
+        - cost_per_unit
+        - renovation_timeline_months
+        - target_rent_premium_per_unit
+        - lease_up_absorption_rate
+
+    rent_control_analysis:
+      description: "Required for NYC, Newark, LA, SF, DC, and other rent-regulated markets."
+      required_fields:
+        - ordinance_name_and_citation
+        - applicability_to_subject_units
+        - exemption_pathway_if_any
+        - max_allowable_increase_percentage
+        - legal_counsel_confirmation_status
+
+  risk_factors:
+    typical_risks:
+      - category: "Execution"
+        name: "Renovation cost overrun / timeline slippage"
+        quantification: "IRR impact per 6-month delay; cost overrun sensitivity per 10% increase"
+      - category: "Market"
+        name: "Rent growth underperformance"
+        quantification: "IRR at 0%, 1%, 2% rent growth scenarios"
+      - category: "Regulatory"
+        name: "Rent control / stabilization exposure"
+        quantification: "Revenue impact if rent increase capped at CPI or regulatory max"
+      - category: "Market"
+        name: "Concession pressure / lease-up velocity"
+        quantification: "IRR impact if absorption is 50% of assumed rate"
+
+  sensitivity_priorities:
+    primary: "Exit cap rate vs. rent growth (standard 5x5 grid)"
+    secondary: "LTV vs. interest rate (especially for value-add with bridge debt)"
+    tertiary: "Renovation cost overrun vs. rent premium achieved"
+
+  language_notes:
+    negative_leverage: >
+      Common for value-add multifamily. Frame explicitly: "Going-in cap of X.X% is
+      below the Y.Y% debt cost, producing negative leverage at acquisition. This is
+      expected; stabilized cap of Z.Z% remains below debt cost. Returns are
+      appreciation-driven, not current-income-driven."
+    dscr_below_one: >
+      State the dollar shortfall, the reserve requirement, and confirm
+      capitalization at closing. Do not handwave.
+
+---
+
+nnn_credit:
+  display_name: "Net Lease / NNN Credit Tenant"
+  unit_of_measure: "per SF"
+  key_metrics:
+    primary_cap_rate_driver: "Credit quality of tenant, lease term, rent escalations"
+    replacement_cost_benchmark: "Less relevant; value is lease-stream NPV, not physical asset"
+    occupancy_standard: "Binary: 100% or 0% (single-tenant risk)"
+    revenue_granularity: "Base rent, CAM reimbursements, percentage rent if retail"
+
+  unique_sections:
+    tenant_credit_analysis:
+      description: "Required. Moody's/S&P rating, revenue, EBITDA, lease coverage ratio."
+      required_fields:
+        - tenant_name
+        - credit_rating
+        - annual_revenue
+        - ebitda
+        - rent_as_pct_of_revenue
+        - lease_coverage_ratio
+        - public_or_private
+
+    lease_structure_summary:
+      description: "Lease term, options, escalations, termination rights, co-tenancy."
+      required_fields:
+        - lease_commencement_date
+        - initial_term_years
+        - remaining_term_years
+        - renewal_options
+        - annual_escalation_type_and_rate
+        - termination_or_kick_out_clauses
+        - tenant_improvement_obligations
+        - landlord_obligations_if_any
+
+    dark_store_scenario:
+      description: "Required for retail NNN. What happens if tenant vacates but continues paying?"
+      required_fields:
+        - dark_store_lease_provisions
+        - re_tenanting_cost_estimate
+        - downtime_assumption_months
+        - replacement_rent_estimate
+
+  risk_factors:
+    typical_risks:
+      - category: "Credit"
+        name: "Tenant default or downgrade"
+        quantification: "Value impact of 1-2 notch downgrade; recovery scenario if lease rejected in BK"
+      - category: "Exit"
+        name: "Lease rollover / residual value"
+        quantification: "Value at lease expiration assuming dark; re-tenanting timeline and cost"
+      - category: "Market"
+        name: "Cap rate expansion on short remaining term"
+        quantification: "NNN cap rates expand 50-100bps per 5-year reduction in remaining term"
+      - category: "Structural"
+        name: "Environmental or roof/structural liability under NNN"
+        quantification: "Landlord exposure for items typically excluded from NNN reimbursement"
+
+  sensitivity_priorities:
+    primary: "Exit cap rate vs. remaining lease term at disposition"
+    secondary: "Tenant credit downgrade scenario (investment-grade to BB)"
+    tertiary: "Re-tenanting cost and downtime if tenant vacates"
+
+  language_notes:
+    credit_framing: >
+      Lead with tenant credit, not property characteristics. "The investment thesis
+      is a 12-year Walgreens (Baa2/BBB) lease stream with 1.5% annual escalations,
+      providing predictable cash flow with a 6.2% going-in yield."
+    residual_value: >
+      Always address what the property is worth at lease expiration without the
+      tenant. NNN investors sometimes ignore residual; IC should not.
+
+---
+
+land:
+  display_name: "Land / Development Site"
+  unit_of_measure: "per buildable SF or per entitled unit"
+  key_metrics:
+    primary_cap_rate_driver: "N/A -- no income. Value is residual land value from development proforma."
+    replacement_cost_benchmark: "Comparable land sales per buildable SF or per entitled unit"
+    occupancy_standard: "N/A"
+    revenue_granularity: "N/A -- pro forma revenue from hypothetical development"
+
+  unique_sections:
+    entitlement_status:
+      description: "Critical. Entitled land trades at 2-5x unentitled in most markets."
+      required_fields:
+        - current_zoning
+        - entitled_use
+        - entitled_density_units_or_sf
+        - entitlement_expiration_date
+        - outstanding_conditions_or_variances
+        - political_risk_assessment
+
+    residual_land_value_analysis:
+      description: "Back into land value from development proforma. This IS the underwriting."
+      required_fields:
+        - total_development_cost_budget
+        - hard_cost_per_sf
+        - soft_cost_percentage
+        - stabilized_noi_of_completed_project
+        - exit_cap_rate_of_completed_project
+        - completed_project_value
+        - residual_land_value
+        - land_purchase_price_vs_residual
+
+    comparable_land_sales:
+      description: "3-5 recent land sales in the submarket."
+      required_fields:
+        - sale_date
+        - location
+        - price_per_buildable_sf
+        - zoning_and_entitlement_status
+        - buyer_type
+
+  risk_factors:
+    typical_risks:
+      - category: "Entitlement"
+        name: "Zoning change / entitlement denial"
+        quantification: "Value of unentitled land vs. entitled; loss as % of purchase price"
+      - category: "Execution"
+        name: "Construction cost escalation"
+        quantification: "Impact on residual land value per 10% increase in hard costs"
+      - category: "Market"
+        name: "Market cycle timing"
+        quantification: "2-4 year development cycle means exit into unknown market conditions"
+      - category: "Financing"
+        name: "Construction loan availability"
+        quantification: "LTC requirements; equity gap if lender reduces advance rate"
+
+  sensitivity_priorities:
+    primary: "Residual land value vs. hard cost per SF"
+    secondary: "Stabilized rent vs. exit cap of completed project"
+    tertiary: "Entitlement timeline delay (6, 12, 24 months)"
+
+  language_notes:
+    no_income_framing: >
+      Land generates no income. Frame return entirely as development margin or
+      appreciation of entitled land value. "Return is a function of the spread
+      between purchase price ($X/buildable SF) and residual land value ($Y/buildable SF)
+      implied by the development proforma."
+    hold_cost: >
+      Explicitly state carry cost: property taxes, interest on acquisition
+      financing, insurance, maintenance. These erode return on a non-income asset.
+
+---
+
+bridge_loan:
+  display_name: "Bridge Loan / Mezzanine / Preferred Equity (Debt Investment)"
+  unit_of_measure: "per dollar invested"
+  key_metrics:
+    primary_cap_rate_driver: "N/A -- coupon rate, origination fees, exit fees drive return"
+    replacement_cost_benchmark: "Loan-to-value and loan-to-cost relative to collateral"
+    occupancy_standard: "Collateral occupancy as loan covenant metric"
+    revenue_granularity: "Interest income, origination fee amortization, extension fees"
+
+  unique_sections:
+    loan_structure_summary:
+      description: "The investment IS the loan. Detail every structural feature."
+      required_fields:
+        - loan_amount
+        - ltv_at_origination
+        - ltc_at_origination
+        - coupon_rate_and_type
+        - origination_fee_points
+        - exit_fee_points
+        - initial_term_months
+        - extension_options
+        - interest_reserve_months
+        - recourse_type
+        - guarantor_net_worth_and_liquidity
+
+    collateral_analysis:
+      description: "Underwrite the property as if you were buying it. You need to know recovery value."
+      required_fields:
+        - property_type_and_location
+        - appraised_value
+        - as_is_vs_as_stabilized_value
+        - borrower_business_plan
+        - borrower_equity_in_deal
+        - senior_debt_if_mezzanine
+
+    default_and_recovery_scenario:
+      description: "Required. Model the downside: what happens if borrower defaults?"
+      required_fields:
+        - foreclosure_timeline_months
+        - carry_cost_during_foreclosure
+        - estimated_reo_value
+        - loss_severity_percentage
+        - recovery_to_lender
+
+  risk_factors:
+    typical_risks:
+      - category: "Credit"
+        name: "Borrower default"
+        quantification: "Loss severity at various LTV assumptions; recovery timeline"
+      - category: "Collateral"
+        name: "Collateral value decline"
+        quantification: "LTV at 10%, 20%, 30% value decline; covenant breach thresholds"
+      - category: "Execution"
+        name: "Borrower business plan failure"
+        quantification: "Impact on as-stabilized value if renovation/lease-up underperforms"
+      - category: "Structural"
+        name: "Maturity default / inability to refinance"
+        quantification: "Extension costs; modification terms; foreclosure cost and timeline"
+
+  sensitivity_priorities:
+    primary: "Loss severity at various collateral value declines (10-40%)"
+    secondary: "Yield to maturity under extension scenarios"
+    tertiary: "Recovery timeline sensitivity (12, 18, 24 months)"
+
+  language_notes:
+    yield_framing: >
+      Report yield-to-maturity and yield with extensions. Include origination and
+      exit fees in the IRR calculation. "All-in YTM of 14.2% includes 2 points
+      origination (amortized over 24-month initial term) and 1 point exit fee."
+    loss_given_default: >
+      Always present the LGD scenario. "In a default scenario with 25% collateral
+      value decline, LTV reaches 87%. Foreclosure timeline of 18 months at $X/month
+      carry results in a loss severity of Y% and net recovery of Z cents on the dollar."
+
+---
+
+trophy_office:
+  display_name: "Trophy / Class A Office"
+  unit_of_measure: "per SF"
+  key_metrics:
+    primary_cap_rate_driver: "In-place NOI/SF, mark-to-market on leases, WALT"
+    replacement_cost_benchmark: "Hard + soft cost per SF for comparable new construction"
+    occupancy_standard: "Physical occupancy, economic occupancy, sublease as % of total"
+    revenue_granularity: "Rent roll by tenant: name, SF, rent/SF, expiration, escalations"
+
+  unique_sections:
+    rent_roll_analysis:
+      description: "Tenant-by-tenant analysis. This is the core of office underwriting."
+      required_fields:
+        - tenant_name
+        - sf_occupied
+        - lease_start_and_expiration
+        - current_rent_per_sf
+        - market_rent_per_sf
+        - escalation_structure
+        - renewal_probability_estimate
+        - credit_quality_if_known
+
+    walt_and_rollover_schedule:
+      description: "Weighted average lease term and rollover by year."
+      required_fields:
+        - walt_years
+        - rollover_schedule_by_year_sf_and_pct
+        - tenant_concentration_top_3
+        - near_term_rollover_exposure_within_3_years
+
+    mark_to_market_analysis:
+      description: "In-place vs. market rents. Office mark-to-market can be positive or negative."
+      required_fields:
+        - weighted_avg_in_place_rent
+        - current_market_rent
+        - mark_to_market_percentage
+        - noi_impact_of_full_mark_to_market
+
+    sublease_and_remote_work_analysis:
+      description: "Post-2020 requirement. Quantify sublease exposure and utilization."
+      required_fields:
+        - sublease_sf_as_pct_of_submarket_inventory
+        - building_sublease_sf_if_any
+        - tenant_utilization_data_if_available
+        - submarket_office_demand_trend
+
+  risk_factors:
+    typical_risks:
+      - category: "Market"
+        name: "Office demand secular decline / remote work"
+        quantification: "Submarket vacancy trend; absorption data; sublease inventory"
+      - category: "Rollover"
+        name: "Near-term lease expiration concentration"
+        quantification: "% of NR expiring in Years 1-3; downtime cost per SF"
+      - category: "Execution"
+        name: "TI/LC cost on new leases"
+        quantification: "TI allowance per SF; leasing commission per SF; payback period"
+      - category: "Capital"
+        name: "Cap rate expansion for office assets"
+        quantification: "Office cap rates have expanded 100-200bps since 2022; exit cap sensitivity"
+      - category: "Financing"
+        name: "Lender pullback from office"
+        quantification: "Available leverage today vs. 2021; DSCR and DY constraints"
+
+  sensitivity_priorities:
+    primary: "Exit cap rate vs. renewal probability on top 3 tenants"
+    secondary: "TI/LC cost per SF vs. market rent achievable"
+    tertiary: "Sublease absorption timeline if major tenant vacates"
+
+  language_notes:
+    post_covid_framing: >
+      Office requires explicit addressal of secular demand trends. Do not ignore
+      the elephant in the room. "Submarket office vacancy is X.X%, up from Y.Y%
+      in 2019. Sublease inventory represents Z.Z% of total inventory. The
+      acquisition thesis does not rely on a return to pre-pandemic utilization."
+    tenant_concentration: >
+      If top tenant is >25% of NR, model the full vacancy scenario. "If [Tenant]
+      vacates at lease expiration (Year X), the building faces Y months of downtime
+      at $Z/SF carry cost, totaling $X.XM. Re-tenanting at market requires $A/SF
+      in TI and $B/SF in LC, with a payback period of C years."

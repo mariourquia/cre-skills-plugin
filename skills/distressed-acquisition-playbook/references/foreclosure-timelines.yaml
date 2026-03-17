@@ -1,0 +1,390 @@
+# foreclosure-timelines.yaml
+# Top 20 states by CRE transaction volume.
+# Judicial = court-supervised process. Non-judicial = power of sale (trustee deed).
+# Timelines are typical ranges for commercial properties. Residential may differ.
+# Redemption = post-sale period where borrower can reclaim property by paying full amount.
+# Data reflects 2025-2026 norms. Contested cases or bankruptcy filing extends all timelines.
+
+states:
+
+  california:
+    process: non-judicial
+    typical_months: 4-6
+    statutory_minimum_months: 3.75
+    redemption_period: none
+    key_steps:
+      - "Notice of default filed and recorded (day 1)"
+      - "3-month waiting period after NOD"
+      - "Notice of trustee sale published 20 days before sale"
+      - "Trustee sale (auction) at county courthouse"
+      - "Trustee deed recorded; buyer takes possession"
+    notes: >
+      Non-judicial is standard for commercial. Judicial available but rarely used.
+      Deficiency judgment available only through judicial foreclosure. One-action rule
+      (CCP 726) limits lender to single foreclosure action. Anti-deficiency protections
+      do not apply to commercial loans.
+
+  texas:
+    process: non-judicial
+    typical_months: 2-4
+    statutory_minimum_months: 1.5
+    redemption_period: none
+    key_steps:
+      - "Notice of default and intent to accelerate"
+      - "21-day cure period"
+      - "Notice of trustee sale posted and filed 21 days before sale"
+      - "Trustee sale on first Tuesday of month at county courthouse"
+      - "Trustee deed; immediate possession"
+    notes: >
+      Fastest major-market foreclosure state. First Tuesday sale schedule is rigid.
+      Commercial borrowers have no redemption rights. Deficiency suits permitted
+      within 2 years. Strong lender state.
+
+  new_york:
+    process: judicial
+    typical_months: 12-36
+    statutory_minimum_months: 8
+    redemption_period: none_statutory
+    key_steps:
+      - "Lis pendens filed"
+      - "Summons and complaint served on borrower and lienholders"
+      - "Borrower answer period (20-30 days)"
+      - "Discovery and motion practice (3-12 months)"
+      - "Summary judgment motion or trial (3-12 months)"
+      - "Judgment of foreclosure and sale"
+      - "Referee sale (auction) scheduled 30-60 days post-judgment"
+    notes: >
+      Among the slowest states. NYC commercial foreclosures routinely take 18-30 months.
+      Court backlogs significant. No statutory redemption, but borrower can redeem
+      anytime before sale. Mortgage recording tax (2.8% in NYC) affects note purchase economics.
+
+  florida:
+    process: judicial
+    typical_months: 8-18
+    statutory_minimum_months: 5
+    redemption_period: none_after_sale
+    key_steps:
+      - "Lis pendens filed"
+      - "Complaint served; 20-day answer period"
+      - "If uncontested: summary judgment in 3-6 months"
+      - "If contested: 8-18 months through trial"
+      - "Certificate of sale issued"
+      - "Certificate of title issued 10 days after sale (if no objection)"
+    notes: >
+      Judicial but faster than NY. Rocket dockets in some counties (Miami-Dade,
+      Palm Beach) expedite uncontested commercial foreclosures. Deficiency judgments
+      require separate action. Right of redemption extinguished at sale.
+
+  illinois:
+    process: judicial
+    typical_months: 10-18
+    statutory_minimum_months: 7
+    redemption_period: 7_months_commercial
+    key_steps:
+      - "Complaint filed; 30-day answer period"
+      - "Motion for summary judgment (if uncontested)"
+      - "Judgment of foreclosure"
+      - "Redemption period: 7 months from complaint (3 months if abandoned)"
+      - "Judicial sale conducted"
+      - "Order confirming sale; deed issued"
+    notes: >
+      Redemption period runs from date of complaint filing, not judgment. Commercial
+      properties: 7-month redemption (vs 3 months for abandoned). Cook County
+      (Chicago) has longest timelines in state due to court volume.
+
+  georgia:
+    process: non-judicial
+    typical_months: 2-4
+    statutory_minimum_months: 1.5
+    redemption_period: none
+    key_steps:
+      - "Demand letter to borrower (not statutorily required but standard)"
+      - "Notice of sale published in county newspaper 4 consecutive weeks"
+      - "Sale on first Tuesday of month at county courthouse"
+      - "Deed under power recorded"
+    notes: >
+      Very fast, lender-friendly. First Tuesday schedule like Texas. No right of
+      redemption. Confirmation hearing required only if lender seeks deficiency judgment.
+      Borrower defenses are limited in non-judicial process.
+
+  pennsylvania:
+    process: judicial
+    typical_months: 6-12
+    statutory_minimum_months: 4
+    redemption_period: none_commercial
+    key_steps:
+      - "Complaint in mortgage foreclosure filed"
+      - "Borrower served; 20-day response period"
+      - "Default judgment if no response (60-90 days)"
+      - "If contested: 6-12 months through trial"
+      - "Writ of execution; sheriff's sale scheduled"
+      - "Sheriff's deed issued post-sale"
+    notes: >
+      Philadelphia sheriff's sales are quarterly, creating timing gaps. Commercial
+      has no redemption period (residential has limited rights). Act 91 notice
+      requirements apply to residential only.
+
+  north_carolina:
+    process: non-judicial
+    typical_months: 2-4
+    statutory_minimum_months: 1.5
+    redemption_period: none
+    key_steps:
+      - "Notice of hearing filed with clerk of superior court"
+      - "Clerk's hearing (10 days after notice)"
+      - "Order authorizing sale"
+      - "Notice of sale posted 20 days before sale"
+      - "Trustee sale at courthouse"
+      - "10-day upset bid period (anyone can submit higher bid)"
+    notes: >
+      Unique upset bid process allows overbidding for 10 days after sale. If upset
+      bid received, new sale held, and another 10-day period runs. Can extend
+      process by 30-60 days if bidding war ensues. Clerk's hearing is a rubber stamp
+      for commercial.
+
+  new_jersey:
+    process: judicial
+    typical_months: 12-24
+    statutory_minimum_months: 6
+    redemption_period: 10_days_post_sale
+    key_steps:
+      - "Lis pendens filed; complaint served"
+      - "Answer period (35 days)"
+      - "If uncontested: office foreclosure track (faster)"
+      - "If contested: traditional litigation track"
+      - "Final judgment; sheriff sale scheduled"
+      - "10-day redemption period after sale"
+      - "Sheriff's deed issued"
+    notes: >
+      Slow judicial state. Office foreclosure track (uncontested) can complete in
+      6-9 months. Contested cases routinely 18-24 months. Fair Foreclosure Act adds
+      procedural requirements. Surplus funds after sale go to junior lienholders
+      then borrower.
+
+  virginia:
+    process: non-judicial
+    typical_months: 2-4
+    statutory_minimum_months: 1
+    redemption_period: none
+    key_steps:
+      - "14-day notice of intent to accelerate (if deed of trust requires)"
+      - "Notice of sale published in newspaper (14 days before sale)"
+      - "Notice posted at property and courthouse"
+      - "Trustee sale at property or courthouse"
+      - "Trustee deed recorded"
+    notes: >
+      Fast and lender-friendly. One of the quickest states. No right of redemption
+      for commercial. Borrower's only defense is injunction (must show clear grounds).
+      Deficiency permitted.
+
+  ohio:
+    process: judicial
+    typical_months: 8-14
+    statutory_minimum_months: 5
+    redemption_period: none_after_confirmation
+    key_steps:
+      - "Complaint filed; borrower served"
+      - "28-day answer period"
+      - "Summary judgment motion (if uncontested)"
+      - "Decree of foreclosure"
+      - "Sheriff's appraisal"
+      - "Sheriff's sale (2/3 rule: must sell for at least 2/3 of appraised value)"
+      - "Confirmation hearing (30 days post-sale)"
+    notes: >
+      Two-thirds rule is unusual -- property must sell for at least 2/3 of appraisal
+      at first sale. If no qualifying bid, second sale has no minimum. This can add
+      60-90 days. Right of redemption ends at sale confirmation.
+
+  colorado:
+    process: non-judicial
+    typical_months: 3-5
+    statutory_minimum_months: 2.5
+    redemption_period: 75_days_commercial
+    key_steps:
+      - "Notice of election and demand (NED) filed with county public trustee"
+      - "Public trustee mails notice to borrower and lienholders"
+      - "110-125 day waiting period"
+      - "Public trustee sale"
+      - "75-day redemption period (commercial)"
+    notes: >
+      Non-judicial through public trustee (government official, not private trustee).
+      75-day commercial redemption period allows borrower, junior lienholders, or
+      IRS to redeem. Extends effective timeline. Rural counties move faster.
+
+  massachusetts:
+    process: non-judicial
+    typical_months: 3-6
+    statutory_minimum_months: 2.5
+    redemption_period: none_commercial
+    key_steps:
+      - "Notice of default and right to cure (150 days for residential; commercial exempt)"
+      - "Notice of mortgagee's sale published 3 consecutive weeks"
+      - "Sale may be held 14+ days after first publication"
+      - "Memorandum of sale recorded"
+      - "Foreclosure deed recorded"
+    notes: >
+      Commercial foreclosure is relatively fast once the power of sale is exercised.
+      Soldier's and Sailor's Civil Relief Act compliance required. Entry and possession
+      foreclosure is alternative (rarely used for commercial). Title insurance after
+      foreclosure requires careful review.
+
+  arizona:
+    process: non-judicial
+    typical_months: 3-5
+    statutory_minimum_months: 3
+    redemption_period: none_for_deeds_of_trust
+    key_steps:
+      - "Notice of trustee sale recorded (90 days before sale)"
+      - "Copy mailed to borrower within 5 days of recording"
+      - "Sale conducted at location specified in notice"
+      - "Trustee deed issued to purchaser"
+    notes: >
+      Straightforward non-judicial process. No redemption for deeds of trust
+      (mortgages have 6-month redemption, but deeds of trust are standard for
+      commercial). Anti-deficiency applies to purchase-money on 1-2 family only.
+
+  washington:
+    process: non-judicial
+    typical_months: 4-6
+    statutory_minimum_months: 3.5
+    redemption_period: none
+    key_steps:
+      - "Notice of default issued to borrower (30 days to cure)"
+      - "Notice of trustee sale recorded (120 days before sale)"
+      - "Sale conducted by trustee"
+      - "Trustee deed issued"
+    notes: >
+      120-day notice period is longer than most non-judicial states. No redemption.
+      Washington's Deed of Trust Act governs. Mediation requirements apply to
+      residential only.
+
+  michigan:
+    process: non-judicial
+    typical_months: 3-8
+    statutory_minimum_months: 2
+    redemption_period: 6_months_commercial
+    key_steps:
+      - "Notice of sale published 4 consecutive weeks"
+      - "Sale conducted at county courthouse (sheriff sale)"
+      - "6-month redemption period (commercial >3 acres or >4 units)"
+      - "Sheriff deed issued after redemption expiration"
+    notes: >
+      Non-judicial by advertisement, but 6-month redemption for commercial makes
+      effective timeline 8-10 months. Borrower retains possession during redemption.
+      Property condition risk during redemption period is significant.
+
+  minnesota:
+    process: non-judicial
+    typical_months: 3-8
+    statutory_minimum_months: 2
+    redemption_period: 6_months
+    key_steps:
+      - "Notice of sale published 6 consecutive weeks"
+      - "Sale at county courthouse"
+      - "6-month redemption period (12 months if >10 acres agricultural)"
+      - "Sheriff certificate ripens to deed after redemption expiration"
+    notes: >
+      Similar to Michigan with significant redemption period. Borrower retains
+      possession during redemption. Can be shortened to 5 weeks if property is
+      abandoned (requires court filing).
+
+  maryland:
+    process: non-judicial
+    typical_months: 3-6
+    statutory_minimum_months: 2
+    redemption_period: none_commercial
+    key_steps:
+      - "Order to docket filed with circuit court"
+      - "Court order authorizing sale"
+      - "Notice of sale published"
+      - "Trustee sale conducted"
+      - "Court ratification of sale (30-45 days post-sale)"
+      - "Deed executed after ratification"
+    notes: >
+      Hybrid system -- non-judicial but requires court order to authorize and
+      ratify. Faster than pure judicial. Baltimore City has expedited commercial
+      foreclosure procedures. No redemption for commercial.
+
+  connecticut:
+    process: judicial
+    typical_months: 8-15
+    statutory_minimum_months: 5
+    redemption_period: court_discretion
+    key_steps:
+      - "Complaint filed; return date set (2-6 weeks)"
+      - "Borrower files appearance and answer"
+      - "Motion for judgment of strict foreclosure or foreclosure by sale"
+      - "Strict foreclosure: title vests on Law Day (date set by court)"
+      - "Foreclosure by sale: committee sale conducted"
+    notes: >
+      Unique strict foreclosure option -- title passes directly to lender on
+      court-set date without auction. Lender must elect strict foreclosure if
+      property value exceeds debt. Borrower can open judgment within statutory
+      period. Court sets redemption period (typically 2-6 months).
+
+  indiana:
+    process: judicial
+    typical_months: 6-12
+    statutory_minimum_months: 4
+    redemption_period: none_commercial
+    key_steps:
+      - "Complaint filed; borrower served"
+      - "20-day answer period"
+      - "Default or summary judgment"
+      - "Decree of foreclosure"
+      - "Sheriff sale (30 days after decree)"
+      - "Sheriff deed issued"
+    notes: >
+      Straightforward judicial process. No redemption for commercial (residential
+      has limited rights). Marion County (Indianapolis) sheriff sales are monthly
+      with published schedules. Deficiency judgment available.
+
+summary:
+  fastest_states:
+    - state: texas
+      typical: "2-4 months"
+      process: non-judicial
+    - state: georgia
+      typical: "2-4 months"
+      process: non-judicial
+    - state: virginia
+      typical: "2-4 months"
+      process: non-judicial
+
+  slowest_states:
+    - state: new_york
+      typical: "12-36 months"
+      process: judicial
+    - state: new_jersey
+      typical: "12-24 months"
+      process: judicial
+    - state: connecticut
+      typical: "8-15 months"
+      process: judicial
+
+  states_with_commercial_redemption:
+    - state: colorado
+      period: "75 days"
+    - state: michigan
+      period: "6 months"
+    - state: minnesota
+      period: "6 months"
+    - state: connecticut
+      period: "court discretion (2-6 months)"
+    - state: ohio
+      period: "until sale confirmation"
+
+  acquisition_strategy_implications:
+    non_judicial_fast: >
+      TX, GA, VA, AZ: Lender can foreclose quickly. Distressed borrowers have
+      limited time. Note purchases must close fast. REO inventory turns over.
+      Best markets for REO acquisition strategy.
+    judicial_slow: >
+      NY, NJ, CT, IL: Extended timelines create opportunity for note purchase
+      at deeper discounts (lender carrying cost is high). Receivership often
+      preferred over waiting for foreclosure. Borrowers have more leverage
+      to negotiate deed-in-lieu.
+    redemption_states: >
+      CO, MI, MN: Budget for redemption period carrying costs. Property
+      condition risk during redemption. Price notes and bids accordingly.
+      Consider negotiating deed-in-lieu to avoid redemption risk.

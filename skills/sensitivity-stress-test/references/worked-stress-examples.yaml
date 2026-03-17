@@ -1,0 +1,382 @@
+---
+# Sensitivity & Stress Test Worked Examples
+# Market data calibrated to Q1 2026 conditions
+# All dollar amounts in USD unless noted
+---
+
+examples:
+
+  # =========================================================================
+  # EXAMPLE A: 50-Unit Multifamily Base Case with 4x4 Sensitivity Grid
+  # =========================================================================
+
+  - id: stress_example_01
+    name: "50-Unit MF Value-Add -- Full Sensitivity & Tornado Analysis"
+    description: >
+      50-unit multifamily in Northern NJ, post-stabilization. Base case assumptions
+      from deal-underwriting-assistant example_01. This example layers on a complete
+      sensitivity framework: 4x4 grid, tornado chart, and breakeven analysis.
+
+    base_case:
+      property: "50-Unit MF, Ironbound, Newark NJ"
+      purchase_price: 12_000_000
+      going_in_noi: 472_800
+      stabilized_noi: 665_000
+      loan_amount: 7_800_000
+      interest_rate: 0.0700
+      io_period_years: 2
+      amort_years: 30
+      hold_period: 5
+      exit_cap_rate: 0.0550
+      rent_growth: 0.030
+      expense_growth: 0.025
+      capex_budget: 360_000
+      equity_invested: 4_740_000
+      base_levered_irr: 0.121
+      base_equity_multiple: 1.83
+      base_unlevered_irr: 0.092
+
+    # -------------------------------------------------------------------
+    # 4x4 SENSITIVITY GRID: Rent Growth x Exit Cap -> Levered IRR
+    # -------------------------------------------------------------------
+    sensitivity_grid:
+      description: >
+        Levered IRR (%) across 16 scenarios. Rows = exit cap rate (4 levels).
+        Columns = annual rent growth post-stabilization (4 levels).
+        Base case is exit_cap=5.50%, rent_growth=3.0%.
+      axis_x:
+        label: "Annual Rent Growth"
+        values: [0.010, 0.020, 0.030, 0.040]
+        base_index: 2
+      axis_y:
+        label: "Exit Cap Rate"
+        values: [0.0475, 0.0525, 0.0550, 0.0625]
+        base_index: 2
+      matrix_levered_irr:
+        #                  1.0%   2.0%   3.0%   4.0%
+        0.0475:          [14.2,  15.5,  16.8,  18.1]
+        0.0525:          [11.6,  12.9,  14.2,  15.5]
+        0.0550:          [10.7,  11.9,  12.1,  14.5]   # base case row
+        0.0625:          [ 7.8,   9.0,  10.2,  11.4]
+      matrix_equity_multiple:
+        0.0475:          [2.01, 2.12, 2.23, 2.35]
+        0.0525:          [1.82, 1.93, 2.04, 2.15]
+        0.0550:          [1.74, 1.84, 1.83, 2.06]
+        0.0625:          [1.54, 1.63, 1.73, 1.83]
+      base_case_cell:
+        row: 0.0550
+        col: 0.030
+        levered_irr: 12.1
+        equity_multiple: 1.83
+      observations:
+        - "75bps cap expansion (5.50% -> 6.25%) erodes IRR by ~200bps at constant rent growth"
+        - "1% incremental rent growth adds ~130bps to levered IRR at constant exit cap"
+        - "Worst case (6.25% cap, 1% growth) still clears 7.8% levered IRR -- deal is defensible"
+        - "Best case (4.75% cap, 4% growth) at 18.1% is optimistic but achievable in strong cycle"
+
+    # -------------------------------------------------------------------
+    # TORNADO CHART: 6 Variables Ranked by Impact on Levered IRR
+    # -------------------------------------------------------------------
+    tornado_chart:
+      description: >
+        Each variable is stressed +/- from base while all others held constant.
+        Ranked by total IRR swing (high minus low). Identifies which assumptions
+        the deal is most sensitive to.
+      base_irr: 12.1
+      variables:
+        - rank: 1
+          variable: "Exit Cap Rate"
+          base_value: 0.0550
+          low_stress: 0.0650
+          high_stress: 0.0475
+          irr_at_low_stress: 8.7
+          irr_at_high_stress: 16.8
+          total_swing_bps: 810
+          direction: "inverse -- lower cap = higher IRR"
+          interpretation: >
+            Exit cap is the dominant driver. 100bps cap expansion from 5.50% to 6.50%
+            destroys 340bps of IRR. This is typical for value-add deals where exit
+            valuation drives the bulk of returns.
+
+        - rank: 2
+          variable: "Rent Growth Rate"
+          base_value: 0.030
+          low_stress: 0.010
+          high_stress: 0.050
+          irr_at_low_stress: 9.4
+          irr_at_high_stress: 15.2
+          total_swing_bps: 580
+          direction: "direct"
+          interpretation: >
+            Rent growth is the second-most impactful. The 1% floor still produces 9.4%
+            which clears most hurdle rates. Rent growth sensitivity is magnified by the
+            value-add component (20 units re-leased at higher rents).
+
+        - rank: 3
+          variable: "Interest Rate"
+          base_value: 0.0700
+          low_stress: 0.0900
+          high_stress: 0.0550
+          irr_at_low_stress: 9.8
+          irr_at_high_stress: 14.0
+          total_swing_bps: 420
+          direction: "inverse -- lower rate = higher IRR"
+          interpretation: >
+            200bps rate stress reduces IRR by 230bps. The IO period partially buffers
+            rate sensitivity in early years. Amortizing period amplifies the impact.
+
+        - rank: 4
+          variable: "Renovation Budget Overrun"
+          base_value: 360_000
+          low_stress: 504_000        # +40% overrun
+          high_stress: 324_000       # -10% savings
+          irr_at_low_stress: 10.3
+          irr_at_high_stress: 12.5
+          total_swing_bps: 220
+          direction: "inverse -- higher capex = lower IRR"
+          interpretation: >
+            40% cost overrun ($144K additional) reduces IRR by 180bps. Modest impact
+            relative to exit cap and rent growth because capex is a one-time cash flow
+            at the front of the hold, partially offset by time-value.
+
+        - rank: 5
+          variable: "Vacancy Rate (Stabilized)"
+          base_value: 0.05
+          low_stress: 0.10
+          high_stress: 0.03
+          irr_at_low_stress: 10.8
+          irr_at_high_stress: 12.8
+          total_swing_bps: 200
+          direction: "inverse -- higher vacancy = lower IRR"
+          interpretation: >
+            Doubling vacancy from 5% to 10% costs 130bps of IRR. Newark Ironbound
+            vacancy averaged 3.8% in 2025; 10% would be a severe market dislocation.
+
+        - rank: 6
+          variable: "Expense Growth Rate"
+          base_value: 0.025
+          low_stress: 0.045
+          high_stress: 0.015
+          irr_at_low_stress: 11.3
+          irr_at_high_stress: 12.6
+          total_swing_bps: 130
+          direction: "inverse -- higher expense growth = lower IRR"
+          interpretation: >
+            Expense growth is the least impactful single variable. Even at 4.5% annual
+            expense inflation (well above CPI), IRR only drops 80bps. Newark property
+            tax reassessment is the largest single expense risk.
+
+      ranking_summary:
+        - "1. Exit Cap Rate (810bps swing) -- dominant"
+        - "2. Rent Growth (580bps swing) -- revenue driver"
+        - "3. Interest Rate (420bps swing) -- leverage cost"
+        - "4. Capex Overrun (220bps swing) -- execution risk"
+        - "5. Vacancy (200bps swing) -- occupancy risk"
+        - "6. Expense Growth (130bps swing) -- least impactful"
+
+    # -------------------------------------------------------------------
+    # BREAKEVEN THRESHOLDS
+    # -------------------------------------------------------------------
+    breakeven_analysis:
+      description: >
+        The value of each variable that drives levered IRR to exactly 0%.
+        Shows how far each assumption must deteriorate before the deal loses money.
+      thresholds:
+        - variable: "Exit Cap Rate"
+          breakeven_value: 0.0920
+          headroom_from_base: "+370bps"
+          note: "Cap would need to expand from 5.50% to 9.20% to destroy all equity. Implies a property value of $7.7M vs $12M purchase. Very unlikely absent complete market collapse."
+
+        - variable: "Rent Growth"
+          breakeven_value: -0.035
+          headroom_from_base: "-6.5% from 3% base"
+          note: "Rents would need to DECLINE 3.5% annually for 5 years. Cumulative rent drop of ~16%. This occurred in select metros during 2008-2010 GFC but not in NYC metro multifamily."
+
+        - variable: "Interest Rate"
+          breakeven_value: 0.142
+          headroom_from_base: "+720bps"
+          note: "Rate would need to reach 14.2% for zero IRR. IO period buffers early years. Implausible in current cycle."
+
+        - variable: "Vacancy Rate"
+          breakeven_value: 0.38
+          headroom_from_base: "+33% from 5% base"
+          note: "38% stabilized vacancy = 19 of 50 units permanently empty. Effectively a distressed asset scenario."
+
+      combined_stress:
+        description: "Simultaneous adverse moves on top 3 variables"
+        scenario: "Exit cap +75bps (6.25%), rent growth -100bps (2.0%), rate +100bps (8.0%)"
+        combined_levered_irr: 5.8
+        combined_equity_multiple: 1.38
+        verdict: "Deal survives triple stress with 5.8% IRR. Below typical 8% hurdle but still positive. Sponsor retains capital."
+
+  # =========================================================================
+  # EXAMPLE B: Lender Stress Test -- Covenant Cascade at +200bps
+  # =========================================================================
+
+  - id: stress_example_02
+    name: "Lender Covenant Cascade -- Rate Stress +200bps"
+    description: >
+      Lender-perspective stress test on a stabilized $25M office property.
+      Current DSCR 1.45x at 6.0% rate. Test covenant cascade as rates rise
+      +200bps at refinance (to 8.0%). Three covenant trip-wires: 1.25x, 1.10x, 1.0x.
+
+    loan_profile:
+      property: "125,000 SF Suburban Office, Parsippany NJ"
+      appraised_value: 25_000_000
+      loan_amount: 16_250_000           # 65% LTV
+      current_rate: 0.060               # 6.0% fixed, maturing 18 months
+      amort_years: 25
+      current_annual_ds: 1_260_360      # monthly $105,030 on 25yr amort at 6%
+      in_place_noi: 1_825_000           # $14.60/SF NOI on 125K SF
+      current_dscr: 1.448               # 1,825,000 / 1,260,360 = 1.448x
+      current_debt_yield: 0.1123        # 1,825,000 / 16,250,000 = 11.23%
+      current_ltv: 0.65
+
+    rate_stress_scenarios:
+      base:
+        rate: 0.060
+        annual_ds: 1_260_360
+        dscr: 1.448
+        status: "PASS all covenants"
+        cash_after_ds: 564_640
+
+      plus_100bps:
+        rate: 0.070
+        annual_ds: 1_381_680            # refi at 7.0%, 25yr amort on same balance
+        dscr: 1.321                     # 1,825,000 / 1,381,680
+        status: "PASS all covenants"
+        cash_after_ds: 443_320
+        note: "Cash flow reduced 21% but still above 1.25x"
+
+      plus_150bps:
+        rate: 0.075
+        annual_ds: 1_443_480
+        dscr: 1.264                     # 1,825,000 / 1,443,480
+        status: "PASS 1.25x -- marginal (1.26x)"
+        cash_after_ds: 381_520
+        note: "1bps above 1.25x trigger. Any NOI softening trips first covenant."
+
+      plus_200bps:
+        rate: 0.080
+        annual_ds: 1_506_120
+        dscr: 1.212                     # 1,825,000 / 1,506,120
+        status: "FAIL 1.25x covenant"
+        cash_after_ds: 318_880
+        note: "Below 1.25x. Triggers cash sweep and reporting requirements."
+
+      plus_250bps:
+        rate: 0.085
+        annual_ds: 1_569_600
+        dscr: 1.163                     # 1,825,000 / 1,569,600
+        status: "FAIL 1.25x, approaching 1.10x"
+        cash_after_ds: 255_400
+        note: "Lock-box may be activated. Sponsor loses cash flow control."
+
+      plus_300bps:
+        rate: 0.090
+        annual_ds: 1_633_920
+        dscr: 1.117
+        status: "FAIL 1.25x, marginal on 1.10x"
+        cash_after_ds: 191_080
+
+      plus_350bps:
+        rate: 0.095
+        annual_ds: 1_699_080
+        dscr: 1.074
+        status: "FAIL 1.25x and 1.10x covenants"
+        cash_after_ds: 125_920
+        note: "Below 1.10x. Triggers default notice countdown. Lender may require partial paydown or additional collateral."
+
+      noi_decline_at_plus_200:
+        description: "NOI decline at +200bps refi rate. What NOI drop trips each covenant?"
+        at_8pct_rate:
+          ds: 1_506_120
+          dscr_1_25_threshold_noi: 1_882_650    # DS * 1.25
+          dscr_1_10_threshold_noi: 1_656_732    # DS * 1.10
+          dscr_1_00_threshold_noi: 1_506_120    # DS * 1.00
+          current_noi: 1_825_000
+          headroom_to_1_25x:
+            noi_drop_dollars: -57_650           # need NOI to rise to $1.883M, so negative headroom
+            noi_drop_pct: "ALREADY BELOW -- NOI must INCREASE 3.2% to restore 1.25x"
+          headroom_to_1_10x:
+            noi_drop_dollars: 168_268
+            noi_drop_pct: -0.092                # NOI can decline 9.2% before 1.10x breach
+          headroom_to_1_00x:
+            noi_drop_dollars: 318_880
+            noi_drop_pct: -0.175                # NOI can decline 17.5% before debt service coverage = 0
+
+    covenant_cascade:
+      description: >
+        Sequential consequences as DSCR deteriorates through each threshold.
+        Based on standard CMBS/balance-sheet loan covenant structure.
+
+      tier_1:
+        trigger: "DSCR < 1.25x"
+        label: "Cash Management"
+        consequences:
+          - "Excess cash flow swept into lender-controlled reserve account"
+          - "Monthly reporting frequency increases from quarterly to monthly"
+          - "Sponsor must provide updated rent roll and T-12 within 30 days"
+          - "Lender may engage third-party property manager at borrower expense"
+          - "No distributions to equity until DSCR restored above 1.25x for 2 consecutive quarters"
+        cure_options:
+          - "Deposit additional cash reserve equal to 6 months debt service ($753K)"
+          - "Provide guarantor top-up guarantee"
+          - "Demonstrate written leases that will restore DSCR within 12 months"
+        estimated_rate_trigger: "+150-200bps from current 6.0%"
+
+      tier_2:
+        trigger: "DSCR < 1.10x"
+        label: "Hard Lock-Box / Springing Recourse"
+        consequences:
+          - "All property cash flows directed to lender-controlled lock-box"
+          - "Borrower loses ALL cash flow control"
+          - "Lender may activate springing recourse provision (loan becomes full recourse)"
+          - "Loan is classified as 'Criticized' on lender's books (bank regulatory impact)"
+          - "Lender issues formal default notice with 60-day cure period"
+          - "Lender may engage receiver if borrower is unresponsive"
+        cure_options:
+          - "Principal paydown to restore DSCR above 1.25x"
+          - "Required paydown at 8.0% rate: $2.4M to reduce DS and restore 1.25x"
+          - "Additional collateral pledge"
+          - "Loan modification / extension with rate buydown"
+        estimated_rate_trigger: "+350bps from current 6.0%"
+
+      tier_3:
+        trigger: "DSCR < 1.00x"
+        label: "Payment Default"
+        consequences:
+          - "Property NOI insufficient to cover debt service"
+          - "Borrower must fund shortfall from reserves or equity"
+          - "Event of default; acceleration clause may be invoked"
+          - "Cross-default provisions may trigger on other borrower loans"
+          - "Foreclosure proceedings may commence (NJ: 12-18 month judicial process)"
+          - "Lender marks loan as Non-Performing (NPL) -- reserve requirements increase"
+        required_noi_decline_from_current: -0.175
+        note: >
+          At +200bps, NOI must decline 17.5% to reach 1.0x. For suburban NJ office,
+          this means losing ~22,000 SF of occupancy (18% of NRA) from current levels
+          with no backfill. Plausible in a severe downturn but not in base case.
+
+    action_plan:
+      description: "Recommended actions at current +200bps stress"
+      immediate:
+        - "Request 90-day pre-maturity rate lock from current lender"
+        - "Solicit 3 refi quotes (CMBS conduit, bank, credit union)"
+        - "Prepare waiver request for temporary 1.15x DSCR floor"
+      short_term:
+        - "Accelerate lease-up of 8,500 SF vacancy (currently 6.8% vacant)"
+        - "Push 3 pending lease renewals to market rate ($2/SF above in-place)"
+        - "Projected NOI lift from lease-up: +$170K/year -> DSCR restored to 1.33x"
+      contingency:
+        - "If refi rates exceed 8.5%, consider partial paydown of $1.5M from reserves"
+        - "Paydown reduces loan to $14.75M, DS to $1,366K, DSCR to 1.34x at 8.5%"
+        - "Alternative: sell asset if achievable exit cap is below 7.5% (>$24.3M)"
+
+    summary:
+      key_finding: >
+        At +200bps rate stress, the 1.25x DSCR covenant is breached but 1.10x
+        holds with 9.2% NOI decline headroom. The property can sustain the refi
+        but will enter cash sweep. Sponsor should begin refi process immediately
+        and execute lease-up strategy to restore NOI above covenant threshold.
+      risk_rating: "AMBER -- Actionable, not critical"

@@ -1,0 +1,477 @@
+# Annual Fund Audit PBC (Prepared by Client) Checklist
+# Organized by category with typical auditor timeline
+
+---
+audit_metadata:
+  document: "Annual Fund Audit PBC Checklist"
+  applicable_to: "Closed-end and open-end CRE investment funds"
+  auditor_engagement: "Big 4 or national firm with real estate fund practice"
+  fiscal_year_end: "December 31"
+  target_opinion_date: "March 31 (90 days post FYE)"
+
+---
+# AUDITOR TIMELINE
+timeline:
+  - milestone: "Engagement letter execution"
+    target_date: "October 15 (T-75 days)"
+    notes: "Confirm scope, fees, team. Include any new entities or structures."
+
+  - milestone: "Planning meeting"
+    target_date: "November 1 (T-60 days)"
+    notes: "Discuss significant transactions, new accounting standards, key estimates."
+
+  - milestone: "Interim fieldwork"
+    target_date: "November 15-30"
+    notes: "Test controls, walk-throughs, preliminary analytics. Provide interim PBC items."
+
+  - milestone: "Year-end close"
+    target_date: "January 15 (T+15 days)"
+    notes: "Complete close process. All December entries posted."
+
+  - milestone: "PBC delivery - Phase 1 (financials)"
+    target_date: "January 25 (T+25 days)"
+    notes: "Trial balance, financial statement drafts, supporting schedules."
+
+  - milestone: "PBC delivery - Phase 2 (legal, tax, valuations)"
+    target_date: "February 5 (T+35 days)"
+    notes: "Legal confirmations, tax workpapers, final appraisals."
+
+  - milestone: "Final fieldwork"
+    target_date: "February 10-28"
+    notes: "Substantive testing, confirmation follow-up, subsequent events review."
+
+  - milestone: "Draft financial statements review"
+    target_date: "March 5 (T+65 days)"
+    notes: "Review auditor draft FS and footnotes. Provide comments within 5 business days."
+
+  - milestone: "Management representation letter"
+    target_date: "March 20 (T+80 days)"
+    notes: "Review, execute, and return to auditor."
+
+  - milestone: "Signed opinion"
+    target_date: "March 31 (T+90 days)"
+    notes: "Final signed audit opinion delivered. Distribute to LPs per LPA requirements."
+
+---
+# PBC ITEMS BY CATEGORY
+
+financial_statements:
+  - id: "FS-01"
+    item: "Year-end trial balance (fund level and consolidated)"
+    priority: "critical"
+    owner: "Controller"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "FS-02"
+    item: "Draft financial statements (balance sheet, income statement, cash flow, changes in partners capital)"
+    priority: "critical"
+    owner: "Controller"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "FS-03"
+    item: "General ledger detail for all accounts (full year)"
+    priority: "critical"
+    owner: "Controller"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "FS-04"
+    item: "Bank reconciliations for all accounts (December 31)"
+    priority: "critical"
+    owner: "Accountant"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "FS-05"
+    item: "Bank statements for all accounts (full year, plus January of subsequent year)"
+    priority: "high"
+    owner: "Accountant"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "FS-06"
+    item: "Intercompany reconciliation schedule"
+    priority: "high"
+    owner: "Controller"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "FS-07"
+    item: "Revenue recognition schedule: rental income, CAM reconciliation, percentage rent"
+    priority: "high"
+    owner: "Accountant"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "FS-08"
+    item: "Accounts receivable aging (tenant receivables by property)"
+    priority: "high"
+    owner: "Accountant"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "FS-09"
+    item: "Accounts payable listing and accrued expenses detail"
+    priority: "high"
+    owner: "Accountant"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "FS-10"
+    item: "Straight-line rent receivable schedule by tenant"
+    priority: "high"
+    owner: "Accountant"
+    status: "pending"
+    due_date: "January 25"
+
+capital_accounts:
+  - id: "CA-01"
+    item: "Capital account statements by investor (beginning balance, contributions, distributions, allocation of income/loss, ending balance)"
+    priority: "critical"
+    owner: "Fund Accountant"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "CA-02"
+    item: "Capital call notices issued during the year (with wire confirmations)"
+    priority: "high"
+    owner: "Fund Accountant"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "CA-03"
+    item: "Distribution notices and wire confirmations"
+    priority: "high"
+    owner: "Fund Accountant"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "CA-04"
+    item: "Investor commitment schedule (committed, called, uncalled, percentage)"
+    priority: "high"
+    owner: "Fund Accountant"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "CA-05"
+    item: "Waterfall calculation (preferred return, catch-up, carried interest)"
+    priority: "critical"
+    owner: "Controller"
+    status: "pending"
+    due_date: "February 5"
+
+  - id: "CA-06"
+    item: "GP co-investment documentation and capital account"
+    priority: "high"
+    owner: "Fund Accountant"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "CA-07"
+    item: "Subscription credit facility: agreement, draw/repayment schedule, outstanding balance"
+    priority: "high"
+    owner: "Controller"
+    status: "pending"
+    due_date: "January 25"
+
+fee_calculations:
+  - id: "FE-01"
+    item: "Management fee calculation by period (basis, rate, amount)"
+    priority: "critical"
+    owner: "Controller"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "FE-02"
+    item: "Organizational expense amortization schedule"
+    priority: "medium"
+    owner: "Controller"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "FE-03"
+    item: "Performance fee / carried interest calculation (cumulative)"
+    priority: "critical"
+    owner: "Controller"
+    status: "pending"
+    due_date: "February 5"
+
+  - id: "FE-04"
+    item: "Fee offset schedule (if applicable: transaction fees, property management fees offsetting base fee)"
+    priority: "high"
+    owner: "Controller"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "FE-05"
+    item: "Expense allocation methodology documentation (fund expenses vs. property expenses vs. GP expenses)"
+    priority: "high"
+    owner: "Controller"
+    status: "pending"
+    due_date: "January 25"
+
+valuations:
+  - id: "VA-01"
+    item: "Third-party appraisal reports for all properties (Q4 or year-end dated)"
+    priority: "critical"
+    owner: "Asset Manager"
+    status: "pending"
+    due_date: "February 5"
+
+  - id: "VA-02"
+    item: "Internal valuation memoranda (if any properties valued internally)"
+    priority: "critical"
+    owner: "Asset Manager"
+    status: "pending"
+    due_date: "February 5"
+
+  - id: "VA-03"
+    item: "Valuation committee minutes and approval documentation"
+    priority: "high"
+    owner: "Portfolio Manager"
+    status: "pending"
+    due_date: "February 5"
+
+  - id: "VA-04"
+    item: "Rent roll for each property (as of December 31)"
+    priority: "critical"
+    owner: "Property Manager"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "VA-05"
+    item: "Capital expenditure detail by property (actual spend vs. budget)"
+    priority: "high"
+    owner: "Asset Manager"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "VA-06"
+    item: "NOI bridge: budget vs. actual with variance explanations"
+    priority: "high"
+    owner: "Asset Manager"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "VA-07"
+    item: "Market comparable data supporting valuations (cap rates, price per SF, recent transactions)"
+    priority: "medium"
+    owner: "Asset Manager"
+    status: "pending"
+    due_date: "February 5"
+
+debt_schedule:
+  - id: "DE-01"
+    item: "Debt schedule: lender, property, original balance, current balance, rate, maturity, covenants"
+    priority: "critical"
+    owner: "Controller"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "DE-02"
+    item: "Loan agreements and amendments (new or modified during the year)"
+    priority: "high"
+    owner: "Legal"
+    status: "pending"
+    due_date: "February 5"
+
+  - id: "DE-03"
+    item: "Debt compliance certificates (quarterly submissions to lenders)"
+    priority: "high"
+    owner: "Controller"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "DE-04"
+    item: "Interest rate hedge documentation (if applicable: swap agreements, cap agreements)"
+    priority: "medium"
+    owner: "Controller"
+    status: "pending"
+    due_date: "February 5"
+
+  - id: "DE-05"
+    item: "Mortgage payoff/refinancing closing statements (for any transactions during year)"
+    priority: "high"
+    owner: "Controller"
+    status: "pending"
+    due_date: "January 25"
+
+legal:
+  - id: "LE-01"
+    item: "Limited Partnership Agreement (LPA) and all amendments"
+    priority: "critical"
+    owner: "Legal"
+    status: "pending"
+    due_date: "January 15"
+    notes: "Provide at interim fieldwork if available"
+
+  - id: "LE-02"
+    item: "Side letters (all executed)"
+    priority: "high"
+    owner: "Legal"
+    status: "pending"
+    due_date: "February 5"
+
+  - id: "LE-03"
+    item: "Legal entity organizational chart (fund structure with all subsidiaries)"
+    priority: "high"
+    owner: "Legal"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "LE-04"
+    item: "Acquisition and disposition closing documents (for transactions during year)"
+    priority: "high"
+    owner: "Legal"
+    status: "pending"
+    due_date: "February 5"
+
+  - id: "LE-05"
+    item: "Litigation summary: pending, threatened, settled (including insurance coverage)"
+    priority: "high"
+    owner: "Legal"
+    status: "pending"
+    due_date: "February 5"
+
+  - id: "LE-06"
+    item: "Attorney confirmation letters (signed by outside counsel)"
+    priority: "critical"
+    owner: "Legal"
+    status: "pending"
+    due_date: "February 15"
+    notes: "Auditor will send directly to outside counsel; fund must authorize response"
+
+  - id: "LE-07"
+    item: "Property management agreements (new or amended during year)"
+    priority: "medium"
+    owner: "Legal"
+    status: "pending"
+    due_date: "February 5"
+
+  - id: "LE-08"
+    item: "Insurance policies summary: coverage types, limits, deductibles, carriers"
+    priority: "medium"
+    owner: "Risk Manager"
+    status: "pending"
+    due_date: "February 5"
+
+tax:
+  - id: "TX-01"
+    item: "Prior year tax returns (fund and all subsidiary entities)"
+    priority: "high"
+    owner: "Tax Manager"
+    status: "pending"
+    due_date: "January 25"
+
+  - id: "TX-02"
+    item: "Tax depreciation schedules by property"
+    priority: "high"
+    owner: "Tax Manager"
+    status: "pending"
+    due_date: "February 5"
+
+  - id: "TX-03"
+    item: "Section 704(b) capital account reconciliation (book vs. tax)"
+    priority: "high"
+    owner: "Tax Manager"
+    status: "pending"
+    due_date: "February 5"
+
+  - id: "TX-04"
+    item: "State tax filing obligations by entity and jurisdiction"
+    priority: "medium"
+    owner: "Tax Manager"
+    status: "pending"
+    due_date: "February 5"
+
+  - id: "TX-05"
+    item: "1099 reporting: summary of payments requiring reporting"
+    priority: "medium"
+    owner: "Accountant"
+    status: "pending"
+    due_date: "January 31"
+
+  - id: "TX-06"
+    item: "FIRPTA withholding documentation for foreign investors"
+    priority: "high"
+    owner: "Tax Manager"
+    status: "pending"
+    due_date: "February 5"
+    notes: "Applicable only if fund has non-US LPs"
+
+---
+# DOCUMENT REQUEST TRACKING TEMPLATE
+
+tracking_template:
+  columns:
+    - field: "id"
+      description: "PBC item identifier"
+    - field: "category"
+      description: "FS, CA, FE, VA, DE, LE, TX"
+    - field: "item_description"
+      description: "What is being requested"
+    - field: "priority"
+      description: "Critical, High, Medium"
+    - field: "owner"
+      description: "Person responsible for producing"
+    - field: "due_date"
+      description: "Target delivery date to auditor"
+    - field: "status"
+      values:
+        - "not_started"
+        - "in_progress"
+        - "under_review"
+        - "delivered"
+        - "auditor_follow_up"
+        - "complete"
+    - field: "date_delivered"
+      description: "Actual delivery date"
+    - field: "auditor_notes"
+      description: "Any follow-up questions or issues"
+    - field: "resolution_date"
+      description: "Date follow-up items resolved"
+
+  summary_metrics:
+    total_items: 42
+    by_priority:
+      critical: 12
+      high: 22
+      medium: 8
+    by_category:
+      financial_statements: 10
+      capital_accounts: 7
+      fee_calculations: 5
+      valuations: 7
+      debt_schedule: 5
+      legal: 8
+      tax: 6
+
+---
+# COMMON AUDITOR ADJUSTMENTS TO WATCH FOR
+
+common_adjustments:
+  - area: "Straight-line rent"
+    issue: "Incorrect calculation of free rent periods, tenant improvement amortization, or lease term"
+    prevention: "Reconcile SLR schedule to lease abstracts quarterly"
+
+  - area: "Fair value of derivatives"
+    issue: "Interest rate swaps/caps not marked to market at period end"
+    prevention: "Obtain counterparty valuations monthly; reconcile to third-party pricing service"
+
+  - area: "Impairment"
+    issue: "Properties with undiscounted cash flows below carrying value not tested for impairment"
+    prevention: "Screen portfolio quarterly for impairment indicators; document analysis"
+
+  - area: "Acquisition cost allocation"
+    issue: "Incorrect allocation between land, building, in-place leases, above/below market leases"
+    prevention: "Engage third-party to prepare purchase price allocation within 90 days of closing"
+
+  - area: "Related party transactions"
+    issue: "Undisclosed or improperly disclosed related party transactions"
+    prevention: "Maintain related party registry; require disclosure for all transactions"
+
+  - area: "Subsequent events"
+    issue: "Material events between year-end and opinion date not properly disclosed"
+    prevention: "Run subsequent events checklist at each fieldwork date and opinion date"

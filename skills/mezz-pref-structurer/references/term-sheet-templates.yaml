@@ -1,0 +1,222 @@
+# Mezzanine Loan and Preferred Equity Term Sheet Templates
+# Standard institutional terms for subordinate capital structuring
+# All dollar amounts and rates are illustrative; adjust per deal specifics
+
+---
+
+mezzanine_loan_term_sheet:
+  header:
+    document_type: "Indicative Term Sheet -- Mezzanine Loan"
+    disclaimer: "Non-binding indication of interest. Subject to credit approval, legal documentation, and intercreditor agreement."
+    date: "YYYY-MM-DD"
+    prepared_by: "Lender Name"
+
+  parties:
+    borrower: "Property Owner LLC (or its direct parent entity)"
+    mezzanine_lender: "Mezz Lender Fund LP"
+    senior_lender: "Senior Lender, N.A."
+    guarantor: "Sponsor Entity and/or Key Principal(s)"
+
+  property:
+    address: "123 Main Street, City, ST ZIP"
+    property_type: "Multifamily / Office / Industrial / Retail"
+    units_or_sf: "XX units / XX,XXX SF"
+    current_occupancy: "XX%"
+    stabilized_occupancy: "XX%"
+
+  loan_terms:
+    loan_amount: "$X,XXX,XXX"
+    loan_purpose: "Acquisition / Refinancing / Recapitalization"
+    combined_ltv: "75-85% (senior + mezz as % of appraised value)"
+    senior_ltv: "60-70%"
+    mezz_last_dollar_ltv: "75-85%"
+    interest_rate:
+      type: "Fixed / Floating (SOFR + spread)"
+      base_rate: "12.00-15.00% (all-in, blended current pay + accrual)"
+      current_pay_component: "8.00-10.00% (paid monthly)"
+      accrual_component: "2.00-5.00% (PIK, added to principal)"
+      default_rate: "Contract rate + 4.00%"
+      rate_floor: "12.00%"
+    term: "2-5 years, coterminous with or inside senior loan maturity"
+    extension_options:
+      count: "1-2 extensions of 12 months each"
+      conditions:
+        - "No event of default"
+        - "DSCR at or above minimum threshold"
+        - "Payment of extension fee"
+        - "Rate adjustment (if applicable)"
+      extension_fee: "0.25-0.50% of outstanding principal per extension"
+    amortization: "Interest-only (full term); no scheduled principal amortization"
+    prepayment:
+      lockout: "12-24 months from closing"
+      penalty_schedule:
+        year_1: "Locked out"
+        year_2: "2.00% of outstanding principal"
+        year_3: "1.00% of outstanding principal"
+        thereafter: "Open (no penalty)"
+      minimum_interest: "12-24 months of interest (if prepaid early)"
+
+  collateral_and_security:
+    primary_collateral: "First-priority pledge of 100% of membership interests in borrower entity"
+    additional_security:
+      - "Assignment of borrower's rights under operating agreement"
+      - "Assignment of management agreement"
+      - "Cash management agreement / lockbox (if required by intercreditor)"
+    guarantee:
+      type: "Non-recourse with standard carve-outs"
+      carve_outs:
+        - "Fraud or intentional misrepresentation"
+        - "Misapplication or misappropriation of funds"
+        - "Voluntary bankruptcy filing"
+        - "Environmental liability"
+        - "Violation of transfer restrictions"
+      completion_guarantee: "Required if deal is transitional / value-add"
+
+  financial_covenants:
+    minimum_combined_dscr: "1.10x (senior + mezz debt service)"
+    minimum_senior_dscr: "1.25x"
+    minimum_debt_yield: "8.00-10.00% (on combined senior + mezz)"
+    cash_sweep_trigger: "DSCR < 1.15x triggers excess cash flow sweep"
+    cash_trap: "DSCR < 1.05x triggers full cash trap until cure"
+    reserve_requirements:
+      interest_reserve: "6-12 months of combined debt service (transitional deals)"
+      capex_reserve: "Per engineering report, funded at closing"
+      tax_and_insurance_escrow: "Per senior loan requirements"
+
+  intercreditor:
+    intercreditor_agreement: "Required; to be negotiated between senior lender and mezz lender"
+    key_provisions:
+      standstill_period: "60-120 days following notice of default"
+      cure_rights: "Mezz lender has right (not obligation) to cure senior loan defaults"
+      purchase_option: "Right to purchase senior loan at par + accrued + fees"
+      notice_requirements: "Senior lender to provide simultaneous default notices to mezz lender"
+      modification_consent: "Senior loan modifications affecting term, rate, or principal require mezz consent"
+      foreclosure_subordination: "Mezz lien on equity interests subordinate to senior lender's mortgage"
+
+  fees:
+    origination_fee: "1.00-2.00% of loan amount"
+    exit_fee: "0.50-1.00% of original loan amount (or outstanding balance)"
+    legal_costs: "Borrower pays lender's legal counsel (estimated $50,000-$100,000)"
+    third_party_reports: "Borrower pays for appraisal, environmental, engineering (if not covered by senior loan reports)"
+
+  reporting:
+    financial_reporting:
+      - "Monthly operating statements within 30 days of month-end"
+      - "Annual audited financial statements within 90 days of year-end"
+      - "Rent roll (quarterly, certified)"
+      - "Annual budget (submitted 30 days prior to fiscal year-end)"
+    compliance_certificates: "Quarterly DSCR and debt yield certification"
+
+  transfer_restrictions:
+    property_transfer: "Prohibited without lender consent (consistent with senior loan)"
+    equity_transfer:
+      controlling_interest: "Prohibited without consent"
+      passive_interests: "Transfers of less than 49% non-controlling interests permitted with notice"
+    sponsor_removal: "Key principal must maintain minimum 10-25% ownership and active management role"
+
+---
+
+preferred_equity_term_sheet:
+  header:
+    document_type: "Indicative Term Sheet -- Preferred Equity Investment"
+    disclaimer: "Non-binding indication of interest. Subject to investment committee approval, legal documentation, and senior lender recognition."
+    date: "YYYY-MM-DD"
+    prepared_by: "Preferred Equity Investor Name"
+
+  parties:
+    issuer: "Property Owner JV LLC"
+    preferred_investor: "Pref Equity Fund LP"
+    common_equity_sponsor: "Sponsor Entity LLC"
+    senior_lender: "Senior Lender, N.A."
+
+  property:
+    address: "123 Main Street, City, ST ZIP"
+    property_type: "Multifamily / Office / Industrial / Retail"
+    units_or_sf: "XX units / XX,XXX SF"
+    current_occupancy: "XX%"
+    stabilized_occupancy: "XX%"
+
+  investment_terms:
+    preferred_equity_amount: "$X,XXX,XXX"
+    investment_purpose: "Acquisition / Refinancing / Recapitalization"
+    total_capitalization: "$XX,XXX,XXX (senior debt + preferred equity + common equity)"
+    capital_stack_position:
+      senior_debt: "$XX,XXX,XXX (XX% LTV)"
+      preferred_equity: "$X,XXX,XXX (senior debt + pref = XX% of value)"
+      common_equity: "$X,XXX,XXX (XX% of value)"
+    preferred_return:
+      type: "Cumulative, compounding, non-participating / participating"
+      base_rate: "12.00-18.00% per annum"
+      current_pay_component: "8.00-12.00% (paid monthly/quarterly from distributable cash)"
+      accrual_component: "2.00-6.00% (accrues if insufficient distributable cash; compounds)"
+      participation: "Optional: 25-50% of profits above a specified common equity IRR hurdle (e.g., 20% IRR)"
+    term: "3-7 years"
+    redemption:
+      mandatory_redemption_date: "Coterminous with or inside senior loan maturity"
+      early_redemption:
+        lockout: "12-24 months"
+        premium_schedule:
+          year_1: "Locked out"
+          year_2: "103% of invested capital + accrued"
+          year_3: "102% of invested capital + accrued"
+          year_4_plus: "101% of invested capital + accrued"
+      minimum_return: "1.25-1.50x equity multiple on preferred investment"
+
+  distribution_waterfall:
+    priority:
+      tier_1: "Senior debt service (paid first, per loan documents)"
+      tier_2: "Operating expenses, reserves, and capital expenditures"
+      tier_3: "Preferred equity current pay return"
+      tier_4: "Preferred equity accrued return catch-up (if any accruals outstanding)"
+      tier_5: "Return of preferred equity invested capital"
+      tier_6: "Common equity preferred return (sponsor promote hurdle)"
+      tier_7: "Remaining cash flow split per promote structure"
+    notes:
+      - "No distributions to common equity until preferred equity current pay and accrual are current"
+      - "Capital events (refinancing, sale) follow same waterfall priority"
+
+  governance_and_control:
+    board_or_management_committee:
+      preferred_seats: "1-2 seats (observer or voting, depending on investment size)"
+      major_decisions_requiring_consent:
+        - "Sale or refinancing of the property"
+        - "Annual budget approval"
+        - "Capital expenditures above $XX,XXX threshold"
+        - "New leases or lease modifications above threshold"
+        - "Incurrence of additional debt"
+        - "Changes to property management"
+        - "Distributions to common equity"
+    springing_control_rights:
+      trigger: "Failure to pay preferred return for 2+ consecutive quarters; or DSCR below 1.10x for 2+ consecutive quarters"
+      rights_upon_trigger:
+        - "Full management and decision-making authority transfers to preferred investor"
+        - "Right to replace property manager"
+        - "Right to force sale of property"
+        - "Right to approve or reject all expenditures above $X,XXX"
+        - "Dilution ratchet: preferred investor's ownership percentage increases by X% per quarter of non-payment"
+
+  tax_considerations:
+    entity_structure: "Investment structured as equity interest in LLC taxed as partnership"
+    tax_treatment: "Preferred returns allocated as partnership income (not interest expense); NOT deductible by the JV"
+    k1_reporting: "Preferred investor receives Schedule K-1; income character follows property operations (ordinary income, depreciation, capital gains)"
+    depreciation_allocation: "Preferred investor typically allocated depreciation proportional to economic interest (or per Section 704(b) special allocation)"
+    state_tax: "Preferred investor subject to state tax in jurisdiction where property is located"
+
+  fees:
+    structuring_fee: "1.00-2.00% of preferred equity commitment"
+    asset_management_fee: "0.25-0.50% of invested capital per annum (if applicable)"
+    legal_costs: "Sponsor/JV pays preferred investor's legal counsel (estimated $75,000-$150,000)"
+
+  reporting:
+    financial_reporting:
+      - "Monthly operating statements within 30 days of month-end"
+      - "Quarterly investor reports with financial summary, leasing update, and capital account statement"
+      - "Annual audited JV financial statements and tax returns within 90 days of year-end"
+      - "Annual budget (submitted 30 days prior to fiscal year-end for approval)"
+    capital_account_statements: "Quarterly, showing contributions, distributions, accrued return, and balance"
+
+  transfer_restrictions:
+    preferred_interest: "Transferable to qualified institutional buyers with sponsor consent (not to be unreasonably withheld)"
+    tag_along: "Preferred investor has tag-along rights on any common equity sale"
+    drag_along: "Common equity sponsor has drag-along rights if sale exceeds minimum return thresholds for preferred"
+    right_of_first_refusal: "Sponsor has 30-day ROFR on any proposed transfer of preferred interests"

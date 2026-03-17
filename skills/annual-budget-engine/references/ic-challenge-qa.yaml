@@ -1,0 +1,198 @@
+# IC Budget Challenge Questions & Model Answers
+# Pre-built Q&A for investment committee budget defense preparation.
+# Each question represents a common IC challenge with a structured model answer.
+
+questions:
+  - id: 1
+    category: insurance
+    question: "Your insurance assumption is 8% below last year's actual. Walk me through why."
+    context: "IC member suspects sandbagging or ignorance of market hardening."
+    model_answer: |
+      Three factors drive the reduction:
+      1. Loss history improvement: We had two water damage claims in 2024 totaling $180K.
+         Our 3-year claims ratio dropped from 62% to 34% after a clean 2025. Our broker
+         confirmed a 5-7% loss experience credit at renewal.
+      2. Carrier switch: We moved from Zurich to Berkshire on the property program. Berkshire
+         is pricing 10-12% below incumbent for our risk profile in this submarket.
+      3. Deductible restructuring: We moved from $10K to $25K per-occurrence deductible,
+         saving approximately 4% on premium.
+      Net effect: market is up 6% (per CIAB Q4), but our property-specific adjustments
+      yield a net 8% decrease. We have the broker's indication letter dated [date] supporting
+      this budget.
+    key_principle: "Never argue against the market trend. Acknowledge the macro and explain property-specific deviations with evidence."
+
+  - id: 2
+    category: property_tax
+    question: "You've budgeted a 3% tax increase, but we just acquired this asset. Won't the county reassess to purchase price?"
+    context: "IC member is testing whether the AM understands acquisition-triggered reassessment."
+    model_answer: |
+      Good catch, but we've accounted for this. The property is in [State] which has a
+      [2-year/annual] reassessment cycle. We acquired at $32M, and the current assessed
+      value is $28.5M. However:
+      1. This jurisdiction applies a [ratio] equalization factor, so the effective assessed
+         value post-reassessment will be approximately $29.8M, not $32M.
+      2. Reassessment won't hit the tax roll until [fiscal year], which falls in our Year 2
+         budget. Year 1 is still on the prior assessment.
+      3. We've budgeted a 3% increase for Year 1 (millage rate adjustment only) and a 12%
+         step-up in Year 2 for the reassessment catch-up.
+      If you'd like, I can show the Year 1 and Year 2 tax build side by side.
+    key_principle: "Demonstrate jurisdiction-specific knowledge. Generic answers erode confidence."
+
+  - id: 3
+    category: revenue
+    question: "Your rent growth assumption of 4% seems aggressive given current supply deliveries in this submarket."
+    context: "IC member is testing macro awareness and whether rent growth is justified by fundamentals."
+    model_answer: |
+      We agree that submarket supply is elevated. Here's how we built the 4%:
+      1. Loss-to-lease capture: In-place rents average $1,475 vs market at $1,525. That's
+         3.4% loss-to-lease. With 48% annual turnover, we capture roughly half in Year 1:
+         ~1.7% of GPR from lease trade-outs alone, not market rent growth.
+      2. Market rent growth: We're underwriting 2.3% organic growth (below the 3.1% CoStar
+         forecast) to account for the 1,200 units delivering in 2026-27.
+      3. Combined effect: 1.7% (loss-to-lease capture) + 2.3% (organic) = 4.0%.
+      Importantly, if we stress rent growth to 0% organic (flat market), we still achieve
+      1.7% revenue growth from lease trade-outs. Our downside NOI at 0% growth is $1,380K
+      vs budget of $1,431K -- a 3.6% miss, well within debt service coverage.
+    key_principle: "Decompose growth into mark-to-market capture vs organic growth. Always show the downside case unprompted."
+
+  - id: 4
+    category: r_and_m
+    question: "R&M per unit is $1,829 -- that's 15% above IREM median. Why aren't we more efficient?"
+    context: "IC member benchmarking against industry data."
+    model_answer: |
+      IREM median for this MSA and vintage is $1,250/unit, so we're $579/unit above. Three
+      drivers:
+      1. Deferred maintenance catch-up ($220/unit): The prior owner deferred HVAC filter
+         changes, gutter cleaning, and exterior caulking. We're running an 18-month catch-up
+         that adds $44K/year ($220/unit). This is temporary and drops out in Year 3.
+      2. Turnover rate ($280/unit above median): Our 48% turnover is above the IREM median
+         of 40%. Each turn costs $1,800 in make-ready. The 16 excess turns cost $28,800
+         ($144/unit). We're addressing this via renewal incentives -- budgeting a drop to
+         44% in Year 2.
+      3. Age-related maintenance ($79/unit): 2008 vintage means 18-year-old systems. HVAC
+         units are failing at a higher rate than the IREM median property (which averages
+         10-12 years old). This is structural until the HVAC replacement capex program
+         completes in Year 3.
+      Net: $579/unit above median, fully explained. $364/unit is temporary (deferred +
+      turnover), $215/unit is age-driven and permanent until capex replaces systems.
+    key_principle: "Acknowledge the variance, decompose it into temporary vs structural, and tie structural items to the capex plan."
+
+  - id: 5
+    category: vacancy
+    question: "You're budgeting 6% vacancy, but trailing-twelve is running at 8%. What gives you confidence in the improvement?"
+    context: "IC member is testing whether the vacancy assumption is aspirational or evidence-based."
+    model_answer: |
+      Trailing-twelve vacancy reflects the renovation program. We had 15-20 units offline
+      for renovation at any given time during the past 12 months. With the interior reno
+      program completing in Q2, here's the bridge:
+      1. Current physical vacancy: 12 units (6.0%). This is the run-rate, not the T-12.
+      2. T-12 average was 16 units (8.0%) because of renovation downtime.
+      3. Submarket vacancy (CoStar): 5.8% as of last quarter.
+      4. Our comparable set (2005-2012 vintage, Class B, same submarket): 5.2-6.5% range.
+      We're budgeting 6.0% -- at the high end of our comp set and in line with current
+      physical vacancy. If we hit 7% (stress case), NOI impact is approximately $36,600
+      ($183/unit), or $665K in value at our cap rate. DSCR remains above 1.25x at 7%.
+    key_principle: "Distinguish between T-12 average (includes renovation drag) and current run-rate. Show the stress case and DSCR impact."
+
+  - id: 6
+    category: utilities
+    question: "Why is your utilities budget up 6% when CPI is running at 3%?"
+    context: "IC member conflating CPI with utility-specific cost drivers."
+    model_answer: |
+      Utility costs don't track CPI. They're driven by rate cases, infrastructure
+      surcharges, and consumption. Three components:
+      1. Electric (+5%): The local utility filed a rate case approved by the PUC in Q3 2025,
+         effective January 2026. The rate increase is 4.8% on commercial tariffs. We added
+         0.2% for consumption drift (warmer summers trending). Source: [utility] rate order
+         docket [number].
+      2. Water/sewer (+6%): The municipal water authority approved a 6.2% increase for
+         infrastructure rehabilitation. This is the third year of a 5-year capital
+         improvement surcharge. Source: city council resolution [number].
+      3. Gas (+2%): Henry Hub futures are relatively flat. Our increase reflects a minor
+         delivery charge adjustment.
+      Weighted average: 5.1% across all utilities. We round up to capture consumption
+      variance. We also budget $101K in RUBS reimbursement income, which offsets 28% of
+      total utility expense.
+    key_principle: "Cite the specific rate case or regulatory action. 'Utilities are up because of inflation' is not an acceptable answer."
+
+  - id: 7
+    category: management_fee
+    question: "The management fee is 4% of EGI. Can we renegotiate to 3% given portfolio scale?"
+    context: "IC member seeking fee compression."
+    model_answer: |
+      We evaluated this at the last contract renewal. The math:
+      1. Current fee: 4.0% of EGI = $139,757/year
+      2. At 3.0%: $104,818/year
+      3. Savings: $34,939/year = $635K in value at 5.5% cap
+      However, the tradeoffs:
+      1. Our current manager delivers 94% collections, 48% turnover (improving), and
+         maintains a 4.2-star Google rating. Switching to a discount operator typically costs
+         200-400bps in occupancy during the transition -- 2% occupancy loss for 6 months =
+         $36,600 in lost revenue, exceeding the annual fee savings.
+      2. We have a termination clause requiring 90 days notice with a 3-month fee tail.
+         Switching cost: approximately $35K.
+      3. We can negotiate to 3.75% at the next renewal (6 months out) using portfolio scale
+         as leverage. That saves $8,735/year = $159K in value. Lower risk than a full switch.
+      Recommendation: negotiate to 3.75% at renewal, not a full operator change mid-hold.
+    key_principle: "Frame fee reduction as a value creation opportunity but quantify the switching cost and execution risk."
+
+  - id: 8
+    category: capex_vs_opex
+    question: "You've classified $85K of flooring work as capex. That looks like routine R&M to me."
+    context: "IC member testing capitalization policy compliance."
+    model_answer: |
+      The $85K covers full common-area flooring replacement across all three buildings:
+      lobbies, hallways, and amenity spaces. Our capitalization criteria:
+      1. Cost exceeds the $5,000 per-item threshold (each building is $25-30K).
+      2. The work extends useful life by more than one year (new LVP flooring has a 10-15
+         year EUL vs the 12-year-old carpet being replaced).
+      3. It is not a repair of existing flooring -- it is a full replacement with a different,
+         longer-lived material.
+      Under our GAAP capitalization policy, this qualifies as a capital improvement, not a
+      repair. Keeping it above the NOI line would depress NOI by $85K, destroying $1.55M in
+      appraised value -- an aggressive accounting position that would hurt our refinancing
+      basis and LP marks.
+      The auditor reviewed and approved this classification in the prior year for a similar
+      scope at our [other property].
+    key_principle: "Reference the three capitalization criteria (threshold, useful life extension, replacement vs repair) and note the valuation impact of misclassification."
+
+  - id: 9
+    category: reserves
+    question: "Your replacement reserves are $281K/year but the lender only requires $250/unit ($50K/year). Why are we over-reserving?"
+    context: "IC member focused on near-term cash distributions, questioning reserve levels."
+    model_answer: |
+      The lender's $250/unit is a minimum escrow, not an engineering-based reserve. Our
+      $281K is driven by the PCA (property condition assessment):
+      1. Roof: 4 years remaining life, $1.85M replacement. Requires $84K/year to fully fund.
+      2. HVAC: 50 units at end-of-life, $250K near-term replacement. Already underfunded.
+      3. Parking: resurface needed within 3 years, $180K.
+      Current reserve balance: $1.1M. Near-term need: $2.28M. Adequacy ratio: 0.48x
+      (critically underfunded).
+      If we reserve at the lender minimum, we'll face a $1.7M unfunded capital call in
+      Years 3-4. That either comes from LP capital calls (destroys IRR) or deferred
+      maintenance (destroys value at disposition -- buyers deduct dollar-for-dollar).
+      The additional $231K/year in reserves reduces annual distributions by $1,155/unit but
+      prevents a $8,500/unit capital call in Year 4. It's NPV-positive.
+    key_principle: "Always frame over-reserving as NPV-positive vs the alternative (capital calls or deferred maintenance deduction at sale)."
+
+  - id: 10
+    category: overall_noi
+    question: "Your budgeted NOI growth is 5.2% year-over-year. That's above our portfolio average of 3.8%. Justify."
+    context: "IC member testing whether the asset is being over-projected relative to the portfolio."
+    model_answer: |
+      The 5.2% breaks down into three components:
+      1. Revenue growth: +4.0% (as discussed: 1.7% loss-to-lease capture + 2.3% organic).
+         This contributes +$140K to NOI.
+      2. Controllable opex efficiency: -1.2% reduction in controllable opex ratio (from 26%
+         to 24.8% of EGI). This is the deferred maintenance catch-up rolling off ($44K) and
+         turnover reduction ($14K). Contributes +$58K to NOI.
+      3. Non-controllable opex increase: +4.8% (insurance, tax, utilities). This offsets
+         gains by -$55K.
+      Net NOI change: +$140K + $58K - $55K = +$143K, or +5.2% on a base of $1,358K.
+      The portfolio average of 3.8% is a stabilized asset blend. This property is in Year 2
+      of a value-add execution with catch-up efficiencies that won't recur. By Year 4, NOI
+      growth normalizes to 2.5-3.0%, below portfolio average, as the value-add gains are
+      fully captured.
+      If you'd like, I can show the 5-year NOI growth trajectory showing the deceleration
+      from 5.2% to 2.8% as the property stabilizes.
+    key_principle: "Decompose growth into revenue, controllable opex, and non-controllable opex. Show that above-average growth is temporary and tie it to the business plan timeline."

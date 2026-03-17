@@ -1,0 +1,484 @@
+# PSA Risk Matrix: Standard Provisions by Risk Category
+#
+# Each provision is categorized as Critical, High, or Medium risk.
+# Buyer-favorable and seller-favorable positions are stated.
+# Recommended redline language is provided for buyer-side negotiation.
+#
+# Usage: Walk through each provision during PSA review. Flag any provision
+# where the seller's form is at the seller-favorable position and the deal
+# risk warrants a buyer-favorable redline.
+
+provisions:
+
+  # ============================================================
+  # CRITICAL RISK PROVISIONS
+  # These provisions can cause total loss of deposit or purchase.
+  # Non-negotiable for a prudent buyer.
+  # ============================================================
+
+  - name: Due Diligence Termination Right
+    risk_level: Critical
+    description: >
+      Buyer's unilateral right to terminate during the DD period for
+      any reason or no reason, with full refund of earnest money.
+    buyer_favorable: >
+      Buyer may terminate for any reason or no reason during the DD Period.
+      Upon termination, Escrow Agent shall return the Deposit to Buyer within
+      3 business days. Buyer has no obligation to disclose findings.
+    seller_favorable: >
+      Buyer may terminate only for "material adverse findings" as defined
+      in the PSA. Seller has right to review findings and cure before Buyer
+      may terminate. Deposit refund requires Seller's written consent.
+    recommended_redline: >
+      "Buyer may terminate this Agreement at any time prior to the expiration
+      of the Due Diligence Period by delivering written notice to Seller and
+      Escrow Agent. Upon such termination, Escrow Agent shall return the
+      Deposit to Buyer within three (3) business days without further
+      instruction from Seller. No cause or reason for termination is required."
+    negotiation_note: >
+      This is non-negotiable. Any PSA that requires cause for termination
+      during DD effectively eliminates the DD period. Walk away if the seller
+      insists on a "cause" standard during the refundable DD period.
+
+  - name: Default and Remedies
+    risk_level: Critical
+    description: >
+      Consequences of buyer default (failure to close) and seller default
+      (failure to deliver title, breach of reps). The most litigated
+      provision in CRE PSAs.
+    buyer_favorable: >
+      Buyer's sole liability for default is forfeiture of the Deposit as
+      liquidated damages. Seller waives any right to specific performance
+      against Buyer. Seller's default entitles Buyer to specific performance
+      OR return of Deposit plus reimbursement of DD costs.
+    seller_favorable: >
+      Seller may pursue specific performance against Buyer (force buyer to
+      close) or seek actual damages (including lost profits, carrying costs,
+      and broker commissions) in addition to retaining the Deposit.
+    recommended_redline: >
+      "In the event of Buyer's default, Seller's sole and exclusive remedy
+      shall be to retain the Deposit as liquidated damages, and Seller hereby
+      waives any right to specific performance or actual damages against Buyer.
+      In the event of Seller's default, Buyer shall be entitled, at Buyer's
+      election, to (a) specific performance of Seller's obligations hereunder,
+      or (b) termination of this Agreement and return of the Deposit, together
+      with reimbursement of Buyer's actual out-of-pocket due diligence costs
+      not to exceed $[X]."
+    negotiation_note: >
+      Liquidated damages (deposit forfeiture as Seller's only remedy) is
+      market for all deals under $50M. Specific performance against Buyer
+      is rare and should be resisted. If the seller insists on specific
+      performance, counter with a cap on damages equal to the Deposit.
+
+  - name: Title and Survey Objection/Cure
+    risk_level: Critical
+    description: >
+      Buyer's right to object to title defects and survey exceptions,
+      Seller's obligation to cure, and Buyer's remedy if cure fails.
+    buyer_favorable: >
+      Buyer may object to any title exception or survey matter. Seller must
+      cure all objections or Buyer may terminate with full Deposit refund.
+      Seller must deliver title free of all liens, judgments, and monetary
+      encumbrances regardless of whether Buyer objects.
+    seller_favorable: >
+      Buyer may object only during a limited objection window (5 days).
+      Seller has the option (not obligation) to cure. If Seller elects not
+      to cure, Buyer must either accept the exception or terminate. Monetary
+      liens excepted from this structure (Seller must clear).
+    recommended_redline: >
+      "Buyer shall have fifteen (15) business days from receipt of the Title
+      Commitment and Survey to deliver written objections. Seller shall cure
+      all objections within fifteen (15) business days of receipt. If Seller
+      fails to cure any objection, Buyer may (a) terminate with full Deposit
+      refund, or (b) waive the objection and proceed to close. Notwithstanding
+      the foregoing, Seller shall be obligated to cure (i) all monetary liens,
+      (ii) all mechanics' liens, (iii) any matter created by Seller after
+      the Effective Date, and (iv) all matters that Seller agrees in writing
+      to cure."
+    negotiation_note: >
+      The mandatory cure items (monetary liens, mechanics' liens, post-PSA
+      encumbrances) are non-negotiable. The optional cure for other matters
+      is the standard compromise. Never accept a PSA that gives Seller the
+      unilateral right to decide whether to cure without giving Buyer a
+      termination right.
+
+  - name: Material Adverse Change (MAC) Clause
+    risk_level: Critical
+    description: >
+      Buyer's right to terminate if the property suffers a material adverse
+      change between PSA execution and closing (casualty, condemnation,
+      major tenant default, environmental discovery).
+    buyer_favorable: >
+      Any casualty, condemnation, tenant default, or other event that
+      reduces the value of the Property by more than $[X] or [X]% of
+      purchase price entitles Buyer to terminate with full Deposit refund,
+      or proceed to close with an assignment of insurance/condemnation
+      proceeds and a price reduction.
+    seller_favorable: >
+      Only a total casualty or condemnation exceeding 25% of improvements
+      triggers a termination right. Partial casualties are handled through
+      insurance assignment. No termination right for tenant defaults.
+    recommended_redline: >
+      "If, prior to Closing, (a) the Property suffers a casualty where the
+      cost of repair exceeds $[250,000 or 2% of Purchase Price], (b) any
+      portion of the Property is taken or threatened by condemnation, or
+      (c) tenants occupying more than [15]% of rentable area default, vacate,
+      or provide notice of termination, then Buyer may, at Buyer's election,
+      (i) terminate this Agreement with full refund of the Deposit, or
+      (ii) proceed to Closing with an assignment of all insurance or
+      condemnation proceeds and a credit against the Purchase Price equal to
+      any applicable deductible."
+    negotiation_note: >
+      The MAC threshold should be calibrated to the deal size and asset type.
+      For a $12M multifamily, a $250K threshold (2%) is appropriate. For a
+      $100M office tower, a $1M threshold (1%) is standard. The tenant
+      default trigger is critical for office and retail; less relevant for
+      multifamily.
+
+  - name: Environmental Indemnification
+    risk_level: Critical
+    description: >
+      Allocation of liability for pre-existing environmental contamination.
+      CERCLA imposes strict liability on current and former owners.
+    buyer_favorable: >
+      Seller indemnifies Buyer for all environmental conditions existing
+      prior to Closing, including remediation costs, regulatory fines, and
+      third-party claims, with no cap or time limitation. Seller's
+      environmental representations survive Closing indefinitely.
+    seller_favorable: >
+      Property sold "as-is" with respect to environmental conditions.
+      Buyer assumes all environmental liability upon Closing. Seller's
+      environmental representations do not survive Closing.
+    recommended_redline: >
+      "Seller shall indemnify, defend, and hold harmless Buyer from and
+      against any and all claims, costs, and liabilities arising from
+      Hazardous Materials present on or under the Property prior to the
+      Closing Date. This indemnification shall survive Closing for a period
+      of [36] months with no cap. Seller's representations regarding
+      environmental conditions shall survive Closing for [36] months."
+    negotiation_note: >
+      Full environmental indemnification is achievable from institutional
+      sellers and developers. Private sellers and estate/trust sellers
+      will resist because the exposure is potentially unlimited. In those
+      cases, negotiate for (a) a capped indemnification (5-10% of purchase
+      price), (b) an environmental insurance policy funded by Seller at
+      closing, or (c) a price reduction reflecting the estimated remediation
+      cost identified in the Phase I/II.
+
+  # ============================================================
+  # HIGH RISK PROVISIONS
+  # These provisions can cause significant financial loss or
+  # delay. Strongly recommended to negotiate buyer-favorable.
+  # ============================================================
+
+  - name: Representations and Warranties Scope
+    risk_level: High
+    description: >
+      What the seller represents about the property. Breadth and specificity
+      of reps determines buyer's information quality and post-closing recourse.
+    buyer_favorable: >
+      Comprehensive representations covering: authority, title, leases,
+      environmental, structural condition, permits, litigation, tax,
+      compliance, contracts, insurance, employees, rent roll accuracy,
+      and operating statement accuracy. Each rep is specific and verifiable.
+    seller_favorable: >
+      Limited representations: authority to sell and no actual knowledge of
+      material defects. "To Seller's knowledge" qualifier on all substantive
+      reps. "Knowledge" defined as actual knowledge of the individual signer
+      without duty of inquiry.
+    recommended_redline: >
+      Accept "to Seller's knowledge" qualifiers but define "knowledge" broadly:
+      "Knowledge means the actual or constructive knowledge of [named
+      individuals], including information that would be known upon reasonable
+      inquiry of the property manager, building engineer, and legal counsel."
+    negotiation_note: >
+      The fight is over the "knowledge" definition. "Actual knowledge without
+      duty of inquiry" is worthless. "Constructive knowledge including
+      reasonable inquiry" is meaningful. Name the specific individuals whose
+      knowledge counts (typically the asset manager and property manager).
+
+  - name: Representations Survival Period
+    risk_level: High
+    description: >
+      How long seller's representations remain enforceable after closing.
+    buyer_favorable: >
+      18-24 months for general representations. Indefinite for environmental,
+      tax, and ERISA representations.
+    seller_favorable: >
+      Representations do not survive closing. All claims must be raised
+      before the closing date.
+    recommended_redline: >
+      "Seller's representations and warranties shall survive Closing for a
+      period of twelve (12) months (the 'Survival Period'). Environmental
+      representations shall survive Closing for thirty-six (36) months.
+      Any claim must be asserted in writing within the applicable Survival
+      Period."
+    negotiation_note: >
+      12-month survival is market for deals under $50M. 18 months for
+      complex assets or assets with known issues. Push for longer survival
+      on environmental reps regardless of deal size.
+
+  - name: Indemnification Cap
+    risk_level: High
+    description: >
+      Maximum amount Seller will pay for breaches of representations.
+    buyer_favorable: >
+      Cap equal to 10-15% of purchase price with carve-outs for fraud,
+      willful misconduct, and environmental claims (no cap).
+    seller_favorable: >
+      Cap equal to the Deposit amount (1-3% of purchase price). No
+      carve-outs.
+    recommended_redline: >
+      "Seller's aggregate indemnification liability shall not exceed [7.5]%
+      of the Purchase Price, provided that this cap shall not apply to
+      (a) claims arising from Seller's fraud or willful misconduct,
+      (b) environmental indemnification obligations, or (c) Seller's
+      obligation to cure monetary liens."
+    negotiation_note: >
+      5-10% cap is market. Below 5% is inadequate for anything other than
+      a pristine, stabilized asset. Fraud and environmental carve-outs
+      are standard and should not be controversial.
+
+  - name: Estoppel Certificates
+    risk_level: High
+    description: >
+      Signed statements from tenants confirming lease terms, rent,
+      deposit, and any claims. Critical for verifying the rent roll.
+    buyer_favorable: >
+      Estoppel certificates required from tenants occupying 90% of
+      rentable area/units. Estoppels must be dated within 30 days of
+      closing. Any estoppel that reveals a material discrepancy from
+      the rent roll is grounds for Buyer to terminate or receive a credit.
+    seller_favorable: >
+      Estoppel certificates "commercially reasonable efforts" basis.
+      No specific coverage threshold. Discrepancies do not trigger
+      termination right.
+    recommended_redline: >
+      "Seller shall deliver estoppel certificates from tenants occupying
+      not less than [80]% of the occupied units/rentable area, dated within
+      thirty (30) days of the scheduled Closing Date. If any estoppel
+      reveals a material discrepancy from Seller's representations regarding
+      lease terms, rental amounts, or tenant claims, Buyer may (a) terminate
+      with full Deposit refund, or (b) proceed to Closing with a credit
+      against the Purchase Price equal to the economic impact of the
+      discrepancy."
+    negotiation_note: >
+      80% coverage is market for multifamily. 90% for office and retail
+      where individual tenants represent a larger share of revenue.
+      The discrepancy remedy is critical. Without it, the estoppel
+      requirement is toothless.
+
+  - name: Seller Interim Operating Covenants
+    risk_level: High
+    description: >
+      Restrictions on Seller's operation of the property between PSA
+      execution and closing. Prevents Seller from entering unfavorable
+      leases, contracts, or capital commitments.
+    buyer_favorable: >
+      Seller shall not, without Buyer's prior written consent: enter into
+      new leases, modify existing leases, enter into service contracts
+      exceeding $[X]/month or with terms exceeding [X] months, make
+      capital expenditures exceeding $[X], or apply for any zoning change.
+    seller_favorable: >
+      Seller operates the property in the ordinary course. No Buyer
+      consent required for routine leasing or contract renewals.
+    recommended_redline: >
+      "From the Effective Date through Closing, Seller shall (a) operate the
+      Property in the ordinary course, (b) not enter into any new lease,
+      lease modification, or lease termination without Buyer's prior written
+      consent (not to be unreasonably withheld), (c) not enter into any
+      service contract with a term exceeding 30 days or a monthly cost
+      exceeding $2,500 without Buyer's consent, and (d) not make any capital
+      expenditure exceeding $10,000 without Buyer's consent, except for
+      emergency repairs."
+    negotiation_note: >
+      The "not to be unreasonably withheld" qualifier on leasing consent
+      is the standard compromise. Buyer doesn't want to block legitimate
+      leasing activity; Buyer does want to prevent Seller from signing
+      below-market leases to inflate occupancy before closing.
+
+  - name: Condemnation
+    risk_level: High
+    description: >
+      Buyer's rights if government takes or threatens to take the property
+      or a portion of it through eminent domain.
+    buyer_favorable: >
+      Any condemnation notice (even partial) entitles Buyer to terminate.
+      If Buyer proceeds, all condemnation awards are assigned to Buyer
+      with a purchase price reduction.
+    seller_favorable: >
+      Only condemnation affecting more than 25% of improvements triggers
+      termination right. Partial condemnation proceeds split between
+      Seller and Buyer.
+    recommended_redline: >
+      "If prior to Closing any condemnation proceeding is commenced or
+      threatened, Buyer may terminate with full Deposit refund. If Buyer
+      elects to proceed, Seller shall assign all condemnation awards to
+      Buyer and reduce the Purchase Price by the fair market value of the
+      taken portion as determined by Buyer's appraiser."
+    negotiation_note: >
+      Full termination right on any condemnation is achievable in most
+      markets. The "threatened" language is important because condemnation
+      proceedings often begin with informal notice that depresses value
+      before formal taking.
+
+  # ============================================================
+  # MEDIUM RISK PROVISIONS
+  # These provisions affect deal economics or timeline but are
+  # unlikely to cause total loss. Negotiate where practical.
+  # ============================================================
+
+  - name: Assignment Rights
+    risk_level: Medium
+    description: >
+      Buyer's ability to assign the PSA to an affiliate entity.
+    buyer_favorable: >
+      Buyer may assign to any entity controlled by Buyer's principals
+      without Seller's consent. Original Buyer released from liability.
+    seller_favorable: >
+      No assignment without Seller's prior written consent. Original
+      Buyer remains liable regardless of assignment.
+    recommended_redline: >
+      "Buyer may assign this Agreement to any entity in which Buyer's
+      principals hold a controlling interest, without Seller's consent,
+      provided that Buyer shall remain jointly and severally liable for
+      Buyer's obligations hereunder. Any other assignment requires
+      Seller's prior written consent, not to be unreasonably withheld."
+    negotiation_note: >
+      Joint and several liability of the original Buyer is a reasonable
+      concession that addresses Seller's concern about creditworthiness.
+
+  - name: Closing Cost Allocation
+    risk_level: Medium
+    description: >
+      Who pays title insurance, transfer taxes, recording fees, escrow
+      fees, and survey costs.
+    buyer_favorable: >
+      Seller pays owner's title policy, transfer taxes, and 50% of
+      escrow fees. Buyer pays lender's title policy, survey, and 50%
+      of escrow fees.
+    seller_favorable: >
+      Buyer pays all title policies, survey, and recording fees. Transfer
+      taxes split per local custom. Seller pays only existing lien payoff.
+    recommended_redline: >
+      Follow local custom. In most jurisdictions: Seller pays owner's
+      title policy and seller's share of transfer tax. Buyer pays
+      lender's title policy, survey, and buyer's share of transfer tax.
+      Escrow fees split 50/50.
+    negotiation_note: >
+      Closing cost allocation follows strong local custom and is rarely
+      worth fighting over. Focus your negotiation capital on the
+      Critical and High risk provisions.
+
+  - name: Broker Commission
+    risk_level: Medium
+    description: >
+      Confirmation of who is responsible for broker commissions.
+    buyer_favorable: >
+      Seller is solely responsible for all broker commissions. Seller
+      indemnifies Buyer against any broker claims.
+    seller_favorable: >
+      Each party responsible for its own broker. No cross-indemnification.
+    recommended_redline: >
+      "Seller shall pay all brokerage commissions due to [listing broker]
+      and [buyer's broker, if applicable] pursuant to separate agreement.
+      Seller shall indemnify and hold harmless Buyer from any claim for
+      brokerage commission arising from Seller's actions."
+    negotiation_note: >
+      Always confirm the commission structure in writing before PSA
+      execution. Commission disputes that surface at closing can delay
+      or kill a deal.
+
+  - name: Possession and Transition
+    risk_level: Medium
+    description: >
+      When Buyer takes possession, and the transition of property
+      management, vendor contracts, and tenant relationships.
+    buyer_favorable: >
+      Buyer takes possession at closing. Seller provides 30-day
+      transition assistance including introduction to all vendors,
+      utility account transfers, and property management records.
+    seller_favorable: >
+      Buyer takes possession at closing with no transition obligation
+      from Seller beyond delivery of keys and files.
+    recommended_redline: >
+      "Seller shall cooperate with Buyer during a thirty (30) day
+      transition period following Closing, including (a) introduction of
+      Buyer to tenants and vendors, (b) transfer of utility accounts,
+      (c) delivery of all property management records, tenant files, and
+      maintenance logs, and (d) assignment of all service contracts that
+      Buyer elects to assume."
+    negotiation_note: >
+      Transition assistance is low-cost for the seller and high-value
+      for the buyer. Most sellers agree to reasonable transition
+      provisions. The key is making sure it's in writing, not a
+      verbal promise.
+
+  - name: Dispute Resolution
+    risk_level: Medium
+    description: >
+      Forum and mechanism for resolving disputes.
+    buyer_favorable: >
+      Binding arbitration with a CRE-experienced arbitrator. Prevailing
+      party entitled to attorney's fees. Arbitration in Buyer's
+      jurisdiction.
+    seller_favorable: >
+      Litigation in Seller's jurisdiction. No attorney fee shifting.
+    recommended_redline: >
+      "Any dispute arising under this Agreement shall be resolved by
+      binding arbitration administered by [JAMS / AAA] in [jurisdiction]
+      before a single arbitrator with commercial real estate experience.
+      The prevailing party shall be entitled to recover reasonable
+      attorney's fees and costs."
+    negotiation_note: >
+      Arbitration is faster and cheaper than litigation for most CRE
+      disputes. Attorney fee shifting discourages frivolous claims
+      from both sides. Agree on a neutral jurisdiction if parties
+      are in different states.
+
+  - name: Confidentiality
+    risk_level: Medium
+    description: >
+      Restrictions on disclosure of PSA terms and due diligence findings.
+    buyer_favorable: >
+      Reasonable confidentiality with carve-outs for Buyer's lenders,
+      investors, attorneys, and accountants. No restriction on Buyer's
+      use of DD findings after termination.
+    seller_favorable: >
+      Strict confidentiality. Buyer must return or destroy all DD
+      materials upon termination. Buyer may not disclose any findings
+      to third parties.
+    recommended_redline: >
+      "Each party shall maintain the confidentiality of the terms of
+      this Agreement and all due diligence materials, except for
+      disclosures to such party's attorneys, accountants, lenders,
+      equity investors, and consultants. Upon termination, Buyer shall
+      return or destroy Seller's proprietary financial information but
+      shall retain copies of all third-party reports commissioned by
+      Buyer."
+    negotiation_note: >
+      The right to retain third-party reports (Phase I, PCA, appraisal)
+      is important because Buyer paid for them. Seller's request for
+      return of Seller-provided financials is reasonable.
+
+  - name: 1031 Exchange Cooperation
+    risk_level: Medium
+    description: >
+      Obligation of each party to cooperate with the other's Section
+      1031 tax-deferred exchange.
+    buyer_favorable: >
+      Both parties agree to cooperate with the other's 1031 exchange
+      at no additional cost or liability to the cooperating party.
+    seller_favorable: >
+      Same. This is one of the few provisions where interests are
+      aligned.
+    recommended_redline: >
+      "Each party agrees to cooperate with the other party's Section
+      1031 exchange, provided that (a) the cooperating party incurs
+      no additional cost or liability, (b) the exchange does not delay
+      Closing, and (c) the cooperating party is not required to take
+      title to any exchange property."
+    negotiation_note: >
+      1031 cooperation is standard and uncontroversial. Include it in
+      every PSA. The key protection is that cooperation cannot delay
+      closing or impose liability on the cooperating party.

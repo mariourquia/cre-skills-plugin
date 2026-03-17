@@ -1,0 +1,277 @@
+# Broker Commission Benchmarks
+# Leasing Strategy & Marketing Planner Reference
+# Commission rates by property type, market, and deal type
+
+---
+# =============================================================================
+# SECTION 1: OFFICE COMMISSION STRUCTURES
+# =============================================================================
+
+office:
+  new_lease_commissions:
+    description: "Standard commission rates for new office lease transactions"
+
+    standard_structure:
+      year_1: "4-6% of annual base rent"
+      years_2_through_5: "2-3% of annual base rent"
+      years_6_through_10: "1-2% of annual base rent"
+      years_11_plus: "1% of annual base rent"
+
+    alternative_structures:
+      flat_percentage:
+        rate: "3-4% of aggregate base rent over full term"
+        when_used: "Simpler calculation, common in suburban markets"
+        example: "10,000 SF x $30/SF x 7 years x 3.5% = $73,500"
+
+      declining_scale:
+        description: "Higher percentage in early years, declining each year"
+        example:
+          year_1: "6%"
+          year_2: "5%"
+          year_3: "4%"
+          year_4: "3%"
+          year_5: "2%"
+          years_6_10: "1%"
+        when_used: "Large deals, long-term leases"
+
+      dollar_per_sf:
+        rate: "$1.00-$3.00 per SF per year of term"
+        when_used: "Some markets quote commissions per SF rather than percentage"
+        example: "10,000 SF x $2.00/SF/yr x 7 years = $140,000"
+
+    market_variations:
+      gateway_markets:
+        cities: ["New York", "San Francisco", "Los Angeles", "Chicago", "Boston", "Washington DC"]
+        typical_rate: "Higher end of ranges (5-6% yr 1)"
+        notes: "Highly competitive markets, brokers command premium rates"
+      secondary_markets:
+        cities: ["Atlanta", "Dallas", "Denver", "Phoenix", "Charlotte", "Nashville"]
+        typical_rate: "Mid-range (4-5% yr 1)"
+        notes: "Standard market rates"
+      tertiary_markets:
+        cities: ["Smaller MSAs, suburban markets"]
+        typical_rate: "Lower end or flat rates (3-4% yr 1)"
+        notes: "Less broker competition, sometimes flat rates"
+
+    cbd_vs_suburban:
+      cbd: "Typically 0.5-1% higher than suburban (more competitive, higher rents)"
+      suburban: "Standard rates, sometimes flat percentage structures"
+
+  renewal_commissions:
+    standard_rate: "50% of new deal commission rate"
+    range: "40-60% of new deal rate"
+    example:
+      new_deal_rate: "4% yr 1, 2% yrs 2-5"
+      renewal_rate: "2% yr 1, 1% yrs 2-5"
+    negotiation_notes:
+      - "Some landlords argue renewal commission should be lower since tenant is already in place"
+      - "Brokers argue they earn renewal by maintaining relationship and preventing defection"
+      - "Compromise: 50% of new deal rate for renewals negotiated by broker; 25% if tenant renews directly"
+
+  expansion_commissions:
+    rate: "Same as new lease for expansion space"
+    notes: "Expansion is new SF being leased; should be compensated at new deal rates"
+    negotiation: "If expansion is exercise of contractual option, some landlords pay reduced commission (25-50% of new deal rate)"
+
+# =============================================================================
+# SECTION 2: RETAIL COMMISSION STRUCTURES
+# =============================================================================
+
+retail:
+  new_lease_commissions:
+    inline_retail:
+      description: "Small shop space, 1,000-10,000 SF"
+      year_1_through_5: "5-6% of annual base rent"
+      years_6_through_10: "2-3% of annual base rent"
+      notes: "Higher rates reflect smaller deal sizes and more effort per SF"
+
+    anchor_pad:
+      description: "Anchor tenant, 10,000+ SF"
+      year_1_through_5: "4-5% of annual base rent"
+      years_6_through_10: "1-2% of annual base rent"
+      notes: "Lower rates on larger deals; anchor leases are often direct (no tenant rep)"
+
+    restaurant:
+      description: "Restaurant and food service tenants"
+      rate: "5-6% of aggregate base rent"
+      notes: "Higher rate reflects longer sales cycle, more complex deal structure"
+
+    nnn_retail:
+      description: "Single-tenant NNN leases"
+      rate: "4-5% of aggregate base rent"
+      notes: "Sometimes calculated on total rent (base + NNN) rather than base only"
+
+  percentage_rent_commission:
+    policy: "Commission typically NOT paid on percentage rent (variable component)"
+    exception: "Some listing agreements include commission on percentage rent above breakpoint"
+
+  renewal_commissions:
+    standard_rate: "50% of new deal rate"
+    option_renewal: "25-50% of new deal rate if tenant exercises contractual option"
+
+# =============================================================================
+# SECTION 3: INDUSTRIAL COMMISSION STRUCTURES
+# =============================================================================
+
+industrial:
+  new_lease_commissions:
+    standard_warehouse:
+      description: "Warehouse and distribution, 10,000+ SF"
+      year_1_through_5: "4-5% of annual base rent"
+      years_6_through_10: "2-3% of annual base rent"
+      notes: "Industrial leases often shorter term (3-5 years); commission calculated on full term"
+
+    large_distribution:
+      description: "100,000+ SF distribution centers"
+      rate: "3-4% of aggregate base rent"
+      notes: "Reduced rate for very large deals; total commission still substantial"
+      example: "200,000 SF x $8/SF x 5 years x 3.5% = $280,000"
+
+    flex_space:
+      description: "Office/warehouse flex, 3,000-20,000 SF"
+      rate: "5-6% yr 1, 3-4% yrs 2-5"
+      notes: "Higher rates for smaller flex deals, similar effort to office"
+
+    land_lease:
+      description: "Ground lease for industrial development"
+      rate: "3-5% of aggregate ground rent"
+      notes: "Specialized; fewer brokers, higher rates per transaction"
+
+  renewal_commissions:
+    standard_rate: "50% of new deal rate"
+    notes: "Industrial renewals are common (tenants rarely move large operations); broker value is in market intel and negotiation"
+
+# =============================================================================
+# SECTION 4: COMMISSION SPLIT STRUCTURES
+# =============================================================================
+
+commission_splits:
+  description: "How total commission is divided between listing broker and tenant rep broker"
+
+  standard_splits:
+    equal_split:
+      ratio: "50/50"
+      description: "Listing broker and tenant rep each receive 50% of total commission"
+      when_used: "Most common in balanced markets"
+
+    listing_broker_advantage:
+      ratio: "60/40 (listing / tenant rep)"
+      description: "Listing broker receives larger share"
+      when_used: "Strong landlord market, high demand, or when listing broker does most of the work"
+
+    tenant_rep_advantage:
+      ratio: "40/60 (listing / tenant rep)"
+      description: "Tenant rep receives larger share"
+      when_used: "Weak landlord market, need to incentivize tenant reps to show the space"
+
+  override_bonus:
+    description: "Additional commission or bonus above standard rates"
+    types:
+      listing_override:
+        rate: "0.5-1% additional on listing broker's share"
+        purpose: "Incentivize listing broker's team to prioritize the property"
+      speed_bonus:
+        amount: "$X,XXX per deal signed within specified timeframe"
+        example: "$5,000 bonus for any lease signed in Q1"
+        purpose: "Accelerate lease-up velocity"
+      size_bonus:
+        amount: "Additional 0.5-1% for deals above target SF"
+        example: "Standard commission plus 0.5% for any deal over 20,000 SF"
+        purpose: "Incentivize larger deals that reduce vacancy faster"
+
+  no_commission_scenarios:
+    direct_deal: "Tenant contacts landlord directly, no broker involved (landlord saves full commission)"
+    house_deal: "Listing broker represents both sides (may reduce total commission to 3-4%)"
+    renewal_no_broker: "Tenant renews without broker involvement (some landlords pay reduced commission as goodwill)"
+
+# =============================================================================
+# SECTION 5: LISTING AGREEMENT KEY TERMS
+# =============================================================================
+
+listing_agreement:
+  description: "Key terms to negotiate in exclusive listing agreements with brokers"
+
+  term:
+    standard: "12 months"
+    range: "6-24 months"
+    recommendation: "12 months with 6-month performance review clause"
+    cancellation: "30-60 day written notice after initial term"
+    notes: "Avoid perpetual listings. Include performance benchmarks (minimum tours, proposals)."
+
+  tail_period:
+    description: "Period after listing expires during which broker is still owed commission if a tenant they introduced signs a lease"
+    standard: "6-12 months"
+    maximum: "12 months"
+    tenant_list: "Broker must provide written list of protected tenants (prospects introduced during listing period)"
+    notes: "Tail should only apply to specifically named prospects, not 'anyone who toured the building'"
+
+  commission_rates:
+    specify: "Exact commission schedule by year of lease term"
+    payment_timing: "50% at lease execution, 50% at rent commencement (standard)"
+    alternative_timing: "100% at rent commencement (landlord preference) or 100% at lease execution (broker preference)"
+    clawback: "If tenant defaults before occupancy, broker must refund commission (negotiate)"
+
+  marketing_obligations:
+    minimum_requirements:
+      - "Update listings on CoStar, LoopNet within 5 business days of execution"
+      - "Professional photography within 15 days"
+      - "Minimum 2 broker events per year"
+      - "Monthly activity reports with pipeline detail"
+      - "Quarterly market update and competitive analysis"
+    advertising_cost: "Clarify who pays for advertising (typically landlord or split)"
+
+  exclusions:
+    protected_list: "Landlord may exclude specific tenants from commission obligation (existing tenants renewing, tenants in active negotiation at listing date)"
+    maximum_exclusions: "3-5 tenants (brokers resist large exclusion lists)"
+
+  co_brokerage:
+    requirement: "Listing broker must cooperate with all licensed tenant rep brokers"
+    co_broke_rate: "Specify in listing agreement (prevents disputes)"
+    notes: "If listing broker also represents the tenant (dual agency), total commission may be reduced"
+
+# =============================================================================
+# SECTION 6: COMMISSION BUDGET PROJECTION
+# =============================================================================
+
+budget_projection:
+  description: "Template for projecting annual commission expense"
+
+  formula: |
+    Projected Commission = Sum of:
+      (New Lease SF x Avg Rent x Avg Term x New Lease Rate) +
+      (Renewal SF x Avg Rent x Avg Renewal Term x Renewal Rate) +
+      (Expansion SF x Avg Rent x Avg Expansion Term x Expansion Rate) +
+      Override/Bonus Budget
+
+  example:
+    portfolio: "500,000 SF office portfolio, 12% vacancy"
+    assumptions:
+      new_leases: "40,000 SF at $32/SF, 5-year average term"
+      renewals: "25,000 SF at $34/SF, 5-year average term"
+      expansions: "5,000 SF at $32/SF, 3-year average term"
+      commission_rate_new: "4% yr 1, 2% yrs 2-5"
+      commission_rate_renewal: "2% yr 1, 1% yrs 2-5"
+      override_budget: 15000
+
+    calculation:
+      new_lease_commission:
+        year_1: "40,000 x $32 x 4% = $51,200"
+        years_2_5: "40,000 x $32 x 2% x 4 = $102,400"
+        total: "$153,600"
+      renewal_commission:
+        year_1: "25,000 x $34 x 2% = $17,000"
+        years_2_5: "25,000 x $34 x 1% x 4 = $34,000"
+        total: "$51,000"
+      expansion_commission:
+        year_1: "5,000 x $32 x 4% = $6,400"
+        years_2_3: "5,000 x $32 x 2% x 2 = $6,400"
+        total: "$12,800"
+      override_bonus: "$15,000"
+      total_projected: "$232,400"
+      per_sf_leased: "$3.32/SF (based on 70,000 SF total activity)"
+
+  accounting_treatment:
+    gaap: "Capitalize and amortize over lease term (ASC 842)"
+    cash_basis: "Expense when paid"
+    budget_line: "Leasing costs or below-the-line capital expenditure"
+    notes: "For acquisition underwriting, leasing commissions are typically modeled as a capital cost alongside TI, not an operating expense"

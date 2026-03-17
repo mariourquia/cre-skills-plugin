@@ -1,0 +1,344 @@
+# Lease Negotiation Scenario Playbooks
+# 8 negotiation scenarios with structured frameworks
+
+# ============================================================
+# SCENARIO 1: ANCHOR TENANT RENEWAL -- LEVERAGE PLAY
+# ============================================================
+scenario_1:
+  name: "Anchor Tenant Renewal with High Leverage"
+  context: |
+    Anchor tenant (>20% of GLA) approaching lease expiration.
+    Tenant has co-tenancy triggers on 3+ inline tenants.
+    Submarket vacancy is low. Tenant's alternatives are limited.
+  tenant_leverage:
+    - Co-tenancy clauses triggered if anchor departs
+    - Specialized buildout hard to replicate
+    - Brand recognition draws traffic
+  landlord_leverage:
+    - Low submarket vacancy limits tenant alternatives
+    - Tenant's relocation costs exceed $500K+
+    - Inline tenants depend on anchor traffic
+  strategy:
+    opening_position:
+      rent: "Market + 5% anchor premium"
+      term: "10 years minimum"
+      ti: "Minimal ($15-20/SF refresh only)"
+      options: "One 5-year, at market with floor"
+    walk_away_floor:
+      rent: "Market - 5% (still above in-place)"
+      term: "7 years minimum"
+      ti: "Up to $35/SF"
+      concession_limit: "2 months free rent"
+    negotiation_sequence:
+      1: "Open at market + 5%, anchor premium justified by co-tenancy value"
+      2: "If pushback, offer to reduce to market in exchange for 10-year term"
+      3: "TI is the release valve -- increase TI before reducing rent"
+      4: "Free rent only as last concession, applied to months 1-2 (not end of term)"
+      5: "If tenant threatens relocation, quantify their moving costs vs your concession"
+    key_clauses:
+      - "Continuous operation covenant (no go-dark)"
+      - "Radius restriction (no competing location within 5 miles)"
+      - "Recapture right if tenant assigns to non-approved operator"
+      - "Kick-out clause only after year 5 with 12-month notice + penalty"
+    risk_mitigation:
+      - "Pre-negotiate LOI with backup tenant before final round"
+      - "Model co-tenancy cascade: if anchor leaves, which inlines exercise?"
+      - "Secure waiver of co-tenancy from key inlines if possible"
+
+# ============================================================
+# SCENARIO 2: STARTUP TENANT -- HIGH RISK, HIGH UPSIDE
+# ============================================================
+scenario_2:
+  name: "Startup or Early-Stage Tenant Lease"
+  context: |
+    Fast-growing tech/professional services startup wants 5K-15K SF.
+    No operating history, limited financial statements.
+    High growth potential but material default risk.
+  tenant_leverage:
+    - Desirable tenant profile (tech company improves building brand)
+    - Multiple competing buildings courting them
+    - Flexible on term length
+  landlord_leverage:
+    - Tenant needs space urgently (growth forcing move)
+    - Limited financials mean fewer options from institutional landlords
+    - Can demand more security
+  strategy:
+    opening_position:
+      rent: "Market rate, no discount for credit risk"
+      security: "6 months prepaid rent + LOC"
+      guarantee: "Personal guarantees from founders (2+ years revenue)"
+      term: "5 years with no kick-out"
+    walk_away_floor:
+      rent: "Market - 3%"
+      security: "3 months + declining LOC"
+      guarantee: "1 year personal guarantee"
+      term: "3 years minimum"
+    negotiation_sequence:
+      1: "Quote market rent -- do not discount for startup status"
+      2: "Security is non-negotiable: LOC or prepaid rent required"
+      3: "Offer reduced TI in exchange for shorter guarantee period"
+      4: "Structure declining LOC (reduces by 1 month every 12 months of on-time payment)"
+      5: "Expansion option as value-add: right to adjacent space at market"
+    key_clauses:
+      - "Letter of credit (irrevocable, auto-renewing, evergreen)"
+      - "Financial reporting covenant (quarterly within 45 days)"
+      - "Assignment requires landlord consent + financial qualification"
+      - "Expansion right of first offer on adjacent space"
+      - "Subletting permitted with landlord approval + profit split (50/50)"
+    security_structure:
+      year_1: "6-month LOC + personal guarantee"
+      year_2: "5-month LOC + personal guarantee"
+      year_3: "4-month LOC, guarantee burns off if revenue > $5M"
+      year_4: "3-month LOC"
+      year_5: "2-month LOC"
+
+# ============================================================
+# SCENARIO 3: MULTI-FLOOR OFFICE CONSOLIDATION
+# ============================================================
+scenario_3:
+  name: "Large Tenant Consolidation (Multi-Floor)"
+  context: |
+    Corporate tenant consolidating from 3 locations into single building.
+    Needs 40K-80K SF. Multiple buildings competing. 12-18 month timeline.
+  strategy:
+    opening_position:
+      rent: "Market, with structured escalations"
+      term: "10-15 years"
+      ti: "$65-80/SF (turnkey buildout)"
+      concessions: "4-6 months free rent"
+    negotiation_priorities:
+      1: "Secure long term first -- 10+ years is worth $5-10/SF rent concession"
+      2: "TI is amortized over term -- longer term = lower annual TI impact"
+      3: "Offer building standard finishes at landlord cost, upgrades at tenant cost"
+      4: "Structured rent: start below market, above-market escalations, NPV-neutral"
+      5: "Naming rights or signage as non-cash concession"
+    key_clauses:
+      - "Must-take space (committed expansion, not optioned)"
+      - "Contraction right only with 18-month notice + penalty (unamortized TI + 6mo rent)"
+      - "SNDA from lender (subordination, non-disturbance, attornment)"
+      - "Building exclusivity (no competing businesses)"
+      - "After-hours HVAC at cost (not profit markup)"
+      - "Tenant's architect approves base building systems"
+    financial_structuring:
+      rent_schedule:
+        years_1_2: "10% below market (moving cost offset)"
+        years_3_5: "Market rate"
+        years_6_10: "Market + 2% annual escalation"
+        npv_neutral: true
+      ti_amortization:
+        total_ti: "80/SF on 60K SF = $4.8M"
+        amortization_rate: 0.07
+        annual_amortization: "$684K over 10 years"
+        impact_on_effective_rent: "$11.40/SF/year"
+
+# ============================================================
+# SCENARIO 4: RESTAURANT TENANT -- SPECIALIZED USE
+# ============================================================
+scenario_4:
+  name: "Restaurant Lease Negotiation"
+  context: |
+    Restaurant operator (local or small chain) for ground-floor retail.
+    High TI cost due to kitchen buildout. High failure rate.
+    Drives foot traffic but material risk.
+  strategy:
+    opening_position:
+      base_rent: "70% of comparable retail rent (restaurant discount)"
+      percentage_rent: "6-8% of gross sales above natural breakpoint"
+      term: "10 years (amortize TI)"
+      ti: "Landlord provides shell condition, tenant builds out"
+    negotiation_priorities:
+      1: "Percentage rent is critical -- captures upside if restaurant succeeds"
+      2: "Minimize landlord TI exposure (tenant's kitchen = tenant's cost)"
+      3: "Secure personal guarantee + 6 months security"
+      4: "Negotiate co-tenancy carefully -- restaurant should not get retail co-tenancy"
+      5: "Hours of operation covenant (minimum hours, no seasonal closures)"
+    key_clauses:
+      - "Percentage rent: 6% of gross sales over $X natural breakpoint"
+      - "Sales reporting: monthly, certified annually by CPA"
+      - "Audit right: landlord can audit books annually at tenant cost if >5% discrepancy"
+      - "Continuous operation: minimum 6 days/week, lunch and dinner service"
+      - "Grease trap / exhaust: tenant responsible for maintenance and code compliance"
+      - "Use restriction: specific cuisine type, no conversion without consent"
+      - "Liquor license: tenant's responsibility, assignment requires new license"
+      - "Radius restriction: 3 miles, same concept"
+    percentage_rent_structure:
+      natural_breakpoint:
+        formula: "base_rent / percentage_rate"
+        example: "If base rent = $120K/yr and rate = 6%, breakpoint = $2M"
+      artificial_breakpoint:
+        description: "Set at specific dollar amount regardless of base rent"
+        typical_range: "$1.5M - $3M depending on market and concept"
+      graduated_rates:
+        tier_1: "6% on sales $0 - $2M"
+        tier_2: "5% on sales $2M - $3.5M"
+        tier_3: "4% on sales above $3.5M"
+
+# ============================================================
+# SCENARIO 5: MEDICAL/DENTAL TENANT -- HIGH TI, LONG TERM
+# ============================================================
+scenario_5:
+  name: "Medical or Dental Practice Lease"
+  context: |
+    Medical or dental practice needs 2K-8K SF with specialized buildout.
+    Extremely high TI ($100-200/SF). Very sticky tenant (rarely relocates).
+    Strong credit (professional income), long-term occupant.
+  strategy:
+    opening_position:
+      rent: "Market + 10-15% (premium for specialized use)"
+      term: "10 years (minimum to amortize TI)"
+      ti: "Landlord funds up to $80/SF, tenant funds overage"
+      escalation: "3% annual fixed (no CPI uncertainty)"
+    negotiation_priorities:
+      1: "Long term is paramount -- 10 years minimum, 15 preferred"
+      2: "Above-market rent justified by use restriction and TI amortization"
+      3: "Personal guarantee from all practice partners"
+      4: "Restrict assignment to qualified medical professionals only"
+      5: "No kick-out, no contraction, no termination rights"
+    key_clauses:
+      - "Use restriction: medical/dental use only, specific specialty"
+      - "Compliance: tenant responsible for all medical facility regulations"
+      - "HVAC: additional capacity at tenant cost (medical uses require more)"
+      - "Signage: building standard, professional designation only"
+      - "After-hours access: 24/7 (emergency medical need)"
+      - "Hazardous materials: tenant indemnifies, provides insurance rider"
+      - "ADA compliance: tenant responsible for interior, landlord for common areas"
+    ti_structure:
+      landlord_contribution: 80  # $/SF
+      estimated_total_buildout: 150  # $/SF
+      tenant_overage: 70  # $/SF
+      landlord_amortization: "8% over 10 years = $11.60/SF/year added to rent"
+
+# ============================================================
+# SCENARIO 6: SUBLEASE SITUATION -- TENANT WANTS TO SUBLEASE
+# ============================================================
+scenario_6:
+  name: "Tenant Sublease Negotiation"
+  context: |
+    Existing tenant wants to sublease 40-60% of their space.
+    Business is contracting. Sublease is below market.
+    Landlord has consent rights.
+  strategy:
+    landlord_objectives:
+      1: "Maintain direct lease relationship with prime tenant"
+      2: "Capture profit from sublease spread (if lease permits)"
+      3: "Ensure subtenant is creditworthy"
+      4: "Preserve recapture right if more favorable"
+    negotiation_positions:
+      consent_with_conditions:
+        profit_sharing: "50% of sublease profit (sublease rent - prime rent)"
+        subtenant_approval: "Landlord reviews subtenant financials"
+        use_restriction: "Subtenant must comply with all lease terms"
+        term_limitation: "Sublease cannot exceed prime lease term - 1 day"
+      recapture_option:
+        description: "Landlord terminates prime lease for subleased portion"
+        when_to_exercise: "If subtenant is better credit than prime, or market rent > prime rent"
+        mechanics: "30-day election period after sublease notice"
+      blend_and_extend:
+        description: "Convert sublease into direct lease, renegotiate prime"
+        prime_tenant: "Reduced space, reduced rent, term extension"
+        new_direct_tenant: "Direct lease at market to subtenant"
+        benefit: "Eliminates sublease middleman, improves rent roll quality"
+    key_clauses:
+      - "Consent not unreasonably withheld, but landlord has 30-day review period"
+      - "Profit split: 50/50 on sublease premium over prime rent"
+      - "Recapture right: landlord can terminate prime for subleased portion"
+      - "Subtenant financials: net worth > 12 months of sublease rent"
+      - "Prime tenant remains liable for all obligations"
+      - "Sublease must be on landlord-approved form"
+
+# ============================================================
+# SCENARIO 7: LEASE RENEWAL WITH EXPANSION
+# ============================================================
+scenario_7:
+  name: "Renewal + Expansion Negotiation"
+  context: |
+    Good tenant wants to renew and take additional 3K-5K SF.
+    Current lease below market. Expansion space available.
+    Opportunity to blend rent across old and new space.
+  strategy:
+    opening_position:
+      existing_space: "Market rent (mark up from in-place)"
+      expansion_space: "Market rent"
+      blended_approach: false  # Start with market on both
+      term: "7-10 years on all space"
+      ti_existing: "$15/SF refresh"
+      ti_expansion: "$45/SF buildout"
+    negotiation_sequence:
+      1: "Quote market on both spaces separately"
+      2: "If pushback on existing space markup, offer blend-and-extend"
+      3: "Blend formula: (old_rent * old_sf + market * new_sf) / total_sf"
+      4: "Adjust blend to be 3-5% below straight market to show 'discount'"
+      5: "TI on expansion is standard; TI on existing is leverage tool"
+    blend_calculation_example:
+      existing_space_sf: 8000
+      existing_rent_psf: 42.00
+      market_rent_psf: 50.00
+      expansion_sf: 4000
+      total_sf: 12000
+      straight_market: 50.00  # What landlord would charge if all new
+      blended_rate: "(42*8000 + 50*4000) / 12000 = 44.67"
+      negotiated_blend: 47.00  # Split the difference
+      annual_revenue_increase: "(47-42)*8000 + 47*4000 = $228,000"
+      value_creation_at_6_cap: "$3,800,000"
+    key_clauses:
+      - "Coterminous expiration (all space on same schedule)"
+      - "Single lease amendment (not separate lease for expansion)"
+      - "Cross-default between old and new space"
+      - "Contiguous space requirement (expansion adjacent to existing)"
+
+# ============================================================
+# SCENARIO 8: DISTRESSED TENANT EARLY TERMINATION
+# ============================================================
+scenario_8:
+  name: "Distressed Tenant Seeking Early Termination"
+  context: |
+    Tenant requests early lease termination (3+ years remaining).
+    Business struggling. Risk of bankruptcy if lease continues.
+    Landlord must choose: negotiate exit or risk default/bankruptcy.
+  strategy:
+    assessment_framework:
+      step_1: "Verify distress is real (request financials within 10 days)"
+      step_2: "Calculate remaining lease value vs workout/termination cost"
+      step_3: "Assess bankruptcy risk and lease treatment in Ch 11"
+      step_4: "Model re-leasing timeline and market conditions"
+    negotiation_positions:
+      structured_termination:
+        termination_fee: "6-12 months rent (unamortized TI + LC + vacancy cost)"
+        payment_method: "50% at execution, 50% within 90 days"
+        space_return: "Broom clean within 60 days"
+        mutual_release: "Full release of all claims"
+      accelerated_lease_buyout:
+        formula: "NPV of remaining rent - NPV of re-lease income = termination fee"
+        discount: "20-40% discount from formula for immediate payment"
+        security: "Security deposit applied to termination fee"
+      blend_and_extend_down:
+        description: "Reduce space, reduce rent, extend term"
+        reduced_sf: "50-70% of current"
+        reduced_rent: "Market rate on smaller space"
+        extended_term: "5 years from modification date"
+        benefit: "Keeps tenant paying, avoids vacancy"
+    bankruptcy_considerations:
+      ch_11_risks:
+        - "Tenant has 120 days to assume or reject lease (extendable to 210)"
+        - "During assumption period, tenant must cure defaults"
+        - "If rejected, landlord claim capped at greater of 1 year rent or 15% of remaining"
+        - "Administrative rent claim for post-petition occupancy"
+      pre_bankruptcy_strategy:
+        - "Negotiate termination BEFORE filing (more control)"
+        - "If tenant files: file proof of claim immediately"
+        - "Monitor for preference payments (90-day lookback)"
+    termination_fee_calculation:
+      remaining_term_months: 36
+      monthly_rent: 15000
+      remaining_lease_value: 540000
+      unamortized_ti: 85000
+      unamortized_lc: 22000
+      estimated_vacancy_months: 6
+      vacancy_carrying_cost: 54000  # 6 months x $9K
+      re_leasing_costs: 120000  # New TI + LC
+      total_landlord_cost: 281000  # TI + LC + vacancy + re-lease
+      market_rent_new: 16000  # Slightly above current (mark to market)
+      new_lease_npv_30mo: 435000  # 30 months of higher rent (after 6mo vacancy)
+      net_loss_to_landlord: 105000  # 540K remaining - 435K new - costs
+      proposed_termination_fee: 150000  # Net loss + negotiating premium
+      floor_termination_fee: 90000  # Minimum acceptable (covers hard costs)

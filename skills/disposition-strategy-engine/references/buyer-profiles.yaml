@@ -1,0 +1,360 @@
+# buyer-profiles.yaml
+# Five archetypal CRE buyer profiles with pricing behavior, DD expectations,
+# close probability, and negotiation strategy implications.
+
+profiles:
+
+  institutional_fund:
+    name: "Institutional Fund / REIT"
+    description: >
+      PE real estate funds (Blackstone, Brookfield, Starwood, KKR), public REITs,
+      insurance company direct investment, sovereign wealth, pension fund separate
+      accounts. Typically deploying $50M+ per deal.
+    typical_asset_targets:
+      - "Class A multifamily 200+ units"
+      - "Institutional industrial/logistics 100k+ SF"
+      - "Core office (trophy CBD only)"
+      - "Net lease credit tenant"
+      - "Student housing, self-storage, data center at scale"
+    pricing_behavior:
+      cap_rate_tolerance: "Lowest. Will accept 4.0-5.5% for core quality."
+      premium_drivers:
+        - "Credit-quality tenant base"
+        - "Long WALE (7+ years)"
+        - "Institutional-grade construction and systems"
+        - "Liquidity of market and submarket"
+        - "ESG / green building certification"
+      discount_triggers:
+        - "Deferred maintenance or renovation required"
+        - "Short remaining lease term"
+        - "Secondary/tertiary market location"
+        - "Operational complexity (hotel, senior housing)"
+      pricing_range: "0-5% premium to market for core; 5-15% discount for value-add requiring execution"
+    dd_expectations:
+      timeline: "45-60 days"
+      depth: "Exhaustive"
+      requirements:
+        - "Full third-party report package (Phase I, PCA, ALTA survey, appraisal)"
+        - "Tenant estoppels for 80%+ of leased SF"
+        - "Audited or reviewed financial statements for property"
+        - "Title commitment with all standard exceptions removed"
+        - "Environmental questionnaire and compliance history"
+        - "Zoning and building code compliance letter"
+        - "ADA compliance assessment"
+        - "Insurance loss runs (5 years)"
+        - "Capital expenditure history and budget"
+        - "Detailed rent roll with lease abstracts"
+        - "T12 and T3 financial statements"
+        - "Operating expense detail with backup"
+        - "Property tax assessment and appeal history"
+        - "Utility consumption data"
+        - "ESG/energy audit (increasingly required)"
+      deal_breakers:
+        - "Unresolved environmental contamination"
+        - "Structural deficiency in PCA"
+        - "Title defects that cannot be insured over"
+        - "Material tenant credit deterioration"
+    close_probability: "75-85%"
+    close_probability_notes: >
+      High close rate once LOI is signed. Institutional reputation risk of
+      re-trading is a deterrent. However, investment committee approval is
+      required -- deals die at IC more often than at DD.
+    negotiation_profile:
+      strengths:
+        - "Certainty of close once committed"
+        - "Access to cheapest capital (lowest cap rate acceptable)"
+        - "Speed of execution with dedicated deal teams"
+      weaknesses:
+        - "Rigid DD requirements slow the process"
+        - "IC approval creates uncertainty pre-commitment"
+        - "ESG and compliance requirements may be burdensome"
+        - "May require reps and warranties that smaller sellers resist"
+    seller_strategy: >
+      Maximize competitive tension. Run a broad marketing process with multiple
+      institutional bidders. Set a clear DD timeline and enforce it. Prepare a
+      comprehensive data room before going to market -- institutional buyers
+      penalize disorganized sellers with lower bids or re-trades.
+
+  private_equity_value_add:
+    name: "Private Equity Value-Add / Opportunistic"
+    description: >
+      Mid-market PE firms ($10M-100M equity checks), opportunity funds, merchant
+      builders buying for renovation and repositioning. Target IRR 15-25%.
+      Examples: Bridge Investment Group, Graystar (value-add), TruAmerica, Priderock.
+    typical_asset_targets:
+      - "Class B/C multifamily with renovation upside"
+      - "Suburban office for conversion"
+      - "Undermanaged retail with re-tenanting opportunity"
+      - "Industrial with below-market rents"
+      - "Distressed or special situation any asset class"
+    pricing_behavior:
+      cap_rate_tolerance: "Higher going-in cap (6.0-8.0%) but underwrite to lower stabilized cap"
+      premium_drivers:
+        - "Large loss-to-lease (rent upside)"
+        - "Below replacement cost basis"
+        - "Clear renovation/repositioning playbook"
+        - "Seller financing or assumable below-market debt"
+        - "Motivated seller (pricing flexibility)"
+      discount_triggers:
+        - "Significant capex required (priced into basis)"
+        - "Lease-up risk"
+        - "Regulatory complexity (rent control, entitlements)"
+        - "Environmental remediation required"
+      pricing_range: "10-30% discount to stabilized value. Going-in cap rate 100-300 bps above core."
+    dd_expectations:
+      timeline: "30-45 days"
+      depth: "Focused on value drivers"
+      requirements:
+        - "Phase I environmental (required, non-negotiable)"
+        - "PCA focused on major systems (roof, HVAC, envelope)"
+        - "Rent roll with lease expiration detail"
+        - "T12 financials with line-item detail"
+        - "Unit-level inspection (multifamily) or space-by-space walkthrough"
+        - "Renovation cost estimates from their GC"
+        - "Submarket rent comps (they will run their own)"
+        - "Title commitment"
+        - "Zoning verification for intended use"
+      deal_breakers:
+        - "Renovation cost exceeds budget by >20%"
+        - "Achievable rents below underwriting"
+        - "Environmental issue requiring >$500k remediation"
+        - "Structural issue not visible in initial tour"
+    close_probability: "60-70%"
+    close_probability_notes: >
+      Lower than institutional due to more aggressive underwriting assumptions.
+      Value-add buyers re-trade more frequently -- renovation cost discoveries
+      and rent comp analysis are common re-trade triggers. Equity raise risk
+      if syndicated deal.
+    negotiation_profile:
+      strengths:
+        - "Can close on properties institutional buyers won't touch"
+        - "Flexible on structure (seller financing, master lease, JV)"
+        - "Fast decision-making (smaller teams)"
+        - "Comfortable with operational complexity"
+      weaknesses:
+        - "Higher re-trade frequency"
+        - "May have equity raise contingency (capital call risk)"
+        - "Aggressive initial pricing to win, then re-trade in DD"
+        - "Shorter track record may mean financing contingency"
+    seller_strategy: >
+      Qualify the buyer's equity source before accepting LOI. Ask for proof of
+      funds or capital commitment letter. Build 5-10% re-trade buffer into
+      expectations. Require hard earnest money deposit (1-2% non-refundable
+      at DD expiration). Shorter DD period limits re-trade opportunity.
+
+  1031_exchange_buyer:
+    name: "1031 Exchange Buyer"
+    description: >
+      Individual or entity selling another property and reinvesting proceeds
+      under IRC Section 1031 to defer capital gains tax. Must identify
+      replacement property within 45 days and close within 180 days of
+      selling the relinquished property. Highly motivated by timeline.
+    typical_asset_targets:
+      - "Stabilized, low-management properties"
+      - "NNN retail or industrial"
+      - "Small multifamily (5-50 units)"
+      - "DST interests (passive 1031)"
+      - "Tenant-in-common (TIC) structures"
+    pricing_behavior:
+      cap_rate_tolerance: "Will accept 50-100 bps below market due to tax deferral value"
+      premium_drivers:
+        - "Stabilized, minimal management required"
+        - "Price matches exchange equity (exact sizing)"
+        - "Seller flexibility on closing timeline"
+        - "Clean title, no contingencies"
+        - "In-place management (turnkey)"
+      discount_triggers:
+        - "Operational complexity"
+        - "Renovation required"
+        - "Lease-up risk"
+        - "Financing difficulty"
+      pricing_range: "0-8% premium to market. Willingness to overpay increases as 45-day ID deadline approaches."
+    dd_expectations:
+      timeline: "15-30 days (compressed by 180-day clock)"
+      depth: "Moderate -- focused on confirming, not discovering"
+      requirements:
+        - "Rent roll and T12 (already reviewed pre-offer)"
+        - "Phase I (may accept existing if recent)"
+        - "Title commitment"
+        - "Estoppels for major tenants"
+        - "Basic PCA or inspection"
+      deal_breakers:
+        - "Anything that delays closing past 180-day deadline"
+        - "Title issue requiring extended cure"
+        - "Financing unavailable in timeline"
+        - "Material misrepresentation in financials"
+    close_probability: "80-90%"
+    close_probability_notes: >
+      Highest close probability of any buyer type. The tax penalty for failing
+      to close ($500k-2M+ in deferred taxes) is a powerful motivator. Once
+      identified, 1031 buyers almost never walk unless DD reveals a material
+      problem. Financing is the most common failure point.
+    negotiation_profile:
+      strengths:
+        - "Highest close probability"
+        - "Will pay premium for certainty and speed"
+        - "Less price-sensitive due to tax deferral benefit"
+        - "Motivated to resolve issues rather than walk"
+      weaknesses:
+        - "Rigid timeline creates pressure on both sides"
+        - "May need to boot (add cash) if exchange value doesn't match"
+        - "Limited negotiation leverage -- seller knows the clock"
+        - "Often individual (less sophisticated DD, but also less demanding)"
+    seller_strategy: >
+      Identify 1031 buyers through broker network and advertise "1031 exchange
+      friendly" in marketing materials. Emphasize stabilized NOI and clean
+      operations. Price at or slightly above market -- 1031 buyers will accept
+      the premium. Be flexible on closing timeline within their 180-day window.
+      The fastest path to highest-probability close.
+
+  high_net_worth_individual:
+    name: "High-Net-Worth Individual / Family Office"
+    description: >
+      Wealthy individuals, family offices, and small partnerships acquiring CRE
+      for wealth preservation, income, and legacy. Typically $2M-30M deal size.
+      Often self-managed or use small property management firms.
+    typical_asset_targets:
+      - "Small multifamily (5-30 units)"
+      - "Single-tenant NNN retail"
+      - "Small office or medical office"
+      - "Mixed-use properties"
+      - "Land for development (long-term hold)"
+    pricing_behavior:
+      cap_rate_tolerance: "Moderate. 5.5-7.5% for stabilized. Will accept lower for prestigious locations."
+      premium_drivers:
+        - "Prestige location or trophy aesthetic"
+        - "Simple operations (NNN, small MF)"
+        - "Tax benefits (depreciation, cost segregation)"
+        - "Legacy / generational hold potential"
+        - "Below-market financing available"
+      discount_triggers:
+        - "Management complexity"
+        - "Tenant quality concerns"
+        - "Deferred maintenance visible on tour"
+        - "Bad neighborhood perception (regardless of data)"
+      pricing_range: "Market to 5% discount. Emotional buyers may overpay for perceived quality."
+    dd_expectations:
+      timeline: "30-45 days"
+      depth: "Variable -- ranges from thorough to cursory depending on sophistication"
+      requirements:
+        - "Property inspection (personal walk-through is critical)"
+        - "Rent roll and financials (may not deeply analyze)"
+        - "Phase I (lender-required)"
+        - "Appraisal (lender-required)"
+        - "Title insurance"
+        - "Lease review for major tenants"
+      deal_breakers:
+        - "Visible physical problems (roof leak, parking lot, cosmetic)"
+        - "Bad personal impression of property or neighborhood"
+        - "Financing falls through"
+        - "Spouse or partner vetoes"
+        - "Attorney or CPA advice to walk"
+    close_probability: "55-65%"
+    close_probability_notes: >
+      Lower close rate driven by: financing contingencies, emotional decision-making,
+      advisor interference (attorney, CPA who may be risk-averse), and personal
+      circumstances. Non-refundable earnest money significantly improves close rate.
+    negotiation_profile:
+      strengths:
+        - "Can move quickly (no IC, no fund process)"
+        - "Flexible on structure and terms"
+        - "May have long-term hold horizon (patient capital)"
+        - "Relationship-driven -- repeat buyer potential"
+      weaknesses:
+        - "Emotional decision-making (over-index on aesthetics)"
+        - "Financing dependency (often 75-80% LTV needed)"
+        - "Advisor influence can kill deals late"
+        - "May lack DD sophistication (miss real issues, worry about non-issues)"
+    seller_strategy: >
+      Presentation matters disproportionately. Property should be clean, landscaped,
+      and well-maintained for tours. Provide a clear, simple financial summary -- not
+      a 50-page OM. Build personal rapport. Be transparent about known issues (trust
+      is paramount). Require financing pre-approval letter with LOI. Non-refundable
+      earnest money at DD expiration is essential.
+
+  owner_occupant:
+    name: "Owner-Occupant / User"
+    description: >
+      Business purchasing property for its own operations. Medical practices
+      buying MOB, restaurants buying retail, manufacturers buying industrial.
+      Pricing reflects operational value, not just investment returns.
+    typical_asset_targets:
+      - "Medical/dental office (MOB)"
+      - "Small industrial/flex for manufacturing or distribution"
+      - "Restaurant/retail space"
+      - "Auto service or specialty retail"
+      - "Professional office (law firm, accounting)"
+    pricing_behavior:
+      cap_rate_tolerance: "N/A -- pricing based on operational value, not cap rate"
+      premium_drivers:
+        - "Location specific to business needs (patient base, logistics, visibility)"
+        - "Building configuration matches operations (dock height, ceiling, layout)"
+        - "Eliminates rent escalation risk"
+        - "Building equity through mortgage vs paying landlord"
+        - "SBA 504 financing availability (10% down)"
+      discount_triggers:
+        - "Renovation required to fit operations"
+        - "Location not ideal but acceptable"
+        - "Environmental or zoning risk"
+        - "Shared parking or access issues"
+      pricing_range: "5-20% premium to investor pricing. Operational value exceeds investment value."
+    dd_expectations:
+      timeline: "30-60 days (SBA loans require longer)"
+      depth: "Focused on operational suitability, not investment metrics"
+      requirements:
+        - "Building inspection focused on systems relevant to operations"
+        - "Zoning confirmation for intended use"
+        - "ADA compliance (especially medical)"
+        - "Environmental (Phase I required for SBA)"
+        - "Appraisal (lender-required)"
+        - "Utility capacity verification"
+        - "Parking adequacy"
+        - "Signage rights and restrictions"
+      deal_breakers:
+        - "Zoning does not permit intended use"
+        - "Building cannot be economically modified for operations"
+        - "Environmental issue delays occupancy"
+        - "SBA or conventional financing denied"
+        - "Competing location becomes available"
+    close_probability: "50-60%"
+    close_probability_notes: >
+      Moderate close rate. Financing is the primary risk -- SBA loans have
+      extensive requirements and 60-90 day processing. Business operational
+      changes (losing a contract, partner dispute) can kill deals. But when
+      the buyer's business needs are urgent, close probability rises to 70%+.
+    negotiation_profile:
+      strengths:
+        - "Will pay above investment value for the right property"
+        - "Long-term hold (mortgage payoff, not exit)"
+        - "Less price-sensitive when operational needs are met"
+        - "SBA financing is creative (low down payment)"
+      weaknesses:
+        - "Financing complexity and timeline (SBA)"
+        - "Operational contingencies (may need to sell current space)"
+        - "Limited real estate sophistication"
+        - "May need landlord-like handholding through process"
+    seller_strategy: >
+      Market to business users through trade channels, not just CRE brokers.
+      Medical office: contact medical practice brokers and physician relocation
+      companies. Industrial: contact local economic development and business
+      associations. Highlight operational features (dock count, ceiling height,
+      patient rooms, visibility). Price 5-10% above investor market and be
+      patient -- the right user will pay it.
+
+buyer_selection_matrix:
+  maximize_price:
+    first_choice: "1031 exchange buyer (premium for speed + tax deferral)"
+    second_choice: "Owner-occupant (pays above investment value)"
+    fallback: "Institutional fund (deepest pockets, lowest cap rate)"
+  maximize_close_probability:
+    first_choice: "1031 exchange buyer (80-90%)"
+    second_choice: "Institutional fund (75-85%)"
+    fallback: "Private equity value-add (60-70%)"
+  maximize_speed:
+    first_choice: "1031 exchange buyer (15-30 day DD, motivated)"
+    second_choice: "HNW individual with cash (30 days, no IC)"
+    fallback: "PE value-add (30-45 day DD, fast decisions)"
+  distressed_or_complex_asset:
+    first_choice: "PE value-add (comfortable with complexity)"
+    second_choice: "Institutional fund (if scale justifies)"
+    avoid: "1031, HNW, owner-occupant (risk-averse, financing-dependent)"

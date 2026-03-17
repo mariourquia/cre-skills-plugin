@@ -1,0 +1,229 @@
+# CRE Deal Quick-Screen Scoring Rubric
+# 12-point go/no-go framework for initial deal triage
+# Score each factor 1-5. Total possible: 60.
+# KEEP threshold: >= 36 (60%). KILL threshold: < 24 (40%). Gray zone: 24-35 (deeper look).
+# Any single factor scored 1 = automatic KILL unless mitigated by thesis override.
+
+schema:
+  version: "1.0"
+  updated: "2026-03-17"
+  usage: |
+    Score each factor independently. Do not anchor on the deal narrative.
+    Complete all 12 before making a recommendation. Gray-zone deals
+    require a written thesis memo justifying advancement.
+
+thresholds:
+  keep: 36
+  kill: 24
+  auto_kill_single_factor: 1
+
+factors:
+
+  - id: 1
+    name: "Cap Rate vs Market"
+    weight: 1.0
+    description: "Going-in cap rate relative to trailing 12-month average for the asset class and submarket."
+    scoring:
+      5: "Going-in cap > market avg + 75bps. Clear value play."
+      4: "Going-in cap > market avg + 25-75bps. Modest spread."
+      3: "Going-in cap within +/- 25bps of market avg. Fairly priced."
+      2: "Going-in cap < market avg by 25-75bps. Paying up -- need growth thesis."
+      1: "Going-in cap < market avg by >75bps. Priced to perfection."
+    red_flags:
+      - "Broker quoting trailing cap rate on pro forma income"
+      - "Cap rate calculated on T-3 trailing, not T-12"
+      - "NOI excludes management fee or reserves"
+
+  - id: 2
+    name: "Price Per Unit vs Replacement Cost"
+    weight: 1.0
+    description: "Acquisition basis per unit (or per SF for non-MF) relative to estimated replacement cost."
+    scoring:
+      5: "Basis < 60% of replacement cost. Deep discount."
+      4: "Basis 60-75% of replacement cost. Solid margin of safety."
+      3: "Basis 75-90% of replacement cost. Moderate cushion."
+      2: "Basis 90-100% of replacement cost. No margin of safety."
+      1: "Basis > 100% of replacement cost. Paying more than build-new."
+    red_flags:
+      - "Replacement cost not adjusted for local labor and entitlement costs"
+      - "Land value excluded from replacement cost estimate"
+      - "Functional obsolescence not factored (e.g., older office floor plates)"
+
+  - id: 3
+    name: "DSCR at Current Rates"
+    weight: 1.0
+    description: "Debt service coverage ratio using in-place NOI and current market financing terms (not broker-quoted rates)."
+    scoring:
+      5: "DSCR > 1.50x. Fortress coverage."
+      4: "DSCR 1.30-1.50x. Comfortable. Standard agency threshold."
+      3: "DSCR 1.15-1.30x. Tight but financeable with recourse or higher spread."
+      2: "DSCR 1.00-1.15x. Requires equity cushion or rate buydown."
+      1: "DSCR < 1.00x. Negative leverage. Cash-in refi scenario."
+    assumptions:
+      base_rate: "Current 10yr UST + 150-250bps spread depending on asset class"
+      amortization: "30yr for MF, 25yr for office/retail/industrial"
+      ltv_constraint: "65-75% LTV, whichever binds first (LTV or DSCR)"
+    red_flags:
+      - "Broker using interest-only period to inflate DSCR"
+      - "DSCR calculated on pro forma NOI, not in-place"
+      - "Rate cap cost not included in year-1 cash flow for floating-rate deals"
+
+  - id: 4
+    name: "Occupancy"
+    weight: 1.0
+    description: "Physical and economic occupancy relative to submarket stabilized occupancy."
+    scoring:
+      5: "Economic occupancy > 95% and above submarket avg."
+      4: "Economic occupancy 90-95%, in line with submarket."
+      3: "Economic occupancy 85-90%, modestly below submarket. Lease-up upside."
+      2: "Economic occupancy 75-85%. Material vacancy. Requires lease-up capital and timeline."
+      1: "Economic occupancy < 75%. Distressed or repositioning play -- different underwriting framework."
+    red_flags:
+      - "Physical occupancy quoted instead of economic occupancy"
+      - "Master lease or corporate guarantee masking actual tenant demand"
+      - "Occupancy inflated by below-market leases about to roll"
+
+  - id: 5
+    name: "Market Fundamentals"
+    weight: 1.0
+    description: "Population growth, employment growth, and income growth trends for the MSA and submarket."
+    scoring:
+      5: "Top-decile population + employment growth. Diversified employment base. Rising incomes."
+      4: "Above-average growth on 2+ metrics. No concentration risk."
+      3: "Average growth. Stable but no tailwind."
+      2: "Below-average growth or single-employer dependency."
+      1: "Population decline, employment contraction, or structural demand shift (e.g., remote work cratering office)."
+    data_sources:
+      - "BLS Quarterly Census of Employment and Wages"
+      - "Census ACS 1-year estimates"
+      - "Moody's Analytics MSA forecasts"
+      - "CoStar submarket analytics"
+
+  - id: 6
+    name: "Physical Condition"
+    weight: 1.0
+    description: "Estimated deferred maintenance and capital needs relative to acquisition basis."
+    scoring:
+      5: "Deferred maintenance < 2% of basis. Recently renovated or new construction."
+      4: "Deferred maintenance 2-5% of basis. Normal wear, no major systems due."
+      3: "Deferred maintenance 5-10% of basis. Roof, HVAC, or plumbing approaching end of life."
+      2: "Deferred maintenance 10-20% of basis. Multiple systems due. Heavy lift."
+      1: "Deferred maintenance > 20% of basis. Gut renovation or demolition candidate."
+    red_flags:
+      - "No PCA report available or PCA older than 2 years"
+      - "Flat roofs in freeze-thaw climates with unknown history"
+      - "Galvanized or polybutylene plumbing"
+      - "Known asbestos, mold, or lead paint without remediation plan"
+      - "Deferred elevator modernization (cost: $150-250K per cab)"
+
+  - id: 7
+    name: "Basis Per Unit (Absolute)"
+    weight: 1.0
+    description: "Absolute price per unit relative to market tier and asset class norms. Sanity check independent of cap rate."
+    scoring:
+      5: "Basis per unit in bottom quartile for submarket quality tier."
+      4: "Basis per unit below median for submarket quality tier."
+      3: "Basis per unit at median for submarket quality tier."
+      2: "Basis per unit above median. Need above-market rent growth to justify."
+      1: "Basis per unit in top quartile. Peak pricing territory."
+    note: "Cross-reference with replacement-cost-benchmarks.yaml for absolute thresholds."
+
+  - id: 8
+    name: "Vintage Risk"
+    weight: 1.0
+    description: "Construction vintage and associated capital expenditure profile."
+    scoring:
+      5: "Built or gut-renovated within last 10 years. Modern systems, code-compliant."
+      4: "Built 10-20 years ago. Systems have useful life remaining. Minor cosmetic updates."
+      3: "Built 20-30 years ago. Major systems approaching replacement cycle."
+      2: "Built 30-50 years ago. Expect full MEP replacement within hold period."
+      1: "Built 50+ years ago without major renovation. Structural and code compliance risk."
+    vintage_capex_benchmarks:
+      pre_1970: "$15,000-30,000/unit for full renovation"
+      1970_1989: "$8,000-18,000/unit for systems + interiors"
+      1990_2009: "$4,000-10,000/unit for interiors + selective systems"
+      2010_plus: "$1,500-4,000/unit for cosmetic refresh"
+
+  - id: 9
+    name: "Regulatory Risk"
+    weight: 1.0
+    description: "Rent control, rent stabilization, inclusionary zoning, condo conversion restrictions, or pending legislation."
+    scoring:
+      5: "No rent regulation. Landlord-friendly state. No pending legislation."
+      4: "Minimal regulation. Voluntary affordability set-asides only."
+      3: "Moderate regulation. Rent stabilization with vacancy decontrol or reasonable annual increases."
+      2: "Restrictive regulation. Rent control with limited pass-throughs. Just-cause eviction."
+      1: "Severe regulation. Strict rent control, no vacancy decontrol, condo conversion ban, tenant right of first refusal."
+    high_risk_jurisdictions:
+      - "New York City (rent stabilization, good cause eviction)"
+      - "San Francisco (rent control, just cause, Ellis Act constraints)"
+      - "Los Angeles (RSO, Measure ULA transfer tax)"
+      - "St. Paul, MN (3% cap, no vacancy decontrol)"
+      - "Oregon (statewide 7% + CPI cap)"
+
+  - id: 10
+    name: "Environmental Risk"
+    weight: 1.0
+    description: "Known or suspected environmental contamination, flood zone, wildfire zone, seismic zone."
+    scoring:
+      5: "Clean Phase I, no RECs, no flood/fire/seismic risk."
+      4: "De minimis RECs on Phase I. Standard insurance covers residual risk."
+      3: "Recognized Environmental Conditions requiring Phase II. Manageable with escrow."
+      2: "Known contamination with remediation plan. Brownfield tax credits may offset."
+      1: "Active contamination, Superfund proximity, FEMA flood zone AE without mitigation, or high wildfire risk."
+    red_flags:
+      - "Adjacent dry cleaner, gas station, or industrial use (vapor intrusion risk)"
+      - "Underground storage tanks (USTs) on site or adjacent"
+      - "Property in 100-year floodplain without flood mitigation"
+      - "Phase I older than 180 days (ASTM E1527-21 shelf life)"
+
+  - id: 11
+    name: "Seller Motivation"
+    weight: 1.0
+    description: "Why is the seller selling? Motivated sellers create opportunity. Forced sellers create the best pricing."
+    scoring:
+      5: "Forced seller: fund wind-down, lender REO, estate liquidation, partnership dispute."
+      4: "Motivated seller: capital recycling, portfolio pruning, tax deadline (1031 reverse)."
+      3: "Normal seller: achieved business plan, taking profits."
+      2: "Testing the market. No urgency. Will pull listing if price not met."
+      1: "Trophy holder. Emotional attachment. Unrealistic price expectations."
+    intelligence_sources:
+      - "Broker relationship (off-record context)"
+      - "Loan maturity databases (CMBS, Trepp)"
+      - "Court filings (bankruptcy, divorce, probate)"
+      - "SEC filings (for REIT/fund sellers)"
+      - "Property tax delinquency records"
+
+  - id: 12
+    name: "Competitive Dynamics"
+    weight: 1.0
+    description: "Number of competing bidders, process type, and likelihood of winning at a rational price."
+    scoring:
+      5: "Off-market or exclusive. No competitive pressure."
+      4: "Limited marketing. Best-and-final with 2-3 bidders."
+      3: "Broadly marketed but niche asset (fewer natural buyers)."
+      2: "Widely marketed, 5-10 bidders. Competitive process."
+      1: "Auction or widely marketed trophy asset. 20+ bidders. Winner's curse risk."
+    red_flags:
+      - "Broker running 'best and final' with artificial urgency"
+      - "Multiple rounds of bidding driving price above underwriting"
+      - "Syndicator competition bidding on pro forma (not in-place)"
+
+worked_example:
+  deal: "240-unit garden-style MF, Dallas suburb, 1998 vintage, 92% occupied"
+  scores:
+    cap_rate_vs_market: 4        # 5.8% going-in vs 5.2% market avg
+    price_per_unit_vs_repl: 4    # $145K/unit vs $190K replacement
+    dscr_current_rates: 3        # 1.22x at 6.5% rate
+    occupancy: 4                 # 92% economic vs 93% submarket
+    market_fundamentals: 5       # DFW top-decile pop + job growth
+    physical_condition: 3        # Roofs due in 3-5 years, $6K/unit deferred
+    basis_per_unit: 4            # Below median for B-class DFW
+    vintage_risk: 3              # 1998 build, HVAC nearing replacement
+    regulatory_risk: 5           # Texas, no rent regulation
+    environmental_risk: 5        # Clean Phase I, no flood zone
+    seller_motivation: 4         # Fund winding down, 18-month deadline
+    competitive_dynamics: 3      # Broadly marketed, ~8 bidders
+  total: 47
+  threshold: "KEEP (47/60 = 78%)"
+  recommendation: "Advance to full underwriting. Key risks: roof capex timing, competitive bidding. Mitigants: strong market fundamentals, basis below replacement, motivated seller."

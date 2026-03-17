@@ -1,0 +1,340 @@
+---
+# Rent Roll Analyzer Worked Example
+# 30-Tenant Office Building -- Full Rent Roll Analysis
+# Market data calibrated to Q1 2026 conditions
+# All dollar amounts in USD
+---
+
+example:
+  id: rent_roll_example_01
+  name: "30-Tenant Office Rent Roll -- Complete Analysis"
+  description: >
+    125,000 SF multi-tenant suburban office in Parsippany, NJ. 30 tenants.
+    In-place rent $18.00/SF avg vs. $22.00/SF market. Full analysis includes
+    cleaned data table, rollover schedule, loss-to-lease waterfall, tenant
+    concentration, WALT calculation, and data quality flags.
+
+  # -------------------------------------------------------------------
+  # PROPERTY OVERVIEW
+  # -------------------------------------------------------------------
+  property:
+    name: "Parsippany Corporate Center"
+    address: "100 Corporate Drive, Parsippany NJ 07054"
+    total_nra: 125_000                     # Net Rentable Area (SF)
+    floors: 4
+    year_built: 1998
+    renovation: 2019                       # lobby, common areas
+    market_rent_psf: 22.00                 # current market asking rent
+    market_subtype: "Class A- suburban office"
+    occupancy: 0.932                       # 93.2% occupied = 116,500 SF leased
+    vacant_sf: 8_500
+
+  # -------------------------------------------------------------------
+  # CLEANED RENT ROLL (30 Tenants)
+  # -------------------------------------------------------------------
+  rent_roll:
+    as_of_date: "2026-03-01"
+    headers: ["Suite", "Tenant", "SF", "Lease_Start", "Lease_Exp", "Base_Rent_PSF", "Annual_Rent", "Escalation", "Lease_Type", "Options", "Notes"]
+
+    tenants:
+      - { suite: "100", tenant: "Meridian Financial Group",     sf: 22_000, start: "2022-07-01", exp: "2032-06-30", rent_psf: 20.50, annual: 451_000, esc: "3% annual",     type: "NNN",     options: "2x5yr", notes: "" }
+      - { suite: "110", tenant: "Apex Technology Solutions",    sf: 15_500, start: "2023-01-01", exp: "2030-12-31", rent_psf: 21.00, annual: 325_500, esc: "3% annual",     type: "NNN",     options: "1x5yr", notes: "" }
+      - { suite: "120", tenant: "Bergen County Title Agency",   sf: 8_200,  start: "2021-03-01", exp: "2026-08-31", rent_psf: 17.50, annual: 143_500, esc: "2.5% annual",  type: "Mod Gross", options: "1x3yr", notes: "Expiring in 6 months" }
+      - { suite: "130", tenant: "DataVault Cloud Services",     sf: 6_800,  start: "2024-06-01", exp: "2029-05-31", rent_psf: 22.00, annual: 149_600, esc: "3% annual",     type: "NNN",     options: "None",  notes: "At market" }
+      - { suite: "200", tenant: "NovaCare Physical Therapy",    sf: 5_200,  start: "2020-09-01", exp: "2026-08-31", rent_psf: 16.00, annual: 83_200,  esc: "2% annual",     type: "Mod Gross", options: "1x5yr", notes: "Significantly below market" }
+      - { suite: "205", tenant: "Tri-State Insurance Brokers",  sf: 4_800,  start: "2019-04-01", exp: "2026-03-31", rent_psf: 15.00, annual: 72_000,  esc: "2% annual",     type: "Gross",   options: "Expired", notes: "EXPIRED LEASE -- month-to-month" }
+      - { suite: "210", tenant: "Parsippany Pediatrics",        sf: 4_500,  start: "2023-09-01", exp: "2028-08-31", rent_psf: 19.50, annual: 87_750,  esc: "2.5% annual",  type: "Mod Gross", options: "1x5yr", notes: "" }
+      - { suite: "215", tenant: "Alliance Staffing Inc",        sf: 3_800,  start: "2024-01-01", exp: "2027-12-31", rent_psf: 21.50, annual: 81_700,  esc: "3% annual",     type: "NNN",     options: "1x3yr", notes: "" }
+      - { suite: "220", tenant: "Morris County CPA Group",      sf: 3_500,  start: "2022-01-01", exp: "2027-06-30", rent_psf: 18.00, annual: 63_000,  esc: "2.5% annual",  type: "Mod Gross", options: "1x5yr", notes: "" }
+      - { suite: "225", tenant: "Greenfield Law Partners",      sf: 3_200,  start: "2025-03-01", exp: "2030-02-28", rent_psf: 22.00, annual: 70_400,  esc: "3% annual",     type: "NNN",     options: "1x5yr", notes: "Recent lease at market" }
+      - { suite: "300", tenant: "Pinnacle Wealth Advisors",     sf: 7_500,  start: "2021-06-01", exp: "2026-05-31", rent_psf: 16.50, annual: 123_750, esc: "2% annual",     type: "Mod Gross", options: "1x5yr", notes: "Expiring in 3 months" }
+      - { suite: "305", tenant: "CoreBridge Analytics",         sf: 5_000,  start: "2023-06-01", exp: "2028-05-31", rent_psf: 20.00, annual: 100_000, esc: "2.5% annual",  type: "NNN",     options: "None",  notes: "" }
+      - { suite: "310", tenant: "Velocity Marketing Group",     sf: 4_000,  start: "2024-09-01", exp: "2029-08-31", rent_psf: 21.50, annual: 86_000,  esc: "3% annual",     type: "NNN",     options: "1x3yr", notes: "" }
+      - { suite: "315", tenant: "Summit Engineering Assoc",     sf: 3_600,  start: "2022-04-01", exp: "2027-03-31", rent_psf: 18.50, annual: 66_600,  esc: "2% annual",     type: "Mod Gross", options: "1x3yr", notes: "" }
+      - { suite: "320", tenant: "Eastpoint HR Solutions",       sf: 2_800,  start: "2025-01-01", exp: "2028-12-31", rent_psf: 21.00, annual: 58_800,  esc: "3% annual",     type: "NNN",     options: "None",  notes: "" }
+      - { suite: "325", tenant: "NJ Dental Associates",         sf: 2_500,  start: "2020-11-01", exp: "2026-10-31", rent_psf: 16.00, annual: 40_000,  esc: "2% annual",     type: "Gross",   options: "1x5yr", notes: "Below market" }
+      - { suite: "330", tenant: "Ridgeview Financial Planning",  sf: 2_000,  start: "2024-03-01", exp: "2029-02-28", rent_psf: 21.00, annual: 42_000,  esc: "2.5% annual",  type: "NNN",     options: "1x3yr", notes: "" }
+      - { suite: "335", tenant: "ProServ IT Consulting",        sf: 1_800,  start: "2025-06-01", exp: "2028-05-31", rent_psf: 22.00, annual: 39_600,  esc: "3% annual",     type: "NNN",     options: "None",  notes: "At market" }
+      - { suite: "400", tenant: "Clearpath Logistics",          sf: 4_200,  start: "2023-03-01", exp: "2028-02-28", rent_psf: 19.00, annual: 79_800,  esc: "2.5% annual",  type: "NNN",     options: "1x5yr", notes: "" }
+      - { suite: "405", tenant: "Horizon Biotech",              sf: 3_000,  start: "2024-11-01", exp: "2029-10-31", rent_psf: 22.00, annual: 66_000,  esc: "3% annual",     type: "NNN",     options: "1x5yr", notes: "At market" }
+      - { suite: "410", tenant: "Platinum Realty Advisors",      sf: 2_200,  start: "2022-08-01", exp: "2027-07-31", rent_psf: 18.00, annual: 39_600,  esc: "2% annual",     type: "Mod Gross", options: "None",  notes: "" }
+      - { suite: "415", tenant: "First Bridge Capital",          sf: 1_900,  start: "2025-09-01", exp: "2030-08-31", rent_psf: 22.00, annual: 41_800,  esc: "3% annual",     type: "NNN",     options: "1x5yr", notes: "Recent lease at market" }
+      - { suite: "420", tenant: "TechForward Solutions",         sf: 1_500,  start: "2024-04-01", exp: "2027-03-31", rent_psf: 20.50, annual: 30_750,  esc: "2.5% annual",  type: "NNN",     options: "1x3yr", notes: "" }
+      - { suite: "425", tenant: "Oakmont Advisory Group",        sf: 1_200,  start: "2023-08-01", exp: "2026-07-31", rent_psf: 19.00, annual: 22_800,  esc: "2% annual",     type: "Mod Gross", options: "1x3yr", notes: "Expiring in 5 months" }
+      - { suite: "430", tenant: "Liberty Tax & Accounting",      sf: 1_000,  start: "2021-12-01", exp: "2026-11-30", rent_psf: 16.50, annual: 16_500,  esc: "2% annual",     type: "Gross",   options: "1x3yr", notes: "Below market" }
+      - { suite: "VACANT-A", tenant: "VACANT",                   sf: 3_500,  start: "",           exp: "",           rent_psf: 0,     annual: 0,       esc: "",              type: "",        options: "",      notes: "Vacant since 2025-09" }
+      - { suite: "VACANT-B", tenant: "VACANT",                   sf: 2_800,  start: "",           exp: "",           rent_psf: 0,     annual: 0,       esc: "",              type: "",        options: "",      notes: "Vacant since 2025-11" }
+      - { suite: "VACANT-C", tenant: "VACANT",                   sf: 2_200,  start: "",           exp: "",           rent_psf: 0,     annual: 0,       esc: "",              type: "",        options: "",      notes: "Vacant since 2026-01" }
+
+    roll_totals:
+      total_leased_sf: 116_500
+      total_vacant_sf: 8_500
+      occupancy_rate: 0.932
+      total_annual_rent: 2_381_150
+      weighted_avg_rent_psf: 20.44         # 2,381,150 / 116,500
+      weighted_avg_lease_term_remaining: 3.1  # years, rent-weighted
+
+  # -------------------------------------------------------------------
+  # ROLLOVER SCHEDULE
+  # -------------------------------------------------------------------
+  rollover_schedule:
+    description: >
+      Leases expiring by period. Includes month-to-month tenants as
+      immediate rollover risk. Shows SF and % of NRA rolling in each period.
+
+    annual:
+      - period: "MTM (Expired)"
+        tenants: ["Tri-State Insurance (Suite 205)"]
+        sf_expiring: 4_800
+        pct_nra: 0.038
+        annual_rent_at_risk: 72_000
+        note: "Month-to-month. Tenant can leave with 30-day notice."
+
+      - period: "2026 Q2 (Apr-Jun)"
+        tenants: ["Pinnacle Wealth (300)"]
+        sf_expiring: 7_500
+        pct_nra: 0.060
+        annual_rent_at_risk: 123_750
+        note: "Expiring May 2026. Renewal discussions not yet initiated."
+
+      - period: "2026 Q3 (Jul-Sep)"
+        tenants: ["Bergen County Title (120)", "NovaCare PT (200)", "Oakmont Advisory (425)", "NJ Dental (325)"]
+        sf_expiring: 16_100
+        pct_nra: 0.129
+        annual_rent_at_risk: 289_500
+        note: "Heavy Q3 rollover. 4 tenants, 12.9% of NRA. All below market."
+
+      - period: "2026 Q4 (Oct-Dec)"
+        tenants: ["Liberty Tax (430)"]
+        sf_expiring: 1_000
+        pct_nra: 0.008
+        annual_rent_at_risk: 16_500
+
+      - period: "2027"
+        tenants: ["Alliance Staffing (215)", "Morris County CPA (220)", "Summit Engineering (315)", "TechForward (420)", "Platinum Realty (410)"]
+        sf_expiring: 15_300
+        pct_nra: 0.122
+        annual_rent_at_risk: 281_650
+
+      - period: "2028"
+        tenants: ["Parsippany Pediatrics (210)", "CoreBridge (305)", "Eastpoint HR (320)", "Clearpath Logistics (400)", "ProServ IT (335)"]
+        sf_expiring: 17_300
+        pct_nra: 0.138
+        annual_rent_at_risk: 365_950
+
+      - period: "2029+"
+        tenants: ["Meridian Financial (100)", "Apex Technology (110)", "DataVault (130)", "Greenfield Law (225)", "Velocity Marketing (310)", "Ridgeview Financial (330)", "Horizon Biotech (405)", "First Bridge Capital (415)"]
+        sf_expiring: 55_500
+        pct_nra: 0.444
+        annual_rent_at_risk: 1_232_300
+
+    quarterly_summary:
+      next_12_months:
+        sf_rolling: 29_400                 # MTM + Q2 + Q3 + Q4 2026
+        pct_nra: 0.235
+        rent_at_risk: 501_750
+        assessment: >
+          23.5% of NRA rolls in next 12 months. This is ELEVATED for suburban
+          office. Q3 2026 is the concentration point with 12.9% of NRA. All
+          near-term expirations are below market, creating mark-to-market upside
+          if tenants renew or are replaced.
+
+  # -------------------------------------------------------------------
+  # LOSS-TO-LEASE WATERFALL
+  # -------------------------------------------------------------------
+  loss_to_lease:
+    description: >
+      Quantifies the gap between in-place rents and market rents.
+      Market rent: $22.00/SF. Analysis by tenant shows where the
+      largest mark-to-market opportunities exist.
+    market_rent_psf: 22.00
+    in_place_avg_psf: 20.44
+    loss_to_lease_psf: 1.56                # 22.00 - 20.44
+    loss_to_lease_pct: 0.071               # 1.56 / 22.00 = 7.1%
+
+    waterfall:
+      gross_potential_rent_at_market: 2_563_000  # 116,500 SF * $22.00/SF
+      less_in_place_rent: -2_381_150
+      total_loss_to_lease: 181_850
+      loss_to_lease_pct_of_gpr: 0.071
+
+    by_tenant_top_10_gap:
+      description: "10 tenants with largest loss-to-lease ($/SF below market)"
+      headers: ["Tenant", "SF", "In-Place $/SF", "Market $/SF", "Gap $/SF", "Annual Gap $"]
+      rows:
+        - ["Tri-State Insurance (205)", 4_800, 15.00, 22.00, 7.00, 33_600]
+        - ["NovaCare PT (200)",         5_200, 16.00, 22.00, 6.00, 31_200]
+        - ["NJ Dental (325)",           2_500, 16.00, 22.00, 6.00, 15_000]
+        - ["Pinnacle Wealth (300)",     7_500, 16.50, 22.00, 5.50, 41_250]
+        - ["Liberty Tax (430)",         1_000, 16.50, 22.00, 5.50,  5_500]
+        - ["Bergen County Title (120)", 8_200, 17.50, 22.00, 4.50, 36_900]
+        - ["Morris County CPA (220)",   3_500, 18.00, 22.00, 4.00, 14_000]
+        - ["Platinum Realty (410)",      2_200, 18.00, 22.00, 4.00,  8_800]
+        - ["Summit Engineering (315)",   3_600, 18.50, 22.00, 3.50, 12_600]
+        - ["Oakmont Advisory (425)",     1_200, 19.00, 22.00, 3.00,  3_600]
+      subtotal_top_10_gap: 202_450
+      note: >
+        Top 10 below-market tenants account for $202K in annual loss-to-lease.
+        Six of these 10 expire within 12 months, creating near-term mark-to-market
+        opportunity. If all 6 renew at market, incremental revenue = $163K/year.
+
+    mark_to_market_scenario:
+      assumptions:
+        renewal_probability: 0.65          # 65% of expiring tenants renew
+        new_lease_rent: 22.00              # replacements at market
+        renewal_rent: 21.00                # renewals at slight discount to market
+        downtime_months: 6                 # 6 months vacancy if tenant does not renew
+        ti_per_sf_renewal: 10.00           # $10/SF TI for renewal
+        ti_per_sf_new: 30.00               # $30/SF TI for new tenant
+        lc_pct_renewal: 0.03              # 3% of lease value
+        lc_pct_new: 0.06                  # 6% of lease value
+      projected_year_1_rent_increase: 118_000
+      projected_year_1_vacancy_cost: -62_000
+      projected_ti_lc_cost: -185_000
+      net_year_1_impact: -129_000          # negative due to TI/LC and vacancy
+      year_2_stabilized_uplift: 155_000    # full-year benefit of higher rents
+      note: "Mark-to-market is NPV positive but requires upfront capital for TI/LC."
+
+  # -------------------------------------------------------------------
+  # TENANT CONCENTRATION ANALYSIS
+  # -------------------------------------------------------------------
+  tenant_concentration:
+    description: >
+      Top 5 tenants by NRA. Concentration risk if any single tenant or
+      small group dominates the rent roll.
+
+    top_5:
+      - { rank: 1, tenant: "Meridian Financial Group",  sf: 22_000, pct_nra: 0.176, pct_rent: 0.189 }
+      - { rank: 2, tenant: "Apex Technology Solutions",  sf: 15_500, pct_nra: 0.124, pct_rent: 0.137 }
+      - { rank: 3, tenant: "Bergen County Title Agency", sf: 8_200,  pct_nra: 0.066, pct_rent: 0.060 }
+      - { rank: 4, tenant: "Pinnacle Wealth Advisors",  sf: 7_500,  pct_nra: 0.060, pct_rent: 0.052 }
+      - { rank: 5, tenant: "DataVault Cloud Services",  sf: 6_800,  pct_nra: 0.054, pct_rent: 0.063 }
+
+    top_5_combined:
+      sf: 60_000
+      pct_nra: 0.480
+      pct_rent: 0.501
+      note: >
+        Top 5 tenants occupy 48% of NRA and contribute 50% of rent.
+        Moderate concentration. Meridian Financial alone is 17.6% of NRA --
+        a single-tenant risk. However, Meridian's lease runs through 2032
+        with 3% annual escalations, providing long-term stability.
+
+    herfindahl_index: 0.076
+    herfindahl_note: >
+      HHI of 0.076 indicates moderate diversification. A fully diversified
+      30-tenant building would have HHI = 0.033. The elevated HHI is driven
+      by Meridian (17.6%) and Apex (12.4%). Acceptable for suburban office.
+
+    credit_quality:
+      investment_grade: 0                  # no publicly rated tenants
+      national_tenants: 2                  # NovaCare (chain), NJ Dental (regional chain)
+      local_professional: 28
+      note: "Predominantly local professional services. Limited credit underwriting available. Rely on trade references and financials."
+
+  # -------------------------------------------------------------------
+  # WALT CALCULATION (Weighted Average Lease Term)
+  # -------------------------------------------------------------------
+  walt_calculation:
+    description: >
+      WALT is the average remaining lease term weighted by rent (or SF).
+      Rent-weighted WALT gives more weight to higher-paying tenants.
+      Longer WALT = more income stability.
+
+    method: "Rent-weighted"
+    as_of_date: "2026-03-01"
+
+    computation:
+      description: "Sum of (annual_rent * remaining_years) / total annual rent"
+      selected_tenants_detail:
+        - { tenant: "Meridian Financial", annual_rent: 451_000, remaining_yrs: 6.33, product: 2_854_830 }
+        - { tenant: "Apex Technology",    annual_rent: 325_500, remaining_yrs: 4.83, product: 1_572_165 }
+        - { tenant: "Bergen County Title", annual_rent: 143_500, remaining_yrs: 0.50, product: 71_750 }
+        - { tenant: "DataVault Cloud",    annual_rent: 149_600, remaining_yrs: 3.25, product: 486_200 }
+        - { tenant: "Tri-State Insurance", annual_rent: 72_000, remaining_yrs: 0.08, product: 5_760 }
+      note: "Full calculation includes all 25 occupied tenants"
+
+      sum_of_products: 9_997_000           # sum across all 25 tenants
+      total_annual_rent: 2_381_150
+      walt_rent_weighted: 4.20             # 9,997,000 / 2,381,150 = 4.20 years
+
+    sf_weighted_walt: 3.65                 # SF-weighted gives lower WALT (small below-market tenants pull it down)
+
+    benchmarks:
+      suburban_office_avg: 3.5
+      institutional_minimum: 4.0
+      assessment: >
+        Rent-weighted WALT of 4.2 years is above institutional minimum (4.0)
+        and above suburban office average (3.5). This is primarily driven by
+        Meridian Financial (6.3 years remaining, $451K/year). Without Meridian,
+        WALT drops to 3.1 years -- a concern for institutional buyers.
+
+  # -------------------------------------------------------------------
+  # DATA QUALITY FLAGS
+  # -------------------------------------------------------------------
+  data_quality_flags:
+    description: >
+      Automated checks on rent roll data integrity. Three flags identified
+      requiring resolution before underwriting can proceed.
+
+    flags:
+      - flag_id: DQ-01
+        severity: HIGH
+        category: "Expired Lease"
+        tenant: "Tri-State Insurance Brokers (Suite 205)"
+        issue: >
+          Lease expired 2026-03-31. Tenant is month-to-month. No executed
+          renewal or extension on file. Tenant is paying $15.00/SF -- deepest
+          discount to market in the building ($7.00/SF below market).
+        impact: >
+          4,800 SF (3.8% of NRA) at immediate departure risk. If tenant leaves,
+          $72K annual rent lost + 6-12 months vacancy + $30/SF TI for replacement.
+          Worst case cost: $72K lost rent + $144K TI = $216K.
+        resolution: >
+          Immediately engage tenant on renewal at $20-21/SF (phased increase).
+          If tenant declines, begin marketing suite. An executed lease (renewal
+          or new) is required before closing for any buyer relying on this income.
+
+      - flag_id: DQ-02
+        severity: MEDIUM
+        category: "SF Discrepancy"
+        issue: >
+          Total leased SF (116,500) + vacant SF (8,500) = 125,000. However,
+          the building's certificate of occupancy lists 127,200 SF gross.
+          The 2,200 SF difference is likely common area or mechanical space
+          excluded from NRA, but this has not been confirmed.
+        impact: >
+          If the 2,200 SF is actually rentable space classified as common area,
+          there is potential additional leasable SF. Conversely, if NRA is
+          overstated in the rent roll, per-SF metrics are understated.
+        resolution: >
+          Request building measurement report (BOMA 2017 standard). Reconcile
+          NRA vs. GLA vs. CO square footage. Update rent roll if needed.
+
+      - flag_id: DQ-03
+        severity: MEDIUM
+        category: "Missing Fields"
+        issue: >
+          5 tenants (Bergen County Title, NovaCare, Tri-State, NJ Dental,
+          Liberty Tax) have lease type listed as "Gross" or "Mod Gross" but
+          no expense stop or base year specified in the rent roll. Without
+          this information, the net effective rent and true NNN-equivalent
+          cannot be calculated.
+        impact: >
+          If expense stops are low or non-existent, the landlord bears full
+          expense risk on these 5 tenants (combined 21,700 SF). Annual
+          expense exposure could be $6-8/SF = $130-174K unrecovered.
+        resolution: >
+          Pull lease abstracts for all 5 tenants. Confirm expense stop
+          amounts or base year provisions. Update proforma to reflect
+          actual landlord expense obligations.
+
+    summary:
+      total_flags: 3
+      high_severity: 1
+      medium_severity: 2
+      low_severity: 0
+      underwriting_readiness: >
+        Rent roll requires resolution of DQ-01 (expired lease) before
+        any offer can be submitted. DQ-02 and DQ-03 should be resolved
+        during due diligence but do not block initial underwriting.

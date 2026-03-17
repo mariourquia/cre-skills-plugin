@@ -1,0 +1,353 @@
+# data-sources-hierarchy.yaml
+# Ranked data sources per metric for submarket analysis.
+# Tier 1 = most reliable/granular, Tier 4 = anecdotal/supplementary.
+# Cost: $ = free, $$ = <$500/mo, $$$ = $500-2k/mo, $$$$ = >$2k/mo.
+# Lag: how stale the data typically is when you access it.
+
+metrics:
+
+  vacancy_rate:
+    description: "Physical and economic vacancy for the submarket"
+    sources:
+      - tier: 1
+        name: CoStar / CoStar Analytics
+        cost: "$$$$"
+        lag: "1-2 weeks"
+        coverage: "National, property-level"
+        notes: "Gold standard for commercial. Quarterly surveys + algorithm. Sublease tracked separately."
+      - tier: 1
+        name: CBRE Econometric Advisors (CBRE EA)
+        cost: "$$$$"
+        lag: "1 month"
+        coverage: "National, submarket-level"
+        notes: "Institutional-grade forecasts. Requires brokerage relationship or subscription."
+      - tier: 2
+        name: REIS (Moody's Analytics)
+        cost: "$$$"
+        lag: "1 month"
+        coverage: "National, submarket-level"
+        notes: "Good for multifamily and office. Less granular than CoStar for industrial."
+      - tier: 2
+        name: Yardi Matrix
+        cost: "$$$"
+        lag: "2-4 weeks"
+        coverage: "National, property-level for multifamily"
+        notes: "Strong multifamily coverage. Tracks rent by unit type. Less reliable for office/industrial."
+      - tier: 3
+        name: Local brokerage market reports
+        cost: "$"
+        lag: "Quarterly"
+        coverage: "MSA or submarket"
+        notes: "Free from CBRE, JLL, Cushman, Newmark. Good directional data. Self-serving sample bias."
+      - tier: 4
+        name: Census Housing Vacancy Survey
+        cost: "$"
+        lag: "1 quarter"
+        coverage: "National/regional (not submarket)"
+        notes: "Too coarse for deal-level work. Useful for macro trends only."
+
+  rent_levels_and_growth:
+    description: "Asking and effective rents by property type and submarket"
+    sources:
+      - tier: 1
+        name: CoStar
+        cost: "$$$$"
+        lag: "1-2 weeks"
+        coverage: "National, property-level"
+        notes: "Asking and effective rent tracked. Concession data improving but still incomplete."
+      - tier: 1
+        name: Yardi Matrix
+        cost: "$$$"
+        lag: "2-4 weeks"
+        coverage: "National, property-level for MF"
+        notes: "Best-in-class for multifamily rent tracking. Unit-type granularity."
+      - tier: 2
+        name: Apartments.com / CoStar listing data
+        cost: "$"
+        lag: "Real-time"
+        coverage: "National, property-level"
+        notes: "Asking rents only. No concession data. Selection bias toward marketed units."
+      - tier: 2
+        name: Zillow Observed Rent Index (ZORI)
+        cost: "$"
+        lag: "1 month"
+        coverage: "National, ZIP-level"
+        notes: "Repeat-rent methodology. Good for trend, not level. Free API available."
+      - tier: 3
+        name: BLS CPI Rent Component
+        cost: "$"
+        lag: "1 month"
+        coverage: "MSA-level"
+        notes: "Lagging indicator (6-12 month lag to market). Useful for inflation hedging analysis."
+      - tier: 3
+        name: HUD Fair Market Rents (FMR)
+        cost: "$"
+        lag: "Annual"
+        coverage: "County/MSA"
+        notes: "Published annually. 40th percentile rent. Relevant for Section 8 and LIHTC."
+      - tier: 4
+        name: Craigslist / Facebook Marketplace scraping
+        cost: "$"
+        lag: "Real-time"
+        coverage: "Local, informal"
+        notes: "Captures shadow market (private landlords). Noisy but reveals floor pricing."
+
+  absorption:
+    description: "Net absorption of space (occupied SF/units change period over period)"
+    sources:
+      - tier: 1
+        name: CoStar
+        cost: "$$$$"
+        lag: "1-2 weeks"
+        coverage: "National, submarket-level"
+        notes: "Quarterly net absorption by property type. Can decompose organic vs BTS."
+      - tier: 1
+        name: CBRE EA
+        cost: "$$$$"
+        lag: "1 month"
+        coverage: "National, submarket-level"
+        notes: "Absorption forecasts are the core product. 5-year forward projections."
+      - tier: 2
+        name: REIS (Moody's)
+        cost: "$$$"
+        lag: "1 month"
+        coverage: "National, submarket-level"
+        notes: "Historical absorption data strong. Forecast methodology is demand-model based."
+      - tier: 3
+        name: Local brokerage quarterly reports
+        cost: "$"
+        lag: "Quarterly"
+        coverage: "MSA/submarket"
+        notes: "Directional. Sample-based, not census. Good for qualitative color."
+
+  supply_pipeline:
+    description: "Projects under construction, planned, entitled, and proposed"
+    sources:
+      - tier: 1
+        name: CoStar
+        cost: "$$$$"
+        lag: "1-2 weeks"
+        coverage: "National, project-level"
+        notes: "Tracks construction status, est delivery, pre-leasing. Most comprehensive."
+      - tier: 1
+        name: County/city building permits database
+        cost: "$"
+        lag: "1-2 months"
+        coverage: "Jurisdiction-level"
+        notes: "Primary source. CoStar scrapes these. Going direct catches what CoStar misses."
+      - tier: 2
+        name: Dodge Data & Analytics (construction starts)
+        cost: "$$$"
+        lag: "1 month"
+        coverage: "National, project-level"
+        notes: "Tracks construction starts, not permits. Good for timing actual delivery."
+      - tier: 2
+        name: Planning commission meeting minutes/agendas
+        cost: "$"
+        lag: "Real-time"
+        coverage: "Jurisdiction-level"
+        notes: "Earliest signal of new projects. Captures entitlement applications before permit."
+      - tier: 3
+        name: Census Building Permits Survey
+        cost: "$"
+        lag: "2 months"
+        coverage: "MSA/county"
+        notes: "Aggregated permit counts. Good for macro trend. Residential only."
+      - tier: 3
+        name: Developer/contractor press releases
+        cost: "$"
+        lag: "Variable"
+        coverage: "Project-level"
+        notes: "Self-reported. Timing often aspirational. Useful for early intelligence."
+
+  employment:
+    description: "Job growth, composition, and concentration by industry"
+    sources:
+      - tier: 1
+        name: BLS Current Employment Statistics (CES)
+        cost: "$"
+        lag: "1 month (preliminary), 2 months (revised)"
+        coverage: "MSA-level, by industry"
+        notes: "Gold standard for employment. Monthly, seasonally adjusted. NAICS industry detail."
+      - tier: 1
+        name: BLS Quarterly Census of Employment and Wages (QCEW)
+        cost: "$"
+        lag: "6 months"
+        coverage: "County-level, by industry"
+        notes: "Census (not survey) of all employers. Most accurate but very lagged."
+      - tier: 2
+        name: ADP National Employment Report
+        cost: "$"
+        lag: "1 month"
+        coverage: "National/regional"
+        notes: "Leading indicator for BLS. Private sector only. Not submarket-level."
+      - tier: 2
+        name: LinkedIn Workforce Reports / Indeed Hiring Lab
+        cost: "$"
+        lag: "1 month"
+        coverage: "MSA-level"
+        notes: "Leading indicator of hiring intent. Biased toward white-collar."
+      - tier: 3
+        name: State unemployment insurance claims
+        cost: "$"
+        lag: "1 week"
+        coverage: "State/county"
+        notes: "High-frequency leading indicator. Weekly initial claims signal turning points."
+      - tier: 3
+        name: Employer press releases / WARN Act filings
+        cost: "$"
+        lag: "60 days before layoff"
+        coverage: "Employer-level"
+        notes: "WARN Act requires 60-day notice for layoffs >100. Check state DOL websites."
+
+  population_and_demographics:
+    description: "Population growth, migration, household formation, income"
+    sources:
+      - tier: 1
+        name: Census American Community Survey (ACS)
+        cost: "$"
+        lag: "1 year (1-yr estimates), 2 years (5-yr)"
+        coverage: "Census tract / ZIP / county / MSA"
+        notes: "Most granular demographic data. 5-yr estimates for small areas. 1-yr for MSA+."
+      - tier: 1
+        name: Census Population Estimates Program (PEP)
+        cost: "$"
+        lag: "6 months"
+        coverage: "County / MSA"
+        notes: "Annual estimates between decennial census. Best for recent population change."
+      - tier: 2
+        name: IRS Statistics of Income (SOI) migration data
+        cost: "$"
+        lag: "2 years"
+        coverage: "County-to-county"
+        notes: "Tax return-based migration flows. Shows where people are moving from/to with income."
+      - tier: 2
+        name: USPS Change of Address data (via HUD)
+        cost: "$"
+        lag: "1 quarter"
+        coverage: "ZIP/county"
+        notes: "Quarterly migration signal. More timely than Census. Available via HUD aggregation."
+      - tier: 3
+        name: Placer.ai / SafeGraph (foot traffic)
+        cost: "$$$"
+        lag: "1 month"
+        coverage: "POI-level"
+        notes: "Mobile device data. Proxy for population density and activity patterns."
+      - tier: 3
+        name: Utility connection data
+        cost: "$"
+        lag: "1-3 months"
+        coverage: "Service area"
+        notes: "New electric/water connections = new households. Request from local utility."
+
+  property_tax:
+    description: "Tax rates, assessment methodology, appeal potential"
+    sources:
+      - tier: 1
+        name: County assessor / tax collector website
+        cost: "$"
+        lag: "Real-time (current year)"
+        coverage: "Parcel-level"
+        notes: "Primary source. Assessment, rate, exemptions, payment history. Always check directly."
+      - tier: 2
+        name: CoStar / property-level data
+        cost: "$$$$"
+        lag: "1 year"
+        coverage: "Property-level"
+        notes: "Aggregates tax data but often 1 year behind. Use for comps, not subject."
+      - tier: 2
+        name: State equalization board reports
+        cost: "$"
+        lag: "Annual"
+        coverage: "County-level"
+        notes: "Assessment-to-sales ratio studies. Reveals if county is over/under assessing."
+      - tier: 3
+        name: Tax appeal consultants (firms like Altus, Ryan)
+        cost: "Contingency"
+        coverage: "Property-level"
+        notes: "They know local assessor behavior. Free consultation; paid on savings."
+
+  crime_and_safety:
+    description: "Crime rates, trends, and perception"
+    sources:
+      - tier: 1
+        name: FBI Uniform Crime Report (UCR) / NIBRS
+        cost: "$"
+        lag: "1 year"
+        coverage: "Agency/city-level"
+        notes: "Official crime statistics. Transition from UCR to NIBRS ongoing -- gaps in some jurisdictions."
+      - tier: 2
+        name: Local police department crime maps
+        cost: "$"
+        lag: "1-7 days"
+        coverage: "Address/block level"
+        notes: "Most timely. Many departments publish online dashboards. Quality varies."
+      - tier: 2
+        name: CrimeMapping.com / SpotCrime
+        cost: "$"
+        lag: "1-7 days"
+        coverage: "Address-level"
+        notes: "Aggregates police reports. Good for quick screening. Not comprehensive."
+      - tier: 3
+        name: AreaVibes / NeighborhoodScout
+        cost: "$ to $$"
+        lag: "Annual"
+        coverage: "ZIP/neighborhood"
+        notes: "Crime indices and grades. Useful for comparative ranking. Methodology opaque."
+
+  transportation_and_infrastructure:
+    description: "Highway access, transit, airport, port proximity"
+    sources:
+      - tier: 1
+        name: State DOT traffic counts (AADT)
+        cost: "$"
+        lag: "1 year"
+        coverage: "Road segment"
+        notes: "Annual average daily traffic. Critical for retail and industrial last-mile."
+      - tier: 1
+        name: Transit agency ridership data
+        cost: "$"
+        lag: "1-3 months"
+        coverage: "Station/route"
+        notes: "Monthly ridership. Relevant for TOD and urban multifamily."
+      - tier: 2
+        name: Walkscore / Transit Score
+        cost: "$"
+        lag: "Real-time"
+        coverage: "Address-level"
+        notes: "Algorithmic score. Widely used in multifamily marketing. Proxy, not actual data."
+      - tier: 2
+        name: Google Maps / Mapbox isochrone analysis
+        cost: "$"
+        lag: "Real-time"
+        coverage: "Address-level"
+        notes: "Drive-time analysis. 10/20/30-min sheds for labor pool and amenity access."
+      - tier: 3
+        name: Infrastructure investment plans (MPO, state CIP)
+        cost: "$"
+        lag: "Annual"
+        coverage: "Regional"
+        notes: "Planned highway, transit, water/sewer. Long-term value driver signal."
+
+general_guidance:
+  budget_tiers:
+    bootstrapping:
+      monthly_cost: "$0-200"
+      stack: "Census, BLS, county records, brokerage reports, Zillow, Walkscore, police maps"
+      limitation: "No property-level commercial data. Manual assembly required."
+    mid_market:
+      monthly_cost: "$500-2,000"
+      stack: "Yardi Matrix + REIS + above free sources"
+      limitation: "Limited industrial and office property-level detail."
+    institutional:
+      monthly_cost: "$2,000-10,000+"
+      stack: "CoStar + CBRE EA + Placer.ai + all free sources"
+      limitation: "Cost. Requires volume to justify."
+  best_practices:
+    - "Always triangulate -- no single source is sufficient"
+    - "Free public data is often more reliable than vendor data for macro metrics"
+    - "The best source for concession data is talking to leasing agents, not any database"
+    - "County records are primary sources -- CoStar and others are secondary aggregators"
+    - "USPS and utility data are underutilized leading indicators"
+    - "Foot traffic data (Placer, SafeGraph) is noisy but reveals trends 3-6 months early"
+    - "Always check the methodology section of any data product before trusting the numbers"

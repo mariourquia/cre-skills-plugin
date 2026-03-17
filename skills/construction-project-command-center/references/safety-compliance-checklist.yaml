@@ -1,0 +1,574 @@
+# Construction Safety Compliance Checklist
+# Reference: OSHA 29 CFR 1926 (Construction Industry Standards)
+# Baseline project: ground-up multifamily, 200 units, 18-month schedule
+# Last updated: 2026-03-17
+
+---
+
+# Daily Site Safety Log Template
+daily_safety_log:
+  header:
+    project_name: ""
+    date: ""
+    weather: ""  # temp, precipitation, wind speed
+    shift: ""  # day, night, swing
+    site_superintendent: ""
+    safety_officer: ""
+
+  headcount:
+    gc_employees: 0
+    subcontractor_employees: 0
+    visitors: 0
+    total_on_site: 0
+
+  active_trades:
+    - trade: ""
+      subcontractor: ""
+      headcount: 0
+      work_area: ""
+      hazards_present: []  # fall, electrical, excavation, confined_space, etc.
+
+  incidents:
+    - time: ""
+      type: ""  # near_miss, first_aid, recordable, lost_time, fatality
+      description: ""
+      injured_party: ""
+      employer: ""
+      immediate_action: ""
+      root_cause_investigation_initiated: false
+      osha_reportable: false  # fatality: 8hrs, hospitalization/amputation/eye_loss: 24hrs
+
+  safety_observations:
+    positive:
+      - observation: ""
+        trade: ""
+    corrective:
+      - observation: ""
+        trade: ""
+        corrective_action: ""
+        deadline: ""
+        responsible_party: ""
+
+  permit_status:
+    hot_work_permits_active: 0
+    confined_space_permits_active: 0
+    excavation_permits_active: 0
+    crane_permits_active: 0
+
+  notes: ""
+
+---
+
+# Weekly Toolbox Talk Template
+weekly_toolbox_talk:
+  header:
+    project_name: ""
+    date: ""
+    topic: ""
+    presenter: ""
+    duration_minutes: 15  # minimum
+
+  # Rotate through these topics monthly
+  annual_topic_calendar:
+    january:
+      - "Cold weather hazards and hypothermia prevention"
+      - "Winter driving safety for site vehicles"
+    february:
+      - "Scaffolding safety (29 CFR 1926.451)"
+      - "Ladder safety and three-point contact"
+    march:
+      - "Excavation and trenching (29 CFR 1926.650-652)"
+      - "Soil classification and protective systems"
+    april:
+      - "Fall protection (29 CFR 1926.500-503)"
+      - "Personal fall arrest system inspection"
+    may:
+      - "Electrical safety and lockout/tagout (29 CFR 1926.405)"
+      - "GFCIs and assured equipment grounding"
+    june:
+      - "Heat illness prevention"
+      - "Hydration and work-rest cycles"
+    july:
+      - "Crane and rigging safety (29 CFR 1926.1400-1442)"
+      - "Signal person qualifications"
+    august:
+      - "Confined space entry (29 CFR 1926.1200)"
+      - "Atmospheric testing and rescue plans"
+    september:
+      - "Fire prevention and extinguisher use"
+      - "Hot work procedures and fire watch"
+    october:
+      - "Silica dust exposure (29 CFR 1926.1153)"
+      - "Respiratory protection program"
+    november:
+      - "Housekeeping and material storage"
+      - "Struck-by hazard awareness"
+    december:
+      - "Year-end safety review and lessons learned"
+      - "Emergency action plan review"
+
+  attendance:
+    - name: ""
+      employer: ""
+      signature: ""
+    # minimum attendance: all workers on site that day
+
+  discussion_points: []
+  questions_raised: []
+  follow_up_items: []
+
+---
+
+# Monthly OSHA Compliance Self-Audit
+monthly_osha_audit:
+  header:
+    project_name: ""
+    audit_date: ""
+    auditor: ""
+    next_audit_date: ""
+
+  # Section 1: Fall Protection (29 CFR 1926.500-503)
+  # Leading cause of construction fatalities (33%)
+  fall_protection:
+    - id: FP-01
+      item: "Fall protection provided at 6 feet or greater"
+      standard: "1926.501(b)(1)"
+      status: ""  # pass, fail, n/a
+      finding: ""
+      corrective_action: ""
+
+    - id: FP-02
+      item: "Guardrail systems meet specifications (42\" top rail, mid-rail, toeboard)"
+      standard: "1926.502(b)"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: FP-03
+      item: "Personal fall arrest systems inspected before each use"
+      standard: "1926.502(d)"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: FP-04
+      item: "Safety nets installed where required"
+      standard: "1926.502(c)"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: FP-05
+      item: "Floor holes and openings covered or guarded"
+      standard: "1926.502(i)"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: FP-06
+      item: "Leading edge work has fall protection plan"
+      standard: "1926.502(k)"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: FP-07
+      item: "Anchorage points rated for 5,000 lbs per worker"
+      standard: "1926.502(d)(15)"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+  # Section 2: Scaffolding (29 CFR 1926.451-454)
+  scaffolding:
+    - id: SC-01
+      item: "Scaffolds erected under direction of competent person"
+      standard: "1926.451(f)(7)"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: SC-02
+      item: "Scaffold platforms fully planked (no gaps > 1 inch)"
+      standard: "1926.451(b)"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: SC-03
+      item: "Guardrails on all open sides and ends above 10 feet"
+      standard: "1926.451(g)(1)"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: SC-04
+      item: "Access ladders or stairways provided"
+      standard: "1926.451(e)"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: SC-05
+      item: "Base plates and mudsills on firm foundation"
+      standard: "1926.451(c)(2)"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: SC-06
+      item: "Scaffold tags current (green = safe, red = do not use)"
+      standard: "Best practice"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+  # Section 3: Excavation (29 CFR 1926.650-652)
+  excavation:
+    - id: EX-01
+      item: "Competent person inspects excavations daily and after rain"
+      standard: "1926.651(k)"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: EX-02
+      item: "Protective systems for excavations > 5 feet deep"
+      standard: "1926.652"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: EX-03
+      item: "Underground utilities located and marked (811/call before you dig)"
+      standard: "1926.651(b)"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: EX-04
+      item: "Spoil piles set back minimum 2 feet from edge"
+      standard: "1926.651(j)"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: EX-05
+      item: "Means of egress (ladder, ramp) within 25 feet of workers"
+      standard: "1926.651(c)(2)"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+  # Section 4: Electrical (29 CFR 1926.400-449)
+  electrical:
+    - id: EL-01
+      item: "GFCIs on all temporary power outlets"
+      standard: "1926.405(a)(2)(ii)"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: EL-02
+      item: "Temporary wiring protected from damage"
+      standard: "1926.405(a)(2)(ii)(J)"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: EL-03
+      item: "Lockout/tagout procedures followed for energized work"
+      standard: "1926.417"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: EL-04
+      item: "Electrical panels accessible (36\" clearance maintained)"
+      standard: "1926.405(b)"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: EL-05
+      item: "Extension cords rated for construction use (S, SO, ST, STO)"
+      standard: "1926.405(a)(2)(ii)(I)"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+  # Section 5: Crane and Rigging (29 CFR 1926.1400-1442)
+  crane_rigging:
+    - id: CR-01
+      item: "Crane operator certified per OSHA requirements"
+      standard: "1926.1427"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: CR-02
+      item: "Daily crane inspection by competent person"
+      standard: "1926.1412"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: CR-03
+      item: "Annual crane inspection by qualified inspector on file"
+      standard: "1926.1412(f)"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: CR-04
+      item: "Rigging inspected before each shift"
+      standard: "1926.1413"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: CR-05
+      item: "Signal person designated and qualified"
+      standard: "1926.1428"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: CR-06
+      item: "Power line clearance maintained (20 feet for lines up to 350kV)"
+      standard: "1926.1408"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+  # Section 6: Fire Prevention
+  fire_prevention:
+    - id: FI-01
+      item: "Fire extinguishers within 100 feet of all work areas"
+      standard: "1926.150(c)(1)"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: FI-02
+      item: "Fire extinguishers inspected monthly (tag current)"
+      standard: "1926.150(c)(1)(viii)"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: FI-03
+      item: "Hot work permits issued and fire watch posted"
+      standard: "1926.352"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: FI-04
+      item: "Flammable/combustible materials stored properly"
+      standard: "1926.152"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+  # Section 7: PPE and Housekeeping
+  ppe_housekeeping:
+    - id: PP-01
+      item: "Hard hats worn in all active work areas"
+      standard: "1926.100"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: PP-02
+      item: "Eye protection worn during grinding, cutting, drilling"
+      standard: "1926.102"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: PP-03
+      item: "High-visibility vests worn in vehicle traffic areas"
+      standard: "1926.201"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: PP-04
+      item: "Work areas free of debris and tripping hazards"
+      standard: "1926.25"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+    - id: PP-05
+      item: "Adequate lighting in all occupied areas"
+      standard: "1926.56"
+      status: ""
+      finding: ""
+      corrective_action: ""
+
+  audit_summary:
+    total_items_audited: 0
+    items_pass: 0
+    items_fail: 0
+    items_na: 0
+    critical_findings: []
+    corrective_actions_open: 0
+    next_steps: ""
+
+---
+
+# Incident Reporting Framework
+incident_reporting:
+  severity_levels:
+    near_miss:
+      definition: "Event that could have resulted in injury or property damage but did not"
+      notification_timeline: "Report to site superintendent within 2 hours"
+      investigation_required: true
+      investigation_deadline: "5 business days"
+      osha_reportable: false
+
+    first_aid:
+      definition: "Injury requiring only first aid treatment (band-aid, ice, OTC medication)"
+      notification_timeline: "Report to site superintendent immediately, safety officer within 4 hours"
+      investigation_required: true
+      investigation_deadline: "3 business days"
+      osha_reportable: false
+      osha_recordable: false
+
+    recordable:
+      definition: "Injury requiring medical treatment beyond first aid, restricted duty, or days away from work"
+      notification_timeline: "Report to site superintendent immediately, safety officer within 1 hour, owner within 4 hours"
+      investigation_required: true
+      investigation_deadline: "48 hours"
+      osha_reportable: false  # unless hospitalization
+      osha_recordable: true
+      osha_300_log: true
+
+    lost_time:
+      definition: "Injury resulting in one or more days away from work beyond the day of injury"
+      notification_timeline: "Report to site superintendent immediately, safety officer within 1 hour, owner within 2 hours"
+      investigation_required: true
+      investigation_deadline: "24 hours"
+      osha_reportable: false  # unless hospitalization
+      osha_recordable: true
+      osha_300_log: true
+
+    hospitalization:
+      definition: "In-patient hospitalization, amputation, or loss of an eye"
+      notification_timeline: "Report to OSHA within 24 hours (call 1-800-321-OSHA or online)"
+      investigation_required: true
+      investigation_deadline: "24 hours"
+      osha_reportable: true
+      reporting_deadline_hours: 24
+
+    fatality:
+      definition: "Death of any worker on the project"
+      notification_timeline: "Report to OSHA within 8 hours"
+      investigation_required: true
+      investigation_deadline: "Immediate"
+      osha_reportable: true
+      reporting_deadline_hours: 8
+      additional_notifications:
+        - "Local law enforcement"
+        - "Owner/developer immediately"
+        - "Construction lender immediately"
+        - "Insurance carrier immediately"
+        - "Legal counsel immediately"
+
+  root_cause_analysis:
+    methodology: "5-Why analysis"
+    template:
+      incident_description: ""
+      immediate_cause: ""
+      why_1: ""
+      why_2: ""
+      why_3: ""
+      why_4: ""
+      why_5: ""
+      root_cause: ""
+      corrective_actions:
+        - action: ""
+          responsible_party: ""
+          deadline: ""
+          verification_method: ""
+
+  safety_metrics:
+    total_recordable_incident_rate:
+      formula: "(recordable_incidents x 200,000) / total_hours_worked"
+      industry_average_construction: 2.8
+      target: 1.5
+      note: "200,000 represents 100 full-time workers x 2,000 hours/year"
+
+    lost_time_incident_rate:
+      formula: "(lost_time_incidents x 200,000) / total_hours_worked"
+      industry_average_construction: 1.1
+      target: 0.5
+
+    days_away_restricted_transferred:
+      formula: "(DART_incidents x 200,000) / total_hours_worked"
+      industry_average_construction: 1.6
+      target: 0.8
+
+    experience_modification_rate:
+      description: "Workers comp modifier based on 3-year claims history"
+      baseline: 1.00
+      good: "< 0.85"
+      poor: "> 1.20"
+      note: "Verify GC and all major subs have EMR < 1.00 as a condition of contract"
+
+---
+
+# Subcontractor Safety Compliance Requirements
+subcontractor_compliance:
+  pre_mobilization:
+    - item: "Written safety program on file"
+      required: true
+    - item: "Competent person designated for each trade"
+      required: true
+    - item: "EMR verification (< 1.00 required, < 1.20 conditional)"
+      required: true
+    - item: "OSHA 30-hour certification for superintendent"
+      required: true
+    - item: "OSHA 10-hour certification for all workers"
+      required: true
+    - item: "Workers compensation insurance certificate"
+      required: true
+    - item: "General liability insurance certificate (naming owner/GC as additional insured)"
+      required: true
+    - item: "Auto insurance certificate"
+      required: true
+    - item: "Drug and alcohol testing program documentation"
+      required: true
+    - item: "Trade-specific safety certifications"
+      required: true
+      examples:
+        - "Crane operator: NCCCO certification"
+        - "Welder: AWS certification"
+        - "Electrician: state license"
+        - "Plumber: state license"
+
+  ongoing:
+    - item: "Attend weekly toolbox talks"
+      frequency: "weekly"
+    - item: "Participate in monthly safety audits"
+      frequency: "monthly"
+    - item: "Maintain insurance certificates (no lapses)"
+      frequency: "continuous"
+    - item: "Report all incidents within required timeframes"
+      frequency: "per event"
+    - item: "Correct safety violations within 24 hours of notice"
+      frequency: "per event"
+
+  enforcement:
+    first_violation:
+      action: "Written warning to subcontractor with corrective action and 24-hour deadline"
+    second_violation:
+      action: "Formal notice of non-compliance, meeting with sub principal, 48-hour cure period"
+    third_violation:
+      action: "Suspension from site pending safety stand-down and corrective action plan"
+    pattern_violations:
+      action: "Default notice per subcontract, potential termination for cause"
+    imminent_danger:
+      action: "Immediate stop-work order for affected area. No notice required. Resume only after competent person certifies safe conditions."

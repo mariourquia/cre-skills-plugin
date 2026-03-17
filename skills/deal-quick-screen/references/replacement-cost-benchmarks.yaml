@@ -1,0 +1,268 @@
+# CRE Replacement Cost Benchmarks
+# Per-unit (MF) or per-SF (commercial) by property type and market tier
+# Updated: 2026-03-17
+# Sources: RSMeans, Marshall & Swift, recent ground-up development budgets
+# These are all-in costs: land + hard costs + soft costs + developer profit
+# Use for quick-screen comparison against acquisition basis
+
+schema:
+  version: "1.0"
+  updated: "2026-03-17"
+  usage: |
+    Compare acquisition price per unit (or per SF) against replacement cost
+    for the relevant market tier and property type. A basis below 75% of
+    replacement cost provides meaningful margin of safety. Above 100%
+    signals peak pricing or a bet on rent growth outpacing construction costs.
+
+market_tier_definitions:
+  tier_1:
+    description: "Top 6 MSAs by institutional CRE volume"
+    examples: ["New York", "Los Angeles", "San Francisco", "Chicago", "Boston", "Washington DC"]
+    characteristics: "High land cost, union labor, long entitlement timelines, high soft costs"
+  tier_2:
+    description: "Major MSAs with active institutional markets"
+    examples: ["Dallas", "Atlanta", "Denver", "Phoenix", "Austin", "Nashville", "Charlotte", "Raleigh", "Tampa", "Miami", "Seattle", "Portland"]
+    characteristics: "Moderate land cost, competitive labor market, 12-18 month entitlements"
+  tier_3:
+    description: "Secondary/tertiary markets"
+    examples: ["San Antonio", "Jacksonville", "Memphis", "Oklahoma City", "Louisville", "Birmingham", "Tucson", "Boise", "Spokane"]
+    characteristics: "Low land cost, available labor, streamlined permitting"
+
+# All costs in 2026 dollars
+
+multifamily:
+  description: "Per-unit all-in replacement cost including land, hard costs, soft costs, FF&E, and developer margin"
+  unit_type_mix_assumption: "Weighted average: 30% studio/1BR, 50% 2BR, 20% 3BR"
+
+  garden_style:
+    description: "2-3 story wood-frame, surface parking, suburban/exurban"
+    tier_1:
+      range: [200000, 350000]
+      midpoint: 275000
+      land_pct: "15-25%"
+      hard_cost_per_sf: [180, 260]
+    tier_2:
+      range: [150000, 250000]
+      midpoint: 195000
+      land_pct: "10-18%"
+      hard_cost_per_sf: [140, 200]
+    tier_3:
+      range: [100000, 180000]
+      midpoint: 140000
+      land_pct: "8-12%"
+      hard_cost_per_sf: [110, 160]
+
+  mid_rise:
+    description: "4-6 story Type III/V over I podium, structured parking"
+    tier_1:
+      range: [350000, 550000]
+      midpoint: 440000
+      land_pct: "20-30%"
+      hard_cost_per_sf: [250, 380]
+    tier_2:
+      range: [250000, 400000]
+      midpoint: 320000
+      land_pct: "15-22%"
+      hard_cost_per_sf: [200, 300]
+    tier_3:
+      range: [180000, 300000]
+      midpoint: 235000
+      land_pct: "10-18%"
+      hard_cost_per_sf: [160, 240]
+
+  high_rise:
+    description: "7+ story Type I concrete/steel, structured/underground parking"
+    tier_1:
+      range: [500000, 900000]
+      midpoint: 680000
+      land_pct: "25-40%"
+      hard_cost_per_sf: [400, 650]
+    tier_2:
+      range: [380000, 600000]
+      midpoint: 480000
+      land_pct: "18-28%"
+      hard_cost_per_sf: [300, 480]
+    tier_3:
+      range: [280000, 450000]
+      midpoint: 360000
+      land_pct: "12-20%"
+      hard_cost_per_sf: [240, 380]
+
+office:
+  description: "Per-SF all-in replacement cost"
+
+  suburban_low_rise:
+    description: "1-3 story, surface parking, Class B spec"
+    tier_1:
+      range_per_sf: [280, 420]
+      midpoint: 340
+    tier_2:
+      range_per_sf: [200, 320]
+      midpoint: 255
+    tier_3:
+      range_per_sf: [150, 250]
+      midpoint: 195
+    note: "Suburban office replacement cost increasingly academic -- limited new supply due to structural demand questions post-COVID"
+
+  urban_mid_rise:
+    description: "4-10 story, structured parking, Class A spec"
+    tier_1:
+      range_per_sf: [500, 800]
+      midpoint: 630
+    tier_2:
+      range_per_sf: [350, 550]
+      midpoint: 440
+    tier_3:
+      range_per_sf: [250, 400]
+      midpoint: 320
+
+  urban_high_rise:
+    description: "10+ story, underground parking, Class A+ trophy"
+    tier_1:
+      range_per_sf: [800, 1400]
+      midpoint: 1050
+    tier_2:
+      range_per_sf: [550, 900]
+      midpoint: 700
+    tier_3:
+      range_per_sf: [400, 650]
+      midpoint: 510
+    note: "Trophy high-rise effectively limited to Tier 1 and select Tier 2 markets"
+
+industrial:
+  description: "Per-SF all-in replacement cost"
+
+  warehouse_distribution:
+    description: "Single-story, 28-36ft clear, dock-high, 50%+ truck court coverage"
+    tier_1:
+      range_per_sf: [120, 200]
+      midpoint: 155
+    tier_2:
+      range_per_sf: [80, 150]
+      midpoint: 110
+    tier_3:
+      range_per_sf: [55, 110]
+      midpoint: 80
+
+  light_industrial:
+    description: "Flex/light manufacturing, 16-24ft clear, mix of office and warehouse"
+    tier_1:
+      range_per_sf: [150, 250]
+      midpoint: 195
+    tier_2:
+      range_per_sf: [100, 180]
+      midpoint: 135
+    tier_3:
+      range_per_sf: [70, 130]
+      midpoint: 95
+
+  cold_storage:
+    description: "Refrigerated/frozen warehouse, specialized MEP"
+    tier_1:
+      range_per_sf: [300, 500]
+      midpoint: 390
+    tier_2:
+      range_per_sf: [220, 380]
+      midpoint: 290
+    tier_3:
+      range_per_sf: [170, 300]
+      midpoint: 230
+    note: "Cold storage premiums driven by insulation, refrigeration plant, and specialized loading"
+
+retail:
+  description: "Per-SF all-in replacement cost"
+
+  strip_center:
+    description: "Single-story inline retail, surface parking"
+    tier_1:
+      range_per_sf: [200, 350]
+      midpoint: 270
+    tier_2:
+      range_per_sf: [140, 250]
+      midpoint: 190
+    tier_3:
+      range_per_sf: [100, 180]
+      midpoint: 135
+
+  grocery_anchored:
+    description: "Community center with grocery anchor, shadow anchor pads"
+    tier_1:
+      range_per_sf: [250, 400]
+      midpoint: 320
+    tier_2:
+      range_per_sf: [170, 300]
+      midpoint: 230
+    tier_3:
+      range_per_sf: [120, 220]
+      midpoint: 165
+
+  single_tenant_net_lease:
+    description: "Build-to-suit single tenant, NNN structure"
+    tier_1:
+      range_per_sf: [200, 450]
+      midpoint: 310
+    tier_2:
+      range_per_sf: [140, 300]
+      midpoint: 210
+    tier_3:
+      range_per_sf: [90, 200]
+      midpoint: 140
+    note: "Wide range reflects tenant-specific build-out (QSR vs medical vs auto parts)"
+
+adjustment_factors:
+  description: "Apply these multipliers to base replacement costs for specific conditions"
+
+  union_labor:
+    description: "Prevailing wage / union labor requirement"
+    multiplier: [1.15, 1.35]
+    applicable_markets: ["New York", "Chicago", "Boston", "San Francisco", "Los Angeles", "Philadelphia", "Detroit"]
+
+  seismic_zone:
+    description: "Seismic design category D, E, or F"
+    multiplier: [1.08, 1.18]
+    applicable_markets: ["San Francisco", "Los Angeles", "Seattle", "Portland", "Salt Lake City"]
+
+  flood_zone:
+    description: "FEMA flood zone AE or VE -- elevated construction required"
+    multiplier: [1.10, 1.25]
+    note: "Applies to ground floor and foundation. Multiplicative with other factors."
+
+  entitlement_timeline:
+    description: "Extended entitlement process adds carry cost"
+    short: { months: "6-12", carry_cost_pct: "2-4%" }
+    medium: { months: "12-24", carry_cost_pct: "4-8%" }
+    long: { months: "24-48", carry_cost_pct: "8-16%" }
+    note: "Tier 1 markets typically 18-36 months. Tier 3 markets 6-12 months."
+
+  affordable_set_aside:
+    description: "Inclusionary zoning requirement reduces achievable rents"
+    impact: "10-20% of units at 60-80% AMI reduces blended revenue by 3-8%"
+    markets_with_mandatory: ["New York", "San Francisco", "Los Angeles", "Boston", "Denver", "Portland"]
+
+  impact_fees:
+    description: "Municipal impact/linkage fees"
+    range_per_unit: [2000, 30000]
+    high_fee_markets: ["San Jose", "Irvine", "San Francisco", "Boulder", "Arlington VA"]
+    note: "Can add 5-15% to total development cost in high-fee jurisdictions"
+
+  construction_inflation:
+    description: "Annual escalator to apply for forward-looking estimates"
+    trailing_5yr_avg: "4.5%"
+    current_annual_estimate: "3.5-5.0%"
+    note: "Apply from benchmark date to expected construction midpoint"
+
+worked_example:
+  scenario: "Evaluating 200-unit garden-style MF acquisition in Raleigh (Tier 2) at $160K/unit"
+  replacement_cost_calc:
+    base_midpoint_per_unit: 195000
+    adjustments: "No union labor, no seismic, no flood zone, standard entitlement (12 months)"
+    adjusted_replacement_cost: 195000
+    acquisition_basis: 160000
+    basis_as_pct_of_replacement: "82%"
+    scoring: "Score 3 on screening rubric (75-90% = moderate cushion)"
+    interpretation: |
+      At 82% of replacement cost, there is a modest margin of safety.
+      New supply cannot be delivered at this basis, providing a floor.
+      However, the discount is not deep enough to constitute a pure
+      replacement-cost play. Rent growth and operational upside must
+      carry the investment thesis.

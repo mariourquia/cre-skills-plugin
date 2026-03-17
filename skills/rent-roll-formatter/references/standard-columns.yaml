@@ -1,0 +1,446 @@
+# standard-columns.yaml
+# Standard column definitions for a normalized commercial real estate rent roll.
+# Covers multifamily, office, retail, and industrial with property-type-specific fields.
+# Each column: name, data type, required/optional, validation rules, description.
+
+common_columns:
+  # These apply to all property types
+
+  - name: unit_id
+    display: "Unit / Suite"
+    type: string
+    required: true
+    max_length: 20
+    validation:
+      - "Must be unique within the property"
+      - "Alphanumeric, may include hyphens and dots (e.g., '101', 'A-201', '3.14')"
+    description: "Unique identifier for the leasable unit or suite."
+
+  - name: floor
+    display: "Floor"
+    type: integer
+    required: true
+    validation:
+      - "Must be >= 0 (0 = basement/lower level)"
+      - "Must not exceed building total floors"
+    description: "Floor number where unit is located."
+
+  - name: tenant_name
+    display: "Tenant Name"
+    type: string
+    required: true
+    max_length: 100
+    validation:
+      - "If vacant, use 'VACANT' (uppercase)"
+      - "If model/office, use 'MODEL' or 'OFFICE' (uppercase)"
+      - "Legal entity name preferred over DBA"
+    description: "Current occupant's legal name or vacancy designation."
+
+  - name: lease_status
+    display: "Status"
+    type: enum
+    required: true
+    values: ["occupied", "vacant", "notice", "month_to_month", "model", "down", "employee"]
+    validation:
+      - "Must be one of the defined values"
+      - "'notice' = tenant has given notice to vacate"
+      - "'down' = unit offline for renovation or repair"
+      - "'employee' = staff housing or office use"
+    description: "Current occupancy and lease status."
+
+  - name: unit_type
+    display: "Unit Type"
+    type: string
+    required: true
+    max_length: 20
+    validation:
+      - "Multifamily: use BR/BA format (e.g., '1BR/1BA', '2BR/2BA', 'Studio')"
+      - "Commercial: use space type (e.g., 'Office', 'Retail', 'Warehouse', 'Medical')"
+    description: "Classification of unit or suite type."
+
+  - name: rentable_sf
+    display: "Rentable SF"
+    type: decimal
+    required: true
+    precision: 1
+    validation:
+      - "Must be > 0"
+      - "Multifamily: typically 300-2,500 SF"
+      - "Office: typically 200-50,000 SF per suite"
+      - "Industrial: typically 1,000-500,000 SF"
+      - "Sum of all units should equal total rentable SF for the property"
+    description: "Rentable square footage of the unit. For MF, this is the unit interior SF."
+
+  - name: lease_start
+    display: "Lease Start"
+    type: date
+    required: true
+    format: "YYYY-MM-DD"
+    validation:
+      - "Must be a valid date"
+      - "Must be <= lease_end"
+      - "Vacant units: leave null"
+    description: "Commencement date of the current lease."
+
+  - name: lease_end
+    display: "Lease End"
+    type: date
+    required: true
+    format: "YYYY-MM-DD"
+    validation:
+      - "Must be a valid date"
+      - "Must be >= lease_start"
+      - "Month-to-month: use the last day of the current month"
+      - "Vacant units: leave null"
+    description: "Expiration date of the current lease."
+
+  - name: lease_term_months
+    display: "Term (Mo)"
+    type: integer
+    required: false
+    validation:
+      - "Derived: calculated from lease_start and lease_end"
+      - "Typical MF: 6, 12, 15, 18, 24 months"
+      - "Typical commercial: 36, 60, 84, 120 months"
+    description: "Total lease term in months. Derived field."
+
+  - name: remaining_term_months
+    display: "Remaining (Mo)"
+    type: integer
+    required: false
+    validation:
+      - "Derived: calculated from today's date and lease_end"
+      - "Negative values indicate holdover/month-to-month"
+    description: "Months remaining on current lease. Derived field."
+
+  - name: monthly_base_rent
+    display: "Monthly Rent"
+    type: decimal
+    required: true
+    precision: 2
+    validation:
+      - "Must be >= 0"
+      - "Vacant/down units: $0"
+      - "Must reconcile: monthly_base_rent * 12 = annual_base_rent (within $12 rounding)"
+    description: "Current monthly base rent charged to tenant."
+
+  - name: annual_base_rent
+    display: "Annual Rent"
+    type: decimal
+    required: true
+    precision: 2
+    validation:
+      - "Must be >= 0"
+      - "Derived: monthly_base_rent * 12"
+    description: "Annualized base rent. Derived from monthly."
+
+  - name: rent_per_sf
+    display: "Rent/SF"
+    type: decimal
+    required: false
+    precision: 2
+    validation:
+      - "Derived: annual_base_rent / rentable_sf"
+      - "Vacant units: $0 or null"
+    description: "Annual rent per rentable square foot. Derived field."
+
+  - name: market_rent
+    display: "Market Rent"
+    type: decimal
+    required: false
+    precision: 2
+    validation:
+      - "Estimated achievable rent at current market conditions"
+      - "Should be populated for all units (including vacant)"
+      - "Used to calculate loss-to-lease"
+    description: "Estimated current market monthly rent for this unit."
+
+  - name: loss_to_lease
+    display: "Loss to Lease"
+    type: decimal
+    required: false
+    precision: 2
+    validation:
+      - "Derived: market_rent - monthly_base_rent"
+      - "Positive = below market (upside). Negative = above market (risk)"
+    description: "Difference between market rent and in-place rent. Derived field."
+
+  - name: concession_monthly
+    display: "Concession/Mo"
+    type: decimal
+    required: false
+    precision: 2
+    validation:
+      - "Amortized monthly value of all concessions"
+      - "Free rent: face_rent * free_months / lease_term"
+      - "Must be >= 0"
+    description: "Monthly amortized concession value."
+
+  - name: effective_rent
+    display: "Effective Rent"
+    type: decimal
+    required: false
+    precision: 2
+    validation:
+      - "Derived: monthly_base_rent - concession_monthly"
+    description: "Net effective monthly rent after concessions. Derived field."
+
+  - name: deposit
+    display: "Security Deposit"
+    type: decimal
+    required: true
+    precision: 2
+    validation:
+      - "Must be >= 0"
+      - "Typical: 1-2 months rent (MF), 1-6 months rent (commercial)"
+      - "Must reconcile to total deposits on balance sheet"
+    description: "Security deposit held for this tenant."
+
+  - name: balance_due
+    display: "Balance Due"
+    type: decimal
+    required: false
+    precision: 2
+    validation:
+      - "Outstanding balance owed by tenant"
+      - "Negative = tenant credit"
+      - "Used for delinquency analysis"
+    description: "Current accounts receivable balance for tenant."
+
+  - name: move_in_date
+    display: "Move-In"
+    type: date
+    required: false
+    format: "YYYY-MM-DD"
+    validation:
+      - "May differ from lease_start (early access, holdover from prior lease)"
+    description: "Actual date tenant took occupancy."
+
+  - name: notes
+    display: "Notes"
+    type: string
+    required: false
+    max_length: 500
+    description: "Free-text field for lease-specific notes (renewal options, special terms, etc.)."
+
+multifamily_specific:
+  - name: bedrooms
+    display: "BR"
+    type: integer
+    required: true
+    validation:
+      - "0 = studio, 1-4 typical"
+    description: "Number of bedrooms."
+
+  - name: bathrooms
+    display: "BA"
+    type: decimal
+    required: true
+    precision: 1
+    validation:
+      - "0.5 = half bath, 1.0, 1.5, 2.0, 2.5, 3.0 typical"
+    description: "Number of bathrooms."
+
+  - name: renovation_status
+    display: "Reno Status"
+    type: enum
+    required: false
+    values: ["classic", "partial", "full", "premium"]
+    description: "Renovation tier for value-add tracking."
+
+  - name: pet_rent
+    display: "Pet Rent"
+    type: decimal
+    required: false
+    precision: 2
+    validation:
+      - "Monthly pet rent charge"
+      - "Separate from base rent"
+    description: "Monthly pet rent if applicable."
+
+  - name: other_income
+    display: "Other Income"
+    type: decimal
+    required: false
+    precision: 2
+    validation:
+      - "Parking, storage, utility reimbursement, etc."
+      - "Monthly amount"
+    description: "Other monthly income attributed to this unit."
+
+commercial_specific:
+  - name: lease_type
+    display: "Lease Type"
+    type: enum
+    required: true
+    values: ["gross", "modified_gross", "nnn", "absolute_net", "percentage"]
+    description: "Lease structure determining expense responsibility."
+
+  - name: cam_charge
+    display: "CAM/Mo"
+    type: decimal
+    required: false
+    precision: 2
+    validation:
+      - "Monthly common area maintenance charge"
+      - "NNN leases: based on pro rata share of actual expenses"
+      - "Gross leases: typically $0 (included in base rent)"
+    description: "Monthly CAM charge to tenant."
+
+  - name: tax_charge
+    display: "Tax/Mo"
+    type: decimal
+    required: false
+    precision: 2
+    description: "Monthly property tax pass-through charge to tenant."
+
+  - name: insurance_charge
+    display: "Ins/Mo"
+    type: decimal
+    required: false
+    precision: 2
+    description: "Monthly insurance pass-through charge to tenant."
+
+  - name: total_monthly_charge
+    display: "Total/Mo"
+    type: decimal
+    required: false
+    precision: 2
+    validation:
+      - "Derived: monthly_base_rent + cam_charge + tax_charge + insurance_charge"
+    description: "Total monthly obligation. Derived field."
+
+  - name: escalation_type
+    display: "Escalation"
+    type: enum
+    required: false
+    values: ["fixed_pct", "fixed_dollar", "cpi", "fair_market", "none"]
+    description: "Type of rent escalation in the lease."
+
+  - name: escalation_rate
+    display: "Esc Rate"
+    type: decimal
+    required: false
+    precision: 2
+    validation:
+      - "For fixed_pct: annual percentage increase (e.g., 3.0)"
+      - "For fixed_dollar: annual $/SF increase (e.g., 0.50)"
+      - "For CPI: cap and floor if applicable"
+    description: "Annual escalation rate or amount."
+
+  - name: escalation_date
+    display: "Esc Date"
+    type: date
+    required: false
+    format: "YYYY-MM-DD"
+    description: "Next scheduled rent escalation date."
+
+  - name: renewal_options
+    display: "Renewals"
+    type: string
+    required: false
+    max_length: 100
+    validation:
+      - "Format: 'Nx Y years at Z' (e.g., '2x 5 years at FMV' or '1x 3 years at 95% FMV')"
+    description: "Renewal option terms summary."
+
+  - name: tenant_sic
+    display: "SIC Code"
+    type: string
+    required: false
+    max_length: 6
+    description: "Standard Industrial Classification code for tenant's business."
+
+  - name: guarantor
+    display: "Guarantor"
+    type: string
+    required: false
+    max_length: 100
+    description: "Personal or corporate guarantor on the lease."
+
+  - name: ti_allowance
+    display: "TI Allowance"
+    type: decimal
+    required: false
+    precision: 2
+    validation:
+      - "Total TI $ provided by landlord"
+      - "Useful for tracking unamortized TI balance"
+    description: "Total tenant improvement allowance provided."
+
+  - name: ti_amortized_balance
+    display: "TI Balance"
+    type: decimal
+    required: false
+    precision: 2
+    description: "Unamortized TI balance remaining on lease."
+
+industrial_specific:
+  - name: clear_height
+    display: "Clear Height (ft)"
+    type: decimal
+    required: false
+    precision: 1
+    description: "Warehouse clear height in feet."
+
+  - name: dock_doors
+    display: "Dock Doors"
+    type: integer
+    required: false
+    description: "Number of dock-high doors serving this space."
+
+  - name: drive_in_doors
+    display: "Drive-In Doors"
+    type: integer
+    required: false
+    description: "Number of grade-level drive-in doors."
+
+  - name: office_pct
+    display: "Office %"
+    type: decimal
+    required: false
+    precision: 1
+    validation:
+      - "Percentage of space finished as office"
+      - "Typical: 5-20% for warehouse, 50-80% for flex"
+    description: "Percentage of leasable area finished as office."
+
+  - name: power_capacity
+    display: "Power (Amps)"
+    type: integer
+    required: false
+    description: "Electrical service capacity in amps."
+
+summary_metrics:
+  description: "Calculated summary fields for the rent roll header/footer."
+  fields:
+    - name: total_units
+      formula: "COUNT(unit_id)"
+    - name: total_rentable_sf
+      formula: "SUM(rentable_sf)"
+    - name: occupied_units
+      formula: "COUNT(unit_id WHERE lease_status = 'occupied')"
+    - name: physical_occupancy
+      formula: "occupied_units / total_units * 100"
+    - name: economic_occupancy
+      formula: "SUM(monthly_base_rent WHERE lease_status = 'occupied') / SUM(market_rent) * 100"
+    - name: total_monthly_revenue
+      formula: "SUM(monthly_base_rent WHERE lease_status IN ('occupied', 'month_to_month'))"
+    - name: total_annual_revenue
+      formula: "total_monthly_revenue * 12"
+    - name: avg_rent_per_unit
+      formula: "total_monthly_revenue / occupied_units"
+    - name: avg_rent_per_sf
+      formula: "total_annual_revenue / SUM(rentable_sf WHERE occupied)"
+    - name: total_loss_to_lease
+      formula: "SUM(loss_to_lease WHERE loss_to_lease > 0)"
+    - name: loss_to_lease_pct
+      formula: "total_loss_to_lease / SUM(market_rent) * 100"
+    - name: wale_years
+      formula: "SUM(remaining_term_months * annual_base_rent) / SUM(annual_base_rent) / 12"
+    - name: total_deposits
+      formula: "SUM(deposit)"
+    - name: total_balance_due
+      formula: "SUM(balance_due WHERE balance_due > 0)"
+    - name: delinquency_pct
+      formula: "COUNT(unit_id WHERE balance_due > 0) / occupied_units * 100"

@@ -1,0 +1,448 @@
+# Lease Compliance Audit Checklist
+# 25 audit items across 6 categories
+
+# ============================================================
+# CATEGORY 1: RENT & ESCALATION COMPLIANCE (5 items)
+# ============================================================
+category_1_rent_escalation:
+  name: "Rent & Escalation Compliance"
+  items:
+    - id: "RE-01"
+      name: "Base Rent Verification"
+      description: "Verify current base rent matches lease schedule including all amendments"
+      procedure:
+        - "Extract rent schedule from lease and all amendments"
+        - "Compare to landlord billing for each month of audit period"
+        - "Verify any mid-year rent commencement or changes"
+        - "Check for unauthorized rent increases"
+      common_findings:
+        - "Escalation applied early (wrong effective date)"
+        - "Wrong base amount used for percentage increase"
+        - "Amendment rent schedule not reflected in billing"
+      severity: "High"
+      frequency: "Annual"
+
+    - id: "RE-02"
+      name: "CPI Escalation Accuracy"
+      description: "Verify CPI escalation calculation matches lease methodology"
+      procedure:
+        - "Identify CPI series specified in lease (CPI-U, CPI-W, regional)"
+        - "Verify measurement period (month-to-month, annual average)"
+        - "Recalculate escalation using correct CPI data from BLS"
+        - "Check for floor and cap application"
+        - "Verify compounding method (compound vs simple)"
+      common_findings:
+        - "Wrong CPI series used"
+        - "Wrong measurement months"
+        - "Floor applied when CPI is negative but cap not applied when high"
+        - "Compounding when lease says non-compounding"
+      severity: "High"
+      frequency: "Annual"
+
+    - id: "RE-03"
+      name: "Fixed Escalation Verification"
+      description: "Verify fixed percentage or dollar escalations match lease terms"
+      procedure:
+        - "Extract escalation schedule from lease"
+        - "Compare to actual rent charged each period"
+        - "Verify escalation date (anniversary vs calendar year)"
+        - "Check compounding base (prior year actual vs original base)"
+      common_findings:
+        - "Escalation on wrong anniversary date"
+        - "Compounding on escalated amount instead of original base"
+      severity: "Medium"
+      frequency: "Annual"
+
+    - id: "RE-04"
+      name: "Percentage Rent Calculation"
+      description: "Verify percentage rent breakpoint and rate application"
+      procedure:
+        - "Confirm natural vs artificial breakpoint per lease"
+        - "Verify breakpoint adjusts for mid-year rent changes"
+        - "Recalculate percentage rent from tenant sales reports"
+        - "Verify exclusions from gross sales per lease definition"
+      common_findings:
+        - "Breakpoint not adjusted for rent change"
+        - "Wrong percentage rate applied"
+        - "Monthly estimates not credited against annual calculation"
+      severity: "High"
+      frequency: "Annual"
+
+    - id: "RE-05"
+      name: "Free Rent / Abatement Compliance"
+      description: "Verify all rent abatements and concessions properly applied"
+      procedure:
+        - "Extract all concession provisions from lease"
+        - "Verify free rent months correctly applied (right months, right amount)"
+        - "Check if rent abatement is conditional (e.g., no default)"
+        - "Verify abatement scope (base rent only vs total rent)"
+      common_findings:
+        - "Free rent applied to wrong months"
+        - "Abatement not applied to additional rent (when lease says it should be)"
+        - "Conditional abatement revoked without proper notice"
+      severity: "Medium"
+      frequency: "At occurrence"
+
+# ============================================================
+# CATEGORY 2: CAM / OPERATING EXPENSE COMPLIANCE (5 items)
+# ============================================================
+category_2_cam_opex:
+  name: "CAM / Operating Expense Compliance"
+  items:
+    - id: "CAM-01"
+      name: "Pro-Rata Share Verification"
+      description: "Verify tenant's proportionate share calculation is correct"
+      procedure:
+        - "Confirm tenant's rentable SF per lease"
+        - "Confirm building total rentable SF per lease (or as remeasured)"
+        - "Recalculate pro-rata share"
+        - "Check for adjustments (excluded areas, storage, amenity space)"
+        - "Verify numerator and denominator have not been improperly changed"
+      common_findings:
+        - "Building SF changed without lease amendment"
+        - "Tenant charged on gross SF instead of rentable"
+        - "Common area included in denominator inconsistently"
+      severity: "High"
+      frequency: "Annual"
+
+    - id: "CAM-02"
+      name: "Excluded Expense Verification"
+      description: "Verify no lease-excluded expenses are passed through"
+      procedure:
+        - "Extract exclusion list from lease"
+        - "Review GL detail line by line for excluded items"
+        - "Flag capital expenditures, leasing costs, litigation, above-building"
+        - "Verify depreciation treatment for capital items"
+      common_findings:
+        - "Capital expenditures fully expensed instead of amortized"
+        - "Landlord legal fees included in CAM"
+        - "Marketing/leasing expenses in operating expense pool"
+        - "Above-standard management costs"
+      severity: "High"
+      frequency: "Annual"
+
+    - id: "CAM-03"
+      name: "Expense Cap Testing"
+      description: "Verify expense caps properly calculated and applied"
+      procedure:
+        - "Identify cap type (cumulative, non-cumulative, compounding)"
+        - "Identify capped categories (controllable only vs all expenses)"
+        - "Calculate cap amount for audit year"
+        - "Compare actual charges to cap"
+        - "Verify landlord applied cap before billing tenant"
+      common_findings:
+        - "Cap not applied at all"
+        - "Wrong cap type used (non-cumulative instead of cumulative)"
+        - "Uncontrollable expenses subject to cap (or vice versa)"
+        - "Base year amount incorrect"
+      severity: "High"
+      frequency: "Annual"
+
+    - id: "CAM-04"
+      name: "Gross-Up Verification"
+      description: "Verify gross-up calculation methodology and application"
+      procedure:
+        - "Confirm lease contains gross-up provision"
+        - "Identify gross-up occupancy level per lease"
+        - "Calculate weighted average actual occupancy"
+        - "Verify only variable expenses are grossed up"
+        - "Recalculate grossed-up amounts"
+      common_findings:
+        - "Gross-up applied without lease authority"
+        - "Fixed expenses grossed up"
+        - "Wrong occupancy denominator used"
+        - "Gross-up applied after cap (should be before)"
+      severity: "Medium"
+      frequency: "Annual"
+
+    - id: "CAM-05"
+      name: "Management Fee Audit"
+      description: "Verify management fee within lease parameters"
+      procedure:
+        - "Identify management fee structure per lease (% of EGI, fixed, etc.)"
+        - "Identify fee cap (if any)"
+        - "Verify fee calculated on correct revenue base"
+        - "Check for related-party management arrangements"
+        - "Compare fee to market rates (3-5% of EGI typical)"
+      common_findings:
+        - "Fee exceeds lease cap"
+        - "Fee calculated on gross revenue instead of collected revenue"
+        - "Related party fee above market"
+        - "Additional 'administrative fee' charged on top of management fee"
+      severity: "Medium"
+      frequency: "Annual"
+
+# ============================================================
+# CATEGORY 3: TAX & INSURANCE COMPLIANCE (4 items)
+# ============================================================
+category_3_tax_insurance:
+  name: "Tax & Insurance Compliance"
+  items:
+    - id: "TI-01"
+      name: "Real Estate Tax Pass-Through"
+      description: "Verify property tax charges match actual tax bills"
+      procedure:
+        - "Obtain actual tax bills from assessor or landlord"
+        - "Compare billed amount to landlord's pass-through"
+        - "Verify any tax abatements or exemptions are credited to tenants"
+        - "Check for PILOT (Payment In Lieu Of Taxes) proper treatment"
+        - "Verify tax appeal costs and savings shared per lease"
+      common_findings:
+        - "Tax abatement not passed through to tenants"
+        - "Tax appeal savings retained by landlord"
+        - "Prior year adjustment not credited"
+        - "Tax on landlord's personal property included"
+      severity: "High"
+      frequency: "Annual"
+
+    - id: "TI-02"
+      name: "Insurance Premium Verification"
+      description: "Verify insurance charges reflect actual premiums"
+      procedure:
+        - "Obtain insurance policy declarations pages"
+        - "Compare premiums to amounts charged to tenants"
+        - "Verify only property-level insurance is passed through"
+        - "Check for deductible payments improperly included"
+        - "Verify per-lease insurance exclusions"
+      common_findings:
+        - "Umbrella/excess policy covering landlord's portfolio charged to single property"
+        - "D&O insurance included in pass-through"
+        - "Insurance deductible payments passed as operating expense"
+      severity: "Medium"
+      frequency: "Annual"
+
+    - id: "TI-03"
+      name: "Tax Assessment Review"
+      description: "Verify property assessed value is reasonable"
+      procedure:
+        - "Compare assessed value to market value"
+        - "Review assessment methodology (income, comparable, cost)"
+        - "Identify if landlord should be appealing (over-assessed)"
+        - "Check if appeal obligation exists in lease"
+      common_findings:
+        - "Property over-assessed; landlord not appealing"
+        - "Assessment based on above-market rent assumption"
+        - "Landlord appealed but didn't pass savings to tenants"
+      severity: "Medium"
+      frequency: "Every reassessment cycle"
+
+    - id: "TI-04"
+      name: "Base Year Tax/Insurance"
+      description: "Verify base year amounts are correct for stop calculations"
+      procedure:
+        - "Confirm base year matches lease commencement year"
+        - "Verify base year actual expense (not estimate)"
+        - "Check for gross-up of base year (if building was not stabilized)"
+        - "Confirm base year was a full 12-month period"
+      common_findings:
+        - "Base year used landlord's estimate, not actual"
+        - "Partial year not annualized"
+        - "Base year gross-up not applied (inflated tenant obligation)"
+      severity: "High"
+      frequency: "Once (at lease execution), verify annually"
+
+# ============================================================
+# CATEGORY 4: LEASE TERM COMPLIANCE (4 items)
+# ============================================================
+category_4_lease_terms:
+  name: "Lease Term Compliance"
+  items:
+    - id: "LT-01"
+      name: "Option Exercise Verification"
+      description: "Verify renewal and expansion options properly tracked"
+      procedure:
+        - "Extract all option provisions from lease"
+        - "Verify exercise notice deadlines"
+        - "Confirm option rent determination method"
+        - "Track whether options have been properly exercised or waived"
+      common_findings:
+        - "Option exercise deadline passed without notice (option lost)"
+        - "Landlord did not respond to exercise within required period"
+        - "Fair market rent determination not per lease process"
+      severity: "High"
+      frequency: "Per option window"
+
+    - id: "LT-02"
+      name: "Assignment & Subletting Compliance"
+      description: "Verify any assignments or subleases comply with lease terms"
+      procedure:
+        - "Identify any assignments or subleases during audit period"
+        - "Verify landlord consent was obtained"
+        - "Check profit-sharing provisions"
+        - "Confirm assignee/subtenant meets lease requirements"
+        - "Verify original tenant liability continuation"
+      common_findings:
+        - "Sublease profit not shared per lease"
+        - "Assignment without required landlord consent"
+        - "Recapture right not exercised by landlord"
+      severity: "Medium"
+      frequency: "At occurrence"
+
+    - id: "LT-03"
+      name: "Co-Tenancy Compliance"
+      description: "Verify co-tenancy provisions are being honored"
+      procedure:
+        - "Identify co-tenancy requirements (opening, operating)"
+        - "Verify named tenants are open and operating"
+        - "Check occupancy threshold requirements"
+        - "Calculate rent reduction if co-tenancy violated"
+      common_findings:
+        - "Co-tenant closed but landlord still charging full rent"
+        - "Occupancy below threshold but no rent adjustment"
+        - "Landlord disputing co-tenancy trigger definition"
+      severity: "High"
+      frequency: "Ongoing monitoring"
+
+    - id: "LT-04"
+      name: "Exclusive Use Verification"
+      description: "Verify landlord has not violated exclusive use provisions"
+      procedure:
+        - "Extract exclusive use clause language"
+        - "Review current tenant roster for competing uses"
+        - "Check new leases executed during audit period for conflicts"
+        - "Verify remedy if exclusive violated (rent reduction, termination)"
+      common_findings:
+        - "New tenant with overlapping use violates exclusive"
+        - "Landlord argues narrow interpretation of exclusive language"
+        - "Tenant not notified of violation"
+      severity: "High"
+      frequency: "At new lease execution, annual review"
+
+# ============================================================
+# CATEGORY 5: FINANCIAL COMPLIANCE (4 items)
+# ============================================================
+category_5_financial:
+  name: "Financial Compliance"
+  items:
+    - id: "FI-01"
+      name: "Security Deposit / LOC Tracking"
+      description: "Verify security deposit held properly and LOC current"
+      procedure:
+        - "Confirm deposit amount matches lease (including any increases)"
+        - "Verify deposit in interest-bearing account (if lease requires)"
+        - "Check LOC expiration and auto-renewal provisions"
+        - "Verify any burn-down schedule applied correctly"
+      common_findings:
+        - "LOC expired and not renewed"
+        - "Deposit interest not credited to tenant"
+        - "Deposit amount not increased per escalation clause"
+      severity: "High"
+      frequency: "Annual"
+
+    - id: "FI-02"
+      name: "Late Fee Compliance"
+      description: "Verify late fees assessed per lease terms"
+      procedure:
+        - "Extract late fee provisions (amount, grace period, notice)"
+        - "Review payment history for late payments"
+        - "Verify late fees assessed only after grace period"
+        - "Check if notice was required before late fee"
+        - "Verify late fee amount per lease (flat fee vs percentage)"
+      common_findings:
+        - "Late fee assessed without required notice"
+        - "Late fee charged before grace period expired"
+        - "Percentage late fee applied to wrong base (total vs base rent)"
+      severity: "Medium"
+      frequency: "As incurred"
+
+    - id: "FI-03"
+      name: "Reconciliation Timeliness"
+      description: "Verify landlord delivers annual reconciliation within lease deadline"
+      procedure:
+        - "Extract reconciliation delivery requirement from lease"
+        - "Document date reconciliation actually received"
+        - "Determine remedy if late (waiver of additional charges, etc.)"
+      common_findings:
+        - "Reconciliation delivered 6+ months late"
+        - "Lease provides tenant is not liable for charges if reconciliation is late"
+        - "Landlord sends estimated reconciliation, not actual"
+      severity: "Medium"
+      frequency: "Annual"
+
+    - id: "FI-04"
+      name: "Tenant Credit Application"
+      description: "Verify credits and refunds properly applied"
+      procedure:
+        - "Identify any credits owed to tenant (prior year overcharges, concessions)"
+        - "Verify credits applied to subsequent billing"
+        - "Check for interest on overpayments (if lease provides)"
+        - "Confirm refund timing per lease"
+      common_findings:
+        - "Prior year audit credits not applied"
+        - "Reconciliation credit delayed beyond lease requirement"
+        - "Interest on overpayment not calculated"
+      severity: "Medium"
+      frequency: "Annual"
+
+# ============================================================
+# CATEGORY 6: PHYSICAL / OPERATIONAL COMPLIANCE (3 items)
+# ============================================================
+category_6_physical:
+  name: "Physical & Operational Compliance"
+  items:
+    - id: "PH-01"
+      name: "Services Delivery Verification"
+      description: "Verify landlord provides services specified in lease"
+      procedure:
+        - "Extract required services from lease (HVAC hours, janitorial, etc.)"
+        - "Document actual service delivery"
+        - "Note any service interruptions or quality issues"
+        - "Verify after-hours HVAC billing rate per lease"
+      common_findings:
+        - "HVAC hours reduced from lease requirement"
+        - "Janitorial frequency reduced without rent adjustment"
+        - "After-hours HVAC billed above lease rate"
+      severity: "Medium"
+      frequency: "Quarterly spot-check"
+
+    - id: "PH-02"
+      name: "Maintenance & Repair Obligations"
+      description: "Verify landlord fulfilling maintenance obligations per lease"
+      procedure:
+        - "Identify landlord vs tenant maintenance responsibilities"
+        - "Review work order history and response times"
+        - "Check capital maintenance program compliance"
+        - "Document deferred maintenance items"
+      common_findings:
+        - "Roof or structural repairs deferred"
+        - "HVAC replacement costs passed to tenants as operating expense"
+        - "Landlord shifting maintenance cost to tenant without lease basis"
+      severity: "Medium"
+      frequency: "Annual"
+
+    - id: "PH-03"
+      name: "Common Area Standards"
+      description: "Verify common areas maintained to lease-required standards"
+      procedure:
+        - "Review lease for common area maintenance standards"
+        - "Physical inspection of common areas"
+        - "Review cleaning and maintenance logs"
+        - "Document any ADA compliance issues"
+        - "Compare actual condition to 'first-class' or other lease standard"
+      common_findings:
+        - "Common areas below 'first-class' standard specified in lease"
+        - "Deferred maintenance increasing CAM costs unnecessarily"
+        - "ADA violations creating liability"
+      severity: "Low-Medium"
+      frequency: "Semi-annual"
+
+# ============================================================
+# SUMMARY STATISTICS
+# ============================================================
+summary:
+  total_items: 25
+  by_category:
+    rent_escalation: 5
+    cam_opex: 5
+    tax_insurance: 4
+    lease_terms: 4
+    financial: 4
+    physical: 3
+  by_severity:
+    high: 12
+    medium: 11
+    low_medium: 2
+  typical_audit_duration:
+    single_tenant: "2-4 weeks"
+    portfolio_10_leases: "6-10 weeks"
+    complex_retail_center: "8-12 weeks"

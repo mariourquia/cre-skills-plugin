@@ -1,0 +1,280 @@
+# Legal Timeline Reference for CRE Special Situations
+# Timelines are general guidance -- confirm jurisdiction-specific requirements with counsel
+
+---
+bankruptcy_timeline:
+  description: "Key deadlines in commercial tenant bankruptcy proceedings"
+  chapter_11_reorganization:
+    - event: "Petition date"
+      day: 0
+      notes: "Automatic stay takes effect immediately. All collection activity must cease."
+      landlord_action: "Cease all collection. Do not change locks, withhold services, or contact tenant about prepetition debts."
+
+    - event: "First day motions heard"
+      day: 1-3
+      notes: "Debtor seeks authority for interim cash management, DIP financing, critical vendor payments."
+      landlord_action: "Monitor -- if tenant is paying rent via first-day cash management order, note any priority granted."
+
+    - event: "Schedules and Statement of Financial Affairs due"
+      day: 14
+      notes: "Debtor files listing all assets, liabilities, executory contracts (including leases)."
+      landlord_action: "Review schedules for accuracy of lease terms, amounts owed, characterization of lease."
+
+    - event: "341 Meeting of Creditors"
+      day: 21-40
+      notes: "Creditors may examine debtor under oath."
+      landlord_action: "Attend or send counsel. Ask about plans for the leased premises."
+
+    - event: "Bar date for filing proofs of claim"
+      day: 90-120
+      notes: "Deadline set by court order. MISSING THIS DEADLINE FORFEITS YOUR CLAIM."
+      landlord_action: "File proof of claim for all prepetition amounts: rent, CAM, real estate taxes, damages. File early."
+
+    - event: "Lease assumption/rejection deadline"
+      day: 120
+      notes: "Non-residential real property leases must be assumed or rejected within 120 days of petition."
+      landlord_action: "If approaching deadline without action, file motion requesting debtor assume or reject."
+
+    - event: "Extension of assumption/rejection deadline"
+      day: 121-210
+      notes: "Court may extend once by 90 days for cause. No further extensions without landlord consent."
+      landlord_action: "Object to extension if debtor is not paying postpetition rent or maintaining premises."
+
+    - event: "Deemed rejection"
+      day: 210
+      notes: "If not assumed by day 210, lease is automatically deemed rejected."
+      landlord_action: "File rejection damages claim (capped per Section 502(b)(6))."
+
+    - event: "Plan confirmation"
+      day: 180-540
+      notes: "Debtor proposes reorganization plan. Creditors vote. Court confirms if requirements met."
+      landlord_action: "Review plan treatment of your claim. Vote to accept or reject. Object if treatment is inequitable."
+
+    - event: "Preference action deadline"
+      day: 730
+      notes: "Trustee has 2 years from petition date to file preference actions."
+      landlord_action: "Preserve payment records and lease documents as defense evidence."
+
+  chapter_7_liquidation:
+    - event: "Petition date"
+      day: 0
+      notes: "Trustee appointed to liquidate assets."
+      landlord_action: "Cease collection. Contact trustee regarding premises."
+
+    - event: "Lease deemed rejected"
+      day: 60
+      notes: "Chapter 7 trustee has 60 days to assume or reject (extendable by court for cause)."
+      landlord_action: "Secure premises upon rejection. File proof of claim."
+
+    - event: "341 Meeting of Creditors"
+      day: 21-40
+      notes: "Same as Chapter 11."
+
+    - event: "Bar date for claims"
+      day: 90
+      notes: "Typically 90 days after first 341 meeting date."
+      landlord_action: "File proof of claim."
+
+---
+condemnation_timeline:
+  description: "Eminent domain timelines by state (selected major CRE states)"
+
+  new_york:
+    - event: "Notice of proposed acquisition"
+      action: "Government publishes notice and holds public hearing"
+      landlord_response_window: "30 days to submit written objections"
+
+    - event: "Determination and findings"
+      action: "Government issues formal determination"
+      landlord_response_window: "30 days to challenge in Article 78 proceeding"
+
+    - event: "Vesting of title (filing of acquisition map)"
+      action: "Title transfers to government upon filing"
+      landlord_response_window: "Must vacate within timeframe specified in notice"
+
+    - event: "Claim for compensation"
+      action: "Owner files claim in Court of Claims"
+      landlord_response_window: "3 years from vesting date"
+
+    - event: "Advance payment"
+      action: "Government deposits estimated compensation"
+      landlord_response_window: "Owner may withdraw without prejudicing claim for additional compensation"
+
+    - event: "Trial"
+      action: "Court of Claims trial on just compensation"
+      typical_timeline: "18-36 months from claim filing"
+
+  california:
+    - event: "Resolution of necessity"
+      action: "Government body adopts resolution (requires public hearing)"
+      landlord_response_window: "Owner has right to appear and be heard at hearing"
+
+    - event: "Pre-condemnation offer"
+      action: "Government must make good faith offer based on appraisal"
+      landlord_response_window: "No mandatory acceptance period, but negotiate"
+
+    - event: "Filing of eminent domain action"
+      action: "Government files complaint; deposits probable just compensation"
+      landlord_response_window: "30 days to respond to complaint"
+
+    - event: "Withdrawal of deposit"
+      action: "Owner may withdraw deposit"
+      landlord_response_window: "Does not waive right to seek additional compensation"
+
+    - event: "Exchange of valuation data"
+      action: "Both sides exchange appraisals and expert information"
+      typical_timeline: "90-180 days before trial"
+
+    - event: "Trial"
+      action: "Jury trial on just compensation"
+      typical_timeline: "12-24 months from filing"
+
+  texas:
+    - event: "Initial offer"
+      action: "Government makes bona fide offer to purchase"
+      landlord_response_window: "No formal deadline but negotiate promptly"
+
+    - event: "Special commissioners hearing"
+      action: "If negotiation fails, government petitions court for commissioners"
+      typical_timeline: "Commissioners appointed within 30 days"
+
+    - event: "Commissioners award"
+      action: "Three commissioners determine just compensation"
+      typical_timeline: "Hearing within 20-60 days of appointment"
+
+    - event: "Objection to award"
+      action: "Either party may object and request jury trial"
+      landlord_response_window: "Must object within 20 days of commissioners award"
+
+    - event: "Jury trial"
+      action: "De novo trial on just compensation"
+      typical_timeline: "6-18 months from objection filing"
+
+  florida:
+    - event: "Good faith offer"
+      action: "Government makes written offer with appraisal"
+      landlord_response_window: "30 days to accept or counter"
+
+    - event: "Filing of petition"
+      action: "Government files eminent domain petition"
+      landlord_response_window: "20 days to file written defenses"
+
+    - event: "Order of taking"
+      action: "Court enters order transferring title upon deposit of good faith estimate"
+      landlord_response_window: "Withdraw deposit without prejudice"
+
+    - event: "Mediation"
+      action: "Court may order mediation"
+      typical_timeline: "60-120 days after filing"
+
+    - event: "Jury trial"
+      action: "Full compensation determined by jury"
+      typical_timeline: "12-24 months from petition"
+
+---
+remediation_timeline:
+  description: "Environmental remediation timelines by contamination type"
+
+  petroleum_soil_only:
+    phase_ii_assessment: "4-8 weeks"
+    regulatory_notification: "24-48 hours from discovery (if above reportable quantities)"
+    remedial_investigation: "4-12 weeks"
+    remedial_action_plan: "4-8 weeks for preparation and approval"
+    active_remediation: "2-12 months (excavation: weeks; in-situ: months)"
+    confirmation_sampling: "2-4 weeks post-remediation"
+    closure_report: "4-8 weeks to prepare"
+    agency_review_and_nfa: "60-180 days"
+    total_typical: "12-36 months"
+
+  petroleum_with_groundwater:
+    phase_ii_assessment: "6-12 weeks (includes monitoring well installation)"
+    delineation: "3-6 months (quarterly groundwater sampling to define plume)"
+    regulatory_notification: "24-48 hours from discovery"
+    remedial_investigation: "6-12 months"
+    remedial_action_plan: "2-4 months"
+    active_remediation: "2-7 years (pump-and-treat or enhanced bioremediation)"
+    monitoring: "Quarterly sampling for 1-4 years post-active treatment"
+    closure_report: "4-8 weeks to prepare"
+    agency_review_and_nfa: "90-270 days"
+    total_typical: "3-10 years"
+
+  chlorinated_solvents:
+    phase_ii_assessment: "8-16 weeks (complex site characterization needed)"
+    delineation: "6-18 months (solvents migrate far and deep)"
+    regulatory_notification: "24-48 hours from discovery"
+    remedial_investigation: "12-24 months"
+    feasibility_study: "4-8 months"
+    remedial_action_plan: "3-6 months for preparation and approval"
+    active_remediation: "5-20 years (chemical oxidation, bioremediation, PRB)"
+    long_term_monitoring: "Quarterly to semi-annual for 5-10 years"
+    institutional_controls: "Deed restrictions if residual contamination remains"
+    closure: "May achieve NFA or may transition to long-term monitoring with controls"
+    total_typical: "10-25+ years"
+
+  asbestos_building_materials:
+    survey: "1-2 weeks for comprehensive building survey"
+    abatement_plan: "2-4 weeks"
+    neshap_notification: "10 working days before demolition or renovation"
+    abatement: "1-8 weeks depending on scope"
+    air_monitoring: "During and after abatement"
+    clearance: "1-2 days post-abatement"
+    total_typical: "6-16 weeks"
+
+---
+fund_dissolution_timeline:
+  description: "Closed-end CRE fund wind-down and dissolution timeline"
+
+  phases:
+    - phase: "Decision and authorization"
+      duration: "30-60 days"
+      actions:
+        - "GP determines fund term is expiring or early termination warranted"
+        - "Review LPA dissolution provisions and required approvals"
+        - "Obtain LPAC consent if required"
+        - "Notify all LPs in writing per LPA notice provisions"
+        - "Engage dissolution counsel and accountants"
+
+    - phase: "Asset disposition"
+      duration: "6-24 months"
+      actions:
+        - "Develop disposition strategy: orderly sale vs. portfolio sale vs. continuation vehicle"
+        - "Engage disposition brokers"
+        - "Market and sell assets"
+        - "Consider GP-led secondary for assets not ready for sale"
+        - "Wind down property-level operations"
+        - "Terminate property management and vendor contracts"
+
+    - phase: "Final accounting and distribution"
+      duration: "90-120 days after last asset sale"
+      actions:
+        - "Complete final capital account reconciliation"
+        - "Calculate final waterfall: return of capital, preferred return, promote"
+        - "Prepare final financial statements"
+        - "Engage auditor for final audit"
+        - "Wire final distributions to all LPs"
+        - "Deliver final capital account statements"
+
+    - phase: "Tax and regulatory filings"
+      duration: "Per applicable deadlines"
+      actions:
+        - "Prepare and distribute final K-1s"
+        - "File final fund tax returns (federal and all applicable states)"
+        - "File final informational returns"
+        - "Obtain tax clearance certificates where required"
+
+    - phase: "Entity dissolution"
+      duration: "30-90 days"
+      actions:
+        - "File Certificate of Cancellation (Delaware LP/LLC)"
+        - "File withdrawal/dissolution in all registered states"
+        - "Cancel EIN if no longer needed"
+        - "Terminate registered agent services"
+        - "Archive all fund records per LPA retention requirements (typically 7-10 years)"
+
+    - phase: "Tail period"
+      duration: "2-3 years post-dissolution"
+      actions:
+        - "Maintain D&O/E&O insurance tail coverage"
+        - "Maintain records for potential tax audits or litigation"
+        - "Address any post-dissolution claims or adjustments"
+        - "Distribute any holdback or escrow releases"

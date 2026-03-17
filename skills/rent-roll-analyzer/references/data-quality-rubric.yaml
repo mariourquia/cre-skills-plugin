@@ -1,0 +1,218 @@
+# Rent Roll Data Quality Scoring Rubric
+# Grades: A (complete/reliable), B (usable with caveats), C (unreliable/requires remediation)
+# Score each dimension independently. Overall grade = lowest individual grade (weakest link).
+
+rubric:
+  version: "1.0"
+  description: >
+    Scoring rubric for evaluating rent roll data quality across 10 dimensions.
+    Use this rubric during initial data intake to flag issues before underwriting begins.
+    A rent roll graded C on any dimension should not be used for final underwriting
+    without remediation or supplemental data from the seller.
+
+dimensions:
+  1_completeness:
+    name: "Field Completeness"
+    weight: 15
+    description: "Are all required fields populated for every tenant?"
+    required_fields:
+      - tenant_name
+      - suite_number
+      - square_footage
+      - lease_start_date
+      - lease_expiration_date
+      - base_rent_per_sf
+      - annual_base_rent
+      - monthly_base_rent
+      - rent_escalation_schedule
+      - security_deposit
+      - lease_type  # gross, NNN, modified gross
+    grades:
+      A:
+        criteria: "All required fields populated for 100% of tenants"
+        action: "Proceed to analysis"
+      B:
+        criteria: "1-2 fields missing for <10% of tenants; no missing tenant names or rents"
+        action: "Flag missing fields; proceed with documented assumptions"
+      C:
+        criteria: ">2 fields missing for >10% of tenants; or any tenant missing rent data"
+        action: "Request updated rent roll from seller before proceeding"
+
+  2_date_consistency:
+    name: "Date Consistency"
+    weight: 10
+    description: "Are lease dates logically consistent and current?"
+    checks:
+      - "Lease start date precedes expiration date"
+      - "No expiration dates in the past (unless month-to-month noted)"
+      - "Rent roll effective date is within 30 days of analysis date"
+      - "Lease commencement dates align with property age"
+      - "No overlapping lease periods for the same suite"
+    grades:
+      A:
+        criteria: "All dates consistent; rent roll dated within 30 days; no expired leases without MTM notation"
+        action: "Proceed"
+      B:
+        criteria: "Rent roll 30-90 days old; 1-3 date inconsistencies identifiable and correctable"
+        action: "Adjust for known changes since rent roll date; document assumptions"
+      C:
+        criteria: "Rent roll >90 days old; multiple date errors; expired leases with no status update"
+        action: "Request current rent roll; do not underwrite from stale data"
+
+  3_sf_reconciliation:
+    name: "Square Footage Reconciliation"
+    weight: 15
+    description: "Does the sum of tenant SF match the building's total rentable SF?"
+    grades:
+      A:
+        criteria: "Sum of occupied SF + vacant SF = total rentable SF within 1%"
+        action: "Proceed"
+      B:
+        criteria: "Discrepancy of 1-5%; explainable by common areas, storage, or building measurement standard differences"
+        action: "Document discrepancy; verify against property tax records or BOMA measurement"
+      C:
+        criteria: "Discrepancy >5%; or vacant SF not listed; or total SF not provided"
+        action: "Request building measurement report or tax assessor SF; reconcile before underwriting"
+
+  4_rent_arithmetic:
+    name: "Rent Arithmetic Accuracy"
+    weight: 10
+    description: "Do monthly rent, annual rent, and per-SF rent calculations tie?"
+    checks:
+      - "annual_rent = monthly_rent * 12 (within $1 rounding)"
+      - "annual_rent = base_rent_per_sf * sf (within $1 rounding)"
+      - "No negative rents or zero rents for occupied suites"
+    grades:
+      A:
+        criteria: "All three rent figures tie for 100% of tenants"
+        action: "Proceed"
+      B:
+        criteria: "1-3 tenants have rounding discrepancies >$10/year; correctable by inspection"
+        action: "Correct arithmetic; note adjustments"
+      C:
+        criteria: ">3 tenants have irreconcilable rent figures; or monthly and annual rents contradict"
+        action: "Request clarification from seller; do not trust aggregated revenue figure"
+
+  5_escalation_documentation:
+    name: "Rent Escalation Documentation"
+    weight: 10
+    description: "Are scheduled rent increases documented and calculable?"
+    grades:
+      A:
+        criteria: "Fixed escalation schedule or CPI formula documented for every tenant; step dates specified"
+        action: "Build escalation into proforma by tenant"
+      B:
+        criteria: "Escalations documented for >80% of tenants; remaining tenants assumed flat"
+        action: "Flag tenants without escalation data; apply conservative flat assumption"
+      C:
+        criteria: "Escalations missing for >20% of tenants; or contradictory escalation terms"
+        action: "Request lease abstracts for major tenants; estimate escalations from market comps"
+
+  6_vacancy_identification:
+    name: "Vacancy Identification"
+    weight: 10
+    description: "Are vacant suites clearly identified with SF and market rent estimates?"
+    grades:
+      A:
+        criteria: "All vacant suites listed with SF, condition, and estimated market rent; vacancy matches physical inspection"
+        action: "Proceed; use listed vacancy SF for loss calculation"
+      B:
+        criteria: "Vacant suites listed but market rent estimates missing; or 1-2 suites with ambiguous status"
+        action: "Apply submarket asking rent to vacant suites; verify ambiguous suites"
+      C:
+        criteria: "No vacancy section; or physical inspection reveals vacancy not reflected in rent roll"
+        action: "Conduct independent vacancy survey; do not rely on seller's occupancy claim"
+
+  7_lease_type_clarity:
+    name: "Lease Type Clarity"
+    weight: 5
+    description: "Is the lease structure (gross, NNN, modified gross) specified for each tenant?"
+    grades:
+      A:
+        criteria: "Lease type specified for every tenant; expense reimbursement method documented"
+        action: "Proceed; model expense recovery by lease type"
+      B:
+        criteria: "Lease type specified for >80% of tenants; building has a dominant lease structure"
+        action: "Apply dominant structure to unspecified tenants; note assumption"
+      C:
+        criteria: "Lease types not specified; mix of gross and NNN with no differentiation"
+        action: "Request lease abstracts; expense recovery model is unreliable without this data"
+
+  8_tenant_creditworthiness:
+    name: "Tenant Credit Information"
+    weight: 5
+    description: "Is sufficient information available to assess tenant credit risk?"
+    grades:
+      A:
+        criteria: "Credit rating or financial data available for tenants >10% of rent; guaranty structures documented"
+        action: "Proceed with credit-adjusted analysis"
+      B:
+        criteria: "Tenant names identifiable; public company tenants verifiable; private tenant credit unknown"
+        action: "Research public tenants; flag private tenant credit as risk factor"
+      C:
+        criteria: "Tenant names redacted or abbreviated beyond recognition; no credit information available"
+        action: "Request unredacted rent roll; credit risk is unassessable"
+
+  9_option_documentation:
+    name: "Lease Option Documentation"
+    weight: 10
+    description: "Are renewal options, expansion rights, and termination rights documented?"
+    grades:
+      A:
+        criteria: "All options documented: type, exercise date, terms, notice period"
+        action: "Model option scenarios in rollover analysis"
+      B:
+        criteria: "Options noted for major tenants (>5% of rent); minor tenants undocumented"
+        action: "Assume no options for undocumented tenants; conservative for rollover risk"
+      C:
+        criteria: "No option information provided; or options referenced but terms missing"
+        action: "Request lease abstracts; termination options are critical risk factors"
+
+  10_historical_consistency:
+    name: "Historical Consistency"
+    weight: 10
+    description: "Does the rent roll reconcile with the T-12 income statement?"
+    checks:
+      - "Annualized rent roll revenue within 5% of T-12 rental income"
+      - "Tenant count consistent between rent roll and T-12 tenant list"
+      - "Vacancy SF consistent between rent roll and T-12 vacancy rate"
+    grades:
+      A:
+        criteria: "Rent roll annualizes within 3% of T-12 rental income; tenant count matches"
+        action: "Proceed; minor timing differences are normal"
+      B:
+        criteria: "3-8% discrepancy explainable by mid-year tenant changes or rent steps"
+        action: "Document reconciliation; adjust for known changes"
+      C:
+        criteria: ">8% discrepancy with no explanation; or tenant count mismatch >2 tenants"
+        action: "Flag data integrity issue; request monthly rent collection reports for verification"
+
+scoring:
+  method: "weakest_link"
+  description: >
+    The overall data quality grade equals the lowest grade across all 10 dimensions.
+    A single C-grade dimension renders the entire rent roll unreliable for final underwriting.
+  thresholds:
+    A: "All 10 dimensions grade A. Rent roll is underwriting-ready."
+    B: "No C grades; 1+ B grades. Rent roll is usable with documented caveats and assumptions."
+    C: "1+ C grades. Rent roll requires remediation before underwriting. Request additional data from seller."
+
+  weighted_score:
+    description: >
+      Optional numerical score for ranking data quality across deal pipeline.
+      A=3, B=2, C=1. Multiply each grade by dimension weight, sum, divide by total weight (100).
+    example:
+      inputs:
+        completeness: A  # 3 * 15 = 45
+        date_consistency: B  # 2 * 10 = 20
+        sf_reconciliation: A  # 3 * 15 = 45
+        rent_arithmetic: A  # 3 * 10 = 30
+        escalation: B  # 2 * 10 = 20
+        vacancy: A  # 3 * 10 = 30
+        lease_type: A  # 3 * 5 = 15
+        credit: B  # 2 * 5 = 10
+        options: B  # 2 * 10 = 20
+        historical: A  # 3 * 10 = 30
+      calculation: "(45+20+45+30+20+30+15+10+20+30) / 100 = 2.65"
+      grade: "B (weakest link: date_consistency at B)"
+      interpretation: "Score 2.65/3.00. Usable rent roll with minor data gaps in dates, escalations, credit, and options."

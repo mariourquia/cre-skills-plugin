@@ -1,0 +1,669 @@
+# Master Due Diligence Checklist for CRE Acquisitions
+# 80+ items across 6 workstreams
+# Each item: description, responsible party, timeline, red flags, cost estimate, dependencies
+
+schema:
+  version: "1.0"
+  updated: "2026-03-17"
+  usage: |
+    Deploy at LOI execution. Assign workstream leads on Day 1.
+    Standard DD period: 30-45 days (negotiable to 60 for complex assets).
+    Critical path items (Phase I ESA, title, survey, PCA) must be ordered
+    within 48 hours of LOI execution to avoid timeline compression.
+
+workstreams:
+
+  # =========================================================================
+  # WORKSTREAM 1: FINANCIAL DUE DILIGENCE
+  # =========================================================================
+  financial:
+    lead: "Acquisitions / Asset Management"
+    description: "Validate income, expenses, rent roll, and financial projections"
+    items:
+
+      - id: FIN-01
+        name: "T-3 Operating Statements"
+        description: "Obtain trailing 3-year actual operating statements (P&L). Prefer audited or tax return basis. Reconcile to broker's trailing financials."
+        responsible: "Acquisitions"
+        timeline: "Days 1-5"
+        red_flags:
+          - "Seller provides only 'restated' or 'adjusted' financials, not actuals"
+          - "Revenue trending down while OM shows stabilized growth"
+          - "Operating expenses declining without capital investment to explain it"
+        cost: "$0 (seller-provided)"
+        dependency: "None"
+
+      - id: FIN-02
+        name: "Rent Roll Audit"
+        description: "Obtain current rent roll with unit-level detail: unit number, type, SF, tenant name, lease start/end, base rent, concessions, deposits, balance due. Reconcile total to T-12 revenue."
+        responsible: "Acquisitions"
+        timeline: "Days 1-5"
+        red_flags:
+          - "More than 10% of leases expire within 90 days of closing"
+          - "Concentrated tenant exposure (any single tenant > 15% of revenue for MF, > 25% for commercial)"
+          - "Significant gap between gross potential rent and effective gross income"
+          - "Month-to-month tenants exceeding 15% of occupied units"
+        cost: "$0 (seller-provided)"
+        dependency: "None"
+
+      - id: FIN-03
+        name: "Lease Abstract Review"
+        description: "For commercial: abstract all leases for key terms (base rent, escalations, CAM/NNN structure, renewal options, termination rights, co-tenancy, exclusive use, TI obligations). For MF: sample 10-15% of lease files."
+        responsible: "Acquisitions + Legal"
+        timeline: "Days 3-15"
+        red_flags:
+          - "Below-market renewal options that cap upside"
+          - "Termination or kick-out clauses tied to co-tenancy or sales thresholds"
+          - "TI or landlord work obligations not reflected in pro forma"
+          - "Free rent or concessions not disclosed in OM"
+        cost: "$2,000-8,000 (legal review for commercial; minimal for MF)"
+        dependency: "Rent roll received"
+
+      - id: FIN-04
+        name: "Accounts Receivable / Delinquency Report"
+        description: "Current AR aging report. Identify tenants with outstanding balances > 30 days."
+        responsible: "Acquisitions"
+        timeline: "Days 1-5"
+        red_flags:
+          - "AR > 5% of annual revenue"
+          - "Concentration of delinquency in anchor or major tenants"
+          - "Eviction proceedings in progress without disclosure"
+        cost: "$0 (seller-provided)"
+        dependency: "None"
+
+      - id: FIN-05
+        name: "Real Estate Tax Review"
+        description: "Obtain current tax bills, assessed value, pending appeals. Model reassessment at acquisition price. Identify exemptions or abatements that may expire."
+        responsible: "Acquisitions + Tax Counsel"
+        timeline: "Days 5-15"
+        red_flags:
+          - "Current assessed value < 60% of acquisition price in reassessment state"
+          - "Active PILOT or tax abatement expiring within hold period"
+          - "Pending tax appeal that inflates OM's expense projection"
+        cost: "$1,500-5,000 (tax consultant review)"
+        dependency: "None"
+
+      - id: FIN-06
+        name: "Utility Bill Review"
+        description: "T-24 utility bills (electric, gas, water/sewer, trash). Identify master-metered vs sub-metered. Evaluate RUBS or sub-metering conversion opportunity."
+        responsible: "Acquisitions"
+        timeline: "Days 5-10"
+        red_flags:
+          - "Master-metered utilities with no sub-metering path"
+          - "Utility expense trending up >10% annually"
+          - "Water/sewer costs indicating leaks or irrigation waste"
+        cost: "$0 (seller-provided)"
+        dependency: "None"
+
+      - id: FIN-07
+        name: "Service Contract Review"
+        description: "All third-party contracts: management, maintenance, landscaping, pest, elevator, fire alarm, security, cable/internet, laundry. Identify assignability, termination clauses, auto-renewals."
+        responsible: "Acquisitions + Legal"
+        timeline: "Days 5-15"
+        red_flags:
+          - "Long-term contracts not terminable at sale (e.g., laundry, telecom)"
+          - "Management contract with affiliate of seller at above-market fees"
+          - "Service contracts with auto-renew and penalty clauses"
+        cost: "$0-2,000 (legal review)"
+        dependency: "None"
+
+      - id: FIN-08
+        name: "Capital Expenditure History"
+        description: "T-5 capital expenditure detail. Reconcile to property condition improvements. Identify recurring vs non-recurring capex."
+        responsible: "Acquisitions"
+        timeline: "Days 5-10"
+        red_flags:
+          - "Minimal capex history on aging asset (deferred maintenance)"
+          - "Capex categorized as opex to inflate NOI"
+          - "Renovation capex without corresponding rent increases"
+        cost: "$0 (seller-provided)"
+        dependency: "None"
+
+      - id: FIN-09
+        name: "Insurance Loss History"
+        description: "T-5 insurance claims and loss runs. Identify frequency and severity of claims."
+        responsible: "Acquisitions + Insurance Broker"
+        timeline: "Days 5-10"
+        red_flags:
+          - "Repeat water damage claims (plumbing failure pattern)"
+          - "Liability claims indicating safety issues"
+          - "Claims frequency that may affect insurability or premium"
+        cost: "$0 (seller/insurance carrier provided)"
+        dependency: "None"
+
+      - id: FIN-10
+        name: "Bank Statement Reconciliation"
+        description: "For assets >$25M or where financials appear inconsistent: request T-12 bank statements to verify actual cash deposits match reported revenue."
+        responsible: "Acquisitions"
+        timeline: "Days 10-20"
+        red_flags:
+          - "Deposits materially below reported revenue"
+          - "Large irregular deposits inflating revenue"
+          - "Unexplained inter-account transfers"
+        cost: "$0 (seller-provided)"
+        dependency: "T-12 operating statement received"
+
+      - id: FIN-11
+        name: "Pro Forma Stress Test"
+        description: "Build independent pro forma with market-reality assumptions. Compare to broker pro forma using reverse DCF methodology. Quantify OM gap."
+        responsible: "Acquisitions"
+        timeline: "Days 5-15"
+        red_flags:
+          - "OM gap > 15% (broker assumptions materially aggressive)"
+          - "Deal does not pencil at market-reality exit cap + 50bps"
+          - "Levered IRR drops below core returns under stress"
+        cost: "$0 (internal)"
+        dependency: "FIN-01 through FIN-08 received"
+
+      - id: FIN-12
+        name: "Financing Confirmation"
+        description: "Obtain term sheet or LOI from lender. Confirm rate, LTV, DSCR, IO period, prepayment, reserves. Verify deal economics at actual (not assumed) financing."
+        responsible: "Capital Markets / Acquisitions"
+        timeline: "Days 10-25"
+        red_flags:
+          - "Actual rate > assumed rate by 50bps+ (common in rising rate environments)"
+          - "Lender requires higher reserves than modeled"
+          - "Rate cap cost exceeds budget (floating-rate deals)"
+          - "DSCR constraint binding before LTV constraint"
+        cost: "$0-5,000 (application fee, rate lock deposit)"
+        dependency: "Appraisal and PCA ordered"
+
+  # =========================================================================
+  # WORKSTREAM 2: PHYSICAL DUE DILIGENCE
+  # =========================================================================
+  physical:
+    lead: "Engineering / Construction Management"
+    description: "Assess physical condition, deferred maintenance, and capital needs"
+    items:
+
+      - id: PHY-01
+        name: "Property Condition Assessment (PCA)"
+        description: "ASTM E2018-15 compliant PCA by qualified engineering firm. 12-year capital needs table. Includes MEP, structural, building envelope, site, accessibility."
+        responsible: "Third-party engineer"
+        timeline: "Order Day 1-3. Report Days 15-25."
+        red_flags:
+          - "Immediate repair needs exceeding 5% of acquisition price"
+          - "Structural deficiencies (foundation, load-bearing elements)"
+          - "Fire/life safety code violations"
+          - "12-year capital needs exceeding 20% of acquisition price"
+        cost: "$4,000-15,000 (varies by asset size and type)"
+        dependency: "Property access agreement"
+
+      - id: PHY-02
+        name: "Site Inspection (Buyer's Walk)"
+        description: "Physical walk of property by acquisition team and engineer. Document condition of common areas, unit interiors (sample 15-20%), mechanical rooms, roof, parking."
+        responsible: "Acquisitions + Engineering"
+        timeline: "Days 3-10"
+        red_flags:
+          - "Deferred maintenance visible that seller did not disclose"
+          - "Unit interiors materially different from model/show units"
+          - "Odors indicating mold, smoke damage, or pest infestation"
+          - "Visible structural cracks, water intrusion staining, settling"
+        cost: "$0-2,000 (travel)"
+        dependency: "Property access agreement"
+
+      - id: PHY-03
+        name: "Roof Assessment"
+        description: "Dedicated roof inspection: age, type, condition, remaining useful life, ponding, flashing, penetrations. Core sample if age unknown."
+        responsible: "Roofing contractor or PCA engineer"
+        timeline: "Days 5-15"
+        red_flags:
+          - "Roof > 15 years (built-up) or > 20 years (TPO/EPDM/metal) without replacement"
+          - "Evidence of ponding water or failed drainage"
+          - "Multiple layers (re-roofing over existing -- full tear-off required)"
+          - "Active leaks or interior water damage below roof"
+        cost: "$1,000-3,000 (may be included in PCA)"
+        dependency: "Property access"
+
+      - id: PHY-04
+        name: "MEP Systems Assessment"
+        description: "Evaluate HVAC, plumbing, electrical systems. Age, condition, remaining useful life. Capacity adequacy."
+        responsible: "PCA engineer or MEP specialist"
+        timeline: "Days 5-20 (may be part of PCA)"
+        red_flags:
+          - "HVAC units > 15 years (packaged) or > 20 years (central plant)"
+          - "Galvanized steel or polybutylene plumbing"
+          - "Electrical panels with known defects (Federal Pacific, Zinsco)"
+          - "Insufficient electrical capacity for modern loads / EV charging"
+        cost: "Included in PCA or $2,000-5,000 standalone"
+        dependency: "Property access"
+
+      - id: PHY-05
+        name: "Unit Interior Inspection"
+        description: "Inspect 15-20% of unit interiors. Document finishes, appliances, flooring, fixtures, HVAC, plumbing. Photograph and score condition."
+        responsible: "Acquisitions + Construction Manager"
+        timeline: "Days 3-10"
+        red_flags:
+          - "Renovation scope larger than OM represented"
+          - "Mold, pest evidence, or water damage in units"
+          - "Non-standard or discontinued finishes (replacement cost premium)"
+        cost: "$0 (internal, during site visit)"
+        dependency: "Property access, tenant notification"
+
+      - id: PHY-06
+        name: "Elevator Inspection"
+        description: "If applicable: inspection by licensed elevator consultant. Age, code compliance, modernization needs, maintenance history."
+        responsible: "Third-party elevator consultant"
+        timeline: "Days 10-20"
+        red_flags:
+          - "Elevators > 25 years without modernization"
+          - "Outstanding code violations or failed inspections"
+          - "Proprietary systems (single-vendor maintenance lock-in)"
+        cost: "$1,500-4,000 per elevator"
+        dependency: "Property access"
+
+      - id: PHY-07
+        name: "Parking and Site Infrastructure"
+        description: "Assess parking surfaces, drainage, sidewalks, retaining walls, fencing, lighting, signage. Pavement core samples if condition uncertain."
+        responsible: "PCA engineer or civil engineer"
+        timeline: "Days 5-15"
+        red_flags:
+          - "Parking lot overlay or reconstruction needed ($3-6/SF)"
+          - "Stormwater management non-compliance"
+          - "Retaining wall failure or settlement"
+        cost: "Included in PCA or $1,000-3,000 standalone"
+        dependency: "Property access"
+
+      - id: PHY-08
+        name: "Accessibility / ADA Compliance"
+        description: "Review common areas, parking, paths of travel, and a sample of units for ADA/FHA compliance."
+        responsible: "PCA engineer or accessibility consultant"
+        timeline: "Days 5-20"
+        red_flags:
+          - "No accessible units in property built post-1991 (FHA requirement)"
+          - "Non-compliant parking, signage, or paths of travel"
+          - "Active ADA complaints or litigation"
+        cost: "Included in PCA or $2,000-5,000 standalone"
+        dependency: "Property access"
+
+  # =========================================================================
+  # WORKSTREAM 3: LEGAL DUE DILIGENCE
+  # =========================================================================
+  legal:
+    lead: "Real Estate Counsel"
+    description: "Title, survey, zoning, entity structure, litigation, and regulatory compliance"
+    items:
+
+      - id: LEG-01
+        name: "Title Commitment / Preliminary Title Report"
+        description: "Order ALTA owner's title commitment. Review all Schedule B exceptions. Identify liens, easements, encumbrances, restrictions."
+        responsible: "Title company + Real estate counsel"
+        timeline: "Order Day 1-3. Receive Days 7-15."
+        red_flags:
+          - "Unreleased mechanics liens or judgment liens"
+          - "Easements restricting development or use"
+          - "CC&Rs limiting rental use, density, or modifications"
+          - "Tax liens or delinquent assessments"
+          - "Title exceptions requiring curative action"
+        cost: "$2,000-8,000 (commitment fee; policy premium at closing)"
+        dependency: "None"
+
+      - id: LEG-02
+        name: "ALTA/NSPS Survey"
+        description: "Order ALTA/NSPS land title survey with Table A items. Identify boundaries, improvements, easements, encroachments, flood zones, setbacks."
+        responsible: "Licensed surveyor"
+        timeline: "Order Day 1-3. Receive Days 15-25."
+        red_flags:
+          - "Improvements encroaching on easements or setbacks"
+          - "Boundary disputes or gaps/overlaps with adjacent parcels"
+          - "Flood zone encroachment not previously disclosed"
+          - "Survey does not match legal description in deed"
+        cost: "$5,000-25,000 (varies by acreage and complexity)"
+        dependency: "None"
+
+      - id: LEG-03
+        name: "Zoning and Land Use Verification"
+        description: "Confirm current zoning designation, permitted uses, density, parking requirements, setbacks, height limits. Identify any non-conforming use or variance."
+        responsible: "Zoning counsel or consultant"
+        timeline: "Days 3-15"
+        red_flags:
+          - "Legal non-conforming use (grandfathered but cannot be expanded/rebuilt)"
+          - "Pending zoning changes or overlay districts"
+          - "Parking count below current code (non-conforming)"
+          - "Density exceeds current zoning (cannot rebuild to same density)"
+        cost: "$1,500-5,000 (zoning report or opinion letter)"
+        dependency: "None"
+
+      - id: LEG-04
+        name: "Entity and Organizational Document Review"
+        description: "Review seller's entity docs, operating agreements, partnership agreements. Confirm authority to sell, no ROFR or consent requirements."
+        responsible: "Real estate counsel"
+        timeline: "Days 5-15"
+        red_flags:
+          - "Right of first refusal held by tenant, partner, or adjacent owner"
+          - "Consent requirements from lender, partner, or governmental body"
+          - "Pending litigation involving the selling entity"
+        cost: "$2,000-5,000 (legal review)"
+        dependency: "None"
+
+      - id: LEG-05
+        name: "Litigation Search"
+        description: "Search federal and state court records for pending or threatened litigation involving the property or seller entity."
+        responsible: "Real estate counsel"
+        timeline: "Days 5-15"
+        red_flags:
+          - "Active personal injury or premises liability claims"
+          - "Construction defect claims (especially for newer construction)"
+          - "Tenant class action or fair housing complaints"
+          - "Environmental litigation or government enforcement actions"
+        cost: "$500-2,000 (court record search)"
+        dependency: "None"
+
+      - id: LEG-06
+        name: "Regulatory Compliance Review"
+        description: "Building permits, certificate of occupancy, fire inspection, health department, rent regulation compliance (if applicable)."
+        responsible: "Acquisitions + Legal"
+        timeline: "Days 5-20"
+        red_flags:
+          - "Missing or expired certificate of occupancy"
+          - "Unpermitted construction or additions"
+          - "Open building code violations"
+          - "Rent regulation non-compliance (overcharges, improper deregulation)"
+        cost: "$500-3,000 (FOIA requests, municipal record search)"
+        dependency: "None"
+
+      - id: LEG-07
+        name: "Estoppel Certificates"
+        description: "For commercial: obtain tenant estoppels confirming lease terms, rent, deposits, landlord obligations, defaults. For MF: not standard but may be required for major commercial tenants in mixed-use."
+        responsible: "Seller (to deliver) + Legal (to review)"
+        timeline: "Days 15-30"
+        red_flags:
+          - "Tenants claiming different terms than lease abstract shows"
+          - "Tenants claiming unperformed landlord obligations"
+          - "Tenants asserting offsets, credits, or expansion rights not in file"
+        cost: "$0 (seller obligation per PSA)"
+        dependency: "PSA estoppel delivery requirement"
+
+      - id: LEG-08
+        name: "HOA / Condo Association Review"
+        description: "If applicable: review governing documents, financials, meeting minutes, pending assessments, litigation, reserves."
+        responsible: "Real estate counsel"
+        timeline: "Days 5-20"
+        red_flags:
+          - "Special assessments pending or recently levied"
+          - "Underfunded reserves (< 50% of recommended)"
+          - "Pending litigation by or against HOA"
+          - "Rental restrictions or caps"
+        cost: "$1,000-3,000 (legal review)"
+        dependency: "HOA document delivery"
+
+      - id: LEG-09
+        name: "Purchase and Sale Agreement Review"
+        description: "Negotiate and execute PSA with appropriate protections: DD contingency, financing contingency, title/survey cure period, rep and warranty survival, earnest money structure."
+        responsible: "Real estate counsel"
+        timeline: "Pre-DD or Days 1-5"
+        red_flags:
+          - "Hard earnest money before DD completion"
+          - "Short DD period (< 30 days for institutional-quality asset)"
+          - "Limited rep and warranty survival post-closing"
+          - "Seller's right to cure extending beyond closing date"
+        cost: "$5,000-20,000 (legal fees for PSA negotiation)"
+        dependency: "LOI executed"
+
+  # =========================================================================
+  # WORKSTREAM 4: MARKET DUE DILIGENCE
+  # =========================================================================
+  market:
+    lead: "Research / Acquisitions"
+    description: "Validate market assumptions, supply/demand dynamics, and competitive positioning"
+    items:
+
+      - id: MKT-01
+        name: "Submarket Supply Pipeline"
+        description: "Identify all projects under construction, permitted, and proposed within competitive radius. Quantify units/SF to be delivered by quarter."
+        responsible: "Research"
+        timeline: "Days 3-10"
+        red_flags:
+          - "Pipeline > 5% of existing inventory (oversupply risk)"
+          - "New deliveries directly competitive (same unit mix, price point, location)"
+          - "Entitlements granted for large projects not yet under construction"
+        cost: "$0-2,000 (CoStar subscription or consultant)"
+        dependency: "None"
+
+      - id: MKT-02
+        name: "Rent Comparable Analysis"
+        description: "Pull 5-10 rent comps for each unit type. Calculate effective rents (face minus concessions). Determine property's market positioning."
+        responsible: "Acquisitions"
+        timeline: "Days 3-10"
+        red_flags:
+          - "Property rents above market (negative mark-to-market on rollover)"
+          - "Wide concession variance suggesting market weakness"
+          - "Lack of comps at target post-renovation rents (for value-add)"
+        cost: "$0-1,500 (CoStar or mystery shopping)"
+        dependency: "None"
+
+      - id: MKT-03
+        name: "Sales Comparable Analysis"
+        description: "Pull 5-10 sales comps (closed within 12 months, same asset class and quality tier). Analyze per-unit/SF pricing, cap rates, buyer profiles."
+        responsible: "Acquisitions"
+        timeline: "Days 3-10"
+        red_flags:
+          - "Acquisition price above comp median without justification"
+          - "Comp volume declining (market liquidity risk)"
+          - "Cap rate compression trend reversing"
+        cost: "$0-1,500 (CoStar or RCA)"
+        dependency: "None"
+
+      - id: MKT-04
+        name: "Demand Driver Analysis"
+        description: "Identify top employers, employment growth by sector, population growth, household formation. Assess concentration risk."
+        responsible: "Research"
+        timeline: "Days 3-15"
+        red_flags:
+          - "Single employer > 20% of local employment (company town risk)"
+          - "Population decline or stagnation in MSA"
+          - "Major employer relocation or layoff announced"
+        cost: "$0 (public data: BLS, Census, Moody's)"
+        dependency: "None"
+
+      - id: MKT-05
+        name: "Competitive Property Visits"
+        description: "Tour 3-5 direct competitors. Assess condition, amenities, management quality, concessions. Mystery-shop rents."
+        responsible: "Acquisitions"
+        timeline: "Days 3-15"
+        red_flags:
+          - "Competitors offering superior product at similar rents"
+          - "New construction delivering at or below subject's asking rents"
+          - "Competitors offering 2+ months free rent"
+        cost: "$500-1,500 (travel and time)"
+        dependency: "None"
+
+      - id: MKT-06
+        name: "Regulatory and Legislative Review"
+        description: "Research pending or recently enacted rent control, tenant protection, transfer tax, zoning, or environmental legislation affecting the market."
+        responsible: "Research + Legal"
+        timeline: "Days 5-15"
+        red_flags:
+          - "Rent control legislation under active consideration"
+          - "Transfer tax increase that raises transaction costs"
+          - "Zoning changes that could increase competitive supply"
+        cost: "$0-1,000"
+        dependency: "None"
+
+  # =========================================================================
+  # WORKSTREAM 5: INSURANCE DUE DILIGENCE
+  # =========================================================================
+  insurance:
+    lead: "Insurance Broker"
+    description: "Assess insurability, coverage requirements, and premium impact on operations"
+    items:
+
+      - id: INS-01
+        name: "Insurance Premium Quotation"
+        description: "Obtain competitive quotes for property, general liability, umbrella, and any specialty coverage (flood, earthquake, windstorm). Compare to pro forma assumption."
+        responsible: "Insurance broker"
+        timeline: "Days 5-20"
+        red_flags:
+          - "Quoted premium > 120% of pro forma assumption"
+          - "Limited carrier appetite (non-standard market)"
+          - "High deductibles required ($50K+ per occurrence)"
+        cost: "$0 (broker quotes are free; premium binds at closing)"
+        dependency: "PCA report helpful but not required"
+
+      - id: INS-02
+        name: "Loss Run Analysis"
+        description: "Review T-5 loss runs. Identify frequency, severity, and type of claims. Assess impact on future insurability and premium."
+        responsible: "Insurance broker"
+        timeline: "Days 5-15"
+        red_flags:
+          - "Loss ratio > 60% (high claim frequency/severity)"
+          - "Repeat claim types indicating systemic issue"
+          - "Pending large claims (reserve impact)"
+        cost: "$0 (seller/carrier provided)"
+        dependency: "None"
+
+      - id: INS-03
+        name: "Flood Insurance Determination"
+        description: "FEMA flood zone determination. If Zone A or V, obtain flood insurance quotes and assess mitigation options."
+        responsible: "Insurance broker + Survey"
+        timeline: "Days 3-10"
+        red_flags:
+          - "Property in Zone AE or VE (mandatory flood insurance, $25K-100K+ annually)"
+          - "Recent FEMA map revision placing property in higher-risk zone"
+          - "No flood insurance history despite zone designation"
+        cost: "$0 for determination; $500-2,000 for elevation certificate if needed"
+        dependency: "Survey"
+
+      - id: INS-04
+        name: "Earthquake / Windstorm Assessment"
+        description: "If applicable: seismic risk assessment (CA, Pacific NW) or windstorm exposure (Gulf Coast, FL). Determine probable maximum loss (PML) and coverage requirements."
+        responsible: "Insurance broker + Structural engineer"
+        timeline: "Days 10-20"
+        red_flags:
+          - "PML > 20% (high seismic risk)"
+          - "Windstorm deductible > 5% of insured value"
+          - "Unreinforced masonry in seismic zone"
+        cost: "$3,000-10,000 (PML study if required by lender)"
+        dependency: "PCA report"
+
+      - id: INS-05
+        name: "Lender Insurance Requirements"
+        description: "Confirm lender's insurance requirements: coverage minimums, deductible maximums, named insured requirements, reserve requirements."
+        responsible: "Insurance broker + Capital markets"
+        timeline: "Days 15-25"
+        red_flags:
+          - "Lender requires coverage levels materially above market (higher premium)"
+          - "Lender requires replacement cost coverage on asset where ACV is more appropriate"
+          - "Rate cap requirement for floating-rate loans (verify cost and availability)"
+        cost: "$0"
+        dependency: "Financing term sheet received"
+
+  # =========================================================================
+  # WORKSTREAM 6: ENVIRONMENTAL DUE DILIGENCE
+  # =========================================================================
+  environmental:
+    lead: "Environmental Consultant"
+    description: "Identify environmental liabilities, contamination risk, and regulatory compliance"
+    items:
+
+      - id: ENV-01
+        name: "Phase I Environmental Site Assessment"
+        description: "ASTM E1527-21 compliant Phase I ESA. Historical use review, regulatory database search, site reconnaissance, interviews. Identify RECs, CRECs, HRECs."
+        responsible: "Third-party environmental consultant"
+        timeline: "Order Day 1-3. Report Days 15-25."
+        red_flags:
+          - "Recognized Environmental Conditions (RECs) requiring Phase II"
+          - "Adjacent high-risk uses (gas stations, dry cleaners, industrial)"
+          - "Historical use as gas station, auto repair, manufacturing, or dry cleaning"
+          - "Underground storage tanks (USTs) on site"
+        cost: "$2,500-6,000"
+        dependency: "Property access for site reconnaissance"
+
+      - id: ENV-02
+        name: "Phase II Environmental Site Assessment"
+        description: "If Phase I identifies RECs: subsurface investigation (soil borings, groundwater monitoring wells, soil vapor sampling). Quantify contamination and estimate remediation cost."
+        responsible: "Third-party environmental consultant"
+        timeline: "Days 15-35 (if triggered by Phase I)"
+        red_flags:
+          - "Contamination exceeding residential or commercial screening levels"
+          - "Groundwater contamination migrating off-site"
+          - "Vapor intrusion risk to occupied spaces"
+          - "Remediation cost estimate > 3% of acquisition price"
+        cost: "$8,000-50,000+ (depends on scope)"
+        dependency: "Phase I ESA identifies RECs"
+
+      - id: ENV-03
+        name: "Asbestos / Lead Paint / Mold Survey"
+        description: "For pre-1980 buildings: asbestos-containing materials (ACM) survey. Pre-1978: lead-based paint (LBP) risk assessment. Mold inspection if water intrusion suspected."
+        responsible: "Environmental consultant or industrial hygienist"
+        timeline: "Days 5-15"
+        red_flags:
+          - "Friable asbestos in occupied spaces (immediate hazard)"
+          - "ACM in materials that will be disturbed during renovation (abatement cost)"
+          - "Lead-based paint in pre-1978 residential units (HUD/EPA compliance)"
+          - "Active mold growth indicating ongoing moisture intrusion"
+        cost: "$2,000-8,000 (survey); abatement costs vary widely"
+        dependency: "Property access"
+
+      - id: ENV-04
+        name: "Radon Testing"
+        description: "If in EPA Zone 1 or 2 (elevated radon potential): radon testing per EPA protocols. Particularly important for garden-style MF with slab-on-grade or crawlspace."
+        responsible: "Environmental consultant"
+        timeline: "Days 5-15"
+        red_flags:
+          - "Radon levels > 4 pCi/L (EPA action level)"
+          - "No mitigation system in high-radon area"
+        cost: "$500-2,000"
+        dependency: "Property access"
+
+      - id: ENV-05
+        name: "Wetlands / Endangered Species"
+        description: "If undeveloped land or expansion potential: wetlands delineation and endangered species review. Required for USACE permits."
+        responsible: "Environmental consultant"
+        timeline: "Days 10-25"
+        red_flags:
+          - "Jurisdictional wetlands on developable portions of site"
+          - "Endangered species habitat designation"
+          - "Buffer zone requirements reducing usable area"
+        cost: "$3,000-15,000"
+        dependency: "Applicable only if development/expansion planned"
+
+      - id: ENV-06
+        name: "Environmental Insurance"
+        description: "If environmental risk is identified but manageable: obtain Pollution Legal Liability (PLL) insurance to cap exposure."
+        responsible: "Insurance broker + Environmental counsel"
+        timeline: "Days 20-35"
+        red_flags:
+          - "PLL premium > 1% of acquisition price annually"
+          - "Exclusions for known conditions"
+          - "Deductible > remediation cost estimate"
+        cost: "$5,000-50,000 annual premium (risk-dependent)"
+        dependency: "Phase I and Phase II results"
+
+# =========================================================================
+# TIMELINE SUMMARY
+# =========================================================================
+timeline_summary:
+  day_1_3:
+    - "Order title commitment (LEG-01)"
+    - "Order ALTA survey (LEG-02)"
+    - "Order Phase I ESA (ENV-01)"
+    - "Order PCA (PHY-01)"
+    - "Request T-3 financials, rent roll, AR, utility bills, service contracts (FIN-01 through FIN-09)"
+    - "Schedule site visit (PHY-02)"
+  day_3_10:
+    - "Site visit and unit inspections (PHY-02, PHY-05)"
+    - "Begin rent and sales comp analysis (MKT-02, MKT-03)"
+    - "Begin submarket research (MKT-01, MKT-04)"
+    - "Tour competitor properties (MKT-05)"
+    - "Order insurance quotes (INS-01)"
+  day_10_20:
+    - "Receive and review financials (FIN-01 through FIN-09)"
+    - "Lease abstract review (FIN-03)"
+    - "Zoning verification (LEG-03)"
+    - "Entity and litigation review (LEG-04, LEG-05)"
+    - "Begin pro forma stress test (FIN-11)"
+    - "Receive insurance quotes (INS-01)"
+  day_15_30:
+    - "Receive PCA, Phase I ESA, survey, title commitment"
+    - "Order Phase II if triggered (ENV-02)"
+    - "Finalize pro forma and reverse DCF (FIN-11)"
+    - "Obtain financing term sheet (FIN-12)"
+    - "Receive estoppels (LEG-07)"
+    - "Complete market DD memo"
+  day_25_40:
+    - "Resolve title exceptions"
+    - "Receive Phase II results if applicable"
+    - "Finalize insurance program"
+    - "Complete DD summary memo for investment committee"
+    - "DD expiration: go/no-go decision"

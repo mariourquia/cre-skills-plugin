@@ -1,0 +1,900 @@
+# Building Inspection Checklists
+# Complete checklists for daily, weekly, monthly, quarterly, and annual inspections
+# Baseline: 200-unit Class B multifamily, built 2008, ASHRAE Zone 4A
+# Last updated: 2026-03-17
+
+---
+
+# Daily Building Walk-Through (25 items)
+# Duration: 45-60 minutes
+# Performed by: on-site maintenance technician or property manager
+daily_walk_through:
+  header:
+    property: ""
+    date: ""
+    inspector: ""
+    weather: ""
+    temperature_high: 0
+    temperature_low: 0
+
+  exterior:
+    - id: DW-01
+      item: "Building entrance doors close and latch properly"
+      pass_fail: ""
+      notes: ""
+      escalation: "Urgent -- security concern if entry doors don't latch"
+
+    - id: DW-02
+      item: "Exterior lighting operational (all fixtures)"
+      pass_fail: ""
+      notes: ""
+      escalation: "Routine -- replace within 48 hours. Emergency if parking area dark."
+
+    - id: DW-03
+      item: "Parking lot and sidewalks clear of debris and hazards"
+      pass_fail: ""
+      notes: ""
+      escalation: "Urgent if trip hazard. Routine for debris."
+
+    - id: DW-04
+      item: "Dumpster area clean, gates closed, no overflow"
+      pass_fail: ""
+      notes: ""
+      escalation: "Routine. Call hauler if overflow."
+
+    - id: DW-05
+      item: "Landscaping irrigation not leaking or flooding"
+      pass_fail: ""
+      notes: ""
+      escalation: "Urgent if active leak. Routine for minor adjustment."
+
+    - id: DW-06
+      item: "Building signage and address numbers intact"
+      pass_fail: ""
+      notes: ""
+      escalation: "Scheduled. Fire code requires visible address."
+
+    - id: DW-07
+      item: "No visible graffiti, vandalism, or property damage"
+      pass_fail: ""
+      notes: ""
+      escalation: "Routine. Remove graffiti within 24-48 hours."
+
+  lobby_common_areas:
+    - id: DW-08
+      item: "Lobby clean, well-lit, and presentable"
+      pass_fail: ""
+      notes: ""
+      escalation: "Routine."
+
+    - id: DW-09
+      item: "Mailbox area secure and functional"
+      pass_fail: ""
+      notes: ""
+      escalation: "Urgent if mailboxes compromised."
+
+    - id: DW-10
+      item: "Elevator operating normally (ride both cabs)"
+      pass_fail: ""
+      notes: ""
+      escalation: "Urgent if any cab out of service."
+
+    - id: DW-11
+      item: "Stairwells clean, well-lit, doors closing properly"
+      pass_fail: ""
+      notes: ""
+      escalation: "Emergency if stairwell doors not latching (fire code)."
+
+    - id: DW-12
+      item: "Common area HVAC functioning (temperature comfortable)"
+      pass_fail: ""
+      notes: ""
+      escalation: "Urgent in extreme weather. Routine otherwise."
+
+    - id: DW-13
+      item: "Laundry room equipment operational and clean"
+      pass_fail: ""
+      notes: ""
+      escalation: "Routine. Track out-of-service machines."
+
+    - id: DW-14
+      item: "Fitness center / amenity spaces clean and equipment functional"
+      pass_fail: ""
+      notes: ""
+      escalation: "Routine."
+
+  mechanical_utility:
+    - id: DW-15
+      item: "Mechanical rooms locked and accessible only to authorized personnel"
+      pass_fail: ""
+      notes: ""
+      escalation: "Urgent if unlocked. Security and code violation."
+
+    - id: DW-16
+      item: "No unusual noises, vibrations, or odors from mechanical equipment"
+      pass_fail: ""
+      notes: ""
+      escalation: "Varies. Gas odor = Emergency (evacuate, call gas company)."
+
+    - id: DW-17
+      item: "No water leaks or standing water in mechanical rooms"
+      pass_fail: ""
+      notes: ""
+      escalation: "Urgent. Identify source immediately."
+
+    - id: DW-18
+      item: "Sump pumps operational (test if equipped)"
+      pass_fail: ""
+      notes: ""
+      escalation: "Urgent. Failure leads to flooding."
+
+    - id: DW-19
+      item: "Water heater temperature and pressure normal"
+      pass_fail: ""
+      notes: ""
+      escalation: "Urgent if temperature > 140F at tap (scald risk)."
+
+  safety:
+    - id: DW-20
+      item: "Fire alarm panel: no trouble or supervisory conditions"
+      pass_fail: ""
+      notes: ""
+      escalation: "Emergency. Any trouble condition requires immediate investigation."
+
+    - id: DW-21
+      item: "Emergency exits clear and unobstructed"
+      pass_fail: ""
+      notes: ""
+      escalation: "Emergency. Fire code violation. Clear immediately."
+
+    - id: DW-22
+      item: "Exit signs illuminated"
+      pass_fail: ""
+      notes: ""
+      escalation: "Urgent. Replace within 24 hours."
+
+    - id: DW-23
+      item: "Fire extinguishers in place with current inspection tags"
+      pass_fail: ""
+      notes: ""
+      escalation: "Routine if present but tag expired. Emergency if missing."
+
+    - id: DW-24
+      item: "AED (automated external defibrillator) in place and indicator green"
+      pass_fail: ""
+      notes: ""
+      escalation: "Urgent if indicator not green (battery or pad issue)."
+
+    - id: DW-25
+      item: "Slip/trip hazards identified and addressed"
+      pass_fail: ""
+      notes: ""
+      escalation: "Urgent. Liability risk. Cone/barricade immediately, repair within 24 hours."
+
+  summary:
+    total_items: 25
+    pass: 0
+    fail: 0
+    work_orders_generated: 0
+    notes: ""
+
+---
+
+# Weekly Life Safety Check (15 items)
+# Duration: 30-45 minutes
+# Performed by: on-site maintenance technician
+weekly_life_safety:
+  header:
+    property: ""
+    week_of: ""
+    inspector: ""
+
+  fire_alarm:
+    - id: WLS-01
+      item: "Fire alarm control panel -- normal condition, no trouble lights"
+      pass_fail: ""
+      notes: ""
+      escalation: "Emergency if trouble condition active"
+
+    - id: WLS-02
+      item: "Fire alarm communicator -- verify connection to monitoring center"
+      pass_fail: ""
+      notes: ""
+      escalation: "Emergency -- building unmonitored"
+
+    - id: WLS-03
+      item: "Sprinkler system -- main valve open and supervised"
+      pass_fail: ""
+      notes: ""
+      escalation: "Emergency -- sprinkler system impaired"
+
+    - id: WLS-04
+      item: "Sprinkler system -- gauges within normal range"
+      pass_fail: ""
+      notes: ""
+      normal_ranges:
+        system_pressure: "150-175 PSI (typical residential)"
+        air_pressure_dry: "per system design (typically 40 PSI)"
+
+    - id: WLS-05
+      item: "Fire pump -- run test (where equipped)"
+      pass_fail: ""
+      notes: ""
+      escalation: "Urgent if pump fails to start or low pressure"
+
+  egress:
+    - id: WLS-06
+      item: "All stairwell doors close and latch (walk each stairwell)"
+      pass_fail: ""
+      notes: ""
+      escalation: "Emergency -- compromised fire separation"
+
+    - id: WLS-07
+      item: "Emergency lighting -- activate test button (30-second test)"
+      pass_fail: ""
+      notes: ""
+      units_tested: 0
+      units_failed: 0
+      escalation: "Urgent -- replace batteries within 48 hours"
+
+    - id: WLS-08
+      item: "Exit signs -- all illuminated (walk every floor)"
+      pass_fail: ""
+      notes: ""
+      escalation: "Urgent -- code requires all exit signs operational"
+
+    - id: WLS-09
+      item: "No storage or obstructions in stairwells or exit paths"
+      pass_fail: ""
+      notes: ""
+      escalation: "Emergency -- clear immediately"
+
+  elevator_safety:
+    - id: WLS-10
+      item: "Elevator emergency phone test (each cab)"
+      pass_fail: ""
+      notes: ""
+      escalation: "Urgent -- code requires functional emergency communication"
+
+    - id: WLS-11
+      item: "Elevator door reopening device functional (safety edge/photo eye)"
+      pass_fail: ""
+      notes: ""
+      escalation: "Urgent -- safety hazard"
+
+  carbon_monoxide:
+    - id: WLS-12
+      item: "CO detectors operational (common areas with gas equipment)"
+      pass_fail: ""
+      notes: ""
+      escalation: "Emergency -- life safety hazard"
+
+  security:
+    - id: WLS-13
+      item: "Security cameras operational (spot check 5 cameras)"
+      pass_fail: ""
+      cameras_checked: ""
+      notes: ""
+      escalation: "Urgent -- liability exposure"
+
+    - id: WLS-14
+      item: "Access control system functioning (test 3 doors)"
+      pass_fail: ""
+      doors_tested: ""
+      notes: ""
+      escalation: "Urgent if exterior doors affected"
+
+    - id: WLS-15
+      item: "Emergency generator -- verify auto-start battery charged, block heater on"
+      pass_fail: ""
+      notes: ""
+      escalation: "Urgent -- generator may fail to start in power outage"
+
+  summary:
+    total_items: 15
+    pass: 0
+    fail: 0
+    work_orders_generated: 0
+
+---
+
+# Monthly Mechanical Room Inspection (20 items)
+# Duration: 60-90 minutes
+# Performed by: chief engineer or qualified HVAC technician
+monthly_mechanical:
+  header:
+    property: ""
+    month: ""
+    inspector: ""
+
+  boiler_room:
+    - id: MMR-01
+      item: "Boiler operating pressure and temperature within normal range"
+      pass_fail: ""
+      readings:
+        boiler_1_pressure: ""
+        boiler_1_temp: ""
+        boiler_2_pressure: ""
+        boiler_2_temp: ""
+      normal_range: "Pressure: 12-15 PSI, Temperature: 160-180F supply"
+
+    - id: MMR-02
+      item: "Combustion air louvers open and unobstructed"
+      pass_fail: ""
+      notes: ""
+      escalation: "Emergency -- incomplete combustion, CO risk"
+
+    - id: MMR-03
+      item: "Gas piping -- no odor, no visible corrosion, drip legs drained"
+      pass_fail: ""
+      notes: ""
+      escalation: "Emergency if gas odor detected"
+
+    - id: MMR-04
+      item: "Flue connections tight, no exhaust leaks"
+      pass_fail: ""
+      notes: ""
+      escalation: "Emergency -- CO risk"
+
+    - id: MMR-05
+      item: "Expansion tank pressure correct"
+      pass_fail: ""
+      reading: ""
+      target: ""
+      notes: ""
+
+  pump_room:
+    - id: MMR-06
+      item: "Domestic water booster pumps -- pressure and flow normal"
+      pass_fail: ""
+      reading: ""
+      notes: ""
+
+    - id: MMR-07
+      item: "Pump seals -- no leaks"
+      pass_fail: ""
+      notes: ""
+      escalation: "Routine if minor weep. Urgent if active drip."
+
+    - id: MMR-08
+      item: "Pump motor temperature and amp draw"
+      pass_fail: ""
+      readings:
+        pump_1_amps: ""
+        pump_1_nameplate: ""
+        pump_2_amps: ""
+        pump_2_nameplate: ""
+      note: "Amps > 110% of nameplate indicates overload"
+
+    - id: MMR-09
+      item: "Hot water heater/storage -- temperature, anode rod condition"
+      pass_fail: ""
+      temperature: ""
+      target: "120-125F at tap, 140F at storage with mixing valve"
+
+  electrical_room:
+    - id: MMR-10
+      item: "Electrical panels -- no signs of overheating (discoloration, smell)"
+      pass_fail: ""
+      notes: ""
+      escalation: "Emergency if evidence of overheating"
+
+    - id: MMR-11
+      item: "Panel breakers properly labeled"
+      pass_fail: ""
+      notes: ""
+
+    - id: MMR-12
+      item: "36-inch clearance maintained in front of all panels"
+      pass_fail: ""
+      notes: ""
+      escalation: "Urgent -- NEC requirement"
+
+    - id: MMR-13
+      item: "No unauthorized extension cords or power strips"
+      pass_fail: ""
+      notes: ""
+
+  emergency_generator:
+    - id: MMR-14
+      item: "Generator monthly run test (30 minutes under load)"
+      pass_fail: ""
+      run_time_minutes: 0
+      load_kw: 0
+      fuel_level_percent: 0
+      notes: ""
+      escalation: "Urgent if generator fails to start or run"
+
+    - id: MMR-15
+      item: "Generator coolant level and battery voltage"
+      pass_fail: ""
+      coolant_level: ""
+      battery_voltage: ""
+      target_voltage: "24V DC minimum"
+
+    - id: MMR-16
+      item: "Automatic transfer switch -- exercise and test"
+      pass_fail: ""
+      notes: ""
+      escalation: "Urgent -- building has no backup power if ATS fails"
+
+  cooling_tower_seasonal:
+    - id: MMR-17
+      item: "Cooling tower basin -- clean, water treatment current"
+      pass_fail: ""
+      notes: ""
+      seasonal: "April through October (cooling season)"
+
+    - id: MMR-18
+      item: "Cooling tower water chemistry test results"
+      pass_fail: ""
+      readings:
+        conductivity: ""
+        pH: ""
+        hardness: ""
+        bacteria: ""
+      note: "Per water treatment vendor program targets"
+
+  general:
+    - id: MMR-19
+      item: "All mechanical rooms clean, organized, no storage of non-mechanical items"
+      pass_fail: ""
+      notes: ""
+
+    - id: MMR-20
+      item: "MSDS/SDS binder current and accessible"
+      pass_fail: ""
+      notes: ""
+      escalation: "Routine -- OSHA requirement"
+
+  summary:
+    total_items: 20
+    pass: 0
+    fail: 0
+    work_orders_generated: 0
+
+---
+
+# Quarterly Elevator Audit (12 items)
+# Duration: 2-3 hours (both cabs)
+# Performed by: property manager + elevator consultant (or qualified in-house)
+quarterly_elevator_audit:
+  header:
+    property: ""
+    quarter: ""
+    inspector: ""
+    elevator_vendor: ""
+    contract_type: ""  # full_service, oil_and_grease, PM_only
+
+  performance_metrics:
+    - id: QEA-01
+      item: "Callback log review (callbacks per unit this quarter)"
+      data:
+        cab_1_callbacks: 0
+        cab_2_callbacks: 0
+        target: "< 9 per unit per quarter (< 3/month)"
+      pass_fail: ""
+      notes: ""
+
+    - id: QEA-02
+      item: "Entrapment log review (entrapments per unit this quarter)"
+      data:
+        cab_1_entrapments: 0
+        cab_2_entrapments: 0
+        target: "0 (any entrapment requires incident review)"
+      pass_fail: ""
+      notes: ""
+
+    - id: QEA-03
+      item: "Out-of-service hours this quarter"
+      data:
+        cab_1_hours: 0
+        cab_2_hours: 0
+        target: "< 8 hours per unit per quarter (99.6% uptime)"
+      pass_fail: ""
+      notes: ""
+
+  physical_inspection:
+    - id: QEA-04
+      item: "Cab interior condition (walls, ceiling, floor, lighting)"
+      condition_score: 0  # 1-5
+      notes: ""
+
+    - id: QEA-05
+      item: "Door operation -- smooth, proper speed, no banging"
+      pass_fail: ""
+      door_open_time_sec: 0
+      door_close_time_sec: 0
+      target: "Open: 1.5-3.0 sec. Close: 3.0-4.0 sec. (ADA compliant)"
+
+    - id: QEA-06
+      item: "Ride quality -- smooth acceleration, deceleration, leveling"
+      pass_fail: ""
+      leveling_accuracy_inches: 0
+      target: "Within 1/2 inch of landing (ADA requirement)"
+
+    - id: QEA-07
+      item: "Machine room -- clean, temperature controlled, no oil leaks"
+      pass_fail: ""
+      room_temp_f: 0
+      target: "Room temperature: 55-100F per ASME A17.1"
+
+  safety_testing:
+    - id: QEA-08
+      item: "Fire recall test -- Phase I (lobby recall from each floor)"
+      pass_fail: ""
+      notes: ""
+      escalation: "Emergency -- fire recall is life safety critical"
+
+    - id: QEA-09
+      item: "Fire recall test -- Phase II (in-car firefighter operation)"
+      pass_fail: ""
+      notes: ""
+
+    - id: QEA-10
+      item: "Door reopening devices -- safety edge and/or photo eye"
+      pass_fail: ""
+      notes: ""
+
+    - id: QEA-11
+      item: "Emergency phone test -- connection to monitoring center"
+      pass_fail: ""
+      notes: ""
+
+    - id: QEA-12
+      item: "Hoistway door interlocks -- doors will not open unless cab is at landing"
+      pass_fail: ""
+      floors_tested: ""
+      notes: ""
+      escalation: "Emergency -- interlock failure is immediate safety hazard"
+
+  vendor_performance_scorecard:
+    response_time_avg_minutes: 0
+    target_response_minutes: 60
+    pm_visits_completed: 0
+    pm_visits_scheduled: 0
+    parts_on_backorder: []
+    contract_compliance_issues: []
+    overall_grade: ""  # A, B, C, D, F
+
+  summary:
+    total_items: 12
+    pass: 0
+    fail: 0
+    action_items: []
+
+---
+
+# Annual Building Systems Assessment (40 items)
+# Duration: 4-6 hours (full building)
+# Performed by: property manager + chief engineer + consultant (recommended)
+annual_building_assessment:
+  header:
+    property: ""
+    assessment_date: ""
+    inspector: ""
+    consultant: ""
+    weather_conditions: ""
+
+  # Section 1: Building Envelope (8 items)
+  building_envelope:
+    - id: ABA-01
+      item: "Exterior wall condition (masonry, siding, stucco, EIFS)"
+      condition_score: 0  # 1-5
+      findings: ""
+      photos: false
+      estimated_repair_cost: 0
+
+    - id: ABA-02
+      item: "Window/glazing condition (seals, frames, operation)"
+      condition_score: 0
+      findings: ""
+      failed_units_count: 0
+      estimated_repair_cost: 0
+
+    - id: ABA-03
+      item: "Caulking and sealants (all joints, penetrations)"
+      condition_score: 0
+      findings: ""
+      linear_feet_needing_replacement: 0
+      estimated_repair_cost: 0
+
+    - id: ABA-04
+      item: "Roof membrane condition (walk entire roof)"
+      condition_score: 0
+      findings: ""
+      ponding_areas: 0
+      membrane_cuts_punctures: 0
+      flashing_condition: ""
+      estimated_remaining_life_years: 0
+      estimated_replacement_cost: 0
+
+    - id: ABA-05
+      item: "Roof drainage (gutters, downspouts, internal drains)"
+      condition_score: 0
+      findings: ""
+      estimated_repair_cost: 0
+
+    - id: ABA-06
+      item: "Foundation condition (visible portions, below-grade waterproofing)"
+      condition_score: 0
+      findings: ""
+      evidence_of_water_infiltration: false
+      estimated_repair_cost: 0
+
+    - id: ABA-07
+      item: "Balcony/terrace condition (structural, waterproofing, railings)"
+      condition_score: 0
+      findings: ""
+      estimated_repair_cost: 0
+      note: "NYC FISP/Local Law 11 requires facade inspection every 5 years"
+
+    - id: ABA-08
+      item: "Parking structure condition (if applicable -- concrete, rebar, membrane)"
+      condition_score: 0
+      findings: ""
+      estimated_repair_cost: 0
+
+  # Section 2: HVAC Systems (8 items)
+  hvac_systems:
+    - id: ABA-09
+      item: "Heating system overall condition and performance"
+      condition_score: 0
+      age_years: 0
+      remaining_life_years: 0
+      findings: ""
+      estimated_replacement_cost: 0
+
+    - id: ABA-10
+      item: "Cooling system overall condition and performance"
+      condition_score: 0
+      age_years: 0
+      remaining_life_years: 0
+      findings: ""
+      estimated_replacement_cost: 0
+
+    - id: ABA-11
+      item: "Ventilation system adequacy and condition"
+      condition_score: 0
+      findings: ""
+      note: "ASHRAE 62.1 minimum outdoor air requirements met?"
+
+    - id: ABA-12
+      item: "Building automation system (BAS) functionality"
+      condition_score: 0
+      findings: ""
+      note: "Software current? Points functioning? Trending data available?"
+
+    - id: ABA-13
+      item: "Ductwork condition (accessible sections)"
+      condition_score: 0
+      findings: ""
+      insulation_condition: ""
+
+    - id: ABA-14
+      item: "Cooling tower condition"
+      condition_score: 0
+      findings: ""
+      fill_condition: ""
+      structural_condition: ""
+      estimated_repair_cost: 0
+
+    - id: ABA-15
+      item: "Energy performance benchmarking"
+      eui_kbtu_sf: 0
+      energy_star_score: 0
+      comparison_to_prior_year: ""
+      note: "NYC LL97 compliance: check emissions limits for building size"
+
+    - id: ABA-16
+      item: "Refrigerant management (EPA 608 compliance, leak history)"
+      findings: ""
+      total_refrigerant_lbs: 0
+      refrigerant_added_this_year_lbs: 0
+      leak_rate_percent: 0
+      note: "Leak rate > 125% (commercial) triggers mandatory repair/retire"
+
+  # Section 3: Plumbing (6 items)
+  plumbing:
+    - id: ABA-17
+      item: "Domestic water piping condition"
+      condition_score: 0
+      pipe_material: ""
+      age_years: 0
+      findings: ""
+      estimated_replacement_cost: 0
+
+    - id: ABA-18
+      item: "Domestic hot water system condition and performance"
+      condition_score: 0
+      findings: ""
+      delivery_temp_f: 0
+      estimated_replacement_cost: 0
+
+    - id: ABA-19
+      item: "Waste and drain piping condition"
+      condition_score: 0
+      pipe_material: ""
+      findings: ""
+      camera_inspection_date: ""
+      estimated_replacement_cost: 0
+
+    - id: ABA-20
+      item: "Backflow prevention devices -- tested and certified"
+      pass_fail: ""
+      last_test_date: ""
+      next_test_due: ""
+      note: "Annual testing required by most jurisdictions"
+
+    - id: ABA-21
+      item: "Water meter and shut-off valve condition"
+      pass_fail: ""
+      findings: ""
+
+    - id: ABA-22
+      item: "Sump pump and ejector pump condition"
+      condition_score: 0
+      findings: ""
+      backup_power: false
+
+  # Section 4: Electrical (6 items)
+  electrical:
+    - id: ABA-23
+      item: "Main switchgear condition"
+      condition_score: 0
+      age_years: 0
+      findings: ""
+      infrared_scan_date: ""
+      estimated_replacement_cost: 0
+
+    - id: ABA-24
+      item: "Distribution panels condition"
+      condition_score: 0
+      findings: ""
+      note: "Any Federal Pacific, Zinsco, or recalled panels = immediate replacement"
+
+    - id: ABA-25
+      item: "Emergency generator condition and test records"
+      condition_score: 0
+      age_years: 0
+      last_load_test_date: ""
+      findings: ""
+      estimated_replacement_cost: 0
+
+    - id: ABA-26
+      item: "Transformer condition (if building-owned)"
+      condition_score: 0
+      findings: ""
+      note: "PCB testing required for pre-1979 transformers"
+
+    - id: ABA-27
+      item: "Lighting systems (common area, exterior, parking)"
+      condition_score: 0
+      percent_led: 0
+      findings: ""
+      led_retrofit_cost_estimate: 0
+
+    - id: ABA-28
+      item: "Electrical service capacity adequate for current and planned loads"
+      pass_fail: ""
+      current_capacity_amps: 0
+      current_demand_amps: 0
+      findings: ""
+      note: "EV charging infrastructure may require service upgrade"
+
+  # Section 5: Fire/Life Safety (6 items)
+  fire_life_safety:
+    - id: ABA-29
+      item: "Fire alarm system condition and age"
+      condition_score: 0
+      age_years: 0
+      findings: ""
+      estimated_replacement_cost: 0
+
+    - id: ABA-30
+      item: "Sprinkler system condition (heads, piping, valves)"
+      condition_score: 0
+      head_count: 0
+      heads_over_50_years: 0
+      findings: ""
+      note: "NFPA 25 requires testing of sprinkler heads at 50 years"
+
+    - id: ABA-31
+      item: "Fire extinguisher inventory and certification"
+      pass_fail: ""
+      total_extinguishers: 0
+      expired_count: 0
+
+    - id: ABA-32
+      item: "Emergency lighting and exit signs (90-minute battery test)"
+      pass_fail: ""
+      units_tested: 0
+      units_failed: 0
+      note: "NFPA 101 requires annual 90-minute discharge test"
+
+    - id: ABA-33
+      item: "Fire door and damper inspection"
+      pass_fail: ""
+      doors_inspected: 0
+      doors_failed: 0
+      dampers_inspected: 0
+      dampers_failed: 0
+      note: "NFPA 80 requires annual fire door inspection"
+
+    - id: ABA-34
+      item: "Stairwell pressurization system (if equipped)"
+      pass_fail: ""
+      findings: ""
+
+  # Section 6: Elevator (2 items)
+  elevator:
+    - id: ABA-35
+      item: "Elevator system overall condition and modernization timeline"
+      condition_score: 0
+      age_years: 0
+      last_modernization_year: 0
+      remaining_life_years: 0
+      estimated_modernization_cost: 0
+
+    - id: ABA-36
+      item: "Elevator code compliance (most recent state inspection report)"
+      pass_fail: ""
+      last_inspection_date: ""
+      violations_outstanding: 0
+
+  # Section 7: Site and Parking (4 items)
+  site_parking:
+    - id: ABA-37
+      item: "Parking lot/garage surface condition"
+      condition_score: 0
+      findings: ""
+      estimated_repair_cost: 0
+
+    - id: ABA-38
+      item: "Site drainage condition (storm drains, retention)"
+      condition_score: 0
+      findings: ""
+
+    - id: ABA-39
+      item: "Fencing, gates, and site security"
+      condition_score: 0
+      findings: ""
+
+    - id: ABA-40
+      item: "ADA compliance (accessible routes, parking, signage)"
+      pass_fail: ""
+      findings: ""
+      note: "Annual ADA compliance review recommended"
+
+  # Assessment Summary
+  assessment_summary:
+    total_items: 40
+    condition_scores:
+      excellent_5: 0
+      good_4: 0
+      fair_3: 0
+      poor_2: 0
+      critical_1: 0
+
+    overall_building_condition: 0  # weighted average
+
+    immediate_action_items: []
+
+    capital_needs_0_1_year:
+      items: []
+      total_cost: 0
+
+    capital_needs_1_3_years:
+      items: []
+      total_cost: 0
+
+    capital_needs_3_5_years:
+      items: []
+      total_cost: 0
+
+    total_5_year_capital_need: 0
+    current_reserve_balance: 0
+    reserve_adequacy_percent: 0  # reserve / 5yr need
+
+    deferred_maintenance_items: []
+    total_deferred_maintenance_cost: 0

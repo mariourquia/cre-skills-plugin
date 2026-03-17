@@ -1,0 +1,281 @@
+# cycle-indicators.yaml
+# Leading, coincident, and lagging indicators for CRE market cycle positioning.
+# Each indicator includes source, frequency, threshold interpretation, and
+# which cycle phase transition it best signals.
+
+indicator_types:
+  leading: "Predicts future cycle movement 3-12 months ahead"
+  coincident: "Confirms current cycle position in real time"
+  lagging: "Validates that a phase transition has already occurred"
+
+indicators:
+
+  leading:
+
+    - id: L01
+      name: "Building Permits Filed (Commercial)"
+      source: "County/city building departments, Census Bureau"
+      frequency: Monthly
+      lag_to_reality: "18-24 months before delivery impacts market"
+      thresholds:
+        rising_sharply: "Pipeline > 6% of existing stock signals Phase II peak approaching"
+        flat_to_declining: "Permit decline signals Phase III recognition by developers"
+        near_zero: "Confirms Phase IV / early Phase I -- no economic case for new supply"
+      signals_transition: "Phase II to Phase III (when permits surge), Phase III to Phase IV (when permits collapse)"
+      notes: >
+        Most powerful leading indicator. Permits lead deliveries by 18-24 months.
+        A surge in permits during Phase II tells you Phase III is 18 months away.
+        Track at the submarket level, not just MSA.
+
+    - id: L02
+      name: "CMBS Delinquency Rate"
+      source: "Trepp, Bloomberg, Moody's"
+      frequency: Monthly
+      lag_to_reality: "3-6 months leading indicator of broader distress"
+      thresholds:
+        below_2pct: "Healthy market. Phase I late or Phase II."
+        2_to_5pct: "Stress emerging. Phase III."
+        above_5pct: "Significant distress. Phase IV approaching or underway."
+        above_10pct: "Systemic stress (GFC-level). Deep Phase IV."
+      signals_transition: "Phase II to Phase III (rising from low base), Phase III to Phase IV (acceleration above 5%)"
+      notes: >
+        CMBS loans are the canary in the coal mine -- they are typically more
+        aggressively underwritten than bank loans. Delinquency rising from
+        trough is an early warning. Track by property type (office delinquency
+        rising while MF is stable signals sector-specific, not broad, stress).
+
+    - id: L03
+      name: "Lending Standards (Senior Loan Officer Survey)"
+      source: "Federal Reserve SLOOS (quarterly)"
+      frequency: Quarterly
+      lag_to_reality: "6-12 months leading"
+      thresholds:
+        easing: "Banks loosening CRE lending standards. Phase II sentiment. Fuels expansion."
+        unchanged: "Neutral. Could be any phase."
+        tightening: "Banks tightening. Phase III / Phase IV approaching. Capital drying up."
+        significantly_tightening: "Phase IV. Refinancing risk elevated. Distressed opportunities ahead."
+      signals_transition: "Phase II to III (tightening begins), Phase IV to I (tightening peaks and begins to ease)"
+      notes: >
+        When 50%+ of banks report tightening CRE standards, expect transaction
+        volume to decline 30-50% within 6-12 months. This is one of the most
+        reliable leading indicators for Phase III and IV.
+
+    - id: L04
+      name: "Architecture Billings Index (ABI)"
+      source: "American Institute of Architects (AIA)"
+      frequency: Monthly
+      lag_to_reality: "9-12 months leading"
+      thresholds:
+        above_50: "Expansion. Billings growing = construction starts in 9-12 months."
+        at_50: "Neutral. No growth in billings."
+        below_50: "Contraction. Project cancellations/deferrals. Supply pipeline shrinking."
+        below_45: "Significant contraction. Phase IV signal."
+      signals_transition: "Phase I to II (rising above 50), Phase II to III (falling below 50)"
+      notes: >
+        The ABI is a diffusion index -- above 50 means more firms report
+        billings increases than decreases. It leads construction starts by
+        9-12 months because design precedes permitting and construction.
+        Breakdown by project type (commercial, institutional, residential)
+        provides sector-specific signals.
+
+    - id: L05
+      name: "Real Capital Analytics (RCA) Transaction Volume"
+      source: "MSCI Real Capital Analytics"
+      frequency: Monthly
+      lag_to_reality: "3-6 months leading"
+      thresholds:
+        rising_yoy: "Capital flowing in. Phase I late to Phase II. Confidence building."
+        flat: "Stable sentiment. Mid-cycle."
+        declining_10_to_25pct: "Caution. Phase II late or Phase III early. Bid-ask widening."
+        declining_above_25pct: "Phase III to IV. Significant pullback. Distress cycle beginning."
+      signals_transition: "Phase IV to I (volume trough and uptick), Phase II to III (volume decline from peak)"
+      notes: >
+        Transaction volume peaks before prices peak. When volume starts
+        declining while prices are still rising, it signals that buyers are
+        becoming cautious even as sellers are still optimistic. This divergence
+        is a Phase II to III transition signal.
+
+    - id: L06
+      name: "WARN Act Filings (Layoff Notices)"
+      source: "State Department of Labor websites"
+      frequency: Continuous (as filed)
+      lag_to_reality: "60 days before layoffs occur"
+      thresholds:
+        baseline: "Normal churn. No signal."
+        elevated: "2x baseline filings in a market. Watch for absorption impact."
+        spike: "Major employer downsizing. Direct demand destruction for office/MF."
+      signals_transition: "Phase II to III (demand-side shock)"
+      notes: >
+        WARN Act requires 60-day notice for layoffs of 100+ workers. Monitoring
+        filings for target markets provides early warning of demand destruction.
+        Particularly important for markets dependent on a single large employer
+        or industry cluster.
+
+    - id: L07
+      name: "Interest Rate Futures (Fed Funds, 10-Year Treasury)"
+      source: "CME FedWatch, Treasury.gov, Bloomberg"
+      frequency: Daily
+      lag_to_reality: "3-12 months leading for cap rate movement"
+      thresholds:
+        rate_cuts_priced: "Capital cost declining. Favorable for Phase I/II. Cap rate compression ahead."
+        flat_curve: "Neutral to cautious. Mid-cycle."
+        rate_hikes_priced: "Capital cost rising. Headwind for all phases. Accelerates Phase III."
+        inverted_curve: "Recession signal (6-18 month lead). Phase IV preparation."
+      signals_transition: "Impacts all transitions. Rate hikes accelerate II to III. Rate cuts accelerate IV to I."
+      notes: >
+        The 10-year Treasury is the foundation of cap rate pricing. A 100 bps
+        move in the 10-year eventually flows through to cap rates (with a 6-12
+        month lag and imperfect correlation). Fed funds rate affects floating-rate
+        debt cost directly and bridge/construction loan economics.
+
+  coincident:
+
+    - id: C01
+      name: "Vacancy Rate vs Long-Term Average"
+      source: "CoStar, CBRE EA, REIS, Yardi Matrix"
+      frequency: Quarterly
+      lag_to_reality: "Real-time (when published, reflects trailing quarter)"
+      thresholds:
+        well_below_lta: "Phase II. Strong fundamentals."
+        at_lta: "Transitional. Could be Phase I (improving) or Phase III (deteriorating)."
+        above_lta: "Phase III or IV. Weak fundamentals."
+        significantly_above_lta: "Phase IV. Market in distress."
+      signals_transition: "Direction matters more than level. Crossing LTA downward = Phase I to II. Crossing upward = Phase II to III."
+      interpretation: >
+        Compare current vacancy to 20-year average. The direction of movement
+        (improving vs deteriorating) is more important than the absolute level.
+        A market at 8% vacancy and declining is healthier than one at 5% and rising.
+
+    - id: C02
+      name: "Net Absorption (Trailing 4 Quarters)"
+      source: "CoStar, CBRE EA, REIS"
+      frequency: Quarterly
+      lag_to_reality: "Real-time"
+      thresholds:
+        strongly_positive: "Phase II. Demand outpacing supply."
+        positive_but_declining: "Phase II late / Phase III early. Peak is behind."
+        flat_to_slightly_negative: "Phase III or IV."
+        significantly_negative: "Phase IV. Tenant contraction underway."
+      signals_transition: "Absorption peak confirms Phase II peak. Absorption turning negative confirms Phase III to IV."
+
+    - id: C03
+      name: "Effective Rent Growth (Year-over-Year)"
+      source: "CoStar, Yardi Matrix, REIS"
+      frequency: Quarterly
+      lag_to_reality: "Real-time"
+      thresholds:
+        above_5pct: "Phase II expansion. Strong landlord pricing power."
+        2_to_5pct: "Phase II moderate or early Phase III deceleration."
+        0_to_2pct: "Phase I late or Phase III."
+        negative: "Phase III late or Phase IV."
+      signals_transition: "Rent growth peaking = Phase II peak. Rent growth turning negative = Phase III to IV."
+
+    - id: C04
+      name: "Cap Rate Level and Trend"
+      source: "MSCI RCA, CoStar, CBRE EA, broker reports"
+      frequency: Quarterly
+      lag_to_reality: "1-2 quarters (transactions close with lag)"
+      thresholds:
+        compressing: "Phase I to II. Capital flowing in, risk premium declining."
+        stable_low: "Phase II established."
+        widening: "Phase III. Risk premium expanding. Price discovery difficult."
+        wide_and_volatile: "Phase IV. Distress pricing. Wide bid-ask spreads."
+      signals_transition: "Cap rate inflection point (compression to expansion) confirms Phase II to III."
+
+    - id: C05
+      name: "Concession Trend"
+      source: "Leasing broker surveys, CoStar (partial), mystery shopping"
+      frequency: Quarterly
+      lag_to_reality: "Real-time (most current market signal)"
+      thresholds:
+        concessions_declining: "Phase I to II. Landlord leverage increasing."
+        no_concessions: "Phase II peak. Landlord has pricing power."
+        concessions_reappearing: "Phase III. Market softening."
+        concessions_aggressive: "Phase IV. Landlords desperate to retain tenants."
+      signals_transition: "First reappearance of concessions is earliest Phase III signal. Often leads rent growth deceleration by 1-2 quarters."
+      notes: >
+        This is the most real-time market signal available. Concessions appear
+        before vacancy rises and before rent growth decelerates in published data.
+        Talk to leasing brokers monthly.
+
+  lagging:
+
+    - id: G01
+      name: "Construction Completions (Deliveries)"
+      source: "CoStar, Census, Dodge Data"
+      frequency: Quarterly
+      lag_to_reality: "18-24 months behind starts"
+      thresholds:
+        rising: "Confirms Phase II to III transition (supply arriving)"
+        peak: "Phase III underway"
+        declining: "Phase IV (no new projects completing)"
+        trough: "Phase I (pipeline exhausted)"
+      signals_transition: "Confirms Phase III after the fact. By the time deliveries peak, the damage to fundamentals is underway."
+
+    - id: G02
+      name: "Foreclosure Filings"
+      source: "County records, ATTOM Data, RealtyTrac"
+      frequency: Monthly
+      lag_to_reality: "6-18 months after defaults begin"
+      thresholds:
+        low: "Phase I or II. Healthy credit environment."
+        rising: "Phase III late to Phase IV early. Distress materializing."
+        peak: "Phase IV. Maximum distressed inventory."
+        declining: "Phase I. Workout cycle completing."
+      signals_transition: "Confirms Phase IV. By the time foreclosures peak, the smart money is already buying."
+
+    - id: G03
+      name: "Appraised Values (NCREIF Property Index)"
+      source: "NCREIF (quarterly)"
+      frequency: Quarterly
+      lag_to_reality: "1-2 quarters behind transaction pricing"
+      thresholds:
+        appreciation_positive: "Phase I late or Phase II."
+        appreciation_decelerating: "Phase II late."
+        depreciation: "Phase III to IV."
+        depreciation_moderating: "Phase IV late, approaching Phase I."
+      signals_transition: "NCREIF values are smoothed and lag transactions by 1-2 quarters. Useful for confirmation, not prediction."
+
+    - id: G04
+      name: "CRE Loan Origination Volume"
+      source: "MBA Commercial/Multifamily Origination Survey"
+      frequency: Quarterly
+      lag_to_reality: "3-6 months behind lending decisions"
+      thresholds:
+        rising: "Phase I to II. Lenders re-entering market."
+        peak: "Phase II peak. Maximum liquidity."
+        declining: "Phase III. Lenders pulling back."
+        trough: "Phase IV. Minimal lending. Refinancing risk highest."
+      signals_transition: "Loan origination peak confirms Phase II peak (usually with 1-2 quarter lag). Trough confirms Phase IV."
+
+composite_scoring:
+  description: >
+    No single indicator is sufficient. Use a weighted composite of 5-7 indicators
+    to determine cycle position. Leading indicators should receive highest weight
+    for forward-looking decisions.
+  suggested_weights:
+    leading: 50%
+    coincident: 35%
+    lagging: 15%
+  scoring_method: >
+    For each indicator, assign a phase score (1=Recovery, 2=Expansion,
+    3=Hypersupply, 4=Recession). Weight by category. The weighted average
+    determines your assessed phase position. Scores between integers indicate
+    transition (e.g., 2.6 = late Expansion approaching Hypersupply).
+  example:
+    market: "Dallas Multifamily, Q1 2026"
+    indicators:
+      L01_permits: {phase_score: 3, weight: 0.12, note: "Permits declining from peak"}
+      L02_cmbs: {phase_score: 2, weight: 0.10, note: "Delinquency low but ticking up"}
+      L03_lending: {phase_score: 3, weight: 0.10, note: "Banks tightening MF standards"}
+      L05_volume: {phase_score: 3, weight: 0.08, note: "Transaction volume -15% YoY"}
+      L07_rates: {phase_score: 2, weight: 0.10, note: "Rate cuts priced, supportive"}
+      C01_vacancy: {phase_score: 3, weight: 0.10, note: "Vacancy 7.2%, above 6.1% LTA, rising"}
+      C02_absorption: {phase_score: 2, weight: 0.08, note: "Absorption positive but slowing"}
+      C03_rent: {phase_score: 3, weight: 0.10, note: "Effective rent growth -1.2% YoY"}
+      C05_concessions: {phase_score: 3, weight: 0.07, note: "2 months free common in lease-ups"}
+      G01_deliveries: {phase_score: 3, weight: 0.08, note: "Record completions this quarter"}
+      G02_foreclosures: {phase_score: 2, weight: 0.07, note: "Low but rising"}
+    weighted_score: 2.72
+    assessed_phase: "Phase III (Hypersupply) -- early stage"
+    strategy: "SELL non-core Dallas MF. HOLD only long-WALE, stabilized assets. DO NOT ACQUIRE at current pricing. Prepare capital for Phase IV buying opportunity in 12-18 months."

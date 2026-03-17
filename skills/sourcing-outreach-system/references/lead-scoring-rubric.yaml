@@ -1,0 +1,253 @@
+# Lead Scoring Rubric for CRE Deal Sourcing
+# Total score: 0-100 points across 4 categories (25 points each)
+# Thresholds determine pipeline stage classification
+
+schema:
+  version: "1.0"
+  total_possible: 100
+  categories:
+    - property_fit (0-25)
+    - seller_motivation (0-25)
+    - deal_economics (0-25)
+    - competitive_dynamics (0-25)
+
+thresholds:
+  hot:
+    range: "76-100"
+    description: "High probability of closing. Active pursuit. Principal contact within 24 hours."
+    action: "Submit LOI within 1 week. Assign dedicated deal lead."
+    expected_conversion: "15-25%"
+  warm:
+    range: "51-75"
+    description: "Good fit with manageable gaps. Active nurturing required."
+    action: "Schedule follow-up within 1 week. Gather missing data. Prepare preliminary underwriting."
+    expected_conversion: "5-10%"
+  nurture:
+    range: "26-50"
+    description: "Potential fit but timing, motivation, or economics not aligned."
+    action: "Add to CRM drip campaign. Quarterly check-in. Monitor for trigger events."
+    expected_conversion: "1-3%"
+  file:
+    range: "0-25"
+    description: "Does not meet current criteria. Archive for future reference."
+    action: "Log in CRM. No active outreach. Re-score if market conditions change."
+    expected_conversion: "<1%"
+
+categories:
+
+  property_fit:
+    weight: 25
+    description: "How well does the property match the firm's acquisition criteria?"
+    sub_criteria:
+
+      property_type:
+        max_points: 6
+        scoring:
+          6: "Exact target type (e.g., garden-style multifamily if that's the buy box)"
+          4: "Adjacent type (e.g., mid-rise multifamily when targeting garden-style)"
+          2: "Tangential type (e.g., mixed-use with significant residential component)"
+          0: "Outside investment mandate entirely"
+
+      size:
+        max_points: 5
+        scoring:
+          5: "Squarely within target unit count or SF range"
+          3: "Within 20% of target range boundaries"
+          1: "Within 50% of target range (stretch deal)"
+          0: "Materially outside range (too small to move the needle or too large for capital)"
+
+      location:
+        max_points: 6
+        scoring:
+          6: "Target submarket, A/B location within submarket"
+          4: "Target MSA, secondary submarket"
+          2: "Adjacent MSA or emerging submarket"
+          0: "Outside geographic mandate"
+
+      vintage_condition:
+        max_points: 4
+        scoring:
+          4: "Target vintage range, condition matches strategy (e.g., value-add candidate)"
+          2: "Acceptable vintage, condition manageable with known capex"
+          0: "Major structural/environmental issues or functionally obsolete"
+
+      regulatory_environment:
+        max_points: 4
+        scoring:
+          4: "Favorable regulatory environment (landlord-friendly, no rent control, reasonable BPS)"
+          2: "Moderate regulation (some rent stabilization, emerging BPS compliance)"
+          0: "Hostile regulatory environment (strict rent control, punitive BPS, moratoriums)"
+
+  seller_motivation:
+    weight: 25
+    description: "How motivated is the seller to transact, and how soon?"
+    sub_criteria:
+
+      stated_interest:
+        max_points: 7
+        scoring:
+          7: "Seller has stated willingness to sell or is actively marketing"
+          5: "Seller is open to hearing offers / 'depends on price'"
+          3: "Seller is neutral -- not opposed but not actively seeking"
+          1: "Seller declined but did not say never"
+          0: "Seller firmly stated no interest, hostile response"
+
+      motivation_trigger:
+        max_points: 7
+        scoring:
+          7: "Strong trigger present: estate/death, divorce, partnership dispute, financial distress, tax deadline (1031), retirement, relocation"
+          5: "Moderate trigger: aging owner (70+), deferred maintenance burden, upcoming loan maturity, tired landlord"
+          3: "Mild trigger: long hold period (15+ years), market peak perception, portfolio rebalancing"
+          1: "No discernible trigger but property is not core to owner's strategy"
+          0: "Owner recently acquired, actively investing in property, long-term hold"
+
+      timeline:
+        max_points: 6
+        scoring:
+          6: "Seller wants to transact within 0-3 months"
+          4: "Seller considering within 3-12 months"
+          2: "Seller may consider in 12-24 months"
+          0: "No timeline, indefinite hold"
+
+      decision_authority:
+        max_points: 5
+        scoring:
+          5: "Single decision-maker, direct contact established"
+          3: "Small partnership, key contact identified, generally aligned"
+          1: "Institutional owner, multiple approval layers, bureaucratic"
+          0: "Cannot identify decision-maker, trust/estate with unclear authority"
+
+  deal_economics:
+    weight: 25
+    description: "Does the deal pencil at a price the seller would accept?"
+    sub_criteria:
+
+      pricing_expectations:
+        max_points: 7
+        scoring:
+          7: "Seller's price expectation aligns with or is below our underwritten value"
+          5: "Seller expects 5-10% above our value (negotiable gap)"
+          3: "Seller expects 10-20% above our value (requires education/time)"
+          1: "Seller expects >20% above our value (aspirational pricing)"
+          0: "Seller's expectations are unrealistic / no anchor to market"
+
+      cap_rate_yield:
+        max_points: 6
+        scoring:
+          6: "Going-in cap rate meets or exceeds target (stabilized or proforma based on strategy)"
+          4: "Cap rate within 25 bps of target (achievable with modest assumptions)"
+          2: "Cap rate 25-50 bps below target (requires above-market execution)"
+          0: "Cap rate >50 bps below target (does not pencil without heroic assumptions)"
+
+      value_add_potential:
+        max_points: 6
+        scoring:
+          6: "Clear, quantifiable value-add: below-market rents >15%, identified capex with proven ROI, operational upside"
+          4: "Moderate value-add: below-market rents 5-15%, some operational improvement available"
+          2: "Limited value-add: near-market rents, minimal operational upside"
+          0: "No value-add or negative (above-market rents, over-improved, declining submarket)"
+
+      financing_availability:
+        max_points: 6
+        scoring:
+          6: "Agency-eligible, strong debt market interest, favorable LTV and terms"
+          4: "Conventional financing available, standard terms"
+          2: "Financing challenging (specialized lender needed, lower LTV, higher rate)"
+          0: "Financing very difficult (environmental issues, occupancy too low, structural problems)"
+
+  competitive_dynamics:
+    weight: 25
+    description: "What is our competitive position relative to other potential buyers?"
+    sub_criteria:
+
+      market_exposure:
+        max_points: 7
+        scoring:
+          7: "Truly off-market: no broker, no other buyers aware, direct owner contact"
+          5: "Lightly marketed: broker pocket listing, 2-3 buyers aware"
+          3: "Marketed to select group: targeted offering memorandum, 10-20 buyers"
+          1: "Broadly marketed: listed on LoopNet/CoStar, open bid process"
+          0: "Auction or best-and-final process with 20+ bidders"
+
+      relationship_advantage:
+        max_points: 6
+        scoring:
+          6: "Existing relationship with seller (prior deals, personal connection, advisor referral)"
+          4: "Warm introduction (mutual contact, broker relationship, community tie)"
+          2: "Cold outreach but strong first impression (credible firm, relevant track record)"
+          0: "No relationship, competing against buyers with relationships"
+
+      speed_advantage:
+        max_points: 6
+        scoring:
+          6: "Can close faster than competitors (pre-approved debt, committed equity, simplified diligence)"
+          4: "Competitive closing timeline (standard 30-60 day process)"
+          2: "Slower than typical (need fund approval, financing contingency, partner consent)"
+          0: "Significant delay risk (capital raise needed, committee process, closing uncertainty)"
+
+      structural_advantage:
+        max_points: 6
+        scoring:
+          6: "Unique advantage: 1031 buyer (tax-motivated premium), operating expertise seller values, portfolio synergy"
+          4: "Moderate advantage: local presence, strong reputation, seller-preferred structure"
+          2: "No advantage or disadvantage: standard buyer"
+          0: "Structural disadvantage: out-of-market, no track record, contingent offer"
+
+# Scoring Process
+scoring_process:
+  frequency: "Score at first contact, re-score at each meaningful interaction"
+  owner: "Deal sourcing analyst or acquisitions associate"
+  review: "Acquisitions director reviews all HOT leads weekly"
+  documentation: "Record score, rationale, and data sources in CRM"
+  re_scoring_triggers:
+    - "New information from owner or broker"
+    - "Market condition change (rates, cap rates, regulation)"
+    - "Competitive landscape change (new bidder, deal fell through)"
+    - "Time-based (quarterly review of NURTURE pipeline)"
+    - "Trigger event (loan maturity, tax deadline, ownership change)"
+
+# CRM Integration
+crm_fields:
+  required:
+    - property_address
+    - owner_name
+    - owner_contact_info
+    - property_type
+    - estimated_size_units_or_sf
+    - total_score
+    - category_scores
+    - pipeline_stage  # HOT, WARM, NURTURE, FILE
+    - last_contact_date
+    - next_action_date
+    - assigned_to
+  optional:
+    - estimated_value
+    - asking_price
+    - cap_rate_estimate
+    - motivation_notes
+    - competitive_intel
+    - broker_name
+    - data_sources_used
+
+# Pipeline Management
+pipeline_velocity:
+  hot_to_loi: "1-2 weeks"
+  loi_to_psa: "1-3 weeks"
+  psa_to_close: "30-60 days"
+  total_hot_to_close: "2-4 months typical"
+
+stage_gate_criteria:
+  hot_to_loi:
+    - "Score >= 76"
+    - "Preliminary underwriting complete"
+    - "Seller engaged and responsive"
+    - "Pricing gap < 10%"
+  loi_to_psa:
+    - "LOI accepted or countered within acceptable range"
+    - "Financing pre-approval obtained"
+    - "Investment committee verbal approval"
+  psa_to_close:
+    - "PSA executed"
+    - "Earnest money deposited"
+    - "Diligence workplan initiated"
+    - "Lender engaged and processing"
