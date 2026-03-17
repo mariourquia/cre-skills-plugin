@@ -4,6 +4,22 @@ This guide covers installing the CRE Skills Plugin for Claude Desktop (the macOS
 
 ---
 
+## Recommended: macOS DMG Installer
+
+The simplest installation method for Claude Desktop users on macOS.
+
+1. Download `cre-skills-v1.0.0.dmg` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
+2. Open the DMG.
+3. Double-click "CRE Skills Installer".
+4. Follow the Terminal prompts. The installer detects whether you have Claude Code, Claude Desktop, or both, and configures each automatically.
+5. Restart Claude Desktop.
+
+After installation, start a new conversation and use `/cre-skills:cre-route` to verify the plugin is active.
+
+If you prefer a manual approach or are on Windows, use one of the options below.
+
+---
+
 ## Option A: Plugin Marketplace (When Available)
 
 When the Claude plugin marketplace is live, this will be the simplest path.

@@ -42,16 +42,38 @@ claude plugin add /path/to/cre-skills-plugin
 claude plugin add github:mariourquia/cre-skills-plugin
 ```
 
+### One-Line Installer
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/mariourquia/cre-skills-plugin/main/scripts/install.sh | bash
+```
+
+### macOS DMG (Double-Click Installer)
+
+Download `cre-skills-v1.0.0.dmg` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
+
+1. Open the DMG
+2. Double-click "CRE Skills Installer"
+3. Follow the Terminal prompts
+4. Restart Claude Code or Claude Desktop
+
+The installer automatically detects whether you have Claude Code, Claude Desktop, or both, and configures accordingly.
+
+### Claude Desktop
+
+The DMG installer (above) handles Claude Desktop configuration automatically. For manual setup, see [docs/install-desktop.md](docs/install-desktop.md).
+
+### Claude.ai / Cowork (Team Environments)
+
+For team deployment, add to your marketplace configuration or use managed settings.
+See [docs/install-cowork.md](docs/install-cowork.md) for detailed instructions.
+
 ### Claude Code (local development)
 
 ```bash
 git clone https://github.com/mariourquia/cre-skills-plugin.git
 claude --plugin-dir ./cre-skills-plugin
 ```
-
-### Claude Desktop / Claude.ai
-
-The plugin works with Claude Desktop when installed through a marketplace or loaded via the plugin manager. Skills are available as `/cre-skills:skill-name`.
 
 ---
 
