@@ -1,0 +1,321 @@
+# Entitlement Approval Timeline and Cost Benchmarks
+# Realistic ranges by approval type and municipality complexity
+
+schema:
+  version: "1.0"
+  context: "Benchmarks for US municipalities. Actual timelines vary significantly by jurisdiction, project complexity, and political environment. Always confirm with local land use attorney."
+  notes:
+    - "Timelines measured from complete application submission to final decision"
+    - "Costs include application fees, consultant fees, and legal fees"
+    - "Does not include construction permitting (which follows entitlement)"
+
+approval_types:
+
+  as_of_right:
+    description: "Project complies with all zoning requirements. Administrative/ministerial approval only."
+    triggers:
+      - "Permitted use in zoning district"
+      - "Meets all dimensional standards (setbacks, height, density, parking, FAR)"
+      - "No overlay district requiring additional review"
+    timeline:
+      typical: "2-4 months"
+      fast_track: "4-8 weeks (small municipalities, simple projects)"
+      slow: "4-6 months (large cities, complex plan review, backlogs)"
+      bottlenecks:
+        - "Plan review staff capacity and backlog"
+        - "Utility connection approvals"
+        - "Fire marshal review"
+        - "Stormwater management approval"
+        - "ADA compliance review"
+    costs:
+      application_fees: "$2,000-15,000"
+      plan_review_fees: "$3,000-20,000 (often per SF or per unit)"
+      impact_fees: "$5,000-50,000+ per unit (varies wildly by jurisdiction)"
+      professional_fees:
+        architect: "$10,000-50,000 (permit-ready drawings)"
+        engineer: "$5,000-25,000 (civil/site)"
+        attorney: "$2,000-10,000 (review only)"
+      total_estimated: "$25,000-120,000 (excluding impact fees)"
+    approval_probability: "95-99%"
+    risk_factors:
+      - "Plan review comments requiring redesign"
+      - "Utility capacity constraints discovered during review"
+      - "Staff interpretation of ambiguous code provisions"
+
+  site_plan_review:
+    description: "Permitted use requiring planning board approval of site design, circulation, landscaping, architecture."
+    triggers:
+      - "Project exceeds size threshold for administrative review"
+      - "New construction or major addition"
+      - "Change of use requiring site improvements"
+    timeline:
+      typical: "4-8 months"
+      fast_track: "3-5 months (streamlined jurisdictions, simple projects)"
+      slow: "8-14 months (complex projects, multiple revision rounds, design review overlay)"
+      phases:
+        pre_application_meeting: "2-4 weeks to schedule and attend"
+        application_preparation: "4-8 weeks"
+        staff_review_period: "4-8 weeks (includes comment rounds)"
+        public_hearing: "1-2 months from complete review to hearing date"
+        conditions_resolution: "2-4 weeks post-approval"
+      bottlenecks:
+        - "Traffic impact study (add 2-3 months if required)"
+        - "Environmental review (wetlands, stormwater)"
+        - "Design review board (additional hearing cycle)"
+        - "Staff comment resolution iterations"
+        - "Planning board meeting scheduling (often monthly)"
+    costs:
+      application_fees: "$5,000-25,000"
+      traffic_study: "$15,000-60,000 (if required)"
+      environmental_assessment: "$10,000-40,000"
+      professional_fees:
+        architect: "$20,000-80,000"
+        civil_engineer: "$15,000-50,000"
+        landscape_architect: "$5,000-25,000"
+        attorney: "$10,000-30,000"
+        planning_consultant: "$10,000-30,000"
+      total_estimated: "$50,000-250,000"
+    approval_probability: "85-95%"
+    common_conditions:
+      - "Landscaping modifications"
+      - "Traffic mitigation (turn lanes, signals, improvements)"
+      - "Stormwater management enhancements"
+      - "Architectural design changes"
+      - "Lighting plan adjustments"
+      - "Construction hour restrictions"
+      - "Phasing requirements"
+
+  variance:
+    description: "Relief from specific dimensional standard (setback, height, parking, lot coverage)."
+    triggers:
+      - "Project does not meet one or more dimensional requirements"
+      - "Requires ZBA or equivalent quasi-judicial hearing"
+    timeline:
+      minor_variance:
+        description: "Small dimensional deviation (e.g., 10% setback reduction)"
+        typical: "3-6 months"
+      standard_variance:
+        description: "Moderate dimensional deviation"
+        typical: "6-9 months"
+      major_variance:
+        description: "Significant deviation from multiple standards"
+        typical: "8-12 months"
+      phases:
+        pre_application: "2-4 weeks"
+        application_preparation: "4-6 weeks"
+        public_notice_period: "15-30 days (certified mail to neighbors)"
+        staff_review: "4-6 weeks"
+        zba_hearing: "1-2 months from notice"
+        appeal_period: "30 days post-decision"
+      bottlenecks:
+        - "ZBA meeting schedule (often monthly or bi-monthly)"
+        - "Neighbor opposition triggering continuances"
+        - "Legal standard demonstration (hardship vs. practical difficulty)"
+        - "Staff recommendation against variance"
+    costs:
+      application_fees: "$2,000-10,000"
+      public_notice: "$500-2,000 (mailing, publication)"
+      professional_fees:
+        attorney: "$10,000-40,000 (critical for variance cases)"
+        planning_consultant: "$5,000-20,000"
+        engineer: "$5,000-15,000"
+        appraiser_or_expert: "$3,000-10,000 (if hardship must be demonstrated)"
+      total_estimated: "$25,000-100,000"
+    approval_probability:
+      minor: "70-85%"
+      standard: "55-70%"
+      major: "40-60%"
+    denial_risk_factors:
+      high_risk:
+        - "Self-created hardship (developer caused the need)"
+        - "Use variance disguised as area variance"
+        - "Significant neighbor opposition with valid concerns"
+        - "Staff recommendation for denial"
+        - "Prior denial of similar variance on site"
+      low_risk:
+        - "Unique lot shape or topography"
+        - "Variance consistent with neighborhood character"
+        - "No objections from neighbors"
+        - "Staff recommendation for approval"
+        - "Conditions offered to mitigate impact"
+
+  conditional_use_permit:
+    description: "Approval for use listed as conditional/special in zoning district."
+    triggers:
+      - "Proposed use requires CUP per zoning code"
+      - "Common CUP uses: drive-throughs, churches, daycare, gas stations, cell towers"
+    timeline:
+      typical: "4-8 months"
+      fast_track: "3-5 months"
+      slow: "8-14 months (controversial uses, community opposition)"
+      phases:
+        pre_application: "2-4 weeks"
+        application_preparation: "4-8 weeks"
+        staff_review: "4-8 weeks"
+        public_notice: "15-30 days"
+        planning_board_hearing: "1-2 months"
+        conditions_resolution: "2-4 weeks"
+    costs:
+      application_fees: "$3,000-15,000"
+      professional_fees:
+        attorney: "$10,000-35,000"
+        planning_consultant: "$5,000-20,000"
+        traffic_study: "$15,000-50,000 (often required)"
+        noise_study: "$5,000-15,000 (if applicable)"
+        other_specialized: "$5,000-20,000"
+      total_estimated: "$40,000-150,000"
+    approval_probability: "65-80%"
+    common_conditions:
+      - "Operating hours restrictions"
+      - "Noise limits and monitoring"
+      - "Traffic management plan"
+      - "Screening and buffering from residential"
+      - "Annual review or sunset clause"
+      - "Maximum occupancy or capacity limits"
+
+  rezoning:
+    description: "Legislative change of zoning district classification."
+    triggers:
+      - "Proposed use not permitted or conditional in current district"
+      - "Density or intensity significantly above current zoning"
+      - "Comprehensive plan supports higher-intensity use"
+    timeline:
+      plan_consistent:
+        description: "Proposed zoning consistent with comprehensive plan future land use"
+        typical: "9-18 months"
+      plan_inconsistent:
+        description: "Requires comprehensive plan amendment first, then rezoning"
+        typical: "18-30 months"
+      phases:
+        pre_application_meetings: "1-2 months"
+        community_engagement: "2-4 months (neighborhood meetings, charrettes)"
+        application_preparation: "2-4 months"
+        staff_review: "2-4 months"
+        planning_board_hearing: "1-2 months"
+        city_council_first_reading: "1-2 months after PB recommendation"
+        city_council_second_reading: "1-2 months after first reading"
+        ordinance_effective: "30 days after adoption"
+      bottlenecks:
+        - "Community opposition requiring multiple hearings"
+        - "Council member concerns requiring negotiation"
+        - "Environmental impact review (EIS/SEPA)"
+        - "Traffic impact study and mitigation negotiation"
+        - "Affordable housing negotiation"
+        - "Infrastructure capacity analysis"
+        - "Comprehensive plan amendment process (if needed)"
+    costs:
+      application_fees: "$5,000-30,000"
+      comprehensive_plan_amendment: "$5,000-15,000 (if required)"
+      professional_fees:
+        attorney: "$25,000-100,000+"
+        planning_consultant: "$15,000-60,000"
+        traffic_study: "$25,000-75,000"
+        environmental_study: "$15,000-50,000"
+        community_engagement: "$10,000-40,000"
+        lobbyist_or_government_relations: "$10,000-50,000 (if applicable)"
+        fiscal_impact_analysis: "$10,000-30,000"
+      total_estimated: "$75,000-350,000"
+    approval_probability:
+      plan_consistent: "55-75%"
+      plan_inconsistent: "25-45%"
+    proffer_obligations:
+      description: "Voluntary developer commitments offered to secure approval"
+      common_proffers:
+        - "Affordable housing set-aside (10-20% of units)"
+        - "Public infrastructure improvements (roads, signals, utilities)"
+        - "Park land dedication or fee-in-lieu"
+        - "School site dedication or impact payment"
+        - "Community amenities (community center, trail, plaza)"
+        - "Design standards above code minimum"
+        - "Phasing commitments"
+      typical_cost: "5-15% of project development cost"
+
+  planned_development:
+    description: "Flexible zoning approval for large or mixed-use projects with negotiated standards."
+    triggers:
+      - "Large-scale development (typically 10+ acres or 100+ units)"
+      - "Mixed-use project requiring flexibility across use categories"
+      - "Developer seeking density bonus in exchange for public benefits"
+    timeline:
+      typical: "18-36 months"
+      fast_track: "12-18 months (strong political support, simple project)"
+      slow: "30-48 months (large-scale, controversial, phased)"
+      phases:
+        concept_plan: "3-6 months (informal review, community input)"
+        preliminary_plan: "6-12 months (formal review, public hearings)"
+        final_plan: "3-6 months (detailed engineering, final conditions)"
+        development_agreement: "2-4 months (legal negotiation)"
+    costs:
+      application_fees: "$10,000-50,000"
+      professional_fees:
+        attorney: "$50,000-200,000"
+        planning_consultant: "$30,000-100,000"
+        architect_urban_designer: "$30,000-100,000"
+        civil_engineer: "$25,000-75,000"
+        traffic_engineer: "$30,000-100,000"
+        environmental_consultant: "$20,000-75,000"
+        community_engagement: "$15,000-60,000"
+        fiscal_impact_analyst: "$10,000-30,000"
+      total_estimated: "$150,000-500,000+"
+    approval_probability: "50-70%"
+    development_agreement_elements:
+      - "Vesting period (protection from future zoning changes)"
+      - "Phasing schedule and triggers"
+      - "Infrastructure obligations and timing"
+      - "Affordable housing commitments"
+      - "Design standards and review process"
+      - "Fees and exactions schedule"
+      - "Performance bonds and guarantees"
+      - "Sunset clause and extension provisions"
+
+# Municipality Complexity Factor
+municipality_complexity:
+  description: "Adjust timelines based on municipality type"
+  factors:
+    streamlined:
+      description: "Pro-development jurisdictions with fast-track programs"
+      timeline_multiplier: 0.7
+      examples: "Some Sun Belt suburbs, enterprise zones, opportunity zones"
+      indicators:
+        - "Published permit timeline guarantees"
+        - "One-stop-shop permit center"
+        - "Electronic plan review"
+        - "Staff-level approval authority for routine projects"
+    standard:
+      description: "Typical municipality with standard process"
+      timeline_multiplier: 1.0
+    complex:
+      description: "Large cities, coastal/historic areas, high-regulation environments"
+      timeline_multiplier: 1.5
+      examples: "NYC, SF, Boston, historic districts, California (CEQA)"
+      indicators:
+        - "Multiple discretionary reviews required"
+        - "Environmental impact review (EIS/CEQA)"
+        - "Community board or advisory body review"
+        - "Design review overlay"
+        - "Inclusionary zoning negotiation"
+    very_complex:
+      description: "Jurisdictions with extensive environmental or political hurdles"
+      timeline_multiplier: 2.0
+      examples: "California coastal zone, NEPA-triggering federal nexus, contested rezonings in major cities"
+
+# Carrying Cost Impact
+carrying_costs:
+  description: "Financial impact of entitlement timeline on project economics"
+  components:
+    land_cost_of_carry:
+      formula: "land_price * (interest_rate / 12) * months_of_entitlement"
+      example: "$5M land * 8% / 12 * 18 months = $600,000"
+    property_taxes:
+      formula: "assessed_value * tax_rate * (months / 12)"
+      note: "May be at current (lower) use assessment during entitlement"
+    professional_fees:
+      note: "See approval type costs above"
+    opportunity_cost:
+      formula: "equity_deployed * target_IRR * (months / 12)"
+      example: "$2M equity * 20% IRR * 18 months = $600,000"
+    insurance_and_maintenance:
+      typical: "$1-3/SF/year for land banking"
+  total_carrying_cost_guidance:
+    rule_of_thumb: "Budget 2-5% of total project cost for entitlement period carrying costs"
+    sensitivity: "Every 6-month delay adds ~1-2% to total project cost"

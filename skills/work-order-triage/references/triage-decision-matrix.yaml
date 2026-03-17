@@ -1,0 +1,324 @@
+# Work Order Triage Decision Matrix
+# Classification rubric for property management maintenance requests
+
+schema:
+  version: "1.0"
+  context: "Triage system for commercial and multifamily property management. Classifies incoming work orders by severity and routes to appropriate response workflow."
+
+priority_levels:
+
+  emergency:
+    code: "P1"
+    color: "RED"
+    description: "Immediate threat to life safety, property, or habitability. Requires immediate dispatch."
+    response_time: "Immediate (within 30 minutes of report)"
+    resolution_target: "Stabilize within 2 hours, full repair within 24 hours"
+    approval_authority: "Property manager or on-call engineer can authorize up to $5,000 without VP approval. No spending limit for life safety."
+    budget_threshold: "$5,000 pre-approved for stabilization; above $5,000 requires VP notification within 1 hour"
+    escalation: "If not stabilized within 2 hours, escalate to VP of Operations and asset manager"
+    after_hours: "Dispatch immediately via on-call vendor or engineer"
+
+    categories:
+      life_safety:
+        examples:
+          - "Gas leak (evacuate, call utility and 911)"
+          - "Fire or smoke (evacuate, call 911)"
+          - "Carbon monoxide alarm (evacuate, call 911)"
+          - "Structural collapse or imminent structural failure"
+          - "Exposed electrical wiring / electrical fire risk"
+          - "Active shooter / security breach"
+        response: "Call 911 first. Evacuate. Then dispatch on-call."
+        tenant_communication: |
+          "URGENT: [Building Name] -- Emergency in [location]. Please evacuate
+          immediately per the posted evacuation plan. Do not use elevators.
+          Assemble at [designated meeting point]. We will provide updates via
+          [email/text/PA system]. Your safety is our priority."
+
+      water_intrusion:
+        examples:
+          - "Burst pipe (supply or waste)"
+          - "Active roof leak into occupied space"
+          - "Flooding from any source"
+          - "Fire sprinkler activation (unintended)"
+          - "Sewage backup into occupied space"
+        response: "Shut off water supply (if burst pipe), deploy water extraction, protect contents"
+        tenant_communication: |
+          "NOTICE: We are aware of a water event in [location] and have
+          dispatched our emergency response team. Please move personal
+          belongings away from affected areas. We will provide an update
+          within [1 hour]. Contact: [emergency line]."
+
+      hvac_failure_critical:
+        examples:
+          - "Complete HVAC failure when outdoor temp > 95F or < 32F"
+          - "Server room / data center cooling failure"
+          - "Boiler failure in freezing conditions (pipe freeze risk)"
+          - "Refrigerant leak in occupied area"
+        response: "Dispatch HVAC contractor immediately. Deploy portable units if available."
+        tenant_communication: |
+          "NOTICE: We are experiencing an HVAC system issue affecting [area].
+          Our service team has been dispatched and is en route. Estimated
+          arrival: [X minutes]. We are deploying temporary [heating/cooling]
+          units. Next update in [1 hour]."
+
+      elevator_entrapment:
+        examples:
+          - "Person(s) trapped in elevator"
+          - "Elevator malfunction with potential entrapment"
+        response: "Call elevator service company (emergency line). Call fire department if entrapment confirmed. Communicate with trapped occupants via intercom."
+        tenant_communication: |
+          "We are aware of the elevator issue and have contacted our elevator
+          service provider and local fire department. A technician is en route.
+          Please use [alternate elevator/stairs]. We will provide updates every
+          [15 minutes] until resolved."
+
+      electrical_failure:
+        examples:
+          - "Complete power loss to building (not utility-wide outage)"
+          - "Electrical panel failure, burning smell"
+          - "Generator failure during utility outage"
+          - "Transformer failure"
+        response: "Call electrician. If burning smell, evacuate affected area and call 911."
+        tenant_communication: |
+          "NOTICE: We are experiencing an electrical issue in [area]. Our
+          maintenance team and [electrician/utility company] have been notified.
+          Please do not attempt to restore power to any equipment. Emergency
+          lighting is active. Update in [30 minutes]."
+
+  urgent:
+    code: "P2"
+    color: "ORANGE"
+    description: "Significant operational disruption or risk of escalation to emergency. Requires same-day response."
+    response_time: "Within 4 hours during business hours; next business morning if reported after hours (unless P1 risk)"
+    resolution_target: "Within 24-48 hours"
+    approval_authority: "Property manager can authorize up to $2,500"
+    budget_threshold: "$2,500 pre-approved; $2,500-$10,000 requires VP approval within 24 hours"
+    escalation: "If not resolved within 48 hours, escalate to VP of Operations"
+    after_hours: "Evaluate for P1 escalation. If not life safety, schedule for first thing next business day."
+
+    categories:
+      partial_system_failure:
+        examples:
+          - "One of two elevators out of service"
+          - "Partial HVAC failure (one zone, one floor)"
+          - "Hot water failure (entire building or riser)"
+          - "Partial lighting failure (entire floor or common area)"
+          - "Building automation system (BAS) offline"
+          - "Fire alarm panel in trouble (not alarm)"
+          - "Parking gate malfunction (access blocked)"
+        response: "Dispatch appropriate vendor. Implement workaround. Post notice."
+        tenant_communication: |
+          "[Building Name] Maintenance Notice: [System] is experiencing a
+          partial outage affecting [area]. Our service team has been dispatched.
+          In the meantime, [workaround instructions]. Expected resolution:
+          [timeframe]. Contact [property management] with questions."
+
+      code_violation_risk:
+        examples:
+          - "Exit sign or emergency lighting not functioning"
+          - "Fire extinguisher missing or expired"
+          - "Tripping hazard in common area"
+          - "Handrail loose or missing"
+          - "ADA access path obstructed"
+          - "Smoke detector chirping or malfunctioning"
+        response: "Dispatch maintenance. Implement temporary safety measure (signage, barricade)."
+        tenant_communication: |
+          "Maintenance Notice: We have identified a [issue type] in [location]
+          and have scheduled repair for [date/time]. [Temporary measure] has
+          been implemented. Thank you for your patience."
+
+      major_leak:
+        examples:
+          - "Active roof leak (not into occupied space)"
+          - "Pipe leak (controlled, not burst)"
+          - "Toilet overflow (single unit, contained)"
+          - "HVAC condensate leak"
+          - "Window leak during storm"
+        response: "Deploy containment (buckets, tarps). Schedule plumber/roofer."
+        tenant_communication: |
+          "We are aware of a leak in [location] and have deployed containment
+          measures. A [plumber/roofer] is scheduled for [date/time]. Please
+          notify us if the situation changes. Contact: [phone]."
+
+      security_concern:
+        examples:
+          - "Access control system failure (doors unlocked)"
+          - "CCTV system down"
+          - "Broken exterior door or window (security risk)"
+          - "Unauthorized person in building (non-threatening)"
+        response: "Post security guard if access control is down. Dispatch locksmith/glazier."
+
+  routine:
+    code: "P3"
+    color: "YELLOW"
+    description: "Standard maintenance request. No immediate operational impact. Scheduled repair."
+    response_time: "Acknowledge within 1 business day. Schedule within 3 business days."
+    resolution_target: "Within 5-10 business days"
+    approval_authority: "Property manager for items under $1,000; maintenance supervisor for items under $500"
+    budget_threshold: "$1,000 pre-approved for routine repairs"
+    escalation: "If not completed within 10 business days, escalate to property manager"
+    after_hours: "Do not dispatch. Log for next business day processing."
+
+    categories:
+      cosmetic_repairs:
+        examples:
+          - "Wall damage (scuff, small hole, paint chip)"
+          - "Ceiling tile stained or damaged"
+          - "Carpet stain or minor tear"
+          - "Door hardware sticky or loose"
+          - "Cabinet door or drawer not closing properly"
+          - "Baseboard damaged"
+          - "Light fixture cosmetic damage (still functional)"
+        response: "Add to maintenance queue. Schedule based on location priority (common area > back-of-house)."
+        tenant_communication: |
+          "Thank you for reporting [issue]. Work order #[WO number] has been
+          created. Our maintenance team will address this within [X] business
+          days. You'll receive a notification when the work is scheduled."
+
+      minor_repairs:
+        examples:
+          - "Toilet running (not overflowing)"
+          - "Faucet dripping"
+          - "Single light bulb or ballast replacement"
+          - "Thermostat not responding (single zone, mild weather)"
+          - "Garbage disposal jammed"
+          - "Dishwasher not draining"
+          - "Window blind broken"
+          - "Outlet not working (single outlet, not a circuit)"
+        response: "Schedule maintenance tech visit."
+        tenant_communication: |
+          "Work order #[WO number] received for [issue description]. Our
+          maintenance technician will be scheduled within [X] business days.
+          Preferred access time? Reply to this message or call [phone]."
+
+      scheduled_maintenance:
+        examples:
+          - "HVAC filter replacement (per schedule)"
+          - "Pest control treatment (per schedule)"
+          - "Landscape maintenance (per schedule)"
+          - "Common area cleaning issues"
+          - "Parking lot striping touch-up"
+          - "Pressure washing (scheduled)"
+        response: "Incorporate into scheduled maintenance program."
+
+  deferrable:
+    code: "P4"
+    color: "GREEN"
+    description: "Enhancement, non-critical replacement, or long-term improvement. Can be planned and budgeted."
+    response_time: "Acknowledge within 3 business days."
+    resolution_target: "Schedule within 30-90 days or incorporate into next budget cycle"
+    approval_authority: "Property manager recommends; asset manager approves items > $2,500"
+    budget_threshold: "Requires inclusion in operating or capital budget"
+    escalation: "Review at monthly property management meeting"
+    after_hours: "Do not dispatch. Log for review."
+
+    categories:
+      enhancements:
+        examples:
+          - "Tenant requests additional electrical outlet"
+          - "Request for improved lighting in common area"
+          - "Tenant requests key card access to specific area"
+          - "Request for EV charging stations"
+          - "Signage update request"
+          - "Lobby furniture replacement request"
+          - "Bike rack installation request"
+        response: "Log request. Evaluate cost-benefit. Include in budget planning if approved."
+        tenant_communication: |
+          "Thank you for your suggestion regarding [enhancement]. We have
+          logged this request (Ref #[WO number]) and will evaluate it during
+          our next planning cycle. We'll follow up with a decision by [date]."
+
+      non_critical_replacement:
+        examples:
+          - "Appliance nearing end of life (still functional)"
+          - "Carpet replacement (worn but not hazardous)"
+          - "Countertop or cabinet replacement (cosmetic)"
+          - "Parking lot seal coating"
+          - "Interior painting (refresh, not damage repair)"
+          - "Fixture upgrade (functional but dated)"
+        response: "Assess condition. Add to capital improvement plan or next turn scope."
+
+      preventive_upgrades:
+        examples:
+          - "Energy efficiency improvement (LED upgrade, BMS optimization)"
+          - "Security system upgrade"
+          - "Common area renovation planning"
+          - "ADA compliance improvements (beyond minimum)"
+          - "Sustainability initiative (recycling program, EV infrastructure)"
+        response: "Develop scope and budget. Present at quarterly asset management review."
+
+# Triage Decision Flowchart
+decision_flowchart:
+  step_1: "Is there an immediate threat to life, health, or safety?"
+  step_1_yes: "EMERGENCY (P1) -- Dispatch immediately"
+  step_1_no: "Proceed to Step 2"
+
+  step_2: "Is there active property damage occurring or risk of escalation?"
+  step_2_yes: "Is the damage contained?"
+  step_2_yes_contained: "URGENT (P2) -- Same-day response"
+  step_2_yes_not_contained: "EMERGENCY (P1) -- Dispatch immediately"
+  step_2_no: "Proceed to Step 3"
+
+  step_3: "Does this affect daily operations or tenant use of space?"
+  step_3_yes: "URGENT (P2) if significant impact, ROUTINE (P3) if minor inconvenience"
+  step_3_no: "Proceed to Step 4"
+
+  step_4: "Is this a code compliance or regulatory issue?"
+  step_4_yes: "URGENT (P2)"
+  step_4_no: "Proceed to Step 5"
+
+  step_5: "Is this a repair of existing functionality or an enhancement?"
+  step_5_repair: "ROUTINE (P3)"
+  step_5_enhancement: "DEFERRABLE (P4)"
+
+# Vendor Management
+vendor_response:
+  emergency_vendors:
+    required: "Maintain 24/7 on-call contracts with:"
+    vendors:
+      - "Plumber (water/sewer emergencies)"
+      - "Electrician (power failures)"
+      - "HVAC contractor (heating/cooling failures)"
+      - "Elevator service company (entrapment)"
+      - "Locksmith (security breaches)"
+      - "Water extraction/restoration company (flooding)"
+      - "Glass company (broken windows/doors)"
+    contract_terms:
+      response_time: "On-site within 1-2 hours"
+      after_hours_rate: "1.5x-2.0x standard rate (negotiate caps)"
+      annual_review: "Review vendor performance and rates annually"
+
+  routine_vendors:
+    bid_threshold: "Competitive bids required for work > $2,500"
+    preferred_vendor_list: "Maintain 2-3 qualified vendors per trade"
+    insurance_requirements:
+      gl_minimum: "$1,000,000 per occurrence"
+      workers_comp: "Statutory limits"
+      auto: "$1,000,000 combined single limit"
+      additional_insured: "Property owner/manager listed as additional insured"
+
+# KPIs and Reporting
+kpis:
+  response_time:
+    p1_target: "100% acknowledged within 30 minutes"
+    p2_target: "95% acknowledged within 4 hours"
+    p3_target: "90% acknowledged within 1 business day"
+    p4_target: "85% acknowledged within 3 business days"
+  resolution_time:
+    p1_target: "95% stabilized within 2 hours"
+    p2_target: "90% resolved within 48 hours"
+    p3_target: "85% resolved within 10 business days"
+    p4_target: "80% resolved within 90 days"
+  tenant_satisfaction:
+    survey_timing: "48 hours after work order completion"
+    target_score: ">= 4.0 / 5.0"
+    response_rate_target: ">= 30%"
+  volume_metrics:
+    work_orders_per_unit_per_year: "4-8 (multifamily)"
+    work_orders_per_1000_sf_per_year: "2-4 (commercial)"
+    emergency_as_pct_of_total: "<5% (if higher, indicates deferred maintenance)"
+    completion_rate: ">95% closed within target timeframe"
+  cost_metrics:
+    average_cost_per_work_order: "$75-250 (routine), $500-2,000 (urgent), $2,000+ (emergency)"
+    maintenance_cost_per_sf: "$2-6/SF/year (office), $800-1,500/unit/year (multifamily)"
+    ratio_preventive_to_reactive: "Target 60:40 or better (more preventive = fewer emergencies)"

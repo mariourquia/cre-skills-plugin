@@ -1,0 +1,301 @@
+# Estoppel Discrepancy Checklist
+# 15 common discrepancies found when comparing estoppel certifications against lease files and internal records.
+# Each entry includes: what to look for, investigation steps, and a resolution template.
+
+schema:
+  id: string          # unique identifier
+  category: string    # Rent | Deposit | Term | Options | Expenses | Defaults | Other
+  discrepancy: string # what the mismatch looks like
+  frequency: string   # How often this appears in practice (High / Medium / Low)
+  severity: string    # Impact on closing (Critical / Moderate / Minor)
+  investigation_steps: list[string]
+  resolution_template: string  # language for the resolution letter or estoppel correction
+
+discrepancies:
+
+  - id: DISC-01
+    category: Rent
+    discrepancy: "Tenant-certified base rent does not match the rent roll or lease rent schedule"
+    frequency: High
+    severity: Critical
+    investigation_steps:
+      - "Pull the executed lease and all amendments. Trace the rent schedule from commencement through current date, applying every escalation."
+      - "Compare the lease rent schedule to the rent roll line item for this tenant. Identify whether the rent roll reflects the current period or a future/past period."
+      - "Check if a rent deferral, abatement, or credit was applied but not reversed in the rent roll."
+      - "Verify whether the escalation clause is fixed-dollar, fixed-percentage, or CPI-based. If CPI, confirm the index used and the calculation."
+      - "Contact property management to confirm what amount is actually being collected monthly."
+    resolution_template: >
+      Upon review, the discrepancy between the estoppel-certified rent of $[ESTOPPEL_AMOUNT]/month
+      and the rent roll amount of $[RENT_ROLL_AMOUNT]/month is attributable to [CAUSE: e.g.,
+      "the 2.85% annual escalation effective September 1, 2025, which was not yet reflected in
+      the rent roll as of the extraction date"]. The correct current base rent per the Lease
+      (Section [X], as amended by [Amendment]) is $[CORRECT_AMOUNT]/month. The rent roll has
+      been updated accordingly.
+
+  - id: DISC-02
+    category: Deposit
+    discrepancy: "Security deposit amount on estoppel differs from landlord's deposit records"
+    frequency: High
+    severity: Critical
+    investigation_steps:
+      - "Pull the original lease security deposit clause and all amendments modifying the deposit."
+      - "Check if the lease contains a deposit burn-down schedule (common: deposit reduces after Year 3 or Year 5 if no defaults)."
+      - "Confirm whether any portion of the deposit was drawn against and whether it was replenished."
+      - "If LC-based, pull the current LC and verify the face amount matches the required deposit."
+      - "Compare tenant's certified amount, landlord's ledger, and the LC face amount. All three must reconcile."
+    resolution_template: >
+      The estoppel certifies a security deposit of $[ESTOPPEL_AMOUNT]. Landlord records show
+      $[LANDLORD_AMOUNT]. The difference of $[DIFF] is attributable to [CAUSE: e.g., "a
+      scheduled deposit reduction per Section 7.3 of the Lease, effective after Year 5 with
+      no defaults, which was not reflected in landlord's tracking system"]. The correct deposit
+      amount as of the estoppel date is $[CORRECT_AMOUNT]. [If LC: "A replacement LC in the
+      corrected amount has been requested from the issuing bank."]
+
+  - id: DISC-03
+    category: Term
+    discrepancy: "Lease expiration date on estoppel does not match rent roll or abstract"
+    frequency: Medium
+    severity: Critical
+    investigation_steps:
+      - "Pull the original lease and every amendment. Identify every clause that modified the term."
+      - "Check for exercised renewal options that extended the term. Confirm whether the option exercise notice was properly delivered and acknowledged."
+      - "Check for early termination options that may have been exercised or may have lapsed."
+      - "Verify whether a holdover situation exists (lease expired, tenant still in occupancy, no renewal executed)."
+      - "Confirm whether month-to-month terms apply and if so, what rent governs."
+    resolution_template: >
+      The estoppel certifies a lease expiration of [ESTOPPEL_DATE]. Internal records show
+      [INTERNAL_DATE]. The discrepancy is due to [CAUSE: e.g., "the First Amendment dated
+      March 1, 2020, which extended the term by 2 years to August 31, 2030; the internal
+      abstract was not updated"]. The correct expiration date is [CORRECT_DATE]. The rent roll
+      and abstract have been corrected.
+
+  - id: DISC-04
+    category: Options
+    discrepancy: "Tenant claims renewal or expansion option that does not appear in landlord's records"
+    frequency: Medium
+    severity: Critical
+    investigation_steps:
+      - "Search the lease and all amendments, side letters, and LOIs for any option language."
+      - "Check if an option was granted verbally or in an unsigned document. These are not enforceable but indicate a negotiation history."
+      - "Review broker deal sheets from the original transaction for option terms that may have been agreed but not documented."
+      - "If the option exists in the lease but was missed in the abstract, update the abstract and assess the impact on valuation (renewal options at below-market rent reduce reversion value)."
+      - "If the option does not exist in any signed document, prepare a response to tenant's counsel requesting the supporting documentation."
+    resolution_template: >
+      Tenant's estoppel claims [OPTION_TYPE] that [EXISTS/DOES NOT EXIST] in the executed
+      Lease and amendments. [If exists: "The option is found in Section [X] of the [Lease/
+      Amendment]. Landlord's records have been updated. Impact on valuation: [describe, e.g.,
+      'Two 5-year renewal options at 95% FMV reduce the probability-weighted exit cap rate
+      assumption by approximately 15bps.']"] [If does not exist: "Landlord has requested
+      supporting documentation from Tenant. Pending resolution, this item is flagged as an
+      open diligence issue."]
+
+  - id: DISC-05
+    category: Expenses
+    discrepancy: "CAM/OpEx structure or base year on estoppel differs from lease"
+    frequency: Medium
+    severity: Moderate
+    investigation_steps:
+      - "Confirm the lease expense structure: NNN, modified gross, full service, or base year stop."
+      - "If base year, confirm which year is the base and whether any amendments reset the base year."
+      - "Check whether the property manager has been billing the correct structure. Overbilling or underbilling creates a reconciliation liability."
+      - "Review the most recent annual CAM reconciliation statement sent to tenant and compare to the estoppel certification."
+      - "If a CAM cap exists (common: 4-5% annual increase on controllable expenses), confirm whether the cap has been applied correctly in prior reconciliations."
+    resolution_template: >
+      The estoppel certifies [TENANT_CLAIMED_STRUCTURE]. The lease provides for
+      [ACTUAL_STRUCTURE]. [If overbilled: "Tenant has been overbilled by approximately
+      $[AMOUNT] over [PERIOD]. A reconciliation credit of $[CREDIT] is owed to Tenant and
+      should be reflected as a closing adjustment."] [If underbilled: "Tenant has been
+      underbilled by approximately $[AMOUNT]. Landlord's right to collect the shortfall is
+      governed by Section [X] of the Lease and applicable statute of limitations."]
+
+  - id: DISC-06
+    category: Expenses
+    discrepancy: "CAM cap percentage on estoppel differs from lease or was not applied in billings"
+    frequency: Medium
+    severity: Moderate
+    investigation_steps:
+      - "Pull the lease clause governing CAM caps. Distinguish between caps on total OpEx vs. caps on controllable expenses only."
+      - "Pull 3 years of CAM reconciliation statements. Verify whether the cap was applied."
+      - "Calculate the cumulative vs. compounding cap. A cumulative 5% cap means 5% over base year total; a compounding 5% cap means 5% increase year-over-year."
+      - "If the cap was not applied, calculate the overpayment exposure across all affected years."
+      - "Determine whether the overpayment creates a closing adjustment or a tenant claim."
+    resolution_template: >
+      The Lease provides for a [X]% annual cap on [controllable expenses / total operating
+      expenses] per Section [X]. Review of CAM reconciliation statements for [YEARS] indicates
+      the cap [was / was not] correctly applied. [If not applied: "The estimated overpayment
+      is $[AMOUNT] across [YEARS]. This amount should be credited to Tenant and reflected as
+      a closing proration. Buyer assumes liability for the credit if not resolved pre-closing."]
+
+  - id: DISC-07
+    category: Rent
+    discrepancy: "Tenant certifies free rent or abatement that landlord records show as completed"
+    frequency: Low
+    severity: Moderate
+    investigation_steps:
+      - "Pull the lease clause governing free rent or abatement."
+      - "Check whether the free rent was conditional (e.g., tied to occupancy, construction completion, or a specific date)."
+      - "Verify accounting records: was rent actually collected during the claimed free period?"
+      - "Determine if the tenant is confusing an expired abatement with an ongoing concession."
+      - "If the tenant is correct and free rent remains, calculate the remaining value and its impact on effective rent."
+    resolution_template: >
+      Tenant certifies $[AMOUNT] in remaining free rent. Landlord records indicate the free
+      rent period [has been completed as of DATE / is still in effect through DATE]. [If
+      completed: "Supporting documentation (rent ledger showing collections during the claimed
+      free period) has been provided to Tenant's counsel for correction."] [If ongoing:
+      "Remaining free rent of $[AMOUNT] covering [PERIOD] must be disclosed to Buyer and
+      reflected as a closing adjustment."]
+
+  - id: DISC-08
+    category: Deposit
+    discrepancy: "Letter of credit expiration date is prior to lease expiration"
+    frequency: Medium
+    severity: Critical
+    investigation_steps:
+      - "Pull the LC and confirm the expiration date and auto-renewal provisions."
+      - "Confirm whether the lease requires the LC to remain in effect through [X] days after lease expiration."
+      - "Check whether the LC contains an evergreen (auto-renewal) clause with a non-renewal notice provision."
+      - "If the LC has expired or will expire before lease expiration, determine whether the tenant is in default of the deposit requirement."
+      - "Contact the issuing bank to confirm the LC status and renewal terms."
+    resolution_template: >
+      The LC (No. [LC_NUMBER], issued by [BANK]) expires on [LC_EXPIRY]. The Lease requires
+      the deposit to remain in effect through [REQUIRED_DATE]. [If gap exists: "Tenant is
+      required to deliver a replacement or extended LC by [DATE] per Section [X] of the Lease.
+      Failure to do so constitutes a default under Section [X]. This item must be resolved
+      prior to closing or held back from sale proceeds."]
+
+  - id: DISC-09
+    category: Options
+    discrepancy: "Renewal option notice deadline has passed but tenant claims option is still available"
+    frequency: Low
+    severity: Critical
+    investigation_steps:
+      - "Pull the renewal option clause and confirm the notice deadline (typically 9-18 months before expiration)."
+      - "Search landlord files for any renewal notice from tenant."
+      - "Determine whether landlord sent a reminder notice (some leases require landlord to remind tenant of the deadline)."
+      - "Check state law: some jurisdictions provide equitable relief for missed option deadlines if tenant can demonstrate intent and landlord was not prejudiced."
+      - "Assess the valuation impact: if the option is dead, the space can be re-leased at market; if alive, the option rent governs."
+    resolution_template: >
+      The renewal option required written notice by [DEADLINE]. [If notice received: "Tenant
+      delivered timely notice on [DATE]. The option is validly exercised."] [If no notice:
+      "No notice was received. Per Section [X], the option has lapsed. Tenant has been notified.
+      [If tenant disputes: 'Matter has been referred to counsel. Buyer should be advised of the
+      potential claim and the space should be underwritten under both retention and re-lease
+      scenarios.']"]
+
+  - id: DISC-10
+    category: Defaults
+    discrepancy: "Tenant discloses an uncured landlord default not in property management records"
+    frequency: Low
+    severity: Critical
+    investigation_steps:
+      - "Obtain details of the claimed default from tenant's estoppel response or counsel."
+      - "Review the specific lease obligation cited (e.g., HVAC maintenance, parking, common area condition)."
+      - "Inspect the property condition related to the claimed default."
+      - "Review property management work order history for the claimed issue."
+      - "Determine whether the default gives tenant any remedy (rent abatement, offset, termination right)."
+      - "Assess the cost to cure and whether it becomes a closing adjustment or buyer obligation."
+    resolution_template: >
+      Tenant's estoppel discloses an uncured landlord default: [DESCRIPTION]. Investigation
+      confirms [the default exists and the estimated cost to cure is $[AMOUNT] / the claimed
+      default does not constitute a default under the Lease because [REASON]]. [If valid:
+      "The cure cost of $[AMOUNT] should be [resolved pre-closing by Seller / credited to
+      Buyer at closing / escrowed pending resolution]. Buyer's counsel should confirm whether
+      the default triggers any tenant remedy under Section [X]."]
+
+  - id: DISC-11
+    category: Other
+    discrepancy: "Tenant claims exclusive use right not reflected in landlord's tenant restriction summary"
+    frequency: Low
+    severity: Moderate
+    investigation_steps:
+      - "Pull the use and exclusivity clause from the lease."
+      - "Check all other tenant leases in the property for conflicting use rights."
+      - "Determine whether the exclusive is absolute or qualified (e.g., 'primary use' vs. 'incidental use')."
+      - "Assess whether any existing tenant is currently violating the exclusive."
+      - "Quantify the exposure: if the exclusive is violated, tenant may have a rent reduction claim or termination right."
+    resolution_template: >
+      Tenant certifies an exclusive use right for [USE]. The Lease [does / does not] contain
+      this right per Section [X]. [If exists: "Review of all property leases confirms [no
+      conflict / conflict with [TENANT] in Suite [X] whose lease permits [USE]."] [If
+      conflict: "The conflicting lease was executed [before/after] the exclusive grant. Legal
+      counsel should determine priority and exposure. Estimated annual rent reduction claim
+      under the exclusive clause: $[AMOUNT]."]
+
+  - id: DISC-12
+    category: Term
+    discrepancy: "Tenant claims co-tenancy or kick-out right that would permit early termination"
+    frequency: Low
+    severity: Critical
+    investigation_steps:
+      - "Pull the co-tenancy clause. Identify the named co-tenants and/or the occupancy threshold."
+      - "Verify whether the co-tenancy condition is currently satisfied (named tenant still in occupancy, occupancy above threshold)."
+      - "If the co-tenancy has been triggered (named tenant left, occupancy below threshold), determine the tenant's remedy: rent reduction, termination right, or both."
+      - "Check whether the tenant has actually exercised the remedy or is simply preserving the right."
+      - "Assess the financial impact: if the tenant can terminate, model the downtime, TI, and commission cost of re-leasing."
+    resolution_template: >
+      Tenant certifies a co-tenancy right per Section [X] requiring [CONDITION]. Current
+      status: [CONDITION IS/IS NOT satisfied]. [If triggered: "Tenant's remedy under the
+      clause is [rent reduction to $[AMOUNT] / right to terminate upon [NOTICE] days notice].
+      This right has [been exercised / not yet been exercised]. Buyer should underwrite the
+      space under a termination scenario. Estimated re-leasing cost: $[AMOUNT] (TI + LC +
+      downtime)."]
+
+  - id: DISC-13
+    category: Other
+    discrepancy: "Tenant certifies a sublease that landlord has no record of approving"
+    frequency: Low
+    severity: Moderate
+    investigation_steps:
+      - "Pull the assignment and subletting clause. Determine whether landlord consent is required."
+      - "Search landlord files for any sublease consent request or approval letter."
+      - "Determine whether the sublease is in place (subtenant in occupancy, paying rent)."
+      - "Check whether the landlord has a recapture right that was not exercised."
+      - "Assess whether the unapproved sublease constitutes a default and what remedies the landlord has."
+    resolution_template: >
+      Tenant's estoppel discloses a sublease to [SUBTENANT] for [SF] of the Premises.
+      Landlord records [contain / do not contain] an executed consent to sublease. The Lease
+      [requires / does not require] landlord consent per Section [X]. [If unapproved and
+      consent required: "The sublease was entered without required consent, which constitutes
+      a default under Section [X]. Options: (1) ratify the sublease retroactively with
+      appropriate conditions, (2) require tenant to cure by terminating the sublease, or
+      (3) reserve landlord's remedies. Resolution required prior to closing."]
+
+  - id: DISC-14
+    category: Rent
+    discrepancy: "Percentage rent breakpoint or calculation method on estoppel differs from lease"
+    frequency: Low
+    severity: Moderate
+    investigation_steps:
+      - "Pull the percentage rent clause including the natural breakpoint formula or stated breakpoint."
+      - "Verify the applicable percentage rate and the definition of gross sales."
+      - "Pull the tenant's most recent sales report and the most recent percentage rent calculation."
+      - "Compare the estoppel-certified breakpoint to the lease-stated breakpoint."
+      - "If the breakpoint is a natural breakpoint (base rent / percentage rate), recalculate using current base rent."
+    resolution_template: >
+      The estoppel certifies a percentage rent breakpoint of $[ESTOPPEL_BP]. The Lease provides
+      for [a natural breakpoint / a stated breakpoint of $[LEASE_BP]]. [If natural: "The
+      correct breakpoint based on current base rent of $[RENT] and a [X]% rate is $[CORRECT_BP]."]
+      [If stated: "The Lease states $[LEASE_BP], which does not change with rent escalations.
+      Tenant's certification appears to be using a recalculated figure. The correct breakpoint
+      per the Lease is $[LEASE_BP]."]
+
+  - id: DISC-15
+    category: Other
+    discrepancy: "Guarantor information on estoppel differs from lease or guaranty is missing"
+    frequency: Medium
+    severity: Critical
+    investigation_steps:
+      - "Pull the guaranty agreement (should be a separate document or exhibit to the lease)."
+      - "Confirm the guarantor entity or individual named in the guaranty."
+      - "Determine whether the guaranty is full-term or limited (common: burns off after Year 5 or upon tenant meeting a net worth threshold)."
+      - "If the guaranty has burned off, confirm the burn-off conditions were actually met."
+      - "If the guarantor is an entity, confirm it is still in good standing and has not been dissolved or merged."
+      - "If the estoppel names a different guarantor, determine whether a guaranty assignment or replacement occurred."
+    resolution_template: >
+      The estoppel certifies the guarantor as [ESTOPPEL_GUARANTOR]. Landlord records show
+      [LANDLORD_GUARANTOR]. [If different: "The discrepancy is due to [CAUSE: e.g., 'a
+      corporate restructuring in which the guarantor entity merged into [NEW ENTITY] on
+      [DATE]']. A replacement guaranty or confirmation of successor liability is required."]
+      [If guaranty claimed as burned off: "The burn-off conditions per Section [X] of the
+      Guaranty require [CONDITIONS]. Documentation confirming satisfaction of these conditions
+      [has / has not] been obtained."]

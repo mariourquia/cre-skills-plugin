@@ -1,0 +1,440 @@
+# Lease Abstract Field Definitions
+# 35 standard fields for commercial lease abstraction.
+# Each field: definition, where to find it in the lease, common language variations, and extraction rules.
+
+schema:
+  id: string                    # field identifier (FIELD-01 through FIELD-35)
+  field_name: string            # canonical field name
+  category: string              # Identification | Premises | Term | Rent | Expenses | Options | Insurance | Use | Assignment | Default | Guaranty | Other
+  definition: string            # precise definition of what this field captures
+  typical_lease_location: string # where to find this in a standard lease
+  common_language_variations:    # different ways leases express this concept
+    - string
+  extraction_rules: string      # how to extract and normalize the value
+  data_type: string             # text | date | currency | percentage | boolean | schedule
+
+fields:
+
+  - id: FIELD-01
+    field_name: Tenant Legal Name
+    category: Identification
+    definition: "The full legal name of the tenant entity as it appears in the lease preamble. Not a DBA or trade name."
+    typical_lease_location: "First paragraph of the lease (preamble/recitals), after 'between... and...'"
+    common_language_variations:
+      - "'Tenant' means [Entity Name], a [State] [entity type]"
+      - "the party of the second part"
+      - "Lessee"
+    extraction_rules: "Extract the full legal entity name including entity type (LLC, Inc., LP, etc.) and state of formation. If a DBA is used, note both the legal name and the DBA. Check amendments for name changes."
+    data_type: text
+
+  - id: FIELD-02
+    field_name: Landlord Legal Name
+    category: Identification
+    definition: "The full legal name of the landlord entity as stated in the lease."
+    typical_lease_location: "First paragraph of the lease (preamble/recitals)"
+    common_language_variations:
+      - "'Landlord' means [Entity Name]"
+      - "Lessor"
+      - "Owner"
+    extraction_rules: "Extract the original landlord name. Then check all amendments and assignment/assumption agreements for successor landlords. Note the current landlord if different from original."
+    data_type: text
+
+  - id: FIELD-03
+    field_name: Lease Execution Date
+    category: Identification
+    definition: "The date the lease was signed by both parties."
+    typical_lease_location: "First line of the lease or signature page"
+    common_language_variations:
+      - "This Lease is made and entered into as of [Date]"
+      - "Effective as of [Date]"
+      - "Dated [Date]"
+    extraction_rules: "Use the date stated in the preamble. If the preamble date differs from signature dates, use the later of the two signature dates unless the lease specifies otherwise."
+    data_type: date
+
+  - id: FIELD-04
+    field_name: Premises Description
+    category: Premises
+    definition: "The physical space being leased, including suite number, floor, and any non-contiguous areas."
+    typical_lease_location: "Article 1 or 'Premises' definition section. Exhibit A or B (floor plan)."
+    common_language_variations:
+      - "'Premises' shall mean Suite [X] on the [X] floor"
+      - "that certain space outlined on Exhibit A"
+      - "consisting of approximately [X] rentable square feet"
+    extraction_rules: "Extract suite/unit number, floor, wing/section, and any ancillary spaces (storage, roof rights, patio). Check all amendments for space additions or reductions. Note if the premises were modified post-execution."
+    data_type: text
+
+  - id: FIELD-05
+    field_name: Rentable Square Footage
+    category: Premises
+    definition: "The rentable area of the premises as stated in the lease, used for rent calculations."
+    typical_lease_location: "Premises definition or Basic Lease Information section"
+    common_language_variations:
+      - "approximately [X] rentable square feet (RSF)"
+      - "[X] square feet of Rentable Area as measured per BOMA standards"
+      - "deemed to be [X] square feet for all purposes"
+    extraction_rules: "Extract the RSF figure. Note whether the lease says 'approximately' or 'deemed to be' (the latter is non-recalculable). Check for remeasurement clauses. If the lease references BOMA, note which BOMA standard (2010, 2017, etc.)."
+    data_type: text
+
+  - id: FIELD-06
+    field_name: Commencement Date
+    category: Term
+    definition: "The date the lease term begins. May differ from rent commencement date."
+    typical_lease_location: "Article 2 or Term section. May reference a Commencement Date Agreement (separate exhibit)."
+    common_language_variations:
+      - "The Term shall commence on [Date]"
+      - "upon Substantial Completion of Landlord's Work"
+      - "the earlier of (i) Tenant's occupancy or (ii) [Date]"
+    extraction_rules: "If a fixed date, extract it. If contingent on landlord's work completion, note the contingency and check for a Commencement Date Agreement (CDA) that confirms the actual date. If no CDA exists, flag as unconfirmed."
+    data_type: date
+
+  - id: FIELD-07
+    field_name: Rent Commencement Date
+    category: Term
+    definition: "The date rent payments begin. Often later than lease commencement due to free rent or build-out periods."
+    typical_lease_location: "Article 2 or 3. Basic Lease Information. Free rent clause."
+    common_language_variations:
+      - "Rent shall commence on [Date]"
+      - "[X] months after the Commencement Date"
+      - "upon the expiration of the Free Rent Period"
+    extraction_rules: "If a fixed date, extract it. If expressed as an offset from commencement ('3 months after'), calculate the actual date. If contingent, note the contingency. The gap between commencement and rent commencement is the free rent period."
+    data_type: date
+
+  - id: FIELD-08
+    field_name: Expiration Date
+    category: Term
+    definition: "The date the lease term ends."
+    typical_lease_location: "Article 2. Basic Lease Information. Check all amendments for extensions."
+    common_language_variations:
+      - "The Term shall expire on [Date]"
+      - "for a period of [X] years from the Commencement Date"
+      - "ending on the last day of the [X]th Lease Year"
+    extraction_rules: "Extract the stated date. If expressed as a duration ('10 years from commencement'), calculate the end date. Check all amendments for term extensions. If a renewal option has been exercised, the expiration date is the end of the renewal term."
+    data_type: date
+
+  - id: FIELD-09
+    field_name: Lease Term (months)
+    category: Term
+    definition: "The total duration of the current lease term in months."
+    typical_lease_location: "Derived from commencement and expiration dates."
+    common_language_variations:
+      - "for a term of [X] years"
+      - "[X] months"
+      - "[X] Lease Years"
+    extraction_rules: "Calculate from commencement to expiration. Express in months. Note if the lease uses 'Lease Years' (which may start on a date other than January 1)."
+    data_type: text
+
+  - id: FIELD-10
+    field_name: Current Monthly Base Rent
+    category: Rent
+    definition: "The base rent amount currently payable per month, excluding additional rent (CAM, taxes, insurance)."
+    typical_lease_location: "Article 3 or Rent section. Rent schedule exhibit."
+    common_language_variations:
+      - "Base Rent shall be $[X] per month"
+      - "$[X] per rentable square foot per annum, payable in equal monthly installments"
+      - "Minimum Rent"
+    extraction_rules: "Determine the current period in the rent schedule and extract the corresponding monthly amount. If expressed as annual or per-SF, convert to monthly. Current = the amount applicable as of the abstraction date."
+    data_type: currency
+
+  - id: FIELD-11
+    field_name: Rent Schedule
+    category: Rent
+    definition: "The complete schedule of base rent over the lease term, showing all escalations."
+    typical_lease_location: "Article 3. Exhibit or schedule attached to the lease."
+    common_language_variations:
+      - Fixed-dollar schedule table
+      - "Base Rent shall increase by [X]% annually"
+      - "Base Rent shall be adjusted to Fair Market Value"
+      - "Base Rent shall increase by the greater of [X]% or CPI"
+    extraction_rules: "Extract the full schedule as a table: period start, period end, monthly rent, annual rent, rent per SF. If escalation is percentage-based, calculate and populate all future periods. If CPI or FMV, note the formula and leave future amounts as 'TBD per [formula]'."
+    data_type: schedule
+
+  - id: FIELD-12
+    field_name: Escalation Type
+    category: Rent
+    definition: "The method by which base rent increases over the lease term."
+    typical_lease_location: "Article 3, rent escalation clause."
+    common_language_variations:
+      - "Fixed: [X]% annual increase"
+      - "CPI: adjusted annually based on [Index], [Base Month]"
+      - "FMV: adjusted to Fair Market Value at [intervals]"
+      - "Fixed dollar: increases by $[X] per year"
+      - "Greater of [X]% or CPI"
+    extraction_rules: "Classify as: Fixed Percentage, Fixed Dollar, CPI, FMV, Hybrid (greater of), or None. If CPI, note the specific index (CPI-U, CPI-W), base month, and any floor/ceiling. If FMV, note the arbitration/determination mechanism."
+    data_type: text
+
+  - id: FIELD-13
+    field_name: Percentage Rent
+    category: Rent
+    definition: "Additional rent based on tenant's gross sales exceeding a breakpoint."
+    typical_lease_location: "Article 3 or separate Percentage Rent section. Common in retail only."
+    common_language_variations:
+      - "[X]% of Gross Sales in excess of the Breakpoint"
+      - "Natural Breakpoint: Base Rent / Percentage Rate"
+      - "Artificial Breakpoint: $[X]"
+    extraction_rules: "Extract: (1) percentage rate, (2) breakpoint type (natural or artificial), (3) breakpoint amount, (4) definition of Gross Sales (inclusions/exclusions), (5) reporting frequency, (6) audit rights. If not applicable (office/industrial), note 'N/A'."
+    data_type: text
+
+  - id: FIELD-14
+    field_name: Operating Expense Structure
+    category: Expenses
+    definition: "The method by which the tenant pays for building operating expenses."
+    typical_lease_location: "Article 4 or Additional Rent section. Definition of Operating Expenses."
+    common_language_variations:
+      - "Triple Net (NNN): Tenant pays pro rata share of all operating expenses"
+      - "Base Year Stop: Tenant pays increases over Base Year [YEAR]"
+      - "Expense Stop: Tenant pays increases over $[X]/RSF"
+      - "Modified Gross: Landlord pays [specified expenses], Tenant pays [specified expenses]"
+      - "Full Service Gross: rent includes all operating expenses"
+    extraction_rules: "Classify as: NNN, Base Year, Expense Stop, Modified Gross, or Full Service. If Base Year, note the year. If Expense Stop, note the dollar amount. Note any exclusions from operating expenses (capital expenditures, management fees above X%, etc.)."
+    data_type: text
+
+  - id: FIELD-15
+    field_name: Pro Rata Share
+    category: Expenses
+    definition: "Tenant's proportionate share of building operating expenses, typically RSF of premises / RSF of building."
+    typical_lease_location: "Basic Lease Information or Operating Expense section."
+    common_language_variations:
+      - "Tenant's Pro Rata Share shall be [X]%"
+      - "Tenant's Proportionate Share"
+      - "based on [X] RSF / [Y] RSF = [Z]%"
+    extraction_rules: "Extract the percentage. Verify the calculation: tenant RSF / building RSF. Note whether the share is fixed or recalculable (if building is expanded). Note if different shares apply to different expense categories (common: separate share for taxes vs. CAM)."
+    data_type: percentage
+
+  - id: FIELD-16
+    field_name: CAM Cap
+    category: Expenses
+    definition: "A ceiling on annual increases in controllable operating expenses passed through to tenant."
+    typical_lease_location: "Operating Expense section or amendments."
+    common_language_variations:
+      - "Controllable Expenses shall not increase by more than [X]% per annum"
+      - "cumulative cap of [X]% over the Base Year"
+      - "compounding cap of [X]% per annum"
+    extraction_rules: "Extract: (1) cap percentage, (2) whether cumulative or compounding, (3) which expenses are covered (controllable only, or all OpEx), (4) which expenses are excluded from the cap (taxes, insurance, utilities are commonly excluded). If no cap exists, note 'No cap'."
+    data_type: text
+
+  - id: FIELD-17
+    field_name: Security Deposit
+    category: Rent
+    definition: "Cash, letter of credit, or other security held by landlord as collateral for tenant's lease obligations."
+    typical_lease_location: "Article 5 or Security Deposit section."
+    common_language_variations:
+      - "Tenant shall deposit $[X] as security"
+      - "Tenant shall deliver a Letter of Credit in the amount of $[X]"
+      - "Security Deposit shall be reduced to $[X] after [conditions]"
+    extraction_rules: "Extract: (1) amount, (2) form (cash, LC, surety bond), (3) any burn-down schedule (conditions for reduction), (4) if LC, the required issuing bank rating and auto-renewal terms. Check amendments for modifications."
+    data_type: currency
+
+  - id: FIELD-18
+    field_name: Renewal Options
+    category: Options
+    definition: "Tenant's right to extend the lease term beyond the initial expiration."
+    typical_lease_location: "Article or Section titled 'Renewal Option' or 'Extension Option'. Often near end of lease."
+    common_language_variations:
+      - "[X] option(s) to renew for [X] years each"
+      - "Option to Extend"
+      - "at Fair Market Value / at [X]% of then-current rent / at a fixed rate"
+    extraction_rules: "Extract: (1) number of options, (2) term of each, (3) rent basis (FMV, fixed, CPI, percentage of then-current), (4) notice deadline (months before expiration), (5) conditions (no default, continuous occupancy). Note whether options are personal to the named tenant or transferable."
+    data_type: text
+
+  - id: FIELD-19
+    field_name: Expansion Option
+    category: Options
+    definition: "Tenant's right to lease additional space in the building."
+    typical_lease_location: "Separate article or section. May be labeled 'Expansion Right', 'Right to Expand', or 'Must-Take Space'."
+    common_language_variations:
+      - "Right to expand into [Space]"
+      - "Must-Take: Tenant shall lease [Space] no later than [Date]"
+      - "Expansion Option on [Floor/Suite]"
+    extraction_rules: "Extract: (1) space covered (specific suite or general 'contiguous space'), (2) deadline to exercise, (3) rent terms (same as existing, FMV, or specified rate), (4) whether it is an option (tenant's choice) or a must-take (obligation), (5) notice requirements."
+    data_type: text
+
+  - id: FIELD-20
+    field_name: Termination Option
+    category: Options
+    definition: "Tenant's right to end the lease before the stated expiration date."
+    typical_lease_location: "Separate article. May be in a specific amendment."
+    common_language_variations:
+      - "Tenant may terminate this Lease effective [Date] upon [notice] and payment of [fee]"
+      - "Early Termination Right"
+      - "Kick-Out Clause"
+    extraction_rules: "Extract: (1) earliest termination date, (2) notice period required, (3) termination fee (common: unamortized TI + commissions + X months rent), (4) conditions (e.g., no default). Calculate the fee amount if formula-based."
+    data_type: text
+
+  - id: FIELD-21
+    field_name: Right of First Refusal (ROFR)
+    category: Options
+    definition: "Tenant's right to match a third-party offer on specified space before landlord can lease it to the third party."
+    typical_lease_location: "Separate article or section near expansion/renewal options."
+    common_language_variations:
+      - "Right of First Refusal on [Space]"
+      - "Tenant shall have the right to lease [Space] on the same terms offered to a bona fide third party"
+    extraction_rules: "Extract: (1) space covered, (2) matching period (days to respond), (3) whether the right survives assignment, (4) whether it is extinguished after one waiver or persists."
+    data_type: text
+
+  - id: FIELD-22
+    field_name: Right of First Offer (ROFO)
+    category: Options
+    definition: "Landlord must offer specified space to tenant before marketing it to third parties."
+    typical_lease_location: "Same location as ROFR. Often confused with ROFR in lease drafting."
+    common_language_variations:
+      - "Right of First Offer"
+      - "Right of First Opportunity"
+      - "Landlord shall first offer [Space] to Tenant before marketing"
+    extraction_rules: "Extract same fields as ROFR. Additionally note: (1) the offer terms (FMV, landlord-determined, or negotiated), (2) response period, (3) whether landlord can lease to third parties at any price after tenant declines or only at terms not materially more favorable."
+    data_type: text
+
+  - id: FIELD-23
+    field_name: Insurance Requirements
+    category: Insurance
+    definition: "Types and amounts of insurance tenant must carry."
+    typical_lease_location: "Article titled 'Insurance'. May reference an exhibit."
+    common_language_variations:
+      - "Commercial General Liability: $[X] per occurrence / $[X] aggregate"
+      - "Property Insurance on Tenant's contents"
+      - "Umbrella/Excess Liability"
+    extraction_rules: "Extract: (1) CGL limits (per occurrence and aggregate), (2) property/contents coverage requirement, (3) umbrella requirement, (4) workers' comp, (5) whether landlord is named as additional insured, (6) waiver of subrogation requirement, (7) business interruption."
+    data_type: text
+
+  - id: FIELD-24
+    field_name: Use Restrictions
+    category: Use
+    definition: "What the tenant is permitted (and prohibited) to do in the premises."
+    typical_lease_location: "Article titled 'Use' or 'Permitted Use'."
+    common_language_variations:
+      - "solely for [use]"
+      - "general office purposes and uses ancillary thereto"
+      - "any lawful use consistent with the character of a first-class office building"
+    extraction_rules: "Extract: (1) permitted use (exact language), (2) any specific prohibitions, (3) whether landlord consent is required to change use, (4) any exclusive use rights (retail), (5) hazardous materials restrictions."
+    data_type: text
+
+  - id: FIELD-25
+    field_name: Assignment and Subletting
+    category: Assignment
+    definition: "Conditions under which tenant may assign the lease or sublet the premises."
+    typical_lease_location: "Article titled 'Assignment and Subletting'."
+    common_language_variations:
+      - "Tenant shall not assign or sublet without Landlord's prior written consent, not to be unreasonably withheld"
+      - "Permitted Transfers: transfers to affiliates, successors by merger"
+      - "Landlord shall have a recapture right"
+    extraction_rules: "Extract: (1) whether consent is required, (2) standard of consent (sole discretion vs. not unreasonably withheld), (3) permitted transfers (affiliates, mergers, reorganizations), (4) profit-sharing on sublease (common: 50/50 after costs), (5) recapture right (landlord can terminate and re-lease), (6) whether guaranty survives assignment."
+    data_type: text
+
+  - id: FIELD-26
+    field_name: Default Provisions - Tenant
+    category: Default
+    definition: "Events constituting a tenant default and landlord's remedies."
+    typical_lease_location: "Article titled 'Default' or 'Events of Default'."
+    common_language_variations:
+      - "Event of Default: (a) failure to pay rent within [X] days of due date"
+      - "failure to perform any obligation within [X] days after notice"
+      - "bankruptcy, insolvency, assignment for benefit of creditors"
+    extraction_rules: "Extract: (1) monetary default cure period (typically 5-10 days), (2) non-monetary default cure period (typically 30 days), (3) number of notices required before default, (4) landlord remedies (termination, damages, self-help, acceleration), (5) late fee amount/percentage, (6) interest rate on past-due amounts."
+    data_type: text
+
+  - id: FIELD-27
+    field_name: Default Provisions - Landlord
+    category: Default
+    definition: "Events constituting a landlord default and tenant's remedies."
+    typical_lease_location: "Same article as tenant default, or a separate section."
+    common_language_variations:
+      - "Landlord Default: failure to perform within [X] days after Tenant's notice"
+      - "Tenant's sole remedy shall be specific performance or injunctive relief"
+      - "Tenant may offset against rent"
+    extraction_rules: "Extract: (1) notice and cure periods, (2) tenant's remedies (offset, self-help, termination, damages), (3) any limitation on landlord's liability (common: limited to landlord's interest in the property), (4) whether tenant can offset rent."
+    data_type: text
+
+  - id: FIELD-28
+    field_name: Guaranty
+    category: Guaranty
+    definition: "Third-party guarantee of tenant's lease obligations."
+    typical_lease_location: "Separate Guaranty Agreement attached as exhibit. May be referenced in Basic Lease Information."
+    common_language_variations:
+      - "Guaranty of Lease"
+      - "Guarantor: [Name]"
+      - "Good Guy Guaranty" (NY specific: guarantor liable only until surrender of premises)
+    extraction_rules: "Extract: (1) guarantor name and relationship to tenant, (2) scope (full lease term or limited), (3) burn-off conditions (net worth threshold, time-based, revenue-based), (4) cap on guaranty amount (if any), (5) whether guaranty is joint and several, (6) 'good guy' provisions (NY)."
+    data_type: text
+
+  - id: FIELD-29
+    field_name: Tenant Improvement Allowance
+    category: Other
+    definition: "Landlord's contribution toward tenant's build-out of the premises."
+    typical_lease_location: "Work Letter (exhibit to lease). Basic Lease Information."
+    common_language_variations:
+      - "Landlord shall provide a TI Allowance of $[X] per RSF"
+      - "Improvement Allowance"
+      - "Construction Allowance"
+    extraction_rules: "Extract: (1) total amount and per-SF amount, (2) what it covers (hard costs only, or hard + soft costs), (3) disbursement method (lump sum, progress draws, upon completion), (4) deadline to use (common: 12-18 months from commencement), (5) whether unused portion is returned to landlord or converted to free rent."
+    data_type: currency
+
+  - id: FIELD-30
+    field_name: Free Rent Period
+    category: Rent
+    definition: "Period during which base rent is abated or reduced."
+    typical_lease_location: "Article 3 or Rent section. May also appear in amendments."
+    common_language_variations:
+      - "[X] months of free base rent"
+      - "Rent Abatement Period"
+      - "Conditional: free rent abates if tenant defaults"
+    extraction_rules: "Extract: (1) number of months, (2) whether base rent only or base + additional rent, (3) specific months (first X months, or specific calendar months), (4) whether the abatement is conditional (clawback if tenant defaults)."
+    data_type: text
+
+  - id: FIELD-31
+    field_name: Holdover Provisions
+    category: Term
+    definition: "Terms governing tenant's occupancy after lease expiration without a renewal."
+    typical_lease_location: "Article titled 'Holdover' or 'Holding Over'."
+    common_language_variations:
+      - "Holdover rent shall be [X]% of the last monthly rent" (common: 150-200%)
+      - "Tenant shall be deemed a month-to-month tenant"
+      - "Holdover shall constitute a default"
+    extraction_rules: "Extract: (1) holdover rent rate (percentage of last rent), (2) whether holdover creates month-to-month tenancy or is a default, (3) landlord's right to consequential damages from holdover."
+    data_type: text
+
+  - id: FIELD-32
+    field_name: Condemnation
+    category: Other
+    definition: "Rights and obligations if all or part of the premises is taken by eminent domain."
+    typical_lease_location: "Article titled 'Condemnation' or 'Eminent Domain'."
+    common_language_variations:
+      - "If all or substantially all of the Premises is taken"
+      - "Tenant's right to terminate if [X]% or more is taken"
+      - "Tenant shall have no claim to the condemnation award"
+    extraction_rules: "Extract: (1) threshold for termination (percentage of premises taken), (2) who receives the award, (3) whether tenant can make a separate claim for moving expenses or trade fixtures."
+    data_type: text
+
+  - id: FIELD-33
+    field_name: Casualty / Damage
+    category: Other
+    definition: "Rights and obligations if the premises or building is damaged by fire or other casualty."
+    typical_lease_location: "Article titled 'Casualty', 'Fire and Casualty', or 'Damage and Destruction'."
+    common_language_variations:
+      - "Landlord shall repair within [X] days"
+      - "Tenant may terminate if restoration not completed within [X] months"
+      - "Rent abates proportionally during restoration"
+    extraction_rules: "Extract: (1) landlord's obligation to restore, (2) restoration timeline, (3) tenant's termination right if restoration is delayed, (4) rent abatement during restoration, (5) whether landlord is obligated to restore tenant's improvements (or only base building)."
+    data_type: text
+
+  - id: FIELD-34
+    field_name: Estoppel Obligation
+    category: Other
+    definition: "Tenant's obligation to provide estoppel certificates when requested by landlord."
+    typical_lease_location: "Article titled 'Estoppel Certificate' or 'Certificates'."
+    common_language_variations:
+      - "Tenant shall deliver an estoppel certificate within [X] days of request"
+      - "failure to deliver shall be deemed confirmation of the statements"
+      - "Tenant shall not unreasonably withhold or delay"
+    extraction_rules: "Extract: (1) response deadline (typically 10-20 days), (2) deemed approval provision (if tenant fails to respond, the landlord's version is deemed certified), (3) required frequency."
+    data_type: text
+
+  - id: FIELD-35
+    field_name: Subordination and Attornment
+    category: Other
+    definition: "Whether the lease is subordinate to existing and future mortgages, and tenant's obligation to attorn to successor landlords."
+    typical_lease_location: "Article titled 'Subordination' or 'Subordination and Attornment'."
+    common_language_variations:
+      - "This Lease is and shall be subject and subordinate to any mortgage"
+      - "Tenant's subordination is conditioned upon receipt of an SNDA"
+      - "Tenant shall attorn to any successor landlord"
+    extraction_rules: "Extract: (1) whether subordination is automatic or conditioned on SNDA, (2) whether tenant has the right to demand an SNDA, (3) attornment obligation."
+    data_type: text

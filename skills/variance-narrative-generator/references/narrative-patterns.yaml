@@ -1,0 +1,357 @@
+# narrative-patterns.yaml
+# 20 pre-built patterns for common CRE budget-to-actual variances.
+# Each pattern: trigger condition, narrative template, classification, and recommended action.
+# Use: populate variance commentary in monthly/quarterly asset management reports.
+
+patterns:
+
+  # ============================================================
+  # REVENUE VARIANCES
+  # ============================================================
+
+  - id: REV-01
+    name: "Occupancy Below Budget"
+    trigger:
+      metric: "physical_occupancy"
+      condition: "actual < budget by 3+ percentage points"
+    classification: "Unfavorable"
+    severity_scale:
+      minor: "3-5 pts below budget"
+      moderate: "5-10 pts below budget"
+      severe: "10+ pts below budget"
+    template: >
+      Physical occupancy of {actual_occ}% is {delta} percentage points below
+      the budgeted {budget_occ}%. {root_cause}. This represents a revenue
+      shortfall of approximately ${revenue_impact}/month. {action_statement}.
+    root_cause_options:
+      - "Elevated turnover during Q{quarter} driven by {count} move-outs exceeding budget by {pct}%"
+      - "Lease-up velocity on renovated units is {weeks} weeks behind pro forma, averaging {actual_weeks} weeks vs budgeted {budget_weeks} weeks"
+      - "Loss of anchor tenant ({tenant_name}, {pct_nra}% of NRA) in {month} was not budgeted"
+      - "Competing new supply ({property_name}, {units} units) delivered in {month}, increasing submarket availability"
+      - "Seasonal leasing slowdown deeper than historical pattern"
+    action_options:
+      - "Management is implementing a targeted concession strategy (${amount} move-in special) through {end_date}"
+      - "Leasing team has been augmented with {count} additional agents. Traffic is up {pct}% month-over-month"
+      - "Marketing spend increased by ${amount}/month on digital channels. Lead volume trending up"
+      - "Renovation scope paused on {count} units to prioritize lease-up of completed inventory"
+      - "Broker incentives of ${amount}/lease activated for {unit_type} units"
+
+  - id: REV-02
+    name: "Effective Rent Below Budget"
+    trigger:
+      metric: "effective_rent_per_unit"
+      condition: "actual < budget by 3%+"
+    classification: "Unfavorable"
+    template: >
+      Average effective rent of ${actual_rent}/unit is ${delta} ({pct}%) below
+      the budgeted ${budget_rent}. {root_cause}. Annualized revenue impact
+      is approximately ${annual_impact}. {action_statement}.
+    root_cause_options:
+      - "Concession burn rate is higher than budgeted. Actual concessions average {actual_conc} months free vs {budget_conc} budgeted"
+      - "Market rent growth of {actual_growth}% underperformed the {budget_growth}% assumption due to new competitive supply"
+      - "Renewal rates negotiated below budget as tenants leveraged competing offers"
+      - "Unit mix shift: {count} {type} units leased vs budget of {budget_count}, at lower rent points"
+      - "Loss-to-lease burn-off slower than projected. In-place rents {pct}% below market vs {budget_pct}% assumed at underwriting"
+    action_options:
+      - "Concession strategy being phased out as occupancy stabilizes above {target}%"
+      - "Renewal offers being sent 120 days prior to expiration (vs 90 days previously) to reduce competitive shopping"
+      - "Premium pricing implemented on renovated units: ${premium} above pro forma for upgraded finishes"
+      - "Revenue management system implemented to optimize pricing daily based on supply/demand"
+
+  - id: REV-03
+    name: "Revenue Above Budget"
+    trigger:
+      metric: "total_revenue"
+      condition: "actual > budget by 3%+"
+    classification: "Favorable"
+    template: >
+      Total revenue of ${actual_rev} is ${delta} ({pct}%) above budget of
+      ${budget_rev}. {root_cause}. {sustainability_note}.
+    root_cause_options:
+      - "Occupancy stabilized {months} months ahead of schedule at {occ}%, generating unbudgeted rent from {count} units"
+      - "Market rent growth of {actual_growth}% exceeded the {budget_growth}% assumption. New leases signing at ${avg_rent} vs ${budget_avg} budgeted"
+      - "Other income outperformance: {income_line} generated ${amount} vs ${budget_amount} budgeted, driven by {reason}"
+      - "Renovation premium of ${actual_premium}/unit exceeding the ${budget_premium} assumption"
+      - "Early lease termination fees of ${amount} collected (unbudgeted)"
+    sustainability_note_options:
+      - "This outperformance is expected to persist as in-place rents are now marked to market"
+      - "Revenue outperformance is partially driven by one-time items (${amount}) and partially by recurring improvement (${amount})"
+      - "Sustainability depends on maintaining current {occ}% occupancy through seasonal leasing trough in Q{quarter}"
+
+  - id: REV-04
+    name: "Bad Debt / Collection Loss Above Budget"
+    trigger:
+      metric: "bad_debt_pct"
+      condition: "actual > budget by 1+ percentage points"
+    classification: "Unfavorable"
+    template: >
+      Bad debt and collection loss of ${actual_amount} ({actual_pct}% of
+      gross revenue) exceeds the budgeted ${budget_amount} ({budget_pct}%)
+      by ${delta}. {root_cause}. {action_statement}.
+    root_cause_options:
+      - "{count} tenants ({pct}% of units) are 60+ days delinquent, up from {prior_count} last quarter"
+      - "Eviction proceedings are pending for {count} units with a combined balance of ${amount}"
+      - "Local eviction moratorium extended through {date}, preventing resolution of {count} chronic non-payers"
+      - "Economic softening in the submarket: local unemployment rate increased to {rate}% from {prior_rate}%"
+    action_options:
+      - "Eviction filings submitted for {count} units. Expected resolution in {weeks} weeks based on local court timeline"
+      - "Payment plans offered to {count} tenants with partial payment history. ${amount} expected recovery"
+      - "Screening criteria tightened: minimum credit score increased to {score}, income requirement to {multiplier}x rent"
+      - "Third-party collections engaged for ${amount} in write-offs. Historical recovery rate: {pct}%"
+
+  # ============================================================
+  # EXPENSE VARIANCES
+  # ============================================================
+
+  - id: EXP-01
+    name: "Insurance Expense Above Budget"
+    trigger:
+      metric: "insurance_expense"
+      condition: "actual > budget by 10%+"
+    classification: "Unfavorable"
+    template: >
+      Insurance expense of ${actual} is ${delta} ({pct}%) above the budgeted
+      ${budget}. {root_cause}. {action_statement}.
+    root_cause_options:
+      - "Policy renewal reflected a {pct}% rate increase driven by carrier market hardening in {region}"
+      - "Windstorm/flood coverage increased by ${amount} following reclassification of property's risk zone"
+      - "Claims history (${count} claims, ${amount} total) triggered an experience modification surcharge"
+      - "Carrier non-renewed policy; replacement carrier priced {pct}% higher due to limited market competition"
+    action_options:
+      - "Broker marketing the account to {count} additional carriers for mid-term competitive quote"
+      - "Increasing deductible from ${current} to ${proposed} to reduce premium by an estimated ${savings}"
+      - "Implementing loss prevention program (roof maintenance, fire suppression inspection) to improve claims history"
+      - "Evaluating captive insurance or group purchasing program for portfolio-level savings"
+
+  - id: EXP-02
+    name: "Property Tax Expense Above Budget"
+    trigger:
+      metric: "property_tax"
+      condition: "actual > budget by 5%+"
+    classification: "Unfavorable"
+    template: >
+      Property tax expense of ${actual} is ${delta} ({pct}%) above budget
+      of ${budget}. {root_cause}. {action_statement}.
+    root_cause_options:
+      - "Acquisition triggered reassessment at ${new_value} assessed value, {pct}% above prior assessment of ${prior_value}"
+      - "Millage rate increased from {prior_rate} to {new_rate} mills, adding ${impact} to annual tax bill"
+      - "Special assessment of ${amount} levied for {purpose} (infrastructure, school bond, etc.)"
+      - "Loss of exemption or abatement that reduced prior-year taxes by ${amount}"
+    action_options:
+      - "Tax appeal filed with {jurisdiction} for tax year {year}. Hearing scheduled for {date}. Targeted reduction: ${amount}"
+      - "Engaged property tax consultant ({firm_name}) on contingency basis. Estimated savings: ${amount} over {years} years"
+      - "Budget reforecast incorporates new tax level. No further action -- reassessment reflects market value"
+      - "Evaluating PILOT or abatement application for capital improvement program"
+
+  - id: EXP-03
+    name: "Repair and Maintenance Above Budget"
+    trigger:
+      metric: "r_and_m"
+      condition: "actual > budget by 15%+"
+    classification: "Unfavorable"
+    template: >
+      Repair and maintenance expense of ${actual} is ${delta} ({pct}%) above
+      the budgeted ${budget}. {root_cause}. {action_statement}.
+    root_cause_options:
+      - "Unbudgeted emergency repairs: {description} totaling ${amount} in {month}"
+      - "Make-ready costs per unit averaged ${actual_cost} vs budgeted ${budget_cost}, driven by {reason}"
+      - "HVAC repair costs {pct}% above budget due to {count} unit failures and refrigerant cost inflation"
+      - "Plumbing emergencies: {count} incidents totaling ${amount}. Aging pipe infrastructure is the root cause"
+      - "Vendor rate increases averaging {pct}% above contracted rates, reflecting labor market tightening"
+    action_options:
+      - "Rebidding service contracts: {count} contracts out for bid targeting {pct}% cost reduction"
+      - "Preventive maintenance program implemented for {system} to reduce emergency repair frequency"
+      - "Evaluating capital replacement of {system} to eliminate recurring repair expense (payback: {years} years)"
+      - "Emergency repair reserve increased to ${amount}/unit/month to reflect actual run rate"
+
+  - id: EXP-04
+    name: "Utilities Expense Above Budget"
+    trigger:
+      metric: "utilities"
+      condition: "actual > budget by 10%+"
+    classification: "Unfavorable"
+    template: >
+      Utility expense of ${actual} is ${delta} ({pct}%) above the budgeted
+      ${budget}. {root_cause}. {action_statement}.
+    root_cause_options:
+      - "Rate increase of {pct}% from {utility_provider} effective {date}, not anticipated in budget"
+      - "Extreme weather (heating/cooling degree days {pct}% above average) increased consumption"
+      - "Water leak in {location} identified in {month}; repair completed but {months} months of elevated usage"
+      - "Common area usage higher than budgeted due to {reason} (extended operating hours, equipment inefficiency)"
+      - "Vacant unit utility costs higher than assumed due to climate control requirements for pipe/mold prevention"
+    action_options:
+      - "LED lighting retrofit underway: {pct}% complete. Expected annual savings: ${amount}"
+      - "RUBS (Ratio Utility Billing System) implementation in progress. Target: {pct}% recovery of owner-paid utilities"
+      - "Smart thermostat installation in {count} common areas. Estimated savings: ${amount}/year"
+      - "Water conservation measures (low-flow fixtures) being installed in {count} units during turnover"
+
+  - id: EXP-05
+    name: "Management Fee Variance"
+    trigger:
+      metric: "management_fee"
+      condition: "actual differs from budget by 5%+"
+    classification: "Variable"
+    template: >
+      Management fee of ${actual} ({actual_pct}% of EGI) is ${delta} vs
+      budgeted ${budget} ({budget_pct}% of EGI). {root_cause}.
+    root_cause_options:
+      - "Fee is a percentage of collections. Higher-than-budgeted revenue drove proportionally higher fee (favorable variance)"
+      - "Fee is a percentage of collections. Lower occupancy reduced fee dollar amount (unfavorable indicator)"
+      - "Transition to new management company with {pct}% fee (vs prior {prior_pct}%) effective {date}"
+      - "Performance incentive fee of ${amount} triggered by achieving {metric} target"
+
+  - id: EXP-06
+    name: "Expense Savings (Favorable)"
+    trigger:
+      metric: "total_operating_expenses"
+      condition: "actual < budget by 5%+"
+    classification: "Favorable"
+    template: >
+      Total operating expenses of ${actual} are ${delta} ({pct}%) below
+      budget of ${budget}. Key drivers: {driver_summary}. {sustainability_note}.
+    root_cause_options:
+      - "Contract renegotiation on {service} achieved ${savings}/year reduction ({pct}% below prior contract)"
+      - "Insurance renewal at ${amount} vs budgeted ${budget_amount}, reflecting improved claims history"
+      - "Energy efficiency improvements reduced utility cost by ${amount} ({pct}%) vs prior year"
+      - "Turnover lower than budgeted ({actual_turns} vs {budget_turns}), reducing make-ready costs by ${savings}"
+      - "Property tax appeal successful: ${savings} annual reduction effective tax year {year}"
+
+  # ============================================================
+  # NOI AND CAPITAL VARIANCES
+  # ============================================================
+
+  - id: NOI-01
+    name: "NOI Below Budget"
+    trigger:
+      metric: "noi"
+      condition: "actual < budget by 5%+"
+    classification: "Unfavorable"
+    template: >
+      Net Operating Income of ${actual_noi} is ${delta} ({pct}%) below
+      the budgeted ${budget_noi}. Revenue contributed ${rev_variance}
+      ({rev_driver}) and expenses contributed ${exp_variance} ({exp_driver}).
+      {outlook_statement}.
+    outlook_options:
+      - "Based on current leasing pipeline of {count} applications, we project occupancy recovery to {occ}% by {date}, which would bring NOI within {pct}% of budget"
+      - "NOI underperformance is structural: submarket conditions have deteriorated since budget was set. Recommend budget reforecast"
+      - "NOI shortfall is timing-related: {amount} of budgeted revenue will be recognized in {quarter} rather than current quarter"
+      - "Management is implementing a {count}-point operational improvement plan targeting ${amount} incremental NOI by {date}"
+
+  - id: NOI-02
+    name: "NOI Above Budget"
+    trigger:
+      metric: "noi"
+      condition: "actual > budget by 5%+"
+    classification: "Favorable"
+    template: >
+      Net Operating Income of ${actual_noi} is ${delta} ({pct}%) above
+      budget of ${budget_noi}. Revenue outperformance of ${rev_delta}
+      was driven by {rev_driver}. Expense performance contributed ${exp_delta}
+      through {exp_driver}. {outlook_statement}.
+
+  - id: CAP-01
+    name: "Capital Expenditure Over Budget"
+    trigger:
+      metric: "capex_total"
+      condition: "actual > budget by 15%+"
+    classification: "Unfavorable"
+    template: >
+      Capital expenditure of ${actual} is ${delta} ({pct}%) above the
+      budgeted ${budget}. {root_cause}. Impact on project-level returns:
+      {return_impact}. {action_statement}.
+    root_cause_options:
+      - "Renovation cost per unit increased from ${budget_cpu} to ${actual_cpu} due to {reason} (material costs, scope expansion, change orders)"
+      - "Unbudgeted capital item: {description} at ${amount}, triggered by {cause} (code compliance, equipment failure, PCA finding)"
+      - "General contractor change order of ${amount} for {reason}. {count} of {total} change orders approved this period"
+      - "Construction timeline extended by {weeks} weeks, adding ${amount} in carrying costs and contractor overhead"
+    action_options:
+      - "Remaining renovation scope reduced from {original} to {revised} units to manage total capex within {pct}% of original budget"
+      - "Value engineering applied to remaining units: replacing {item} with {alternative}, saving ${amount}/unit"
+      - "Change order approval process tightened: all COs above ${threshold} require investor-level approval"
+      - "GC placed on notice for schedule adherence. Liquidated damages clause activated at ${amount}/day"
+
+  - id: CAP-02
+    name: "Capital Expenditure Under Budget (Timing)"
+    trigger:
+      metric: "capex_total"
+      condition: "actual < budget by 20%+ at period end"
+    classification: "Watch"
+    template: >
+      Capital expenditure of ${actual} is ${delta} ({pct}%) below the
+      budgeted ${budget} through {period_end}. {root_cause}.
+      {catch_up_plan}.
+    root_cause_options:
+      - "Renovation starts delayed by {weeks} weeks due to {reason} (permitting, contractor availability, material lead times)"
+      - "{count} units budgeted for renovation in {quarter} deferred to {new_quarter} to prioritize lease-up of completed inventory"
+      - "Vendor/contractor procurement took {weeks} weeks longer than planned. Contracts now executed"
+      - "Scope reduction: {count} capital items deferred based on updated PCA priority assessment"
+    catch_up_options:
+      - "Renovation pace is accelerating: {count} units in progress, {count} in pipeline. Expect to reach {pct}% of annual budget by year-end"
+      - "Capital spending will be back-loaded to H2. Contractor capacity confirmed for {count} units/month throughput"
+      - "Deferred capital items will roll into next budget year. No impact on asset stabilization timeline"
+
+  # ============================================================
+  # DEBT SERVICE AND RETURN VARIANCES
+  # ============================================================
+
+  - id: DS-01
+    name: "Debt Service Coverage Ratio Below Covenant"
+    trigger:
+      metric: "dscr"
+      condition: "actual < covenant_minimum"
+    classification: "Critical"
+    template: >
+      DSCR of {actual_dscr}x is below the loan covenant minimum of
+      {covenant_dscr}x. Shortfall of ${shortfall}/month. {root_cause}.
+      Cure period per loan agreement: {cure_days} days. {action_statement}.
+    root_cause_options:
+      - "NOI decline of ${delta} driven by occupancy loss ({occ}% vs {required_occ}% breakeven for covenant)"
+      - "Floating rate debt: rate increased from {prior_rate}% to {current_rate}%, increasing DS by ${delta}/month"
+      - "Seasonal NOI low point combined with elevated capital reserve deposits"
+    action_options:
+      - "Proactive lender communication initiated. Providing updated business plan and NOI recovery timeline"
+      - "Cash sweep provisions activated per loan agreement. Excess cash flow directed to lender reserve"
+      - "Evaluating interest rate cap purchase to limit further exposure on floating-rate portion"
+      - "Emergency cost reduction measures: {actions} targeting ${amount}/month expense reduction"
+      - "Capital call to equity investors for ${amount} to fund operating shortfall during stabilization"
+
+  - id: RET-01
+    name: "Cash-on-Cash Return Below Target"
+    trigger:
+      metric: "cash_on_cash"
+      condition: "actual < target by 2+ percentage points"
+    classification: "Unfavorable"
+    template: >
+      Cash-on-cash return of {actual_coc}% is {delta} percentage points
+      below the {target_coc}% target. Primary drivers: {drivers}.
+      {context_statement}. {action_statement}.
+    root_cause_options:
+      - "NOI underperformance of ${noi_delta} accounts for {pct}% of the shortfall"
+      - "Debt service increase of ${ds_delta} (rate adjustment) accounts for {pct}% of the shortfall"
+      - "Unbudgeted capital expenditure of ${capex_delta} reduced distributable cash flow"
+      - "Lender reserve requirement of ${reserve_amount} reduced distributable cash"
+    action_options:
+      - "Current shortfall is expected to be temporary. NOI recovery plan targets {coc_target}% CoC by {date}"
+      - "Distribution suspension recommended for {quarters} quarter(s) to preserve liquidity"
+      - "Refinancing analysis underway to reduce debt service cost. Term sheet expected by {date}"
+
+  - id: RET-02
+    name: "IRR Tracking Below Underwriting"
+    trigger:
+      metric: "projected_irr"
+      condition: "current projection < underwritten IRR by 3+ percentage points"
+    classification: "Unfavorable"
+    template: >
+      Projected IRR of {projected_irr}% is {delta} percentage points below
+      the underwritten {underwritten_irr}%. Key variance drivers:
+      {driver_summary}. {remediation_strategy}.
+    driver_summary_options:
+      - "Delayed stabilization ({actual_months} months vs {budget_months} budgeted) reduced cumulative cash flow by ${amount}"
+      - "Exit cap rate assumption revised from {budget_cap}% to {revised_cap}% based on market conditions, reducing terminal value by ${amount}"
+      - "Total capex of ${actual_capex} vs ${budget_capex} budgeted increased total basis by ${delta}"
+      - "Lower-than-projected rent growth ({actual_growth}% vs {budget_growth}%) reduced both cash flow and terminal value"
+    remediation_options:
+      - "Hold period extension from {original} to {revised} years to capture additional rent growth and NOI appreciation"
+      - "Supplemental loan or refinance to extract equity and improve equity multiple"
+      - "Accelerated disposition recommended to preserve remaining return before further market deterioration"
+      - "Revised business plan targets {revised_irr}% IRR. Investor communication scheduled for {date}"

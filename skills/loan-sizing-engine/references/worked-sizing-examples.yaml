@@ -1,0 +1,457 @@
+---
+# Worked Loan Sizing Examples
+# Two fully worked sizings with NCF normalization, multi-constraint sizing,
+# binding constraint identification, rate sensitivity, and reserve schedules.
+# Market assumptions: Q1 2026 (7Y Treasury ~4.20%, MF agency spreads ~140-160bps)
+---
+
+examples:
+
+  # =========================================================================
+  # EXAMPLE A: 150-Unit Multifamily Agency Loan
+  # =========================================================================
+  - id: sizing_01
+    name: "150-Unit MF Agency Loan -- Fairfield, CT"
+    property_type: multifamily
+    loan_program: Fannie_Mae_DUS
+    as_of_date: "2026-03-15"
+
+    property_inputs:
+      units: 150
+      year_built: 2005
+      location: "Fairfield, CT"
+      appraised_value: 38_500_000
+      purchase_price: 37_000_000     # 4% discount to appraisal
+
+    # ----- T-12 INCOME (trailing 12 months actuals) -----
+    t12_income:
+      gross_potential_rent: 3_420_000   # 150 units * avg $1,900/mo * 12
+      loss_to_lease: -136_800           # 4% -- below-market renewals
+      vacancy_loss: -171_000            # 5.0% economic vacancy
+      concessions: -34_200              # 1.0% concessions (1 month free on new leases)
+      bad_debt: -17_100                 # 0.5%
+      net_rental_income: 3_060_900
+      other_income:
+        parking: 54_000                 # 60 spaces * $75/mo * 12
+        laundry: 18_000
+        pet_fees: 14_400                # 40 pets * $30/mo * 12
+        late_fees: 7_200
+        storage: 10_800
+        total_other: 104_400
+      effective_gross_income: 3_165_300
+
+    # ----- T-12 EXPENSES (actual) -----
+    t12_expenses:
+      real_estate_taxes: 485_000
+      insurance: 112_500               # $750/unit
+      utilities: 195_000               # owner-paid water/sewer + common electric
+      management_fee: 126_612          # 4.0% of EGI
+      payroll: 210_000                 # 3 FTE on-site
+      repairs_maintenance: 187_500     # $1,250/unit
+      contract_services: 67_500        # landscaping, snow, pest, elevator
+      admin_general: 37_500
+      marketing: 15_000
+      total_t12_expenses: 1_436_612
+
+    t12_noi: 1_728_688                 # EGI 3,165,300 - OpEx 1,436,612
+
+    # ----- NCF NORMALIZATION (agency underwriting adjustments) -----
+    ncf_normalization:
+      description: >
+        Agency lenders normalize T-12 to reflect sustainable cash flow.
+        Key adjustments: management fee floor, replacement reserves, vacancy floor.
+      adjustments:
+        - item: "Management fee adjustment"
+          t12_actual: 126_612          # 4.0% of EGI
+          agency_standard: 158_265     # 5.0% of EGI (Fannie floor)
+          adjustment: -31_653
+          note: "Fannie requires minimum 5% management fee regardless of actual"
+
+        - item: "Replacement reserves"
+          t12_actual: 0                # not in T-12 (capex is below the line)
+          agency_standard: -37_500     # $250/unit/year (Fannie standard)
+          adjustment: -37_500
+          note: "Fannie Mae standard $250/unit for post-2000 construction"
+
+        - item: "Vacancy adjustment"
+          t12_actual: -171_000         # 5.0% actual
+          agency_standard: -171_000    # 5.0% (matches; no adjustment needed)
+          adjustment: 0
+          note: "T-12 vacancy at 5.0% meets Fannie floor. No adjustment."
+
+        - item: "Real estate tax trending"
+          t12_actual: 485_000
+          agency_standard: 499_550     # +3% for next assessment cycle
+          adjustment: -14_550
+          note: "Agency trends taxes forward 1 year at 3% for CT assessment cycle"
+
+      total_adjustments: -83_703
+      agency_ncf: 1_644_985            # T-12 NOI 1,728,688 - 83,703
+
+    # ----- SIZING UNDER 3 CONSTRAINTS -----
+    sizing_constraints:
+      interest_rate: 0.0560            # 7Y Treasury 4.20% + 140bps DUS spread
+      amortization_years: 30
+      term_years: 10                   # Fannie 10-year fixed
+
+      constraint_1_dscr:
+        metric: DSCR
+        minimum: 1.25                  # Fannie DUS minimum
+        ncf: 1_644_985
+        max_annual_debt_service: 1_315_988   # NCF / 1.25
+        # Solve for loan: DS = L * [r/12 * (1+r/12)^360] / [(1+r/12)^360 - 1]
+        # r = 5.60%, r/12 = 0.004667
+        # (1.004667)^360 = 5.3178
+        # payment factor = 0.004667 * 5.3178 / (5.3178 - 1) = 0.024817 / 4.3178 = 0.005748
+        # Monthly DS = 1,315,988 / 12 = 109,666
+        # Loan = 109,666 / 0.005748 = 19,079,000
+        monthly_constant: 0.005748
+        max_loan_amount: 19_079_000
+        calculation_shown: "NCF $1,644,985 / 1.25x = $1,315,988 max DS -> $109,666/mo / 0.005748 = $19,079,000"
+
+      constraint_2_ltv:
+        metric: LTV
+        maximum: 0.80                  # Fannie DUS max for standard tier
+        appraised_value: 38_500_000
+        max_loan_amount: 30_800_000    # 38,500,000 * 0.80
+        calculation_shown: "Appraised value $38,500,000 * 80% = $30,800,000"
+
+      constraint_3_debt_yield:
+        metric: debt_yield
+        minimum: 0.075                 # 7.5% Fannie floor
+        ncf: 1_644_985
+        max_loan_amount: 21_933_133    # 1,644,985 / 0.075
+        calculation_shown: "NCF $1,644,985 / 7.5% = $21,933,133"
+
+      binding_constraint: DSCR
+      binding_constraint_note: >
+        DSCR sizes to $19.08M, which is the smallest of the three.
+        DSCR is the binding constraint. LTV at this loan amount = 49.6% (well under 80%).
+        Debt yield at this amount = 8.62% (above 7.5% floor).
+      sized_loan_amount: 19_075_000    # rounded to nearest $25K (agency convention)
+      ltv_at_sized: 0.496              # 19,075,000 / 38,500,000
+      debt_yield_at_sized: 0.0862      # 1,644,985 / 19,075,000
+      dscr_at_sized: 1.25
+
+    # ----- RATE SENSITIVITY GRID -----
+    rate_sensitivity:
+      description: "Sized loan amount under DSCR constraint at various interest rates"
+      note: "DSCR 1.25x binding. All other constraints assumed non-binding at these levels."
+      rate_grid:
+        - rate: 0.0460
+          monthly_constant: 0.005117
+          max_loan_dscr: 21_430_000
+          ltv_implied: 0.557
+          debt_yield_implied: 0.0768
+
+        - rate: 0.0510
+          monthly_constant: 0.005430
+          max_loan_dscr: 20_224_000
+          ltv_implied: 0.525
+          debt_yield_implied: 0.0814
+
+        - rate: 0.0560
+          monthly_constant: 0.005748
+          max_loan_dscr: 19_075_000    # BASE CASE
+          ltv_implied: 0.496
+          debt_yield_implied: 0.0862
+
+        - rate: 0.0610
+          monthly_constant: 0.006072
+          max_loan_dscr: 18_094_000
+          ltv_implied: 0.470
+          debt_yield_implied: 0.0909
+
+        - rate: 0.0660
+          monthly_constant: 0.006401
+          max_loan_dscr: 17_155_000
+          ltv_implied: 0.446
+          debt_yield_implied: 0.0959
+
+        - rate: 0.0710
+          monthly_constant: 0.006735
+          max_loan_dscr: 16_285_000
+          ltv_implied: 0.423
+          debt_yield_implied: 0.1010
+
+      sensitivity_note: >
+        Each 50bps rate increase reduces max proceeds by ~$950K-$1M. At +150bps
+        (7.10%), proceeds drop $2.8M (15%) from base case. Borrower should
+        consider rate lock timing and defeasance flexibility.
+
+    # ----- RESERVE SCHEDULE -----
+    reserve_schedule:
+      replacement_reserves:
+        annual_amount: 37_500          # $250/unit
+        monthly_escrow: 3_125
+        disbursement: "Annual upon submission of capital improvement invoices"
+        balance_year_5: 187_500
+        balance_year_10: 375_000
+
+      tax_escrow:
+        annual_amount: 499_550         # trended taxes
+        monthly_escrow: 41_629
+        note: "1/12th of annual taxes escrowed monthly"
+
+      insurance_escrow:
+        annual_amount: 112_500
+        monthly_escrow: 9_375
+
+      repair_escrow:
+        initial_deposit: 0             # 2005 vintage, no deferred maintenance
+        note: "No upfront repair escrow required. PCA shows no immediate capital needs."
+
+      total_monthly_escrows: 54_129    # reserves + tax + insurance
+      total_monthly_payment: 163_795   # debt service $109,666 + escrows $54,129
+      effective_dscr_with_escrows: 1.00
+      effective_dscr_note: >
+        Including escrows, the effective DSCR drops to 1.00x. This is typical
+        for agency deals; the 1.25x DSCR is measured on debt service only.
+        Escrows are funded from NOI but are not debt service.
+
+
+  # =========================================================================
+  # EXAMPLE B: 50,000 SF Office CMBS Conduit
+  # =========================================================================
+  - id: sizing_02
+    name: "50K SF Suburban Office -- CMBS Conduit, Princeton NJ"
+    property_type: office
+    loan_program: CMBS_conduit
+    as_of_date: "2026-03-15"
+
+    property_inputs:
+      rentable_sf: 50_000
+      year_built: 1998
+      location: "Princeton, NJ (Route 1 Corridor)"
+      appraised_value: 11_200_000
+      purchase_price: 10_750_000
+
+    # ----- T-12 INCOME -----
+    t12_income:
+      tenants:
+        - name: "BioPharm Solutions LLC"
+          sf: 22_000
+          rent_psf: 32.00
+          annual_rent: 704_000
+          lease_expiry: "2031-06-30"
+          credit: "Private, IG-equivalent per D&B"
+
+        - name: "Meridian Consulting Group"
+          sf: 12_000
+          rent_psf: 29.50
+          annual_rent: 354_000
+          lease_expiry: "2028-12-31"
+          credit: "Private, mid-market"
+
+        - name: "State Farm Insurance (sublease)"
+          sf: 8_000
+          rent_psf: 28.00
+          annual_rent: 224_000
+          lease_expiry: "2027-09-30"
+          credit: "A-rated"
+
+      occupied_sf: 42_000
+      vacant_sf: 8_000
+      physical_occupancy: 0.84
+      gross_potential_rent: 1_500_000  # 50,000 SF * $30.00/SF market rent
+      in_place_rent: 1_282_000         # sum of 3 tenants
+      vacancy_loss: -218_000           # vacant 8,000 SF at market
+      effective_gross_income: 1_282_000 # rent from occupied only
+      expense_recoveries: 168_000      # CAM/tax reimbursements from NNN structure
+      other_income: 6_000              # antenna lease
+      total_egi: 1_456_000
+
+    # ----- T-12 EXPENSES -----
+    t12_expenses:
+      real_estate_taxes: 224_000       # $4.48/SF
+      insurance: 30_000               # $0.60/SF
+      utilities: 125_000              # $2.50/SF (owner-paid for common + base building)
+      management_fee: 58_240          # 4.0% of EGI
+      janitorial: 62_500              # $1.25/SF
+      repairs_maintenance: 100_000    # $2.00/SF
+      landscaping_snow: 22_500
+      elevator_maintenance: 18_000
+      security: 12_000
+      admin: 15_000
+      total_t12_expenses: 667_240
+
+    t12_noi: 788_760                   # EGI 1,456,000 - OpEx 667,240
+
+    # ----- NCF NORMALIZATION (CMBS adjustments) -----
+    ncf_normalization:
+      adjustments:
+        - item: "Management fee to 5%"
+          t12_actual: 58_240
+          cmbs_standard: 72_800        # 5% of EGI
+          adjustment: -14_560
+
+        - item: "Replacement reserves"
+          t12_actual: 0
+          cmbs_standard: -12_500       # $0.25/SF for office
+          adjustment: -12_500
+
+        - item: "TI/LC reserve"
+          t12_actual: 0
+          cmbs_standard: -75_000       # $1.50/SF annualized (5-year WALT / $7.50/SF TI amortized)
+          adjustment: -75_000
+          note: >
+            CMBS underwrites TI/LC as a below-the-line reserve. $7.50/SF TI allowance
+            amortized over 5-year average lease term = $1.50/SF/year. This is a major
+            sizing drag for office product vs multifamily.
+
+        - item: "Vacancy adjustment to market"
+          t12_actual: -218_000         # 16% vacancy
+          cmbs_standard: -150_000      # normalize to 10% (market stabilized for Route 1)
+          adjustment: 68_000
+          note: "CMBS credit to stabilized 10% vacancy for well-located Route 1 office"
+
+        - item: "Mark-to-market rent adjustment"
+          t12_actual: 0
+          cmbs_standard: 0
+          adjustment: 0
+          note: "In-place rents at $28-32/SF vs market $30/SF -- no material adjustment"
+
+      total_adjustments: -34_060
+      cmbs_ncf: 754_700                # T-12 NOI 788,760 - 34,060
+
+    # ----- SIZING UNDER 3 CONSTRAINTS -----
+    sizing_constraints:
+      interest_rate: 0.0690            # 10Y Treasury 4.30% + 260bps CMBS spread (office penalty)
+      amortization_years: 30
+      term_years: 10
+      note: "Office CMBS spreads 260bps over benchmark (wider than MF due to sector stress)"
+
+      constraint_1_dscr:
+        metric: DSCR
+        minimum: 1.35                  # CMBS office minimum (tighter than MF 1.25x)
+        ncf: 754_700
+        max_annual_debt_service: 559_037   # 754,700 / 1.35
+        # r/12 = 0.00575; (1.00575)^360 = 7.9178
+        # constant = 0.00575 * 7.9178 / 6.9178 = 0.045528 / 6.9178 = 0.006582
+        monthly_constant: 0.006582
+        max_loan_amount: 7_083_000     # (559,037/12) / 0.006582
+        calculation_shown: "NCF $754,700 / 1.35x = $559,037 max DS -> $46,586/mo / 0.006582 = $7,083,000"
+
+      constraint_2_ltv:
+        metric: LTV
+        maximum: 0.65                  # CMBS office max (reduced from 75% due to sector)
+        appraised_value: 11_200_000
+        max_loan_amount: 7_280_000
+        calculation_shown: "Appraised value $11,200,000 * 65% = $7,280,000"
+
+      constraint_3_debt_yield:
+        metric: debt_yield
+        minimum: 0.095                 # 9.5% CMBS office floor (higher than MF 7.5%)
+        ncf: 754_700
+        max_loan_amount: 7_944_000     # 754,700 / 0.095
+        calculation_shown: "NCF $754,700 / 9.5% = $7,944,000"
+
+      binding_constraint: DSCR
+      binding_constraint_note: >
+        DSCR is again binding at $7.08M. LTV at this amount = 63.2% (under 65% cap).
+        Debt yield = 10.65% (well above 9.5% floor). The TI/LC reserve deduction
+        is the primary sizing drag -- without it, DSCR-sized proceeds would be $8.2M.
+        This illustrates why office CMBS proceeds are structurally lower than MF.
+      sized_loan_amount: 7_075_000     # rounded to nearest $25K
+      ltv_at_sized: 0.632
+      debt_yield_at_sized: 0.1067      # 754,700 / 7,075,000
+      dscr_at_sized: 1.35
+
+    # ----- RATE SENSITIVITY GRID -----
+    rate_sensitivity:
+      description: "Sized loan amount under DSCR 1.35x at various rates"
+      rate_grid:
+        - rate: 0.0590
+          monthly_constant: 0.005942
+          max_loan_dscr: 7_846_000
+          ltv_implied: 0.700
+          debt_yield_implied: 0.0962
+          note: "Hits LTV cap at 65% -> binding switches to LTV at $7,280,000"
+
+        - rate: 0.0640
+          monthly_constant: 0.006258
+          max_loan_dscr: 7_446_000
+          ltv_implied: 0.665
+          debt_yield_implied: 0.1014
+          note: "Marginally above LTV cap"
+
+        - rate: 0.0690
+          monthly_constant: 0.006582
+          max_loan_dscr: 7_083_000     # BASE CASE
+          ltv_implied: 0.632
+          debt_yield_implied: 0.1067
+
+        - rate: 0.0740
+          monthly_constant: 0.006912
+          max_loan_dscr: 6_739_000
+          ltv_implied: 0.602
+          debt_yield_implied: 0.1120
+
+        - rate: 0.0790
+          monthly_constant: 0.007249
+          max_loan_dscr: 6_423_000
+          ltv_implied: 0.573
+          debt_yield_implied: 0.1175
+
+        - rate: 0.0840
+          monthly_constant: 0.007591
+          max_loan_dscr: 6_132_000
+          ltv_implied: 0.547
+          debt_yield_implied: 0.1231
+
+      sensitivity_note: >
+        Office CMBS is more rate-sensitive than agency MF due to wider base
+        spread and higher DSCR floor. Each 50bps increases cuts proceeds ~$330K.
+        At 5.90%, the binding constraint flips to LTV (65% cap), creating a ceiling.
+
+    # ----- RESERVE SCHEDULE -----
+    reserve_schedule:
+      replacement_reserves:
+        annual_amount: 12_500          # $0.25/SF
+        monthly_escrow: 1_042
+
+      ti_lc_reserve:
+        annual_amount: 75_000          # $1.50/SF
+        monthly_escrow: 6_250
+        note: >
+          CMBS requires TI/LC escrow for office. This is the single largest
+          non-debt-service cash outflow and a defining feature of office CMBS.
+          Reserve is released upon tenant execution with CMBS servicer approval.
+
+      tax_escrow:
+        annual_amount: 224_000
+        monthly_escrow: 18_667
+
+      insurance_escrow:
+        annual_amount: 30_000
+        monthly_escrow: 2_500
+
+      rollover_reserve:
+        initial_deposit: 150_000       # 2 months of gross rent as rollover cushion
+        note: "State Farm sublease expires 2027; CMBS requires rollover reserve for near-term expiry"
+
+      total_monthly_escrows: 28_459
+      total_monthly_payment: 75_045    # DS $46,586 + escrows $28,459
+      effective_dscr_with_escrows: 0.84
+      effective_dscr_note: >
+        Effective DSCR including escrows drops to 0.84x -- the property cannot
+        self-fund escrows from NOI alone. This is a common office CMBS dynamic.
+        Borrower must fund the gap from equity or accept lower escrow levels
+        via servicer negotiation. This structural cash drain is why many
+        sponsors avoid office CMBS in the current rate environment.
+
+    # ----- COMPARISON TABLE -----
+    mf_vs_office_sizing_comparison:
+      description: "Side-by-side showing why MF agency sizes better than office CMBS"
+      headers: [metric, MF_agency, office_CMBS]
+      rows:
+        - [interest_rate, "5.60%", "6.90%"]
+        - [dscr_floor, "1.25x", "1.35x"]
+        - [ltv_cap, "80%", "65%"]
+        - [debt_yield_floor, "7.5%", "9.5%"]
+        - [replacement_reserve_per_unit, "$250/unit", "$0.25/SF"]
+        - [ti_lc_reserve, "N/A", "$1.50/SF"]
+        - [ncf_haircut_from_t12, "-4.8%", "-4.3% (offset by vacancy credit)"]
+        - [proceeds_pct_of_value, "49.5%", "63.2%"]
+        - [binding_constraint, "DSCR", "DSCR"]
+        - [effective_dscr_w_escrows, "1.00x", "0.84x"]

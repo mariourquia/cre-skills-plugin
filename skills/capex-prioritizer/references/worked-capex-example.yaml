@@ -1,0 +1,418 @@
+---
+# Worked CapEx Prioritization Example
+# 100-unit MF, 5 projects totaling $800K. Per-project IRR/NPV,
+# interaction matrix, residual value, DSCR impact, replacement cost
+# benchmarks, "do nothing" cost, and recommended priority ranking.
+# Property: 100-unit garden-style MF, 1995 vintage, Morristown NJ.
+---
+
+property:
+  name: "Morris Terrace Apartments"
+  type: multifamily
+  units: 100
+  year_built: 1995
+  location: "Morristown, NJ"
+  current_noi: 1_420_000
+  current_value: 25_000_000
+  cap_rate: 0.0568
+  discount_rate: 0.08                 # sponsor's hurdle rate for capital allocation
+  hold_period_remaining: 5            # years to planned disposition
+  annual_debt_service: 1_050_000
+  current_dscr: 1.352                 # 1,420,000 / 1,050,000
+
+# =============================================================================
+# PROJECT DEFINITIONS
+# =============================================================================
+projects:
+
+  - id: P1
+    name: "Unit Interior Renovation (40 units)"
+    category: Revenue_Enhancement
+    cost: 320_000                      # $8,000/unit * 40 units
+    timing: "Months 1-12 (phased, 3-4 units/month)"
+    useful_life_years: 15
+    description: >
+      Kitchen and bath refresh: new countertops, cabinet refacing, updated fixtures,
+      LVP flooring, fresh paint. Targets below-market units renting at $1,650/mo
+      vs. $1,950/mo market for renovated comps.
+
+    revenue_impact:
+      rent_increase_per_unit: 300      # $1,650 -> $1,950/mo
+      units_affected: 40
+      annual_incremental_revenue: 144_000   # 40 * $300 * 12
+      ramp_up_schedule:
+        year_1: 72_000                # 50% of units online mid-year
+        year_2: 144_000               # fully stabilized
+        year_3: 148_320               # +3% growth
+        year_4: 152_770
+        year_5: 157_353
+      vacancy_during_renovation: -16_000   # ~1 month vacancy per unit, 40 * $400 lost rent
+
+    expense_impact:
+      annual_maintenance_savings: 8_000    # newer finishes = fewer service calls
+      annual_turnover_cost_reduction: 6_000 # higher retention from renovated units
+
+    financial_analysis:
+      incremental_noi_year_1: 64_000   # 72,000 revenue - 16,000 vacancy + 8,000 maint savings
+      incremental_noi_stabilized: 158_000  # 144,000 + 8,000 + 6,000
+      simple_payback_years: 2.03       # 320,000 / 158,000
+      project_irr: 0.412              # 41.2%
+      # Cash flows: [-320K, +64K, +158K, +162K, +167K, +171K]
+      # IRR solve: 41.2%
+      project_npv_at_8pct: 276_000
+      # NPV = -320K + 64/1.08 + 158/1.08^2 + 162/1.08^3 + 167/1.08^4 + 171/1.08^5 = $276K
+      residual_value_at_exit:
+        noi_contribution: 158_000
+        cap_rate: 0.0568
+        value_created: 2_781_000       # 158,000 / 0.0568
+        cost: 320_000
+        value_multiple: 8.7            # $8.69 of value per $1 invested
+
+    dscr_impact:
+      pre_project: 1.352
+      post_project_year_2: 1.502       # (1,420,000 + 158,000) / 1,050,000
+      dscr_improvement: 0.150
+
+  - id: P2
+    name: "Roof Replacement (Building A & B)"
+    category: Capital_Preservation
+    cost: 185_000
+    timing: "Months 3-5"
+    useful_life_years: 25
+    description: >
+      Full tear-off and replacement of flat roof membrane on Buildings A and B
+      (50 units). Current roof is 28 years old, past useful life. Active leaks
+      in 6 units causing tenant complaints and turnover.
+
+    revenue_impact:
+      rent_increase_per_unit: 0        # no direct rent increase
+      units_affected: 50
+      annual_incremental_revenue: 0
+      vacancy_reduction: 19_800        # eliminates 1% excess vacancy from leak complaints
+      # 50 units * $1,650 avg * 12 * 0.02 vacancy reduction = $19,800
+      retention_improvement: 9_900     # fewer move-outs = lower turnover cost
+
+    expense_impact:
+      annual_maintenance_savings: 24_000   # eliminates $2K/month in leak repairs and temp patches
+      insurance_premium_reduction: 4_500   # removal of roof exclusion rider
+
+    financial_analysis:
+      incremental_noi_year_1: 48_300   # 19,800 + 9,900 + 24,000 + 4,500 - 10,200 (partial year)
+      incremental_noi_stabilized: 58_200
+      simple_payback_years: 3.18       # 185,000 / 58,200
+      project_irr: 0.224              # 22.4%
+      # Cash flows: [-185K, +48.3K, +58.2K, +58.2K, +58.2K, +58.2K]
+      project_npv_at_8pct: 48_000
+      residual_value_at_exit:
+        noi_contribution: 58_200
+        cap_rate: 0.0568
+        value_created: 1_025_000
+        cost: 185_000
+        value_multiple: 5.5
+
+    dscr_impact:
+      pre_project: 1.352
+      post_project_year_2: 1.408
+      dscr_improvement: 0.055
+
+    do_nothing_cost:
+      annual_leak_repair: 24_000
+      tenant_loss_from_leaks: 19_800
+      insurance_surcharge: 4_500
+      risk_of_structural_damage: "Moderate -- water intrusion to framing over 2-3 years"
+      estimated_cost_if_delayed_3_years: 265_000   # structural remediation adds $80K
+      annual_cost_of_inaction: 48_300
+      note: >
+        Deferring roof replacement 3+ years risks structural damage ($80K additional),
+        potential mold remediation ($40-60K), and accelerated insurance premium increases.
+        The "do nothing" scenario costs more than the project within 4 years.
+
+  - id: P3
+    name: "Common Area & Amenity Upgrade"
+    category: Revenue_Enhancement
+    cost: 145_000
+    timing: "Months 2-4"
+    useful_life_years: 10
+    description: >
+      Lobby renovation, fitness center equipment upgrade, outdoor grilling/lounge area,
+      package locker system. Targets rental premium and retention.
+
+    revenue_impact:
+      rent_increase_per_unit: 25       # $25/unit/month across all 100 units
+      units_affected: 100
+      annual_incremental_revenue: 30_000
+      amenity_fee_income: 6_000        # package locker fees
+      ramp_up_schedule:
+        year_1: 18_000                # phased lease renewals
+        year_2: 36_000
+        year_3: 37_080
+
+    expense_impact:
+      annual_maintenance_increase: -4_800   # fitness equipment maintenance contract
+      annual_utilities_increase: -2_400     # additional lighting, HVAC for amenity space
+
+    financial_analysis:
+      incremental_noi_year_1: 10_800   # 18,000 - 4,800 - 2,400
+      incremental_noi_stabilized: 28_800   # 36,000 - 4,800 - 2,400
+      simple_payback_years: 5.03
+      project_irr: 0.082              # 8.2%
+      # Cash flows: [-145K, +10.8K, +28.8K, +29.7K, +30.6K, +31.5K]
+      project_npv_at_8pct: -13_000     # marginal NPV; barely clears hurdle
+      residual_value_at_exit:
+        noi_contribution: 28_800
+        cap_rate: 0.0568
+        value_created: 507_000
+        cost: 145_000
+        value_multiple: 3.5
+
+    dscr_impact:
+      pre_project: 1.352
+      post_project_year_2: 1.379
+      dscr_improvement: 0.027
+
+  - id: P4
+    name: "Parking Lot & Exterior Lighting"
+    category: Capital_Preservation
+    cost: 95_000
+    timing: "Months 4-5"
+    useful_life_years: 12
+    description: >
+      Mill and overlay 60,000 SF parking lot (cracking, potholes), restripe,
+      replace 20 exterior light fixtures with LED. Addresses safety complaints
+      and curb appeal.
+
+    revenue_impact:
+      rent_increase_per_unit: 0
+      units_affected: 0
+      annual_incremental_revenue: 0
+      vacancy_reduction: 6_600         # improved curb appeal reduces prospect drop-off
+      # Estimated 0.5% occupancy improvement * 100 * $1,650 * 12 * 0.067
+
+    expense_impact:
+      annual_maintenance_savings: 8_400    # eliminates pothole patching ($400/month)
+      annual_utility_savings: 5_400        # LED = 60% energy reduction on exterior lighting
+      # 20 fixtures * 150W -> 60W = 1.8kW savings * 12hr/day * 365 * $0.14/kWh = $5,400
+
+    financial_analysis:
+      incremental_noi_year_1: 17_400   # 6,600 + 8,400 + 5,400 - 3,000 (partial year)
+      incremental_noi_stabilized: 20_400
+      simple_payback_years: 4.66
+      project_irr: 0.128              # 12.8%
+      # Cash flows: [-95K, +17.4K, +20.4K, +20.4K, +20.4K, +20.4K]
+      project_npv_at_8pct: 1_200
+      residual_value_at_exit:
+        noi_contribution: 20_400
+        cap_rate: 0.0568
+        value_created: 359_000
+        cost: 95_000
+        value_multiple: 3.8
+
+    dscr_impact:
+      pre_project: 1.352
+      post_project_year_2: 1.371
+      dscr_improvement: 0.019
+
+    do_nothing_cost:
+      annual_patching_repairs: 4_800
+      liability_risk: "Trip-and-fall claims averaging $15-25K per incident in NJ"
+      insurance_note: "Insurer flagged parking lot condition in last inspection"
+      estimated_deferred_cost_3_years: 140_000   # full reconstruct if base fails
+      note: "Deferring 3+ years converts $95K overlay into $140K full reconstruct."
+
+  - id: P5
+    name: "Boiler Plant Upgrade (Building C)"
+    category: Efficiency
+    cost: 55_000
+    timing: "Month 6-7 (off-season install)"
+    useful_life_years: 20
+    description: >
+      Replace 30-year-old cast iron boiler in Building C (25 units) with
+      high-efficiency condensing unit. Current unit operates at ~72% efficiency;
+      new unit rated at 95%.
+
+    revenue_impact:
+      rent_increase_per_unit: 0
+      units_affected: 25
+      annual_incremental_revenue: 0
+
+    expense_impact:
+      annual_gas_savings: 11_400       # 25 units * current gas $1,900/unit * (1 - 72/95)
+      # Efficiency gain: 72% -> 95% = 24.2% savings on gas for 25 units
+      annual_maintenance_savings: 3_600    # new boiler warranty, fewer service calls
+      annual_total_savings: 15_000
+
+    financial_analysis:
+      incremental_noi_year_1: 7_500    # partial year (install month 6)
+      incremental_noi_stabilized: 15_000
+      simple_payback_years: 3.67
+      project_irr: 0.193              # 19.3%
+      # Cash flows: [-55K, +7.5K, +15K, +15K, +15K, +15K]
+      project_npv_at_8pct: 9_500
+      residual_value_at_exit:
+        noi_contribution: 15_000
+        cap_rate: 0.0568
+        value_created: 264_000
+        cost: 55_000
+        value_multiple: 4.8
+
+    dscr_impact:
+      pre_project: 1.352
+      post_project_year_2: 1.366
+      dscr_improvement: 0.014
+
+    do_nothing_cost:
+      risk_of_failure: "High -- 30-year-old unit past useful life"
+      emergency_replacement_premium: 18_000   # 30% premium for emergency install in winter
+      tenant_loss_if_no_heat: "NJ implied warranty of habitability violation; tenants can withhold rent"
+      estimated_lost_revenue_if_failure: 25_000   # 2 weeks no heat in winter = move-outs
+      note: "Emergency failure during heating season is the highest-risk single event in this portfolio."
+
+# =============================================================================
+# INTERACTION MATRIX
+# =============================================================================
+interaction_matrix:
+  description: >
+    Identifies synergies and conflicts between projects when executed together.
+    (+) = positive interaction, (-) = negative interaction, (0) = independent.
+  matrix:
+    #            P1    P2    P3    P4    P5
+    P1_units: [null, "+",  "+",  "0",  "0"]
+    P2_roof:  ["+",  null, "0",  "0",  "0"]
+    P3_amenity: ["+", "0", null, "+",  "0"]
+    P4_parking: ["0", "0", "+",  null, "0"]
+    P5_boiler: ["0",  "0", "0",  "0",  null]
+
+  interaction_details:
+    - pair: "P1 + P2"
+      type: positive
+      note: "Roof repair eliminates leak-related unit damage, reducing P1 renovation callbacks and protecting renovated finishes. Sequence: P2 before P1 for units in Buildings A/B."
+
+    - pair: "P1 + P3"
+      type: positive
+      note: "Unit renovations + amenity upgrades create a cohesive repositioning narrative. Combined rent premium ($300/unit renos + $25/unit amenities) can be marketed as a single $325/unit increase, improving lease-up velocity."
+
+    - pair: "P3 + P4"
+      type: positive
+      note: "Amenity upgrade + parking/curb appeal together improve the prospect tour experience. Parking lot is the first impression; amenities close the deal. Combined effect on vacancy reduction exceeds sum of parts by estimated 15%."
+
+    - pair: "P5 standalone"
+      type: independent
+      note: "Boiler is a standalone mechanical project with no interaction effects."
+
+# =============================================================================
+# REPLACEMENT COST BENCHMARKS
+# =============================================================================
+replacement_cost_benchmarks:
+  source: "Marshall & Swift, RS Means, IREM 2025 MF Benchmarks"
+  benchmarks:
+    - project: P1_unit_renovations
+      budget_per_unit: 8_000
+      market_benchmark: "7,500-10,000"
+      assessment: "Below midpoint. Scope is cosmetic-only (no layout changes)."
+
+    - project: P2_roof_replacement
+      budget_per_sf: 3.70              # 185,000 / 50,000 SF roof area
+      market_benchmark: "3.50-5.00/SF flat roof membrane"
+      assessment: "Low end. Competitive bid from established contractor."
+
+    - project: P3_amenity_upgrade
+      budget_per_unit: 1_450
+      market_benchmark: "1,000-2,500"
+      assessment: "Midpoint. Includes package lockers ($18K) which is a fixed cost."
+
+    - project: P4_parking
+      budget_per_sf: 1.58              # 95,000 / 60,000 SF
+      market_benchmark: "1.25-2.00/SF mill and overlay"
+      assessment: "Midpoint. Includes LED lighting ($12K incremental)."
+
+    - project: P5_boiler
+      budget_total: 55_000
+      market_benchmark: "45,000-70,000 per condensing boiler for 25-unit building"
+      assessment: "Below midpoint. Off-season scheduling reduces labor premium."
+
+# =============================================================================
+# PRIORITY RANKING
+# =============================================================================
+priority_ranking:
+  methodology: >
+    Ranked by: (1) project IRR, (2) NPV per dollar invested, (3) risk mitigation urgency,
+    (4) interaction synergies. Capital preservation projects with "do nothing" risk
+    receive a priority boost.
+
+  ranking:
+    - rank: 1
+      project: P1_unit_renovations
+      irr: 0.412
+      npv: 276_000
+      npv_per_dollar: 0.86             # $0.86 of NPV per $1 invested
+      rationale: "Highest IRR, highest NPV, highest value creation. Core of repositioning thesis."
+      dscr_post: 1.502
+
+    - rank: 2
+      project: P2_roof_replacement
+      irr: 0.224
+      npv: 48_000
+      npv_per_dollar: 0.26
+      rationale: "Second-highest IRR. Critical deferred maintenance with escalating 'do nothing' cost. Must precede P1 for Buildings A/B units."
+      dscr_post: 1.408
+
+    - rank: 3
+      project: P5_boiler_upgrade
+      irr: 0.193
+      npv: 9_500
+      npv_per_dollar: 0.17
+      rationale: "Third-highest IRR. Emergency failure risk makes this urgent despite smaller scale. Off-season timing window is narrow."
+      dscr_post: 1.366
+
+    - rank: 4
+      project: P4_parking_lighting
+      irr: 0.128
+      npv: 1_200
+      npv_per_dollar: 0.01
+      rationale: "Positive NPV but marginal. Liability risk and insurer pressure elevate priority above amenity project."
+      dscr_post: 1.371
+
+    - rank: 5
+      project: P3_amenity_upgrade
+      irr: 0.082
+      npv: -13_000
+      npv_per_dollar: -0.09
+      rationale: "Negative NPV at 8% hurdle. Consider deferring or descoping. If P1 is executed, amenity upgrade becomes more compelling due to interaction effects. Conditional recommendation: execute only if P1 proceeds."
+      dscr_post: 1.379
+
+  # ----- CUMULATIVE IMPACT -----
+  cumulative_all_projects:
+    total_cost: 800_000
+    total_incremental_noi_stabilized: 280_400   # sum of all project stabilized NOIs
+    portfolio_irr: 0.284              # 28.4% blended
+    portfolio_npv: 321_700
+    noi_post_all_projects: 1_700_400  # 1,420,000 + 280,400
+    dscr_post_all_projects: 1.619     # 1,700,400 / 1,050,000
+    value_created: 4_936_000          # 280,400 / 0.0568
+    total_cost_to_value_ratio: 0.162  # 800K / 4,936K = 16.2% -- every $1 creates $6.17
+
+  recommended_execution_sequence:
+    - phase: 1
+      months: "1-5"
+      projects: [P2, P5]
+      cost: 240_000
+      rationale: "Address deferred maintenance and emergency risk first. P2 before P1 to protect renovated units."
+
+    - phase: 2
+      months: "3-12"
+      projects: [P1]
+      cost: 320_000
+      rationale: "Core revenue driver. Begin after roof work completes on Buildings A/B."
+
+    - phase: 3
+      months: "4-5"
+      projects: [P4]
+      cost: 95_000
+      rationale: "Execute during spring for optimal paving conditions."
+
+    - phase: 4
+      months: "6-8"
+      projects: [P3]
+      cost: 145_000
+      rationale: "Conditional on P1 execution. Enhances repositioning narrative."
+      conditional: true

@@ -1,0 +1,286 @@
+# Annual Compliance Calendar Template
+# Organized by property type with regulatory basis, frequency, and consequences
+
+---
+metadata:
+  document: "CRE Annual Compliance Calendar"
+  version: "1.0"
+  notes: "Frequencies and requirements vary by jurisdiction. Confirm local requirements with counsel and code officials."
+
+---
+# ITEMS APPLICABLE TO ALL COMMERCIAL PROPERTY TYPES
+
+universal_compliance_items:
+
+  fire_safety:
+    - item: "Fire alarm system inspection and testing"
+      regulatory_basis: "NFPA 72, local fire code"
+      frequency: "Annual (full system); Semi-annual (visual inspection); Monthly (testing subset)"
+      typical_cost: "$1,500 - $5,000 per system annually"
+      responsible_party: "Property Manager / Fire protection contractor"
+      consequence_of_noncompliance: "Fire marshal citation, insurance coverage gap, potential building closure order"
+      calendar_months: [1, 7]
+      documentation: "Inspection report retained for 3 years minimum"
+
+    - item: "Fire sprinkler system inspection"
+      regulatory_basis: "NFPA 25, local fire code"
+      frequency: "Quarterly (gauges, valves); Annual (internal); 5-year (full flow test)"
+      typical_cost: "$800 - $3,000 quarterly; $3,000 - $8,000 for 5-year test"
+      responsible_party: "Property Manager / Sprinkler contractor"
+      consequence_of_noncompliance: "Fire marshal citation, insurance premium increase or cancellation"
+      calendar_months: [1, 4, 7, 10]
+      documentation: "NFPA 25 inspection tag on riser + written report"
+
+    - item: "Fire extinguisher inspection"
+      regulatory_basis: "NFPA 10, OSHA 29 CFR 1910.157"
+      frequency: "Monthly (visual); Annual (professional inspection); 6-year (maintenance); 12-year (hydrostatic test)"
+      typical_cost: "$3 - $8 per extinguisher annually"
+      responsible_party: "Property Manager / Fire protection vendor"
+      consequence_of_noncompliance: "OSHA citation, fire code violation, liability exposure"
+      calendar_months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+      documentation: "Inspection tag on each extinguisher"
+
+    - item: "Fire drill"
+      regulatory_basis: "Local fire code, IFC Chapter 4"
+      frequency: "Annual (most buildings); Quarterly (high-rise); Semi-annual (assembly occupancies)"
+      typical_cost: "$500 - $2,000 per drill (staff time, coordination)"
+      responsible_party: "Property Manager / Building engineer"
+      consequence_of_noncompliance: "Fire code violation, liability in event of actual emergency"
+      calendar_months: [3, 6, 9, 12]
+      documentation: "Fire drill report: date, time, participation, evacuation time, deficiencies noted"
+
+    - item: "Emergency lighting and exit sign testing"
+      regulatory_basis: "NFPA 101 Life Safety Code"
+      frequency: "Monthly (30-second test); Annual (90-minute test)"
+      typical_cost: "$200 - $1,000 annually (internal labor)"
+      responsible_party: "Building engineer"
+      consequence_of_noncompliance: "Life safety code violation, fire marshal citation"
+      calendar_months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+      documentation: "Testing log with date, location, pass/fail, corrective action"
+
+  elevator:
+    - item: "Elevator inspection"
+      regulatory_basis: "ASME A17.1, state/local elevator code"
+      frequency: "Annual (required in most jurisdictions); Semi-annual (some jurisdictions)"
+      typical_cost: "$200 - $500 per elevator per inspection"
+      responsible_party: "Property Manager / Elevator contractor / State inspector"
+      consequence_of_noncompliance: "Elevator shutdown order, fine ($500 - $5,000 per elevator)"
+      calendar_months: [6]
+      documentation: "Current inspection certificate posted in each cab"
+
+    - item: "Elevator maintenance"
+      regulatory_basis: "ASME A17.1, manufacturer specifications"
+      frequency: "Monthly (full-maintenance contract)"
+      typical_cost: "$300 - $800 per elevator per month"
+      responsible_party: "Elevator maintenance contractor"
+      consequence_of_noncompliance: "Accelerated wear, entrapment risk, code violation at inspection"
+      calendar_months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+      documentation: "Maintenance log, callback records"
+
+  mechanical_plumbing:
+    - item: "Backflow preventer testing"
+      regulatory_basis: "EPA Safe Drinking Water Act, local water authority"
+      frequency: "Annual"
+      typical_cost: "$75 - $200 per device"
+      responsible_party: "Property Manager / Licensed backflow tester"
+      consequence_of_noncompliance: "Water service disconnection, fine ($100 - $1,000 per device)"
+      calendar_months: [4]
+      documentation: "Test report filed with local water authority"
+
+    - item: "Cooling tower water treatment and Legionella testing"
+      regulatory_basis: "ASHRAE Standard 188, local health department (NYC LL 77)"
+      frequency: "Monthly (water treatment); Quarterly (Legionella culture in some jurisdictions)"
+      typical_cost: "$500 - $2,000 monthly for treatment; $200 - $500 per Legionella test"
+      responsible_party: "Property Manager / Water treatment vendor"
+      consequence_of_noncompliance: "Health department citation, potential building closure, Legionella outbreak liability"
+      calendar_months: [5, 6, 7, 8, 9, 10]
+      documentation: "Water treatment logs, Legionella test results, maintenance records"
+
+    - item: "HVAC system inspection and maintenance"
+      regulatory_basis: "ASHRAE standards, local mechanical code, manufacturer warranty"
+      frequency: "Quarterly (filter changes, belt inspection); Semi-annual (full PM); Annual (comprehensive)"
+      typical_cost: "$0.15 - $0.50 per SF annually for full-service contract"
+      responsible_party: "Building engineer / HVAC contractor"
+      consequence_of_noncompliance: "IAQ complaints, equipment failure, energy waste, warranty void"
+      calendar_months: [3, 6, 9, 12]
+      documentation: "PM work orders, filter change log, refrigerant tracking"
+
+    - item: "Boiler inspection"
+      regulatory_basis: "ASME Boiler and Pressure Vessel Code, state boiler board"
+      frequency: "Annual (internal and external)"
+      typical_cost: "$200 - $500 per boiler"
+      responsible_party: "State boiler inspector or authorized inspection agency"
+      consequence_of_noncompliance: "Operating permit revocation, fine, potential catastrophic failure"
+      calendar_months: [9]
+      documentation: "Inspection certificate, valid for 1 year"
+
+  environmental:
+    - item: "Asbestos management plan review"
+      regulatory_basis: "EPA AHERA (schools), OSHA 29 CFR 1926.1101 (general industry)"
+      frequency: "Annual review; 3-year re-inspection by licensed inspector"
+      typical_cost: "$500 - $2,000 for review; $2,000 - $10,000 for 3-year re-inspection"
+      responsible_party: "Property Manager / Environmental consultant"
+      consequence_of_noncompliance: "EPA fine up to $44,539 per day, OSHA citation, tenant notification requirements"
+      calendar_months: [1]
+      documentation: "Updated management plan, periodic surveillance reports, training records"
+
+    - item: "Lead-based paint disclosure update"
+      regulatory_basis: "EPA RRP Rule (40 CFR 745), HUD Lead Safe Housing Rule (residential)"
+      frequency: "At lease signing and renewal for pre-1978 buildings"
+      typical_cost: "Minimal (disclosure form); $5,000 - $20,000 for testing if triggered"
+      responsible_party: "Property Manager / Leasing team"
+      consequence_of_noncompliance: "EPA fine up to $22,270 per violation, personal injury liability"
+      calendar_months: [1]
+      documentation: "Signed disclosure forms in every tenant file"
+
+    - item: "Stormwater permit compliance (if applicable)"
+      regulatory_basis: "Clean Water Act, EPA NPDES, state equivalent"
+      frequency: "Annual permit renewal; Quarterly inspection of BMPs"
+      typical_cost: "$500 - $2,000 annually for permit and inspections"
+      responsible_party: "Property Manager / Environmental consultant"
+      consequence_of_noncompliance: "EPA/state fine up to $64,618 per day"
+      calendar_months: [3, 6, 9, 12]
+      documentation: "Inspection reports, discharge monitoring reports"
+
+  ada_accessibility:
+    - item: "ADA self-inspection"
+      regulatory_basis: "ADA Title III, DOJ regulations"
+      frequency: "Annual comprehensive; Ongoing observation"
+      typical_cost: "$2,000 - $10,000 for professional survey"
+      responsible_party: "Property Manager / ADA consultant"
+      consequence_of_noncompliance: "DOJ complaint, private lawsuit (attorneys fees), injunctive relief"
+      calendar_months: [2]
+      documentation: "Survey report, barrier removal log, transition plan updates"
+
+  insurance_and_risk:
+    - item: "Insurance policy renewal"
+      regulatory_basis: "Lender requirements, LPA requirements"
+      frequency: "Annual"
+      typical_cost: "Varies widely by property type and location"
+      responsible_party: "Risk Manager / Insurance broker"
+      consequence_of_noncompliance: "Loan default, LPA breach, uninsured exposure"
+      calendar_months: [11]
+      documentation: "Binders, certificates of insurance, evidence of coverage to lenders and LPs"
+
+    - item: "Tenant insurance certificate audit"
+      regulatory_basis: "Lease requirements"
+      frequency: "Annual (at renewal); Upon certificate expiration"
+      typical_cost: "Minimal (staff time to track)"
+      responsible_party: "Property Manager"
+      consequence_of_noncompliance: "Uninsured tenants create liability gap for landlord"
+      calendar_months: [1, 7]
+      documentation: "Current COI on file for every tenant"
+
+---
+# PROPERTY-TYPE-SPECIFIC ITEMS
+
+property_specific:
+
+  office:
+    - item: "Indoor air quality testing"
+      regulatory_basis: "ASHRAE 62.1, tenant complaints, green building certifications"
+      frequency: "Annual or upon complaint"
+      typical_cost: "$1,500 - $5,000 per floor"
+      calendar_months: [5]
+
+    - item: "Window washing (exterior)"
+      regulatory_basis: "Lease obligations, Class A standards, local facade maintenance ordinance"
+      frequency: "Semi-annual (Class A); Annual (Class B/C)"
+      typical_cost: "$0.10 - $0.30 per SF of glass"
+      calendar_months: [4, 10]
+
+  retail:
+    - item: "Grease trap cleaning and inspection"
+      regulatory_basis: "Local plumbing code, health department"
+      frequency: "Monthly to quarterly depending on FOG volume"
+      typical_cost: "$200 - $500 per cleaning"
+      calendar_months: [1, 4, 7, 10]
+
+    - item: "Parking lot re-striping"
+      regulatory_basis: "ADA, local fire lane requirements"
+      frequency: "Annual or as needed"
+      typical_cost: "$0.05 - $0.15 per SF"
+      calendar_months: [4]
+
+  industrial:
+    - item: "Dock leveler and overhead door inspection"
+      regulatory_basis: "OSHA, manufacturer specifications"
+      frequency: "Quarterly"
+      typical_cost: "$100 - $300 per unit"
+      calendar_months: [3, 6, 9, 12]
+
+    - item: "Spill prevention control plan (SPCC) review"
+      regulatory_basis: "EPA 40 CFR 112 (facilities storing >1,320 gallons oil above ground)"
+      frequency: "Annual review; Amendment within 6 months of material change"
+      typical_cost: "$2,000 - $5,000 for PE-certified plan"
+      calendar_months: [1]
+
+  multifamily:
+    - item: "Smoke and CO detector testing"
+      regulatory_basis: "Local fire code, state residential code"
+      frequency: "Annual in common areas; At unit turnover"
+      typical_cost: "$5 - $15 per unit"
+      calendar_months: [9]
+
+    - item: "Pool/spa inspection and water testing"
+      regulatory_basis: "Local health department, state pool code"
+      frequency: "Daily (water chemistry); Annual (health department inspection)"
+      typical_cost: "$3,000 - $8,000 annually for service contract"
+      calendar_months: [4, 5, 6, 7, 8, 9]
+
+    - item: "Pest control"
+      regulatory_basis: "Local health code, lease obligations, bed bug disclosure laws"
+      frequency: "Monthly (common areas); Quarterly (preventive unit treatment)"
+      typical_cost: "$0.02 - $0.05 per SF monthly"
+      calendar_months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+
+---
+# CALENDAR VIEW SUMMARY
+
+calendar_summary:
+  january:
+    - "Fire extinguisher inspection (annual kickoff)"
+    - "Asbestos management plan review"
+    - "Lead paint disclosure review"
+    - "Insurance certificate audit"
+    - "SPCC plan review (industrial)"
+  february:
+    - "ADA self-inspection"
+  march:
+    - "Fire drill (Q1 for high-rise)"
+    - "HVAC seasonal transition (heating to cooling prep)"
+    - "Stormwater permit quarterly inspection"
+  april:
+    - "Backflow preventer testing"
+    - "Window washing (spring, office)"
+    - "Parking lot striping"
+    - "Pool season preparation (multifamily)"
+  may:
+    - "Cooling tower startup and treatment"
+    - "Indoor air quality testing (office)"
+  june:
+    - "Fire drill (Q2 for high-rise)"
+    - "Elevator annual inspection"
+    - "Stormwater permit quarterly inspection"
+  july:
+    - "Fire alarm semi-annual inspection"
+    - "Insurance certificate mid-year audit"
+  august:
+    - "Pre-cooling season HVAC verification"
+  september:
+    - "Fire drill (Q3 for high-rise)"
+    - "Boiler annual inspection (pre-heating season)"
+    - "Smoke/CO detector testing (multifamily)"
+    - "Stormwater permit quarterly inspection"
+  october:
+    - "Cooling tower winterization"
+    - "Window washing (fall, office)"
+    - "Heating system startup"
+  november:
+    - "Insurance policy renewal (typical)"
+    - "Budget compliance costs for next year"
+  december:
+    - "Fire drill (Q4 for high-rise)"
+    - "HVAC filter change (quarterly)"
+    - "Year-end compliance audit across portfolio"
+    - "Stormwater permit quarterly inspection"

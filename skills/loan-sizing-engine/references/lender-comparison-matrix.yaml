@@ -1,0 +1,345 @@
+# CRE Lender Comparison Matrix
+# 6 execution types compared across key terms
+# Reference: 150-unit multifamily, $22.5M value, $2.1M NCF
+
+execution_types:
+
+  # --- 1. Agency (Fannie Mae DUS / Freddie Mac Optigo) ---
+  agency:
+    full_name: "GSE Agency (Fannie Mae DUS / Freddie Mac Optigo)"
+    property_types: ["multifamily (5+ units)", "affordable housing", "seniors housing (select)"]
+    typical_deal_size: "$3M - $500M+"
+    leverage:
+      max_ltv: 0.80
+      typical_ltv: "0.65 - 0.75"
+      supplemental_ltv: "up to 0.80 combined"
+    coverage:
+      min_dscr: 1.25
+      io_dscr: 1.20
+      stressed_dscr: "yes (200bps stress on IO deals)"
+    debt_yield:
+      primary_metric: false
+      typical_minimum: "6.5% - 7.0% (implied)"
+    pricing:
+      index: "SOFR swap rate (matched to term)"
+      typical_spread: "150 - 250 bps"
+      current_all_in_range: "5.25% - 6.75%"
+      rate_type: "fixed"
+    term: [5, 7, 10, 12, 15]
+    amortization: [30]
+    io_available: true
+    io_terms: "1 - 5 years (increases spread 5-15bps)"
+    prepayment:
+      type: ["yield maintenance", "defeasance"]
+      flexibility: "Low. Expensive to exit early."
+      step_down: "Not standard"
+    recourse: "Non-recourse (standard carve-outs)"
+    borrower_requirements:
+      net_worth: "equal to loan amount"
+      liquidity: "9-12 months debt service"
+      experience: "prior multifamily ownership preferred"
+    timeline:
+      application_to_close: "45 - 75 days"
+      rate_lock: "at application (Fannie) or commitment (Freddie)"
+    pros:
+      - "Best pricing in the market"
+      - "Highest leverage (up to 80%)"
+      - "Non-recourse"
+      - "30-year amortization standard"
+      - "Supplemental loan available"
+      - "Assumable (with lender approval)"
+    cons:
+      - "Multifamily only"
+      - "Expensive prepayment (yield maintenance / defeasance)"
+      - "SPE entity required"
+      - "Slower closing timeline"
+      - "Third-party reports required (appraisal, PCA, ESA)"
+
+  # --- 2. CMBS (Conduit) ---
+  cmbs_conduit:
+    full_name: "CMBS Conduit (Commercial Mortgage-Backed Securities)"
+    property_types: ["office", "retail", "industrial", "multifamily", "hospitality", "self-storage", "mixed-use"]
+    typical_deal_size: "$5M - $50M (conduit); $50M+ (single-asset/single-borrower)"
+    leverage:
+      max_ltv: 0.75
+      typical_ltv: "0.60 - 0.70"
+    coverage:
+      min_dscr: 1.25
+      stressed_dscr: "varies by servicer"
+    debt_yield:
+      primary_metric: true
+      typical_minimum: "8.0% - 10.0%"
+      notes: "DY is often the binding constraint for CMBS"
+    pricing:
+      index: "Treasury (matched to term) or SOFR swap"
+      typical_spread: "150 - 300 bps"
+      current_all_in_range: "5.75% - 7.50%"
+      rate_type: "fixed"
+    term: [5, 7, 10]
+    amortization: [25, 30]
+    io_available: true
+    io_terms: "2 - 10 years (full-term IO available for strong assets)"
+    prepayment:
+      type: ["defeasance", "yield maintenance"]
+      flexibility: "Very low. 2-year lock-out, then defeasance."
+      step_down: "Not standard for conduit"
+    recourse: "Non-recourse (standard carve-outs, 'bad boy' guarantees)"
+    borrower_requirements:
+      net_worth: "25% of loan amount (varies)"
+      liquidity: "5-10% of loan amount"
+      experience: "varies"
+      spe_required: true
+    timeline:
+      application_to_close: "60 - 90 days"
+      rate_lock: "at commitment or securitization"
+    pros:
+      - "Non-recourse"
+      - "All property types"
+      - "Full-term IO available"
+      - "Assumable (with servicer approval)"
+      - "No ongoing financial covenants (once securitized)"
+    cons:
+      - "Inflexible loan documents (SPE, cash management, reserves)"
+      - "Special servicer transfer risk"
+      - "No supplemental or subordinate debt allowed"
+      - "Defeasance costly and complex"
+      - "Borrower has limited relationship with servicer"
+
+  # --- 3. Regional / Community Bank ---
+  bank:
+    full_name: "Regional / Community Bank"
+    property_types: ["all (relationship-dependent)"]
+    typical_deal_size: "$1M - $25M"
+    leverage:
+      max_ltv: 0.70
+      typical_ltv: "0.55 - 0.65"
+    coverage:
+      min_dscr: 1.30
+      notes: "Banks are more conservative on DSCR"
+    debt_yield:
+      primary_metric: false
+      typical_minimum: "8.0% - 12.0%"
+    pricing:
+      index: "SOFR or bank prime"
+      typical_spread: "200 - 350 bps"
+      current_all_in_range: "6.50% - 8.50%"
+      rate_type: "floating (SOFR + spread) or short-term fixed (3-5 year)"
+    term: [3, 5, 7]
+    amortization: [25, 30]
+    io_available: "limited (1-2 years for strong borrowers)"
+    prepayment:
+      type: ["step-down (3/2/1)", "yield maintenance", "flat fee (1-2%)"]
+      flexibility: "High. Negotiable."
+    recourse: "Full or partial recourse (most common)"
+    borrower_requirements:
+      net_worth: "varies (global financial strength reviewed)"
+      liquidity: "12 months debt service"
+      experience: "strong preference for experienced borrowers"
+      personal_guarantee: "typically required"
+    timeline:
+      application_to_close: "30 - 60 days"
+      rate_lock: "at closing or shortly before"
+    pros:
+      - "Flexible terms (negotiable)"
+      - "Faster closing"
+      - "Relationship-driven (repeat borrower benefits)"
+      - "Flexible prepayment"
+      - "Can handle complex deals (mixed-use, transitional)"
+    cons:
+      - "Full or partial recourse"
+      - "Lower leverage"
+      - "Shorter terms (refinance risk)"
+      - "Floating rate risk"
+      - "Higher rates"
+      - "Borrower concentration limits"
+
+  # --- 4. Life Insurance Company ---
+  life_company:
+    full_name: "Life Insurance Company (Prudential, MetLife, TIAA, etc.)"
+    property_types: ["core office", "core retail (grocery-anchored)", "industrial", "multifamily"]
+    typical_deal_size: "$10M - $200M+"
+    leverage:
+      max_ltv: 0.65
+      typical_ltv: "0.50 - 0.60"
+    coverage:
+      min_dscr: 1.30
+      notes: "Conservative. Focus on credit quality over leverage."
+    debt_yield:
+      primary_metric: false
+      typical_minimum: "9.0% - 12.0%"
+    pricing:
+      index: "Treasury (matched to term)"
+      typical_spread: "125 - 200 bps"
+      current_all_in_range: "5.00% - 6.25%"
+      rate_type: "fixed"
+    term: [7, 10, 15, 20, 25, 30]
+    amortization: [25, 30]
+    io_available: "limited (full-term IO for trophy assets)"
+    prepayment:
+      type: ["yield maintenance", "declining prepay (negotiable)"]
+      flexibility: "moderate"
+    recourse: "Non-recourse"
+    borrower_requirements:
+      net_worth: "substantial"
+      liquidity: "12-24 months debt service"
+      experience: "institutional borrowers preferred"
+    timeline:
+      application_to_close: "45 - 90 days"
+      rate_lock: "at application (early rate lock is a major advantage)"
+    pros:
+      - "Lowest spreads in the market"
+      - "Longest terms available (up to 30 years)"
+      - "Non-recourse"
+      - "Flexible on property type"
+      - "Early rate lock"
+      - "Relationship-oriented (repeat borrower benefits)"
+    cons:
+      - "Lowest leverage (50-60%)"
+      - "Conservative underwriting"
+      - "Slow process for new borrowers"
+      - "Limited IO"
+      - "Trophy assets only (no value-add or transitional)"
+
+  # --- 5. Bridge / Transitional Lender ---
+  bridge:
+    full_name: "Bridge / Transitional Lender (debt fund, private lender)"
+    property_types: ["all (value-add, transitional, repositioning)"]
+    typical_deal_size: "$5M - $100M+"
+    leverage:
+      max_ltv: 0.80
+      typical_ltv: "0.65 - 0.75"
+      ltc: "up to 0.85 (including renovation budget)"
+    coverage:
+      min_dscr: 1.00
+      notes: "DSCR may be below 1.0x during renovation. Lender sizes on stabilized value."
+    debt_yield:
+      primary_metric: false
+      stabilized_dy_minimum: "7.0% - 9.0%"
+    pricing:
+      index: "SOFR"
+      typical_spread: "300 - 550 bps"
+      current_all_in_range: "7.50% - 10.00%"
+      rate_type: "floating"
+      origination_fee: "1.0% - 2.0%"
+      exit_fee: "0.25% - 1.0% (common)"
+    term: [2, 3]
+    extensions: "1-2 twelve-month extensions (with fee and performance tests)"
+    amortization: ["interest-only (no amortization)"]
+    io_available: true
+    prepayment:
+      type: ["minimum interest guarantee (6-12 months)", "flat fee", "open after lock-out"]
+      flexibility: "Moderate to high"
+    recourse: "Non-recourse (with completion/carry guarantees)"
+    borrower_requirements:
+      net_worth: "varies"
+      liquidity: "12-18 months interest reserve + renovation budget holdback"
+      experience: "strong value-add track record required"
+    timeline:
+      application_to_close: "21 - 45 days"
+    pros:
+      - "Highest leverage (75-85% LTC)"
+      - "Funds renovation budget"
+      - "Interest-only (preserves cash during renovation)"
+      - "Fast closing"
+      - "Flexible on property condition (value-add, lease-up, repositioning)"
+    cons:
+      - "Highest cost of capital"
+      - "Floating rate (rate cap required)"
+      - "Short term (refinance risk)"
+      - "Extension fees and performance tests"
+      - "Interest reserve required (cash drag)"
+      - "Origination and exit fees"
+
+  # --- 6. Debt Fund / Mezzanine ---
+  debt_fund_mezz:
+    full_name: "Debt Fund / Mezzanine Lender"
+    property_types: ["all"]
+    typical_deal_size: "$2M - $50M (mezz tranche)"
+    leverage:
+      position: "subordinate to senior debt"
+      combined_ltv: "0.75 - 0.85"
+      mezz_ltv_band: "65% - 85% (last dollar LTV)"
+    coverage:
+      combined_dscr: "1.10 - 1.20"
+    pricing:
+      rate: "10% - 15% (current pay or PIK)"
+      origination_fee: "1.0% - 3.0%"
+    term: "co-terminus with senior or +1 year"
+    recourse: "non-recourse (pledge of equity interest)"
+    intercreditor: "required with senior lender"
+    pros:
+      - "Increases total leverage without refinancing senior"
+      - "Non-recourse (equity pledge, not property lien)"
+      - "Can be structured as preferred equity to avoid lender consent"
+    cons:
+      - "Expensive (10-15%)"
+      - "Subordinate position = higher risk of loss"
+      - "Senior lender may prohibit or limit"
+      - "Intercreditor negotiation adds time and cost"
+
+# --- Sizing Comparison: 150-Unit MF at $22.5M Value, $2.1M NCF ---
+sizing_comparison:
+  note: "All figures assume property qualifies under each execution type"
+  agency:
+    rate: 0.0575
+    sized_loan: 16875000
+    ltv: 0.75
+    dscr: 1.78
+    equity_required: 5625000
+    annual_ds: 1180125
+    coc: 0.1650
+  cmbs:
+    rate: 0.0625
+    sized_loan: 15750000
+    ltv: 0.70
+    dscr: 1.74
+    equity_required: 6750000
+    annual_ds: 1162125
+    coc: 0.1399
+  bank:
+    rate: 0.0700
+    sized_loan: 13500000
+    ltv: 0.60
+    dscr: 1.95
+    equity_required: 9000000
+    annual_ds: 1078380
+    coc: 0.1143
+  life_company:
+    rate: 0.0550
+    sized_loan: 11250000
+    ltv: 0.50
+    dscr: 2.76
+    equity_required: 11250000
+    annual_ds: 766238
+    coc: 0.1192
+  bridge:
+    rate: 0.0850
+    sized_loan: 16875000
+    ltv: 0.75
+    dscr: 1.47
+    equity_required: 5625000
+    annual_ds: 1434375
+    coc: 0.1196
+    notes: "IO pricing. Highest leverage but highest cost. Appropriate for value-add only."
+
+decision_framework:
+  stabilized_core:
+    first_choice: "Life company (lowest rate, longest term)"
+    second_choice: "Agency (if multifamily, higher leverage)"
+    avoid: "Bridge (overpaying for flexibility not needed)"
+  stabilized_multifamily:
+    first_choice: "Agency (best leverage + rate combo for MF)"
+    second_choice: "Life company (lower rate if lower leverage acceptable)"
+    avoid: "Bridge"
+  value_add:
+    first_choice: "Bridge (funds renovation, IO during transition)"
+    second_choice: "Bank (if lower leverage acceptable, relationship pricing)"
+    permanent_takeout: "Agency or CMBS (refinance after stabilization)"
+  commercial_stabilized:
+    first_choice: "CMBS (all property types, non-recourse)"
+    second_choice: "Life company (if asset is core quality)"
+    third_choice: "Bank (if flexible terms needed)"
+  small_balance:
+    first_choice: "Bank (relationship, speed)"
+    second_choice: "Agency small balance (Fannie/Freddie for $1M-$7.5M MF)"
+    avoid: "CMBS (not cost-effective below $5M)"

@@ -1,0 +1,439 @@
+# worked-screening-example.yaml
+# Three deals screened through the 12-point rubric.
+# Scoring: 1 (fatal) to 5 (ideal). Pass threshold: avg >= 3.0 and no fatal (1).
+# Verdict: KEEP (proceed to underwriting), WATCH (conditional), KILL (pass).
+
+rubric_definition:
+  scoring_scale:
+    1: "Fatal flaw -- single score of 1 kills the deal unless sponsor override"
+    2: "Material concern -- requires mitigation plan"
+    3: "Acceptable -- meets minimum threshold"
+    4: "Favorable -- above-market or de-risked"
+    5: "Ideal -- rare; validates thesis"
+  pass_rules:
+    minimum_average: 3.0
+    fatal_floor: 1
+    watch_band: [2.8, 3.0]
+
+criteria:
+  - id: C01
+    name: Market Fundamentals
+    weight: 1.2
+    description: "MSA employment growth, population trajectory, demand drivers"
+  - id: C02
+    name: Submarket Supply Risk
+    weight: 1.3
+    description: "Pipeline as % of existing stock, delivery timing vs lease-up"
+  - id: C03
+    name: Location Quality
+    weight: 1.0
+    description: "Drive score, walkability, school ratings, crime, proximity to employment"
+  - id: C04
+    name: Physical Condition
+    weight: 1.1
+    description: "Roof, MEP, envelope, deferred maintenance per unit/SF"
+  - id: C05
+    name: In-Place Cash Flow
+    weight: 1.2
+    description: "T12 NOI reliability, rent roll occupancy, collection loss"
+  - id: C06
+    name: Rent Growth Potential
+    weight: 1.0
+    description: "Loss-to-lease, mark-to-market, renovation premium achievable"
+  - id: C07
+    name: Basis vs Replacement Cost
+    weight: 1.1
+    description: "Acquisition cost per unit/SF vs new construction cost"
+  - id: C08
+    name: Financing Availability
+    weight: 0.9
+    description: "Agency eligibility, DSCR, LTV achievable, rate environment"
+  - id: C09
+    name: Sponsor / Seller Motivation
+    weight: 0.8
+    description: "Why selling, fund life, distress signals, negotiation leverage"
+  - id: C10
+    name: Regulatory / Entitlement Risk
+    weight: 1.0
+    description: "Rent control, zoning, environmental, litigation"
+  - id: C11
+    name: Exit Liquidity
+    weight: 0.9
+    description: "Cap rate compression potential, buyer pool depth, hold alternatives"
+  - id: C12
+    name: Thesis Alignment
+    weight: 0.5
+    description: "Fits fund mandate, geography, asset class, return profile"
+
+# ===========================================================================
+# DEAL 1: 50-Unit Multifamily -- Charlotte, NC
+# ===========================================================================
+deal_1:
+  name: "Pinewood Gardens"
+  type: Multifamily
+  units: 50
+  vintage: 1998
+  asking_price: 5250000
+  price_per_unit: 105000
+  market: Charlotte-Concord-Gastonia MSA
+  submarket: East Charlotte / Albemarle Rd corridor
+
+  scores:
+    C01:
+      score: 4
+      weight: 1.2
+      notes: >
+        Charlotte MSA added 38k jobs LTM (+2.9%). Population growth top-10
+        nationally. Bank of America, Honeywell, Lowe's HQ demand drivers.
+        University and healthcare employment anchors in submarket.
+    C02:
+      score: 3
+      weight: 1.3
+      notes: >
+        2,100 units in pipeline within 3-mile radius (8.4% of stock). Most
+        delivering as Class A ($1,600+ rents) -- limited overlap with subject's
+        $1,050 avg rent Class B/C tenant base. Monitor Q3 deliveries.
+    C03:
+      score: 3
+      weight: 1.0
+      notes: >
+        Drive score 72. Grocery and pharmacy within 0.5 mi. School rating 5/10.
+        Crime index slightly above metro avg. 15-min drive to Uptown employment.
+        Not walkable but functional suburban workforce location.
+    C04:
+      score: 4
+      weight: 1.1
+      notes: >
+        Roof replaced 2021 (5 yrs remaining useful life). HVAC units avg 8 yrs
+        old. Parking lot needs mill/overlay ($85k est). Deferred maintenance
+        ~$3,200/unit -- below typical $5k threshold for value-add.
+    C05:
+      score: 4
+      weight: 1.2
+      notes: >
+        T12 NOI $382k (7.3% cap on ask). Occupancy 94% avg over 12 months.
+        Collection loss 2.1% (down from 4.8% two years ago). T3 trending up.
+        Expense ratio 48% -- room to optimize insurance and contract services.
+    C06:
+      score: 5
+      weight: 1.0
+      notes: >
+        In-place avg $1,050/unit. Comps at $1,180 for unrenovated, $1,350 for
+        light renovation. Loss-to-lease 12.4%. Renovation budget $8k/unit yields
+        $200/mo premium -- 24x rent multiple, well within value-add economics.
+    C07:
+      score: 5
+      weight: 1.1
+      notes: >
+        $105k/unit vs replacement cost ~$225k/unit (53% discount). Even with
+        $12k/unit capex, all-in basis $117k/unit -- still 48% below replacement.
+        Strong downside protection.
+    C08:
+      score: 4
+      weight: 0.9
+      notes: >
+        Freddie Mac SBL eligible (5-49 unit program at 50 units -- borderline,
+        confirm). Conventional agency at 75% LTV, est 6.1% rate, 1.30x DSCR.
+        Supplemental financing available post-stabilization.
+    C09:
+      score: 4
+      weight: 0.8
+      notes: >
+        Seller is 72-yr-old individual owner, self-managed for 20 years.
+        Executor/estate planning motivation. No broker -- direct to seller.
+        Likely 5-8% negotiation room. Flexible on closing timeline.
+    C10:
+      score: 4
+      weight: 1.0
+      notes: >
+        No rent control (NC state preemption). Standard B-2 zoning, no overlay
+        district. Phase I clean (2019, update needed). No pending litigation.
+        HOA-free. Low regulatory friction.
+    C11:
+      score: 4
+      weight: 0.9
+      notes: >
+        Charlotte sub-100 unit MF trades at 6.0-6.5% cap. Deep 1031 buyer pool.
+        3-5 year exit realistic at 6.25% cap post-renovation. Multiple exit
+        paths: individual sale, portfolio aggregation, or refi-and-hold.
+    C12:
+      score: 4
+      weight: 0.5
+      notes: >
+        Core-plus to value-add profile. Sunbelt workforce housing thesis.
+        Within target geography and unit count. IRR estimate 15-18% levered
+        on 5-yr hold with renovation execution.
+
+  weighted_average: 4.02
+  has_fatal: false
+  verdict: KEEP
+  next_steps:
+    - Submit LOI at $4.95M (5.7% discount to ask)
+    - Order rent comp survey and T12 audit
+    - Schedule property tour and unit-level inspection
+    - Confirm Freddie SBL eligibility at 50 units
+    - Run full underwriting model with renovation scenarios
+
+# ===========================================================================
+# DEAL 2: 35,000 SF Suburban Office -- Columbus, OH
+# ===========================================================================
+deal_2:
+  name: "Westerville Professional Center"
+  type: Office
+  sf: 35000
+  vintage: 2001
+  asking_price: 3150000
+  price_per_sf: 90
+  market: Columbus MSA
+  submarket: Westerville / Polaris corridor
+
+  scores:
+    C01:
+      score: 3
+      weight: 1.2
+      notes: >
+        Columbus MSA job growth +1.8%. State capital with diversified base
+        (OSU, government, insurance, tech). However, office-using employment
+        growth flat as hybrid/remote persists in insurance sector.
+    C02:
+      score: 2
+      weight: 1.3
+      notes: >
+        Suburban office vacancy 18.2% metro-wide, 21.4% in Polaris submarket.
+        160k SF of new medical office delivering Q2 (not directly competitive
+        but absorbs tenant demand). Net absorption negative 3 of last 4 quarters.
+    C03:
+      score: 3
+      weight: 1.0
+      notes: >
+        Polaris area is strong retail/residential node. Good highway access
+        (I-71). However, office tenants increasingly prefer Short North / downtown
+        for talent recruitment. Suburban disadvantage for Class A tenants.
+    C04:
+      score: 2
+      weight: 1.1
+      notes: >
+        Roof has 3 yrs remaining (est $280k replacement). Two RTUs past useful
+        life ($90k). Parking lot fair. Common area finishes dated -- full lobby
+        renovation needed to compete ($150k). Total deferred maintenance ~$15/SF.
+    C05:
+      score: 1
+      weight: 1.2
+      notes: >
+        T12 NOI $168k (5.3% cap). BUT: anchor tenant (42% of NRA) lease
+        expires in 14 months with no renewal indication. Adjusted for rollover
+        risk, effective NOI drops to ~$97k. WALE only 2.1 years. Two tenants
+        on month-to-month. Cash flow is NOT stable.
+    C06:
+      score: 2
+      weight: 1.0
+      notes: >
+        In-place avg $16.50/SF gross. Market at $18-19/SF but only for
+        renovated product. Achieving market rent requires $20-25/SF TI
+        investment per lease. Concession packages (3-6 months free) standard
+        in submarket. Net effective rent growth negligible.
+    C07:
+      score: 3
+      weight: 1.1
+      notes: >
+        $90/SF vs replacement ~$250/SF. Significant discount but suburban office
+        replacement cost is misleading -- no one is building new suburban office.
+        Basis comparison less relevant when functional obsolescence is the risk.
+    C08:
+      score: 2
+      weight: 0.9
+      notes: >
+        No agency financing for office. Community bank or CMBS only. Likely
+        60-65% LTV max, 7.5%+ rate. Lenders requiring 1.40x DSCR minimum
+        for office. Recourse likely required given tenant rollover profile.
+    C09:
+      score: 4
+      weight: 0.8
+      notes: >
+        Seller is local partnership dissolving after partner death. Motivated
+        to close quickly. Listed 8 months, two price reductions. May accept
+        $2.6-2.7M. Distressed seller dynamic is the one bright spot.
+    C10:
+      score: 3
+      weight: 1.0
+      notes: >
+        Zoning allows medical office conversion (potential upside). No
+        environmental flags. ADA compliance needs assessment -- parking ratio
+        may be under current code for medical use conversion.
+    C11:
+      score: 1
+      weight: 0.9
+      notes: >
+        Suburban office exit market is extremely thin. Cap rates 8-10% for
+        value-add office with rollover risk. Buyer pool limited to local
+        owner-users or deep-discount investors. Likely 18-24 month marketing
+        period on exit. Illiquid.
+    C12:
+      score: 2
+      weight: 0.5
+      notes: >
+        Fund mandate is workforce housing and industrial. Office is off-thesis.
+        Would require IC exception. Distraction from core strategy even if
+        pricing is attractive.
+
+  weighted_average: 2.18
+  has_fatal: true
+  fatal_criteria: [C05, C11]
+  verdict: KILL
+  kill_reasons:
+    - "Two fatal scores: unstable cash flow (C05=1) and illiquid exit (C11=1)"
+    - "Anchor tenant rollover in 14 months with no renewal signal"
+    - "Suburban office structural headwinds -- not cyclical, secular decline"
+    - "Off-thesis for fund mandate"
+  lessons:
+    - "Seller distress does not fix asset-class headwinds"
+    - "Always stress-test NOI for near-term rollover before pricing"
+    - "Replacement cost discount is meaningless for functionally obsolete product"
+
+# ===========================================================================
+# DEAL 3: 80,000 SF Industrial Warehouse -- Lehigh Valley, PA
+# ===========================================================================
+deal_3:
+  name: "Valley Logistics Center"
+  type: Industrial
+  sf: 80000
+  vintage: 2015
+  asking_price: 8800000
+  price_per_sf: 110
+  market: Lehigh Valley / I-78 Corridor
+  submarket: Upper Macungie Township
+
+  scores:
+    C01:
+      score: 5
+      weight: 1.2
+      notes: >
+        Lehigh Valley is top-3 industrial market nationally for absorption.
+        I-78/I-81 intersection provides 40% of US population within 1-day
+        truck drive. Amazon, FedEx, UPS, XPO all have major facilities.
+        E-commerce and reshoring tailwinds persist.
+    C02:
+      score: 3
+      weight: 1.3
+      notes: >
+        4.2M SF in pipeline (6.8% of stock). However, 62% is pre-leased or
+        BTS. Spec delivery of 1.6M SF -- manageable given 3.2M SF trailing
+        12-month absorption. Vacancy may tick up 50-75 bps but stays below
+        5% structural rate.
+    C03:
+      score: 4
+      weight: 1.0
+      notes: >
+        Directly off I-78 Exit 49. 0.3 miles to on-ramp. 32' clear height,
+        ESFR sprinklers, 60' speed bays, 130' truck court. Cross-dock capable.
+        Labor pool adequate -- $18-22/hr warehouse wage, 15-min drive shed
+        covers 85k workers. Amazon within 2 miles helps labor attraction.
+    C04:
+      score: 5
+      weight: 1.1
+      notes: >
+        Built 2015 -- only 11 years old. Tilt-up concrete, TPO roof with
+        15-yr warranty (9 yrs remaining). LED lighting, T-5 high bays. HVAC
+        limited to office (4,000 SF). Dock equipment inspected 2024. Zero
+        deferred maintenance. Capex reserve $0.15/SF sufficient.
+    C05:
+      score: 4
+      weight: 1.2
+      notes: >
+        Single tenant, 3PL operator, NNN lease. Current NOI $528k (6.0% cap).
+        Annual escalators 2.75%. Tenant has been in place since 2018, exercised
+        first renewal option in 2023. Operating metrics strong -- 97% dock
+        utilization per tenant reporting. NNN structure = minimal landlord risk.
+    C06:
+      score: 4
+      weight: 1.0
+      notes: >
+        In-place $6.60/SF NNN. Market asking $7.50-8.25/SF NNN for comparable
+        product. 14-20% mark-to-market on next rollover (2028). New leases in
+        submarket signing at $8.00+ with 3% annual bumps. Industrial rent
+        growth has moderated from 2021-2022 peaks but remains positive.
+    C07:
+      score: 4
+      weight: 1.1
+      notes: >
+        $110/SF vs replacement cost $140-155/SF (25-30% discount). Land in
+        Upper Macungie now $350k+/acre, making new spec uneconomic below
+        $9.00/SF rent. Existing basis provides structural moat against
+        new competitive supply at subject's rent level.
+    C08:
+      score: 4
+      weight: 0.9
+      notes: >
+        Industrial lending remains favorable. Life company or CMBS at 65% LTV,
+        5.75-6.0% rate, 1.35x DSCR. Interest-only available for 2-3 years.
+        Single-tenant risk requires credit analysis but 3PL operator has
+        $200M+ revenue and investment-grade parent.
+    C09:
+      score: 3
+      weight: 0.8
+      notes: >
+        Seller is regional developer recycling capital for new spec project.
+        Not distressed but motivated by deployment timeline. Broker-listed,
+        competitive process likely. Limited negotiation room -- maybe 3-5%
+        given market demand for industrial.
+    C10:
+      score: 3
+      weight: 1.0
+      notes: >
+        Upper Macungie has implemented warehouse moratorium on NEW development
+        (positive for existing stock -- supply constraint). Stormwater
+        management requirements strict. No environmental flags. PILOT agreement
+        expired -- full tax assessment now in effect, already reflected in T12.
+    C11:
+      score: 5
+      weight: 0.9
+      notes: >
+        Industrial is most liquid CRE asset class. Sub-5% cap rate for credit
+        tenanted industrial in Lehigh Valley. Deep institutional buyer pool
+        (Prologis, Blackstone, GLP, REITs, 1031 buyers). 30-60 day marketing
+        period realistic. Multiple exit strategies available.
+    C12:
+      score: 5
+      weight: 0.5
+      notes: >
+        Core-plus industrial in logistics corridor. Directly on thesis.
+        NNN lease with embedded rent growth. Fits fund mandate for income +
+        appreciation. Portfolio diversification benefit (first PA asset).
+
+  weighted_average: 4.04
+  has_fatal: false
+  verdict: KEEP
+  next_steps:
+    - Submit LOI at $8.5M (3.4% discount) with 45-day DD, 15-day financing
+    - Request tenant financials and 3PL parent credit package
+    - Order Phase I update and roof inspection
+    - Model 5-yr hold with rollover at market rent in Year 3
+    - Confirm warehouse moratorium details with township planning dept
+    - Run sensitivity on cap rate exit at 5.5%, 5.75%, 6.0%
+
+# ===========================================================================
+# Summary
+# ===========================================================================
+summary:
+  deals_screened: 3
+  kept: 2
+  killed: 1
+  watched: 0
+  verdicts:
+    - deal: Pinewood Gardens (50-unit MF, Charlotte)
+      verdict: KEEP
+      weighted_avg: 4.02
+      key_driver: "Strong value-add economics, 48% below replacement, motivated seller"
+    - deal: Westerville Professional Center (35k SF Office, Columbus)
+      verdict: KILL
+      weighted_avg: 2.18
+      key_driver: "Two fatals -- unstable cash flow and illiquid exit. Secular office decline."
+    - deal: Valley Logistics Center (80k SF Industrial, Lehigh Valley)
+      verdict: KEEP
+      weighted_avg: 4.04
+      key_driver: "Institutional-quality logistics asset, NNN lease, deep exit liquidity"
+  pattern_notes:
+    - "MF and industrial both benefit from structural demand tailwinds"
+    - "Office kill was driven by secular (not cyclical) headwinds -- replacement cost discount is a trap"
+    - "Seller motivation is a deal enhancer, not a deal maker -- asset quality must stand alone"
+    - "NNN industrial requires tenant credit diligence as substitute for property-level cash flow analysis"

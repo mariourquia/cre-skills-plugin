@@ -1,0 +1,472 @@
+# LP Subscription Processing Checklist
+# Reference: SEC Reg D, FinCEN CDD Rule, fund-specific LPA provisions
+# Baseline: $250M closed-end RE PE fund (Fund IV), 506(b) exemption
+# Last updated: 2026-03-17
+
+---
+
+# Master Subscription Processing Workflow
+subscription_workflow:
+  overview:
+    target_completion_days: 15  # from receipt of initial documents to capital account setup
+    critical_path: "AML/KYC verification (5-7 business days typical)"
+    responsible_parties:
+      primary: "Fund Operations / Investor Relations"
+      legal: "Fund Counsel"
+      compliance: "Chief Compliance Officer"
+      accounting: "Fund Administrator"
+
+  # Phase 1: Document Receipt and Completeness Check (Day 1-2)
+  phase_1_document_review:
+    description: "Review subscription agreement and supporting documents for completeness"
+    deadline_days: 2
+
+    subscription_agreement_verification:
+      - id: SA-01
+        item: "Subscription agreement fully executed (all signature pages)"
+        required: true
+        status: ""  # pass, fail, pending
+        notes: ""
+
+      - id: SA-02
+        item: "Investor name matches government-issued ID exactly"
+        required: true
+        status: ""
+        notes: "No abbreviations, nicknames, or DBA names unless entity"
+
+      - id: SA-03
+        item: "Commitment amount filled in and legible"
+        required: true
+        status: ""
+        notes: "Minimum commitment per LPA (typically $1M-$5M)"
+
+      - id: SA-04
+        item: "Tax ID / SSN / EIN provided"
+        required: true
+        status: ""
+        notes: "W-9 for US persons, W-8BEN for non-US"
+
+      - id: SA-05
+        item: "Address complete (street address, not P.O. Box for individuals)"
+        required: true
+        status: ""
+        notes: ""
+
+      - id: SA-06
+        item: "Wire transfer instructions provided"
+        required: true
+        status: ""
+        notes: "Bank name, ABA/SWIFT, account number, account name"
+
+      - id: SA-07
+        item: "Distribution election completed (reinvest or distribute)"
+        required: true
+        status: ""
+        notes: ""
+
+      - id: SA-08
+        item: "Power of attorney section executed"
+        required: true
+        status: ""
+        notes: "Grants GP authority to act on behalf of LP per LPA"
+
+      - id: SA-09
+        item: "Investor questionnaire completed (all sections)"
+        required: true
+        status: ""
+        notes: "Accreditation, ERISA, FOIA, tax status sections"
+
+      - id: SA-10
+        item: "Side letter requests identified and routed to counsel"
+        required: false
+        status: ""
+        notes: "Flag for separate negotiation track"
+
+      - id: SA-11
+        item: "Subscription amount meets fund minimum"
+        required: true
+        status: ""
+        notes: "Per LPA: individual minimum $X, institutional minimum $Y"
+
+      - id: SA-12
+        item: "No modifications or strikethroughs to standard subscription agreement"
+        required: true
+        status: ""
+        notes: "If modifications present, route to fund counsel immediately"
+
+      - id: SA-13
+        item: "Dated within 90 days of expected closing"
+        required: true
+        status: ""
+        notes: "Stale subscriptions require re-execution"
+
+      - id: SA-14
+        item: "Correct fund entity referenced (verify exact legal name)"
+        required: true
+        status: ""
+        notes: ""
+
+      - id: SA-15
+        item: "All required exhibits and schedules completed"
+        required: true
+        status: ""
+        notes: "Beneficial ownership form, tax form, investor questionnaire"
+
+  # Phase 2: Accredited Investor Verification (Day 2-5)
+  phase_2_accredited_investor:
+    description: "Verify LP meets accredited investor requirements per Reg D exemption"
+    deadline_days: 5
+
+    individual_investor:
+      income_test:
+        threshold: "$200,000 individual / $300,000 joint in each of 2 most recent years"
+        expectation: "reasonable expectation of same in current year"
+        documentation_506b:
+          - "Self-certification in subscription agreement"
+          - "Investor questionnaire attestation"
+        documentation_506c:
+          - "Tax returns (2 most recent years) reviewed by CPA/attorney/BD/RIA"
+          - "OR: W-2s/1099s/K-1s (2 most recent years) + written rep for current year"
+          - "Written verification letter from qualified professional"
+
+      net_worth_test:
+        threshold: "$1,000,000 net worth excluding primary residence"
+        documentation_506b:
+          - "Self-certification in subscription agreement"
+        documentation_506c:
+          - "Written verification from CPA/attorney/BD/RIA"
+          - "OR: bank/brokerage statements (90 days) + credit report"
+
+      professional_certifications:
+        description: "Series 7, 65, or 82 license holders are accredited"
+        documentation: "FINRA BrokerCheck verification or license copy"
+
+      knowledgeable_employee:
+        description: "Executive officers, directors, or advisory committee members of the fund or GP"
+        documentation: "Written certification of status"
+
+    entity_investor:
+      assets_test:
+        threshold: "$5,000,000 in assets (not formed for specific purpose of investing)"
+        documentation: "Financial statements (audited preferred)"
+
+      all_owners_accredited:
+        description: "Entity where all equity owners are individually accredited"
+        documentation: "Accreditation verification for each owner"
+
+      qualified_purchaser:
+        threshold_individual: "$5,000,000 in investments"
+        threshold_entity: "$25,000,000 in investments"
+        documentation: "Written certification + supporting statements"
+        note: "QP status is separate from and in addition to accredited status"
+
+    verification_checklist:
+      - id: AI-01
+        item: "Accreditation basis identified (income, net worth, entity, professional, QP)"
+        status: ""
+
+      - id: AI-02
+        item: "Supporting documentation received and reviewed"
+        status: ""
+
+      - id: AI-03
+        item: "For 506(c): third-party verification letter on file"
+        status: ""
+        note: "Not required for 506(b)"
+
+      - id: AI-04
+        item: "Verification dated within 90 days of closing"
+        status: ""
+
+      - id: AI-05
+        item: "If entity: look-through to beneficial owners completed"
+        status: ""
+
+  # Phase 3: AML/KYC Verification (Day 2-7)
+  phase_3_aml_kyc:
+    description: "Anti-money laundering and know-your-customer verification"
+    deadline_days: 7
+    note: "Can run in parallel with Phase 2"
+
+    individual_kyc:
+      - id: KYC-I-01
+        item: "Government-issued photo ID (passport or driver's license)"
+        required: true
+        status: ""
+
+      - id: KYC-I-02
+        item: "Proof of address (utility bill, bank statement within 90 days)"
+        required: true
+        status: ""
+
+      - id: KYC-I-03
+        item: "Source of funds documentation"
+        required: true  # for commitments > $1M
+        status: ""
+        examples:
+          - "Employment income documentation"
+          - "Investment account statements"
+          - "Trust/inheritance documentation"
+          - "Business sale proceeds documentation"
+
+      - id: KYC-I-04
+        item: "OFAC/SDN list screening completed"
+        required: true
+        status: ""
+        screening_provider: ""
+
+      - id: KYC-I-05
+        item: "PEP (Politically Exposed Person) screening completed"
+        required: true
+        status: ""
+        result: ""  # clear, hit_resolved, hit_pending
+
+      - id: KYC-I-06
+        item: "Adverse media screening completed"
+        required: true
+        status: ""
+
+    entity_kyc:
+      - id: KYC-E-01
+        item: "Formation documents (certificate of incorporation, partnership agreement, trust deed)"
+        required: true
+        status: ""
+
+      - id: KYC-E-02
+        item: "Certificate of good standing (within 90 days)"
+        required: true
+        status: ""
+
+      - id: KYC-E-03
+        item: "Board resolution or GP authorization for investment"
+        required: true
+        status: ""
+
+      - id: KYC-E-04
+        item: "Beneficial ownership form (FinCEN CDD Rule -- 25%+ owners)"
+        required: true
+        status: ""
+        owners_identified: []
+
+      - id: KYC-E-05
+        item: "KYC on each beneficial owner (individual KYC checklist)"
+        required: true
+        status: ""
+        note: "Apply KYC-I-01 through KYC-I-06 for each beneficial owner"
+
+      - id: KYC-E-06
+        item: "OFAC screening on entity name and all DBAs"
+        required: true
+        status: ""
+
+      - id: KYC-E-07
+        item: "Source of funds documentation (entity level)"
+        required: true
+        status: ""
+
+      - id: KYC-E-08
+        item: "Operating agreement or equivalent (confirming authorized signatory)"
+        required: true
+        status: ""
+
+    enhanced_due_diligence:
+      triggers:
+        - "PEP identified among beneficial owners"
+        - "Country of incorporation or beneficial ownership in high-risk jurisdiction"
+        - "Complex ownership structure (3+ tiers)"
+        - "Source of funds involves cash-intensive businesses"
+        - "Adverse media hits"
+      additional_steps:
+        - "Senior management approval required before acceptance"
+        - "Enhanced source of funds review"
+        - "Ongoing monitoring at quarterly frequency (vs standard annual)"
+        - "Detailed memo documenting risk assessment and mitigation"
+
+  # Phase 4: ERISA Compliance Check (Day 5-8)
+  phase_4_erisa:
+    description: "Determine if LP is a benefit plan investor and assess ERISA implications"
+    deadline_days: 8
+
+    checklist:
+      - id: ER-01
+        item: "Is the LP an employee benefit plan subject to ERISA?"
+        status: ""
+        plan_types:
+          - "401(k) plan"
+          - "Defined benefit pension plan"
+          - "Profit-sharing plan"
+          - "403(b) plan"
+
+      - id: ER-02
+        item: "Is the LP an IRA or Keogh plan?"
+        status: ""
+        note: "IRAs are subject to ERISA-like prohibited transaction rules under IRC 4975"
+
+      - id: ER-03
+        item: "Is the LP a governmental plan?"
+        status: ""
+        note: "Governmental plans are generally exempt from ERISA but may have state-level restrictions"
+
+      - id: ER-04
+        item: "Is the LP a church plan?"
+        status: ""
+        note: "Church plans may elect ERISA coverage or remain exempt"
+
+      - id: ER-05
+        item: "If ERISA plan: calculate benefit plan investor percentage"
+        status: ""
+        calculation: |
+          BPI% = (benefit plan investor capital) / (total fund equity)
+          Exclude: GP commitment (if not from benefit plan)
+          Include: all ERISA plans + IRAs + entities with 25%+ BPI
+          Threshold: 25% -- if exceeded, fund is subject to ERISA plan asset rules
+        current_bpi_percentage: 0.0
+        threshold: 25.0
+
+      - id: ER-06
+        item: "VCOC or REOC exemption available?"
+        status: ""
+        vcoc: "Venture Capital Operating Company -- 50%+ in operating companies with management rights"
+        reoc: "Real Estate Operating Company -- 50%+ in real estate with active management"
+        note: "Most RE PE funds qualify for REOC exemption"
+
+      - id: ER-07
+        item: "If BPI% approaching 25%, restrict further ERISA subscriptions"
+        status: ""
+        action: "Notify IR team to screen new subscriptions for ERISA status"
+
+  # Phase 5: Capital Account Setup (Day 8-12)
+  phase_5_account_setup:
+    description: "Create LP capital account and configure systems"
+    deadline_days: 12
+
+    checklist:
+      - id: CA-01
+        item: "LP created in fund administrator system"
+        required: true
+        status: ""
+
+      - id: CA-02
+        item: "Commitment amount entered correctly"
+        required: true
+        status: ""
+
+      - id: CA-03
+        item: "Closing date entered"
+        required: true
+        status: ""
+
+      - id: CA-04
+        item: "Fee rate entered (standard or side letter rate)"
+        required: true
+        status: ""
+
+      - id: CA-05
+        item: "Wire instructions verified (test wire recommended for commitments > $10M)"
+        required: true
+        status: ""
+
+      - id: CA-06
+        item: "Tax reporting classification confirmed (partnership, disregarded entity, etc.)"
+        required: true
+        status: ""
+
+      - id: CA-07
+        item: "Distribution instructions confirmed (wire or check, reinvest or distribute)"
+        required: true
+        status: ""
+
+      - id: CA-08
+        item: "Side letter provisions coded in system (fee discounts, reporting, co-invest)"
+        required: false
+        status: ""
+
+      - id: CA-09
+        item: "MFN notification list updated (if LP has MFN clause)"
+        required: false
+        status: ""
+
+      - id: CA-10
+        item: "Equalization calculated (if subsequent close)"
+        required: false
+        status: ""
+        equalization_amount: 0.0
+
+  # Phase 6: Final Approval and Welcome (Day 12-15)
+  phase_6_final_approval:
+    description: "Final compliance review, GP acceptance, and LP welcome"
+    deadline_days: 15
+
+    checklist:
+      - id: FA-01
+        item: "All Phase 1-5 items marked pass or n/a"
+        required: true
+        status: ""
+
+      - id: FA-02
+        item: "Compliance officer sign-off"
+        required: true
+        status: ""
+        signed_by: ""
+        date: ""
+
+      - id: FA-03
+        item: "GP acceptance (countersign subscription agreement)"
+        required: true
+        status: ""
+        signed_by: ""
+        date: ""
+
+      - id: FA-04
+        item: "Welcome letter sent to LP with:"
+        required: true
+        status: ""
+        contents:
+          - "Confirmation of acceptance and commitment amount"
+          - "Closing date confirmation"
+          - "Capital call notice expectations"
+          - "Portal access credentials (if applicable)"
+          - "Contact information for IR and operations"
+          - "Upcoming reporting schedule"
+
+      - id: FA-05
+        item: "Subscription documents filed in permanent fund records"
+        required: true
+        status: ""
+        storage: "Physical originals in fireproof safe + digital copies in fund admin system"
+
+      - id: FA-06
+        item: "KYC expiration date calendared (3 years for individuals, 1 year for entities)"
+        required: true
+        status: ""
+        expiry_date: ""
+
+---
+
+# Subscription Processing Summary Template
+processing_summary:
+  lp_name: ""
+  commitment: 0.0
+  closing_date: ""
+  processing_start_date: ""
+  processing_completion_date: ""
+  total_processing_days: 0
+
+  phase_status:
+    document_review: ""  # complete, pending, failed
+    accredited_verification: ""
+    aml_kyc: ""
+    erisa_check: ""
+    account_setup: ""
+    final_approval: ""
+
+  exceptions:
+    - phase: ""
+      item_id: ""
+      description: ""
+      resolution: ""
+      resolved_date: ""
+
+  notes: ""
+  approved_by: ""
+  approval_date: ""

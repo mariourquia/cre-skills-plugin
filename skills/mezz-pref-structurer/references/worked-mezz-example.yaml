@@ -1,0 +1,378 @@
+---
+# Mezz / Pref Equity Structurer Worked Example
+# Market data calibrated to Q1 2026 conditions
+# All dollar amounts in USD
+---
+
+example:
+  id: mezz_example_01
+  name: "$30M Total Cap -- Mezz Loan vs. Pref Equity Gap Analysis"
+  description: >
+    $30M total capitalization for a 120-unit Class B multifamily value-add in
+    Jersey City, NJ. Senior lender provides $20M at 65% LTV. $5M gap between
+    senior debt and sponsor equity must be filled by either mezzanine debt or
+    preferred equity. Full comparative analysis with intercreditor provisions,
+    loss severity waterfall, and WACC comparison.
+
+  # -------------------------------------------------------------------
+  # DEAL OVERVIEW
+  # -------------------------------------------------------------------
+  deal_summary:
+    property: "120-Unit Class B MF, Journal Square, Jersey City NJ"
+    acquisition_price: 30_750_000
+    closing_costs: 461_250               # 1.5%
+    total_cost_basis: 31_211_250
+    stabilized_noi: 2_350_000            # $19,583/unit
+    going_in_cap: 0.0764                 # 2,350,000 / 30,750,000
+    stabilized_value: 30_750_000
+    hold_period: 5
+    exit_cap: 0.0575
+    projected_exit_noi: 2_725_000        # 3% annual growth for 5 years
+    projected_exit_value: 47_391_304     # 2,725,000 / 0.0575
+
+  # -------------------------------------------------------------------
+  # CAPITAL STACK
+  # -------------------------------------------------------------------
+  capital_stack:
+    total_capitalization: 30_750_000
+
+    senior_debt:
+      lender: "Regional Bank (Valley National)"
+      amount: 20_000_000
+      ltv: 0.650                         # 20M / 30.75M
+      rate: 0.0650                       # 6.50% fixed, 5-year term
+      amort_years: 30
+      io_period: 2
+      annual_ds_io: 1_300_000            # 20M * 6.5%
+      annual_ds_amort: 1_517_640         # amortizing payment
+      dscr_at_close: 1.808              # 2,350,000 / 1,300,000 (IO)
+      covenants:
+        dscr_minimum: 1.25
+        ltv_maximum: 0.75
+        debt_yield_minimum: 0.085
+
+    gap_amount: 5_000_000
+    gap_ltv_band: "65% to 81.3%"        # senior stops at 65%, gap fills to 81.3%
+    combined_ltv_with_gap: 0.813         # (20M + 5M) / 30.75M
+
+    sponsor_equity:
+      amount: 5_750_000
+      pct_of_total: 0.187               # 5.75M / 30.75M
+
+  # -------------------------------------------------------------------
+  # OPTION A: MEZZANINE LOAN
+  # -------------------------------------------------------------------
+  mezz_loan:
+    structure:
+      type: "Mezzanine Loan"
+      amount: 5_000_000
+      rate: 0.1200                       # 12.0% current-pay interest
+      term_years: 5                      # co-terminous with senior
+      amort: "Interest-only, balloon at maturity"
+      annual_payment: 600_000
+      security: "Pledge of borrower's equity interest in property-owning LLC"
+      position: "Subordinate to senior lien, senior to sponsor equity"
+
+    key_terms:
+      prepayment:
+        year_1: "Locked out (no prepayment)"
+        year_2: 0.03                     # 3% premium
+        year_3: 0.02
+        year_4: 0.01
+        year_5: "Open"
+      default_rate: 0.1800               # 18% default interest
+      reporting: "Monthly financials within 30 days, annual audit"
+      reserves:
+        debt_service_reserve: 300_000    # 6 months mezz DS
+        capex_reserve: 0                 # covered by senior
+      guarantees:
+        completion_guarantee: true
+        environmental_indemnity: true
+        bad_boy_carveout: true
+        payment_guarantee: false
+      uca_trigger: "DSCR < 1.10x on combined basis"
+
+    intercreditor_provisions:
+      agreement_type: "Standard Intercreditor Agreement (ICA)"
+      key_provisions:
+        - provision: "Standstill Period"
+          detail: >
+            Mezz lender must observe 90-day standstill before exercising UCC
+            foreclosure on pledged equity interest. During standstill, senior
+            lender has right to cure mezz default.
+        - provision: "Cure Rights"
+          detail: >
+            Senior lender may (but is not obligated to) cure mezz default.
+            Any cure amounts added to senior loan balance. Mezz lender must
+            provide 10 business days written notice before declaring default.
+        - provision: "UCC Foreclosure"
+          detail: >
+            After standstill, mezz lender may foreclose on equity pledge via
+            UCC Article 9 sale (non-judicial, typically 30-60 days in NJ).
+            Mezz lender steps into sponsor's shoes and takes over property
+            management subject to existing senior loan.
+        - provision: "Consent Rights"
+          detail: >
+            Mezz lender consent required for: (i) new leases > 5,000 SF,
+            (ii) capex > $100K, (iii) property manager changes, (iv) any
+            transfer or refinancing of senior debt.
+        - provision: "Subordination of Mezz DS"
+          detail: >
+            In cash sweep event (combined DSCR < 1.10x), mezz interest payments
+            are subordinated to senior debt service and reserves. Mezz interest
+            accrues at default rate during subordination period.
+        - provision: "Right of First Refusal"
+          detail: >
+            If sponsor receives bona fide offer to purchase the property,
+            mezz lender has 15-day ROFR to match the offer.
+        - provision: "Buy-Sell"
+          detail: >
+            After month 36, mezz lender may issue buy-sell notice to sponsor.
+            Sponsor has 60 days to purchase mezz position at par + accrued.
+
+  # -------------------------------------------------------------------
+  # OPTION B: PREFERRED EQUITY
+  # -------------------------------------------------------------------
+  pref_equity:
+    structure:
+      type: "Preferred Equity"
+      amount: 5_000_000
+      preferred_return: 0.1400           # 14.0% preferred return (accruing)
+      current_pay_component: 0.0800      # 8% current-pay, 6% accruing
+      term: "5-year target, no hard maturity"
+      amort: "None -- preferred return accrues; redeemed at capital event"
+      annual_current_pay: 400_000        # 5M * 8%
+      annual_accrual: 300_000            # 5M * 6%
+      security: "Membership interest in JV LLC (senior to sponsor common equity)"
+      position: "Senior equity position within the JV structure, NOT a lien"
+
+    key_terms:
+      redemption:
+        mandatory_at_sale: true
+        mandatory_at_refi: true
+        optional_after_year_3: true
+        redemption_premium:
+          year_3: 0.02                   # 2% premium on redeemed amount
+          year_4: 0.01
+          year_5: "At par"
+      catch_up: >
+        Pref equity receives 100% catch-up on any accrued but unpaid preferred
+        return before any distributions to sponsor common equity.
+      participation: >
+        After pref return is fully paid (current + accrued), pref equity receives
+        15% of remaining profits above a 14% IRR threshold to sponsor.
+      governance:
+        major_decisions:
+          - "Sale, refinance, or new debt requires pref consent"
+          - "Operating budget deviations > 10% require pref consent"
+          - "Key personnel changes require pref consent"
+        removal_rights: >
+          Pref equity may remove property manager and/or sponsor as managing
+          member if: (i) DSCR < 1.05x for 2 consecutive quarters, or
+          (ii) material misrepresentation, or (iii) unauthorized transfer.
+      reporting: "Monthly operating statements, quarterly capital account statements, annual K-1"
+      tax_treatment: "Equity -- pref equity receives K-1 allocation of income/loss and depreciation"
+
+  # -------------------------------------------------------------------
+  # COMPARATIVE ANALYSIS
+  # -------------------------------------------------------------------
+  comparison:
+    cost_of_capital:
+      mezz_effective_rate: 0.1200        # 12.0% -- all current pay
+      pref_effective_rate: 0.1550        # ~15.5% including accrual and participation
+      pref_rate_note: >
+        Pref effective cost is higher because 6% accrual compounds, and the 15%
+        profit participation adds ~1.5% to effective cost if deal hits target IRR.
+        However, pref has no hard maturity, reducing refinance risk.
+
+    annual_cash_flow_comparison:
+      year_1:
+        noi: 2_350_000
+        senior_ds_io: -1_300_000
+        cash_after_senior: 1_050_000
+        mezz_ds: -600_000
+        pref_current_pay: -400_000
+        cash_to_sponsor_mezz: 450_000
+        cash_to_sponsor_pref: 650_000
+      year_3:
+        noi: 2_494_000                   # 3% growth
+        senior_ds_amort: -1_517_640      # amortization begins
+        cash_after_senior: 976_360
+        mezz_ds: -600_000
+        pref_current_pay: -400_000
+        cash_to_sponsor_mezz: 376_360
+        cash_to_sponsor_pref: 576_360
+      year_5:
+        noi: 2_646_000
+        senior_ds_amort: -1_517_640
+        cash_after_senior: 1_128_360
+        mezz_ds: -600_000
+        pref_current_pay: -400_000
+        cash_to_sponsor_mezz: 528_360
+        cash_to_sponsor_pref: 728_360
+
+    exit_waterfall:
+      gross_exit_value: 47_391_304
+      selling_costs: -710_870            # 1.5%
+      net_exit_proceeds: 46_680_434
+      senior_loan_payoff: -18_950_000    # amortized balance at year 5
+      proceeds_after_senior: 27_730_434
+      mezz_scenario:
+        mezz_payoff: -5_000_000
+        remaining_to_sponsor: 22_730_434
+        sponsor_irr: 0.284               # 28.4% levered IRR to sponsor
+        sponsor_equity_multiple: 3.95
+      pref_scenario:
+        pref_redemption: -5_000_000
+        accrued_pref_return: -1_140_000  # cumulative unpaid 6% accrual over ~3.8 years
+        pref_participation: -840_000     # 15% of profits above pref threshold
+        total_pref_payout: -6_980_000
+        remaining_to_sponsor: 20_750_434
+        sponsor_irr: 0.251               # 25.1% levered IRR to sponsor
+        sponsor_equity_multiple: 3.61
+
+    wacc_comparison:
+      description: "Weighted Average Cost of Capital for each structure"
+      mezz_structure:
+        senior: { weight: 0.650, cost: 0.0650, weighted: 0.0423 }
+        mezz:   { weight: 0.163, cost: 0.1200, weighted: 0.0196 }
+        equity: { weight: 0.187, cost: 0.2000, weighted: 0.0374 }
+        wacc: 0.0993                     # 9.93%
+      pref_structure:
+        senior: { weight: 0.650, cost: 0.0650, weighted: 0.0423 }
+        pref:   { weight: 0.163, cost: 0.1550, weighted: 0.0253 }
+        equity: { weight: 0.187, cost: 0.2000, weighted: 0.0374 }
+        wacc: 0.1050                     # 10.50%
+      delta: "+57bps WACC for pref structure"
+
+    risk_comparison:
+      - dimension: "Refinance Risk"
+        mezz: "HIGH -- hard maturity at year 5; must repay or extend"
+        pref: "LOW -- no hard maturity; redeemed at capital event only"
+        advantage: "Pref"
+
+      - dimension: "Foreclosure Risk"
+        mezz: "HIGH -- UCC foreclosure on equity pledge in 30-60 days"
+        pref: "MODERATE -- removal rights only; no foreclosure mechanism"
+        advantage: "Pref"
+
+      - dimension: "Senior Lender Consent"
+        mezz: "REQUIRED -- most senior lenders must approve mezz; may charge consent fee ($50-100K)"
+        pref: "NOT REQUIRED -- pref sits in JV structure, invisible to senior lender"
+        advantage: "Pref"
+
+      - dimension: "Tax Treatment"
+        mezz: "Debt -- interest expense deductible to borrower; ordinary income to lender"
+        pref: "Equity -- K-1 allocation of depreciation shelters current pay for pref investor"
+        advantage: "Depends on investor tax status"
+
+      - dimension: "Sponsor Cash Flow"
+        mezz: "LOWER -- $600K annual DS vs $400K current pay"
+        pref: "HIGHER -- $200K/year more cash to sponsor during hold"
+        advantage: "Pref"
+
+      - dimension: "Total Cost to Sponsor"
+        mezz: "LOWER -- $5M repayment at exit, no participation"
+        pref: "HIGHER -- $5M + $1.14M accrued + $840K participation = $6.98M"
+        advantage: "Mezz"
+
+      - dimension: "Exit Flexibility"
+        mezz: "Constrained -- prepayment penalties in years 1-4"
+        pref: "Flexible -- optional redemption after year 3 at modest premium"
+        advantage: "Pref"
+
+  # -------------------------------------------------------------------
+  # LOSS SEVERITY WATERFALL
+  # -------------------------------------------------------------------
+  loss_severity:
+    description: >
+      What happens to each tranche at three recovery levels? Assumes forced
+      liquidation at distressed value. Senior balance $18.95M at year 5,
+      mezz/pref at $5M (plus accrual for pref).
+
+    scenario_80_pct_recovery:
+      recovery_rate: 0.80
+      liquidation_value: 24_600_000      # 30.75M * 0.80
+      selling_costs: -369_000
+      net_proceeds: 24_231_000
+      waterfall:
+        senior_owed: 18_950_000
+        senior_recovered: 18_950_000
+        senior_loss: 0
+        senior_loss_severity: 0.00
+        mezz_or_pref_owed: 5_000_000     # mezz at par; pref at $6.14M with accrual
+        mezz_recovered: 5_000_000
+        mezz_loss: 0
+        mezz_loss_severity: 0.00
+        pref_recovered: 5_281_000        # net proceeds - senior = $5.281M; partial accrual recovery
+        pref_accrued_owed: 6_140_000
+        pref_loss: 859_000
+        pref_loss_severity: 0.140        # 14% loss on total pref claim
+        sponsor_equity_recovered: 281_000  # mezz scenario leftover
+        sponsor_equity_mezz_loss: 5_469_000
+        sponsor_equity_pref_recovered: 0
+      verdict: "Both mezz and pref survive 80% recovery. Senior fully covered. Pref takes partial loss on accrued return. Sponsor equity largely wiped in mezz scenario."
+
+    scenario_60_pct_recovery:
+      recovery_rate: 0.60
+      liquidation_value: 18_450_000
+      selling_costs: -276_750
+      net_proceeds: 18_173_250
+      waterfall:
+        senior_owed: 18_950_000
+        senior_recovered: 18_173_250
+        senior_loss: 776_750
+        senior_loss_severity: 0.041       # 4.1% loss on senior
+        mezz_recovered: 0
+        mezz_loss: 5_000_000
+        mezz_loss_severity: 1.00          # total wipeout
+        pref_recovered: 0
+        pref_loss: 6_140_000
+        pref_loss_severity: 1.00
+        sponsor_equity_recovered: 0
+      verdict: "At 60% recovery, senior takes a 4.1% haircut. Mezz and pref are completely wiped. Senior lender absorbs first $777K of loss beyond capital structure."
+
+    scenario_40_pct_recovery:
+      recovery_rate: 0.40
+      liquidation_value: 12_300_000
+      selling_costs: -184_500
+      net_proceeds: 12_115_500
+      waterfall:
+        senior_owed: 18_950_000
+        senior_recovered: 12_115_500
+        senior_loss: 6_834_500
+        senior_loss_severity: 0.361       # 36.1% loss on senior
+        mezz_recovered: 0
+        mezz_loss: 5_000_000
+        mezz_loss_severity: 1.00
+        pref_recovered: 0
+        pref_loss: 6_140_000
+        pref_loss_severity: 1.00
+        sponsor_equity_recovered: 0
+      verdict: "Catastrophic scenario. Senior takes 36% loss. All junior capital destroyed. This implies a property value decline from $30.75M to $12.3M -- a 60% crash consistent with severe distress (e.g., environmental contamination, complete market failure)."
+
+    recovery_breakeven:
+      mezz_breakeven_recovery: 0.78      # recovery at which mezz is fully repaid
+      pref_breakeven_recovery: 0.82      # pref needs higher recovery due to accrued return
+      senior_breakeven_recovery: 0.62    # senior is impaired below 62% recovery
+
+  # -------------------------------------------------------------------
+  # RECOMMENDATION
+  # -------------------------------------------------------------------
+  recommendation:
+    preferred_structure: "Preferred Equity"
+    rationale:
+      - "No senior lender consent required -- eliminates $50-100K fee and 4-6 week delay"
+      - "No hard maturity reduces refinance risk at year 5"
+      - "Higher annual cash flow to sponsor ($200K/year) supports operations"
+      - "Depreciation allocation to pref investor reduces their effective cost"
+      - "Removal rights (vs. foreclosure) create better sponsor-investor alignment"
+    caveats:
+      - "Total exit cost $1.98M higher than mezz -- acceptable if deal hits target IRR"
+      - "Profit participation dilutes sponsor upside in outperformance scenario"
+      - "Pref investor governance rights limit sponsor flexibility on major decisions"
+    when_to_use_mezz_instead:
+      - "Capital markets favor debt (tight spreads, high DSCR coverage)"
+      - "Senior lender consent is already obtained or lender is flexible"
+      - "Sponsor wants to maximize exit proceeds and is confident in refi"
+      - "Pref investor demands excessive governance or participation rights"

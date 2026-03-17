@@ -1,0 +1,374 @@
+# red-flag-library.yaml
+# 30+ DD red flags organized by workstream.
+# Severity: CRITICAL (deal-killer potential), HIGH (material price impact), MEDIUM (risk to monitor), LOW (nuisance).
+# Response: recommended immediate action upon discovery.
+
+workstreams:
+
+  environmental:
+    - id: ENV-01
+      flag: "Phase I identifies REC with no NFA letter"
+      severity: CRITICAL
+      description: >
+        Recognized Environmental Condition without a No Further Action letter
+        from the state means contamination is either confirmed or suspected
+        and not remediated. Buyer inherits liability.
+      response: >
+        Order Phase II immediately (budget $15-50k). If contamination confirmed,
+        obtain remediation cost estimate. Negotiate price reduction equal to
+        1.5x remediation cost (uncertainty premium) or walk.
+    - id: ENV-02
+      flag: "Adjacent dry cleaner or gas station within 500 ft"
+      severity: HIGH
+      description: >
+        Perc (tetrachloroethylene) from dry cleaners and BTEX from gas stations
+        are the most common groundwater contaminants. Plumes migrate. Subject
+        property may be affected even without on-site source.
+      response: >
+        Request regulatory file review for adjacent property. Check state
+        leaking UST database. Consider vapor intrusion assessment ($5-10k).
+        Review environmental insurance options.
+    - id: ENV-03
+      flag: "Underground storage tanks (active or decommissioned)"
+      severity: HIGH
+      description: >
+        USTs, even properly decommissioned, may have residual soil or groundwater
+        contamination. Active USTs carry ongoing regulatory compliance burden.
+      response: >
+        Request tank decommissioning records and soil sampling results.
+        If no sampling was done at decommission, order targeted soil boring
+        at former tank locations ($3-8k).
+    - id: ENV-04
+      flag: "Asbestos-containing materials identified"
+      severity: MEDIUM
+      description: >
+        Common in pre-1980 buildings (floor tile, pipe insulation, popcorn ceiling,
+        roof mastics). Intact ACM is manageable. Friable ACM requires abatement.
+      response: >
+        Obtain asbestos survey with sampling ($2-5k). Budget abatement cost
+        for any planned renovation areas. O&M plan for intact ACM. Factor into
+        capital reserve.
+    - id: ENV-05
+      flag: "Property in FEMA flood zone A or AE"
+      severity: HIGH
+      description: >
+        Flood insurance required by all federally regulated lenders. Premiums
+        can be $5k-50k+ annually depending on building value and flood risk.
+        May deter future buyers.
+      response: >
+        Obtain flood insurance quote immediately. Verify elevation certificate.
+        Check if LOMA (Letter of Map Amendment) is possible. Factor premium
+        into NOI and exit cap rate analysis.
+
+  physical_condition:
+    - id: PHY-01
+      flag: "Roof with less than 3 years remaining useful life"
+      severity: HIGH
+      description: >
+        Imminent roof replacement is one of the largest single capex items.
+        Budget $5-12/SF for commercial flat roof, $8-15/SF for steep-slope.
+      response: >
+        Obtain roof inspection from roofing contractor (not just PCA engineer).
+        Get 2-3 replacement bids. Negotiate seller credit or escrow for full
+        replacement cost. Verify warranty transferability.
+    - id: PHY-02
+      flag: "Galvanized plumbing in multifamily"
+      severity: CRITICAL
+      description: >
+        Galvanized pipe corrodes internally, restricting flow and causing leaks.
+        Full building repipe is disruptive and expensive ($3,000-5,000/unit).
+        Insurance may become unavailable.
+      response: >
+        Scope repipe with plumbing contractor. Confirm insurance will cover
+        the property with galvanized (some carriers exclude or surcharge 200%+).
+        Full repipe cost must be in basis or negotiated as price reduction.
+    - id: PHY-03
+      flag: "Foundation cracking described as 'monitor'"
+      severity: HIGH
+      description: >
+        PCA engineers use "monitor" when cracking exceeds cosmetic but they
+        cannot definitively call it structural without further investigation.
+        This is a soft flag for a potentially hard problem.
+      response: >
+        Engage structural engineer for focused assessment ($3-8k). Determine
+        if cracking is settlement (stabilized) or active movement (requires
+        underpinning at $15-50k+). Install crack monitors if timeline permits.
+    - id: PHY-04
+      flag: "HVAC systems using R-22 refrigerant"
+      severity: MEDIUM
+      description: >
+        R-22 production banned. Remaining supply is expensive ($50-100/lb vs
+        $5-15/lb for R-410A). Retrofit or replacement required at end of life.
+        Replacement cost is 30-50% premium over standard.
+      response: >
+        Inventory all HVAC units by refrigerant type. Budget replacement at
+        accelerated timeline (don't wait for end of useful life). Factor into
+        capital reserve at $4,000-8,000/unit for packaged systems.
+    - id: PHY-05
+      flag: "Elevator modernization needed"
+      severity: MEDIUM
+      description: >
+        Elevator modernization costs $100-250k per cab. Required when control
+        systems are obsolete (parts unavailable) or safety code compliance
+        is triggered by renovation scope.
+      response: >
+        Obtain elevator inspection report and maintenance records. Get
+        modernization bid from 2-3 elevator companies. Determine if code
+        compliance is triggered by planned renovations.
+    - id: PHY-06
+      flag: "Fire/life safety system deficiencies"
+      severity: CRITICAL
+      description: >
+        Non-compliant fire alarm, sprinkler, or egress systems are code
+        violations that can result in fines, insurance voidance, or occupancy
+        restrictions.
+      response: >
+        Obtain fire inspection report from local authority. Engage fire
+        protection engineer for remediation plan and cost estimate. This is
+        non-negotiable -- must be remediated regardless of deal economics.
+
+  financial:
+    - id: FIN-01
+      flag: "T12 NOI diverges from T3 annualized by more than 10%"
+      severity: HIGH
+      description: >
+        Significant divergence means the trailing twelve months is not
+        representative. T3 (annualized last 3 months) may show deterioration
+        (tenant loss, expense spike) or improvement (seasonal, one-time).
+      response: >
+        Obtain monthly P&L for 24 months. Identify the variance driver.
+        If deteriorating: underwrite to T3, not T12. If improving: verify
+        sustainability. Adjust offer price to reflect current run rate.
+    - id: FIN-02
+      flag: "Occupancy dropped more than 5 points in 6 months"
+      severity: HIGH
+      description: >
+        Rapid occupancy decline signals tenant dissatisfaction, market
+        deterioration, or management failure. Each has different implications
+        for recovery timeline and cost.
+      response: >
+        Interview departing tenants (if accessible). Review online reviews
+        and complaints. Analyze competing properties' occupancy. Determine
+        if the issue is property-specific (fixable) or market-wide (structural).
+    - id: FIN-03
+      flag: "Single tenant represents more than 40% of revenue"
+      severity: HIGH
+      description: >
+        Tenant concentration risk. Loss of the anchor tenant would crater NOI
+        and potentially trigger loan default.
+      response: >
+        Review anchor tenant's financial health (credit report, financial
+        statements if available). Review lease terms -- remaining term,
+        renewal options, termination rights. Model vacancy scenario for
+        re-leasing timeline and cost. Underwrite to a probability-weighted
+        average NOI.
+    - id: FIN-04
+      flag: "Operating expenses significantly below market (< 35% expense ratio for MF)"
+      severity: MEDIUM
+      description: >
+        Artificially low expenses inflate NOI. Common in self-managed properties
+        where owner labor is not expensed. May also indicate deferred maintenance
+        or underinsurance.
+      response: >
+        Normalize expenses to market. Add management fee (5-8% of EGI),
+        verify insurance adequacy, confirm maintenance spend is reasonable.
+        Remodel NOI with normalized expenses before pricing.
+    - id: FIN-05
+      flag: "Collection loss exceeding 5% (multifamily)"
+      severity: MEDIUM
+      description: >
+        High bad debt / concession levels indicate tenant quality issues or
+        local economic distress. May improve with better management or may
+        be structural.
+      response: >
+        Review aged receivables by tenant. Identify chronic non-payers.
+        Assess local eviction timeline and cost. Budget for continued
+        elevated collections loss in year 1. Factor into purchase price.
+    - id: FIN-06
+      flag: "Property taxes significantly below post-acquisition reassessment estimate"
+      severity: HIGH
+      description: >
+        Many jurisdictions reassess property taxes upon sale. The increase
+        can be 50-200% in states with acquisition-based reassessment (CA Prop 13
+        step-up, FL Save Our Homes).
+      response: >
+        Research jurisdiction's reassessment methodology. Estimate post-
+        acquisition tax bill using sale price as new assessed value. Model
+        this increased expense in underwriting. Consider tax appeal strategy.
+
+  legal_and_title:
+    - id: LEG-01
+      flag: "Encroachment of improvements onto adjacent property or easement"
+      severity: HIGH
+      description: >
+        Survey reveals building, parking, or other improvement extends beyond
+        property line or into recorded easement. Creates title defect and
+        potential liability.
+      response: >
+        Determine encroachment scope and impact. Options: negotiate easement
+        or license from neighbor, obtain title insurance endorsement, or
+        require seller to cure. Material encroachments (building wall) may
+        be deal-killers.
+    - id: LEG-02
+      flag: "Pending or threatened litigation involving the property"
+      severity: CRITICAL
+      description: >
+        Lis pendens or disclosed litigation can affect title, operations, or
+        financial condition. Personal injury, construction defect, environmental,
+        and landlord-tenant disputes are most common.
+      response: >
+        Obtain full litigation file. Engage counsel to assess exposure and
+        probable outcome. Determine if liability transfers to buyer or remains
+        with seller. Require indemnification or price reduction for estimated
+        exposure. Walk if exposure is unquantifiable.
+    - id: LEG-03
+      flag: "CC&Rs or deed restrictions limiting intended use"
+      severity: HIGH
+      description: >
+        Recorded covenants may prohibit certain uses, require design approval,
+        limit operating hours, or restrict tenant types. May block value-add
+        strategy.
+      response: >
+        Review all CC&Rs in full. Determine if restrictions affect current
+        operations or planned repositioning. Assess enforceability and
+        amendment process. Some CC&Rs have expiration dates.
+    - id: LEG-04
+      flag: "Lease audit reveals material discrepancy with rent roll"
+      severity: HIGH
+      description: >
+        Actual lease terms (rent, escalation, options, TI obligations, CAM caps)
+        differ from the rent roll or OM representation. Common in undermanaged
+        properties.
+      response: >
+        Abstract every lease personally (or hire a lease abstraction service).
+        Reconcile to rent roll. Calculate financial impact of discrepancies.
+        Adjust underwriting. Material discrepancies justify re-trade or
+        representation/warranty demand.
+    - id: LEG-05
+      flag: "Estoppel responses contradict lease terms"
+      severity: HIGH
+      description: >
+        Tenant estoppel certificates state the tenant's understanding of
+        lease terms. Contradictions with the written lease indicate disputes,
+        side agreements, or landlord defaults.
+      response: >
+        Reconcile each estoppel with the corresponding lease. Identify
+        discrepancies and determine which version is accurate. Resolve
+        before closing -- estoppels can create binding representations.
+
+  regulatory_and_zoning:
+    - id: REG-01
+      flag: "Non-conforming use (legal but cannot be expanded or rebuilt)"
+      severity: MEDIUM
+      description: >
+        Property's current use is grandfathered under old zoning but does
+        not comply with current code. If destroyed (fire, storm), may not
+        be rebuilt to same use or density.
+      response: >
+        Verify non-conforming status with planning department. Review
+        insurance coverage for loss (does policy cover rebuilding to
+        current use or only to code?). Consider seeking variance or
+        rezoning proactively. Factor into risk assessment and insurance.
+    - id: REG-02
+      flag: "Rent control or stabilization applies to the property"
+      severity: HIGH
+      description: >
+        Limits rent increases to regulated percentage. Affects value-add
+        strategy, exit pricing, and long-term income growth. May also
+        restrict tenant displacement during renovation.
+      response: >
+        Review applicable ordinance in detail. Model constrained rent growth
+        scenario. Understand vacancy decontrol rules (if any). Adjust
+        purchase price and return expectations. Some rent control regimes
+        make value-add uneconomic.
+    - id: REG-03
+      flag: "Building performance standard (energy) applies"
+      severity: MEDIUM
+      description: >
+        Cities with BPS (NYC LL97, DC BEPS, CO, WA) require buildings to meet
+        energy intensity targets by specific dates. Non-compliance triggers
+        fines ($0.50-5.00/SF/year).
+      response: >
+        Obtain current energy use intensity (EUI) for the property. Compare
+        to applicable target. Budget for compliance (envelope, HVAC, lighting
+        upgrades). Fines should be modeled as an operating expense floor.
+    - id: REG-04
+      flag: "Unpermitted construction or additions"
+      severity: HIGH
+      description: >
+        Work done without permits may not meet code, may not be insurable,
+        and may need to be removed or retroactively permitted at the buyer's
+        expense.
+      response: >
+        Identify all unpermitted work. Estimate cost to retroactively permit
+        (if code-compliant) or remove (if not). Factor into capex budget.
+        Verify insurance covers unpermitted structures.
+
+  tenant_and_operational:
+    - id: TEN-01
+      flag: "Anchor tenant has termination or kick-out clause within 24 months"
+      severity: CRITICAL
+      description: >
+        Termination or co-tenancy kick-out clause allows tenant to exit lease
+        if conditions are met (sales threshold, co-tenant vacancy). Loss of
+        anchor can cascade through co-tenancy clauses.
+      response: >
+        Model the kick-out scenario explicitly. Calculate NOI with and without
+        anchor. Determine re-leasing cost and timeline. Price the deal to
+        the downside scenario or require seller to escrow rent equivalent.
+    - id: TEN-02
+      flag: "Below-market or above-market leases skewing NOI"
+      severity: MEDIUM
+      description: >
+        Below-market leases inflate value on a per-unit/SF basis but depress
+        current income. Above-market leases inflate current income but create
+        rollover risk.
+      response: >
+        Mark every lease to market. Calculate loss-to-lease (below) and
+        gain-to-lease (above). Model lease expiration schedule against market
+        rents. Underwrite to the blended trajectory, not the snapshot.
+    - id: TEN-03
+      flag: "Property management transition required at closing"
+      severity: MEDIUM
+      description: >
+        Seller's management company is being replaced. Transition creates
+        operational disruption: systems migration, staff turnover, tenant
+        confusion. Budget 2-4% NOI loss during transition.
+      response: >
+        Plan transition 30 days before closing. Engage replacement PM early.
+        Require seller to cooperate on handover (tenant files, vendor contracts,
+        security deposits, keys). Budget for 60-90 day stabilization period.
+    - id: TEN-04
+      flag: "High lease expiration concentration (>30% of NRA in 12 months)"
+      severity: HIGH
+      description: >
+        Lease rollover concentrated in a short window creates simultaneous
+        re-leasing pressure, TI obligations, and vacancy risk.
+      response: >
+        Model each expiring lease individually. Assess tenant renewal
+        probability based on tenant interviews and market conditions. Budget
+        TI, leasing commissions, and downtime for each. Stress-test with
+        50% renewal rate scenario.
+    - id: TEN-05
+      flag: "Online reviews consistently negative (< 3.0 stars)"
+      severity: MEDIUM
+      description: >
+        Google, Yelp, and Apartments.com reviews below 3.0 indicate
+        persistent management or property quality issues. Affects leasing
+        velocity and premium potential.
+      response: >
+        Read all reviews (not just star rating). Categorize complaints
+        (maintenance, safety, management, noise, pests). Determine if
+        issues are fixable with capex and management change. Budget for
+        reputation repair in marketing/operations plan.
+    - id: TEN-06
+      flag: "Delinquency rate exceeding 10% of tenants"
+      severity: HIGH
+      description: >
+        Double-digit delinquency indicates either tenant screening failure,
+        local economic distress, or landlord neglect of collections process.
+      response: >
+        Review aged receivables in detail. Identify chronic delinquents vs
+        temporary hardship. Review screening criteria and propose tightening.
+        Budget for potential eviction wave post-acquisition (legal fees,
+        vacancy, turnover). Model 90-day occupancy dip.

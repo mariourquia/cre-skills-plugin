@@ -1,0 +1,474 @@
+# closing-checklist-master.yaml
+# 60+ items organized by workstream for commercial real estate acquisition closing.
+# Each item: responsible party, timeline (days before closing), predecessors, notes.
+# Day 0 = closing date. Negative numbers = days before closing.
+
+meta:
+  property_type: "General commercial (adaptable to MF, office, industrial, retail)"
+  transaction_type: "Acquisition (purchase)"
+  assumed_dd_period: 45
+  assumed_closing_period: 60
+
+workstreams:
+
+  legal_and_title:
+    - id: LT-01
+      item: "Execute Purchase and Sale Agreement (PSA)"
+      responsible: "Buyer counsel + Seller counsel"
+      timeline_day: -60
+      predecessors: []
+      notes: "Trigger for all subsequent activity. Earnest money deposit due per PSA terms."
+
+    - id: LT-02
+      item: "Deliver earnest money deposit to escrow"
+      responsible: "Buyer"
+      timeline_day: -58
+      predecessors: [LT-01]
+      notes: "Typically 1-3% of purchase price. Wire to escrow agent within 2 business days of PSA execution."
+
+    - id: LT-03
+      item: "Order title commitment"
+      responsible: "Buyer counsel / Title company"
+      timeline_day: -58
+      predecessors: [LT-01]
+      notes: "Title company begins search upon receipt of PSA and property description."
+
+    - id: LT-04
+      item: "Receive preliminary title commitment"
+      responsible: "Title company"
+      timeline_day: -50
+      predecessors: [LT-03]
+      notes: "Review Schedule B-II exceptions immediately. Flag items requiring seller cure."
+
+    - id: LT-05
+      item: "Review title exceptions and prepare objection letter"
+      responsible: "Buyer counsel"
+      timeline_day: -45
+      predecessors: [LT-04]
+      notes: "Identify exceptions to be removed, insured over, or accepted. Send objection letter to seller."
+
+    - id: LT-06
+      item: "Seller cure of title objections"
+      responsible: "Seller / Seller counsel"
+      timeline_day: -30
+      predecessors: [LT-05]
+      notes: "PSA typically allows 10-15 days for seller to cure. Extended cure for complex items."
+
+    - id: LT-07
+      item: "Order ALTA survey (or update existing)"
+      responsible: "Buyer / Surveyor"
+      timeline_day: -58
+      predecessors: [LT-01]
+      notes: "3-5 weeks for new survey, 1-2 weeks for update. Coordinate with title for exception plotting."
+
+    - id: LT-08
+      item: "Receive and review ALTA survey"
+      responsible: "Buyer counsel + Surveyor"
+      timeline_day: -35
+      predecessors: [LT-07]
+      notes: "Compare to title commitment. Identify encroachments, easement conflicts, setback issues."
+
+    - id: LT-09
+      item: "Form acquisition entity (LLC/LP)"
+      responsible: "Buyer counsel"
+      timeline_day: -45
+      predecessors: [LT-01]
+      notes: "File articles of organization in state of property. Obtain EIN. Open bank account."
+
+    - id: LT-10
+      item: "Draft and negotiate closing documents"
+      responsible: "Buyer counsel + Seller counsel"
+      timeline_day: -20
+      predecessors: [LT-01]
+      notes: "Assignment of leases, bill of sale, closing statement, deed, owner's affidavit, FIRPTA."
+
+    - id: LT-11
+      item: "Obtain tenant estoppel certificates"
+      responsible: "Seller (with buyer follow-up)"
+      timeline_day: -25
+      predecessors: [LT-01]
+      notes: "PSA typically requires estoppels from tenants representing 75-80% of NRA. Allow 3-4 weeks."
+
+    - id: LT-12
+      item: "Review estoppel certificates against leases"
+      responsible: "Buyer counsel"
+      timeline_day: -20
+      predecessors: [LT-11]
+      notes: "Reconcile rent, term, options, TI, defaults. Flag any discrepancies with seller."
+
+    - id: LT-13
+      item: "Obtain SNDA (Subordination, Non-Disturbance, Attornment) from lender"
+      responsible: "Buyer counsel + Lender"
+      timeline_day: -15
+      predecessors: [LT-11]
+      notes: "Required for major tenants. Lender subordinates its lien to tenant's lease rights."
+
+    - id: LT-14
+      item: "Prepare and file transfer tax documents"
+      responsible: "Title company / Buyer counsel"
+      timeline_day: -5
+      predecessors: [LT-10]
+      notes: "State and local transfer/recordation tax. Calculate based on purchase price."
+
+    - id: LT-15
+      item: "Confirm wire instructions and closing funds"
+      responsible: "Buyer + Title company"
+      timeline_day: -3
+      predecessors: [LT-10]
+      notes: "Verify wire instructions via callback. Wire fraud is a real risk."
+
+    - id: LT-16
+      item: "Execute closing documents"
+      responsible: "All parties"
+      timeline_day: 0
+      predecessors: [LT-10, LT-15]
+      notes: "Signing, notarization, delivery of deed, assignment of leases, bill of sale."
+
+    - id: LT-17
+      item: "Record deed and mortgage"
+      responsible: "Title company"
+      timeline_day: 0
+      predecessors: [LT-16]
+      notes: "Same-day recording preferred. Title policy issued upon recording."
+
+  due_diligence:
+    - id: DD-01
+      item: "Request and receive seller's document package"
+      responsible: "Buyer / Seller"
+      timeline_day: -55
+      predecessors: [LT-01]
+      notes: "Rent roll, T12, T3, leases, service contracts, insurance, tax bills, capital history, permits."
+
+    - id: DD-02
+      item: "Order Phase I Environmental Site Assessment"
+      responsible: "Buyer / Environmental consultant"
+      timeline_day: -58
+      predecessors: [LT-01]
+      notes: "3-4 week turnaround. Rush available at premium. Lender will require."
+
+    - id: DD-03
+      item: "Order Property Condition Assessment (PCA)"
+      responsible: "Buyer / Engineering firm"
+      timeline_day: -58
+      predecessors: [LT-01]
+      notes: "Schedule site visit within first week. 3-4 weeks for full report."
+
+    - id: DD-04
+      item: "Conduct property tour and unit inspections"
+      responsible: "Buyer / Asset manager"
+      timeline_day: -50
+      predecessors: [LT-01]
+      notes: "Walk every unit (MF) or suite (commercial). Document condition with photos."
+
+    - id: DD-05
+      item: "Receive and review Phase I ESA"
+      responsible: "Buyer / Environmental counsel"
+      timeline_day: -30
+      predecessors: [DD-02]
+      notes: "Any REC requires immediate discussion. Phase II budget and timeline if needed."
+
+    - id: DD-06
+      item: "Receive and review PCA"
+      responsible: "Buyer / Asset manager"
+      timeline_day: -30
+      predecessors: [DD-03]
+      notes: "Review capital reserve table. Compare to underwriting capex assumptions."
+
+    - id: DD-07
+      item: "Audit T12 financials against source documents"
+      responsible: "Buyer / Accountant"
+      timeline_day: -35
+      predecessors: [DD-01]
+      notes: "Verify revenue against rent roll, expenses against invoices, NOI against bank deposits."
+
+    - id: DD-08
+      item: "Abstract all leases"
+      responsible: "Buyer counsel or paralegal"
+      timeline_day: -35
+      predecessors: [DD-01]
+      notes: "Extract key terms: rent, escalation, options, TI, CAM, termination, assignment."
+
+    - id: DD-09
+      item: "Review service contracts for assignability"
+      responsible: "Buyer / Property manager"
+      timeline_day: -35
+      predecessors: [DD-01]
+      notes: "Identify contracts to assume vs terminate. Note auto-renewal dates and cancellation terms."
+
+    - id: DD-10
+      item: "Verify zoning compliance"
+      responsible: "Buyer counsel / Zoning consultant"
+      timeline_day: -40
+      predecessors: [LT-01]
+      notes: "Confirm current use is permitted. Check for non-conforming status. Review setbacks."
+
+    - id: DD-11
+      item: "Review insurance coverage and loss history"
+      responsible: "Buyer / Insurance broker"
+      timeline_day: -35
+      predecessors: [DD-01]
+      notes: "5-year loss run. Identify claims history and any excluded perils."
+
+    - id: DD-12
+      item: "Prepare DD summary and objection list"
+      responsible: "Buyer"
+      timeline_day: -20
+      predecessors: [DD-05, DD-06, DD-07, DD-08]
+      notes: "Consolidate findings. Quantify price adjustments. Prepare negotiation strategy."
+
+    - id: DD-13
+      item: "Negotiate DD resolutions with seller"
+      responsible: "Buyer + Seller"
+      timeline_day: -15
+      predecessors: [DD-12]
+      notes: "Price reduction, seller escrow, or seller cure. Must resolve before DD expiration."
+
+    - id: DD-14
+      item: "DD approval / waiver of contingency"
+      responsible: "Buyer"
+      timeline_day: -15
+      predecessors: [DD-13]
+      notes: "Critical milestone. Earnest money typically goes hard (non-refundable) at DD expiration."
+
+  financing:
+    - id: FN-01
+      item: "Engage lender and submit loan application"
+      responsible: "Buyer / Mortgage broker"
+      timeline_day: -55
+      predecessors: [LT-01]
+      notes: "Submit within first week. Include PSA, rent roll, T12, property description."
+
+    - id: FN-02
+      item: "Receive loan term sheet / commitment letter"
+      responsible: "Lender"
+      timeline_day: -40
+      predecessors: [FN-01]
+      notes: "Review terms: rate, LTV, DSCR, reserves, prepayment, recourse. Negotiate if needed."
+
+    - id: FN-03
+      item: "Accept term sheet and pay application/good faith deposit"
+      responsible: "Buyer"
+      timeline_day: -38
+      predecessors: [FN-02]
+      notes: "Deposit typically $10-25k. Rate lock timing discussion."
+
+    - id: FN-04
+      item: "Lender orders appraisal"
+      responsible: "Lender"
+      timeline_day: -38
+      predecessors: [FN-03]
+      notes: "3-5 week turnaround. Buyer typically pays ($5-15k). Must meet lender's MAI requirements."
+
+    - id: FN-05
+      item: "Receive appraisal and review"
+      responsible: "Buyer + Lender"
+      timeline_day: -20
+      predecessors: [FN-04]
+      notes: "If appraisal < purchase price, negotiate with lender on loan amount or bring additional equity."
+
+    - id: FN-06
+      item: "Lender completes underwriting"
+      responsible: "Lender"
+      timeline_day: -15
+      predecessors: [FN-05, DD-05, DD-06]
+      notes: "Lender reviews all DD reports (Phase I, PCA, survey), appraisal, borrower financials."
+
+    - id: FN-07
+      item: "Receive loan commitment (final approval)"
+      responsible: "Lender"
+      timeline_day: -12
+      predecessors: [FN-06]
+      notes: "Final commitment with conditions to close. Rate lock confirmed."
+
+    - id: FN-08
+      item: "Review and negotiate loan documents"
+      responsible: "Buyer counsel + Lender counsel"
+      timeline_day: -10
+      predecessors: [FN-07]
+      notes: "Loan agreement, note, mortgage/deed of trust, guaranty, environmental indemnity."
+
+    - id: FN-09
+      item: "Satisfy lender conditions to close"
+      responsible: "Buyer"
+      timeline_day: -5
+      predecessors: [FN-08]
+      notes: "Insurance binder, entity docs, opinion letters, reserves funded, UCC searches."
+
+    - id: FN-10
+      item: "Loan funding"
+      responsible: "Lender"
+      timeline_day: 0
+      predecessors: [FN-09, LT-16]
+      notes: "Lender wires loan proceeds to escrow/title on closing day."
+
+  insurance:
+    - id: IN-01
+      item: "Engage insurance broker and request quotes"
+      responsible: "Buyer / Insurance broker"
+      timeline_day: -45
+      predecessors: [LT-01]
+      notes: "Provide property details, PCA (when available), loss runs, desired coverage."
+
+    - id: IN-02
+      item: "Receive and compare insurance quotes"
+      responsible: "Buyer / Insurance broker"
+      timeline_day: -30
+      predecessors: [IN-01]
+      notes: "Compare coverage, deductibles, exclusions, premium. Lender will have minimum requirements."
+
+    - id: IN-03
+      item: "Bind insurance policy effective at closing"
+      responsible: "Buyer / Insurance broker"
+      timeline_day: -7
+      predecessors: [IN-02, FN-07]
+      notes: "Policy must be effective at closing. Lender named as additional insured/loss payee."
+
+    - id: IN-04
+      item: "Deliver insurance certificate to lender and title"
+      responsible: "Insurance broker"
+      timeline_day: -5
+      predecessors: [IN-03]
+      notes: "Lender condition to close. Title company needs for closing file."
+
+  property_management:
+    - id: PM-01
+      item: "Select and engage property management company"
+      responsible: "Buyer"
+      timeline_day: -40
+      predecessors: [LT-01]
+      notes: "If not self-managing. RFP to 2-3 firms. Negotiate management agreement."
+
+    - id: PM-02
+      item: "Execute property management agreement"
+      responsible: "Buyer + Property manager"
+      timeline_day: -25
+      predecessors: [PM-01]
+      notes: "Terms: fee (typically 4-8% of EGI), scope, termination, reporting, approval thresholds."
+
+    - id: PM-03
+      item: "Set up property bank accounts"
+      responsible: "Property manager"
+      timeline_day: -15
+      predecessors: [PM-02, LT-09]
+      notes: "Operating account, security deposit account (if required by state), reserve account."
+
+    - id: PM-04
+      item: "Prepare tenant notification letters"
+      responsible: "Buyer / Property manager"
+      timeline_day: -10
+      predecessors: [PM-02]
+      notes: "New ownership, rent payment instructions, maintenance contact, emergency number."
+
+    - id: PM-05
+      item: "Coordinate management transition with seller's PM"
+      responsible: "Buyer PM + Seller PM"
+      timeline_day: -10
+      predecessors: [PM-02]
+      notes: "Transfer tenant files, keys, access codes, vendor contacts, pending work orders."
+
+    - id: PM-06
+      item: "Transfer security deposits"
+      responsible: "Seller + Buyer"
+      timeline_day: 0
+      predecessors: [LT-16]
+      notes: "Seller credits deposits at closing or transfers directly. State laws govern handling."
+
+    - id: PM-07
+      item: "Transfer utility accounts"
+      responsible: "Property manager"
+      timeline_day: 0
+      predecessors: [LT-16]
+      notes: "Coordinate with utility providers. Avoid service interruption. Final reads at closing."
+
+    - id: PM-08
+      item: "Distribute tenant notification letters"
+      responsible: "Property manager"
+      timeline_day: 1
+      predecessors: [LT-16, PM-04]
+      notes: "Mail and/or deliver to each tenant within 24 hours of closing."
+
+  prorations_and_credits:
+    - id: PR-01
+      item: "Calculate rent prorations"
+      responsible: "Buyer counsel + Seller counsel"
+      timeline_day: -5
+      predecessors: [DD-07]
+      notes: "Prepaid rent credited to buyer. Delinquent rent -- establish collection protocol."
+
+    - id: PR-02
+      item: "Calculate property tax prorations"
+      responsible: "Buyer counsel + Seller counsel"
+      timeline_day: -5
+      predecessors: [DD-07]
+      notes: "Prorate based on most recent tax bill or estimate. True-up clause in PSA."
+
+    - id: PR-03
+      item: "Calculate insurance prorations (if assuming policy)"
+      responsible: "Buyer counsel"
+      timeline_day: -5
+      predecessors: [IN-03]
+      notes: "Usually buyer obtains new policy, no proration needed. If assuming, prorate premium."
+
+    - id: PR-04
+      item: "Calculate CAM/opex reconciliation (commercial)"
+      responsible: "Buyer / Seller"
+      timeline_day: -5
+      predecessors: [DD-07]
+      notes: "Year-end CAM reconciliation credits/debits. Establish who handles current year."
+
+    - id: PR-05
+      item: "Prepare and review closing statement (settlement statement)"
+      responsible: "Title company / Buyer counsel"
+      timeline_day: -3
+      predecessors: [PR-01, PR-02, PR-03, PR-04]
+      notes: "Final numbers for all prorations, credits, debits, fees. Both parties must approve."
+
+    - id: PR-06
+      item: "Wire closing funds (equity + costs)"
+      responsible: "Buyer"
+      timeline_day: -1
+      predecessors: [PR-05]
+      notes: "Wire to title company escrow. Amount = purchase price - loan proceeds + buyer costs - credits."
+
+  post_closing:
+    - id: PC-01
+      item: "Confirm deed and mortgage recording"
+      responsible: "Title company"
+      timeline_day: 1
+      predecessors: [LT-17]
+      notes: "Obtain recording confirmation. File in transaction records."
+
+    - id: PC-02
+      item: "Receive owner's title insurance policy"
+      responsible: "Title company"
+      timeline_day: 30
+      predecessors: [LT-17]
+      notes: "Final policy issued after recording. Review for accuracy."
+
+    - id: PC-03
+      item: "File change of ownership with tax assessor"
+      responsible: "Buyer counsel / Property manager"
+      timeline_day: 15
+      predecessors: [LT-17]
+      notes: "Required in most jurisdictions. Triggers reassessment in some states."
+
+    - id: PC-04
+      item: "Update vendor contracts and service agreements"
+      responsible: "Property manager"
+      timeline_day: 15
+      predecessors: [PM-05]
+      notes: "New entity as contract party. Review and renegotiate if needed."
+
+    - id: PC-05
+      item: "Complete unit inspections and renovation scoping"
+      responsible: "Buyer / Property manager / GC"
+      timeline_day: 30
+      predecessors: [LT-16]
+      notes: "Full property walk for renovation planning. Begin contractor bidding."
+
+    - id: PC-06
+      item: "Set up accounting and reporting systems"
+      responsible: "Property manager / Accountant"
+      timeline_day: 15
+      predecessors: [PM-03]
+      notes: "Chart of accounts, budget upload, investor reporting template, lender reporting."

@@ -1,0 +1,315 @@
+# Broker Selection Matrix for CRE Dispositions
+# Evaluation criteria with scoring rubric for selecting a disposition broker.
+# Score each broker 1-5 on each criterion. Weight criteria by importance.
+# Total weighted score determines the recommended broker.
+
+---
+
+metadata:
+  version: "1.0"
+  purpose: >
+    Standardized evaluation framework for selecting a disposition broker.
+    Used when the GP is selling an asset and needs to select from 3-5
+    broker proposals. The matrix ensures the decision is based on
+    objective criteria, not personal relationships alone.
+  process:
+    - "Step 1: Issue RFP to 3-5 brokers with property summary and expectations"
+    - "Step 2: Receive broker proposals (typically 1-2 weeks)"
+    - "Step 3: Score each broker on the criteria below"
+    - "Step 4: Interview top 2-3 brokers (30-45 minutes each)"
+    - "Step 5: Select broker and negotiate listing agreement"
+  typical_timeline: "2-3 weeks from RFP to signed listing agreement"
+
+---
+
+scoring_rubric:
+  description: "Score each criterion 1-5. Definitions below."
+  scale:
+    1: "Unacceptable -- does not meet minimum threshold"
+    2: "Below average -- meets minimum but significant gaps"
+    3: "Average -- meets expectations, no differentiation"
+    4: "Above average -- exceeds expectations in meaningful ways"
+    5: "Exceptional -- clear market leader on this criterion"
+
+---
+
+criteria:
+
+  # CATEGORY 1: MARKET KNOWLEDGE AND TRACK RECORD (Weight: 30%)
+
+  submarket_expertise:
+    weight: 0.12
+    description: "Depth of knowledge in the specific submarket where the asset is located"
+    scoring_guide:
+      1: "No recent transactions in the submarket; limited local presence"
+      2: "1-2 transactions in the broader market but not the submarket"
+      3: "3-5 transactions in the submarket within 3 years"
+      4: "5-10 transactions with specific comp data and buyer relationships"
+      5: "Dominant local presence; 10+ submarket transactions; active buyer Rolodex"
+    key_questions:
+      - "How many transactions have you closed in [submarket] in the past 3 years?"
+      - "Can you name 5 active buyers for this asset type in this submarket?"
+      - "What cap rates are you seeing for comparable assets today?"
+
+  comparable_sales_track_record:
+    weight: 0.10
+    description: "Track record selling comparable assets (type, size, price range)"
+    scoring_guide:
+      1: "No comparable sales in asset type or price range"
+      2: "1-2 comparable sales but different price range or quality"
+      3: "3-5 comparable sales in similar type and price range"
+      4: "5+ comparable sales with documented pricing outcomes"
+      5: "Recognized market leader for this asset type/size; broker of record on recent comps"
+    key_questions:
+      - "What are the 3 most comparable assets you've sold in the past 24 months?"
+      - "What were the outcomes (price/unit, cap rate, days on market)?"
+      - "What was the spread between initial ask and closing price?"
+
+  buyer_database_depth:
+    weight: 0.08
+    description: "Quality and relevance of the broker's buyer database for this specific asset"
+    scoring_guide:
+      1: "Generic database; no segmentation by asset type or buyer profile"
+      2: "Database exists but not tailored to this transaction"
+      3: "Segmented database with 50+ relevant contacts"
+      4: "Curated list of 100+ active buyers with recent transaction history"
+      5: "Deep relationships with likely buyers; can name 3-5 probable bidders today"
+    key_questions:
+      - "How many qualified buyers are on your target list for this asset?"
+      - "How many of those buyers have you closed transactions with in the past 2 years?"
+      - "Are there any off-market buyers you would approach before full marketing?"
+
+  # CATEGORY 2: MARKETING STRATEGY (Weight: 25%)
+
+  marketing_plan_quality:
+    weight: 0.10
+    description: "Specificity and creativity of the proposed marketing plan"
+    scoring_guide:
+      1: "Generic template with no asset-specific strategy"
+      2: "Basic plan: OM, email blast, online listing"
+      3: "Detailed plan with timeline, target buyer segments, marketing channels"
+      4: "Multi-channel strategy with differentiated positioning and buyer segmentation"
+      5: "Innovative approach: targeted outreach, data-driven buyer matching, compelling narrative"
+    key_questions:
+      - "Walk me through your marketing timeline for this asset."
+      - "How will you position this asset to maximize competitive bidding?"
+      - "What is your approach if the first round of offers is below expectations?"
+
+  pricing_opinion:
+    weight: 0.08
+    description: "Credibility and specificity of the broker's pricing opinion (BOV)"
+    scoring_guide:
+      1: "No pricing opinion provided or wildly unrealistic"
+      2: "Pricing opinion without supporting data"
+      3: "Pricing range with 3+ comparable sales cited"
+      4: "Detailed pricing analysis with bull/base/bear scenarios and cap rate support"
+      5: "Pricing backed by recent conversation with probable buyers; includes exit cap sensitivity"
+    key_questions:
+      - "What is your pricing recommendation and how did you arrive at it?"
+      - "What cap rate range do you expect buyers to underwrite?"
+      - "What is the risk of overpricing and how long would you let it sit before adjusting?"
+
+  om_and_collateral_quality:
+    weight: 0.07
+    description: "Quality of the Offering Memorandum and marketing materials"
+    scoring_guide:
+      1: "No sample OM provided; unclear production capability"
+      2: "Basic OM template; limited customization"
+      3: "Professional OM with standard formatting and photography"
+      4: "High-quality OM with custom financial analysis and market data"
+      5: "Institutional-grade OM with professional design, aerials, comps, and proforma"
+    evaluation_notes:
+      - "Request a sample OM from a recent comparable transaction"
+      - "Evaluate: financial accuracy, design quality, narrative clarity"
+      - "Confirm turnaround time for OM production (should be 2-3 weeks with clean data)"
+
+  # CATEGORY 3: TEAM AND EXECUTION (Weight: 25%)
+
+  lead_broker_experience:
+    weight: 0.10
+    description: "Experience level and bandwidth of the lead broker on the team"
+    scoring_guide:
+      1: "Junior broker with <5 years experience; no personal track record"
+      2: "Mid-level broker with some relevant experience but not a market leader"
+      3: "Experienced broker with 10+ years and relevant transaction history"
+      4: "Senior broker with 15+ years and recognized expertise in asset type/market"
+      5: "Top-producing broker with dominant market position and direct buyer relationships"
+    key_questions:
+      - "Who will be the lead point of contact throughout the process?"
+      - "How many active listings does the lead broker currently have?"
+      - "What percentage of your time will be dedicated to our listing?"
+
+  team_depth_and_support:
+    weight: 0.08
+    description: "Quality of the supporting team (analyst, coordinator, marketing)"
+    scoring_guide:
+      1: "Lead broker operates solo with no support"
+      2: "One junior analyst supporting multiple listings"
+      3: "Dedicated analyst and marketing coordinator"
+      4: "Full team: lead broker, associate, analyst, marketing, closing coordinator"
+      5: "Institutional team with research department, national marketing platform, and closing support"
+
+  execution_timeline:
+    weight: 0.07
+    description: "Proposed timeline from listing to close and its realism"
+    scoring_guide:
+      1: "No timeline provided or unrealistic (too fast or too slow)"
+      2: "Generic timeline not tailored to asset type or market conditions"
+      3: "Reasonable timeline: 3-6 months from listing to close"
+      4: "Detailed week-by-week timeline with milestones and contingencies"
+      5: "Timeline calibrated to current market velocity with data on recent DOM for comps"
+
+  # CATEGORY 4: COMMERCIAL TERMS (Weight: 20%)
+
+  commission_rate:
+    weight: 0.08
+    description: "Commission structure and competitiveness"
+    scoring_guide:
+      1: "Above market rate with no justification"
+      2: "At market rate but rigid on structure"
+      3: "At market with some flexibility (e.g., tiered structure)"
+      4: "Below market or creative structure (incentive at higher price tiers)"
+      5: "Competitive rate with performance incentive aligned with seller's goals"
+    market_rates:
+      under_5m: "4-6% gross commission"
+      5m_to_15m: "3-5%"
+      15m_to_50m: "2-4%"
+      50m_to_100m: "1.5-2.5%"
+      over_100m: "1.0-1.5%"
+    notes:
+      - "Commission typically split 50/50 between listing broker and buyer's broker"
+      - "Negotiate a tiered structure: base rate + bonus above a price threshold"
+      - "Example: 3% on first $10M + 1.5% on amount above $10M"
+
+  listing_agreement_terms:
+    weight: 0.06
+    description: "Reasonableness of the listing agreement terms"
+    scoring_guide:
+      1: "12+ month exclusive with no termination right"
+      2: "12-month exclusive with limited termination provisions"
+      3: "6-month exclusive with 30-day termination notice"
+      4: "6-month exclusive with 30-day kick-out after marketing period"
+      5: "6-month with performance milestones; mutual termination for cause at 90 days"
+    key_terms_to_negotiate:
+      - "Term: 6-9 months (avoid 12+)"
+      - "Termination: 30-day written notice after minimum marketing period (90 days)"
+      - "Tail period: 6-12 months (commission owed if buyer from broker's marketing closes)"
+      - "Carve-outs: Specific pre-identified buyers excluded from commission"
+      - "Co-brokerage: Listing broker cooperates with buyer's brokers"
+
+  references_and_reputation:
+    weight: 0.06
+    description: "Quality of references from recent clients"
+    scoring_guide:
+      1: "No references provided or unable to contact"
+      2: "References provided but not for comparable transactions"
+      3: "2-3 references from comparable transactions with positive feedback"
+      4: "3-5 strong references including both sellers and buyers"
+      5: "Institutional references (fund managers, REITs) with specific praise for execution"
+    reference_questions:
+      - "How would you rate the broker's responsiveness during the sale process?"
+      - "Did the final price meet, exceed, or fall below the initial pricing opinion?"
+      - "Were there any surprises during the process? How did the broker handle them?"
+      - "Would you use this broker again for a comparable transaction?"
+      - "How did the broker handle buyer negotiations and re-trades?"
+
+---
+
+# SCORING TEMPLATE
+
+evaluation_template:
+  description: "Complete this for each broker being evaluated"
+  fields:
+    broker_firm: "[Firm Name]"
+    lead_broker: "[Name, Title]"
+    proposal_date: "[Date]"
+    evaluated_by: "[Name]"
+    evaluation_date: "[Date]"
+
+  scores:
+    submarket_expertise:
+      score: null  # 1-5
+      notes: ""
+    comparable_sales_track_record:
+      score: null
+      notes: ""
+    buyer_database_depth:
+      score: null
+      notes: ""
+    marketing_plan_quality:
+      score: null
+      notes: ""
+    pricing_opinion:
+      score: null
+      notes: ""
+    om_and_collateral_quality:
+      score: null
+      notes: ""
+    lead_broker_experience:
+      score: null
+      notes: ""
+    team_depth_and_support:
+      score: null
+      notes: ""
+    execution_timeline:
+      score: null
+      notes: ""
+    commission_rate:
+      score: null
+      notes: ""
+    listing_agreement_terms:
+      score: null
+      notes: ""
+    references_and_reputation:
+      score: null
+      notes: ""
+
+  # Weighted score calculation:
+  # Total = SUM(score_i * weight_i) for all criteria
+  # Maximum possible = 5.00
+
+  total_weighted_score: null  # Calculate: sum of (score * weight)
+  recommendation: null  # "Select" / "Shortlist" / "Decline"
+
+---
+
+# DECISION FRAMEWORK
+
+decision_thresholds:
+  select: "Weighted score >= 4.0 -- strong candidate, proceed to listing agreement"
+  shortlist: "Weighted score 3.0-3.9 -- interview but seek better options"
+  decline: "Weighted score < 3.0 -- does not meet minimum standards"
+
+tiebreaker_factors:
+  description: "If two brokers score within 0.3 of each other, use these tiebreakers"
+  factors:
+    - "Lead broker's personal relationship with the top 3 likely buyers"
+    - "Firm's track record on closing at or above BOV pricing"
+    - "Willingness to structure commission with performance incentive"
+    - "Availability: lead broker's current listing load and bandwidth"
+
+---
+
+# RFP TEMPLATE
+
+rfp_contents:
+  description: "What to include in the RFP sent to prospective brokers"
+  sections:
+    - section: "Property Summary"
+      contents: "Address, type, size, year built, current occupancy, trailing NOI"
+
+    - section: "Seller Objectives"
+      contents: "Target price range (optional), timeline, preferred deal structure"
+
+    - section: "Requested Deliverables"
+      contents:
+        - "Broker opinion of value (BOV) with supporting comparable sales"
+        - "Proposed marketing strategy and timeline"
+        - "Target buyer list (redacted names OK; describe buyer profiles)"
+        - "Team composition and lead broker bio"
+        - "Proposed commission structure"
+        - "3 references from comparable recent transactions"
+        - "Sample OM from a comparable transaction"
+
+    - section: "Submission Instructions"
+      contents: "Deadline, format (PDF), contact for questions, interview dates"

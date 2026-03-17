@@ -1,0 +1,319 @@
+# Building Performance Standards (BPS) Compliance Matrix
+# Jurisdiction-specific requirements for commercial real estate
+# Last updated: 2026-03-17
+
+schema:
+  version: "1.0"
+  fields:
+    jurisdiction: "City/state name"
+    law_name: "Official law or ordinance name"
+    authority: "Administering agency"
+    applicability: "Building size/type thresholds"
+    metric: "Compliance metric (emissions intensity, EUI, ENERGY STAR score)"
+    timeline: "Key compliance dates"
+    thresholds: "Performance limits by period"
+    penalties: "Non-compliance consequences"
+    compliance_pathways: "Approved methods to achieve compliance"
+    exemptions: "Properties excluded from requirements"
+    reporting_requirements: "Annual disclosure obligations"
+
+jurisdictions:
+
+  nyc_ll97:
+    jurisdiction: "New York City"
+    law_name: "Local Law 97 of 2019 (Climate Mobilization Act)"
+    authority: "NYC Department of Buildings (DOB)"
+    applicability:
+      size_threshold: "Buildings > 25,000 SF"
+      includes:
+        - "Single buildings > 25,000 SF"
+        - "Two+ buildings on same tax lot totaling > 50,000 SF"
+        - "Condo buildings if combined > 25,000 SF"
+      building_count_affected: "~50,000 buildings"
+    metric: "tCO2e per SF per year (by occupancy group)"
+    timeline:
+      benchmarking_start: "2024-05-01"
+      period_1_start: "2024-01-01"
+      period_1_end: "2029-12-31"
+      period_2_start: "2030-01-01"
+      period_2_end: "2034-12-31"
+      subsequent_periods: "Every 5 years through 2050"
+      reporting_deadline: "May 1 annually"
+    thresholds:
+      period_1_2024_2029:
+        office_B: 0.00846  # tCO2e/SF/yr
+        residential_R2: 0.00675
+        retail_M: 0.01109
+        hotel_R1: 0.00987
+        healthcare_I2: 0.02381
+        assembly_A: 0.01074
+        educational_E: 0.00758
+        industrial_F: 0.00574
+        storage_S: 0.00426
+      period_2_2030_2034:
+        office_B: 0.00453
+        residential_R2: 0.00407
+        retail_M: 0.00569
+        hotel_R1: 0.00526
+        healthcare_I2: 0.01330
+        assembly_A: 0.00569
+        educational_E: 0.00407
+        industrial_F: 0.00453
+        storage_S: 0.00426
+      notes:
+        - "Mixed-use buildings: weighted average by occupancy group SF"
+        - "Emission coefficients updated periodically by DOB"
+        - "Grid emission factor for electricity: 0.000288962 tCO2e/kWh (2024)"
+    penalties:
+      type: "Annual civil penalty"
+      rate_per_tCO2e: 268.00
+      currency: "USD"
+      assessment: "Annual, based on prior calendar year emissions"
+      enforcement: "DOB issues notice of violation; penalty accrues annually"
+      cap: "No annual cap on penalties"
+      example:
+        building: "500,000 SF office"
+        period_1_excess: "1,270 tCO2e"
+        period_1_penalty: "$340,360/yr"
+        period_2_excess: "3,235 tCO2e"
+        period_2_penalty: "$866,980/yr"
+    compliance_pathways:
+      - name: "Direct emissions reduction"
+        description: "Energy efficiency retrofits, electrification, fuel switching"
+      - name: "Prescriptive path"
+        description: "Implement all measures on DOB-approved prescriptive list"
+        notes: "Available for buildings that cannot meet performance targets"
+      - name: "Renewable energy credits"
+        description: "Purchase of qualifying RECs"
+        restrictions: "Must be NYC-generated wind/solar for certain credits"
+      - name: "Deduction for purchase of GHG offsets"
+        description: "Credits via NYC MOCEJ program (if/when established)"
+      - name: "Adjustment for special circumstances"
+        description: "Hardship waiver for financial distress"
+    exemptions:
+      - "City-owned buildings (separate compliance track)"
+      - "Houses of worship (principal use)"
+      - "Rent-regulated buildings with demonstrated financial hardship"
+      - "Industrial facilities regulated by federal/state air permits"
+      - "Buildings undergoing major capital improvement (temporary deferral)"
+
+  dc_beps:
+    jurisdiction: "Washington, D.C."
+    law_name: "Building Energy Performance Standards (BEPS)"
+    authority: "DC Department of Energy and Environment (DOEE)"
+    applicability:
+      size_threshold: "Buildings > 10,000 SF"
+      includes:
+        - "Private commercial and multifamily buildings"
+        - "District-owned buildings"
+      phased_approach:
+        cycle_1: "Buildings > 50,000 SF (2021-2026)"
+        cycle_2: "Buildings 25,000-49,999 SF (2027-2032)"
+        cycle_3: "Buildings 10,000-24,999 SF (2033-2038)"
+    metric: "Site EUI (kBtu/SF/yr) and/or ENERGY STAR score"
+    timeline:
+      cycle_1_compliance: "2026-01-01"
+      cycle_2_compliance: "2032-01-01"
+      cycle_3_compliance: "2038-01-01"
+      benchmarking_deadline: "April 1 annually (ENERGY STAR Portfolio Manager)"
+    thresholds:
+      methodology: "Property type-specific median EUI targets"
+      office:
+        current_median_EUI: 78.0  # kBtu/SF/yr
+        cycle_1_target: "Below property-type median or ENERGY STAR score >= 50"
+        improvement_alternative: "20% reduction from baseline"
+      multifamily:
+        current_median_EUI: 65.0
+      retail:
+        current_median_EUI: 55.0
+      notes:
+        - "Targets ratchet down each 5-year cycle"
+        - "DOEE publishes property-type-specific targets"
+    penalties:
+      type: "Alternative compliance penalty"
+      initial_fine: "$7.50 per SF for non-compliance after compliance period"
+      escalation: "Increases each cycle"
+      alternative_compliance_fee: "Available in lieu of retrofit"
+    compliance_pathways:
+      - name: "Performance pathway"
+        description: "Meet site EUI or ENERGY STAR score target"
+      - name: "Prescriptive pathway"
+        description: "Implement approved retrofit measures"
+      - name: "Standard target pathway"
+        description: "Achieve 20% EUI reduction from baseline"
+      - name: "Alternative compliance"
+        description: "Pay into DC Green Bank for clean energy projects"
+    exemptions:
+      - "Buildings with ENERGY STAR score >= 75"
+      - "Buildings recently constructed (< 5 years)"
+      - "Buildings with demonstrated financial distress"
+      - "Critical infrastructure (hospitals, data centers) -- modified targets"
+
+  boston_berdo:
+    jurisdiction: "Boston, MA"
+    law_name: "Building Emissions Reduction and Disclosure Ordinance (BERDO 2.0)"
+    authority: "Boston Environment Department"
+    applicability:
+      size_threshold: "Buildings >= 20,000 SF or 15+ residential units"
+      building_count_affected: "~3,500 buildings"
+    metric: "GHG emissions intensity (kgCO2e/SF/yr)"
+    timeline:
+      reporting_start: "2022 (annual reporting)"
+      first_compliance_period: "2025-2029"
+      second_compliance_period: "2030-2034"
+      net_zero_target: "2050"
+      reporting_deadline: "September 15 annually"
+    thresholds:
+      methodology: "Property-type-specific emissions intensity targets"
+      office_2025:
+        target_kgCO2e_per_SF: 7.0
+      office_2030:
+        target_kgCO2e_per_SF: 4.0
+      office_2050:
+        target_kgCO2e_per_SF: 0.0
+      multifamily_2025:
+        target_kgCO2e_per_SF: 5.5
+      multifamily_2030:
+        target_kgCO2e_per_SF: 3.5
+      notes:
+        - "Targets decline every 5 years toward net zero by 2050"
+        - "Individual compliance schedule possible via alternative pathway"
+    penalties:
+      type: "Civil penalty"
+      base_fine: "$150 per violation per day"
+      max_daily: "$1,000/day (reporting violations)"
+      emissions_penalty: "Alternative compliance payment (rate TBD by review board)"
+    compliance_pathways:
+      - name: "Direct performance"
+        description: "Meet emissions intensity target"
+      - name: "Individual compliance schedule"
+        description: "Building-specific glide path with approved milestones"
+      - name: "Alternative compliance payment"
+        description: "Pay into fund for equitable emissions reduction"
+      - name: "Hardship waiver"
+        description: "Demonstrated financial inability to comply"
+    exemptions:
+      - "Affordable housing (extended timelines, not exempt)"
+      - "Houses of worship (reporting only, no performance standard)"
+      - "Buildings under 20,000 SF"
+
+  denver_energize:
+    jurisdiction: "Denver, CO"
+    law_name: "Energize Denver"
+    authority: "Denver Office of Climate Action, Sustainability, and Resiliency (CASR)"
+    applicability:
+      size_threshold: "Buildings >= 25,000 SF"
+    metric: "Site EUI (kBtu/SF/yr) and ENERGY STAR score"
+    timeline:
+      benchmarking_mandatory: "2023 (buildings >= 25,000 SF)"
+      performance_requirements_start: "2024"
+      interim_targets: "2027"
+      final_targets: "2030"
+      reporting_deadline: "June 1 annually"
+    thresholds:
+      methodology: "Property-type-specific EUI targets or ENERGY STAR score"
+      office:
+        interim_2027_EUI: 75.0  # kBtu/SF/yr
+        final_2030_EUI: 60.0
+      multifamily:
+        interim_2027_EUI: 65.0
+        final_2030_EUI: 50.0
+      alternative: "ENERGY STAR score >= 50 (interim), >= 65 (final)"
+    penalties:
+      type: "Escalating fines"
+      benchmarking_failure: "$2,000 first year, increasing annually"
+      performance_failure: "$0.50-$2.00/SF per year of non-compliance"
+    compliance_pathways:
+      - name: "Performance target"
+        description: "Meet EUI or ENERGY STAR score target"
+      - name: "Custom compliance plan"
+        description: "Submit building-specific improvement plan to CASR"
+      - name: "Renewable energy procurement"
+        description: "On-site generation or community solar subscription"
+    exemptions:
+      - "Recently constructed buildings (< 3 years)"
+      - "Buildings scheduled for demolition"
+      - "Agricultural buildings"
+
+  wa_clean_buildings:
+    jurisdiction: "Washington State"
+    law_name: "Clean Buildings Performance Standard (HB 1257)"
+    authority: "Washington Department of Commerce"
+    applicability:
+      tier_1: "Commercial buildings >= 50,000 SF (compliance by 2026)"
+      tier_2: "Commercial buildings >= 20,000 SF (compliance by 2028)"
+    metric: "Site EUI (kBtu/SF/yr)"
+    timeline:
+      tier_1_compliance: "2026-06-01"
+      tier_2_compliance: "2028-06-01"
+      benchmarking_start: "2024 (Tier 2 buildings)"
+      reporting_deadline: "June 1 of compliance year"
+    thresholds:
+      methodology: "Building activity-type-specific EUI targets"
+      office:
+        target_EUI: 80.8  # kBtu/SF/yr
+      retail:
+        target_EUI: 66.7
+      grocery:
+        target_EUI: 190.2
+      hotel:
+        target_EUI: 86.6
+      multifamily:
+        target_EUI: 54.4
+      hospital:
+        target_EUI: 182.6
+      notes:
+        - "Targets based on ASHRAE Standard 100"
+        - "Weather-normalized using local heating/cooling degree days"
+    penalties:
+      type: "Civil penalty"
+      rate: "$5.00 per SF per year of non-compliance"
+      max_annual: "Capped at lesser of $5/SF or actual penalty"
+      example:
+        building_sf: 100000
+        annual_penalty: "$500,000"
+    compliance_pathways:
+      - name: "Performance standard"
+        description: "Meet EUI target for building type"
+      - name: "Energy management plan"
+        description: "Submit Commerce-approved plan with milestones"
+        requirements:
+          - "ASHRAE Level 2 audit or equivalent"
+          - "Investment-grade measures identified"
+          - "Implementation timeline with annual benchmarks"
+      - name: "Conditional compliance"
+        description: "Demonstrated good-faith effort with approved plan"
+    exemptions:
+      - "Buildings < 20,000 SF"
+      - "Agricultural buildings"
+      - "Buildings with less than 50% occupancy (petition required)"
+
+# Cross-Jurisdiction Comparison Summary
+comparison:
+  strictest_penalties: "WA Clean Buildings ($5/SF/yr) and NYC LL97 ($268/tCO2e)"
+  earliest_enforcement: "NYC LL97 (2024), Denver (2024)"
+  smallest_threshold: "DC BEPS (10,000 SF in Cycle 3)"
+  broadest_scope: "NYC LL97 (~50,000 buildings)"
+  net_zero_target:
+    nyc: 2050
+    dc: 2050
+    boston: 2050
+    denver: 2040
+    wa_state: 2050
+
+# Strategic Notes
+strategy:
+  multi_market_portfolios:
+    - "Map each asset to its local BPS regime"
+    - "Prioritize compliance for highest-penalty jurisdictions first"
+    - "Bundle retrofit projects across portfolio for economies of scale"
+    - "Use NYC LL97 compliance as most conservative baseline -- assets meeting LL97 likely meet others"
+  timeline_prioritization:
+    immediate: "NYC LL97 Period 1, Denver interim, WA Tier 1"
+    near_term: "DC BEPS Cycle 1, Boston 2025 targets"
+    medium_term: "WA Tier 2, DC Cycle 2, Boston 2030 targets"
+    long_term: "NYC LL97 Period 2, Denver final targets"
+  cost_benefit:
+    - "Model penalty cost per asset per year under each regime"
+    - "Compare penalty cost to retrofit capex and resultant NOI improvement"
+    - "Many assets: retrofit cheaper than paying penalties by year 3-5"

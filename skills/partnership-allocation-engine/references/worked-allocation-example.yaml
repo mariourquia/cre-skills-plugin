@@ -1,0 +1,418 @@
+---
+# Partnership Allocation Engine Worked Example
+# GP/LP JV with Promote, Section 704(b), Pension LP UBIT Analysis
+# Tax rules current as of 2026
+# All dollar amounts in USD
+---
+
+example:
+  id: allocation_example_01
+  name: "GP/LP JV -- 10/90 Split, 8% Pref, 70/30 Promote, Pension LP"
+  description: >
+    Joint venture: GP (sponsor) 10% / LP (tax-exempt pension fund) 90%.
+    $10M total equity. 8% preferred return, 70/30 promote split above 12% IRR.
+    5-year hold on a stabilized 80-unit multifamily in Edison, NJ. Full capital
+    account tracking, Section 704(b) allocations, UBIT/UDFI analysis for the
+    pension LP, and REIT qualification test.
+
+  # -------------------------------------------------------------------
+  # JV STRUCTURE
+  # -------------------------------------------------------------------
+  jv_structure:
+    entity: "Edison MF Partners LLC"
+    tax_classification: "Partnership (no election to be taxed as corp)"
+    gp:
+      name: "Ironbound Capital LLC (Sponsor/GP)"
+      equity_contribution: 1_000_000       # 10%
+      ownership_pct: 0.10
+      role: "Managing member. Day-to-day operations, capex decisions, leasing."
+      fee_structure:
+        acquisition_fee: 100_000           # 1% of purchase price
+        asset_management_fee: 0.015        # 1.5% of EGI, annually
+        disposition_fee: 0.01              # 1% of gross sale price
+    lp:
+      name: "NJ State Pension Investment Board"
+      equity_contribution: 9_000_000       # 90%
+      ownership_pct: 0.90
+      tax_status: "Tax-exempt under IRC Section 501(a)"
+      type: "Defined benefit pension plan"
+      ubit_concern: true                   # UDFI exposure from leveraged real estate
+
+  # -------------------------------------------------------------------
+  # DEAL ECONOMICS
+  # -------------------------------------------------------------------
+  deal:
+    property: "80-Unit Class B MF, Edison NJ"
+    purchase_price: 20_000_000
+    closing_costs: 300_000
+    total_cost_basis: 20_300_000
+    equity: 10_000_000
+    senior_debt: 10_000_000                # 50% LTV (conservative for pension LP)
+    interest_rate: 0.060
+    amort_years: 30
+    io_period: 2
+    stabilized_noi: 1_550_000
+    hold_period: 5
+    exit_cap: 0.0550
+    noi_growth: 0.030
+
+  # -------------------------------------------------------------------
+  # WATERFALL STRUCTURE
+  # -------------------------------------------------------------------
+  waterfall:
+    description: >
+      Standard institutional waterfall with preferred return, return of
+      capital, and promote. Applied to both operating distributions and
+      capital event (sale/refi) proceeds.
+
+    tiers:
+      - tier: 1
+        label: "Preferred Return (8% cumulative, non-compounding)"
+        description: "GP and LP both receive 8% preferred return on unreturned capital, pro rata to ownership"
+        gp_share: 0.10
+        lp_share: 0.90
+        hurdle: 0.08
+        note: "Preferred return accrues if not distributed. Must be caught up before Tier 2."
+
+      - tier: 2
+        label: "Return of Capital"
+        description: "After pref is current, distributions return contributed equity pro rata"
+        gp_share: 0.10
+        lp_share: 0.90
+
+      - tier: 3
+        label: "GP Catch-Up to 30%"
+        description: "GP receives 100% of distributions until GP has received 30% of total profits (Tiers 1-3 combined)"
+        gp_share: 1.00
+        lp_share: 0.00
+        catch_up_to: 0.30
+
+      - tier: 4
+        label: "Residual Split (70/30)"
+        description: "After catch-up, remaining profits split 70% LP / 30% GP"
+        gp_share: 0.30
+        lp_share: 0.70
+        irr_threshold: 0.12
+
+  # -------------------------------------------------------------------
+  # ANNUAL OPERATING PROFORMA (5-Year Hold)
+  # -------------------------------------------------------------------
+  operating_proforma:
+    headers: ["Item", "Year_1", "Year_2", "Year_3", "Year_4", "Year_5"]
+
+    noi:              [1_550_000, 1_596_500, 1_644_395, 1_693_727, 1_744_539]
+    debt_service_io:  [  600_000,   600_000,         0,         0,         0]
+    debt_service_amort: [      0,         0,   720_000,   720_000,   720_000]
+    asset_mgmt_fee:   [   27_000,    27_810,    28_644,    29_504,    30_389]
+    # AM fee: 1.5% of EGI. EGI ~ $1.8M stabilized, so fee ~ $27K/yr
+
+    net_cash_flow:    [  923_000,   968_690,   895_751,   944_223,   994_150]
+
+  # -------------------------------------------------------------------
+  # CAPITAL ACCOUNT MOVEMENTS (5-Year Hold)
+  # -------------------------------------------------------------------
+  capital_accounts:
+    description: >
+      Capital account tracks each partner's economic interest. Begins at
+      contribution, increased by income allocations and additional contributions,
+      decreased by loss allocations and distributions.
+
+    gp_capital_account:
+      headers: ["Period", "Beginning", "Contributions", "Income_Alloc", "Distributions", "Ending"]
+      rows:
+        - { period: "Year 0", beginning: 0,         contributions: 1_000_000, income: 0,       distributions: 0,       ending: 1_000_000 }
+        - { period: "Year 1", beginning: 1_000_000, contributions: 0,         income: 92_300,  distributions: -80_000, ending: 1_012_300 }
+        - { period: "Year 2", beginning: 1_012_300, contributions: 0,         income: 96_869,  distributions: -80_000, ending: 1_029_169 }
+        - { period: "Year 3", beginning: 1_029_169, contributions: 0,         income: 89_575,  distributions: -80_000, ending: 1_038_744 }
+        - { period: "Year 4", beginning: 1_038_744, contributions: 0,         income: 94_422,  distributions: -80_000, ending: 1_053_166 }
+        - { period: "Year 5", beginning: 1_053_166, contributions: 0,         income: 99_415,  distributions: -80_000, ending: 1_072_581 }
+        - { period: "Exit",   beginning: 1_072_581, contributions: 0,         income: 0,       distributions: -1_072_581, ending: 0 }
+      # Note: GP income allocation = 10% of partnership taxable income
+      # GP distributions during hold = 8% pref * $1M GP equity = $80K/yr
+
+    lp_capital_account:
+      headers: ["Period", "Beginning", "Contributions", "Income_Alloc", "Distributions", "Ending"]
+      rows:
+        - { period: "Year 0", beginning: 0,         contributions: 9_000_000, income: 0,         distributions: 0,         ending: 9_000_000 }
+        - { period: "Year 1", beginning: 9_000_000, contributions: 0,         income: 830_700,   distributions: -720_000,  ending: 9_110_700 }
+        - { period: "Year 2", beginning: 9_110_700, contributions: 0,         income: 871_821,   distributions: -720_000,  ending: 9_262_521 }
+        - { period: "Year 3", beginning: 9_262_521, contributions: 0,         income: 806_176,   distributions: -720_000,  ending: 9_348_697 }
+        - { period: "Year 4", beginning: 9_348_697, contributions: 0,         income: 849_801,   distributions: -720_000,  ending: 9_478_498 }
+        - { period: "Year 5", beginning: 9_478_498, contributions: 0,         income: 894_735,   distributions: -720_000,  ending: 9_653_233 }
+        - { period: "Exit",   beginning: 9_653_233, contributions: 0,         income: 0,         distributions: -9_653_233, ending: 0 }
+      # LP distributions during hold = 8% pref * $9M LP equity = $720K/yr
+
+  # -------------------------------------------------------------------
+  # SECTION 704(b) ALLOCATIONS PER YEAR
+  # -------------------------------------------------------------------
+  section_704b_allocations:
+    description: >
+      Partnership income and loss allocated per Section 704(b) regulations.
+      Allocations must have "substantial economic effect" -- they must be
+      consistent with the partners' economic arrangement (capital accounts,
+      liquidation rights, deficit restoration obligations).
+
+    allocation_methodology: >
+      Income allocated pro rata to ownership (10/90) during operating years.
+      At exit, gain allocated per waterfall economics. Depreciation allocated
+      pro rata (10/90). Section 704(c) applies to contributed property to
+      prevent shifting of built-in gain/loss.
+
+    annual_allocations:
+      headers: ["Year", "Partnership_Taxable_Income", "GP_Allocation (10%)", "LP_Allocation (90%)", "Depreciation", "GP_Depr_Share", "LP_Depr_Share"]
+      rows:
+        - { year: 1, taxable_income: 923_000,  gp_income: 92_300,  lp_income: 830_700,  depreciation: 592_727, gp_depr: 59_273, lp_depr: 533_454 }
+        - { year: 2, taxable_income: 968_690,  gp_income: 96_869,  lp_income: 871_821,  depreciation: 592_727, gp_depr: 59_273, lp_depr: 533_454 }
+        - { year: 3, taxable_income: 895_751,  gp_income: 89_575,  lp_income: 806_176,  depreciation: 592_727, gp_depr: 59_273, lp_depr: 533_454 }
+        - { year: 4, taxable_income: 944_223,  gp_income: 94_422,  lp_income: 849_801,  depreciation: 592_727, gp_depr: 59_273, lp_depr: 533_454 }
+        - { year: 5, taxable_income: 994_150,  gp_income: 99_415,  lp_income: 894_735,  depreciation: 592_727, gp_depr: 59_273, lp_depr: 533_454 }
+      # Depreciation: (20,300,000 - 4,060,000 land) / 27.5 = $590,909/yr on building
+      # Adjusted for land improvement components: $592,727 total depreciation
+
+    k1_items_year_1:
+      description: "Sample K-1 allocations for Year 1"
+      gp_k1:
+        ordinary_income: 92_300
+        depreciation: -59_273
+        net_rental_income: 33_027          # 92,300 - 59,273
+        section_199a_eligible: true        # qualified business income for GP (if individual)
+      lp_k1:
+        ordinary_income: 830_700
+        depreciation: -533_454
+        net_rental_income: 297_246
+        section_199a_eligible: false       # LP is tax-exempt; N/A
+        ubit_note: "See UDFI analysis below"
+
+  # -------------------------------------------------------------------
+  # EXIT WATERFALL -- CUMULATIVE ALLOCATIONS
+  # -------------------------------------------------------------------
+  exit_waterfall:
+    sale_year: 5
+    projected_noi_year_5: 1_744_539
+    exit_cap: 0.0550
+    gross_sale_price: 31_719_000           # 1,744,539 / 0.055
+    disposition_fee: -317_190              # 1% to GP
+    selling_costs: -475_785                # 1.5%
+    net_sale_proceeds: 30_926_025
+    loan_payoff: -9_450_000                # amortized balance at year 5
+    net_equity_proceeds: 21_476_025
+
+    waterfall_application:
+      tier_1_preferred_return:
+        description: "8% pref on unreturned capital. During hold, pref was fully distributed each year."
+        gp_pref_owed: 0                    # fully current
+        lp_pref_owed: 0                    # fully current
+        gp_receives: 0
+        lp_receives: 0
+
+      tier_2_return_of_capital:
+        gp_capital: 1_000_000
+        lp_capital: 9_000_000
+        total_roc: 10_000_000
+        remaining_after_roc: 11_476_025
+
+      tier_3_gp_catch_up:
+        description: >
+          GP receives 100% of distributions until GP has received 30% of
+          total profits above ROC. Total profits = $11,476,025.
+          GP target: 30% * $11,476,025 = $3,442,807.
+          GP already received from hold distributions: $400,000 (5yr * $80K).
+          But wait -- those were pref distributions, not profit distributions
+          above ROC. All $11.476M is profit above ROC.
+        total_profit: 11_476_025
+        gp_target_pct: 0.30
+        gp_target_amount: 3_442_807
+        gp_catch_up_amount: 3_442_807      # 100% to GP until target met
+        remaining: 8_033_218
+
+      tier_4_residual_70_30:
+        remaining_to_split: 8_033_218
+        gp_share: 2_409_965                # 30%
+        lp_share: 5_623_253                # 70%
+
+    total_distributions_at_exit:
+      gp:
+        return_of_capital: 1_000_000
+        catch_up: 3_442_807
+        residual: 2_409_965
+        total_exit: 6_852_772
+        plus_hold_distributions: 400_000   # 5 years * $80K
+        disposition_fee: 317_190
+        acquisition_fee: 100_000
+        asset_mgmt_fees: 143_347           # 5 years cumulative
+        grand_total_gp: 7_813_309
+      lp:
+        return_of_capital: 9_000_000
+        residual: 5_623_253
+        total_exit: 14_623_253
+        plus_hold_distributions: 3_600_000  # 5 years * $720K
+        grand_total_lp: 18_223_253
+
+    returns:
+      gp:
+        equity_invested: 1_000_000
+        total_received: 7_813_309
+        equity_multiple: 7.81              # promote creates massive GP multiple
+        irr: 0.512                         # 51.2% IRR to GP
+      lp:
+        equity_invested: 9_000_000
+        total_received: 18_223_253
+        equity_multiple: 2.02
+        irr: 0.148                         # 14.8% IRR to LP
+      blended:
+        equity_invested: 10_000_000
+        total_received: 26_036_562         # includes fees paid to GP
+        equity_multiple: 2.60
+        irr: 0.211                         # 21.1% blended
+
+  # -------------------------------------------------------------------
+  # UBIT / UDFI ANALYSIS FOR PENSION LP
+  # -------------------------------------------------------------------
+  ubit_udfi:
+    description: >
+      Tax-exempt entities (pensions, endowments) are subject to Unrelated
+      Business Income Tax (UBIT) on debt-financed income. The debt-financed
+      portion of real estate income is treated as Unrelated Debt-Financed
+      Income (UDFI) under IRC Section 514.
+
+    applies: true
+    reason: "Partnership has $10M debt. LP's share of debt = $9M (90%). Debt-financed property triggers UDFI."
+
+    udfi_calculation:
+      description: >
+        UDFI = Net income from debt-financed property * debt/basis ratio.
+        The debt/basis ratio is calculated using the "average acquisition
+        indebtedness" and "average adjusted basis" over the tax year.
+
+      year_1:
+        lp_share_of_income: 830_700
+        lp_share_of_depreciation: 533_454
+        lp_net_rental_income: 297_246
+        average_acquisition_indebtedness: 9_000_000  # LP's 90% share of $10M debt
+        average_adjusted_basis: 18_270_000            # LP's 90% of $20.3M basis
+        debt_basis_ratio: 0.493                       # 9,000,000 / 18,270,000
+        udfi: 146_542                                 # 297,246 * 0.493
+        ubit_rate: 0.21                               # corporate rate for pension trusts
+        ubit_tax: 30_774
+        note: >
+          LP owes $30,774 in UBIT in Year 1. This reduces the LP's effective
+          after-tax return. As the loan amortizes, the debt/basis ratio
+          declines and UDFI decreases.
+
+      year_3:
+        lp_net_rental_income: 272_722      # lower due to higher amortizing DS reducing cash
+        average_acquisition_indebtedness: 8_550_000  # amortized
+        average_adjusted_basis: 17_204_000
+        debt_basis_ratio: 0.497
+        udfi: 135_543
+        ubit_tax: 28_464
+
+      year_5:
+        lp_net_rental_income: 361_281
+        average_acquisition_indebtedness: 8_100_000
+        average_adjusted_basis: 16_138_000
+        debt_basis_ratio: 0.502
+        udfi: 181_363
+        ubit_tax: 38_086
+
+    udfi_at_sale:
+      description: >
+        Capital gain on sale is also subject to UDFI to the extent the
+        property was debt-financed. The highest debt/basis ratio during
+        the 12 months preceding the sale determines the inclusion rate.
+      lp_share_of_gain: 5_623_253
+      debt_basis_ratio_at_sale: 0.502      # year 5 ratio
+      udfi_on_gain: 2_822_873              # 5,623,253 * 0.502
+      ubit_on_gain: 592_803                # 2,822,873 * 0.21
+      note: >
+        The pension LP owes $593K in UBIT on the sale gain. This is a
+        significant tax cost that partially offsets the LP's gross return.
+
+    total_ubit_over_hold:
+      operating_ubit: 165_000              # approximate sum of 5 years
+      sale_ubit: 592_803
+      total_ubit: 757_803
+      impact_on_lp_irr: -0.012             # ~120bps reduction in LP IRR
+      lp_after_ubit_irr: 0.136            # 14.8% - 1.2% = ~13.6%
+
+    mitigation_strategies:
+      - strategy: "Lower Leverage"
+        description: >
+          Reducing LTV from 50% to 35% would lower UDFI ratio from 49% to 34%,
+          reducing total UBIT by ~30%. However, lower leverage reduces IRR.
+        tradeoff: "Lower UBIT but lower returns. Pension LPs typically accept 50-55% LTV."
+
+      - strategy: "Blocker Entity"
+        description: >
+          Interpose a C-corporation blocker between the partnership and the
+          pension LP. The blocker pays corporate tax (21%) but shields the
+          pension from UBIT. Effective rate is similar but avoids UBIT filing.
+        tradeoff: "Double taxation risk at liquidation. Adds entity maintenance cost ($15-25K/yr). Commonly used for large pension allocations."
+
+      - strategy: "All-Equity Structure"
+        description: "No debt = no UDFI. Property purchased with 100% equity."
+        tradeoff: "Dramatically lower returns. Not practical for most CRE acquisitions."
+
+  # -------------------------------------------------------------------
+  # REIT QUALIFICATION TEST
+  # -------------------------------------------------------------------
+  reit_qualification:
+    description: >
+      If the JV were structured as a REIT (or if the LP requires REIT-
+      compliant income), these tests must be satisfied. For a standard
+      partnership JV, REIT tests are informational only -- they become
+      relevant if the LP is a REIT or if the JV converts to REIT status.
+
+    tests:
+      - test: "75% Asset Test"
+        requirement: "At least 75% of total assets must be real estate assets, cash, or government securities"
+        status: "PASS"
+        detail: "100% of assets are real property (MF building + land). Cash reserves < 5%."
+
+      - test: "75% Gross Income Test"
+        requirement: "At least 75% of gross income from rents, mortgage interest, or real property sales"
+        status: "PASS"
+        detail: "100% of gross income is rental income from real property."
+
+      - test: "95% Gross Income Test"
+        requirement: "At least 95% of gross income from real estate sources + dividends + interest + gain from securities"
+        status: "PASS"
+        detail: "100% of income qualifies."
+
+      - test: "Distribution Requirement"
+        requirement: "Must distribute at least 90% of REIT taxable income annually"
+        status: "N/A -- not currently a REIT"
+        detail: "JV distributes ~80% of cash flow. Would need to increase to 90% of taxable income if REIT."
+
+      - test: "Ownership Test"
+        requirement: "100+ shareholders; no 5 or fewer individuals own > 50% (5/50 test)"
+        status: "FAIL"
+        detail: "Only 2 partners. Would need to have 100+ beneficial owners if REIT. Not applicable to partnership JV."
+
+    overall: "The JV meets substantive real estate income/asset tests but is NOT structured as a REIT. REIT conversion is possible but would require ownership restructuring."
+
+  # -------------------------------------------------------------------
+  # SUMMARY & KEY METRICS
+  # -------------------------------------------------------------------
+  summary:
+    gp_returns:
+      irr: 0.512
+      equity_multiple: 7.81
+      total_fees_earned: 560_537           # acquisition + AM + disposition
+      promote_earned: 5_852_772            # catch-up + residual share
+      note: "GP economics are heavily promote-driven. On $1M equity, GP earns $6.8M."
+
+    lp_returns:
+      gross_irr: 0.148
+      after_ubit_irr: 0.136
+      equity_multiple: 2.02
+      total_ubit_paid: 757_803
+      note: "UBIT reduces LP IRR by 120bps. Still attractive for pension allocation to real estate."
+
+    key_structural_observations:
+      - "8% pref is fully covered by operating cash flow in all years"
+      - "12% IRR hurdle is cleared at blended level (21.1%), triggering full promote"
+      - "GP catch-up mechanism results in GP receiving 30% of total profits despite 10% equity contribution"
+      - "Pension LP UDFI exposure is manageable at 50% LTV but adds ~$758K in tax over the hold"
+      - "Conservative 50% LTV was chosen specifically to minimize pension UDFI exposure"
+      - "All Section 704(b) allocations follow the partnership agreement and have substantial economic effect"

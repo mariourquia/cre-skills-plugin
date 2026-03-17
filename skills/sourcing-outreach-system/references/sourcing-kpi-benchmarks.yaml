@@ -1,0 +1,287 @@
+# CRE Deal Sourcing KPI Benchmarks
+# Realistic performance metrics for off-market acquisition programs
+
+schema:
+  version: "1.0"
+  context: "Benchmarks based on industry surveys, broker associations, and operator experience for off-market CRE deal sourcing programs targeting $5M-$100M transactions."
+  disclaimer: "Metrics vary significantly by market, property type, deal size, and firm reputation. Use as starting calibration, then refine with actual performance data."
+
+# Funnel Conversion Benchmarks
+funnel:
+  description: "Standard sourcing funnel from initial touch to closed deal"
+
+  top_of_funnel:
+    total_touches_per_closed_deal:
+      benchmark: "1,200-1,500 total touches (all channels combined)"
+      top_performer: "800-1,000"
+      underperformer: "2,000+"
+      notes: "A 'touch' is any outreach attempt: letter, email, call, DM, meeting"
+
+  stage_conversion_rates:
+    touch_to_response:
+      benchmark: "3-5%"
+      top_performer: "6-8%"
+      notes: "Weighted average across all channels"
+
+    response_to_qualified_lead:
+      benchmark: "25-35%"
+      notes: "Respondent willing to discuss a potential sale"
+
+    qualified_lead_to_loi:
+      benchmark: "15-25%"
+      notes: "Lead progresses to written offer"
+
+    loi_to_psa:
+      benchmark: "40-60%"
+      notes: "LOI accepted, moves to contract negotiation"
+
+    psa_to_close:
+      benchmark: "70-85%"
+      notes: "Executed contract proceeds to closing"
+
+    loi_to_close:
+      benchmark: "30-50%"
+      notes: "LOI to closed deal (combines PSA conversion and close rate)"
+
+  implied_funnel_example:
+    touches: 1500
+    responses: 60  # 4% response rate
+    qualified_leads: 18  # 30% of responses
+    lois_submitted: 4  # 22% of qualified
+    psas_executed: 2  # 50% of LOIs
+    closed_deals: 1  # ~75% of PSAs (slight rounding)
+    overall_yield: "0.067% (1 deal per 1,500 touches)"
+
+# Channel-Specific Benchmarks
+channels:
+
+  direct_mail:
+    response_rate:
+      benchmark: "3-5%"
+      first_letter: "1.5-3%"
+      second_letter: "1-2% (incremental)"
+      third_letter: "0.5-1% (incremental)"
+      total_campaign: "3-5% (cumulative unique responses)"
+      top_performer: "5-8%"
+    cost_per_piece:
+      standard_letter: "$1.50-2.50 (print, postage, list)"
+      handwritten_service: "$3.00-5.00"
+      premium_package: "$5.00-15.00 (FedEx, lumpy mail)"
+    cost_per_response: "$50-80"
+    cost_per_qualified_lead: "$150-300"
+    best_practices:
+      - "Yellow letter or handwritten envelope increases open rate 2-3x"
+      - "First-class postage outperforms bulk rate by 15-20%"
+      - "Include property address in headline for instant relevance"
+      - "3-letter sequence generates 60-80% more responses than single mailer"
+      - "Best days to arrive: Tuesday-Thursday"
+    volume_guidance:
+      minimum_campaign: "500 pieces per mailing"
+      recommended: "1,000-2,000 pieces per month for consistent pipeline"
+
+  email_cold_outreach:
+    open_rate:
+      benchmark: "15-20%"
+      top_performer: "25-35%"
+      underperformer: "<10%"
+    click_rate:
+      benchmark: "2-4%"
+    reply_rate:
+      benchmark: "2-5%"
+      top_performer: "5-8%"
+    bounce_rate:
+      acceptable: "<5%"
+      action_needed: ">10% (clean list immediately)"
+    unsubscribe_rate:
+      acceptable: "<1% per send"
+    cost_per_email:
+      email_platform: "$0.01-0.05 per email (Mailchimp, SendGrid, Apollo)"
+      data_enrichment: "$0.10-0.50 per contact (email finding tools)"
+    cost_per_response: "$10-30"
+    best_practices:
+      - "Personalize subject line with property address or owner name"
+      - "Keep body under 100 words"
+      - "Send from personal domain, not generic gmail"
+      - "Optimal send time: Tuesday-Thursday, 8-10 AM local time"
+      - "3-email sequence: Day 1, Day 4, Day 10"
+      - "CAN-SPAM compliance: physical address, unsubscribe option"
+    deliverability:
+      - "Warm up new sending domains (2-4 weeks)"
+      - "Keep daily volume under 50 for new domains"
+      - "SPF, DKIM, DMARC records required"
+
+  cold_calling:
+    connection_rate:
+      benchmark: "2-3% (live conversation with decision-maker)"
+      raw_answer_rate: "8-12% (someone picks up)"
+      gatekeeper_bypass: "25-35% (of answered calls reach decision-maker)"
+    conversion_to_meeting:
+      benchmark: "10-15% of connections"
+    calls_per_hour:
+      manual_dialing: "15-20 calls/hour"
+      power_dialer: "40-60 calls/hour"
+      notes: "Quality of conversation decreases with power dialer"
+    cost_per_call:
+      in_house_caller: "$3-5 per call attempt (loaded labor cost)"
+      outsourced_cold_caller: "$5-10 per call attempt"
+      outsourced_appointment_setter: "$200-500 per qualified appointment"
+    cost_per_connection: "$100-200"
+    best_practices:
+      - "Call between 10 AM - 12 PM and 2 PM - 4 PM local time"
+      - "Tuesday through Thursday outperforms Monday and Friday"
+      - "Have a specific reason for calling (property address, market data)"
+      - "Ask permission-based opener: 'Do you have 60 seconds?'"
+      - "Prepare for 8 objection types (see objection handlers)"
+      - "Follow up every call with email summary within 1 hour"
+
+  linkedin:
+    connection_acceptance_rate:
+      with_note: "25-35%"
+      without_note: "15-20%"
+    message_response_rate:
+      benchmark: "8-15%"
+      top_performer: "15-25%"
+    best_practices:
+      - "Connect first, pitch later (not in connection request)"
+      - "Limit to 80-100 connection requests per week (avoid ban)"
+      - "Engage with target's content before sending DM"
+      - "Use LinkedIn Sales Navigator for advanced filtering"
+    cost:
+      sales_navigator: "$100/month"
+      automation_tools: "$50-150/month (use cautiously, risk of ban)"
+
+  broker_relationships:
+    deals_sourced_via_brokers:
+      typical_share: "40-60% of total deal flow"
+      off_market_via_brokers: "15-25% (pocket listings, pre-market)"
+    broker_meeting_frequency:
+      target: "2-4 broker meetings per week during active sourcing"
+      market_tours: "1-2 per month with target market brokers"
+    time_to_broker_trust:
+      description: "Time from first meeting to receiving off-market deal flow"
+      benchmark: "3-6 months of consistent engagement"
+      accelerators:
+        - "Close a deal through that broker"
+        - "Provide market intel or buyer feedback on listings"
+        - "Be responsive (reply to OM within 24 hours)"
+        - "Never retrade after LOI (reputation is everything)"
+
+# Pipeline Velocity Metrics
+pipeline_velocity:
+  description: "Time metrics for deal progression"
+
+  touch_to_first_response:
+    direct_mail: "2-4 weeks after mailing"
+    email: "1-5 days"
+    cold_call: "Immediate (if connected)"
+    linkedin: "3-10 days"
+
+  first_response_to_qualified:
+    benchmark: "1-2 weeks"
+    notes: "Time to determine if lead is worth pursuing (basic qualification)"
+
+  qualified_to_loi:
+    benchmark: "2-4 weeks"
+    notes: "Includes property tour, preliminary underwriting, IC approval to submit LOI"
+
+  loi_to_psa:
+    benchmark: "2-4 weeks"
+    notes: "Negotiation of terms, attorney review, execution"
+
+  psa_to_close:
+    benchmark: "30-60 days"
+    notes: "Due diligence period + financing + closing mechanics"
+
+  total_cycle_time:
+    first_touch_to_close:
+      benchmark: "3-6 months (from first meaningful contact)"
+      fast: "6-10 weeks (motivated seller, clean deal)"
+      slow: "9-18 months (relationship nurture to close)"
+
+# Cost Per Acquisition
+cost_per_acquisition:
+  description: "Fully loaded cost to source and close one deal"
+
+  direct_costs:
+    data_subscriptions:
+      costar: "$500-1,500/month"
+      reonomy: "$300-800/month"
+      propstream: "$100-200/month"
+      first_street: "$200-500/month"
+      total_annual: "$12,000-36,000"
+    crm_software:
+      options: "HubSpot, Salesforce, Apto, RealNex, Buildout"
+      cost: "$50-300/month per user"
+    outreach_costs:
+      direct_mail_annual: "$18,000-60,000 (1,000-2,000 pieces/month)"
+      email_tooling: "$1,200-3,600/year"
+      phone_dialer: "$600-2,400/year"
+      linkedin_navigator: "$1,200/year"
+      total_annual: "$21,000-67,200"
+
+  personnel:
+    sourcing_analyst:
+      role: "Manages outreach campaigns, qualifies leads, maintains CRM"
+      annual_cost: "$65,000-95,000 (salary + benefits)"
+      capacity: "1,500-2,500 touches/month, 5-10 qualified leads/month"
+    acquisitions_associate:
+      role: "Underwrites qualified leads, conducts tours, negotiates LOIs"
+      annual_cost: "$90,000-140,000 (salary + benefits)"
+      capacity: "3-5 active deals at any time"
+    acquisitions_director:
+      role: "Relationship management, LOI approval, deal structuring"
+      annual_cost: "$150,000-250,000+ (salary + bonus)"
+
+  total_cost_per_deal:
+    small_shop: "$30,000-60,000 per closed deal"
+    mid_size_firm: "$50,000-100,000 per closed deal"
+    institutional: "$75,000-200,000 per closed deal"
+    notes: "Includes allocated personnel, tech, and outreach costs"
+
+  cost_as_percent_of_deal:
+    target: "<0.5% of purchase price"
+    acceptable: "0.5-1.0%"
+    review_needed: ">1.0%"
+
+# Team Productivity Benchmarks
+team_productivity:
+  sourcing_analyst:
+    monthly_touches: "1,500-2,500"
+    monthly_responses: "60-125"
+    monthly_qualified_leads: "15-35"
+    monthly_property_tours: "4-8"
+
+  acquisitions_associate:
+    monthly_lois_submitted: "2-4"
+    monthly_deals_under_contract: "0.5-1"
+    annual_closed_deals: "3-6"
+    active_pipeline_value: "$20M-100M"
+
+  acquisitions_director:
+    monthly_broker_meetings: "8-16"
+    monthly_lois_approved: "3-6"
+    annual_closed_deals: "4-10"
+    annual_closed_volume: "$50M-300M"
+
+# Reporting Cadence
+reporting:
+  daily:
+    - "Outreach activity (touches by channel)"
+    - "Responses received"
+    - "Follow-up tasks due"
+  weekly:
+    - "Pipeline review (HOT leads status)"
+    - "New leads scored and classified"
+    - "LOI/PSA status update"
+    - "Broker relationship activity"
+  monthly:
+    - "Funnel conversion analysis (by channel)"
+    - "Cost per lead / cost per deal trending"
+    - "Pipeline velocity metrics"
+    - "Channel ROI comparison"
+  quarterly:
+    - "Full pipeline health assessment"
+    - "NURTURE pipeline re-scoring"
+    - "Channel strategy adjustments"
+    - "Budget vs actual sourcing spend"
+    - "Win/loss analysis on closed and lost deals"

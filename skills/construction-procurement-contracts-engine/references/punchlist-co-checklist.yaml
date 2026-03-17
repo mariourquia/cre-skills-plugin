@@ -1,0 +1,416 @@
+# Punch List & Change Order Checklist
+# Construction Procurement & Contracts Engine Reference
+# Organized by building system with warranty tracking
+
+---
+# =============================================================================
+# SECTION 1: PRE-CHANGE ORDER CHECKLIST
+# =============================================================================
+
+change_order_review:
+  entitlement_check:
+    - item: "Verify CO cause category"
+      categories:
+        - owner_directed_change
+        - unforeseen_condition
+        - design_error_or_omission
+        - regulatory_or_code_change
+        - force_majeure
+        - differing_site_condition
+    - item: "Confirm contractual entitlement exists for claimed cause"
+    - item: "Verify notice was provided per contract (typically 7-21 days)"
+    - item: "Check if work was authorized before CO approval (if so, note procedural violation)"
+    - item: "Determine if change is additive, deductive, or time-only"
+
+  cost_review:
+    labor:
+      - item: "Verify labor rates match contract scheduled rates"
+      - item: "Check crew size is reasonable for scope"
+      - item: "Verify hours are reasonable (compare to RS Means or estimator)"
+      - item: "Confirm overtime is justified and pre-approved"
+      - item: "Check for labor burden rate accuracy (typically 35-55% of base wage)"
+    material:
+      - item: "Verify material quantities against takeoff"
+      - item: "Check unit prices against supplier quotes (minimum 2 quotes)"
+      - item: "Confirm material specification matches contract requirements"
+      - item: "Verify sales tax rate is correct for jurisdiction"
+      - item: "Check for material waste factor (typically 5-10%, not 15-20%)"
+    equipment:
+      - item: "Verify equipment rates against AED Green Book or contract rates"
+      - item: "Check rental vs owned equipment rate appropriateness"
+      - item: "Confirm equipment is necessary for this scope (not already on site)"
+      - item: "Verify mobilization/demobilization charges if applicable"
+    subcontractor:
+      - item: "Review sub's detailed breakdown (same rigor as GC)"
+      - item: "Verify sub markup is per contract (typically 10-15% OH&P)"
+      - item: "Confirm GC markup on sub work is per contract (typically 5-10%)"
+      - item: "NO markup on markup -- GC marks up sub's base cost only"
+      - item: "Check for duplicate general conditions charges"
+    general:
+      - item: "Verify no contingency markup on CO work"
+      - item: "Check bond premium adjustment if applicable"
+      - item: "Verify insurance cost adjustment if applicable"
+      - item: "Confirm GC fee applies only to cost of work, not other markups"
+      - item: "Total markup stack should not exceed 20-25% on sub work"
+
+  schedule_impact:
+    - item: "Determine if CO work is on critical path"
+    - item: "Review CPM schedule update showing impact"
+    - item: "Check for concurrent delay (owner delay + contractor delay)"
+    - item: "Verify float consumption is legitimate"
+    - item: "Assess if CO work can be sequenced to avoid delay"
+    - item: "Calculate LD exposure if schedule extends"
+    - item: "Document weather days and force majeure separately"
+
+  documentation_required:
+    - item: "Written description of changed work"
+    - item: "Detailed cost breakdown with backup"
+    - item: "Minimum 2 subcontractor/supplier quotes for material"
+    - item: "CPM schedule fragment showing impact"
+    - item: "Photos of existing conditions (for unforeseen conditions)"
+    - item: "Reference to contract clause supporting entitlement"
+    - item: "Architect/engineer direction or confirmation"
+    - item: "RFI response that triggered the change (if applicable)"
+
+# =============================================================================
+# SECTION 2: PUNCH LIST BY BUILDING SYSTEM (50+ items)
+# =============================================================================
+
+punch_list_by_system:
+
+  structural:
+    - id: STR-01
+      item: "Concrete cracks exceeding 1/16 inch width documented and addressed"
+    - id: STR-02
+      item: "Structural steel connections -- all bolts tightened, welds inspected"
+    - id: STR-03
+      item: "Foundation waterproofing intact, no active leaks"
+    - id: STR-04
+      item: "Post-tension cable stressing reports complete and filed"
+    - id: STR-05
+      item: "Expansion joint covers installed and functional"
+
+  building_envelope:
+    - id: ENV-01
+      item: "Roof membrane fully adhered, all penetrations sealed"
+    - id: ENV-02
+      item: "Window and curtain wall water testing complete (AAMA 501.2)"
+    - id: ENV-03
+      item: "Exterior caulking and sealants complete at all joints"
+    - id: ENV-04
+      item: "Flashing installed correctly at all roof-to-wall transitions"
+    - id: ENV-05
+      item: "Brick/masonry -- no cracks, mortar joints complete, weep holes clear"
+    - id: ENV-06
+      item: "Insulation inspection passed -- no gaps or compression"
+
+  mechanical_hvac:
+    - id: MEC-01
+      item: "HVAC test and balance (TAB) report complete and within tolerance"
+    - id: MEC-02
+      item: "All thermostats/controls programmed and responsive"
+    - id: MEC-03
+      item: "Ductwork -- no visible leaks, all access panels installed"
+    - id: MEC-04
+      item: "Rooftop units operational, vibration isolation confirmed"
+    - id: MEC-05
+      item: "Exhaust fans -- all operational, CFM verified per design"
+    - id: MEC-06
+      item: "Building automation system (BAS) fully commissioned"
+    - id: MEC-07
+      item: "Refrigerant charge verified and logged"
+
+  electrical:
+    - id: ELE-01
+      item: "Switchgear and panels -- all breakers labeled, directories posted"
+    - id: ELE-02
+      item: "Emergency generator load test complete (full load, 2-hour test)"
+    - id: ELE-03
+      item: "Transfer switch operational -- auto and manual tested"
+    - id: ELE-04
+      item: "All lighting fixtures operational, dimming controls tested"
+    - id: ELE-05
+      item: "Exterior lighting -- photocell and timer operational"
+    - id: ELE-06
+      item: "Electrical room signage and arc flash labels posted"
+    - id: ELE-07
+      item: "Metering installed and communicating (if sub-metered)"
+
+  plumbing:
+    - id: PLM-01
+      item: "All fixtures -- no leaks at supply or drain connections"
+    - id: PLM-02
+      item: "Hot water system operational -- temperature verified at fixtures"
+    - id: PLM-03
+      item: "Domestic water pressure test passed"
+    - id: PLM-04
+      item: "Sanitary sewer camera inspection complete (main lines)"
+    - id: PLM-05
+      item: "Gas piping pressure test passed, meter installed"
+    - id: PLM-06
+      item: "Backflow preventers installed, tested, and tagged"
+
+  fire_protection:
+    - id: FP-01
+      item: "Sprinkler system hydrostatic test passed"
+    - id: FP-02
+      item: "Fire pump tested -- flow and pressure per design"
+    - id: FP-03
+      item: "Standpipe system tested and operational"
+    - id: FP-04
+      item: "All sprinkler heads correct type for space (upright, pendant, sidewall)"
+    - id: FP-05
+      item: "Fire department connection (FDC) accessible and labeled"
+    - id: FP-06
+      item: "Spare sprinkler head cabinet stocked per NFPA"
+
+  fire_alarm_life_safety:
+    - id: FA-01
+      item: "Fire alarm acceptance test passed by AHJ"
+    - id: FA-02
+      item: "All pull stations, smoke detectors, heat detectors tested"
+    - id: FA-03
+      item: "Notification devices (horns/strobes) -- coverage and dB verified"
+    - id: FA-04
+      item: "Elevator recall on fire alarm verified"
+    - id: FA-05
+      item: "Stairwell pressurization operational"
+    - id: FA-06
+      item: "Fire alarm monitoring connected and signal received at central station"
+
+  elevator:
+    - id: ELV-01
+      item: "Elevator inspection passed by state/local authority"
+    - id: ELV-02
+      item: "All cab finishes installed and undamaged"
+    - id: ELV-03
+      item: "Phone/intercom in each cab operational"
+    - id: ELV-04
+      item: "Firefighter service (Phase I and Phase II) tested"
+    - id: ELV-05
+      item: "Door operators adjusted -- proper speed and force"
+    - id: ELV-06
+      item: "Machine room clean, equipment labeled, ventilation operational"
+
+  finishes:
+    - id: FIN-01
+      item: "Paint -- all surfaces complete, touch-up done, no visible defects"
+    - id: FIN-02
+      item: "Flooring -- no seam gaps, transitions installed, no damage"
+    - id: FIN-03
+      item: "Tile -- no cracked tiles, grout complete, caulk at transitions"
+    - id: FIN-04
+      item: "Countertops -- no chips, seams aligned, backsplash sealed"
+    - id: FIN-05
+      item: "Cabinets -- all doors/drawers operational, hardware installed"
+    - id: FIN-06
+      item: "Drywall -- Level 4 finish minimum, no visible imperfections"
+    - id: FIN-07
+      item: "Ceiling tiles -- all installed, no stains, grid aligned"
+
+  doors_hardware:
+    - id: DH-01
+      item: "All doors open/close properly, no binding or rubbing"
+    - id: DH-02
+      item: "Hardware -- all locksets, closers, panic hardware operational"
+    - id: DH-03
+      item: "Fire-rated doors -- labels visible, closers adjusted, latching confirmed"
+    - id: DH-04
+      item: "Access control -- all readers programmed and communicating"
+    - id: DH-05
+      item: "ADA-compliant hardware on all required doors"
+
+  site_work:
+    - id: SW-01
+      item: "Paving -- no settlement, ponding, or cracking"
+    - id: SW-02
+      item: "Striping and signage complete per plan"
+    - id: SW-03
+      item: "Landscaping -- all plantings installed per plan, irrigation tested"
+    - id: SW-04
+      item: "Site drainage -- no ponding, all inlets clear"
+    - id: SW-05
+      item: "Fencing and gates -- installed, operational, hardware complete"
+    - id: SW-06
+      item: "Dumpster enclosure complete with screening"
+    - id: SW-07
+      item: "ADA parking and path of travel compliant"
+
+  low_voltage_specialty:
+    - id: LV-01
+      item: "Data/telecom cabling tested and certified"
+    - id: LV-02
+      item: "Security cameras -- all operational, recording, coverage verified"
+    - id: LV-03
+      item: "Intercom/buzzer system operational"
+    - id: LV-04
+      item: "Cable/satellite rough-in tested"
+    - id: LV-05
+      item: "Wi-Fi access points installed and operational (common areas)"
+
+# =============================================================================
+# SECTION 3: PUNCH LIST MANAGEMENT WORKFLOW
+# =============================================================================
+
+punch_list_workflow:
+  step_1_creation:
+    trigger: "Substantial completion walkthrough"
+    participants:
+      - "Owner's representative"
+      - "Architect"
+      - "GC superintendent"
+      - "GC PM"
+      - "Property manager (if identified)"
+    process:
+      - "Systematic walkthrough by area and system"
+      - "Document each item with location, description, photo"
+      - "Assign responsible subcontractor"
+      - "Set priority: critical (safety/code), major (function), minor (cosmetic)"
+      - "Compile into numbered punch list document"
+    deliverable: "Numbered punch list with photos, sorted by trade"
+
+  step_2_assignment:
+    timeline: "Within 3 business days of walkthrough"
+    process:
+      - "GC distributes punch items to responsible subcontractors"
+      - "Each sub acknowledges receipt and provides completion timeline"
+      - "GC compiles schedule and submits to owner"
+      - "Owner approves schedule or requests acceleration"
+    deliverable: "Punch list completion schedule by trade"
+
+  step_3_completion:
+    timeline: "Per approved schedule, typically 30-45 days"
+    process:
+      - "Subs perform corrective work"
+      - "GC superintendent verifies each item"
+      - "GC marks items complete in tracking system"
+      - "Weekly progress reports to owner"
+    deliverable: "Weekly punch list progress report"
+
+  step_4_verification:
+    timeline: "Within 7 days of GC reporting completion"
+    process:
+      - "Owner's representative re-inspects each completed item"
+      - "Items verified as complete are signed off"
+      - "Items not acceptable are returned to GC with comments"
+      - "Second round punch items have 14-day completion deadline"
+    deliverable: "Verified punch list with sign-offs"
+
+  step_5_signoff:
+    trigger: "All punch items verified complete or accepted with holdback"
+    process:
+      - "Owner signs punch list acceptance letter"
+      - "Final completion date established"
+      - "Retainage release processed per contract terms"
+      - "Warranty periods commence from substantial completion (not final)"
+    deliverable: "Punch list acceptance letter, retainage release authorization"
+
+# =============================================================================
+# SECTION 4: WARRANTY TRACKING
+# =============================================================================
+
+warranty_tracking:
+  standard_warranties:
+    general:
+      duration: "1 year from substantial completion"
+      covers: "General workmanship and materials"
+      responsible: "General contractor"
+      action_at_11_months: "Conduct 11-month warranty walkthrough"
+
+    mechanical_hvac:
+      duration: "2 years from substantial completion"
+      covers: "HVAC equipment, controls, ductwork"
+      responsible: "Mechanical subcontractor"
+      notes: "Manufacturer warranty may extend beyond sub warranty"
+      action_items:
+        - "Register all equipment warranties with manufacturers"
+        - "Maintain service records to preserve warranty"
+        - "Schedule 23-month walkthrough"
+
+    structural:
+      duration: "10 years from substantial completion"
+      covers: "Structural defects in foundation, framing, load-bearing elements"
+      responsible: "General contractor / structural sub"
+      notes: "Varies by state statute -- check local requirements"
+
+    roofing:
+      manufacturer_warranty:
+        duration: "20-30 years (NDL -- No Dollar Limit)"
+        covers: "Material defects, may include labor for first 10 years"
+        requirements:
+          - "Must use manufacturer-approved installer"
+          - "Must register warranty within 60 days of completion"
+          - "Maintain per manufacturer's maintenance requirements"
+          - "Annual roof inspections by approved inspector"
+      installer_warranty:
+        duration: "2-5 years"
+        covers: "Workmanship and installation defects"
+
+    waterproofing:
+      duration: "5-10 years"
+      covers: "Below-grade waterproofing, plaza deck, balconies"
+      responsible: "Waterproofing subcontractor"
+      notes: "Manufacturer warranty separate from installer"
+
+    windows_curtain_wall:
+      duration: "5-10 years (glass seal), 2 years (hardware)"
+      covers: "Seal failure (fogging), water infiltration, hardware operation"
+      responsible: "Glazing subcontractor / manufacturer"
+
+    elevator:
+      duration: "1 year (installation), maintenance contract required"
+      covers: "Installation defects, equipment malfunction"
+      responsible: "Elevator contractor"
+      notes: "Transition to maintenance contract before warranty expires"
+
+    appliances:
+      duration: "1-2 years per manufacturer"
+      covers: "Manufacturing defects"
+      responsible: "Manufacturer (direct)"
+      notes: "Register all serial numbers, maintain purchase records"
+
+    paint_finishes:
+      duration: "1 year (workmanship)"
+      covers: "Peeling, blistering, color inconsistency"
+      responsible: "Painting subcontractor"
+      notes: "Touch-up kits and color formulas should be provided at closeout"
+
+    flooring:
+      duration: "1 year workmanship, manufacturer varies"
+      covers: "Installation defects, seam failure, material defects"
+      responsible: "Flooring subcontractor / manufacturer"
+
+  warranty_management_process:
+    month_1:
+      - "Compile master warranty log with all start/end dates"
+      - "File all manufacturer warranty certificates"
+      - "Distribute warranty contact list to property management"
+      - "Set calendar reminders for key warranty expirations"
+
+    month_6:
+      - "6-month review of any warranty claims filed"
+      - "Check seasonal systems not tested at completion (heating if summer CO, cooling if winter CO)"
+
+    month_11:
+      - "Conduct comprehensive 11-month warranty walkthrough"
+      - "Document all deficiencies by system"
+      - "Submit warranty claim to GC with 30-day cure period"
+      - "Focus areas: HVAC performance, envelope leaks, finish defects"
+
+    month_23:
+      - "Conduct mechanical warranty walkthrough before 2-year expiration"
+      - "Document any HVAC, plumbing, or controls issues"
+      - "Submit claims to mechanical subcontractor"
+
+    annually:
+      - "Roof inspection per manufacturer requirements"
+      - "Update warranty log for any claims resolved or pending"
+      - "Review upcoming warranty expirations (90-day advance notice)"
+
+  warranty_claim_process:
+    step_1: "Document deficiency with photos, location, and description"
+    step_2: "Submit written notice to GC per contract warranty provisions"
+    step_3: "GC has 7 days to acknowledge and 30 days to cure (typical)"
+    step_4: "If GC fails to cure, owner may cure and back-charge against retainage or bond"
+    step_5: "For manufacturer warranties, file directly with manufacturer if installer is unresponsive"
+    step_6: "Maintain log of all claims, status, and resolution"

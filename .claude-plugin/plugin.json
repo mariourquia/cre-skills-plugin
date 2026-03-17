@@ -1,0 +1,25 @@
+{
+  "name": "cre-skills",
+  "description": "83 institutional-grade CRE skills covering ~97% of commercial real estate workflow steps. Deal screening, underwriting, structuring, due diligence, capital markets, market research, asset management, leasing, investor relations, development, disposition, sourcing, tax, ESG, portfolio strategy, and daily operations. Includes 40 expert subagents and 6 workflow chains.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Mario Urquia",
+    "url": "https://mariourquia.com"
+  },
+  "repository": "https://github.com/mariourquia/cre-skills-plugin",
+  "license": "MIT",
+  "keywords": [
+    "commercial-real-estate",
+    "cre",
+    "underwriting",
+    "deal-analysis",
+    "asset-management",
+    "capital-markets",
+    "leasing",
+    "development",
+    "investor-relations",
+    "property-management",
+    "institutional",
+    "finance"
+  ]
+}

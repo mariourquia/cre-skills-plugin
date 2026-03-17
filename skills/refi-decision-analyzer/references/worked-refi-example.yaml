@@ -1,0 +1,428 @@
+---
+# Refinance Decision Analyzer Worked Example
+# Market data calibrated to Q1 2026 conditions
+# All dollar amounts in USD
+---
+
+example:
+  id: refi_example_01
+  name: "$4M Loan Maturity -- Refi Decision with Prepayment & Lender Comparison"
+  description: >
+    $4M loan at 5.0% fixed maturing in 12 months on a stabilized 24-unit MF
+    in Hoboken, NJ. Property NOI $500K. Current market rate 6.5%. Full analysis:
+    DSCR stress, prepayment comparison, 3 lender quotes, cash-out NPV,
+    and "do nothing" maturity scenario.
+
+  # -------------------------------------------------------------------
+  # CURRENT LOAN PROFILE
+  # -------------------------------------------------------------------
+  current_loan:
+    property: "24-Unit MF, Hoboken NJ"
+    property_value_at_origination: 6_400_000
+    current_estimated_value: 7_200_000     # appreciated 12.5% over hold
+    loan_amount_original: 4_000_000
+    current_balance: 3_720_000             # 7 years of amortization paid down $280K
+    interest_rate: 0.050                   # 5.0% fixed
+    origination_date: "2019-04-01"
+    maturity_date: "2027-04-01"            # 12 months from analysis date
+    amort_years: 30
+    remaining_amort: 23                    # 23 years remaining
+    io_period: 0
+    monthly_payment: 21_474               # P&I on original $4M at 5.0%, 30yr
+    annual_debt_service: 257_688
+    current_ltv: 0.517                     # 3,720,000 / 7,200,000
+    prepayment_type: "Yield maintenance through month 96, then 1% step-down"
+    prepayment_note: "Currently in step-down period (month 84 of 96-month lockout)"
+
+  property:
+    units: 24
+    in_place_noi: 500_000
+    noi_per_unit: 20_833
+    gross_potential_rent: 720_000          # avg $2,500/mo * 24 * 12
+    vacancy: 0.04                          # 4% -- tight Hoboken market
+    opex: 192_000
+    cap_rate_market: 0.065                 # market cap for Hoboken MF
+
+  # -------------------------------------------------------------------
+  # DSCR STRESS TEST: Current Rate vs +100bp vs +200bp
+  # -------------------------------------------------------------------
+  dscr_analysis:
+    noi: 500_000
+
+    at_current_rate:
+      rate: 0.050
+      annual_ds: 257_688
+      dscr: 1.940                         # 500,000 / 257,688
+      status: "Healthy"
+      cash_after_ds: 242_312
+
+    at_market_rate:
+      description: "Refi at 6.5% market rate, new 30yr amort on $3.72M balance"
+      rate: 0.065
+      new_monthly_payment: 23_511         # $3.72M at 6.5%, 30yr
+      annual_ds: 282_132
+      dscr: 1.772                         # 500,000 / 282,132
+      status: "Healthy -- 150bps rate increase costs $24K/year in additional DS"
+      cash_after_ds: 217_868
+      annual_cash_reduction: 24_444
+
+    at_plus_100bp:
+      description: "Refi at 7.5% in rising rate scenario"
+      rate: 0.075
+      new_monthly_payment: 26_007
+      annual_ds: 312_084
+      dscr: 1.602
+      status: "Adequate but tightening"
+      cash_after_ds: 187_916
+      annual_cash_reduction: 54_396
+
+    at_plus_200bp:
+      description: "Refi at 8.5% in severe rate stress"
+      rate: 0.085
+      new_monthly_payment: 28_593
+      annual_ds: 343_116
+      dscr: 1.457
+      status: "Still above 1.25x minimum but limited headroom"
+      cash_after_ds: 156_884
+      annual_cash_reduction: 85_428
+
+    dscr_floor_analysis:
+      dscr_minimum: 1.25
+      max_rate_at_1_25x_dscr: 0.118       # rate at which DS = NOI / 1.25 = $400K
+      max_rate_note: >
+        Rate must exceed 11.8% before DSCR drops below 1.25x. Current
+        balance is low enough relative to NOI that rate risk is manageable.
+        The low LTV (51.7%) provides substantial cushion.
+
+  # -------------------------------------------------------------------
+  # PREPAYMENT COMPARISON
+  # -------------------------------------------------------------------
+  prepayment_analysis:
+    current_balance: 3_720_000
+    remaining_term_months: 12
+    current_rate: 0.050
+    treasury_10yr: 0.0410                  # 10yr UST at analysis date
+
+    yield_maintenance:
+      description: >
+        Yield maintenance compensates lender for lost interest income.
+        Formula: PV of rate differential over remaining term, discounted
+        at Treasury rate.
+      calculation:
+        rate_differential: 0.009           # 5.0% - 4.1% treasury = 0.9%
+        monthly_differential: 2_790        # 3,720,000 * 0.009 / 12
+        remaining_months: 12
+        discount_rate_monthly: 0.003417    # 4.1% / 12
+        pv_of_differentials: 32_620        # PV annuity of $2,790 for 12 months at 4.1%
+        minimum_penalty: 37_200            # 1% of balance (floor)
+        applicable_penalty: 37_200         # max(yield_maint, 1% floor) = 1% floor governs
+      note: >
+        With only 12 months remaining and current rate close to treasuries,
+        yield maintenance penalty is modest. The 1% floor governs. If rates
+        were materially lower (e.g., Treasury at 2.5%), the penalty would be
+        significantly higher.
+
+    defeasance:
+      description: >
+        Defeasance replaces the loan collateral with a portfolio of UST
+        securities that replicate remaining cash flows. The borrower purchases
+        a defeasance portfolio and the loan remains on the lender's books
+        with UST collateral.
+      calculation:
+        remaining_payments: 12             # 12 monthly P&I payments of $21,474
+        final_balloon: 3_682_000           # estimated balance at maturity
+        total_cashflows_to_replicate: 3_939_688  # 12 * 21,474 + 3,682,000
+        defeasance_portfolio_cost: 3_785_000     # cost of UST portfolio at current yields
+        premium_over_balance: 65_000             # 3,785,000 - 3,720,000
+        defeasance_fee: 35_000                   # third-party servicer fee
+        legal_and_accounting: 25_000             # legal counsel + CPA
+        total_defeasance_cost: 125_000           # premium + fee + legal
+        as_pct_of_balance: 0.0336                # 3.36%
+      note: >
+        Defeasance is expensive relative to yield maintenance for a 12-month
+        remaining term. The fixed costs ($60K in fees) are disproportionate.
+        Only justified if lender requires defeasance (CMBS loans typically do).
+
+    step_down:
+      description: >
+        Step-down prepayment penalty declines annually. Current loan is in
+        the step-down phase (past 8-year lockout). Schedule: 3%, 2%, 1%, open.
+      current_period: "Year 8 (month 84-96): 1% penalty"
+      penalty_amount: 37_200               # 3,720,000 * 1%
+      next_period: "Open (no penalty after month 96 = April 2027)"
+      note: >
+        If the borrower can wait until maturity (12 months), prepayment is
+        $0. The 1% step-down penalty today is $37,200. Consider whether
+        the rate savings from early refi justify the prepayment cost.
+
+    comparison_summary:
+      method:          ["Yield Maintenance", "Defeasance",  "Step-Down (Now)", "Wait to Maturity"]
+      penalty_cost:    [37_200,              125_000,        37_200,            0]
+      total_cost_note: ["1% floor governs",  "High fixed costs", "1% of balance", "No cost"]
+      timing:          ["Immediate",         "4-6 weeks",    "Immediate",       "12 months"]
+      recommendation: >
+        Wait to maturity if possible. The 1% step-down penalty ($37.2K) is
+        identical to yield maintenance floor. Defeasance at $125K is
+        unjustified for a 12-month remaining term. The only reason to prepay
+        early is to lock a favorable refi rate before it moves higher.
+
+  # -------------------------------------------------------------------
+  # 3 LENDER QUOTES COMPARED
+  # -------------------------------------------------------------------
+  lender_quotes:
+    analysis_date: "2026-03-15"
+    loan_amount_requested: 3_720_000       # refi of existing balance (no cash-out)
+
+    quote_1:
+      lender: "Valley National Bank"
+      type: "Bank balance sheet"
+      rate: 0.0625                         # 6.25% fixed 5yr
+      amort: 30
+      io_period: 0
+      term: 5
+      ltv_max: 0.75
+      dscr_min: 1.25
+      origination_fee: 0.0075             # 0.75%
+      fee_dollars: 27_900
+      legal_estimate: 12_000
+      appraisal: 4_500
+      total_closing: 44_400
+      monthly_payment: 22_909
+      annual_ds: 274_908
+      dscr: 1.819
+      year_1_cash_after_ds: 225_092
+      pros:
+        - "Lowest rate among quotes"
+        - "Local lender with existing relationship"
+        - "Flexible on minor covenant adjustments"
+      cons:
+        - "5-year term only (not 7 or 10)"
+        - "Recourse loan (full personal guarantee)"
+        - "Annual financial covenant testing"
+
+    quote_2:
+      lender: "Arbor Realty (Agency/Freddie SBL)"
+      type: "Freddie Mac Small Balance Loan"
+      rate: 0.0670                         # 6.70% fixed 7yr
+      amort: 30
+      io_period: 2
+      term: 7
+      ltv_max: 0.80
+      dscr_min: 1.20
+      origination_fee: 0.0100             # 1.0%
+      fee_dollars: 37_200
+      legal_estimate: 15_000
+      appraisal: 5_000
+      rate_lock_deposit: 37_200           # 1% rate lock
+      total_closing: 94_400               # includes rate lock
+      monthly_payment_io: 20_770          # IO period
+      monthly_payment_amort: 24_005
+      annual_ds_io: 249_240
+      annual_ds_amort: 288_060
+      dscr_io: 2.006
+      dscr_amort: 1.736
+      year_1_cash_after_ds: 250_760       # IO year
+      year_3_cash_after_ds: 211_940       # amortizing
+      pros:
+        - "Non-recourse (standard Freddie carveouts only)"
+        - "7-year term reduces refinance frequency"
+        - "2-year IO improves early cash flow"
+        - "Supplemental loan available after 12 months"
+      cons:
+        - "Higher closing costs ($94K vs $44K)"
+        - "Rate lock deposit required at application"
+        - "Yield maintenance prepayment through entire term"
+        - "Longer closing timeline (60-75 days vs 30-45)"
+
+    quote_3:
+      lender: "Ready Capital (CMBS)"
+      type: "CMBS conduit"
+      rate: 0.0710                         # 7.10% fixed 10yr
+      amort: 30
+      io_period: 3
+      term: 10
+      ltv_max: 0.75
+      dscr_min: 1.25
+      origination_fee: 0.0100
+      fee_dollars: 37_200
+      legal_estimate: 20_000
+      appraisal: 5_000
+      total_closing: 62_200
+      monthly_payment_io: 22_010
+      monthly_payment_amort: 25_102
+      annual_ds_io: 264_120
+      annual_ds_amort: 301_224
+      dscr_io: 1.893
+      dscr_amort: 1.660
+      year_1_cash_after_ds: 235_880
+      year_4_cash_after_ds: 198_776
+      pros:
+        - "10-year term -- longest maturity, eliminates near-term refi risk"
+        - "3-year IO period"
+        - "Non-recourse"
+        - "Assumable (valuable for sale)"
+      cons:
+        - "Highest rate (7.10%)"
+        - "Defeasance required for prepayment (no yield maintenance option)"
+        - "CMBS servicing -- limited flexibility on waivers/modifications"
+        - "Lockbox from day one"
+
+    comparison_matrix:
+      headers: ["Metric", "Valley National", "Arbor (Freddie)", "Ready Capital (CMBS)"]
+      rows:
+        - ["Rate",            "6.25%",    "6.70%",    "7.10%"]
+        - ["Term",            "5yr",      "7yr",      "10yr"]
+        - ["IO Period",       "None",     "2yr",      "3yr"]
+        - ["Recourse",        "Full",     "Non-recourse", "Non-recourse"]
+        - ["Total Closing",   "$44,400",  "$94,400",  "$62,200"]
+        - ["Year 1 DS",       "$274,908", "$249,240", "$264,120"]
+        - ["Year 1 DSCR",     "1.82x",    "2.01x",    "1.89x"]
+        - ["Year 1 Cash",     "$225,092", "$250,760", "$235,880"]
+        - ["Prepayment",      "1% step",  "Yield Maint", "Defeasance"]
+        - ["Closing Time",    "30-45d",   "60-75d",   "45-60d"]
+
+    recommendation:
+      first_choice: "Arbor (Freddie SBL)"
+      rationale:
+        - "Non-recourse eliminates personal guarantee exposure"
+        - "7-year term reduces refi risk vs 5-year bank loan"
+        - "2-year IO provides highest Year 1 cash flow ($250K)"
+        - "Supplemental loan optionality for future cash-out"
+        - "Higher closing cost ($94K) is amortized over 7 years ($13.5K/yr)"
+      second_choice: "Valley National (if recourse is acceptable)"
+      avoid: "CMBS -- rate premium and servicing rigidity not justified for $3.7M loan"
+
+  # -------------------------------------------------------------------
+  # CASH-OUT REFI NPV ANALYSIS
+  # -------------------------------------------------------------------
+  cash_out_analysis:
+    description: >
+      Should the borrower pull cash out at refi? Current LTV is 51.7%.
+      At 75% LTV on $7.2M value, max loan = $5.4M. Net cash-out after
+      paying off existing balance.
+    current_balance: 3_720_000
+    property_value: 7_200_000
+    max_ltv: 0.75
+    max_loan: 5_400_000
+    cash_out_gross: 1_680_000              # 5,400,000 - 3,720,000
+    closing_costs: 54_000                  # 1% origination on incremental $1.68M
+    cash_out_net: 1_626_000
+    new_rate: 0.0700                       # cash-out rate typically 25-50bps higher
+    new_monthly_pmt: 35_923               # $5.4M at 7.0%, 30yr
+    new_annual_ds: 431_076
+    new_dscr: 1.160                        # 500,000 / 431,076 -- below 1.25x threshold
+    dscr_flag: >
+      DSCR drops to 1.16x with cash-out, below most lenders' 1.25x minimum.
+      Maximum loan at 1.25x DSCR = NOI / (1.25 * annual_ds_per_dollar) = $4.85M.
+      Cash-out constrained by DSCR, not LTV.
+    dscr_constrained_loan: 4_850_000
+    dscr_constrained_cash_out: 1_130_000   # 4,850,000 - 3,720,000
+    dscr_constrained_net: 1_076_000        # after closing costs
+
+    npv_of_cash_out:
+      description: >
+        NPV of extracting $1.076M today vs. leaving it in the property.
+        Assumes cash-out proceeds are redeployed at 12% (next deal IRR).
+      cash_out_amount: 1_076_000
+      reinvestment_rate: 0.12
+      incremental_ds_annual: 83_388       # additional DS from higher loan: 431K - 348K
+      incremental_ds_pv_5yr: 322_000      # PV of $83K/yr for 5yr at 8% discount rate
+      fv_of_cash_out_at_12pct: 1_896_000  # 1,076,000 * (1.12)^5
+      opportunity_cost_of_leaving: 820_000 # 1,896,000 - 1,076,000
+      npv_of_cash_out: 498_000            # FV of redeployment - PV of incremental DS - principal
+      verdict: >
+        Cash-out is NPV-positive if proceeds are redeployed above 8%.
+        At 12% redeployment rate, NPV is approximately $498K over 5 years.
+        However, the DSCR constraint limits cash-out to $1.076M net.
+        Proceed with DSCR-constrained cash-out if a deployment target exists.
+
+  # -------------------------------------------------------------------
+  # "DO NOTHING" MATURITY SCENARIO
+  # -------------------------------------------------------------------
+  do_nothing_scenario:
+    description: >
+      What happens if the borrower takes no action and the loan matures
+      in 12 months without a refinance in place?
+    maturity_date: "2027-04-01"
+    balloon_balance: 3_682_000             # balance at maturity after 12 more months of amort
+    consequences:
+      - timeline: "Day 0 (Maturity)"
+        event: "Loan matures. Balloon payment of $3.682M due."
+        action_required: "Pay in full or obtain extension."
+
+      - timeline: "Day 1-30"
+        event: "Grace period (if loan docs provide one). Most bank loans have 10-day grace on P&I but no grace on maturity."
+        action_required: "Contact lender immediately to request 90-180 day extension."
+
+      - timeline: "Day 31+"
+        event: "Loan enters default. Default interest (typically +5% = 10.0%) begins accruing."
+        financial_impact: "Default interest: $3.682M * 10% / 12 = $30,683/month additional cost"
+
+      - timeline: "Day 60-90"
+        event: "Lender issues acceleration notice. Demands full payoff within 30 days."
+        risk: "Foreclosure proceedings may commence."
+
+      - timeline: "Day 90-180"
+        event: "Lender engages special servicer (CMBS) or workout officer (bank). May offer short-term extension at punitive terms (default rate + extension fee of 0.50-1.0%)."
+        extension_terms:
+          rate: 0.100                      # default rate
+          extension_fee: 37_200            # 1% of balance
+          term: "90-180 days"
+          conditions:
+            - "Rate lock on replacement financing"
+            - "Additional principal paydown of 5-10%"
+            - "Personal guarantee (if not already present)"
+
+      - timeline: "Day 180+"
+        event: "If no resolution, lender commences foreclosure (NJ: judicial, 12-18 months) or deed-in-lieu negotiation."
+        note: "NJ has one of the longest foreclosure timelines in the US. Lender strongly prefers workout or note sale."
+
+    estimated_cost_of_inaction:
+      default_interest_6_months: 184_100   # 3,682,000 * 0.10 * 0.5
+      extension_fee: 37_200
+      legal_fees_borrower: 25_000
+      legal_fees_lender_charged_to_borrower: 30_000
+      total_cost: 276_300
+      as_pct_of_balance: 0.075             # 7.5% of loan balance
+
+    verdict: >
+      "Do nothing" is the most expensive option by far. $276K+ in penalties and
+      fees vs. $44-94K in refi closing costs. The borrower should begin the
+      refi process immediately (today) given the 12-month maturity window.
+      Freddie SBL closing takes 60-75 days; starting now leaves 9+ months of
+      buffer for any processing delays.
+
+  # -------------------------------------------------------------------
+  # ACTION PLAN & TIMELINE
+  # -------------------------------------------------------------------
+  action_plan:
+    months_to_maturity: 12
+
+    month_0_to_1:
+      - "Engage mortgage broker or direct lender contacts"
+      - "Order updated appraisal ($4,500-5,000)"
+      - "Compile T-12 operating statements, rent roll, tax returns"
+      - "Obtain preliminary quotes from 3+ lenders"
+
+    month_1_to_3:
+      - "Select lender and submit formal application"
+      - "Rate lock (if available and favorable)"
+      - "Complete lender due diligence (title, survey, environmental phase I)"
+
+    month_3_to_5:
+      - "Loan approval and commitment letter"
+      - "Legal review of loan documents"
+      - "Schedule closing"
+
+    month_5_to_6:
+      - "Close new loan"
+      - "Pay off existing loan (no prepayment penalty if after month 96)"
+      - "If closing before month 96, pay 1% step-down ($37.2K)"
+
+    month_6_to_12:
+      - "Buffer period for delays, rate renegotiation, or lender switch"
+
+    critical_dates:
+      step_down_expires: "2027-04-01"     # penalty drops to 0% at maturity
+      optimal_refi_close: "2027-02-01 to 2027-03-15"  # close right before maturity for $0 penalty
+      latest_safe_start: "2026-09-01"     # must begin process by month 6 to avoid maturity risk

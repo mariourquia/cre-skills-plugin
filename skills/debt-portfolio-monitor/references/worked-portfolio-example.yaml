@@ -1,0 +1,486 @@
+---
+# Debt Portfolio Monitor Worked Example
+# 10-Loan Portfolio with Traffic-Light Dashboard
+# Market data calibrated to Q1 2026 conditions
+# All dollar amounts in USD
+---
+
+example:
+  id: portfolio_example_01
+  name: "10-Loan CRE Debt Portfolio -- Dashboard & Watchlist"
+  description: >
+    Mixed-use CRE portfolio across 10 properties in NJ/NY metro. Total
+    outstanding balance $87.5M. This example shows the full monitoring
+    framework: traffic-light dashboard, watchlist with migration history,
+    covenant compliance matrix, maturity wall, and action items.
+
+  # -------------------------------------------------------------------
+  # PORTFOLIO SUMMARY
+  # -------------------------------------------------------------------
+  portfolio_summary:
+    total_loans: 10
+    total_outstanding_balance: 87_500_000
+    weighted_avg_rate: 0.0672
+    weighted_avg_dscr: 1.48
+    weighted_avg_ltv: 0.63
+    weighted_avg_debt_yield: 0.098
+    weighted_avg_remaining_term_months: 38
+    property_type_mix:
+      multifamily: 4
+      office: 2
+      retail: 2
+      industrial: 1
+      mixed_use: 1
+    geography:
+      northern_nj: 6
+      hudson_county: 2
+      nyc_boroughs: 2
+
+  # -------------------------------------------------------------------
+  # TRAFFIC-LIGHT DASHBOARD
+  # -------------------------------------------------------------------
+  dashboard:
+    description: >
+      Each loan rated GREEN / AMBER / RED based on composite score of
+      DSCR, LTV, debt yield, and qualitative factors. Thresholds:
+      GREEN = all metrics healthy; AMBER = one metric at warning level;
+      RED = any metric breached or imminent breach.
+
+    thresholds:
+      dscr:
+        green: ">= 1.35x"
+        amber: "1.10x - 1.34x"
+        red: "< 1.10x"
+      ltv:
+        green: "<= 65%"
+        amber: "66% - 75%"
+        red: "> 75%"
+      debt_yield:
+        green: ">= 10%"
+        amber: "7.5% - 9.9%"
+        red: "< 7.5%"
+      maturity:
+        green: "> 24 months"
+        amber: "6 - 24 months"
+        red: "< 6 months"
+
+    loans:
+      - id: L01
+        property: "120-Unit MF, Journal Square JC"
+        type: multifamily
+        balance: 16_250_000
+        rate: 0.065
+        noi: 2_350_000
+        dscr: 1.81
+        ltv: 0.65
+        debt_yield: 0.145
+        maturity_months: 48
+        status: GREEN
+        note: "Strong performer. Stabilized value-add."
+
+      - id: L02
+        property: "50-Unit MF, Ironbound Newark"
+        type: multifamily
+        balance: 7_800_000
+        rate: 0.070
+        noi: 575_000
+        dscr: 1.05
+        ltv: 0.68
+        debt_yield: 0.074
+        maturity_months: 36
+        status: RED
+        note: "Value-add in stabilization. DSCR below 1.10x. On watchlist."
+
+      - id: L03
+        property: "80-Unit MF, Hackensack"
+        type: multifamily
+        balance: 12_000_000
+        rate: 0.063
+        noi: 1_480_000
+        dscr: 1.62
+        ltv: 0.58
+        debt_yield: 0.123
+        maturity_months: 54
+        status: GREEN
+        note: "Core hold. Strong rent growth submarket."
+
+      - id: L04
+        property: "60K SF Office, Parsippany"
+        type: office
+        balance: 8_500_000
+        rate: 0.072
+        noi: 780_000
+        dscr: 1.14
+        ltv: 0.71
+        debt_yield: 0.092
+        maturity_months: 18
+        status: AMBER
+        note: "Largest tenant (40% NRA) lease expires in 14 months. Maturity approaching."
+
+      - id: L05
+        property: "125K SF Office, Parsippany"
+        type: office
+        balance: 14_000_000
+        rate: 0.068
+        noi: 1_825_000
+        dscr: 1.45
+        ltv: 0.64
+        debt_yield: 0.130
+        maturity_months: 42
+        status: GREEN
+        note: "Multi-tenant. No single tenant > 15% NRA."
+
+      - id: L06
+        property: "45K SF Retail Strip, Wayne NJ"
+        type: retail
+        balance: 5_200_000
+        rate: 0.075
+        noi: 510_000
+        dscr: 1.18
+        ltv: 0.69
+        debt_yield: 0.098
+        maturity_months: 11
+        status: RED
+        note: "Anchor tenant (grocery, 30% NRA) rumored to downsize. Maturity in 11 months."
+
+      - id: L07
+        property: "22K SF Retail NNN, Montclair"
+        type: retail
+        balance: 3_800_000
+        rate: 0.062
+        noi: 480_000
+        dscr: 1.72
+        ltv: 0.52
+        debt_yield: 0.126
+        maturity_months: 60
+        status: GREEN
+        note: "Investment-grade tenant. NNN lease through 2032."
+
+      - id: L08
+        property: "85K SF Industrial, Secaucus"
+        type: industrial
+        balance: 6_500_000
+        rate: 0.058
+        noi: 920_000
+        dscr: 2.08
+        ltv: 0.47
+        debt_yield: 0.142
+        maturity_months: 30
+        status: GREEN
+        note: "Last-mile logistics. Below-market lease resets in 18 months at +15% bump."
+
+      - id: L09
+        property: "Mixed-Use 12-Unit + Ground Retail, Hoboken"
+        type: mixed_use
+        balance: 4_200_000
+        rate: 0.068
+        noi: 420_000
+        dscr: 1.32
+        ltv: 0.58
+        debt_yield: 0.100
+        maturity_months: 24
+        status: AMBER
+        note: "Ground-floor retail vacant 6 months. Residential units fully leased."
+
+      - id: L10
+        property: "36-Unit MF, Astoria Queens"
+        type: multifamily
+        balance: 9_250_000
+        rate: 0.066
+        noi: 880_000
+        dscr: 1.27
+        ltv: 0.68
+        debt_yield: 0.095
+        maturity_months: 15
+        status: AMBER
+        note: "Rent stabilized units (60% of portfolio). NOI growth capped by RGB."
+
+    summary_counts:
+      green: 5
+      amber: 3
+      red: 2
+      pct_green: 0.50
+      pct_amber: 0.30
+      pct_red: 0.20
+      balance_at_risk: 13_000_000        # L02 + L06 RED balances
+      pct_balance_at_risk: 0.149
+
+  # -------------------------------------------------------------------
+  # WATCHLIST: 3 LOANS WITH MIGRATION HISTORY
+  # -------------------------------------------------------------------
+  watchlist:
+    description: >
+      Loans on watchlist require monthly monitoring and active management.
+      Migration history shows how each loan's status has changed over time.
+
+    watchlist_loans:
+      - loan_id: L02
+        property: "50-Unit MF, Ironbound Newark"
+        current_status: RED
+        current_dscr: 1.05
+        current_ltv: 0.68
+        trigger: "DSCR below 1.10x (value-add stabilization lag)"
+        migration_history:
+          - date: "2025-04-01"
+            status: AMBER
+            dscr: 1.22
+            event: "Renovation commenced. 15 units offline."
+          - date: "2025-07-01"
+            status: RED
+            dscr: 0.87
+            event: "Peak renovation vacancy. Cash flow negative as expected per underwriting."
+          - date: "2025-10-01"
+            status: RED
+            dscr: 0.92
+            event: "10 of 20 renovated units re-leased. Slow absorption."
+          - date: "2026-01-01"
+            status: RED
+            dscr: 1.05
+            event: "17 of 20 renovated units leased. 3 remaining units in lease-up."
+          - date: "2026-03-15"
+            status: RED
+            dscr: 1.05
+            event: "Current. Expected to clear 1.10x by Q2 2026 and 1.25x by Q3 2026."
+        expected_resolution: "Q3 2026"
+        resolution_path: "Complete lease-up of remaining 3 units at target $1,900/month rent."
+        risk_if_unresolved: "If lease-up stalls, DSCR covenant breach triggers cash sweep."
+
+      - loan_id: L06
+        property: "45K SF Retail Strip, Wayne NJ"
+        current_status: RED
+        current_dscr: 1.18
+        current_ltv: 0.69
+        trigger: "Maturity in 11 months + anchor tenant risk"
+        migration_history:
+          - date: "2025-06-01"
+            status: GREEN
+            dscr: 1.42
+            event: "All tenants performing. No concerns."
+          - date: "2025-09-01"
+            status: GREEN
+            dscr: 1.38
+            event: "Minor rent concession to small tenant. Immaterial."
+          - date: "2025-12-01"
+            status: AMBER
+            dscr: 1.25
+            event: "Anchor tenant (grocery) reported same-store sales decline of 12%. Parent company under financial stress. Market rumors of store closings."
+          - date: "2026-02-01"
+            status: RED
+            dscr: 1.18
+            event: "Anchor notified landlord of intent to exercise early termination clause (6-month notice required). Termination effective Aug 2026. Loan matures Feb 2027."
+          - date: "2026-03-15"
+            status: RED
+            dscr: 1.18
+            event: "Current. Must refinance by Feb 2027 with potential 30% vacancy (anchor departure). DSCR will drop to ~0.85x if anchor leaves and space is not backfilled."
+        expected_resolution: "Unknown -- depends on backfill timeline"
+        resolution_path: >
+          Three parallel tracks: (1) negotiate anchor retention with rent concession,
+          (2) market space to replacement grocery/discount retailer, (3) request
+          12-month loan extension from lender.
+        risk_if_unresolved: >
+          If anchor departs and maturity arrives without refi, forced sale or
+          principal paydown required. Estimated value decline of 15-20% without anchor.
+
+      - loan_id: L10
+        property: "36-Unit MF, Astoria Queens"
+        current_status: AMBER
+        current_dscr: 1.27
+        current_ltv: 0.68
+        trigger: "DSCR approaching 1.25x floor + maturity in 15 months"
+        migration_history:
+          - date: "2025-06-01"
+            status: GREEN
+            dscr: 1.38
+            event: "Performing. RGB increase of 2.75% applied."
+          - date: "2025-09-01"
+            status: GREEN
+            dscr: 1.35
+            event: "Insurance renewal +18%. Property tax assessment increased."
+          - date: "2025-12-01"
+            status: AMBER
+            dscr: 1.30
+            event: "Two market-rate units turned over with 3-month vacancy. Expense growth outpacing RGB-capped rent growth on stabilized units."
+          - date: "2026-03-15"
+            status: AMBER
+            dscr: 1.27
+            event: "Current. Trending toward 1.25x breach by Q3 2026 if expense trajectory continues."
+        expected_resolution: "Q2 2026 refi commencement"
+        resolution_path: >
+          Begin refi process to replace 6.6% loan. Target sub-6.0% agency rate
+          on strong Astoria MF fundamentals. Alternatively, 3% rent increases
+          on 14 market-rate units at next renewal cycle (Q2 2026).
+        risk_if_unresolved: "Covenant breach leads to cash sweep; minimal equity extraction at refi."
+
+  # -------------------------------------------------------------------
+  # COVENANT COMPLIANCE MATRIX
+  # -------------------------------------------------------------------
+  covenant_compliance:
+    description: >
+      Full compliance check across all 10 loans. Tests: DSCR minimum,
+      LTV maximum, debt yield minimum. PASS/FAIL/WARNING status.
+
+    matrix:
+      headers: ["Loan", "DSCR Req", "DSCR Actual", "DSCR Status", "LTV Max", "LTV Actual", "LTV Status", "DY Min", "DY Actual", "DY Status"]
+      rows:
+        - ["L01", "1.25x", "1.81x", "PASS",    "75%", "65%", "PASS",    "8.5%", "14.5%", "PASS"]
+        - ["L02", "1.25x", "1.05x", "FAIL",    "75%", "68%", "PASS",    "7.5%", "7.4%",  "FAIL"]
+        - ["L03", "1.25x", "1.62x", "PASS",    "75%", "58%", "PASS",    "8.5%", "12.3%", "PASS"]
+        - ["L04", "1.20x", "1.14x", "WARNING", "75%", "71%", "WARNING", "8.0%", "9.2%",  "PASS"]
+        - ["L05", "1.25x", "1.45x", "PASS",    "75%", "64%", "PASS",    "8.5%", "13.0%", "PASS"]
+        - ["L06", "1.25x", "1.18x", "WARNING", "75%", "69%", "PASS",    "8.0%", "9.8%",  "PASS"]
+        - ["L07", "1.20x", "1.72x", "PASS",    "70%", "52%", "PASS",    "9.0%", "12.6%", "PASS"]
+        - ["L08", "1.25x", "2.08x", "PASS",    "70%", "47%", "PASS",    "8.5%", "14.2%", "PASS"]
+        - ["L09", "1.25x", "1.32x", "PASS",    "75%", "58%", "PASS",    "8.0%", "10.0%", "PASS"]
+        - ["L10", "1.25x", "1.27x", "WARNING", "75%", "68%", "WARNING", "8.0%", "9.5%",  "PASS"]
+
+    summary:
+      total_pass_all: 5                   # L01, L03, L05, L07, L08
+      total_warning: 3                    # L04, L06, L10
+      total_fail_any: 2                   # L02 (DSCR + DY), L06 (DSCR warning only)
+      loans_approaching_dscr_floor:
+        - loan: L02
+          dscr: 1.05
+          floor: 1.25
+          shortfall: -0.20
+          status: "BREACHED"
+        - loan: L10
+          dscr: 1.27
+          floor: 1.25
+          headroom: 0.02
+          status: "2bps above floor -- at risk of breach within 1-2 quarters"
+
+  # -------------------------------------------------------------------
+  # MATURITY WALL CHART DATA
+  # -------------------------------------------------------------------
+  maturity_wall:
+    description: >
+      Outstanding balance by maturity date, grouped by quarter. Shows
+      concentration risk and refinance scheduling requirements.
+
+    quarterly_maturities:
+      - period: "Q1 2027 (0-12 months)"
+        loans: ["L06"]
+        balance: 5_200_000
+        pct_of_total: 0.059
+        risk: "HIGH -- anchor tenant departure coincides with maturity"
+
+      - period: "Q2 2027 (12-18 months)"
+        loans: ["L04", "L10"]
+        balance: 17_750_000
+        pct_of_total: 0.203
+        risk: "ELEVATED -- two loans, one with tenant rollover risk"
+
+      - period: "Q3-Q4 2027 (18-24 months)"
+        loans: ["L09"]
+        balance: 4_200_000
+        pct_of_total: 0.048
+        risk: "MODERATE -- retail vacancy needs resolution before refi"
+
+      - period: "H1 2028 (24-36 months)"
+        loans: ["L08", "L02"]
+        balance: 14_300_000
+        pct_of_total: 0.163
+        risk: "MODERATE -- L02 should be stabilized by then; L08 is strong"
+
+      - period: "H2 2028 - H1 2029 (36-48 months)"
+        loans: ["L05"]
+        balance: 14_000_000
+        pct_of_total: 0.160
+        risk: "LOW -- well-covered multi-tenant office"
+
+      - period: "H2 2029+ (48+ months)"
+        loans: ["L01", "L03", "L07"]
+        balance: 32_050_000
+        pct_of_total: 0.366
+        risk: "LOW -- all GREEN status with long runway"
+
+    concentration_flags:
+      - "Q2 2027 cluster: $17.75M (20.3% of portfolio) matures in a single quarter"
+      - "Next 18 months: $27.15M (31% of portfolio) requires refinance action"
+      - "Positive: $32M (37%) has 4+ years remaining -- low near-term pressure"
+
+  # -------------------------------------------------------------------
+  # ACTION ITEMS PER LOAN
+  # -------------------------------------------------------------------
+  action_items:
+    - loan_id: L01
+      status: GREEN
+      actions:
+        - { priority: LOW, action: "Annual review. No action required.", deadline: "Q1 2027" }
+
+    - loan_id: L02
+      status: RED
+      actions:
+        - { priority: HIGH, action: "Weekly lease-up tracking. Report to lender monthly.", deadline: "Ongoing" }
+        - { priority: HIGH, action: "Complete renovation on final 3 units.", deadline: "2026-04-30" }
+        - { priority: MEDIUM, action: "Prepare DSCR restoration plan for lender if covenant waiver requested.", deadline: "2026-05-15" }
+        - { priority: MEDIUM, action: "Begin refi conversations 12 months before maturity.", deadline: "2027-03-01" }
+
+    - loan_id: L03
+      status: GREEN
+      actions:
+        - { priority: LOW, action: "Annual review. Monitor Hackensack MF supply pipeline.", deadline: "Q1 2027" }
+
+    - loan_id: L04
+      status: AMBER
+      actions:
+        - { priority: HIGH, action: "Engage tenant rep broker to begin replacement tenant search for 40% tenant space.", deadline: "2026-04-01" }
+        - { priority: HIGH, action: "Open refi discussions with 3 lenders. Maturity in 18 months.", deadline: "2026-06-01" }
+        - { priority: MEDIUM, action: "Negotiate early lease renewal with anchor tenant at below-market if needed.", deadline: "2026-05-01" }
+        - { priority: LOW, action: "Consider disposition if replacement tenant economics are unfavorable.", deadline: "2026-09-01" }
+
+    - loan_id: L05
+      status: GREEN
+      actions:
+        - { priority: LOW, action: "Semi-annual review. Strong performer.", deadline: "Q3 2026" }
+
+    - loan_id: L06
+      status: RED
+      actions:
+        - { priority: CRITICAL, action: "Retain retail leasing broker for anchor replacement.", deadline: "2026-04-01" }
+        - { priority: CRITICAL, action: "Request 12-month maturity extension from lender. Prepare extension package with replacement tenant pipeline.", deadline: "2026-05-01" }
+        - { priority: HIGH, action: "Negotiate anchor retention (rent reduction up to 15% if needed to keep tenant).", deadline: "2026-04-15" }
+        - { priority: HIGH, action: "Model worst-case NOI without anchor. Determine if property covers senior DS.", deadline: "2026-04-01" }
+        - { priority: MEDIUM, action: "If extension denied, explore bridge loan for 24-month reposition.", deadline: "2026-07-01" }
+
+    - loan_id: L07
+      status: GREEN
+      actions:
+        - { priority: LOW, action: "Annual review. Monitor tenant credit (investment-grade).", deadline: "Q1 2027" }
+
+    - loan_id: L08
+      status: GREEN
+      actions:
+        - { priority: MEDIUM, action: "Prepare for lease reset in 18 months. Confirm market rent comps.", deadline: "2026-09-01" }
+        - { priority: LOW, action: "Annual review.", deadline: "Q1 2027" }
+
+    - loan_id: L09
+      status: AMBER
+      actions:
+        - { priority: HIGH, action: "Retain retail broker to lease ground-floor vacancy (6 months and counting).", deadline: "2026-04-15" }
+        - { priority: MEDIUM, action: "If not leased by Q3 2026, consider rent reduction or tenant improvement allowance.", deadline: "2026-09-01" }
+        - { priority: MEDIUM, action: "Begin refi process. Maturity in 24 months.", deadline: "2026-09-01" }
+
+    - loan_id: L10
+      status: AMBER
+      actions:
+        - { priority: HIGH, action: "Apply maximum permissible RGB increase on all rent-stabilized units at next renewal.", deadline: "2026-06-01" }
+        - { priority: HIGH, action: "Push market-rate unit rents 3-5% at next lease renewal.", deadline: "2026-04-01" }
+        - { priority: HIGH, action: "Begin refi process. Maturity in 15 months. Target agency rate.", deadline: "2026-06-01" }
+        - { priority: MEDIUM, action: "Expense audit -- identify savings to arrest DSCR erosion. Focus on insurance and R&M.", deadline: "2026-05-01" }
+
+  # -------------------------------------------------------------------
+  # PORTFOLIO-LEVEL RECOMMENDATIONS
+  # -------------------------------------------------------------------
+  portfolio_recommendations:
+    immediate:
+      - "L06 is the highest-risk loan. Anchor tenant departure + near-term maturity creates a dual threat. Allocate senior AM resources immediately."
+      - "L02 is tracking to plan but remains RED. Weekly monitoring until DSCR clears 1.10x."
+      - "L04 and L10 are pre-watchlist. Proactive leasing and refi action now prevents escalation."
+
+    strategic:
+      - "Stagger refi timeline: L10 (Q2 2026 start), L04 (Q2 2026 start), L06 (extension first), L09 (Q3 2026 start)"
+      - "Consider disposition of L06 if anchor departs and backfill exceeds 12-month timeline. Sale at 7.5% cap ($6.8M) still covers debt payoff."
+      - "Portfolio DSCR of 1.48x is healthy in aggregate, but the two RED loans mask weakness. Excluding L02 and L06, portfolio DSCR is 1.58x."
+
+    next_review: "2026-04-15 (monthly cycle for watchlist; quarterly for GREEN loans)"

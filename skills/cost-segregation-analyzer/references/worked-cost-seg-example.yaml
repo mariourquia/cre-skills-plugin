@@ -1,0 +1,411 @@
+---
+# Cost Segregation Analyzer Worked Example
+# $10M MF Acquisition with Component Reclassification
+# Tax rates and bonus depreciation rules as of 2026
+# All dollar amounts in USD
+---
+
+example:
+  id: cost_seg_example_01
+  name: "$10M Multifamily -- Cost Segregation Study with Bonus Depreciation Phase-Down"
+  description: >
+    $10M acquisition of a 60-unit Class B multifamily in East Orange, NJ.
+    Land value $2M (20% of purchase). Cost segregation study reclassifies
+    building components into accelerated recovery classes. Analysis includes
+    bonus depreciation at current phase-down rate, year-by-year tax savings,
+    NPV of benefit, and recapture at year 7 disposition.
+
+  # -------------------------------------------------------------------
+  # ACQUISITION INPUTS
+  # -------------------------------------------------------------------
+  acquisition:
+    property: "60-Unit Class B MF, East Orange NJ"
+    purchase_price: 10_000_000
+    closing_costs_capitalized: 150_000     # title, legal, transfer tax (capitalizable)
+    total_cost_basis: 10_150_000
+    land_value: 2_000_000                  # 20% -- assessed/appraised land allocation
+    depreciable_basis: 8_150_000           # 10,150,000 - 2,000,000
+    acquisition_date: "2026-01-15"
+    property_type: "Residential rental (27.5-year MACRS)"
+    entity: "Single-member LLC treated as disqualified S-corp for tax"
+    investor_tax_profile:
+      ordinary_income_rate: 0.37          # federal
+      state_income_rate: 0.089            # NJ top rate
+      combined_marginal_rate: 0.40        # blended federal + state (net of SALT deduction limitations)
+      capital_gains_rate: 0.238           # 20% federal + 3.8% NIIT
+      depreciation_recapture_rate: 0.25   # Section 1250 unrecaptured gain (25%)
+
+  # -------------------------------------------------------------------
+  # WITHOUT COST SEGREGATION (Straight-Line Only)
+  # -------------------------------------------------------------------
+  without_cost_seg:
+    description: "All building improvements depreciated over 27.5 years straight-line"
+    depreciable_basis: 8_150_000
+    recovery_period: 27.5
+    annual_depreciation: 296_364           # 8,150,000 / 27.5
+    annual_tax_savings: 118_545            # 296,364 * 0.40
+    cumulative_depreciation_7yr: 2_074_548  # 296,364 * 7
+    cumulative_tax_savings_7yr: 829_819
+
+  # -------------------------------------------------------------------
+  # COST SEGREGATION STUDY RESULTS
+  # -------------------------------------------------------------------
+  cost_seg_study:
+    description: >
+      Engineered cost segregation study performed by qualified firm.
+      Components are reclassified from 27.5-year residential into
+      5-year personal property, 15-year land improvements, and
+      remaining 27.5-year structural.
+
+    study_cost: 18_000                     # typical cost for 60-unit MF
+    study_firm: "Hypothetical CPA Engineering Firm"
+    methodology: "Detailed engineering approach with site inspection"
+
+    component_reclassification:
+      five_year_property:
+        description: "Personal property -- carpeting, appliances, cabinetry, window treatments, specialty lighting, security systems, signage"
+        pct_of_depreciable_basis: 0.15
+        amount: 1_222_500                  # 8,150,000 * 15%
+        recovery_method: "200% declining balance, 5-year"
+        items:
+          - { item: "Carpeting & vinyl flooring", amount: 210_000, note: "60 units * $3,500 avg" }
+          - { item: "Kitchen appliances (ranges, refrigerators, dishwashers)", amount: 180_000 }
+          - { item: "Kitchen cabinetry & countertops", amount: 270_000 }
+          - { item: "Window treatments (blinds, shades)", amount: 42_000 }
+          - { item: "Bathroom vanities & fixtures", amount: 156_000 }
+          - { item: "Interior lighting fixtures (non-structural)", amount: 84_000 }
+          - { item: "Security/intercom system", amount: 65_000 }
+          - { item: "Signage (exterior, directory)", amount: 18_000 }
+          - { item: "Laundry equipment (common area)", amount: 45_000 }
+          - { item: "Miscellaneous personal property", amount: 152_500 }
+
+      fifteen_year_property:
+        description: "Land improvements -- parking lot/curbing, sidewalks, landscaping, fencing, exterior lighting, drainage, retaining walls"
+        pct_of_depreciable_basis: 0.10
+        amount: 815_000                    # 8,150,000 * 10%
+        recovery_method: "150% declining balance, 15-year"
+        items:
+          - { item: "Parking lot (asphalt, striping)", amount: 285_000 }
+          - { item: "Concrete curbing", amount: 62_000 }
+          - { item: "Sidewalks & walkways", amount: 95_000 }
+          - { item: "Landscaping (trees, shrubs, irrigation)", amount: 125_000 }
+          - { item: "Perimeter fencing", amount: 48_000 }
+          - { item: "Exterior site lighting", amount: 72_000 }
+          - { item: "Storm drainage system", amount: 88_000 }
+          - { item: "Retaining walls (non-structural)", amount: 40_000 }
+
+      twenty_seven_five_year_structural:
+        description: "Remaining structural components -- building shell, HVAC distribution, plumbing risers, electrical service, roof, elevators"
+        pct_of_depreciable_basis: 0.75
+        amount: 6_112_500                  # 8,150,000 * 75%
+        recovery_method: "Straight-line, 27.5-year"
+
+    allocation_summary:
+      headers: ["Class", "Amount", "Pct", "Recovery", "Method"]
+      rows:
+        - ["5-year Personal Property",  1_222_500, "15%", "5 years",    "200% DB / HY convention"]
+        - ["15-year Land Improvements",    815_000, "10%", "15 years",   "150% DB / HY convention"]
+        - ["27.5-year Structural",       6_112_500, "75%", "27.5 years", "Straight-line"]
+        - ["Land (non-depreciable)",     2_000_000, "N/A", "N/A",        "N/A"]
+        - ["TOTAL",                     10_150_000, "100%", "",           ""]
+
+  # -------------------------------------------------------------------
+  # BONUS DEPRECIATION PHASE-DOWN
+  # -------------------------------------------------------------------
+  bonus_depreciation:
+    description: >
+      Tax Cuts and Jobs Act (TCJA) bonus depreciation phase-down schedule.
+      Property placed in service in 2026 qualifies for 20% bonus on
+      qualifying assets (5-year and 15-year property). Bonus applies
+      to the ENTIRE depreciable amount in the qualifying class.
+    phase_down_schedule:
+      2022: 1.00    # 100% bonus
+      2023: 0.80    # 80% bonus
+      2024: 0.60    # 60% bonus
+      2025: 0.40    # 40% bonus
+      2026: 0.20    # 20% bonus -- CURRENT YEAR
+      2027: 0.00    # bonus expired (absent legislative extension)
+    current_year: 2026
+    bonus_rate: 0.20
+
+    application:
+      five_year_property:
+        basis: 1_222_500
+        bonus_pct: 0.20
+        bonus_amount: 244_500              # 1,222,500 * 20%
+        remaining_basis: 978_000           # 1,222,500 - 244,500
+        remaining_depreciation: "MACRS 5-year on $978,000"
+
+      fifteen_year_property:
+        basis: 815_000
+        bonus_pct: 0.20
+        bonus_amount: 163_000              # 815,000 * 20%
+        remaining_basis: 652_000           # 815,000 - 163,000
+        remaining_depreciation: "MACRS 15-year on $652,000"
+
+      total_bonus_year_1: 407_500          # 244,500 + 163,000
+      bonus_note: >
+        At 20% bonus (2026 phase-down), the first-year deduction is meaningful
+        but far less dramatic than the 100% bonus available in 2022. If Congress
+        extends 100% bonus (proposed in multiple 2025-2026 tax bills), the
+        benefit would be $2.0375M in year 1 instead of $407.5K.
+
+  # -------------------------------------------------------------------
+  # YEAR-BY-YEAR DEPRECIATION AND TAX SAVINGS
+  # -------------------------------------------------------------------
+  annual_schedule:
+    description: >
+      Complete 7-year depreciation schedule comparing cost seg vs straight-line.
+      MACRS percentages: 5yr = [20%, 32%, 19.2%, 11.52%, 11.52%, 5.76%];
+      15yr = [5%, 9.5%, 8.55%, 7.7%, 6.93%, 6.23%, ...]. Half-year convention.
+      Bonus depreciation taken in year 1.
+
+    headers: ["Year", "5yr Depr", "15yr Depr", "27.5yr Depr", "Bonus", "Total CostSeg", "Straight-Line", "Incremental", "Tax Savings @ 40%", "Cumulative Savings"]
+
+    rows:
+      - year: 1
+        five_yr: 195_600       # 978,000 * 20% (MACRS Y1)
+        fifteen_yr: 32_600     # 652,000 * 5% (MACRS Y1)
+        structural: 222_273    # 6,112,500 / 27.5
+        bonus: 407_500         # one-time
+        total_cost_seg: 857_973
+        straight_line: 296_364
+        incremental: 561_609
+        tax_savings: 224_644   # 561,609 * 0.40
+        cumulative_savings: 224_644
+
+      - year: 2
+        five_yr: 312_960       # 978,000 * 32%
+        fifteen_yr: 61_940     # 652,000 * 9.5%
+        structural: 222_273
+        bonus: 0
+        total_cost_seg: 597_173
+        straight_line: 296_364
+        incremental: 300_809
+        tax_savings: 120_324
+        cumulative_savings: 344_967
+
+      - year: 3
+        five_yr: 187_776       # 978,000 * 19.2%
+        fifteen_yr: 55_746     # 652,000 * 8.55%
+        structural: 222_273
+        bonus: 0
+        total_cost_seg: 465_795
+        straight_line: 296_364
+        incremental: 169_431
+        tax_savings: 67_772
+        cumulative_savings: 412_740
+
+      - year: 4
+        five_yr: 112_666       # 978,000 * 11.52%
+        fifteen_yr: 50_204     # 652,000 * 7.7%
+        structural: 222_273
+        bonus: 0
+        total_cost_seg: 385_143
+        straight_line: 296_364
+        incremental: 88_779
+        tax_savings: 35_512
+        cumulative_savings: 448_251
+
+      - year: 5
+        five_yr: 112_666       # 978,000 * 11.52%
+        fifteen_yr: 45_184     # 652,000 * 6.93%
+        structural: 222_273
+        bonus: 0
+        total_cost_seg: 380_123
+        straight_line: 296_364
+        incremental: 83_759
+        tax_savings: 33_504
+        cumulative_savings: 481_755
+
+      - year: 6
+        five_yr: 56_332        # 978,000 * 5.76% (final year)
+        fifteen_yr: 40_620     # 652,000 * 6.23%
+        structural: 222_273
+        bonus: 0
+        total_cost_seg: 319_225
+        straight_line: 296_364
+        incremental: 22_861
+        tax_savings: 9_144
+        cumulative_savings: 490_899
+
+      - year: 7
+        five_yr: 0             # fully depreciated
+        fifteen_yr: 37_296     # 652,000 * 5.72% (approximate)
+        structural: 222_273
+        bonus: 0
+        total_cost_seg: 259_569
+        straight_line: 296_364
+        incremental: -36_795   # cost seg now LOWER than straight-line (crossover)
+        tax_savings: -14_718   # negative = cost seg produces less deduction in this year
+        cumulative_savings: 476_181
+
+    seven_year_totals:
+      total_depreciation_cost_seg: 3_265_001
+      total_depreciation_straight_line: 2_074_548
+      incremental_depreciation: 1_190_453
+      total_incremental_tax_savings: 476_181
+      note: >
+        Cost seg front-loads $1.19M of additional depreciation into years 1-6.
+        The crossover occurs in year 7 when 5-year property is fully depleted
+        and straight-line catches up. This is NOT a permanent tax savings --
+        it is a timing benefit. The NPV calculation below captures the true
+        economic value.
+
+  # -------------------------------------------------------------------
+  # NPV OF TAX BENEFIT
+  # -------------------------------------------------------------------
+  npv_analysis:
+    description: >
+      NPV of incremental tax savings from cost segregation vs. straight-line,
+      discounted at investor's opportunity cost of capital.
+    discount_rate: 0.08                    # 8% opportunity cost
+    incremental_savings_by_year:
+      year_1: 224_644
+      year_2: 120_324
+      year_3: 67_772
+      year_4: 35_512
+      year_5: 33_504
+      year_6: 9_144
+      year_7: -14_718
+    pv_factors:
+      year_1: 0.9259
+      year_2: 0.8573
+      year_3: 0.7938
+      year_4: 0.7350
+      year_5: 0.6806
+      year_6: 0.6302
+      year_7: 0.5835
+    pv_by_year:
+      year_1: 208_019
+      year_2: 103_114
+      year_3: 53_810
+      year_4: 26_101
+      year_5: 22_806
+      year_6: 5_762
+      year_7: -8_588
+    npv_of_benefit: 411_024               # sum of PV by year
+    less_study_cost: -18_000
+    net_npv: 393_024
+    roi_on_study: 21.8                     # 393,024 / 18,000 = 21.8x return
+    note: >
+      The cost seg study costs $18K and generates $393K in NPV tax benefit --
+      a 21.8x return on investment. Even at the 20% bonus phase-down rate,
+      the study is overwhelmingly worthwhile. At 100% bonus (2022 rules),
+      NPV would have been approximately $720K.
+
+  # -------------------------------------------------------------------
+  # DEPRECIATION RECAPTURE AT YEAR 7 DISPOSITION
+  # -------------------------------------------------------------------
+  recapture_analysis:
+    description: >
+      When the property is sold in year 7, accelerated depreciation must be
+      recaptured. Section 1250 recapture taxes the excess of accelerated over
+      straight-line depreciation at 25%, and remaining gain at capital gains rate.
+    disposition_year: 7
+    sale_price: 13_500_000                 # assumed 35% appreciation over 7 years
+    selling_costs: 202_500                 # 1.5%
+    net_sale_proceeds: 13_297_500
+
+    cost_seg_recapture:
+      original_basis: 10_150_000
+      total_depreciation_taken: 3_265_001
+      adjusted_basis: 6_884_999            # 10,150,000 - 3,265,001
+      gain_on_sale: 6_412_501              # 13,297,500 - 6,884,999
+      section_1250_recapture:
+        description: >
+          Unrecaptured Section 1250 gain = total depreciation taken on real property
+          (27.5-year and 15-year). 5-year personal property recapture is Section 1245
+          (ordinary income). However, for residential rental, the 25% rate applies
+          to all unrecaptured 1250 gain.
+        total_depreciation_taken: 3_265_001
+        recapture_amount: 3_265_001
+        recapture_tax_rate: 0.25
+        recapture_tax: 816_250
+      remaining_capital_gain:
+        amount: 3_147_500                  # 6,412,501 - 3,265,001
+        tax_rate: 0.238                    # 20% + 3.8% NIIT
+        tax: 749_105
+      total_tax_on_sale: 1_565_355
+
+    straight_line_recapture:
+      original_basis: 10_150_000
+      total_depreciation_taken: 2_074_548
+      adjusted_basis: 8_075_452
+      gain_on_sale: 5_222_048
+      section_1250_recapture:
+        recapture_amount: 2_074_548
+        recapture_tax_rate: 0.25
+        recapture_tax: 518_637
+      remaining_capital_gain:
+        amount: 3_147_500
+        tax_rate: 0.238
+        tax: 749_105
+      total_tax_on_sale: 1_267_742
+
+    recapture_comparison:
+      additional_tax_from_cost_seg: 297_613   # 1,565,355 - 1,267,742
+      additional_recapture_depreciation: 1_190_453
+      effective_recapture_rate: 0.25          # 297,613 / 1,190,453
+      note: >
+        The cost seg generates $476K in cumulative tax savings during the hold
+        but triggers $298K in additional recapture tax at sale. The net benefit
+        is $178K on a nominal basis. On an NPV basis (tax savings are front-loaded,
+        recapture is deferred), the net benefit is approximately $393K - $174K
+        = $219K. Still a strong 12.2x return on the $18K study cost.
+
+    net_benefit_summary:
+      cumulative_tax_savings_during_hold: 476_181
+      additional_recapture_at_sale: -297_613
+      nominal_net_benefit: 178_568
+      npv_of_savings: 393_024              # front-loaded
+      pv_of_recapture: -173_785            # 297,613 * 0.5835 (year 7 PV factor)
+      npv_net_benefit: 219_239
+      study_cost: -18_000
+      npv_net_of_study: 201_239
+      roi_on_study_net_of_recapture: 11.2  # 201,239 / 18,000
+
+  # -------------------------------------------------------------------
+  # SENSITIVITY: BONUS DEPRECIATION RATE
+  # -------------------------------------------------------------------
+  bonus_sensitivity:
+    description: "How NPV changes if bonus depreciation rate differs from 20%"
+    scenarios:
+      - bonus_rate: 0.00
+        year_1_total_depr: 450_473
+        npv_net_of_recapture: 142_000
+        note: "No bonus. Still worthwhile due to MACRS acceleration."
+      - bonus_rate: 0.20
+        year_1_total_depr: 857_973
+        npv_net_of_recapture: 201_239
+        note: "Current 2026 rate. Base case."
+      - bonus_rate: 0.40
+        year_1_total_depr: 1_265_473
+        npv_net_of_recapture: 268_000
+        note: "2025 rate. Moderately higher."
+      - bonus_rate: 0.60
+        year_1_total_depr: 1_672_973
+        npv_net_of_recapture: 342_000
+        note: "2024 rate."
+      - bonus_rate: 1.00
+        year_1_total_depr: 2_487_973
+        npv_net_of_recapture: 498_000
+        note: "Full 100% bonus. Maximum benefit. First-year deduction covers 30% of depreciable basis."
+
+  # -------------------------------------------------------------------
+  # RECOMMENDATION
+  # -------------------------------------------------------------------
+  recommendation:
+    proceed: true
+    rationale:
+      - "NPV of $201K net of recapture and study cost on an $18K investment = 11.2x ROI"
+      - "Front-loaded tax savings improve cash-on-cash returns in years 1-3 when value-add carry is highest"
+      - "Year 1 tax savings of $225K partially offsets negative carry during renovation period"
+      - "Even at 0% bonus (worst case), NPV is $142K -- study pays for itself regardless"
+    timing_note: >
+      Close in 2026 to capture 20% bonus. If acquisition slips to 2027, bonus
+      drops to 0% (absent legislative extension). Accelerate closing if possible.
+    section_1031_interaction: >
+      If a 1031 exchange is contemplated at disposition, recapture is deferred
+      along with capital gains. Cost seg is even more attractive when combined
+      with a 1031 exchange strategy because recapture is indefinitely deferred.

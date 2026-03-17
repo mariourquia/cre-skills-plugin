@@ -1,0 +1,234 @@
+# Construction Cost Benchmarks for CRE Development
+# Organized by CSI MasterFormat divisions, with product type breakdowns
+# Costs in $/SF of gross building area unless otherwise noted
+# Market: Secondary US metro, 2025-2026 pricing
+
+csi_divisions:
+  # --- Division 01: General Requirements ---
+  division_01_general_requirements:
+    description: "General conditions, temporary facilities, clean-up, project management"
+    typical_range_per_sf: {low: 8, mid: 12, high: 18}
+    as_percent_of_hard: {low: 0.04, mid: 0.06, high: 0.08}
+    notes: "Includes GC supervision, temp power/water, dumpsters, safety, QC"
+
+  # --- Division 02: Existing Conditions ---
+  division_02_existing_conditions:
+    description: "Demolition, environmental remediation, geotechnical work"
+    typical_range_per_sf: {low: 1, mid: 3, high: 10}
+    notes: "Highly site-specific. Brownfield remediation can exceed $20/SF."
+
+  # --- Division 03: Concrete ---
+  division_03_concrete:
+    description: "Foundations, slabs, structural concrete, podium decks"
+    by_product_type:
+      garden_style_wood_frame:
+        per_sf: {low: 8, mid: 12, high: 16}
+        notes: "Slab-on-grade or crawl space foundations only"
+      midrise_podium:
+        per_sf: {low: 22, mid: 30, high: 40}
+        notes: "Podium deck is the major cost driver. Post-tensioned slab common."
+      highrise:
+        per_sf: {low: 35, mid: 50, high: 70}
+        notes: "Structural concrete frame. Formwork and rebar dominate."
+
+  # --- Division 05: Metals ---
+  division_05_metals:
+    description: "Structural steel, miscellaneous metals, railings"
+    by_product_type:
+      garden_style_wood_frame:
+        per_sf: {low: 2, mid: 4, high: 6}
+      midrise_podium:
+        per_sf: {low: 5, mid: 8, high: 12}
+      highrise:
+        per_sf: {low: 15, mid: 25, high: 35}
+    notes: "Steel prices volatile. Tariff-sensitive. Get firm quotes."
+
+  # --- Division 06: Wood/Plastics/Composites ---
+  division_06_wood:
+    description: "Framing, sheathing, finish carpentry, cabinetry"
+    by_product_type:
+      garden_style_wood_frame:
+        per_sf: {low: 20, mid: 28, high: 35}
+        notes: "Dominant structural system. Type V-A construction."
+      midrise_podium:
+        per_sf: {low: 18, mid: 25, high: 32}
+        notes: "Wood frame above podium deck. Type III-A or V-A over I-A."
+      highrise:
+        per_sf: {low: 5, mid: 8, high: 12}
+        notes: "Finish carpentry and cabinetry only. No structural wood."
+
+  # --- Division 07: Thermal & Moisture Protection ---
+  division_07_envelope:
+    description: "Waterproofing, insulation, roofing, siding, cladding"
+    by_product_type:
+      garden_style_wood_frame:
+        per_sf: {low: 10, mid: 14, high: 20}
+      midrise_podium:
+        per_sf: {low: 14, mid: 20, high: 28}
+      highrise:
+        per_sf: {low: 25, mid: 35, high: 50}
+        notes: "Curtain wall systems drive costs significantly higher."
+
+  # --- Division 08: Openings ---
+  division_08_openings:
+    description: "Windows, doors, hardware, glazing"
+    typical_range_per_sf: {low: 6, mid: 10, high: 18}
+    notes: "Window-to-wall ratio is key cost driver. >40% ratio adds $3-5/SF."
+
+  # --- Division 09: Finishes ---
+  division_09_finishes:
+    description: "Drywall, flooring, paint, tile, countertops"
+    by_finish_level:
+      class_b:
+        per_sf: {low: 15, mid: 20, high: 25}
+        notes: "LVP flooring, laminate counters, basic tile, flat paint"
+      class_a:
+        per_sf: {low: 22, mid: 30, high: 38}
+        notes: "Hardwood/premium LVP, quartz counters, subway tile, accent walls"
+      luxury:
+        per_sf: {low: 35, mid: 45, high: 60}
+        notes: "Stone counters, custom tile, designer fixtures, premium appliances"
+
+  # --- Division 21-23: Fire Protection & HVAC ---
+  division_21_23_mechanical:
+    description: "Fire sprinklers, plumbing, HVAC systems"
+    by_product_type:
+      garden_style:
+        per_sf: {low: 18, mid: 24, high: 30}
+        notes: "Individual PTAC or mini-split units. Domestic water risers."
+      midrise:
+        per_sf: {low: 22, mid: 30, high: 40}
+        notes: "Central plant or VRF system. Fire pump may be required."
+      highrise:
+        per_sf: {low: 30, mid: 42, high: 55}
+        notes: "Central plant, cooling towers, standpipe. Highest MEP complexity."
+
+  # --- Division 26: Electrical ---
+  division_26_electrical:
+    description: "Power distribution, lighting, low voltage, EV charging"
+    typical_range_per_sf: {low: 10, mid: 15, high: 22}
+    ev_charging_adder:
+      per_stall: {low: 2500, mid: 5000, high: 8000}
+      notes: "Many jurisdictions now require 10-20% EV-ready parking stalls."
+    solar_ready_adder_per_sf: {low: 1, mid: 2, high: 4}
+
+  # --- Division 31-33: Earthwork & Utilities ---
+  division_31_33_sitework:
+    description: "Grading, paving, underground utilities, stormwater"
+    per_sf_of_site:
+      typical_range: {low: 8, mid: 15, high: 25}
+    notes: "Heavily site-dependent. Rocky soil, high water table, or flood zone adds 50-100%."
+
+  # --- Division 32: Exterior Improvements ---
+  division_32_exterior:
+    description: "Paving, landscaping, fencing, site amenities"
+    per_sf_of_site: {low: 5, mid: 10, high: 18}
+    amenity_packages:
+      basic: {total: 250000, includes: "pool, dog park, basic fitness"}
+      mid_range: {total: 500000, includes: "resort pool, coworking, yoga studio, outdoor kitchen"}
+      luxury: {total: 1000000, includes: "rooftop deck, full gym, spa, theater, golf simulator"}
+
+# --- Product Type Total Cost Summaries ---
+product_type_totals:
+  garden_style_wood_frame:
+    stories: "2-3"
+    construction_type: "Type V-A"
+    total_hard_cost_per_sf: {low: 130, mid: 165, high: 200}
+    total_hard_cost_per_unit: {low: 115000, mid: 148000, high: 180000}
+    avg_unit_size_sf: 875
+    typical_density: "20-30 units/acre"
+    construction_duration_months: {low: 14, mid: 18, high: 24}
+    notes: "Most cost-efficient. Limited to 3 stories in most codes."
+
+  midrise_podium:
+    stories: "4-6 (1 concrete + 3-5 wood)"
+    construction_type: "Type III-A or V-A over I-A podium"
+    total_hard_cost_per_sf: {low: 200, mid: 260, high: 330}
+    total_hard_cost_per_unit: {low: 190000, mid: 250000, high: 320000}
+    avg_unit_size_sf: 950
+    typical_density: "40-80 units/acre"
+    construction_duration_months: {low: 18, mid: 24, high: 30}
+    notes: "Podium deck adds $8-12M for a 250-unit project. Structured parking below."
+
+  highrise:
+    stories: "12-40+"
+    construction_type: "Type I-A (concrete or steel frame)"
+    total_hard_cost_per_sf: {low: 350, mid: 450, high: 600}
+    total_hard_cost_per_unit: {low: 350000, mid: 475000, high: 650000}
+    avg_unit_size_sf: 1000
+    typical_density: "100-200 units/acre"
+    construction_duration_months: {low: 24, mid: 36, high: 48}
+    notes: "Elevator/mechanical core, curtain wall, and fire systems are major cost drivers."
+
+  student_housing:
+    stories: "3-5"
+    construction_type: "Type III-A or V-A"
+    total_hard_cost_per_sf: {low: 140, mid: 175, high: 220}
+    total_hard_cost_per_unit: {low: 90000, mid: 130000, high: 170000}
+    avg_unit_size_sf: 750
+    typical_density: "by-the-bed pricing, 2-4 beds/unit"
+    notes: "Smaller units, shared common areas. Furniture package adds $3-5K/bed."
+
+  build_to_rent_sfr:
+    per_home: {low: 220000, mid: 290000, high: 380000}
+    per_sf: {low: 130, mid: 160, high: 200}
+    avg_home_size_sf: 1800
+    typical_density: "8-12 homes/acre"
+    construction_duration_months: {low: 6, mid: 8, high: 12}
+    notes: "Per-home basis. Site infrastructure is a larger share than MF."
+
+# --- Soft Cost Percentages ---
+soft_costs:
+  architecture_engineering:
+    percent_of_hard: {low: 0.04, mid: 0.06, high: 0.08}
+    notes: "Higher for complex/unique designs. Lower for repeated prototypes."
+  legal:
+    percent_of_hard: {low: 0.005, mid: 0.01, high: 0.02}
+  permits_impact_fees:
+    notes: "Highly jurisdiction-dependent. Can range from $2K to $30K per unit."
+    per_unit: {low: 3000, mid: 9000, high: 25000}
+  insurance_builders_risk:
+    percent_of_hard: {low: 0.01, mid: 0.015, high: 0.025}
+  property_taxes_during_construction:
+    notes: "Assessed on land value during construction, may increase at CO."
+    percent_of_hard: {low: 0.005, mid: 0.01, high: 0.015}
+  marketing_and_leaseup:
+    per_unit: {low: 1000, mid: 2000, high: 4000}
+  total_soft_costs:
+    percent_of_hard: {low: 0.15, mid: 0.20, high: 0.30}
+
+# --- Contingency Standards ---
+contingency:
+  hard_cost_contingency:
+    schematic_design: 0.10  # 10% at SD
+    design_development: 0.075
+    construction_documents: 0.05
+    gmp_execution: 0.03  # After GMP, owner holds 3%
+    notes: "Contingency decreases as design progresses and pricing firms up."
+  soft_cost_contingency:
+    percent: {low: 0.05, mid: 0.10, high: 0.15}
+  owner_contingency:
+    percent: 0.03
+    notes: "Separate from GC contingency. Covers owner-directed changes."
+
+# --- GC Fee Norms ---
+gc_fees:
+  general_conditions:
+    percent_of_hard: {low: 0.04, mid: 0.06, high: 0.08}
+    notes: "GC overhead: supervision, trailers, temp facilities."
+  overhead_and_profit:
+    percent_of_hard: {low: 0.03, mid: 0.05, high: 0.07}
+    notes: "GC margin. Negotiable. Lower in competitive bid, higher in negotiated GMP."
+  insurance_and_bonding:
+    percent_of_hard: {low: 0.015, mid: 0.025, high: 0.035}
+  total_gc_markup:
+    percent_of_direct_costs: {low: 0.10, mid: 0.14, high: 0.18}
+    notes: >
+      Total GC markup = general conditions + OH&P + insurance/bonding.
+      On a $42.5M hard cost budget, GC markup represents $4.25M-$7.65M.
+      This is already included in the per-SF hard cost figures above.
+  gc_contract_types:
+    gmp: "Guaranteed Maximum Price. GC bears overruns above GMP. Most common for MF."
+    lump_sum: "Fixed price. GC bears all cost risk. Used for simpler projects."
+    cost_plus: "Owner pays actual costs + fee. Owner bears cost risk. Used when scope is uncertain."
+    design_build: "Single entity for design + construction. Faster but less owner control."

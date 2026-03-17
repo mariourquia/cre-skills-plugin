@@ -1,0 +1,248 @@
+# TI Cost Benchmarks by Property Type and Finish Level
+# Leasing Strategy & Marketing Planner Reference
+# All costs in $/SF unless noted. Ranges reflect national averages; adjust for market.
+
+---
+# =============================================================================
+# SECTION 1: OFFICE TI COST BENCHMARKS
+# =============================================================================
+
+office:
+  cold_shell:
+    description: "Raw space with no tenant improvements. Exposed structure, no ceiling, no flooring, minimal MEP distribution."
+    cost_range: "$5 - $15/SF"
+    typical_scope:
+      - "Demising walls to corridor"
+      - "Basic electrical distribution to panel"
+      - "HVAC main trunk distribution (no terminal units)"
+      - "Fire sprinkler main loop (no drops to grid)"
+      - "No ceiling, no flooring, no paint"
+    who_typically_pays: "Tenant (with landlord TI allowance)"
+    common_for: "New construction delivery, large single-floor users"
+
+  warm_shell:
+    description: "Building standard improvements in place. Ceiling grid, basic lighting, HVAC distribution, concrete or basic flooring, restrooms on floor."
+    cost_range: "$15 - $30/SF"
+    typical_scope:
+      - "Suspended acoustic ceiling with 2x4 grid"
+      - "Building standard 2x4 fluorescent or LED troffer lighting"
+      - "HVAC VAV boxes and diffusers per design load"
+      - "Fire sprinkler heads dropped to ceiling grid"
+      - "Concrete floor sealed or with basic carpet tile"
+      - "Demising walls to deck with acoustic insulation"
+      - "Electrical panels sized for office density"
+    who_typically_pays: "Landlord provides warm shell; tenant builds from there"
+    common_for: "Multi-tenant office buildings, standard delivery condition"
+
+  move_in_ready:
+    description: "Fully built-out spec suite or second-generation space with cosmetic refresh. Offices, conference room, break room, reception, finishes throughout."
+    cost_range: "$30 - $60/SF"
+    typical_scope:
+      - "Private offices (glass or drywall, 10x12 to 12x15)"
+      - "Open workstation area with power/data"
+      - "1-2 conference rooms with AV rough-in"
+      - "Break room/kitchen with sink, cabinets, appliances"
+      - "Reception area with feature wall"
+      - "Carpet tile throughout, LVP in break room/restrooms"
+      - "Paint throughout, accent walls"
+      - "LED lighting (recessed or pendant per design)"
+      - "HVAC supplemental cooling for server room/conference"
+      - "Electrical: 5-7 watts/SF connected load"
+      - "Data cabling: Cat6 to each workstation"
+    who_typically_pays: "Split -- landlord TI allowance covers base, tenant pays overage"
+    common_for: "Spec suites for 2,000-8,000 SF tenants, quick occupancy"
+
+  build_to_suit:
+    description: "Custom design and construction to tenant specifications. High-end finishes, specialty systems, branding elements."
+    cost_range: "$60 - $120/SF"
+    typical_scope:
+      - "Custom architectural design (open plan, activity-based, hybrid)"
+      - "Premium finishes: stone, wood, metal, glass partitions"
+      - "Custom millwork: reception desk, built-ins, phone rooms"
+      - "Advanced AV: video conferencing suites, digital signage"
+      - "Specialty HVAC: supplemental cooling, dedicated OA"
+      - "Raised access floor (for tech tenants)"
+      - "High-density power and data infrastructure"
+      - "Security: card access, CCTV, intrusion detection"
+      - "Branded environmental graphics"
+      - "Furniture systems (if landlord-provided)"
+    who_typically_pays: "Landlord provides market TI allowance; tenant pays significant overage"
+    common_for: "Anchor tenants, long-term leases (10+ years), law firms, financial firms, tech HQs"
+
+  cost_drivers_and_adjustments:
+    ceiling_height:
+      standard_9ft: "Baseline"
+      high_12ft_plus: "+$3-5/SF (more wall area, taller partitions, longer HVAC duct runs)"
+    floor_level:
+      ground_through_5: "Baseline"
+      high_rise_above_25: "+$2-4/SF (freight access, material staging, elevator time)"
+    building_age:
+      new_construction: "Baseline"
+      pre_1990: "+$5-10/SF (code upgrades, asbestos, electrical capacity)"
+    union_vs_open_shop:
+      open_shop: "Baseline"
+      union_market: "+15-25% (NYC, Chicago, Boston, SF, DC)"
+
+# =============================================================================
+# SECTION 2: RETAIL TI COST BENCHMARKS
+# =============================================================================
+
+retail:
+  vanilla_box:
+    description: "Basic retail delivery. White walls, concrete floor, ceiling grid, basic MEP, storefront, ADA restroom."
+    cost_range: "$10 - $25/SF"
+    typical_scope:
+      - "Demising walls (both sides finished)"
+      - "Storefront with entry door (per building standard)"
+      - "Suspended ceiling grid"
+      - "Basic fluorescent/LED lighting"
+      - "HVAC: rooftop unit or split system per design load"
+      - "Plumbing: 1 ADA restroom with hot/cold supply"
+      - "Electrical: 200A panel, 5 watts/SF lighting, 5 watts/SF power"
+      - "Sprinkler: upright heads to grid"
+      - "Concrete floor (sealed)"
+    who_typically_pays: "Landlord delivers vanilla box; tenant finishes"
+    common_for: "Inline retail 1,000-5,000 SF, strip centers, neighborhood centers"
+
+  restaurant_food_service:
+    description: "Full restaurant build-out including commercial kitchen, grease trap, increased ventilation, and specialty utility requirements."
+    cost_range: "$40 - $80/SF"
+    typical_scope:
+      - "Commercial kitchen with Type I hood, fire suppression, make-up air"
+      - "Grease trap/interceptor (sized per code, typically 500-2,000 gallon)"
+      - "Increased electrical service: 400-800A panel"
+      - "Gas service (if applicable)"
+      - "Increased plumbing: 3-compartment sink, hand sinks, floor drains"
+      - "Walk-in cooler/freezer (may be tenant-provided)"
+      - "Exhaust fan and ductwork to roof"
+      - "ADA-compliant dining area and restrooms"
+      - "Interior finishes per tenant design"
+      - "Patio/outdoor seating (if applicable)"
+    who_typically_pays: "Varies widely -- landlord may provide $15-30/SF TI, tenant covers rest"
+    common_for: "Quick-service, fast-casual, full-service restaurants"
+    notes:
+      - "Restaurant TI is among the most expensive retail categories"
+      - "Landlord must verify roof structural capacity for RTU/exhaust equipment"
+      - "Grease trap installation may require site work and permits"
+      - "Re-leasing risk: next tenant may not be food service, requiring teardown"
+
+  medical_dental:
+    description: "Medical or dental office within retail setting. Increased MEP, lead-lined walls (dental X-ray), medical gas, specialized waste."
+    cost_range: "$50 - $100/SF"
+    typical_scope:
+      - "Exam/treatment rooms with medical-grade finishes"
+      - "Nurse station, lab area, consultation rooms"
+      - "Increased plumbing (hand sinks in each exam room)"
+      - "Medical gas and vacuum (dental)"
+      - "Lead-lined walls for X-ray rooms"
+      - "Specialized HVAC with dedicated OA and negative pressure rooms"
+      - "ADA accessibility throughout"
+      - "Infection control finishes (seamless flooring, antimicrobial surfaces)"
+    who_typically_pays: "Tenant typically pays most; landlord provides vanilla box TI"
+    common_for: "Medical retail, urgent care, dental offices in shopping centers"
+
+# =============================================================================
+# SECTION 3: INDUSTRIAL TI COST BENCHMARKS
+# =============================================================================
+
+industrial:
+  warehouse_distribution:
+    description: "Basic office build-out within industrial warehouse. Typically 5-15% of total SF allocated to office."
+    cost_range: "$5 - $10/SF (of office area only)"
+    typical_scope:
+      - "Demising walls for office area"
+      - "Suspended ceiling in office area"
+      - "HVAC for office area only (warehouse unconditioned)"
+      - "ADA restrooms (1 per 15,000 SF per code)"
+      - "Basic office finishes: VCT or carpet tile, paint, grid ceiling"
+      - "Loading dock equipment (by tenant typically)"
+    who_typically_pays: "Landlord provides minimal TI; tenant builds to suit"
+    common_for: "Distribution centers, warehouses, 3PL facilities"
+    notes: "Warehouse space itself typically delivered as cold shell -- concrete slab, clear height, dock doors, fire sprinkler"
+
+  flex_light_industrial:
+    description: "Office/warehouse flex space with higher office finish ratio (30-50% office)."
+    cost_range: "$15 - $30/SF (of total space)"
+    typical_scope:
+      - "Office build-out at 30-50% of space"
+      - "Showroom or display area"
+      - "HVAC for office and showroom"
+      - "Improved lighting in flex/assembly area"
+      - "Increased electrical for equipment"
+      - "Compressed air (if manufacturing)"
+    who_typically_pays: "Split -- landlord TI covers base office, tenant pays specialty"
+    common_for: "R&D, light manufacturing, showroom-warehouse combos"
+
+  lab_life_science:
+    description: "Laboratory and life science space with specialty ventilation, plumbing, electrical, and finishes."
+    cost_range: "$80 - $150/SF"
+    typical_scope:
+      - "Lab benches and casework"
+      - "Fume hoods and exhaust systems"
+      - "Specialized HVAC: 100% OA, precise temperature/humidity control"
+      - "Deionized water, lab gas, vacuum systems"
+      - "Chemical-resistant flooring and countertops"
+      - "Emergency shower and eyewash stations"
+      - "Increased electrical: 15-20 watts/SF"
+      - "Backup generator for critical systems"
+      - "Vibration isolation (for sensitive equipment)"
+      - "BSL-2 or BSL-3 containment (if applicable)"
+    who_typically_pays: "Landlord provides significant TI ($60-100/SF) for credit tenants on long leases"
+    common_for: "Biotech, pharmaceutical, research institutions"
+    notes: "Lab conversion is the highest-cost industrial TI category. Verify building infrastructure can support (electrical capacity, roof structural, plumbing capacity)."
+
+# =============================================================================
+# SECTION 4: REGIONAL COST ADJUSTMENTS
+# =============================================================================
+
+regional_adjustments:
+  description: "Multiply national average TI costs by regional factor"
+  factors:
+    new_york_city: 1.45
+    san_francisco: 1.40
+    boston: 1.30
+    washington_dc: 1.25
+    los_angeles: 1.25
+    chicago: 1.15
+    seattle: 1.20
+    miami: 1.10
+    denver: 1.05
+    dallas: 0.95
+    houston: 0.95
+    atlanta: 0.90
+    phoenix: 0.90
+    charlotte: 0.85
+    nashville: 0.90
+    national_average: 1.00
+  notes: "Factors reflect relative construction labor and material costs. Update annually using ENR Building Cost Index."
+
+# =============================================================================
+# SECTION 5: TI AMORTIZATION METHODOLOGY
+# =============================================================================
+
+amortization:
+  description: "How to calculate the impact of TI allowance on effective rent"
+
+  formula:
+    monthly_payment: "TI_Amount / PV_Annuity_Factor(rate/12, term_months)"
+    annual_cost_psf: "(Monthly_Payment * 12) / SF"
+    effective_rent: "Face_Rent - Annual_TI_Cost_PSF"
+    landlord_return_on_ti: "Should target 7-9% annualized"
+
+  example:
+    scenario: "10,000 SF office tenant, 7-year lease, $45/SF TI allowance"
+    ti_total: 450000
+    amortization_rate: "8% annual (0.667% monthly)"
+    term_months: 84
+    monthly_payment: 7017
+    annual_cost_psf: 8.42
+    face_rent: 35.00
+    effective_rent: 26.58
+    notes: "Effective rent of $26.58/SF is what the landlord actually receives net of TI cost. This must meet or exceed the underwriting target to justify the deal."
+
+  decision_matrix:
+    rule_1: "TI amortization period should never exceed lease term"
+    rule_2: "Effective rent (face rent minus TI amortization) must exceed operating expenses + debt service per SF"
+    rule_3: "For non-credit tenants, limit TI to 6-12 months of rent (limits exposure if default)"
+    rule_4: "For credit tenants on 10+ year leases, higher TI is justified (low default risk, long amortization)"
+    rule_5: "Spec suite investment should be recoverable within 2 years of occupancy at market rent"

@@ -1,0 +1,431 @@
+# Worked HBU Example: 5-Acre Parcel, R-5 Zoning
+# Full four-test analysis with 3 use types and residual land values
+
+# ============================================================
+# SITE DESCRIPTION
+# ============================================================
+property:
+  address: "1200 Prospect Avenue, Cedar Grove, NJ 07009"
+  parcel_id: "APN 123-456-789"
+  total_area_acres: 5.00
+  total_area_sf: 217800
+  current_use: "Vacant land (former nursery)"
+  acquisition_price_asking: 3200000  # $14.69/SF
+  frontage: "285 feet on Prospect Avenue (county road, AADT 12,500)"
+  depth: "~765 feet (irregular)"
+  topography: "Gentle slope, 18 feet elevation change front to rear"
+  soils: "Sandy loam, good drainage, 3,000 psf bearing capacity"
+  wetlands: "0.35 acres delineated along rear boundary (Army Corps confirmed)"
+  flood_zone: "Zone X (minimal risk, no FEMA restrictions)"
+  utilities: "All available at property line (water, sewer, gas, electric, fiber)"
+  phase_i_esa: "Clean, no RECs identified"
+  tree_coverage: "30% (no specimen trees, standard clearing permitted)"
+  adjacent_uses:
+    north: "Single-family residential (R-3 zone)"
+    south: "Garden apartments (R-5 zone)"
+    east: "Elementary school"
+    west: "Commercial strip center (B-2 zone)"
+
+# ============================================================
+# TEST 1: LEGALLY PERMISSIBLE
+# ============================================================
+test_1_legally_permissible:
+  current_zoning: "R-5 (Multi-Family Residential)"
+  zoning_details:
+    permitted_by_right:
+      - "Single-family detached"
+      - "Townhouses"
+      - "Garden-style apartments (3 stories max)"
+      - "Senior housing"
+      - "Houses of worship"
+      - "Parks and recreation"
+    conditional_use:
+      - "Assisted living facility"
+      - "Day care center"
+      - "Mixed-use (ground floor retail with residential above) -- requires variance"
+    prohibited:
+      - "Commercial/office (requires rezoning to B-2)"
+      - "Industrial"
+      - "Hotel"
+    density_regulations:
+      max_units_per_acre: 18  # Gross density
+      max_far: 0.75
+      max_height: "3 stories / 40 feet"
+      max_lot_coverage: 0.35
+      min_open_space: 0.30
+      setbacks:
+        front: 40
+        side: 25
+        rear: 35
+      parking:
+        studio: 1.5
+        one_bed: 1.75
+        two_bed: 2.0
+        three_bed: 2.25
+        visitor: 0.15  # Per unit
+
+  deed_restrictions: "None on record"
+
+  overlay_districts:
+    tree_preservation: true  # Replacement planting required
+    stormwater_management: true  # On-site detention/retention required
+
+  uses_surviving_test_1:
+    - use_a: "Garden-style apartments (by right)"
+    - use_b: "Townhouse development (by right)"
+    - use_c: "Senior assisted living (conditional use permit required)"
+
+  uses_eliminated:
+    - "Commercial/office: requires rezoning, R-5 prohibits"
+    - "Industrial: prohibited in R-5"
+    - "Retail: requires variance or rezoning"
+
+# ============================================================
+# TEST 2: PHYSICALLY POSSIBLE
+# ============================================================
+test_2_physically_possible:
+  net_developable_area:
+    total_sf: 217800
+    less_wetlands_sf: 15246  # 0.35 acres
+    less_wetland_buffer_sf: 10000  # 50-foot buffer
+    less_stormwater_sf: 12000  # Detention basin
+    net_developable_sf: 180554  # 4.15 acres
+    net_to_gross: 0.829
+
+  building_envelope:
+    after_setbacks_sf: 155000  # Approximate after all setbacks
+    max_footprint_sf: 63210  # 35% lot coverage on 180,554 net
+    max_gfa_3_story: 189630  # 3 stories * footprint (theoretical max)
+    max_far_gfa: 163350  # 0.75 FAR on 217,800 gross (governs)
+
+  use_a_garden_apartments:
+    description: "3-story garden-style, 8-12 unit buildings, surface parking"
+    max_density: 90  # 5 gross acres * 18 units/acre
+    practical_density: 78  # Adjusted for site constraints and parking
+    unit_mix:
+      studio: {count: 8, sf: 550, parking: 1.5}
+      one_bed: {count: 35, sf: 825, parking: 1.75}
+      two_bed: {count: 28, sf: 1100, parking: 2.0}
+      three_bed: {count: 7, sf: 1350, parking: 2.25}
+      total_units: 78
+    total_building_sf: 68900  # Residential only
+    total_parking_spaces: 152  # 140 required + 12 visitor
+    parking_type: "Surface (85 spaces) + 1 tuck-under garage (67 spaces)"
+    amenity_sf: 3500  # Clubhouse, fitness, pool area
+    achievable: true
+    physical_constraints:
+      - "Wetland buffer limits rear building placement"
+      - "Slope requires retaining walls along east side ($180K est.)"
+      - "Stormwater basin occupies southeast corner"
+
+  use_b_townhouses:
+    description: "2-3 story fee-simple townhouses, attached garages"
+    max_density: 90  # Same zoning max
+    practical_density: 52  # Townhouses less dense than apartments
+    unit_mix:
+      two_bed: {count: 16, sf: 1450, garage: 1}
+      three_bed: {count: 28, sf: 1800, garage: 2}
+      four_bed: {count: 8, sf: 2200, garage: 2}
+      total_units: 52
+    total_building_sf: 91800
+    parking: "Attached 1-2 car garages + 20 visitor surface spaces"
+    achievable: true
+    physical_constraints:
+      - "Lower density reduces infrastructure efficiency"
+      - "Individual lot grading more complex on slope"
+
+  use_c_senior_assisted_living:
+    description: "3-story, 80-bed assisted living facility"
+    building_sf: 65000
+    beds: 80
+    common_area_sf: 18000  # Dining, activity rooms, medical
+    parking_spaces: 45  # Staff + visitor (lower for senior)
+    achievable: true
+    physical_constraints:
+      - "Single building design simplifies site work"
+      - "Requires conditional use permit (6-9 month process)"
+      - "ADA accessibility on sloped site requires careful design"
+
+  uses_surviving_test_2:
+    - "All three uses are physically possible"
+    - "No eliminations at this stage"
+
+# ============================================================
+# TEST 3: FINANCIALLY FEASIBLE
+# ============================================================
+test_3_financially_feasible:
+  market_data:
+    submarket: "Essex County, NJ -- western suburbs"
+    apartment_market_rent:
+      studio: 1700
+      one_bed: 2200
+      two_bed: 2850
+      three_bed: 3500
+    apartment_vacancy: 0.045  # 4.5%
+    apartment_cap_rate: 0.052  # 5.2%
+    townhouse_sale_price:
+      two_bed: 425000
+      three_bed: 525000
+      four_bed: 650000
+    assisted_living:
+      monthly_rate_per_bed: 7500  # Private pay
+      occupancy: 0.90
+      cap_rate: 0.065
+
+  # --- USE A: GARDEN APARTMENTS ---
+  use_a_garden_apartments:
+    revenue:
+      gross_potential_rent:
+        studio: 163200  # 8 * 1700 * 12
+        one_bed: 924000  # 35 * 2200 * 12
+        two_bed: 957600  # 28 * 2850 * 12
+        three_bed: 294000  # 7 * 3500 * 12
+        total_gpr: 2338800
+      other_income: 117000  # Parking, laundry, fees (~5% of GPR)
+      vacancy_loss: -110511  # 4.5% of (GPR + other)
+      effective_gross_income: 2345289
+
+    expenses:
+      real_estate_tax: 285000
+      insurance: 62400
+      utilities: 93600
+      repairs_maintenance: 101400
+      management_fee: 93812  # 4% of EGI
+      payroll_onsite: 156000
+      general_admin: 46800
+      marketing: 31200
+      reserves: 19500  # $250/unit
+      total_expenses: 889712
+
+    noi: 1455577
+
+    completed_value:
+      method: "Direct capitalization"
+      noi: 1455577
+      cap_rate: 0.052
+      value: 27991865
+      value_per_unit: 358870
+      value_per_sf_building: 406.27
+
+    development_cost:
+      hard_costs:
+        building: 13780000  # 68,900 SF * $200/SF
+        site_work: 1850000  # Grading, paving, utilities, landscaping
+        parking_structure: 1340000  # Tuck-under garage (67 spaces * $20K)
+        amenity: 700000  # Clubhouse, fitness, pool
+        total_hard: 17670000
+      soft_costs:
+        architecture: 1060200  # 6% of hard
+        permits_fees: 530100  # 3% of hard
+        legal: 265050  # 1.5%
+        insurance: 176700  # 1%
+        marketing: 353400  # 2%
+        contingency: 883500  # 5%
+        total_soft: 3268950
+      financing:
+        construction_interest: 1890000  # Estimated 18-month construction
+        origination: 265050
+        total_financing: 2155050
+      developer_profit:
+        rate: 0.18  # 18% of cost
+        amount: 4156920
+      total_development_cost_ex_land: 27250920
+
+    residual_land_value:
+      completed_value: 27991865
+      less_development_cost: 27250920
+      residual: 740945
+      residual_per_sf: 3.40
+      residual_per_acre: 148189
+      feasible: true
+      land_to_tdc: 0.026  # 2.6% -- very low, tight deal
+
+  # --- USE B: TOWNHOUSES ---
+  use_b_townhouses:
+    revenue:
+      total_sale_revenue:
+        two_bed: 6800000  # 16 * $425,000
+        three_bed: 14700000  # 28 * $525,000
+        four_bed: 5200000  # 8 * $650,000
+        gross_revenue: 26700000
+      less_sales_cost: 1335000  # 5% broker, closing costs
+      net_sale_proceeds: 25365000
+
+    development_cost:
+      hard_costs:
+        building: 15606000  # 91,800 SF * $170/SF (townhouse)
+        site_work: 2200000  # More individual lots, roads, utilities
+        garages: 0  # Included in building cost
+        total_hard: 17806000
+      soft_costs:
+        architecture: 890300  # 5% of hard
+        permits_fees: 534180  # 3%
+        legal: 267090  # 1.5%
+        insurance: 178060  # 1%
+        marketing: 534180  # 3% (higher for for-sale)
+        contingency: 890300  # 5%
+        total_soft: 3294110
+      financing:
+        construction_interest: 2100000  # 24-month construction/sales
+        origination: 285000
+        total_financing: 2385000
+      developer_profit:
+        rate: 0.15  # 15% of cost
+        amount: 3522766
+      total_development_cost_ex_land: 27007876
+
+    residual_land_value:
+      net_sale_proceeds: 25365000
+      less_development_cost: 27007876
+      residual: -1642876  # NEGATIVE
+      feasible: false
+      notes: |
+        Townhouse development is NOT financially feasible at this site.
+        Construction costs exceed achievable sale prices. The lower
+        density (52 units vs 78) does not generate enough revenue to
+        cover development costs. Land value is negative, meaning a
+        developer would need to be PAID to take the land for this use.
+
+  # --- USE C: SENIOR ASSISTED LIVING ---
+  use_c_senior_assisted_living:
+    revenue:
+      gross_potential_revenue: 7200000  # 80 beds * $7,500/mo * 12
+      vacancy_loss: -720000  # 10% (higher for ALF)
+      effective_gross_income: 6480000
+
+    expenses:
+      staffing: 2916000  # 45% of EGI (nursing, aids, admin)
+      food_service: 648000  # 10% of EGI
+      real_estate_tax: 195000
+      insurance: 97200
+      utilities: 162000
+      maintenance: 129600
+      management: 324000  # 5% of EGI
+      marketing: 194400  # 3% of EGI
+      general_admin: 129600
+      reserves: 65000
+      total_expenses: 4860800
+
+    noi: 1619200
+
+    completed_value:
+      method: "Direct capitalization"
+      noi: 1619200
+      cap_rate: 0.065
+      value: 24910769
+      value_per_bed: 311385
+
+    development_cost:
+      hard_costs:
+        building: 17875000  # 65,000 SF * $275/SF (medical-grade)
+        site_work: 1200000
+        total_hard: 19075000
+      soft_costs:
+        architecture: 1334250  # 7% (more complex for medical)
+        permits_fees: 572250  # 3%
+        legal: 381500  # 2% (conditional use + licensing)
+        insurance: 190750  # 1%
+        marketing: 572250  # 3% (pre-leasing)
+        contingency: 953750  # 5%
+        total_soft: 4004750
+      financing:
+        construction_interest: 2050000  # 20-month construction
+        origination: 295000
+        total_financing: 2345000
+      developer_profit:
+        rate: 0.20  # 20% (higher risk, specialized)
+        amount: 5084950
+      total_development_cost_ex_land: 30509700
+
+    residual_land_value:
+      completed_value: 24910769
+      less_development_cost: 30509700
+      residual: -5598931  # NEGATIVE
+      feasible: false
+      notes: |
+        Assisted living is NOT financially feasible. High construction
+        cost ($275/SF for medical-grade) and high operating expense ratio
+        (75% of EGI) result in a deeply negative residual. The 6.5% cap
+        rate for ALF does not compensate for the higher development cost.
+        Would require monthly rates of $9,200+ to be feasible.
+
+  feasibility_summary:
+    use_a_apartments:
+      residual_land_value: 740945
+      feasible: true
+    use_b_townhouses:
+      residual_land_value: -1642876
+      feasible: false
+    use_c_assisted_living:
+      residual_land_value: -5598931
+      feasible: false
+
+  surviving_test_3:
+    - "Use A: Garden Apartments (only feasible use)"
+
+# ============================================================
+# TEST 4: MAXIMALLY PRODUCTIVE
+# ============================================================
+test_4_maximally_productive:
+  result: |
+    Only one use survived Test 3 (garden apartments with residual
+    of $740,945). By default, this is the maximally productive use.
+
+    However, the residual is thin ($3.40/SF, 2.6% land-to-TDC).
+    The asking price of $3,200,000 ($14.69/SF) far exceeds the
+    residual land value. This means:
+
+    1. The land is overpriced for multi-family development
+    2. No economically rational developer should pay the asking price
+    3. The seller must reduce to ~$750K or find a non-economic buyer
+
+  sensitivity_analysis:
+    if_rents_increase_5_pct:
+      new_noi: 1528356
+      new_value: 29391462
+      new_residual: 2140542  # Still below $3.2M asking
+    if_rents_increase_10_pct:
+      new_noi: 1601135
+      new_value: 30791058
+      new_residual: 3540138  # Approaches asking -- barely
+    if_cap_rate_compresses_to_4_75:
+      new_value: 30643726
+      new_residual: 3392806  # Approaches asking
+    if_construction_costs_drop_10_pct:
+      new_dev_cost: 24525828
+      new_residual: 3466037  # Approaches asking
+
+# ============================================================
+# CONCLUSION
+# ============================================================
+conclusion:
+  highest_and_best_use: "Garden-style multi-family apartments"
+  residual_land_value: 740945
+  residual_per_sf: 3.40
+  asking_price: 3200000
+  asking_per_sf: 14.69
+  linneman_test:
+    land_at_asking: 3200000
+    total_dev_cost_with_land: 30450920
+    land_to_tdc: 0.105  # 10.5% at asking -- below healthy range
+    # At residual: 740,945 / 27,991,865 = 2.6% -- very low
+    interpretation: "Even at asking, land-to-TDC is below 15% floor"
+
+  recommendation: |
+    The HBU is garden-style apartments (78 units), but the project
+    is only marginally feasible. The residual land value of $741K
+    implies a maximum land bid of ~$750K ($3.44/SF). The seller's
+    asking price of $3.2M is 4.3x the supportable value.
+
+    Options:
+    1. Negotiate land price down to $750K-$1.0M
+    2. Seek density variance to 22-24 units/acre (increases unit count,
+       may improve residual by $1.5-2.0M)
+    3. Explore mixed-income with LIHTC credits (additional equity source)
+    4. Pass on this site -- economics do not support the asking price
+
+  entitlement_adjustment:
+    p_by_right_approval: 0.95  # Very high for by-right apartment
+    adjusted_value: 703898  # $740,945 * 0.95
+    entitlement_costs: 25000  # Minimal for by-right
+    final_adjusted_value: 678898

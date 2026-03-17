@@ -1,0 +1,470 @@
+# worked-forecast-example.yaml
+# Industrial submarket 3-year supply/demand forecast.
+# Subject: Lehigh Valley, PA -- Upper Macungie Township industrial.
+# Demonstrates pipeline analysis, absorption scenarios, rent impact, and investment implications.
+
+forecast_metadata:
+  submarket: "Lehigh Valley, PA -- I-78 Corridor"
+  property_type: Industrial / Logistics
+  forecast_start: "Q2 2026"
+  forecast_end: "Q1 2029"
+  date_prepared: "2026-03-17"
+  author: "Asset Management"
+  data_sources:
+    - "CoStar Analytics (Q1 2026 release)"
+    - "Lehigh Valley Economic Development Corporation"
+    - "PA DEP permit database"
+    - "Upper Macungie Township Planning Commission minutes"
+    - "CBRE EA industrial forecast (Q4 2025)"
+    - "Broker interviews (Cushman, CBRE, JLL)"
+
+# ===========================================================================
+# SECTION 1: CURRENT CONDITIONS BASELINE
+# ===========================================================================
+
+current_conditions:
+  date: "Q1 2026"
+  existing_stock_sf: 62_500_000
+  vacancy_rate_pct: 4.8
+  vacant_sf: 3_000_000
+  occupied_sf: 59_500_000
+  asking_rent_nnn: 8.15
+  effective_rent_nnn: 7.85
+  concession_rate: "0.5-1 month free on 5+ yr terms"
+  trailing_4q_absorption_sf: 2_800_000
+  trailing_4q_deliveries_sf: 3_200_000
+  ad_ratio_t4q: 0.88
+  trailing_8q_absorption_sf: 6_100_000
+  trailing_8q_deliveries_sf: 5_800_000
+  ad_ratio_t8q: 1.05
+  long_term_avg_vacancy_pct: 5.2
+  assessment: >
+    Market is in late Phase II / early Phase III on the Mueller cycle. Vacancy
+    has ticked up from the 3.1% trough (Q2 2024) but remains below LTA.
+    Absorption is healthy but no longer outpacing deliveries. Rent growth
+    has decelerated from 12% (2023) to 3.5% (T4Q). Pipeline is elevated.
+
+# ===========================================================================
+# SECTION 2: SUPPLY PIPELINE ANALYSIS
+# ===========================================================================
+
+supply_pipeline:
+
+  under_construction:
+    total_sf: 4_200_000
+    projects:
+      - name: "Lehigh Valley Trade Center Phase III"
+        developer: "Prologis"
+        sf: 1_200_000
+        preleased_pct: 75
+        delivery: "Q3 2026"
+        notes: "Amazon BTS 900k SF; 300k SF spec"
+      - name: "Majestic Bethlehem Commerce Center"
+        developer: "Majestic Realty"
+        sf: 850_000
+        preleased_pct: 0
+        delivery: "Q4 2026"
+        notes: "100% spec. 36' clear, cross-dock."
+      - name: "Rockefeller Group Logistics Park"
+        developer: "Rockefeller Group"
+        sf: 650_000
+        preleased_pct: 40
+        delivery: "Q2 2027"
+        notes: "260k pre-leased to XPO. 390k spec."
+      - name: "Liberty Property Trust Legacy Portfolio"
+        developer: "Bridge Industrial"
+        sf: 500_000
+        preleased_pct: 0
+        delivery: "Q3 2027"
+        notes: "Two buildings, 250k SF each. Spec."
+      - name: "Jaindl Land Co Build-to-Suit"
+        developer: "Jaindl"
+        sf: 400_000
+        preleased_pct: 100
+        delivery: "Q2 2026"
+        notes: "BTS for undisclosed 3PL tenant."
+      - name: "Misc smaller projects"
+        developer: "Various"
+        sf: 600_000
+        preleased_pct: 30
+        delivery: "Q2-Q4 2026"
+        notes: "6 projects, 50k-150k SF each."
+    summary:
+      total_under_construction: 4_200_000
+      preleased_sf: 1_740_000
+      spec_sf: 2_460_000
+      preleased_pct: 41.4
+
+  planned_entitled:
+    total_sf: 2_800_000
+    probability_of_start: 60
+    expected_sf: 1_680_000
+    projects:
+      - name: "Ashley Development I-78 Site"
+        sf: 1_000_000
+        status: "Entitled, site work started"
+        probability: 80
+        est_delivery: "Q1 2028"
+      - name: "Endurance Capital Logistics Hub"
+        sf: 800_000
+        status: "Entitled, financing in process"
+        probability: 60
+        est_delivery: "Q2 2028"
+      - name: "Various smaller entitled"
+        sf: 1_000_000
+        status: "Entitled but no construction activity"
+        probability: 40
+        est_delivery: "Q3 2028-Q1 2029"
+
+  proposed_not_entitled:
+    total_sf: 1_500_000
+    probability_of_start: 25
+    expected_sf: 375_000
+    notes: >
+      Upper Macungie warehouse moratorium limits new entitlements in the
+      core submarket. Adjacent townships (Lower Macungie, North Whitehall)
+      are processing applications but face community opposition. Probability
+      of delivery within forecast horizon is low.
+
+  pipeline_summary_by_quarter:
+    # SF delivering each quarter
+    Q2_2026: 1_000_000
+    Q3_2026: 1_500_000
+    Q4_2026: 850_000
+    Q1_2027: 200_000
+    Q2_2027: 650_000
+    Q3_2027: 500_000
+    Q4_2027: 300_000
+    Q1_2028: 800_000
+    Q2_2028: 480_000
+    Q3_2028: 250_000
+    Q4_2028: 125_000
+    Q1_2029: 0
+    total_forecast_deliveries: 6_655_000
+    as_pct_of_existing_stock: 10.6
+
+# ===========================================================================
+# SECTION 3: DEMAND ANALYSIS (ABSORPTION SCENARIOS)
+# ===========================================================================
+
+demand_drivers:
+  primary:
+    - driver: "E-commerce fulfillment expansion"
+      impact: "High"
+      trend: "Continued growth but decelerating from 2020-2022 surge"
+      notes: "Amazon, Walmart, Target all expanding in Lehigh Valley. However, Amazon paused expansion in 2022-2023 and is being more selective."
+    - driver: "Reshoring / nearshoring"
+      impact: "Moderate"
+      trend: "Growing. CHIPS Act and supply chain diversification driving demand."
+      notes: "Pharmaceutical and electronics manufacturing relocating distribution closer to East Coast ports."
+    - driver: "3PL expansion"
+      impact: "High"
+      trend: "Steady. XPO, FedEx Logistics, Ryder all expanding."
+      notes: "3PL sector is the largest demand driver by SF. Follows consumer goods volume."
+    - driver: "Cold storage / food distribution"
+      impact: "Moderate"
+      trend: "Growing. Grocery delivery and meal kit demand."
+      notes: "Cold storage commands 40-60% rent premium. Limited competitive supply."
+  secondary:
+    - driver: "Port of NY/NJ overflow"
+      impact: "Moderate"
+      trend: "Stable. NJ industrial vacancy tightening pushes demand to PA."
+    - driver: "Cannabis distribution"
+      impact: "Low-Moderate"
+      trend: "Growing if PA legalizes recreational (pending legislation)."
+
+absorption_scenarios:
+
+  base_case:
+    description: "Moderate e-commerce growth, stable 3PL expansion, no recession"
+    annual_absorption_sf: 3_200_000
+    quarterly_pattern: [0.20, 0.30, 0.30, 0.20]
+    quarterly_absorption:
+      Q2_2026: 800_000
+      Q3_2026: 960_000
+      Q4_2026: 640_000
+      Q1_2027: 800_000
+      Q2_2027: 800_000
+      Q3_2027: 960_000
+      Q4_2027: 640_000
+      Q1_2028: 800_000
+      Q2_2028: 800_000
+      Q3_2028: 960_000
+      Q4_2028: 640_000
+      Q1_2029: 800_000
+
+  bull_case:
+    description: "Accelerated reshoring, Amazon expansion resumes, cold storage boom"
+    annual_absorption_sf: 4_000_000
+    quarterly_pattern: [0.22, 0.30, 0.28, 0.20]
+    probability: 25
+    key_assumption: "Amazon announces 1M+ SF BTS in 2027. Reshoring drives 2+ new tenants >500k SF."
+
+  bear_case:
+    description: "Mild recession, e-commerce growth stalls, 3PL consolidation"
+    annual_absorption_sf: 2_000_000
+    quarterly_pattern: [0.20, 0.25, 0.30, 0.25]
+    probability: 25
+    key_assumption: "Consumer spending decline -2%. Two major 3PL tenants consolidate operations, releasing 500k SF."
+
+# ===========================================================================
+# SECTION 4: SUPPLY-DEMAND BALANCE PROJECTION
+# ===========================================================================
+
+quarterly_forecast:
+
+  base_case:
+    - quarter: "Q2 2026"
+      beginning_stock: 62_500_000
+      deliveries: 1_000_000
+      absorption: 800_000
+      ending_stock: 63_500_000
+      net_change_occupied: -200_000
+      ending_vacancy_sf: 3_200_000
+      vacancy_rate_pct: 5.0
+      asking_rent: 8.25
+      effective_rent: 7.90
+      rent_growth_qoq_pct: 0.6
+
+    - quarter: "Q3 2026"
+      beginning_stock: 63_500_000
+      deliveries: 1_500_000
+      absorption: 960_000
+      ending_stock: 65_000_000
+      net_change_occupied: -540_000
+      ending_vacancy_sf: 3_740_000
+      vacancy_rate_pct: 5.8
+      asking_rent: 8.30
+      effective_rent: 7.85
+      rent_growth_qoq_pct: -0.6
+      notes: "Peak delivery quarter. Vacancy exceeds LTA. Concessions expand."
+
+    - quarter: "Q4 2026"
+      beginning_stock: 65_000_000
+      deliveries: 850_000
+      absorption: 640_000
+      ending_stock: 65_850_000
+      net_change_occupied: -210_000
+      ending_vacancy_sf: 3_950_000
+      vacancy_rate_pct: 6.0
+      asking_rent: 8.30
+      effective_rent: 7.80
+      rent_growth_qoq_pct: -0.6
+
+    - quarter: "Q1 2027"
+      beginning_stock: 65_850_000
+      deliveries: 200_000
+      absorption: 800_000
+      ending_stock: 66_050_000
+      net_change_occupied: 600_000
+      ending_vacancy_sf: 3_350_000
+      vacancy_rate_pct: 5.1
+      asking_rent: 8.35
+      effective_rent: 7.90
+      rent_growth_qoq_pct: 1.3
+      notes: "Deliveries slow sharply. Absorption exceeds supply. Turning point."
+
+    - quarter: "Q2 2027"
+      beginning_stock: 66_050_000
+      deliveries: 650_000
+      absorption: 800_000
+      ending_stock: 66_700_000
+      net_change_occupied: 150_000
+      ending_vacancy_sf: 3_200_000
+      vacancy_rate_pct: 4.8
+      asking_rent: 8.45
+      effective_rent: 8.05
+      rent_growth_qoq_pct: 1.9
+
+    - quarter: "Q3 2027"
+      beginning_stock: 66_700_000
+      deliveries: 500_000
+      absorption: 960_000
+      ending_stock: 67_200_000
+      net_change_occupied: 460_000
+      ending_vacancy_sf: 2_740_000
+      vacancy_rate_pct: 4.1
+      asking_rent: 8.60
+      effective_rent: 8.25
+      rent_growth_qoq_pct: 2.5
+
+    - quarter: "Q4 2027"
+      beginning_stock: 67_200_000
+      deliveries: 300_000
+      absorption: 640_000
+      ending_stock: 67_500_000
+      net_change_occupied: 340_000
+      ending_vacancy_sf: 2_400_000
+      vacancy_rate_pct: 3.6
+      asking_rent: 8.80
+      effective_rent: 8.50
+      rent_growth_qoq_pct: 3.0
+      notes: "Vacancy below LTA. Landlord pricing power returning. Concessions shrinking."
+
+    - quarter: "Q1 2028"
+      beginning_stock: 67_500_000
+      deliveries: 800_000
+      absorption: 800_000
+      ending_stock: 68_300_000
+      net_change_occupied: 0
+      ending_vacancy_sf: 2_400_000
+      vacancy_rate_pct: 3.5
+      asking_rent: 8.95
+      effective_rent: 8.65
+      rent_growth_qoq_pct: 1.8
+
+    - quarter: "Q2 2028"
+      beginning_stock: 68_300_000
+      deliveries: 480_000
+      absorption: 800_000
+      ending_stock: 68_780_000
+      net_change_occupied: 320_000
+      ending_vacancy_sf: 2_080_000
+      vacancy_rate_pct: 3.0
+      asking_rent: 9.10
+      effective_rent: 8.85
+      rent_growth_qoq_pct: 2.3
+
+    - quarter: "Q3 2028"
+      beginning_stock: 68_780_000
+      deliveries: 250_000
+      absorption: 960_000
+      ending_stock: 69_030_000
+      net_change_occupied: 710_000
+      ending_vacancy_sf: 1_370_000
+      vacancy_rate_pct: 2.0
+      asking_rent: 9.35
+      effective_rent: 9.15
+      rent_growth_qoq_pct: 3.4
+      notes: "Tight market. Sub-3% vacancy. Significant rent acceleration."
+
+    - quarter: "Q4 2028"
+      beginning_stock: 69_030_000
+      deliveries: 125_000
+      absorption: 640_000
+      ending_stock: 69_155_000
+      net_change_occupied: 515_000
+      ending_vacancy_sf: 855_000
+      vacancy_rate_pct: 1.2
+      asking_rent: 9.60
+      effective_rent: 9.45
+      rent_growth_qoq_pct: 3.3
+
+    - quarter: "Q1 2029"
+      beginning_stock: 69_155_000
+      deliveries: 0
+      absorption: 800_000
+      ending_stock: 69_155_000
+      net_change_occupied: 800_000
+      ending_vacancy_sf: 55_000
+      vacancy_rate_pct: 0.1
+      asking_rent: 10.00
+      effective_rent: 9.85
+      rent_growth_qoq_pct: 4.2
+      notes: >
+        Near-zero vacancy is theoretical -- functionally represents extreme
+        tightness with no quality space available. New development will restart
+        well before this point. Rent forecast likely overstated for this quarter.
+
+  annual_summary_base_case:
+    year_2026:
+      deliveries_sf: 3_350_000
+      absorption_sf: 2_400_000
+      ad_ratio: 0.72
+      year_end_vacancy_pct: 6.0
+      year_end_effective_rent: 7.80
+      rent_growth_yoy_pct: -0.6
+    year_2027:
+      deliveries_sf: 1_650_000
+      absorption_sf: 3_200_000
+      ad_ratio: 1.94
+      year_end_vacancy_pct: 3.6
+      year_end_effective_rent: 8.50
+      rent_growth_yoy_pct: 9.0
+    year_2028:
+      deliveries_sf: 1_655_000
+      absorption_sf: 3_200_000
+      ad_ratio: 1.93
+      year_end_vacancy_pct: 1.2
+      year_end_effective_rent: 9.45
+      rent_growth_yoy_pct: 11.2
+
+# ===========================================================================
+# SECTION 5: INVESTMENT IMPLICATIONS
+# ===========================================================================
+
+investment_implications:
+
+  near_term_2026:
+    outlook: "Cautious"
+    rationale: >
+      2026 is the peak supply year with 3.35M SF delivering against 2.4M SF
+      absorption. Vacancy will rise above the long-term average for the first
+      time since 2021. Effective rent growth will be flat to slightly negative.
+      Concessions will expand to 1-2 months free on new leases.
+    strategy: >
+      Hold existing assets. Do not acquire at sub-5.5% cap rates. Delay any
+      disposition to avoid selling into a softening market. Renew existing
+      tenants aggressively even at small concessions -- vacancy is more
+      expensive than a rent reduction.
+
+  medium_term_2027:
+    outlook: "Improving rapidly"
+    rationale: >
+      Deliveries drop by 50% while absorption remains strong. The A/D ratio
+      swings to nearly 2x, rapidly tightening the market. Vacancy falls
+      below LTA by mid-year. This is the inflection point.
+    strategy: >
+      Acquire in early 2027 while vacancy is still elevated and pricing
+      reflects 2026 softness. Sellers in early 2027 are pricing off 2026
+      conditions. Buyers who can underwrite 2027 fundamentals will capture
+      significant upside. Target 6.0-6.5% going-in cap rates.
+
+  longer_term_2028_plus:
+    outlook: "Bullish"
+    rationale: >
+      By late 2028, the market is extremely tight (sub-2% vacancy) with
+      effective rents approaching $9.50/SF -- a 20%+ increase from current
+      levels. New development will restart but won't deliver until 2030+
+      given the Upper Macungie moratorium and 18-24 month construction timeline.
+    strategy: >
+      Dispose of stabilized assets at peak pricing in late 2028 / early 2029.
+      Exit cap rates should compress to 5.0-5.5% given the combination of
+      tight vacancy, strong rent growth, and constrained future supply.
+      This is the optimal exit window before the next wave of development
+      delivers.
+
+  scenario_comparison:
+    base_case:
+      entry_cap_q1_2027: 6.25
+      exit_cap_q4_2028: 5.25
+      noi_growth_2yr: 18.5
+      levered_irr_estimate: 22.0
+    bull_case:
+      entry_cap_q1_2027: 6.25
+      exit_cap_q4_2028: 5.00
+      noi_growth_2yr: 24.0
+      levered_irr_estimate: 28.0
+    bear_case:
+      entry_cap_q1_2027: 6.50
+      exit_cap_q4_2028: 5.75
+      noi_growth_2yr: 8.0
+      levered_irr_estimate: 14.0
+
+  key_risks:
+    - risk: "Amazon announces another expansion pause"
+      probability: "Medium"
+      impact: "Absorption drops 15-20%. Bear case becomes more likely."
+      mitigation: "Diversify tenant base. Avoid single-tenant Amazon risk."
+    - risk: "Recession deeper than bear case"
+      probability: "Low"
+      impact: "Absorption negative for 2-3 quarters. Vacancy exceeds 8%."
+      mitigation: "Maintain conservative leverage (< 65% LTV). Cash reserves."
+    - risk: "Upper Macungie moratorium lifted"
+      probability: "Low (2026-2027), Medium (2028+)"
+      impact: "New supply restarts sooner than forecast. 2029 delivery risk."
+      mitigation: "Accelerate exit timeline if moratorium is lifted."
+    - risk: "Interest rates spike (10yr > 6%)"
+      probability: "Low"
+      impact: "Cap rate expansion offsets NOI growth. Exit pricing weaker."
+      mitigation: "Lock fixed-rate debt at acquisition. Model sensitivity."

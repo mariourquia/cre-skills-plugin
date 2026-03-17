@@ -1,0 +1,723 @@
+# Vendor Booking Schemas for Tenant Event Planner
+# Forward-looking MCP integration definitions.
+# These schemas define the contract between the skill and external vendor APIs.
+# When MCP servers for these vendors become available, this file drives the integration.
+
+version: "0.1.0"
+status: schema_defined  # Transitions to active when MCP servers connect
+
+# ---------------------------------------------------------------------------
+# Approval Workflow
+# ---------------------------------------------------------------------------
+approval_workflow:
+  description: >
+    Every action involving financial commitment passes through a human approval gate.
+    The skill NEVER autonomously commits funds. This workflow is enforced at the
+    orchestration layer regardless of which vendor integration is active.
+  stages:
+    - stage: plan_review
+      description: User reviews generated event plan before vendor outreach begins
+      blocking: true
+      required_action: user_confirms_plan
+      timeout_hours: 72
+
+    - stage: vendor_shortlist
+      description: User approves which vendors to request quotes from
+      blocking: true
+      required_action: user_approves_vendors
+      timeout_hours: 48
+
+    - stage: quote_selection
+      description: User selects winning quote from comparison table
+      blocking: true
+      required_action: user_selects_quote
+      timeout_hours: 48
+
+    - stage: booking_confirmation
+      description: User authorizes booking and financial commitment
+      blocking: true
+      required_action: user_confirms_booking
+      timeout_hours: 24
+
+    - stage: payment_authorization
+      description: User approves final payment after event delivery
+      blocking: true
+      required_action: user_authorizes_payment
+      timeout_hours: 168  # 7 days post-event
+
+# ---------------------------------------------------------------------------
+# Catering Integration
+# ---------------------------------------------------------------------------
+catering:
+  mcp_server: catering_vendor_mcp  # Placeholder server name
+  providers:
+    - name: ezCater
+      api_type: rest
+      coverage: national
+    - name: CaterCow
+      api_type: rest
+      coverage: metro_areas
+    - name: Fooda
+      api_type: rest
+      coverage: office_buildings
+    - name: local_vendors
+      api_type: directory_lookup
+      coverage: local_radius
+
+  actions:
+    search_menus:
+      description: Search available catering options matching event requirements
+      request:
+        type: object
+        required: [location, date, headcount, budget_range]
+        properties:
+          location:
+            type: object
+            properties:
+              address: { type: string }
+              city: { type: string }
+              state: { type: string }
+              zip: { type: string }
+              radius_miles: { type: integer, default: 25 }
+          date: { type: string, format: date }
+          headcount:
+            type: object
+            properties:
+              expected: { type: integer }
+              minimum: { type: integer }
+              maximum: { type: integer }
+          dietary_requirements:
+            type: array
+            items:
+              type: string
+              enum: [vegetarian, vegan, halal, kosher, gluten_free, nut_free, dairy_free]
+          budget_range:
+            type: object
+            properties:
+              min_per_head: { type: number }
+              max_per_head: { type: number }
+          cuisine_type:
+            type: array
+            items: { type: string }
+          meal_type:
+            type: string
+            enum: [breakfast, lunch, dinner, hors_doeuvres, snacks, dessert, beverages_only]
+          service_style:
+            type: string
+            enum: [buffet, plated, drop_off, food_stations, passed]
+      response:
+        type: object
+        properties:
+          vendors:
+            type: array
+            items:
+              type: object
+              properties:
+                vendor_id: { type: string }
+                name: { type: string }
+                rating: { type: number, minimum: 0, maximum: 5 }
+                review_count: { type: integer }
+                price_per_head_range: { type: string }
+                cuisine_types: { type: array, items: { type: string } }
+                dietary_accommodations: { type: array, items: { type: string } }
+                menu_options:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      menu_id: { type: string }
+                      name: { type: string }
+                      description: { type: string }
+                      price_per_head: { type: number }
+                      minimum_order: { type: integer }
+                min_lead_time_days: { type: integer }
+
+    get_quotes:
+      description: Request formal quote from specific vendor with menu selections
+      request:
+        type: object
+        required: [vendor_id, menu_selections, headcount, date, delivery_address]
+        properties:
+          vendor_id: { type: string }
+          menu_selections:
+            type: array
+            items:
+              type: object
+              properties:
+                menu_id: { type: string }
+                quantity: { type: integer }
+                modifications: { type: string }
+          headcount: { type: integer }
+          date: { type: string, format: date }
+          time: { type: string, format: time }
+          delivery_address: { type: string }
+          service_duration_hours: { type: number }
+          setup_required: { type: boolean }
+          staffing_requested: { type: boolean }
+          special_instructions: { type: string }
+      response:
+        type: object
+        properties:
+          quote_id: { type: string }
+          vendor_name: { type: string }
+          line_items:
+            type: array
+            items:
+              type: object
+              properties:
+                description: { type: string }
+                quantity: { type: integer }
+                unit_price: { type: number }
+                subtotal: { type: number }
+          food_subtotal: { type: number }
+          service_fee: { type: number }
+          delivery_fee: { type: number }
+          tax: { type: number }
+          total: { type: number }
+          price_per_head: { type: number }
+          valid_until: { type: string, format: date }
+          cancellation_policy:
+            type: object
+            properties:
+              full_refund_before: { type: string, format: date }
+              partial_refund_before: { type: string, format: date }
+              partial_refund_percent: { type: number }
+              no_refund_after: { type: string, format: date }
+
+    place_order:
+      description: Confirm and place catering order (REQUIRES APPROVAL GATE)
+      approval_gate: true
+      request:
+        type: object
+        required: [quote_id, payment_method, contact_info]
+        properties:
+          quote_id: { type: string }
+          payment_method:
+            type: object
+            properties:
+              type: { type: string, enum: [credit_card, invoice, purchase_order] }
+              reference: { type: string }
+          contact_info:
+            type: object
+            properties:
+              name: { type: string }
+              phone: { type: string }
+              email: { type: string }
+          special_instructions: { type: string }
+          delivery_instructions: { type: string }
+      response:
+        type: object
+        properties:
+          order_id: { type: string }
+          confirmation_number: { type: string }
+          status: { type: string, enum: [confirmed, pending_vendor_confirmation] }
+          estimated_delivery: { type: string, format: date-time }
+          vendor_contact:
+            type: object
+            properties:
+              name: { type: string }
+              phone: { type: string }
+              email: { type: string }
+
+    modify_order:
+      description: Modify an existing catering order
+      request:
+        type: object
+        required: [order_id, changes]
+        properties:
+          order_id: { type: string }
+          changes:
+            type: object
+            properties:
+              headcount: { type: integer }
+              menu_additions: { type: array, items: { type: object } }
+              menu_removals: { type: array, items: { type: string } }
+              time_change: { type: string, format: time }
+              special_instructions: { type: string }
+      response:
+        type: object
+        properties:
+          updated_order_id: { type: string }
+          price_delta: { type: number }
+          new_total: { type: number }
+          confirmation: { type: string }
+          modification_fee: { type: number }
+
+    cancel_order:
+      description: Cancel an existing catering order
+      request:
+        type: object
+        required: [order_id, reason]
+        properties:
+          order_id: { type: string }
+          reason: { type: string }
+      response:
+        type: object
+        properties:
+          cancellation_id: { type: string }
+          status: { type: string, enum: [cancelled, pending_cancellation] }
+          refund_amount: { type: number }
+          refund_timeline_days: { type: integer }
+          cancellation_fee: { type: number }
+
+# ---------------------------------------------------------------------------
+# Entertainment Integration
+# ---------------------------------------------------------------------------
+entertainment:
+  mcp_server: entertainment_vendor_mcp
+  providers:
+    - name: GigSalad
+      api_type: rest
+      coverage: national
+    - name: Thumbtack
+      api_type: rest
+      coverage: national
+    - name: local_agencies
+      api_type: directory_lookup
+      coverage: local_radius
+
+  actions:
+    search_performers:
+      description: Search available entertainment matching event requirements
+      request:
+        type: object
+        required: [location, date, event_type, budget_range]
+        properties:
+          location:
+            type: object
+            properties:
+              city: { type: string }
+              state: { type: string }
+              zip: { type: string }
+              radius_miles: { type: integer, default: 50 }
+          date: { type: string, format: date }
+          event_type: { type: string }
+          category:
+            type: string
+            enum: [dj, live_band, solo_musician, duo_trio, comedian, magician, caricaturist, photo_booth, balloon_artist, face_painter, trivia_host, game_show_host]
+          genre: { type: string }
+          duration_hours: { type: number }
+          budget_range:
+            type: object
+            properties:
+              min: { type: number }
+              max: { type: number }
+          audience:
+            type: string
+            enum: [adults_only, family_friendly, corporate, casual]
+      response:
+        type: object
+        properties:
+          performers:
+            type: array
+            items:
+              type: object
+              properties:
+                performer_id: { type: string }
+                name: { type: string }
+                category: { type: string }
+                rating: { type: number }
+                review_count: { type: integer }
+                price_range: { type: string }
+                available: { type: boolean }
+                media_samples:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type: { type: string, enum: [video, audio, photo] }
+                      url: { type: string }
+                description: { type: string }
+
+    book:
+      description: Book entertainment (REQUIRES APPROVAL GATE)
+      approval_gate: true
+      request:
+        type: object
+        required: [quote_id, payment_method, contact_info, venue_details]
+        properties:
+          quote_id: { type: string }
+          payment_method:
+            type: object
+            properties:
+              type: { type: string, enum: [credit_card, invoice, purchase_order] }
+              reference: { type: string }
+          contact_info:
+            type: object
+            properties:
+              name: { type: string }
+              phone: { type: string }
+              email: { type: string }
+          venue_details:
+            type: object
+            properties:
+              address: { type: string }
+              space_type: { type: string }
+              power_available: { type: boolean }
+              load_in_instructions: { type: string }
+              parking_instructions: { type: string }
+      response:
+        type: object
+        properties:
+          booking_id: { type: string }
+          confirmation: { type: string }
+          performer_contact:
+            type: object
+            properties:
+              name: { type: string }
+              phone: { type: string }
+              email: { type: string }
+          setup_requirements:
+            type: object
+            properties:
+              arrival_time: { type: string, format: time }
+              space_needed: { type: string }
+              power_requirements: { type: string }
+              sound_check_duration_minutes: { type: integer }
+
+# ---------------------------------------------------------------------------
+# Rentals Integration
+# ---------------------------------------------------------------------------
+rentals:
+  mcp_server: rental_vendor_mcp
+  providers:
+    - name: CORT_Events
+      api_type: rest
+      coverage: national
+    - name: Party_Rental_Ltd
+      api_type: rest
+      coverage: regional
+    - name: local_rental_companies
+      api_type: directory_lookup
+      coverage: local_radius
+
+  actions:
+    search_inventory:
+      description: Search available rental items
+      request:
+        type: object
+        required: [location, date, items_needed]
+        properties:
+          location:
+            type: object
+            properties:
+              address: { type: string }
+              zip: { type: string }
+              radius_miles: { type: integer, default: 30 }
+          date: { type: string, format: date }
+          items_needed:
+            type: array
+            items:
+              type: object
+              required: [category, quantity]
+              properties:
+                category:
+                  type: string
+                  enum: [tables, chairs, linens, tents, staging, lighting, sound, inflatables, games, heaters, fans, generators, serving_equipment, bars]
+                quantity: { type: integer }
+                style_preference: { type: string }
+                dimensions: { type: string }
+      response:
+        type: object
+        properties:
+          available_items:
+            type: array
+            items:
+              type: object
+              properties:
+                item_id: { type: string }
+                category: { type: string }
+                name: { type: string }
+                description: { type: string }
+                options:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      option_id: { type: string }
+                      color_or_style: { type: string }
+                      price_per_unit: { type: number }
+                      available_quantity: { type: integer }
+                delivery_fee: { type: number }
+                damage_waiver_fee: { type: number }
+
+    reserve:
+      description: Reserve rental items (REQUIRES APPROVAL GATE)
+      approval_gate: true
+      request:
+        type: object
+        required: [quote_id, payment_method, contact_info]
+        properties:
+          quote_id: { type: string }
+          payment_method:
+            type: object
+            properties:
+              type: { type: string, enum: [credit_card, invoice, purchase_order] }
+              reference: { type: string }
+          contact_info:
+            type: object
+            properties:
+              name: { type: string }
+              phone: { type: string }
+              email: { type: string }
+          access_instructions:
+            type: object
+            properties:
+              delivery_entrance: { type: string }
+              elevator_access: { type: boolean }
+              loading_dock: { type: boolean }
+              contact_on_site: { type: string }
+              contact_phone: { type: string }
+      response:
+        type: object
+        properties:
+          reservation_id: { type: string }
+          confirmation: { type: string }
+          delivery_window:
+            type: object
+            properties:
+              date: { type: string, format: date }
+              earliest: { type: string, format: time }
+              latest: { type: string, format: time }
+          pickup_window:
+            type: object
+            properties:
+              date: { type: string, format: date }
+              earliest: { type: string, format: time }
+              latest: { type: string, format: time }
+
+# ---------------------------------------------------------------------------
+# Venue / Building Services Integration
+# ---------------------------------------------------------------------------
+venue_services:
+  mcp_server: building_management_mcp
+  providers:
+    - name: building_amenity_system
+      api_type: internal
+      coverage: property_specific
+    - name: common_area_booking
+      api_type: internal
+      coverage: property_specific
+
+  actions:
+    check_availability:
+      request:
+        type: object
+        required: [space_id, date, start_time, end_time]
+        properties:
+          space_id: { type: string }
+          date: { type: string, format: date }
+          start_time: { type: string, format: time }
+          end_time: { type: string, format: time }
+          setup_buffer_minutes: { type: integer, default: 60 }
+          teardown_buffer_minutes: { type: integer, default: 60 }
+      response:
+        type: object
+        properties:
+          available: { type: boolean }
+          conflicts:
+            type: array
+            items:
+              type: object
+              properties:
+                event_name: { type: string }
+                time_range: { type: string }
+          alternate_times:
+            type: array
+            items:
+              type: object
+              properties:
+                date: { type: string, format: date }
+                start_time: { type: string, format: time }
+                end_time: { type: string, format: time }
+
+    reserve_space:
+      approval_gate: true
+      request:
+        type: object
+        required: [space_id, date, start_time, end_time, event_description]
+        properties:
+          space_id: { type: string }
+          date: { type: string, format: date }
+          start_time: { type: string, format: time }
+          end_time: { type: string, format: time }
+          event_description: { type: string }
+          expected_attendance: { type: integer }
+          setup_requirements:
+            type: object
+            properties:
+              furniture_config: { type: string }
+              av_needs: { type: array, items: { type: string } }
+              power_requirements: { type: string }
+              catering_setup: { type: boolean }
+              cleanup_service: { type: boolean }
+      response:
+        type: object
+        properties:
+          reservation_id: { type: string }
+          confirmation: { type: string }
+          rules_and_restrictions:
+            type: array
+            items: { type: string }
+          estimated_cost: { type: number }
+
+# ---------------------------------------------------------------------------
+# Communications Integration
+# ---------------------------------------------------------------------------
+communications:
+  mcp_server: property_communications_mcp
+  providers:
+    - name: Mailchimp
+      api_type: rest
+      coverage: email
+    - name: building_app
+      api_type: rest
+      coverage: push_notifications
+    - name: AppFolio
+      api_type: rest
+      coverage: property_management
+    - name: Yardi
+      api_type: rest
+      coverage: property_management
+
+  actions:
+    create_invite:
+      request:
+        type: object
+        required: [event_details, recipient_segment]
+        properties:
+          event_details:
+            type: object
+            properties:
+              name: { type: string }
+              date: { type: string, format: date }
+              time: { type: string, format: time }
+              location: { type: string }
+              description: { type: string }
+              image_url: { type: string }
+          template_style:
+            type: string
+            enum: [formal, casual, festive, corporate, minimal]
+          recipient_segment:
+            type: string
+            enum: [all_tenants, residential_only, commercial_only, specific_floors, families, pet_owners]
+          rsvp_enabled: { type: boolean, default: true }
+          rsvp_options:
+            type: array
+            items:
+              type: string
+              enum: [attending, not_attending, maybe, plus_one, dietary_preference]
+      response:
+        type: object
+        properties:
+          draft_id: { type: string }
+          preview_url: { type: string }
+          recipient_count: { type: integer }
+
+    send_blast:
+      approval_gate: true
+      request:
+        type: object
+        required: [draft_id, channels]
+        properties:
+          draft_id: { type: string }
+          send_time:
+            type: string
+            format: date-time
+            description: Schedule for future send; omit for immediate
+          channels:
+            type: array
+            items:
+              type: string
+              enum: [email, app_push, sms, lobby_display]
+      response:
+        type: object
+        properties:
+          send_id: { type: string }
+          status: { type: string, enum: [sent, scheduled, queued] }
+          recipient_count: { type: integer }
+          channels_used: { type: array, items: { type: string } }
+
+    track_rsvps:
+      request:
+        type: object
+        required: [event_id]
+        properties:
+          event_id: { type: string }
+      response:
+        type: object
+        properties:
+          total_invited: { type: integer }
+          rsvp_yes: { type: integer }
+          rsvp_no: { type: integer }
+          rsvp_maybe: { type: integer }
+          rsvp_pending: { type: integer }
+          plus_ones: { type: integer }
+          dietary_responses:
+            type: object
+            properties:
+              vegetarian: { type: integer }
+              vegan: { type: integer }
+              gluten_free: { type: integer }
+              halal: { type: integer }
+              kosher: { type: integer }
+              nut_free: { type: integer }
+              other: { type: array, items: { type: string } }
+          response_rate_percent: { type: number }
+
+    send_reminders:
+      request:
+        type: object
+        required: [event_id, reminder_type]
+        properties:
+          event_id: { type: string }
+          reminder_type:
+            type: string
+            enum: [three_day, day_of, post_event_thanks]
+          custom_message: { type: string }
+          channels:
+            type: array
+            items:
+              type: string
+              enum: [email, app_push, sms]
+      response:
+        type: object
+        properties:
+          send_id: { type: string }
+          recipient_count: { type: integer }
+          status: { type: string }
+
+# ---------------------------------------------------------------------------
+# Fallback RFP Templates
+# ---------------------------------------------------------------------------
+# When MCP integrations are unavailable, the skill generates these templates
+# for manual vendor outreach.
+
+fallback_templates:
+  catering_rfp:
+    subject: "RFP: Catering for {event_name} on {date}"
+    sections:
+      - event_overview: "Description, date, time, location"
+      - headcount: "Expected {headcount} guests"
+      - menu_requirements: "Meal type, dietary needs, service style"
+      - logistics: "Delivery time, setup requirements, cleanup expectations"
+      - budget_guidance: "Target budget of ${budget_per_head}/person"
+      - response_deadline: "Please respond by {deadline}"
+      - evaluation_criteria: "Price, menu quality, reviews, availability"
+
+  entertainment_rfp:
+    subject: "RFP: Entertainment for {event_name} on {date}"
+    sections:
+      - event_overview: "Description, date, time, venue"
+      - performance_requirements: "Type, duration, audience, vibe"
+      - technical_needs: "Power, space, sound requirements"
+      - budget_guidance: "Target budget of ${budget}"
+      - response_deadline: "Please respond by {deadline}"
+
+  rental_rfp:
+    subject: "RFP: Event Rentals for {event_name} on {date}"
+    sections:
+      - items_needed: "Category, quantity, style preference"
+      - delivery_details: "Address, access instructions, delivery/pickup times"
+      - budget_guidance: "Target budget of ${budget}"
+      - response_deadline: "Please respond by {deadline}"

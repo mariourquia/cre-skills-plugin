@@ -1,0 +1,211 @@
+# Pre-Built Stress Scenarios for CRE Sensitivity Analysis
+# Apply these to any deal model by overriding the base case assumptions.
+# Each scenario includes a narrative, variable adjustments, and expected impact direction.
+
+scenarios:
+  rate_shock:
+    name: "Interest Rate Shock (+200bps)"
+    probability: "15-20%"
+    narrative: >
+      Federal Reserve tightens aggressively in response to persistent inflation.
+      10-year Treasury rises 150bps; credit spreads widen 50bps. Refinance risk
+      materializes for loans maturing in the next 24 months.
+    variable_adjustments:
+      interest_rate: "+200bps from base"
+      exit_cap_rate: "+50bps from base (partial pass-through)"
+      rent_growth: "-50bps from base (demand softens)"
+      vacancy: "+100bps from base"
+      expense_growth: "+50bps from base (wage pressure)"
+      capex: "no change"
+    impact_direction:
+      levered_irr: "down 200-400bps"
+      dscr: "down 15-25%"
+      equity_multiple: "down 0.3-0.6x"
+      refi_risk: "elevated -- may not meet DSCR at refi"
+    primary_risk: "Refinance execution; debt service coverage at maturity"
+    mitigation: >
+      Lock fixed-rate debt at origination. Purchase interest rate cap
+      for floating rate loans. Size loan conservatively to maintain
+      1.25x DSCR at stressed rate.
+
+  vacancy_spike:
+    name: "Vacancy Spike (+500bps)"
+    probability: "10-15%"
+    narrative: >
+      Major local employer downsizes or relocates. Submarket experiences
+      supply wave from new construction delivering simultaneously. Vacancy
+      rises from 5% to 10% with concession pressure.
+    variable_adjustments:
+      interest_rate: "no change"
+      exit_cap_rate: "+25bps from base"
+      rent_growth: "-100bps from base (concession pressure)"
+      vacancy: "+500bps from base (5% to 10%)"
+      expense_growth: "no change"
+      capex: "+10% (additional TI/leasing costs to backfill)"
+    impact_direction:
+      levered_irr: "down 150-300bps"
+      dscr: "down 10-18%"
+      equity_multiple: "down 0.2-0.4x"
+      noi: "down 8-12%"
+    primary_risk: "Revenue decline; potential covenant trigger"
+    mitigation: >
+      Diversify tenant base (low HHI). Target submarkets with
+      employment diversification. Underwrite to physical vacancy
+      1-2% above current market.
+
+  rent_decline:
+    name: "Rent Decline (-5% Annual)"
+    probability: "5-10%"
+    narrative: >
+      Recessionary environment with demand destruction. New supply
+      completes into weak demand. Market rents decline 5% year-over-year
+      for 2 years, then stabilize.
+    variable_adjustments:
+      interest_rate: "+50bps (credit spread widening)"
+      exit_cap_rate: "+50bps from base"
+      rent_growth: "-5% Year 1-2, 0% Year 3, +2% Year 4+"
+      vacancy: "+300bps from base"
+      expense_growth: "+100bps from base (sticky costs)"
+      capex: "no change"
+    impact_direction:
+      levered_irr: "down 400-700bps"
+      dscr: "down 20-30%"
+      equity_multiple: "down 0.5-1.0x"
+      noi_trough: "Year 2 or Year 3"
+    primary_risk: "NOI erosion; negative leverage; potential loss of principal"
+    mitigation: >
+      Build cash reserves pre-close. Negotiate IO period to weather
+      downturn. Target assets with below-market in-place rents
+      (built-in floor from loss-to-lease).
+
+  expense_surge:
+    name: "Expense Surge (+10% Annual)"
+    probability: "10-15%"
+    narrative: >
+      Insurance market hardens (post-catastrophe). Property tax
+      reassessment comes in above estimate. Labor costs spike from
+      minimum wage legislation. All categories rise simultaneously.
+    variable_adjustments:
+      interest_rate: "no change"
+      exit_cap_rate: "+25bps from base (lower NOI margin = risk premium)"
+      rent_growth: "no change"
+      vacancy: "no change"
+      expense_growth: "+10% Year 1, +5% Year 2, base Year 3+"
+      capex: "+15% (materials cost inflation)"
+    impact_direction:
+      levered_irr: "down 100-250bps"
+      dscr: "down 8-15%"
+      equity_multiple: "down 0.15-0.3x"
+      expense_ratio: "up 3-5 percentage points"
+    primary_risk: "Margin compression; particularly acute for NNN pass-through gaps"
+    mitigation: >
+      NNN or modified gross leases with expense recovery. Contest
+      tax reassessment. Shop insurance annually. Sub-meter utilities.
+
+  combined_recession:
+    name: "Combined Recession Scenario"
+    probability: "5-8%"
+    narrative: >
+      Broad economic recession. Unemployment rises 3-4 percentage points.
+      Fed holds rates high initially, then cuts. Credit markets freeze for
+      6-12 months. Multiple stress factors hit simultaneously.
+    variable_adjustments:
+      interest_rate: "+100bps Year 1-2 (credit freeze), -100bps Year 3+ (Fed cuts)"
+      exit_cap_rate: "+100bps from base"
+      rent_growth: "-3% Year 1, -2% Year 2, 0% Year 3, +2% Year 4+"
+      vacancy: "+800bps Year 1-2, -300bps Year 3+"
+      expense_growth: "+200bps from base (sticky)"
+      capex: "+20% (deferred maintenance backlog)"
+    impact_direction:
+      levered_irr: "down 600-1000bps"
+      dscr: "trough below 1.0x in Year 1-2"
+      equity_multiple: "down 0.8-1.5x"
+      cash_flow: "potentially negative Years 1-2"
+    primary_risk: >
+      Liquidity crisis. Cash flow negative during recession. Covenant
+      breach triggers cash sweep. Refinance impossible during credit freeze.
+    mitigation: >
+      Maintain 6-12 months of debt service in reserve. Conservative
+      LTV (below 60%). Fixed-rate debt with no near-term maturity.
+      Avoid value-add execution during late-cycle.
+    note: >
+      This scenario is the "sleep at night" test. If the deal survives
+      combined recession with equity multiple > 1.0x and no covenant
+      default, the risk profile is defensible.
+
+  cap_rate_expansion:
+    name: "Cap Rate Expansion (+75bps)"
+    probability: "20-25%"
+    narrative: >
+      Gradual normalization of cap rates as higher-for-longer rate
+      environment persists. No recession, but buyers demand higher
+      yields. Transaction volume declines. Price discovery is difficult.
+    variable_adjustments:
+      interest_rate: "+25bps (modest)"
+      exit_cap_rate: "+75bps from base"
+      rent_growth: "no change (operations unaffected)"
+      vacancy: "no change"
+      expense_growth: "no change"
+      capex: "no change"
+    impact_direction:
+      levered_irr: "down 200-350bps"
+      dscr: "no change (operations unaffected)"
+      equity_multiple: "down 0.3-0.6x"
+      reversion_value: "down 8-12%"
+    primary_risk: "Reversion value compression; reduced equity multiple"
+    mitigation: >
+      Underwrite with built-in cap rate expansion (25-50bps buffer).
+      Focus on NOI growth to offset cap rate headwind. Extend hold
+      period if cap rates have not normalized at original exit date.
+    note: >
+      Cap rate expansion is the most likely stress scenario in the current
+      environment (2025-2026). A 75bps expansion from 6.0% to 6.75% reduces
+      a $20M property value to $17.8M -- an 11% decline from operations alone.
+
+# Application Instructions
+#
+# To apply a scenario to a base case model:
+# 1. Start with the fully built base case proforma.
+# 2. Select the relevant scenario.
+# 3. Override only the variables listed in variable_adjustments.
+# 4. Recompute all dependent calculations (EGI, NOI, BTCF, reversion, returns).
+# 5. Report the stressed return metrics alongside the base case.
+# 6. For combined recession, model the time-varying adjustments year by year.
+#
+# Scenario Combination Rules:
+# - Do not combine multiple scenarios unless explicitly building a "combined" case.
+# - The combined_recession scenario already incorporates correlated stresses.
+# - Stacking rate_shock on top of combined_recession double-counts rate stress.
+#
+# Probability Calibration:
+# - Probabilities are subjective, market-dependent estimates.
+# - In a rising rate environment, rate_shock probability increases to 25-30%.
+# - In a supply-heavy market, vacancy_spike probability increases to 20-25%.
+# - Adjust probabilities based on current macro conditions and submarket specifics.
+# - The remaining probability (complement to 100%) is the base case probability.
+
+benchmarks:
+  multifamily:
+    going_in_cap: "4.5-6.5%"
+    exit_cap_spread: "+0 to +50bps"
+    stabilized_vacancy: "4-7%"
+    expense_ratio: "38-48%"
+    dscr_floor: "1.20x (agency), 1.25x (bank)"
+  office:
+    going_in_cap: "6.0-9.0%"
+    exit_cap_spread: "+25 to +75bps"
+    stabilized_vacancy: "8-15%"
+    expense_ratio: "42-55%"
+    dscr_floor: "1.30x-1.40x"
+  industrial:
+    going_in_cap: "5.0-7.0%"
+    exit_cap_spread: "+0 to +25bps"
+    stabilized_vacancy: "3-6%"
+    expense_ratio: "25-35%"
+    dscr_floor: "1.25x-1.35x"
+  retail:
+    going_in_cap: "5.5-9.0%"
+    exit_cap_spread: "+25 to +75bps"
+    stabilized_vacancy: "5-10%"
+    expense_ratio: "30-45%"
+    dscr_floor: "1.30x-1.45x"
