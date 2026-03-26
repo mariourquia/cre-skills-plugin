@@ -1,13 +1,13 @@
 # CRE Skills Registry
 # Generated: 2026-03-17
-# Updated: 2026-03-25
-# Total Skills: 98 (3 existing deployed + 77 planned + 18 new deployed)
+# Updated: 2026-03-26
+# Total Skills: 99 (3 existing deployed + 77 planned + 19 new deployed)
 
 metadata:
-  version: "1.3"
+  version: "1.4"
   generated: "2026-03-17"
-  updated: "2026-03-25"
-  total_skills: 98
+  updated: "2026-03-26"
+  total_skills: 99
   categories: 16
   source_prompts_audited: 155
   gap_fill_prompts_added: 32
@@ -1413,4 +1413,18 @@ skills:
     source_prompts: []
     chains_to: [gp-performance-evaluator, fund-terms-comparator]
     chains_from: [lp-data-request-generator, capital-raise-machine]
+    daily_ops_support: []
+
+  - slug: fund-raise-negotiation-engine
+    name: Fund Capital Raise Negotiation Engine
+    category: 09-investor-relations
+    priority: P0
+    phase: 3
+    status: deployed
+    effort_hours: 8
+    plan_file: ""
+    source_prompts: []
+    chains_to: [distribution-notice-generator, quarterly-investor-update, deal-attribution-tracker]
+    chains_from: [capital-raise-machine, fund-formation-toolkit, fund-terms-comparator]
+    lateral: [jv-waterfall-architect, sec-reg-d-compliance, lp-pitch-deck-builder]
     daily_ops_support: []

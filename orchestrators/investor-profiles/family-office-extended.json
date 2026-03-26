@@ -1,0 +1,264 @@
+{
+  "$schema": "Investor Profile - Family Office Extended (Direct Real Estate, Tax-First)",
+  "investorType": "family-office-extended",
+  "extends": "family-office",
+  "teamComposition": {
+    "tier1Override": {
+      "buyerAgent": "buyer-family-office",
+      "additionalAgents": [],
+      "removeAgents": []
+    },
+    "tier2Bias": {
+      "alwaysTrigger": [],
+      "neverTrigger": ["aggressive-gp"]
+    }
+  },
+  "primaryCriteria": {
+    "dscr": {
+      "pass": 1.35,
+      "conditional": 1.25,
+      "fail": 1.15,
+      "description": "Debt Service Coverage Ratio"
+    },
+    "ltv": {
+      "maxPass": 0.60,
+      "maxConditional": 0.65,
+      "fail": 0.75,
+      "description": "Loan to Value Ratio"
+    },
+    "cashOnCash": {
+      "pass": 0.06,
+      "conditional": 0.05,
+      "fail": 0.04,
+      "description": "Annual cash flow / equity invested (pre-tax; after-tax version mandatory alongside)"
+    }
+  },
+  "taxFirstDecisionFramework": {
+    "afterTaxReturnMandatory": true,
+    "taxRates": {
+      "federalOrdinaryIncome": 0.37,
+      "federalLongTermCapitalGains": 0.20,
+      "netInvestmentIncomeTax": 0.038,
+      "stateLocal": {
+        "assumption": "operator-specified",
+        "defaultPlaceholder": 0.10,
+        "note": "Override with actual state + local combined rate for family domicile"
+      }
+    },
+    "depreciationBenefit": {
+      "standardDepreciation": {
+        "residentialHoldingPeriod": 27.5,
+        "commercialHoldingPeriod": 39,
+        "unit": "years",
+        "method": "straight-line"
+      },
+      "costSegregation": {
+        "trigger": "acquisitionPrice >= 2000000",
+        "triggerUnit": "USD",
+        "typicalAccelerationBenefit": "15-40% of depreciable basis front-loaded to 5/7/15-year property",
+        "minimumNPVBenefit": 50000,
+        "minimumNPVUnit": "USD",
+        "recommendWhen": "acquisitionPrice >= 2000000 OR propertyHasSignificantFF&E",
+        "engagementCost": {
+          "typical": "5000-15000",
+          "unit": "USD"
+        }
+      },
+      "bonusDepreciation": {
+        "phaseDownSchedule": "100% through 2022, 80% in 2023, 60% in 2024, 40% in 2025, 20% in 2026, 0% after 2026",
+        "trackAnnually": true
+      }
+    },
+    "exchange1031": {
+      "priority": "default-assumption-at-disposition",
+      "trackEligibilityFrom": "acquisition",
+      "requirements": {
+        "likeKindProperty": true,
+        "qualifiedIntermediaryRequired": true,
+        "identificationPeriodDays": 45,
+        "exchangePeriodDays": 180,
+        "bootAvoidance": "flag-any-boot-in-output"
+      },
+      "dealImplication": "Flag seller unwillingness to accommodate 1031 timing as dealbreaker at LOI stage"
+    },
+    "opportunityZone": {
+      "screenAtMarketResearch": true,
+      "eligibilityTrigger": "property in QOZ census tract",
+      "benefitTiers": {
+        "deferral": "Capital gains deferred until 12/31/2026 or earlier sale",
+        "stepUp": "10% basis step-up if held 5 years (pre-2022 investment only; track legislative updates)",
+        "exclusion": "Post-acquisition gains excluded if held 10+ years"
+      },
+      "holdRequirementForExclusion": 10,
+      "holdRequirementUnit": "years"
+    },
+    "installmentSale": {
+      "considerWhen": "taxableDispositionAndBuyerQualifies",
+      "benefits": "Spread capital gains recognition across installment payment years; reduce peak-year tax bracket exposure",
+      "risks": ["Interest rate risk on deferred payments", "Buyer default risk", "State tax treatment may differ"],
+      "defaultSpreadYears": 5
+    },
+    "estatePlanningVehicles": {
+      "familyLimitedPartnership": {
+        "applicability": "Portfolio value > $5M",
+        "benefit": "Valuation discount 15-35% for minority interests; estate/gift tax efficiency",
+        "flag": "Recommend FLP review at portfolio management phase if portfolio value threshold exceeded"
+      },
+      "irrevocableTrust": {
+        "types": ["GRAT", "IDGT", "QPRT"],
+        "applicability": "Estate > federal exemption threshold",
+        "flag": "Alert when portfolio appreciation creates estate tax exposure"
+      },
+      "charitableVehicles": {
+        "types": ["CRT", "DAF", "CLAT"],
+        "applicability": "Philanthropic intent or highly appreciated asset disposition"
+      }
+    },
+    "k1Integration": {
+      "targetK1Count": {
+        "max": 10,
+        "flagAbove": 7,
+        "note": "K-1 count drives tax preparation complexity and cost"
+      },
+      "preferredEntityStructure": "single-member-llc-or-directly-held",
+      "avoidUBTI": true
+    }
+  },
+  "operationalSimplicityScoring": {
+    "managementHoursPerMonth": {
+      "target": 20,
+      "conditionalMax": 40,
+      "hardMax": 60,
+      "unit": "hours/month",
+      "description": "Total management hours across all assets per month for family principals and staff (not third-party PM)"
+    },
+    "managementComplexity": {
+      "scoringDimensions": [
+        "number of assets",
+        "number of tenants",
+        "number of third-party vendors",
+        "geographic dispersion",
+        "asset type diversity",
+        "active renovation or lease-up in progress"
+      ],
+      "scoringScale": {
+        "low": "1-3 assets, single market, same property type, stabilized",
+        "medium": "4-7 assets, 1-2 markets, 1-2 property types, minor value-add",
+        "high": "8+ assets, 3+ markets, mixed property types, active value-add"
+      },
+      "threshold": "medium",
+      "action": "Flag for review and potential operating partner engagement if score exceeds threshold"
+    },
+    "reportingBurden": {
+      "frequency": "quarterly",
+      "format": "single-combined-report",
+      "pageTarget": {
+        "max": 10,
+        "unit": "pages per asset per quarter"
+      },
+      "consolidatedPortfolioReport": true,
+      "avoidDuplicateReporting": true
+    },
+    "vendorCountMinimization": {
+      "preferPreferredVendorList": true,
+      "maxVendorsPerAsset": 8,
+      "consolidateAcrossAssets": true
+    },
+    "selfManagementThreshold": {
+      "maxUnitsBeforePMRecommended": 30,
+      "note": "Below 30 units, self-management may be feasible; above 30 units, third-party PM is typically more efficient"
+    }
+  },
+  "generationalWealthMetrics": {
+    "steppedUpBasisValue": {
+      "track": true,
+      "description": "Unrealized gain that would be eliminated at death via IRC 1014 stepped-up basis; key metric for hold vs sell decision",
+      "reportIn": "after-tax-return-model",
+      "flagThreshold": {
+        "unrealizedGainAsPercentOfValue": 0.30,
+        "action": "Highlight hold-for-step-up vs sell-now tradeoff in disposition analysis"
+      }
+    },
+    "trustVehicleRecommendations": {
+      "reviewTriggers": [
+        "Portfolio value exceeds federal estate tax exemption",
+        "Asset appreciation rate > 10% per year sustained 3+ years",
+        "Family generational transition planned within 10 years"
+      ],
+      "recommendedVehicles": {
+        "activeManagement": "FLP or LLC with tiered membership interests",
+        "estatePlanning": "IDGT for estate freeze; GRAT for appreciation transfer",
+        "philanthropy": "DAF for charitable giving with investment flexibility"
+      }
+    },
+    "legacyQualityScore": {
+      "dimensions": [
+        "asset quality (durable cash flows, low obsolescence risk)",
+        "location permanence (institutional-quality submarkets)",
+        "management transferability (operable without founders)",
+        "legal structure clarity (clean title, no encumbrances)",
+        "income stability (long WALT, creditworthy tenants)"
+      ],
+      "scale": "1-10 composite",
+      "threshold": {
+        "pass": 7,
+        "conditional": 5,
+        "fail": 4
+      },
+      "description": "Aggregate score measuring suitability of asset for multi-generational hold (10-30 year horizon)"
+    },
+    "holdPeriodBias": {
+      "targetHoldYears": {
+        "min": 10,
+        "preferred": 20,
+        "max": 30
+      },
+      "dispositionTriggerElevated": true,
+      "note": "Disposition trigger thresholds are set higher than base family-office profile; prefer to hold through cycle unless estate or tax event justifies sale"
+    }
+  },
+  "relationshipDrivenSourcingPreferences": {
+    "knownMarketsOnly": {
+      "enforce": true,
+      "definition": "Markets where the family has: (a) prior investment history, (b) an established operating partner, OR (c) direct personal network presence",
+      "unknownMarketAction": "Flag as relationship-gap risk; require operating partner identification before proceeding"
+    },
+    "personalNetworkDeals": {
+      "preference": "strong",
+      "sourcingChannels": ["existing operating partners", "family network referrals", "direct seller relationships", "repeat brokers with prior deal history"],
+      "coldOutreachWeight": 0.10,
+      "note": "Cold-source deals receive lower confidence weight in deal scoring absent relationship validation"
+    },
+    "offMarketPreference": {
+      "preference": "strong",
+      "rationale": "Avoids competitive bid processes that compress returns; leverages relationship advantage",
+      "onMarketThreshold": "Only pursue marketed deals if pricing is below underwritten value AND relationship exists with seller or broker"
+    },
+    "brokerRelationships": {
+      "preferRepeatBrokers": true,
+      "maxNewBrokersPerYear": 3,
+      "trackDealSourceByBroker": true
+    }
+  },
+  "orchestratorPhaseModifications": {
+    "marketResearch": "Add family-network market filter. Eliminate markets where family has no relationships or operating partners. Focus on 2-4 markets with deep conviction rather than broad MSA sweep.",
+    "strategy": "After-tax return is primary metric, not pre-tax IRR. Strategy memo must include after-tax IRR, after-tax equity multiple, and stepped-up basis analysis for long-hold scenarios.",
+    "acquisition": "Widen base hold period assumption to 10-20 years. Mandate cost segregation study for acquisitions >= $2M. Lower leverage ceiling to 60% LTV max pass. Flag 1031 eligibility from day one.",
+    "assetManagement": "Reduce reporting frequency to quarterly. Add annual tax planning review (cost seg updates, depreciation schedule, 1031 pipeline). Operational burden hours tracked monthly against 60hr/month hard cap.",
+    "portfolio": "Add entity count and K-1 complexity as primary portfolio metrics. Flag if K-1 count exceeds 7. Track stepped-up basis value across portfolio. Annual estate planning review trigger.",
+    "disposition": "1031 exchange is default assumption. Installment sale as secondary option. Taxable sale requires explicit override with tax impact modeled and approved. Step-up basis hold analysis mandatory.",
+    "fundManagement": "Typically not applicable (direct ownership preferred). Co-invest vehicles may apply for specific deals exceeding single-asset capital constraints. If co-invest: avoid UBTI, prefer pass-through K-1 structures."
+  },
+  "dealbreakers": [
+    "Management-intensive without established operating partner in market",
+    "Leverage >65% LTV",
+    "Market where family has no relationships or operating partners",
+    "Sellers unwilling to accommodate 1031 timing",
+    "K-1 complexity would push total portfolio K-1 count above 10",
+    "Asset type requiring specialized operational expertise family does not have",
+    "Opportunity zone deal with hold commitment < 10 years (forfeits exclusion benefit)",
+    "Entity structure with UBTI exposure for trust-held investments"
+  ],
+  "reportingVariant": "family-office-extended",
+  "allowedStrategies": ["core", "core-plus"]
+}

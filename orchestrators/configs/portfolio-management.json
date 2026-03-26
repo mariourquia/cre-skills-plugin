@@ -1,0 +1,830 @@
+{
+  "orchestratorId": "portfolio-management",
+  "version": "1.0.0",
+  "entityType": "portfolio",
+  "description": "Six-phase portfolio management pipeline: analyzes portfolio composition, assesses concentration risk across multiple dimensions, decomposes performance attribution, formulates rebalancing strategy, runs stress tests, and produces portfolio reporting. Coordinates portfolio-manager, risk-officer, and performance-analyst agents with skills for allocation, attribution, stress testing, and investor reporting. Terminal verdict: REBALANCE (allocation drift requires action), HOLD (portfolio on track), or DIVEST (forced rebalancing due to concentration or stress breach).",
+  "model": "claude-opus-4-6[1m]",
+  "phases": [
+    {
+      "phaseId": "composition-analysis",
+      "name": "Portfolio Composition Analysis",
+      "weight": 0.15,
+      "agents": [
+        {
+          "agentId": "portfolio-manager",
+          "file": "agents/portfolio/portfolio-manager.md",
+          "model": "claude-opus-4-6[1m]",
+          "inputs": ["config/portfolio.json", "asset-level performance data (from hold-period-monitor handoffs)", "target allocation policy", "fund mandate constraints"],
+          "outputs": ["composition dashboard", "property type allocation vs target", "geographic allocation vs target", "vintage mix analysis", "leverage profile", "allocation drift measurements"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/portfolio-allocator.md",
+            "skills/property-performance-dashboard.md"
+          ],
+          "maxTimeoutMinutes": 40,
+          "validationRules": [
+            {
+              "ruleId": "allocation-drift-calculated",
+              "description": "Allocation drift must be calculated for all tracked dimensions: property type, geography, vintage, leverage.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "all-assets-represented",
+              "description": "Every asset in the portfolio must appear in the composition analysis.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        },
+        {
+          "agentId": "performance-analyst-composition",
+          "file": "agents/portfolio/performance-analyst.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/portfolio.json", "asset-level quarterly dashboards", "market benchmarks"],
+          "outputs": ["asset-level performance summary", "portfolio aggregate metrics", "same-store NOI growth", "occupancy trends by asset", "income vs appreciation breakdown"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/property-performance-dashboard.md"
+          ],
+          "maxTimeoutMinutes": 35
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "portfolio",
+        "passConditions": [
+          {
+            "conditionId": "composition-mapped",
+            "description": "Portfolio composition fully mapped across all allocation dimensions with drift calculated.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "allocation-within-tolerance",
+            "description": "All allocation dimensions are within policy tolerance bands.",
+            "propagateIfFailed": false
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "allocation-drift-detected",
+            "description": "One or more dimensions show drift exceeding warning threshold but below action threshold.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "critical-drift-breach",
+            "description": "Allocation drift exceeds policy maximum in one or more dimensions; rebalancing required.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": []
+      },
+      "dataForDownstreamContract": {
+        "compositionDashboard": {
+          "type": "object",
+          "required": true,
+          "description": "Full portfolio composition analysis with allocation vs target across all dimensions."
+        },
+        "allocationDrift": {
+          "type": "object",
+          "required": true,
+          "description": "Drift measurements per dimension: property type, geography, vintage, leverage."
+        },
+        "assetPerformanceSummary": {
+          "type": "object",
+          "required": true,
+          "description": "Asset-level performance roll-up with aggregate portfolio metrics."
+        }
+      }
+    },
+    {
+      "phaseId": "concentration-risk-assessment",
+      "name": "Concentration Risk Assessment",
+      "weight": 0.20,
+      "agents": [
+        {
+          "agentId": "risk-officer",
+          "file": "agents/portfolio/risk-officer.md",
+          "model": "claude-opus-4-6[1m]",
+          "inputs": ["config/portfolio.json", "composition dashboard", "allocation drift", "lease-level data (aggregated)", "debt schedules (all assets)", "tenant rosters (all assets)"],
+          "outputs": ["concentration heat map", "risk score by dimension", "limit breach flags", "tenant concentration analysis", "geographic concentration analysis", "lender concentration analysis", "interest rate exposure analysis", "lease expiry concentration"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/sensitivity-stress-test.md",
+            "skills/portfolio-allocator.md"
+          ],
+          "maxTimeoutMinutes": 45,
+          "validationRules": [
+            {
+              "ruleId": "concentration-dimensions-complete",
+              "description": "Concentration analysis must cover all six dimensions: tenant, geography, property type, lease expiry, lender, interest rate.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "risk-scores-bounded",
+              "description": "All risk scores must be within 0-100 range.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        },
+        {
+          "agentId": "portfolio-manager-risk",
+          "file": "agents/portfolio/portfolio-manager.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/portfolio.json", "concentration heat map", "risk scores", "limit breach flags", "allocation policy"],
+          "outputs": ["risk-adjusted allocation view", "policy compliance assessment", "breach remediation recommendations"],
+          "critical": false,
+          "dependencies": ["risk-officer"],
+          "skillRefs": [
+            "skills/portfolio-allocator.md"
+          ],
+          "maxTimeoutMinutes": 25
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "composition-analysis",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "compositionDashboard",
+              "critical": true,
+              "description": "Portfolio composition required to identify concentration risks."
+            },
+            {
+              "key": "allocationDrift",
+              "critical": true,
+              "description": "Allocation drift informs which concentration dimensions are most critical."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "portfolio",
+        "passConditions": [
+          {
+            "conditionId": "no-concentration-breaches",
+            "description": "All concentration dimensions are within policy limits.",
+            "propagateIfFailed": false
+          },
+          {
+            "conditionId": "interest-rate-exposure-managed",
+            "description": "Portfolio-level floating rate exposure is within policy limits and hedged appropriately.",
+            "propagateIfFailed": false
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "warning-level-concentration",
+            "description": "One or more dimensions approaching concentration limits (within 80-100% of limit).",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "tenant-concentration-elevated",
+            "description": "Single tenant or tenant industry represents more than 15% of portfolio revenue.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "concentration-limit-breach",
+            "description": "Portfolio exceeds policy concentration limits in one or more dimensions; immediate rebalancing required.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "lender-covenant-portfolio-breach",
+            "description": "Portfolio-level lender covenants breached; cure action required.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "portfolioLevelCovenantBreach",
+          "regulatoryConcentrationViolation"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "concentrationHeatMap": {
+          "type": "object",
+          "required": true,
+          "description": "Concentration analysis across all six dimensions with heat map visualization data."
+        },
+        "riskScores": {
+          "type": "object",
+          "required": true,
+          "description": "Risk scores per dimension and aggregate portfolio risk score."
+        },
+        "breachFlags": {
+          "type": "array",
+          "required": true,
+          "description": "List of concentration limit breaches requiring remediation. Empty array if none."
+        }
+      }
+    },
+    {
+      "phaseId": "performance-attribution",
+      "name": "Performance Attribution",
+      "weight": 0.25,
+      "agents": [
+        {
+          "agentId": "performance-analyst",
+          "file": "agents/portfolio/performance-analyst.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/portfolio.json", "asset-level quarterly dashboards", "market benchmarks (NCREIF, ODCE)", "acquisition basis per asset", "debt terms per asset"],
+          "outputs": ["income vs appreciation decomposition", "leverage effect attribution", "asset selection alpha measurement", "market beta calculation", "vintage year returns", "time-weighted vs money-weighted returns", "benchmark comparison"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/performance-attribution.md",
+            "skills/market-cycle-positioner.md"
+          ],
+          "maxTimeoutMinutes": 45,
+          "validationRules": [
+            {
+              "ruleId": "return-decomposition-sums",
+              "description": "Income return + appreciation return + leverage effect must approximately equal total return within 50bps tolerance.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "benchmark-comparison-present",
+              "description": "At least one benchmark comparison (NCREIF, ODCE, or custom) must be non-null.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
+        },
+        {
+          "agentId": "portfolio-manager-attribution",
+          "file": "agents/portfolio/portfolio-manager.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/portfolio.json", "attribution analysis", "benchmark comparison", "investment strategy targets"],
+          "outputs": ["manager skill assessment", "strategy adherence score", "performance narrative", "alpha source identification"],
+          "critical": false,
+          "dependencies": ["performance-analyst"],
+          "skillRefs": [
+            "skills/performance-attribution.md"
+          ],
+          "maxTimeoutMinutes": 25
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "composition-analysis",
+          "requiredStatus": ["COMPLETED"],
+          "requiredDataKeys": [
+            {
+              "key": "assetPerformanceSummary",
+              "critical": true,
+              "description": "Asset-level performance data required for return decomposition."
+            }
+          ]
+        },
+        {
+          "phaseId": "concentration-risk-assessment",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "riskScores",
+              "critical": false,
+              "description": "Risk context enriches attribution analysis with risk-adjusted return perspective."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "portfolio",
+        "passConditions": [
+          {
+            "conditionId": "attribution-complete",
+            "description": "Full return decomposition completed with benchmark comparison.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "returns-on-target",
+            "description": "Portfolio total return meets or exceeds strategy target return.",
+            "propagateIfFailed": false
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "negative-alpha",
+            "description": "Portfolio generating negative alpha vs benchmark; asset selection underperforming.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "leverage-drag",
+            "description": "Leverage effect is negative (cost of debt exceeds asset-level return); de-leveraging may be warranted.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "significant-underperformance",
+            "description": "Portfolio total return trails benchmark by more than 200bps on a trailing 4-quarter basis.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": []
+      },
+      "dataForDownstreamContract": {
+        "attributionAnalysis": {
+          "type": "object",
+          "required": true,
+          "description": "Full return decomposition: income, appreciation, leverage, alpha, beta."
+        },
+        "benchmarkComparison": {
+          "type": "object",
+          "required": true,
+          "description": "Portfolio return vs benchmark(s) with spread and tracking error."
+        },
+        "managerAssessment": {
+          "type": "object",
+          "required": false,
+          "description": "Manager skill attribution, strategy adherence, alpha sources."
+        }
+      }
+    },
+    {
+      "phaseId": "rebalancing-strategy",
+      "name": "Rebalancing Strategy",
+      "weight": 0.25,
+      "agents": [
+        {
+          "agentId": "portfolio-manager-rebalance",
+          "file": "agents/portfolio/portfolio-manager.md",
+          "model": "claude-opus-4-6[1m]",
+          "inputs": ["config/portfolio.json", "composition dashboard", "concentration heat map", "attribution analysis", "allocation policy", "market cycle assessment", "fund mandate constraints"],
+          "outputs": ["rebalancing recommendations", "priority-ranked sell candidates", "acquisition target profiles", "development pipeline recommendations", "refinancing candidates", "implementation timeline", "transaction cost estimates"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/portfolio-allocator.md",
+            "skills/market-cycle-positioner.md"
+          ],
+          "maxTimeoutMinutes": 45,
+          "validationRules": [
+            {
+              "ruleId": "rebalancing-actionable",
+              "description": "Each rebalancing recommendation must include specific assets, action type, rationale, and priority.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "post-rebalance-allocation-modeled",
+              "description": "Pro forma portfolio composition after recommended rebalancing must be modeled and shown to converge toward target allocation.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        },
+        {
+          "agentId": "risk-officer-rebalance",
+          "file": "agents/portfolio/risk-officer.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/portfolio.json", "rebalancing recommendations", "concentration heat map", "risk scores"],
+          "outputs": ["rebalancing risk assessment", "execution risk flags", "market timing considerations", "liquidity impact analysis", "concentration impact of proposed trades"],
+          "critical": true,
+          "dependencies": ["portfolio-manager-rebalance"],
+          "skillRefs": [
+            "skills/sensitivity-stress-test.md",
+            "skills/portfolio-allocator.md"
+          ],
+          "maxTimeoutMinutes": 30
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "composition-analysis",
+          "requiredStatus": ["COMPLETED"],
+          "requiredDataKeys": [
+            {
+              "key": "compositionDashboard",
+              "critical": true,
+              "description": "Current composition required to determine rebalancing needs."
+            },
+            {
+              "key": "allocationDrift",
+              "critical": true,
+              "description": "Drift measurements drive rebalancing magnitude."
+            }
+          ]
+        },
+        {
+          "phaseId": "concentration-risk-assessment",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "concentrationHeatMap",
+              "critical": true,
+              "description": "Concentration risks must be addressed in rebalancing strategy."
+            },
+            {
+              "key": "breachFlags",
+              "critical": true,
+              "description": "Any concentration breaches require mandatory rebalancing action."
+            }
+          ]
+        },
+        {
+          "phaseId": "performance-attribution",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "attributionAnalysis",
+              "critical": true,
+              "description": "Attribution informs which assets to hold (alpha generators) vs sell (underperformers)."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "portfolio",
+        "passConditions": [
+          {
+            "conditionId": "rebalancing-plan-complete",
+            "description": "Actionable rebalancing plan produced with prioritized recommendations and risk assessment.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "no-rebalancing-needed",
+            "description": "Portfolio within all allocation tolerances; no rebalancing action required this period.",
+            "propagateIfFailed": false
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "market-timing-caution",
+            "description": "Rebalancing recommended but market conditions suggest deferral (illiquid market, distressed pricing).",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "partial-rebalance-feasible",
+            "description": "Full rebalancing not possible due to liquidity constraints; partial rebalancing recommended.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "rebalancing-blocked",
+            "description": "Required rebalancing cannot be executed due to fund lock-up, loan prepayment penalties, or regulatory constraints.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": []
+      },
+      "dataForDownstreamContract": {
+        "rebalancingPlan": {
+          "type": "object",
+          "required": true,
+          "description": "Priority-ranked rebalancing recommendations with sell candidates, acquisition targets, and timeline."
+        },
+        "riskAssessment": {
+          "type": "object",
+          "required": true,
+          "description": "Risk assessment of proposed rebalancing: execution risk, market timing, liquidity impact."
+        },
+        "proFormaAllocation": {
+          "type": "object",
+          "required": true,
+          "description": "Projected portfolio composition after executing rebalancing recommendations."
+        }
+      }
+    },
+    {
+      "phaseId": "stress-testing",
+      "name": "Stress Testing",
+      "weight": 0.10,
+      "agents": [
+        {
+          "agentId": "risk-officer-stress",
+          "file": "agents/portfolio/risk-officer.md",
+          "model": "claude-opus-4-6[1m]",
+          "inputs": ["config/portfolio.json", "composition dashboard", "debt schedules (all assets)", "NOI by asset", "rebalancing plan"],
+          "outputs": ["rate shock results (+100bps, +200bps, +300bps)", "NOI decline results (-10%, -20%, -30%)", "cap rate expansion results (+50bps, +100bps)", "combined stress scenario", "portfolio NAV sensitivity", "liquidity stress test", "covenant compliance under stress"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/sensitivity-stress-test.md"
+          ],
+          "maxTimeoutMinutes": 40,
+          "validationRules": [
+            {
+              "ruleId": "stress-scenarios-complete",
+              "description": "All three primary stress dimensions (rate, NOI, cap rate) must have results.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "covenant-compliance-checked",
+              "description": "Covenant compliance must be evaluated under each stress scenario.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "composition-analysis",
+          "requiredStatus": ["COMPLETED"],
+          "requiredDataKeys": [
+            {
+              "key": "compositionDashboard",
+              "critical": true,
+              "description": "Portfolio composition required to run portfolio-level stress tests."
+            }
+          ]
+        },
+        {
+          "phaseId": "rebalancing-strategy",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "rebalancingPlan",
+              "critical": false,
+              "description": "If rebalancing is proposed, stress tests run on both current and pro forma portfolios."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "portfolio",
+        "passConditions": [
+          {
+            "conditionId": "stress-tests-complete",
+            "description": "All stress scenarios executed with covenant compliance evaluated.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "portfolio-survives-base-stress",
+            "description": "Portfolio maintains positive equity value and meets covenants under 200bps rate shock scenario.",
+            "propagateIfFailed": false
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "covenant-breach-under-stress",
+            "description": "Portfolio breaches one or more covenants under moderate stress (200bps rate shock); hedging or de-leveraging recommended.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "liquidity-stress-warning",
+            "description": "Portfolio liquidity drops below 6 months operating expenses under stress; reserve augmentation recommended.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "portfolio-insolvency-risk",
+            "description": "Portfolio shows negative equity value under severe but plausible stress scenario (300bps rate + 20% NOI decline).",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "portfolioInsolvencyUnderPlausibleStress"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "stressTestResults": {
+          "type": "object",
+          "required": true,
+          "description": "Full stress test results across all scenarios with covenant compliance."
+        },
+        "vulnerabilities": {
+          "type": "array",
+          "required": true,
+          "description": "List of identified portfolio vulnerabilities under stress with severity ratings."
+        }
+      }
+    },
+    {
+      "phaseId": "portfolio-reporting",
+      "name": "Portfolio Reporting",
+      "weight": 0.05,
+      "agents": [
+        {
+          "agentId": "portfolio-reporter",
+          "file": "agents/portfolio/portfolio-reporter.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/portfolio.json", "composition dashboard", "concentration heat map", "attribution analysis", "rebalancing plan", "stress test results", "investor reporting requirements"],
+          "outputs": ["quarterly portfolio dashboard", "LP reporting package", "board presentation materials", "executive summary", "asset-level performance cards"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/quarterly-investor-update.md",
+            "skills/property-performance-dashboard.md"
+          ],
+          "maxTimeoutMinutes": 35,
+          "validationRules": [
+            {
+              "ruleId": "all-sections-populated",
+              "description": "Portfolio report must include composition, risk, attribution, and outlook sections.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "composition-analysis",
+          "requiredStatus": ["COMPLETED"],
+          "requiredDataKeys": [
+            { "key": "compositionDashboard", "critical": true, "description": "Composition data for portfolio report." }
+          ]
+        },
+        {
+          "phaseId": "concentration-risk-assessment",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            { "key": "concentrationHeatMap", "critical": true, "description": "Risk data for portfolio report." }
+          ]
+        },
+        {
+          "phaseId": "performance-attribution",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            { "key": "attributionAnalysis", "critical": true, "description": "Attribution data for portfolio report." }
+          ]
+        },
+        {
+          "phaseId": "stress-testing",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            { "key": "stressTestResults", "critical": false, "description": "Stress results for portfolio report if available." }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "portfolio",
+        "passConditions": [
+          {
+            "conditionId": "report-complete",
+            "description": "Portfolio report generated with all required sections.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [],
+        "failConditions": [
+          {
+            "conditionId": "report-failed",
+            "description": "Portfolio report generation failed after all retries.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": []
+      },
+      "dataForDownstreamContract": {
+        "portfolioReport": {
+          "type": "object",
+          "required": true,
+          "description": "Complete quarterly portfolio report with all sections."
+        },
+        "overallVerdict": {
+          "type": "string",
+          "required": true,
+          "description": "REBALANCE, HOLD, or DIVEST. Drives cross-chain handoffs."
+        }
+      }
+    }
+  ],
+  "checkpointConfig": {
+    "basePath": "data/checkpoints/portfolio-management",
+    "agentLevelTracking": true,
+    "statusValues": {
+      "ANALYZING": "Portfolio analysis in progress.",
+      "REBALANCING": "Rebalancing recommendations under review.",
+      "REPORTING": "Portfolio report being generated.",
+      "COMPLETED": "Portfolio review cycle complete."
+    },
+    "verdictValues": {
+      "REBALANCE": "Allocation drift or concentration breach requires portfolio rebalancing.",
+      "HOLD": "Portfolio on track; allocations within tolerance, performance meeting targets.",
+      "DIVEST": "Forced rebalancing due to concentration breach, covenant violation, or stress test failure. Immediate disposition of specific assets required."
+    }
+  },
+  "crossChainHandoffs": [
+    {
+      "direction": "inbound",
+      "counterpartOrchestrator": "hold-period-monitor",
+      "triggerCondition": "Every completed hold-period-monitor performance-monitoring cycle (quarterly)",
+      "dataContract": {
+        "propertyId": {
+          "type": "string",
+          "required": true,
+          "description": "Property identifier for portfolio-level aggregation.",
+          "sourcePhase": "performance-monitoring",
+          "sourcePath": "quarterlyDashboard.propertyId"
+        },
+        "quarterlyDashboard": {
+          "type": "object",
+          "required": true,
+          "description": "Property-level quarterly performance data.",
+          "sourcePhase": "performance-monitoring",
+          "sourcePath": "quarterlyDashboard"
+        },
+        "dscrStatus": {
+          "type": "object",
+          "required": true,
+          "description": "DSCR compliance status for portfolio-level aggregation.",
+          "sourcePhase": "performance-monitoring",
+          "sourcePath": "dscrStatus"
+        },
+        "holdPeriodVerdict": {
+          "type": "string",
+          "required": true,
+          "description": "Asset-level hold period verdict for portfolio awareness.",
+          "sourcePhase": "reposition-trigger-evaluation",
+          "sourcePath": "overallVerdict"
+        }
+      }
+    },
+    {
+      "direction": "inbound",
+      "counterpartOrchestrator": "fund-management",
+      "triggerCondition": "Fund-level constraints or reporting requirements updated",
+      "dataContract": {
+        "fundMandate": {
+          "type": "object",
+          "required": true,
+          "description": "Fund mandate constraints: allocation limits, leverage limits, geographic restrictions.",
+          "sourcePhase": "formation",
+          "sourcePath": "investmentPolicy"
+        },
+        "reportingRequirements": {
+          "type": "object",
+          "required": false,
+          "description": "LP reporting format and frequency requirements.",
+          "sourcePhase": "monitoring",
+          "sourcePath": "reportingConfig"
+        }
+      }
+    },
+    {
+      "direction": "outbound",
+      "counterpartOrchestrator": "disposition-strategy",
+      "triggerCondition": "Phase 'rebalancing-strategy' recommends asset disposition OR overall verdict == DIVEST",
+      "dataContract": {
+        "sellCandidates": {
+          "type": "array",
+          "required": true,
+          "description": "Priority-ranked list of assets recommended for disposition with rationale.",
+          "sourcePhase": "rebalancing-strategy",
+          "sourcePath": "rebalancingPlan.sellCandidates"
+        },
+        "portfolioContext": {
+          "type": "object",
+          "required": true,
+          "description": "Portfolio-level context for disposition timing and pricing strategy.",
+          "sourcePhase": "rebalancing-strategy",
+          "sourcePath": "riskAssessment"
+        }
+      }
+    },
+    {
+      "direction": "outbound",
+      "counterpartOrchestrator": "market-research-intelligence",
+      "triggerCondition": "Phase 'rebalancing-strategy' identifies acquisition need to fill allocation gaps",
+      "dataContract": {
+        "acquisitionTargetProfiles": {
+          "type": "array",
+          "required": true,
+          "description": "Target acquisition profiles derived from portfolio gaps: property type, geography, size, return targets.",
+          "sourcePhase": "rebalancing-strategy",
+          "sourcePath": "rebalancingPlan.acquisitionTargets"
+        }
+      }
+    }
+  ],
+  "executionConfig": {
+    "concurrency": {
+      "maxConcurrentPhases": 2,
+      "maxAgentsPerPhase": 4
+    },
+    "timeouts": {
+      "defaultAgentMinutes": 35,
+      "defaultPhaseMinutes": 120,
+      "pipelineMinutes": 480
+    },
+    "retryPolicy": {
+      "maxAttempts": 3,
+      "backoffStrategy": "exponential",
+      "baseDelayMs": 10000
+    },
+    "pollingIntervalMs": 30000,
+    "stalledPollThreshold": 10,
+    "logging": {
+      "categories": [
+        "ACTION",
+        "FINDING",
+        "INFO",
+        "PHASE",
+        "ERROR",
+        "DATA_GAP",
+        "COMPLETE",
+        "LAUNCH",
+        "RETRY",
+        "TIMEOUT",
+        "VERDICT",
+        "HANDOFF",
+        "REBALANCE",
+        "STRESS_TEST"
+      ]
+    }
+  }
+}

@@ -1,0 +1,557 @@
+{
+  "orchestratorId": "capital-stack",
+  "version": "1.0.0",
+  "entityType": "deal",
+  "description": "Five-phase capital stack structuring pipeline: qualifies the deal, sizes senior debt, structures equity and mezz/pref layers, optimizes the blended cost of capital, and gates at IC. Coordinates loan-sizing-engine, capital-stack-optimizer, mezz-pref-structurer, and jv-waterfall-architect. Terminal verdict: PROCEED (stack approved), RESTRUCTURE (viable with revised terms), or KILL (no executable structure).",
+  "model": "claude-opus-4-6[1m]",
+  "phases": [
+    {
+      "phaseId": "deal-qualification",
+      "name": "Deal Qualification",
+      "weight": 0.15,
+      "agents": [
+        {
+          "agentId": "deal-screener",
+          "file": "agents/capital-stack/deal-screener.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "underwriting outputs", "asset class profile"],
+          "outputs": ["deal qualification memo", "stack complexity rating", "eligible structure types"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 20
+        },
+        {
+          "agentId": "sponsor-profile",
+          "file": "agents/capital-stack/sponsor-profile.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "sponsor track record", "net worth statement"],
+          "outputs": ["sponsor qualification", "recourse capacity", "prior performance summary"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 20
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "capitalStack",
+        "passConditions": [
+          {
+            "conditionId": "deal-meets-stack-criteria",
+            "description": "Deal NOI and property type are eligible for institutional capital stack structures.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "sponsor-qualified",
+            "description": "Sponsor net worth, liquidity, and track record meet lender and equity partner minimums.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "sponsor-marginal",
+            "description": "Sponsor qualifies with a co-GP or guarantor; additional structuring required.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "sponsor-disqualified",
+            "description": "Sponsor cannot meet recourse requirements or has material defaults in track record.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "sponsorBankruptcy",
+          "activeLenderLitigation"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "eligibleStructures": {
+          "type": "array",
+          "required": true,
+          "description": "List of eligible capital stack structure types (senior-only, senior+mezz, senior+pref, JV) for downstream sizing."
+        },
+        "sponsorQualification": {
+          "type": "object",
+          "required": true,
+          "description": "Sponsor qualification summary including recourse capacity and co-GP requirement flag."
+        }
+      }
+    },
+    {
+      "phaseId": "debt-sizing",
+      "name": "Debt Sizing",
+      "weight": 0.25,
+      "agents": [
+        {
+          "agentId": "loan-sizing-agent",
+          "file": "agents/capital-stack/loan-sizing-agent.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "base case NOI", "deal qualification outputs", "eligible structure types"],
+          "outputs": ["maximum loan amount by lender type", "DSCR at each leverage point", "LTV summary", "lender type comparison matrix"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 30,
+          "validationRules": [
+            {
+              "ruleId": "dscr-at-max-leverage",
+              "description": "DSCR at maximum loan amount must be calculated and non-null.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "ltv-coverage",
+              "description": "LTV must be calculated for agency, bridge, CMBS, and life co lender types.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
+        },
+        {
+          "agentId": "debt-market-scan",
+          "file": "agents/capital-stack/debt-market-scan.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "loan sizing outputs", "asset class profile"],
+          "outputs": ["current market rates by lender type", "spread environment", "execution risk flags"],
+          "critical": false,
+          "dependencies": ["loan-sizing-agent"],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 20
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "deal-qualification",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "eligibleStructures",
+              "critical": true,
+              "description": "Required to constrain loan sizing to eligible structure types."
+            },
+            {
+              "key": "sponsorQualification",
+              "critical": true,
+              "description": "Recourse capacity affects maximum agency loan size."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "capitalStack",
+        "passConditions": [
+          {
+            "conditionId": "viable-loan-amount",
+            "description": "At least one lender type can provide a loan that meets minimum LTV and maintains DSCR above threshold.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "sub-optimal-leverage",
+            "description": "Max loan amount is below targeted LTV; equity requirement exceeds base case assumption.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "no-viable-debt",
+            "description": "No lender type can provide debt meeting minimum deal requirements; equity gap is unresolvable.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "noViableDebtSource",
+          "dscrBelowMinimumAtAnyLeverage"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "seniorDebtSizing": {
+          "type": "object",
+          "required": true,
+          "description": "Maximum senior loan amounts, DSCRs, and LTVs by lender type."
+        },
+        "equityRequirement": {
+          "type": "number",
+          "required": true,
+          "description": "Total equity required at each leverage scenario (purchase price minus max debt)."
+        },
+        "marketRates": {
+          "type": "object",
+          "required": false,
+          "description": "Current market rates by lender type for use in equity return modeling."
+        }
+      }
+    },
+    {
+      "phaseId": "equity-structuring",
+      "name": "Equity Structuring",
+      "weight": 0.25,
+      "agents": [
+        {
+          "agentId": "mezz-pref-structurer-agent",
+          "file": "agents/capital-stack/mezz-pref-structurer-agent.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "debt sizing outputs", "equity requirement", "eligible structure types"],
+          "outputs": ["mezz/pref term sheet scenarios", "effective cost comparison", "subordinate debt vs preferred equity analysis"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 35
+        },
+        {
+          "agentId": "jv-waterfall-architect-agent",
+          "file": "agents/capital-stack/jv-waterfall-architect-agent.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "debt sizing outputs", "equity requirement", "sponsor qualification"],
+          "outputs": ["JV waterfall structure", "LP/GP split scenarios", "promote hurdles", "co-invest terms"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 35
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "debt-sizing",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "seniorDebtSizing",
+              "critical": true,
+              "description": "Senior debt parameters needed to size the equity gap and structure subordinate layers."
+            },
+            {
+              "key": "equityRequirement",
+              "critical": true,
+              "description": "Total equity requirement to allocate across GP, LP, and any mezz/pref layers."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "capitalStack",
+        "passConditions": [
+          {
+            "conditionId": "equity-structure-executable",
+            "description": "At least one equity structure (JV or mezz/pref layered) is executable with market-rate terms.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "sponsor-promote-viable",
+            "description": "GP promote in JV structure is achievable at base case return scenario.",
+            "propagateIfFailed": false
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "thin-promote",
+            "description": "Sponsor promote is achievable only in upside scenarios; base case is insufficient for promote.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "equity-gap-unresolvable",
+            "description": "Equity gap cannot be filled by any combination of LP, mezz, or pref at market-acceptable terms.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "equityGapUnfillable",
+          "mezzCostKillsReturns"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "preferredEquityStructure": {
+          "type": "object",
+          "required": true,
+          "description": "Selected equity structure with layer breakdown, cost of each layer, and total blended cost of capital."
+        },
+        "waterfallTerms": {
+          "type": "object",
+          "required": true,
+          "description": "JV waterfall economics including LP preferred return, GP promote, and hurdle thresholds."
+        }
+      }
+    },
+    {
+      "phaseId": "optimization",
+      "name": "Stack Optimization",
+      "weight": 0.20,
+      "agents": [
+        {
+          "agentId": "capital-stack-optimizer-agent",
+          "file": "agents/capital-stack/capital-stack-optimizer-agent.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "all prior phase outputs", "return thresholds"],
+          "outputs": ["optimized stack configuration", "blended cost of capital", "return impact by tranche", "recommended structure"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 40,
+          "validationRules": [
+            {
+              "ruleId": "blended-coc-calculated",
+              "description": "Blended cost of capital must be calculated for the recommended structure.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "return-attribution-present",
+              "description": "IRR impact must be quantified per capital layer.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
+        },
+        {
+          "agentId": "tax-efficiency-reviewer",
+          "file": "agents/capital-stack/tax-efficiency-reviewer.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "preferred equity structure", "waterfall terms"],
+          "outputs": ["tax efficiency assessment", "depreciation strategy", "entity structure recommendation"],
+          "critical": false,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 25
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "equity-structuring",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "preferredEquityStructure",
+              "critical": true,
+              "description": "Equity structure options for the optimizer to evaluate."
+            },
+            {
+              "key": "waterfallTerms",
+              "critical": true,
+              "description": "Waterfall economics for return modeling across capital layers."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "capitalStack",
+        "passConditions": [
+          {
+            "conditionId": "optimized-stack-meets-returns",
+            "description": "Optimized capital stack delivers LP preferred return and GP promote at base case.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "blended-coc-within-budget",
+            "description": "Blended cost of capital is below the deal's unlevered yield.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "tight-spread",
+            "description": "Spread between blended COC and unlevered yield is less than 100bps; deal is executable but thin.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "negative-leverage",
+            "description": "Blended cost of capital exceeds the property's unlevered yield at any feasible structure.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "negativeLeverage",
+          "blendedCoCExceedsCapRate"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "recommendedStack": {
+          "type": "object",
+          "required": true,
+          "description": "Final recommended capital stack with all tranche details, amounts, rates, and terms."
+        },
+        "blendedCostOfCapital": {
+          "type": "number",
+          "required": true,
+          "description": "Blended cost of capital for the recommended structure as a decimal (e.g., 0.065 = 6.5%)."
+        },
+        "returnProfile": {
+          "type": "object",
+          "required": true,
+          "description": "LP IRR, LP EM, GP promote, and cash-on-cash at base case with the recommended stack."
+        }
+      }
+    },
+    {
+      "phaseId": "ic-gate",
+      "name": "IC Gate",
+      "weight": 0.15,
+      "agents": [
+        {
+          "agentId": "ic-stack-memo-writer",
+          "file": "agents/capital-stack/ic-stack-memo-writer.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "all prior phase outputs", "recommended stack", "return profile"],
+          "outputs": ["capital stack IC memo", "structural alternatives summary", "risk factors by tranche"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 40
+        },
+        {
+          "agentId": "ic-challenge-agent",
+          "file": "agents/capital-stack/ic-challenge-agent.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["capital stack IC memo", "recommended stack", "return profile"],
+          "outputs": ["adversarial questions", "bear case analysis", "sensitivity to structure changes"],
+          "critical": true,
+          "dependencies": ["ic-stack-memo-writer"],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 30
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "optimization",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "recommendedStack",
+              "critical": true,
+              "description": "Recommended capital stack required for IC memo preparation."
+            },
+            {
+              "key": "returnProfile",
+              "critical": true,
+              "description": "Return profile for IC presentation."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "capitalStack",
+        "passConditions": [
+          {
+            "conditionId": "ic-memo-complete",
+            "description": "IC memo produced with all required sections including structure, returns, and risk factors.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "challenge-answered",
+            "description": "IC challenge questions addressed with quantified responses.",
+            "propagateIfFailed": false
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "open-ic-questions",
+            "description": "IC challenge agent flagged questions that require external data not available in pipeline.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "ic-memo-incomplete",
+            "description": "IC memo missing required sections; structure cannot be presented to IC.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": []
+      },
+      "dataForDownstreamContract": {
+        "icStackMemo": {
+          "type": "object",
+          "required": true,
+          "description": "Finalized IC memo for capital stack approval."
+        },
+        "approvedStack": {
+          "type": "object",
+          "required": true,
+          "description": "IC-approved capital stack configuration for execution."
+        }
+      }
+    }
+  ],
+  "checkpointConfig": {
+    "basePath": "data/checkpoints/capital-stack",
+    "agentLevelTracking": true,
+    "verdictValues": {
+      "PROCEED": "Capital stack approved; structure is executable and meets return thresholds.",
+      "RESTRUCTURE": "Stack viable with revised terms; specific changes required before execution.",
+      "KILL": "No executable capital structure exists at current deal economics."
+    }
+  },
+  "crossChainHandoffs": [
+    {
+      "direction": "inbound",
+      "counterpartOrchestrator": "multifamily-acquisition",
+      "triggerCondition": "Counterpart 'multifamily-acquisition' phase 'underwriting' status == COMPLETED",
+      "dataContract": {
+        "baseCase": {
+          "type": "object",
+          "required": true,
+          "description": "Base case financial model with NOI and return assumptions for loan sizing.",
+          "sourcePhase": "underwriting",
+          "sourcePath": "baseCase"
+        },
+        "loanAssumptions": {
+          "type": "object",
+          "required": true,
+          "description": "Initial debt assumptions to validate and optimize.",
+          "sourcePhase": "underwriting",
+          "sourcePath": "loanAssumptions"
+        }
+      }
+    },
+    {
+      "direction": "outbound",
+      "counterpartOrchestrator": "multifamily-acquisition",
+      "triggerCondition": "This orchestrator status == COMPLETED and verdict == PROCEED",
+      "dataContract": {
+        "approvedStack": {
+          "type": "object",
+          "required": true,
+          "description": "IC-approved capital stack for use in financing and legal phases.",
+          "sourcePhase": "ic-gate",
+          "sourcePath": "approvedStack"
+        }
+      }
+    }
+  ],
+  "executionConfig": {
+    "concurrency": {
+      "maxConcurrentPhases": 1,
+      "maxAgentsPerPhase": 4
+    },
+    "timeouts": {
+      "defaultAgentMinutes": 30,
+      "defaultPhaseMinutes": 90,
+      "pipelineMinutes": 300
+    },
+    "retryPolicy": {
+      "maxAttempts": 3,
+      "backoffStrategy": "exponential",
+      "baseDelayMs": 10000
+    },
+    "pollingIntervalMs": 30000,
+    "stalledPollThreshold": 10,
+    "logging": {
+      "categories": [
+        "ACTION",
+        "FINDING",
+        "INFO",
+        "PHASE",
+        "ERROR",
+        "DATA_GAP",
+        "COMPLETE",
+        "LAUNCH",
+        "RETRY",
+        "TIMEOUT",
+        "VERDICT",
+        "HANDOFF"
+      ]
+    }
+  }
+}

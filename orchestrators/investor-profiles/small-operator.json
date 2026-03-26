@@ -1,0 +1,204 @@
+{
+  "$schema": "Investor Profile - Small Operator (1-10 Properties, Owner-Operator)",
+  "investorType": "small-operator",
+  "teamComposition": {
+    "tier1Override": {
+      "buyerAgent": "buyer-family-office",
+      "additionalAgents": [],
+      "removeAgents": ["lens-esg-impact", "aggressive-gp", "buyer-pension-fund", "buyer-reit"]
+    },
+    "tier2Bias": {
+      "alwaysTrigger": [],
+      "neverTrigger": ["aggressive-gp", "perspective-environmental", "lens-esg-impact"]
+    }
+  },
+  "primaryCriteria": {
+    "dscr": {
+      "pass": 1.20,
+      "conditional": 1.10,
+      "fail": 1.00,
+      "description": "Debt Service Coverage Ratio -- recourse debt environment requires tighter floor due to personal liability"
+    },
+    "ltv": {
+      "maxPass": 0.75,
+      "maxConditional": 0.80,
+      "fail": 0.85,
+      "description": "Loan to Value Ratio -- local bank / community bank financing typical; personal guaranty standard"
+    },
+    "cashOnCash": {
+      "pass": 0.08,
+      "conditional": 0.06,
+      "fail": 0.04,
+      "description": "Annual cash flow / equity invested -- must cover operator's time cost and carry personal debt obligations"
+    }
+  },
+  "propertyLevelFocus": {
+    "portfolioAnalyticsApplicable": false,
+    "portfolioAnalyticsNote": "At 1-10 properties, portfolio-level analytics add no decision value. Run analysis per property, not aggregated.",
+    "assetManagementOrchestrator": "per-property",
+    "portfolioOrchestrator": "simplified-property-list-only",
+    "benchmarkingApplicable": false,
+    "benchmarkingNote": "NCREIF, ODCE, and institutional benchmarks are not relevant at this scale. Compare to local market rents, local sales comps, and personal financial plan targets."
+  },
+  "selfManagementDecisionFramework": {
+    "breakEvenUnitCount": {
+      "selfManagementViable": {
+        "max": 30,
+        "unit": "units total across portfolio"
+      },
+      "thirdPartyPMRecommended": {
+        "min": 30,
+        "unit": "units total across portfolio"
+      },
+      "breakEvenAnalysis": {
+        "selfManagementHourlyValue": {
+          "default": 50,
+          "unit": "USD/hour",
+          "note": "Operator should substitute their own hourly rate or opportunity cost"
+        },
+        "estimatedHoursPerUnitPerMonth": {
+          "stabilized": 0.5,
+          "valueAdd": 2.0,
+          "unit": "hours/unit/month"
+        },
+        "thirdPartyPMFee": {
+          "typical": "8-12% of gross rents",
+          "breakEvenNote": "Third-party PM is cost-effective when operator time value exceeds PM fee cost"
+        }
+      }
+    },
+    "selfManagementToolRecommendations": {
+      "rentCollection": ["Buildium", "AppFolio (small portfolio tier)", "Rent Manager", "PayRent"],
+      "maintenanceTracking": ["Maintenance platform within PM software", "simple ticketing system"],
+      "bookkeeping": ["QuickBooks Self-Employed", "Stessa (free for small portfolios)", "local CPA with rental property experience"],
+      "leaseDocuments": ["state-specific lease forms from state landlord association", "attorney-reviewed template"]
+    },
+    "propertyTypeCapability": {
+      "withinCapability": ["single-family residential", "small multifamily (2-12 units)", "small retail (1-3 tenants)", "single-tenant net lease"],
+      "requiresOperatingPartner": ["multifamily > 30 units", "hotel/hospitality", "industrial > 50k sf", "multi-tenant office > 10k sf", "medical or specialized use"]
+    }
+  },
+  "financingConstraints": {
+    "personalGuaranty": {
+      "reality": "Standard for properties under $5M with community/regional bank lenders",
+      "educationFlag": true,
+      "educationContent": "Personal guaranty means the lender can pursue your personal assets (home, savings, other investments) if the property cannot service the debt. This is different from non-recourse debt used by institutional investors.",
+      "maxGuarantyExposureAsPercentOfNetWorth": 1.0,
+      "flagAbove": 0.75,
+      "dealbreaker": "Personal guaranty on loan that should be non-recourse-eligible by property size and structure"
+    },
+    "recourseVsNonRecourse": {
+      "typicalForSmallOperator": "recourse",
+      "nonRecourseAvailabilityThreshold": {
+        "minLoanSize": 2000000,
+        "unit": "USD",
+        "note": "CMBS and agency non-recourse loans typically start at $2M+ and require institutional-quality properties"
+      },
+      "educationFlag": true,
+      "educationContent": "Recourse debt: lender can pursue your personal assets. Non-recourse debt: lender is limited to the property as collateral (with carve-outs for fraud, waste, bankruptcy). Most small operators carry recourse debt from local banks."
+    },
+    "localBankRelationships": {
+      "importance": "high",
+      "rationale": "Community and regional banks are the primary financing source for small operators. Relationship matters for underwriting flexibility, rate, and speed.",
+      "recommendation": "Maintain relationships with 2-3 local lenders before you need them. Track their appetite by property type and loan size.",
+      "dscrSensitivityToPersonalCashFlow": {
+        "note": "Some local lenders will stress-test DSCR against the operator's personal cash flow obligations, not just property cash flow. Model personal debt service alongside property DSCR."
+      }
+    },
+    "interestRateSensitivity": {
+      "note": "Small operator financing is frequently variable or short-term fixed with balloon payment. Model rate sensitivity scenario: +200bps. Flag if DSCR falls below 1.0 in stress scenario.",
+      "balloonRiskEducation": "A balloon payment requires refinancing at maturity. If rates rise or property value declines, refinancing may not be available at the original terms."
+    }
+  },
+  "insuranceAndLiability": {
+    "educationFlag": true,
+    "minimumCoverage": {
+      "propertyAndCasualty": {
+        "required": true,
+        "note": "Full replacement cost coverage, not actual cash value"
+      },
+      "generalLiability": {
+        "required": true,
+        "minimumCoverage": 1000000,
+        "perOccurrence": 1000000,
+        "aggregate": 2000000,
+        "unit": "USD"
+      },
+      "umbrellaPolicy": {
+        "recommended": true,
+        "minimumCoverage": 1000000,
+        "unit": "USD",
+        "note": "Umbrella extends above GL and personal auto/home; critical when personally guarantying debt"
+      },
+      "floodInsurance": {
+        "flag": "Required in FEMA Special Flood Hazard Areas; strongly recommended in Zone X near SFHA boundary",
+        "availabilityRisk": "Availability and cost increasing in coastal and flood-prone markets; screen at acquisition"
+      }
+    },
+    "entityStructure": {
+      "recommended": "single-member LLC per property (or per logical group)",
+      "rationale": "Separate LLC per property limits liability cross-contamination between assets",
+      "educationContent": "Owning rental property in your personal name exposes all personal assets to liability from that property. An LLC isolates liability to the LLC's assets -- but only if properly maintained (separate accounts, no commingling).",
+      "commonMistake": "Commingling personal and property funds defeats the liability protection of the LLC"
+    }
+  },
+  "exitPlanning": {
+    "scale": "3 buildings, not 300",
+    "individualPropertyExitDynamics": {
+      "note": "Selling 1-3 properties is a personal financial event, not a portfolio optimization. Timing is often driven by life circumstances as much as market conditions.",
+      "triggers": ["retirement / liquidity need", "health or family event", "market opportunity (unsolicited offer)", "fatigue from management burden", "estate planning event"],
+      "portfolioOptimizationApplicability": false
+    },
+    "taxConsiderations": {
+      "depreciationRecapture": {
+        "educationFlag": true,
+        "educationContent": "When you sell a property, the IRS recaptures depreciation you took at a 25% rate (Section 1250 recapture). This is separate from the capital gains rate and is often a surprise for first-time sellers.",
+        "modelAt": "disposition analysis"
+      },
+      "exchange1031": {
+        "primaryPath": true,
+        "educationContent": "A 1031 exchange lets you defer capital gains and depreciation recapture tax by reinvesting in a like-kind property. You must identify replacement within 45 days and close within 180 days. A qualified intermediary must hold the proceeds -- you cannot touch the money.",
+        "commonMistake": "Taking cash at closing before QI is in place disqualifies the exchange"
+      },
+      "installmentSale": {
+        "educationFlag": true,
+        "educationContent": "An installment sale spreads the gain over multiple years as the buyer makes payments. This can reduce peak-year tax exposure but introduces buyer default risk."
+      }
+    },
+    "sellAllVsSellOne": {
+      "analysisRequired": true,
+      "dimensions": [
+        "Tax impact of selling all vs selling sequentially",
+        "Capital deployment timeline for 1031 replacement",
+        "Retirement income needs vs lump-sum vs installment",
+        "Succession vs full liquidation"
+      ]
+    },
+    "successionPlanning": {
+      "applicability": "When operator is primary active manager and no successor identified",
+      "options": ["professional property management transition", "portfolio sale to larger operator", "estate transfer to heirs with stepped-up basis", "installment sale to partner or key employee"]
+    }
+  },
+  "orchestratorPhaseModifications": {
+    "marketResearch": "Single-market focus. Skip macro MSA sweep entirely. Start directly at submarket analysis for the market the operator already operates in or is actively considering. Output should answer: 'Is this submarket still investable for someone like me?'",
+    "strategy": "Not formally applicable at this scale. Strategy defaults to: 'Buy good buildings in markets you know, at prices that cash flow on day one, with financing you can service without crossing guaranty thresholds.' Flag if operator is departing from this heuristic.",
+    "acquisition": "Full orchestrator applies. Simplified reporting output. Personal guaranty exposure calculated and prominently displayed. DSCR sensitivity to rate shock flagged. Insurance cost estimate required pre-LOI.",
+    "assetManagement": "Primary use case for small operator. Run per property -- no aggregation. Add self-management decision framework at onboarding. Breakeven PM analysis triggered when portfolio crosses 20 units. Plain-language variance reporting.",
+    "portfolio": "Minimal. Simple property dashboard: address, purchase price, current value estimate, monthly NOI, DSCR, occupancy. No NCREIF benchmarks. Total personal guaranty exposure summary.",
+    "disposition": "Individual property focus. Tax impact explained in dollar terms. 1031 education mandatory. Installment sale modeled as alternative. Personal financial plan impact (retirement, liquidity) integrated.",
+    "fundManagement": "Not applicable. Small operators do not manage fund structures.",
+    "lpIntelligence": "Not applicable. Small operators are not LP investors in third-party funds."
+  },
+  "dealbreakers": [
+    "Personal guaranty on non-recourse-eligible loan",
+    "Property requires specialized management beyond operator capability",
+    "Deferred maintenance exceeding available capital reserves",
+    "Insurance unavailable or unaffordable in target market",
+    "Personal guaranty exposure > 100% of net worth across portfolio",
+    "DSCR < 1.00 in rate shock scenario (+200bps)",
+    "Property type outside operator's demonstrated management capability",
+    "No identified path to professional management if operator becomes unavailable"
+  ],
+  "reportingVariant": "owner-operator",
+  "allowedStrategies": ["core", "core-plus", "value-add"]
+}

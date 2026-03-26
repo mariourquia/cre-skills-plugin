@@ -24,11 +24,11 @@ A Claude plugin delivering **98 institutional-grade commercial real estate skill
 | Metric | Count |
 |--------|-------|
 | Skills | **98** |
-| Expert Agents | **40** |
+| Expert Agents | **54** |
 | Reference Files | **221** |
 | Python Calculators | **10** |
 | Workflow Chains | **6** |
-| Slash Commands | **6** |
+| Slash Commands | **7** |
 | Skill Categories | **16** |
 
 ---
@@ -120,6 +120,12 @@ Raleigh NC, $42M asking, 2018 vintage, 93% occupied, $2.6M NOI, rents 12% below 
 /cre-skills:cre-agents
 ```
 
+**Run an orchestrated pipeline:**
+
+```
+/cre-skills:orchestrate acquisition
+```
+
 **Set up brand guidelines (once):**
 
 ```
@@ -170,9 +176,34 @@ Each chain has a detailed workflow document in `routing/workflows/` with step-by
 
 ---
 
+## Orchestration Engine
+
+The plugin includes a multi-agent orchestration engine (derived from [Avi Hacker's CRE Acquisition Orchestrator](https://github.com/ahacker-1/cre-acquisition-orchestrator)) that coordinates skills into automated pipelines.
+
+### Available Orchestrators
+
+| Orchestrator | Purpose | Phases | Verdict |
+|---|---|---|---|
+| acquisition | Full acquisition lifecycle | DD -> UW -> Financing -> Legal -> Closing -> Challenge | GO / CONDITIONAL / NO-GO |
+| capital-stack | Optimal debt/equity structuring | Qualification -> Sizing -> Structuring -> Optimization -> IC | PROCEED / RESTRUCTURE / KILL |
+| hold-period | Asset management (recurring loop) | Onboarding -> Monitoring (loop) -> Leasing -> Capital -> Tenant -> Reposition | CONTINUE / INTERVENE / EXIT |
+| disposition | Asset sale pipeline | Hold/Sell -> Pricing -> Marketing -> Buyers -> Offers -> DD Mgmt -> Close | SELL / HOLD / REFI |
+| development | Ground-up development | Land -> Entitlement -> Proforma -> Construction -> Lease-Up -> Stabilization | BUILD / KILL / DEFER |
+| fund-management | Full fund lifecycle | Formation -> Raise -> Deploy -> Monitor -> Distribute -> Exit | DEPLOY / HOLD / WIND-DOWN |
+| research | Market intelligence | Macro -> Submarket -> Competitive -> Opportunity -> Memo | INVEST / MONITOR / PASS |
+| strategy | Investment strategy formulation | Capital -> Cycle -> Strategy -> Portfolio -> Memo | DEPLOY / REVISE / HOLD |
+| portfolio | Portfolio-level oversight | Composition -> Concentration -> Attribution -> Rebalance -> Stress -> Report | REBALANCE / HOLD / DIVEST |
+| lp-intelligence | LP evaluation of GPs | GP Eval -> Data Request -> Performance -> Portfolio -> Re-Up | RE-UP / REDUCE / EXIT |
+
+Run with: `/cre-skills:orchestrate acquisition`
+
+See `orchestrators/README.md` for full documentation.
+
+---
+
 ## Expert Agents
 
-40 expert agents across 7 categories, each with a distinct analytical perspective.
+54 expert agents across 13 categories, each with a distinct analytical perspective.
 
 | Category | Count | Agents |
 |----------|-------|--------|
@@ -182,9 +213,15 @@ Each chain has a detailed workflow document in `routing/workflows/` with step-by
 | **Challenge Agents** | 6 | Conservative Lender, Aggressive GP, Skeptical LP, IC Challenger, Value-Add Operator, Distressed Specialist |
 | **Titan Styles** | 6 | Zell, Linneman, Sternlicht, Ross, Gray, Barrack |
 | **Stakeholder Views** | 8 | Tenant, Lender, Municipality, Insurance, Appraiser, Environmental, Construction, Legal |
+| **Research & Strategy** | 4 | Market Research Analyst, Submarket Specialist, Chief Investment Officer, Portfolio Strategist |
+| **Asset Management** | 2 | Asset Manager Lead, Leasing Manager |
+| **Portfolio** | 2 | Portfolio Manager, Risk Officer |
+| **Fund Management** | 2 | Fund Controller, Investor Relations Associate |
+| **Disposition** | 1 | Disposition Manager |
+| **LP Intelligence** | 3 | LP Advisor, Fund Analyst, Allocation Committee Member |
 | **Composite** | 2 | CRE Veteran (generalist router), Deal Team Lead (multi-agent orchestrator) |
 
-The **Deal Team Lead** agent assembles multi-agent teams from 8 pre-built compositions: Acquisition IC, Capital Stack Optimization, Disposition Strategy, Development Feasibility, Lease Negotiation, Fund Formation, Market Cycle Assessment, and Crisis Response.
+The **Deal Team Lead** agent assembles multi-agent teams from 10 pre-built compositions: Acquisition IC, Capital Stack Optimization, Disposition Strategy, Development Feasibility, Lease Negotiation, Fund Formation, Market Cycle Assessment, Crisis Response, Portfolio Review, and LP Due Diligence.
 
 ---
 
@@ -276,12 +313,29 @@ cre-skills-plugin/
       references/          # Supporting reference documents (.md and .yaml)
   agents/
     _index.md              # Agent roster and team compositions
-    <agent>.md             # Individual agent definitions (40 agents)
+    <agent>.md             # Individual agent definitions (40 core agents)
+    research/              # Market research lifecycle agents (2)
+    strategy/              # Investment strategy lifecycle agents (2)
+    asset-management/      # Asset management lifecycle agents (2)
+    portfolio/             # Portfolio oversight lifecycle agents (2)
+    fund/                  # Fund management lifecycle agents (2)
+    disposition/           # Disposition lifecycle agents (1)
+    lp/                    # LP intelligence lifecycle agents (3)
+  orchestrators/
+    engine/                # Pipeline engine schema and handoff registry
+    configs/               # 10 orchestrator JSON configurations
+    prompts/               # 14 orchestrator prompt files
+    challenge-layer/       # Post-pipeline adversarial review config
+    investor-profiles/     # 8 investor profiles + strategy matrix
+    schemas/               # Disagreement and reversal trigger schemas
+    thresholds.json        # Investment thresholds (base + investor overrides)
+    README.md              # Orchestration engine documentation
   commands/
     cre-route.md           # Skill router command
     cre-workflows.md       # Workflow chain browser
     cre-agents.md          # Agent roster browser
     brand-config.md        # Brand guidelines setup
+    orchestrate.md         # Multi-agent pipeline orchestrator
     usage-stats.md         # Telemetry summary
     feedback-summary.md    # Session feedback log
   routing/

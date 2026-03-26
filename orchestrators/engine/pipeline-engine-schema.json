@@ -1,0 +1,848 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cre-acquisition-orchestrator/engines/pipeline-engine-schema.json",
+  "title": "CRE Pipeline Engine Registration Schema",
+  "description": "Defines the registration format for any CRE workflow orchestrator that runs inside the pipeline engine. Generalizes the acquisition-pipeline patterns (phase structure, checkpoint system, dependency graph, verdict engine, self-review protocol) to support any CRE workflow chain: acquisitions, capital stack, hold period, disposition, development, fund management, and more.",
+  "type": "object",
+  "required": [
+    "orchestratorId",
+    "version",
+    "entityType",
+    "description",
+    "model",
+    "phases",
+    "checkpointConfig",
+    "executionConfig"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "orchestratorId": {
+      "type": "string",
+      "description": "Globally unique identifier for this orchestrator. Use kebab-case. Serves as the key in agent-registry lookups and as the prefix for log entries, checkpoint paths, and cross-chain handoff references. Example: 'multifamily-acquisition', 'development-pipeline', 'hold-period-monitor'.",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "minLength": 3,
+      "maxLength": 64
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version of this orchestrator definition (MAJOR.MINOR.PATCH). Increment MAJOR on breaking changes to the phase structure or data contracts, MINOR on new phases or agents, PATCH on logic or threshold changes.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "entityType": {
+      "type": "string",
+      "description": "The primary CRE entity this orchestrator operates on. Controls which deal-schema fields are required at launch, which checkpoint paths are scoped, and which cross-chain handoff contracts are valid.",
+      "enum": ["deal", "property", "fund", "portfolio", "project"]
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of what this orchestrator does: workflow type, asset class, scope, and terminal deliverable. Written for the master orchestrator prompt and the agent-registry index.",
+      "minLength": 20,
+      "maxLength": 500
+    },
+    "model": {
+      "type": "string",
+      "description": "Model identifier for the orchestrator process itself (not for specialist agents, which declare their own model per-agent). Defaults to 'claude-opus-4-6[1m]' for full-context pipeline coordination. All agents use 1M context variants to handle large CRE document sets (rent rolls, T-12s, lease abstracts).",
+      "default": "claude-opus-4-6[1m]",
+      "examples": [
+        "claude-opus-4-6[1m]",
+        "claude-sonnet-4-6[1m]",
+        "claude-haiku-4-6"
+      ]
+    },
+    "phases": {
+      "type": "array",
+      "description": "Ordered list of phase definitions. Phases execute in array order unless earlyStartCriteria overrides. Each phase maps to one phase-orchestrator launched as a background Task. Phase weights must sum to exactly 1.0 for accurate overall-progress calculation.",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/phaseDefinition"
+      }
+    },
+    "challengeLayer": {
+      "type": "object",
+      "description": "Optional reference to a challenge-layer configuration that performs adversarial review of phase outputs before they flow downstream. When present, the orchestrator injects a challenge agent after each phase's verdict and before the downstream handoff. Mirrors the self-review protocol used in the acquisition pipeline.",
+      "additionalProperties": false,
+      "required": ["configRef"],
+      "properties": {
+        "configRef": {
+          "type": "string",
+          "description": "Relative path from repo root to the challenge-layer config file. Example: 'config/challenge-layer.json'.",
+          "pattern": "^[a-zA-Z0-9/_.-]+\\.json$"
+        },
+        "applyToPhases": {
+          "type": "array",
+          "description": "List of phaseIds where the challenge layer activates. If omitted, the challenge layer applies to every phase.",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "challengeModel": {
+          "type": "string",
+          "description": "Model used for the challenge agent. May differ from the orchestrator model. Defaults to the orchestrator model if omitted."
+        }
+      }
+    },
+    "investorParametrization": {
+      "type": "object",
+      "description": "Optional reference to investor-specific parametrization that overrides base thresholds per LP class, fund mandate, or investor profile. Enables the same pipeline to serve different investor strategies without forking the orchestrator definition.",
+      "additionalProperties": false,
+      "required": ["configRef"],
+      "properties": {
+        "configRef": {
+          "type": "string",
+          "description": "Relative path from repo root to the investor parametrization config file. Example: 'config/scenarios/core-plus.json'.",
+          "pattern": "^[a-zA-Z0-9/_.-]+\\.json$"
+        },
+        "parameterNamespace": {
+          "type": "string",
+          "description": "JSON pointer prefix within the config file where investor parameters live. Example: '/strategies/core-plus'. If omitted, the root of the config file is used."
+        },
+        "overridableFields": {
+          "type": "array",
+          "description": "Allowlist of threshold field paths (dot-notation) that investor parametrization is allowed to override. Any field not in this list is locked to the orchestrator's defaults. Prevents over-permissive investor configs from bypassing deal-level safeguards.",
+          "items": {
+            "type": "string",
+            "description": "Dot-notation path to an overridable field. Example: 'underwriting.minIRR', 'dueDiligence.maxRedFlags'."
+          }
+        }
+      }
+    },
+    "checkpointConfig": {
+      "type": "object",
+      "description": "Controls how the orchestrator writes and reads pipeline state. The checkpoint system enables full resume-on-restart: if the process is interrupted at any point, the orchestrator re-reads all checkpoints and restarts only incomplete work.",
+      "additionalProperties": false,
+      "required": ["basePath", "agentLevelTracking"],
+      "properties": {
+        "basePath": {
+          "type": "string",
+          "description": "Root path for all checkpoint files emitted by this orchestrator. Relative to repo root. Placeholders: {entityId} is the deal/fund/project ID injected at runtime. Phase-level checkpoint: {basePath}/{entityId}.json. Agent-level checkpoints: {basePath}/{entityId}/agents/{agentId}.json. Log path: data/logs/{entityId}/{orchestratorId}.log.",
+          "examples": [
+            "data/status",
+            "data/checkpoints/fund",
+            "data/checkpoints/development"
+          ]
+        },
+        "agentLevelTracking": {
+          "type": "boolean",
+          "description": "When true, the orchestrator writes an individual checkpoint file per agent at {basePath}/{entityId}/agents/{agentId}.json. Each agent checkpoint records status, taskId, launchedAt, completedAt, retryCount, findings, redFlags, dataGaps, and validationStatus. Required for granular resume logic and dashboard progress polling. Set false only for single-agent orchestrators where phase-level tracking is sufficient."
+        },
+        "statusValues": {
+          "type": "object",
+          "description": "Custom status vocabulary for this orchestrator. Overrides the default status enum (NOT_STARTED, IN_PROGRESS, COMPLETED, FAILED) with workflow-specific values. Example: a disposition orchestrator might use LISTED, UNDER_CONTRACT, CLOSED instead of generic statuses.",
+          "additionalProperties": {
+            "type": "string",
+            "description": "Human-readable label for this status value. Used in log entries and dashboard display."
+          }
+        },
+        "verdictValues": {
+          "type": "object",
+          "description": "Custom verdict vocabulary. Overrides the default verdict enum (PASS, FAIL, CONDITIONAL) with workflow-appropriate terms. Example: closing orchestrator uses GO, NOT_READY, CONDITIONAL; a development pipeline might use PROCEED, HOLD, ABORT.",
+          "additionalProperties": {
+            "type": "string",
+            "description": "Human-readable label for this verdict value."
+          }
+        }
+      }
+    },
+    "crossChainHandoffs": {
+      "type": "array",
+      "description": "Declarations of data handoffs to or from other orchestrators in the workflow chain. Enables multi-chain CRE workflows where the output of one pipeline (e.g., acquisition) is the input to the next (e.g., hold-period-monitor or disposition). The engine validates that handoff data contracts are satisfied before launching the downstream chain.",
+      "items": {
+        "$ref": "#/$defs/crossChainHandoff"
+      },
+      "uniqueItems": true
+    },
+    "executionConfig": {
+      "$ref": "#/$defs/executionConfig"
+    }
+  },
+  "$defs": {
+    "phaseDefinition": {
+      "type": "object",
+      "description": "Defines a single phase within the pipeline. A phase maps to one phase-orchestrator file launched as a background Task. The phase orchestrator is responsible for launching, collecting, and validating its own specialist agents.",
+      "required": ["phaseId", "name", "weight", "agents", "verdictLogic"],
+      "additionalProperties": false,
+      "properties": {
+        "phaseId": {
+          "type": "string",
+          "description": "Machine identifier for this phase. Used as the key in the master checkpoint's phases object, in dependency declarations, in log entries, and in cross-chain handoff references. Must be unique within the orchestrator. Kebab-case.",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable display name for this phase. Used in report headers, dashboard labels, and log summaries.",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "weight": {
+          "type": "number",
+          "description": "Fractional contribution of this phase to overall pipeline progress (0.0 to 1.0). All phase weights in the orchestrator must sum to exactly 1.0. Example: the acquisition pipeline assigns DD=0.25, UW=0.20, Financing=0.20, Legal=0.25, Closing=0.10.",
+          "minimum": 0.01,
+          "maximum": 1.0
+        },
+        "orchestratorFile": {
+          "type": "string",
+          "description": "Relative path from repo root to the phase orchestrator markdown file. When present, the engine reads this file and launches it as a Task instead of managing agents directly. If omitted, the engine manages agents defined in the 'agents' array directly.",
+          "pattern": "^[a-zA-Z0-9/_.-]+\\.md$",
+          "examples": [
+            "orchestrators/due-diligence-orchestrator.md",
+            "orchestrators/underwriting-orchestrator.md"
+          ]
+        },
+        "agents": {
+          "type": "array",
+          "description": "Specialist agents managed by this phase. Each agent is launched as a background Task by the phase orchestrator. Agents within a phase may run in parallel (no dependencies) or sequentially (with declared dependencies). The engine uses the dependency graph to determine launch order and to validate checkpoint data before each launch.",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/agentDefinition"
+          }
+        },
+        "earlyStartCriteria": {
+          "type": "object",
+          "description": "Optional: allows this phase to launch before its upstream phase fully completes, provided the upstream phase reaches a specified completion threshold. Models the Legal phase early-start pattern in the acquisition pipeline, where legal review begins after DD reaches 80% completion.",
+          "additionalProperties": false,
+          "required": ["upstreamPhase", "completionThreshold"],
+          "properties": {
+            "upstreamPhase": {
+              "type": "string",
+              "description": "The phaseId of the upstream phase that must reach completionThreshold before this phase can start early."
+            },
+            "completionThreshold": {
+              "type": "number",
+              "description": "Fraction of upstream phase agents that must be COMPLETED before early start is triggered (0.0 to 1.0). Example: 0.80 means 80% of upstream agents complete. The engine polls the upstream agent checkpoint directory to calculate this ratio.",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "earlyStartAgents": {
+              "type": "array",
+              "description": "Subset of this phase's agentIds that may launch on early start. Agents not in this list remain PENDING until the upstream phase fully completes. Example: in the legal phase, psa-reviewer and title-survey-reviewer can early-start, but loan-doc-reviewer must wait for financing data.",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            },
+            "blockedAgentsRequire": {
+              "type": "array",
+              "description": "List of conditions (as phaseId references) that must be met before the remaining (non-early-start) agents can launch. Each entry is a phaseId whose status must be COMPLETED or CONDITIONAL. Example: 'financing' must be complete before loan-doc-reviewer launches.",
+              "items": {
+                "type": "string",
+                "description": "A phaseId that must reach COMPLETED or CONDITIONAL status."
+              },
+              "uniqueItems": true
+            }
+          }
+        },
+        "verdictLogic": {
+          "$ref": "#/$defs/verdictLogic"
+        },
+        "upstreamDependencies": {
+          "type": "array",
+          "description": "List of phases that must complete (status COMPLETED or CONDITIONAL) before this phase can launch. The engine validates these before calling the phase orchestrator. For phases with earlyStartCriteria, this list governs the full launch; early-start agents bypass this check using completionThreshold instead.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["phaseId", "requiredStatus", "requiredDataKeys"],
+            "properties": {
+              "phaseId": {
+                "type": "string",
+                "description": "The phaseId of the required upstream phase."
+              },
+              "requiredStatus": {
+                "type": "array",
+                "description": "Acceptable status values for the upstream phase. Engine blocks launch if upstream status is not in this list.",
+                "items": {
+                  "type": "string",
+                  "enum": ["COMPLETED", "CONDITIONAL"]
+                },
+                "minItems": 1
+              },
+              "requiredDataKeys": {
+                "type": "array",
+                "description": "Keys that must be non-null in the upstream phase's dataForDownstream object before this phase can launch. Critical keys (marked critical=true) block launch. Non-critical keys log a warning but allow launch to proceed.",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["key", "critical"],
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "description": "Dot-notation path into the upstream phase's dataForDownstream. Example: 'rentRoll.totalUnits', 'baseCase.purchasePrice'."
+                    },
+                    "critical": {
+                      "type": "boolean",
+                      "description": "True if this key's absence should block the phase from launching. False if absence should only produce a warning and a data gap flag."
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Why this key is required. Used in error messages when the key is missing."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "dataForDownstreamContract": {
+          "type": "object",
+          "description": "Declares the data contract that this phase's orchestrator must populate in its dataForDownstream object upon completion. Serves as machine-readable documentation of the inter-phase handoff and is validated by the engine before the downstream phase launches. Keys are field names; values describe type, requirement level, and purpose.",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type", "required"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "JSON type of this field (string, number, boolean, object, array).",
+                "enum": ["string", "number", "boolean", "object", "array"]
+              },
+              "required": {
+                "type": "boolean",
+                "description": "True if this field must be non-null in the handoff. False if it may be omitted for CONDITIONAL verdicts."
+              },
+              "description": {
+                "type": "string",
+                "description": "What this field contains and why it matters to downstream phases."
+              }
+            }
+          }
+        },
+        "selfReviewProtocol": {
+          "type": "object",
+          "description": "Optional self-review protocol executed by the phase orchestrator after all agents complete but before the final verdict is written. Models the 6-step validation checklist in the master orchestrator: checkpoint verification, report existence, key metric non-null checks, cross-phase consistency, threshold evaluation, confidence scoring.",
+          "additionalProperties": false,
+          "properties": {
+            "crossAgentValidations": {
+              "type": "array",
+              "description": "List of consistency checks to run across agent outputs. Example: unit count from rent-roll-analyst must match physical-inspection.",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["checkId", "agentsInvolved", "tolerance", "actionOnMismatch"],
+                "properties": {
+                  "checkId": {
+                    "type": "string",
+                    "description": "Short identifier for this check. Used in log entries."
+                  },
+                  "agentsInvolved": {
+                    "type": "array",
+                    "description": "AgentIds whose outputs are compared in this check.",
+                    "items": { "type": "string" },
+                    "minItems": 2
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Human-readable description of what is being compared and why."
+                  },
+                  "tolerance": {
+                    "type": "string",
+                    "description": "Acceptable variance before the mismatch is flagged. Express as a percentage string (e.g., '5%') or 'exact' for no tolerance."
+                  },
+                  "actionOnMismatch": {
+                    "type": "string",
+                    "description": "What to do when a mismatch exceeds tolerance.",
+                    "enum": ["log_warning", "log_error", "flag_data_gap", "block_verdict"]
+                  }
+                }
+              }
+            },
+            "confidenceScoringRules": {
+              "type": "object",
+              "description": "Rules for calculating a confidence score (0-100) from deductions. Deductions are applied for null metrics, cross-phase mismatches, data gaps, failed agents, and conditional upstream verdicts. The confidence score is included in the phase completion notification.",
+              "additionalProperties": false,
+              "properties": {
+                "baseScore": {
+                  "type": "integer",
+                  "description": "Starting confidence value before any deductions.",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "default": 100
+                },
+                "deductions": {
+                  "type": "object",
+                  "description": "Map of event types to point deductions.",
+                  "additionalProperties": false,
+                  "properties": {
+                    "perNullKeyMetric": {
+                      "type": "integer",
+                      "description": "Points deducted per null required metric.",
+                      "minimum": 0,
+                      "default": 5
+                    },
+                    "perCrossPhasesMismatch": {
+                      "type": "integer",
+                      "description": "Points deducted per cross-phase consistency failure.",
+                      "minimum": 0,
+                      "default": 10
+                    },
+                    "perDataGap": {
+                      "type": "integer",
+                      "description": "Points deducted per data gap flagged by any agent.",
+                      "minimum": 0,
+                      "default": 2
+                    },
+                    "perFailedNonCriticalAgent": {
+                      "type": "integer",
+                      "description": "Points deducted per non-critical agent that failed after all retries.",
+                      "minimum": 0,
+                      "default": 5
+                    },
+                    "perConditionalUpstream": {
+                      "type": "integer",
+                      "description": "Points deducted per upstream phase with CONDITIONAL verdict.",
+                      "minimum": 0,
+                      "default": 10
+                    },
+                    "perMissingReport": {
+                      "type": "integer",
+                      "description": "Points deducted per expected report file that is missing or empty.",
+                      "minimum": 0,
+                      "default": 15
+                    }
+                  }
+                },
+                "categories": {
+                  "type": "object",
+                  "description": "Score band labels for the final confidence value. Each key is a human-readable category; the value is the minimum score for that category.",
+                  "additionalProperties": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "default": {
+                    "HIGH": 90,
+                    "MEDIUM": 70,
+                    "LOW": 50,
+                    "VERY_LOW": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "agentDefinition": {
+      "type": "object",
+      "description": "Defines a single specialist agent within a phase. Agents are launched as background Tasks by the phase orchestrator. The engine uses this definition to build the launch prompt, track checkpoints, and validate outputs.",
+      "required": ["agentId", "file", "model", "inputs", "outputs", "critical"],
+      "additionalProperties": false,
+      "properties": {
+        "agentId": {
+          "type": "string",
+          "description": "Unique identifier for this agent within the orchestrator. Used as the checkpoint key, as the key in agentStatuses, and in dependency declarations. Kebab-case.",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "file": {
+          "type": "string",
+          "description": "Relative path from repo root to the agent's prompt markdown file. The phase orchestrator reads this file and injects deal config, upstream data, and checkpoint paths before launching.",
+          "pattern": "^[a-zA-Z0-9/_.-]+\\.md$"
+        },
+        "model": {
+          "type": "string",
+          "description": "Model identifier for this specific agent. Specialist agents may use a smaller model than the orchestrator for cost efficiency. Defaults to the orchestrator model if omitted.",
+          "examples": [
+            "claude-opus-4-6[1m]",
+            "claude-sonnet-4-6[1m]",
+            "claude-haiku-4-6"
+          ]
+        },
+        "skillRefs": {
+          "type": "array",
+          "description": "List of skill file references to inject into this agent's launch prompt. Each entry is a relative path to a skill markdown file (e.g., 'skills/underwriting-calc.md'). Skills provide shared calculation logic, benchmarks, and protocols that agents include verbatim.",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9/_.-]+\\.md$"
+          },
+          "uniqueItems": true
+        },
+        "inputs": {
+          "type": "array",
+          "description": "Descriptive list of data sources this agent requires. Used in launch prompt composition and in error messages when upstream data is missing. Not machine-validated by the engine -- use upstreamDependencies.requiredDataKeys for machine validation.",
+          "items": {
+            "type": "string",
+            "description": "Data source name or description. Example: 'config/deal.json', 'T-12 operating statement', 'rent roll document'."
+          },
+          "minItems": 1
+        },
+        "outputs": {
+          "type": "array",
+          "description": "Descriptive list of artifacts this agent produces. Used in downstream dependency declarations and in the agent-registry index.",
+          "items": {
+            "type": "string",
+            "description": "Output artifact name. Example: 'base case financial model', 'rent roll analysis', 'environmental assessment'."
+          },
+          "minItems": 1
+        },
+        "critical": {
+          "type": "boolean",
+          "description": "True if failure of this agent should halt the phase (and the pipeline if it cannot be recovered). False if the phase can continue with a CONDITIONAL verdict and a data gap flag. Example: rent-roll-analyst is critical (cannot build financial model without rent data); tenant-credit is non-critical (credit risk can be flagged as unknown)."
+        },
+        "dependencies": {
+          "type": "array",
+          "description": "AgentIds within the same phase that must be COMPLETED before this agent can launch. An empty array means the agent can launch in parallel with other zero-dependency agents. The engine uses this graph to schedule parallel vs. sequential agent execution.",
+          "items": {
+            "type": "string",
+            "description": "An agentId within the same phase."
+          },
+          "uniqueItems": true
+        },
+        "maxTimeoutMinutes": {
+          "type": "integer",
+          "description": "Maximum number of minutes the phase orchestrator will wait for this agent before marking it TIMED_OUT and applying the retry protocol. Derived from the thresholds config at runtime if not set here; this field provides an override at the agent level.",
+          "minimum": 1,
+          "maximum": 480
+        },
+        "retryPolicy": {
+          "type": "object",
+          "description": "Agent-level retry override. When absent, the orchestrator's executionConfig.retryPolicy applies. Use this to give high-value agents (e.g., scenario-analyst with 27 sub-agents) a more generous retry budget than the default.",
+          "additionalProperties": false,
+          "required": ["maxAttempts", "backoffStrategy"],
+          "properties": {
+            "maxAttempts": {
+              "type": "integer",
+              "description": "Total number of attempts including the initial launch (not just retries). A value of 3 means 1 initial attempt plus 2 retries.",
+              "minimum": 1,
+              "maximum": 10
+            },
+            "backoffStrategy": {
+              "type": "string",
+              "description": "Strategy for spacing retry attempts.",
+              "enum": ["immediate", "fixed", "exponential"],
+              "default": "exponential"
+            },
+            "baseDelayMs": {
+              "type": "integer",
+              "description": "Base delay in milliseconds between retry attempts. For exponential backoff, this is the delay before the first retry; subsequent retries multiply by 2^(attempt-1). Example: baseDelayMs=10000 gives delays of 10s, 20s, 40s.",
+              "minimum": 0,
+              "default": 10000
+            }
+          }
+        },
+        "validationRules": {
+          "type": "array",
+          "description": "Output validation rules that the phase orchestrator runs after this agent completes. Failures trigger a retry with the validation errors injected into the retry prompt. Example rules: 'NOI = EGI - OpEx within 1% tolerance', 'exactly 27 scenarios present'.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["ruleId", "description", "actionOnFailure"],
+            "properties": {
+              "ruleId": {
+                "type": "string",
+                "description": "Short identifier for this rule. Used in log entries."
+              },
+              "description": {
+                "type": "string",
+                "description": "Human-readable description of the validation rule and the expected invariant."
+              },
+              "actionOnFailure": {
+                "type": "string",
+                "description": "What to do when this rule fails.",
+                "enum": ["retry_agent", "log_warning", "flag_data_gap", "halt_phase"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "verdictLogic": {
+      "type": "object",
+      "description": "Defines the decision rules that determine a phase's verdict (PASS/FAIL/CONDITIONAL or workflow-specific equivalents). The phase orchestrator evaluates these conditions after all agents complete and the self-review protocol runs. The verdictLogic reads thresholds from the investorParametrization config or falls back to config/thresholds.json.",
+      "required": ["passConditions", "conditionalConditions", "failConditions"],
+      "additionalProperties": false,
+      "properties": {
+        "passConditions": {
+          "type": "array",
+          "description": "ALL of these conditions must be true for a PASS verdict. Conditions are evaluated after the self-review protocol. If passConditions is empty, the default is: all critical agents completed, no dealbreakers, and all threshold checks pass.",
+          "items": {
+            "$ref": "#/$defs/verdictCondition"
+          }
+        },
+        "conditionalConditions": {
+          "type": "array",
+          "description": "If any FAIL condition is absent but at least one of these is true, the verdict is CONDITIONAL. The phase continues downstream but conditions are propagated in the handoff. Example: fewer than N scenarios passing all thresholds, or a non-critical agent failure.",
+          "items": {
+            "$ref": "#/$defs/verdictCondition"
+          }
+        },
+        "failConditions": {
+          "type": "array",
+          "description": "If ANY of these conditions is true, the verdict is FAIL regardless of other metrics. Dealbreakers belong here.",
+          "items": {
+            "$ref": "#/$defs/verdictCondition"
+          }
+        },
+        "dealbreakers": {
+          "type": "array",
+          "description": "Named dealbreakers from config/thresholds.json that automatically produce a FAIL verdict. These are pre-wired fail conditions for items that should never be negotiated (e.g., Phase II ESA required, environmental liens, unresolvable title cloud). The engine reads these from the thresholds file at runtime; list them here for documentation purposes.",
+          "items": {
+            "type": "string",
+            "description": "Dealbreaker identifier as it appears in config/thresholds.json."
+          },
+          "uniqueItems": true
+        },
+        "thresholdsRef": {
+          "type": "string",
+          "description": "Dot-notation path into config/thresholds.json for the threshold block relevant to this phase. Example: 'underwriting' loads the underwriting block containing minIRR, minDSCR, etc.",
+          "examples": [
+            "dueDiligence",
+            "underwriting",
+            "financing",
+            "closing"
+          ]
+        }
+      }
+    },
+    "verdictCondition": {
+      "type": "object",
+      "description": "A single logical condition used in the verdictLogic evaluation.",
+      "required": ["conditionId", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "conditionId": {
+          "type": "string",
+          "description": "Short identifier for this condition. Used in log entries and in the conditions list written to the phase checkpoint."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable statement of this condition. Written as a boolean assertion. Example: 'Base case DSCR >= 1.25', 'scenariosPassingAll >= 18 of 27', 'No CRITICAL red flags found'."
+        },
+        "metricPath": {
+          "type": "string",
+          "description": "Optional dot-notation path into the phase's aggregated output object where the metric to evaluate lives. When provided, the engine can auto-evaluate this condition against the threshold. When absent, the phase orchestrator evaluates the condition via natural language reasoning."
+        },
+        "operator": {
+          "type": "string",
+          "description": "Comparison operator for numeric or string metric evaluation. Only used when metricPath is provided.",
+          "enum": ["eq", "neq", "gt", "gte", "lt", "lte", "contains", "not_contains", "exists", "not_exists"]
+        },
+        "thresholdRef": {
+          "type": "string",
+          "description": "Dot-notation path into the thresholds config for the comparison value. Example: 'underwriting.minDSCR'. The engine resolves this at runtime after applying investorParametrization overrides."
+        },
+        "propagateIfFailed": {
+          "type": "boolean",
+          "description": "If true and this condition fails, the failure reason is added to the dataForDownstream.conditions array and propagated to all downstream phases. Downstream orchestrators must address or acknowledge propagated conditions.",
+          "default": false
+        }
+      }
+    },
+    "crossChainHandoff": {
+      "type": "object",
+      "description": "Declares a data handoff to or from another orchestrator in the multi-chain CRE workflow. The engine validates handoff contracts before launching the receiving orchestrator.",
+      "required": ["direction", "counterpartOrchestrator", "triggerCondition", "dataContract"],
+      "additionalProperties": false,
+      "properties": {
+        "direction": {
+          "type": "string",
+          "description": "'outbound' means this orchestrator sends data to the counterpart. 'inbound' means this orchestrator receives data from the counterpart at launch.",
+          "enum": ["inbound", "outbound"]
+        },
+        "counterpartOrchestrator": {
+          "type": "string",
+          "description": "The orchestratorId of the other pipeline in the handoff. Must match an orchestratorId registered in agent-registry.json."
+        },
+        "triggerCondition": {
+          "type": "string",
+          "description": "When this handoff activates. For outbound: describes what must be true in this pipeline before the counterpart is launched. For inbound: describes what the counterpart must have completed before this pipeline can start.",
+          "examples": [
+            "This orchestrator status == COMPLETED",
+            "Phase 'closing' verdict == GO",
+            "Counterpart 'acquisition' phase 'underwriting' status == COMPLETED"
+          ]
+        },
+        "dataContract": {
+          "type": "object",
+          "description": "Schema of the data passed in this handoff. Keys are field names in the handoff payload; values describe each field's type, requirement, and meaning.",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type", "required", "description"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "JSON type of this field.",
+                "enum": ["string", "number", "boolean", "object", "array"]
+              },
+              "required": {
+                "type": "boolean",
+                "description": "True if this field must be non-null in the handoff payload."
+              },
+              "description": {
+                "type": "string",
+                "description": "What this field contains. Written from the perspective of the receiving orchestrator."
+              },
+              "sourcePhase": {
+                "type": "string",
+                "description": "The phaseId within this orchestrator where this value is produced. Used by the engine to locate the value in the master checkpoint."
+              },
+              "sourcePath": {
+                "type": "string",
+                "description": "Dot-notation path into the source phase's dataForDownstream where the value lives."
+              }
+            }
+          }
+        }
+      }
+    },
+    "executionConfig": {
+      "type": "object",
+      "description": "Runtime execution parameters for the orchestrator. Controls concurrency, timeouts, retry policy, polling intervals, and logging. Merges with and overrides config/runtime.json at launch time.",
+      "required": ["concurrency", "timeouts", "retryPolicy"],
+      "additionalProperties": false,
+      "properties": {
+        "concurrency": {
+          "type": "object",
+          "description": "Concurrency limits controlling how many phases and agents can run simultaneously.",
+          "additionalProperties": false,
+          "required": ["maxConcurrentPhases", "maxAgentsPerPhase"],
+          "properties": {
+            "maxConcurrentPhases": {
+              "type": "integer",
+              "description": "Maximum number of phases that may be IN_PROGRESS simultaneously. The acquisition pipeline runs phases mostly sequentially (concurrency=1) but allows Legal to early-start while UW/Financing run (concurrency=2). Higher values enable fully parallel pipelines like fund-level analysis.",
+              "minimum": 1,
+              "default": 2
+            },
+            "maxAgentsPerPhase": {
+              "type": "integer",
+              "description": "Maximum number of agents within a single phase that can run as concurrent background Tasks. Limited by the compute and API rate constraints of the execution environment.",
+              "minimum": 1,
+              "default": 7
+            }
+          }
+        },
+        "timeouts": {
+          "type": "object",
+          "description": "Timeout thresholds. Agent-level timeouts are declared per-agent in the agentDefinition; these are the phase-level and pipeline-level fallbacks.",
+          "additionalProperties": false,
+          "required": ["defaultAgentMinutes", "defaultPhaseMinutes"],
+          "properties": {
+            "defaultAgentMinutes": {
+              "type": "integer",
+              "description": "Default timeout in minutes for any agent that does not declare maxTimeoutMinutes. Agent-level maxTimeoutMinutes overrides this.",
+              "minimum": 1,
+              "default": 30
+            },
+            "defaultPhaseMinutes": {
+              "type": "integer",
+              "description": "Maximum wall-clock time in minutes for an entire phase (sum of all its agents plus buffer). If a phase exceeds this, the orchestrator marks all RUNNING agents as TIMED_OUT and evaluates the phase verdict with partial results.",
+              "minimum": 1,
+              "default": 120
+            },
+            "pipelineMinutes": {
+              "type": "integer",
+              "description": "Maximum total wall-clock time in minutes for the entire pipeline. The master orchestrator uses this to detect stuck pipelines. If exceeded, the pipeline is halted and all IN_PROGRESS phases are marked TIMED_OUT.",
+              "minimum": 1
+            }
+          }
+        },
+        "retryPolicy": {
+          "type": "object",
+          "description": "Default retry configuration for agents that fail. Individual agents may override via their retryPolicy field.",
+          "additionalProperties": false,
+          "required": ["maxAttempts", "backoffStrategy", "baseDelayMs"],
+          "properties": {
+            "maxAttempts": {
+              "type": "integer",
+              "description": "Total number of attempts including the initial launch. A value of 3 means 1 initial attempt plus 2 retries, consistent with the acquisition pipeline's 2-retry pattern.",
+              "minimum": 1,
+              "maximum": 10,
+              "default": 3
+            },
+            "backoffStrategy": {
+              "type": "string",
+              "description": "Spacing strategy between retry attempts. 'exponential' applies baseDelayMs * 2^(attempt-1). The acquisition pipeline uses 10s before first retry and 30s before second retry.",
+              "enum": ["immediate", "fixed", "exponential"],
+              "default": "exponential"
+            },
+            "baseDelayMs": {
+              "type": "integer",
+              "description": "Base delay in milliseconds. For exponential backoff, delays are baseDelayMs * 2^0, baseDelayMs * 2^1, etc. Default 10000 = 10 seconds before first retry.",
+              "minimum": 0,
+              "default": 10000
+            }
+          }
+        },
+        "pollingIntervalMs": {
+          "type": "integer",
+          "description": "Interval in milliseconds between progress polls when the orchestrator is waiting on concurrent phases or long-running agents. The master orchestrator polls data/status/{entityId}.json at this interval. Default 30000 = 30 seconds.",
+          "minimum": 1000,
+          "default": 30000
+        },
+        "stalledPollThreshold": {
+          "type": "integer",
+          "description": "Number of consecutive polls with no progress change before the orchestrator logs a WARNING and increases the polling interval. Default 10 matches the acquisition pipeline pattern.",
+          "minimum": 1,
+          "default": 10
+        },
+        "logging": {
+          "type": "object",
+          "description": "Logging configuration for this orchestrator's log stream.",
+          "additionalProperties": false,
+          "properties": {
+            "categories": {
+              "type": "array",
+              "description": "Log categories this orchestrator emits. Used to filter structured log streams and dashboard event feeds.",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ACTION",
+                  "FINDING",
+                  "INFO",
+                  "PHASE",
+                  "ERROR",
+                  "DATA_GAP",
+                  "COMPLETE",
+                  "LAUNCH",
+                  "RETRY",
+                  "TIMEOUT",
+                  "VERDICT",
+                  "HANDOFF",
+                  "ESCALATE",
+                  "RESUME",
+                  "CROSS_CHECK"
+                ]
+              },
+              "uniqueItems": true,
+              "default": ["ACTION", "FINDING", "INFO", "PHASE", "ERROR", "DATA_GAP", "COMPLETE"]
+            },
+            "emitStructuredEvents": {
+              "type": "boolean",
+              "description": "When true, each log entry is also written as a structured JSON event to a sidecar events file. The dashboard reads the events file for real-time progress rendering.",
+              "default": true
+            },
+            "logPath": {
+              "type": "string",
+              "description": "Override for the log file path. If omitted, the engine writes to data/logs/{entityId}/{orchestratorId}.log. Use this to direct logs to a shared pipeline log or a phase-specific path.",
+              "examples": [
+                "data/logs/{entityId}/master.log",
+                "data/logs/{entityId}/{phaseId}.log"
+              ]
+            }
+          }
+        },
+        "validationMode": {
+          "type": "object",
+          "description": "Controls behavior when the orchestrator is launched with MODE=VALIDATE. Enables dry-run testing against synthetic deal data without writing to production checkpoints.",
+          "additionalProperties": false,
+          "properties": {
+            "testEntityPath": {
+              "type": "string",
+              "description": "Path to the synthetic test entity config used in validation mode. Example: 'validation/test-deal.json'.",
+              "pattern": "^[a-zA-Z0-9/_.-]+\\.json$"
+            },
+            "expectedOutputsPath": {
+              "type": "string",
+              "description": "Path to the expected outputs directory for validation assertions. Example: 'validation/expected-outputs/'.",
+              "pattern": "^[a-zA-Z0-9/_.-/]+$"
+            },
+            "isolateWrites": {
+              "type": "boolean",
+              "description": "When true, all file writes are redirected to a temporary directory and never touch data/ or reports/. Default true.",
+              "default": true
+            }
+          }
+        }
+      }
+    }
+  }
+}
