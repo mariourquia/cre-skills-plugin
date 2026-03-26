@@ -107,7 +107,7 @@ handle_user_data() {
   "$has_config"    && printf "    - config.json (opt-in preferences)\n"       || true
   "$has_brand"     && printf "    - brand-guidelines.json (your brand config)\n" || true
   "$has_telemetry" && printf "    - telemetry.jsonl (anonymous usage records)\n" || true
-  "$has_feedback"  && printf "    - feedback.jsonl (session feedback)\n")       || true
+  "$has_feedback"  && printf "    - feedback.jsonl (session feedback)\n"        || true
   echo ""
 
   if [ -t 0 ]; then
