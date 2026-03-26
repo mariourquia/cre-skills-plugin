@@ -1,0 +1,369 @@
+# Market Rate Benchmarks by Loan Type, LTV Tier, and Property Type
+# Source: mid-2025 market conditions (indicative; verify against current lender indications)
+# All spreads in basis points (bps) over the relevant index (SOFR, Treasury, Swap)
+# All rates are indicative ranges -- actual pricing varies by market, sponsor, and deal specifics
+
+metadata:
+  as_of: "mid-2025"
+  disclaimer: >
+    These benchmarks reflect mid-2025 market conditions. CRE debt markets are dynamic --
+    spreads can move 25-75 bps over a quarter. Always verify against current lender indications
+    before using in a term sheet or negotiation. SOFR-based floating rates require current
+    index check; Treasury/Swap-based fixed rates require same-day lock to be accurate.
+
+# =============================================================================
+# AGENCY (FREDDIE MAC OPTIGO / FANNIE MAE DUS) -- MULTIFAMILY ONLY
+# =============================================================================
+
+agency:
+  index: "10-yr Treasury (fixed) or 1-mo SOFR (floating)"
+  eligible_property_types:
+    - multifamily_market_rate
+    - multifamily_affordable
+    - senior_housing
+    - manufactured_housing_community
+    - student_housing  # select programs only
+
+  spreads_by_ltv_tier:
+    # Freddie Mac Optigo / Fannie Mae DUS indicative spreads (T-spread, bps)
+    under_55pct_ltv:
+      freddie: "140-160"
+      fannie: "145-165"
+      notes: "Best-in-class pricing; reserve-light; full-term IO often available"
+    55_to_65pct_ltv:
+      freddie: "155-180"
+      fannie: "160-185"
+      notes: "Standard pricing tier; 3-5 year IO typical"
+    65_to_70pct_ltv:
+      freddie: "170-200"
+      fannie: "175-205"
+      notes: "Green/Affordable programs can reduce spread 10-25 bps"
+    70_to_75pct_ltv:
+      freddie: "190-225"
+      fannie: "195-230"
+      notes: "Top-tier for standard programs; Affordable/Green up to 80%"
+    75_to_80pct_ltv:
+      freddie: "215-260"
+      fannie: "220-265"
+      notes: "Affordable or Green programs only; additional underwriting scrutiny"
+
+  dscr_minimums:
+    standard: 1.25
+    affordable: 1.15
+    green_rewards: 1.20
+    student_housing: 1.30
+    senior_housing: 1.30
+
+  ltv_maximums:
+    standard_market_rate: 0.75
+    affordable: 0.80
+    green_rewards: 0.80
+    student_housing: 0.65
+    senior_housing: 0.65
+
+  io_period_availability:
+    # Maximum IO period by LTV
+    under_55pct_ltv: "Full-term IO available"
+    55_to_65pct_ltv: "Up to 5 years IO"
+    65_to_70pct_ltv: "Up to 3 years IO"
+    70_to_75pct_ltv: "Up to 2 years IO"
+    75pct_plus_ltv: "IO not available"
+
+  prepayment_benchmarks:
+    freddie:
+      common_structure: "Step-down (1% declining)"
+      step_down_schedule: "Year 1: 8%, Year 2: 7%, Year 3: 6%, Year 4: 5%, Year 5: 4%, Year 6: 3%, Year 7: 2%, Year 8: 1%, thereafter: open"
+      alternative: "Yield maintenance (rarely negotiated to step-down)"
+    fannie:
+      common_structure: "Yield maintenance"
+      lockout: "24 months"
+      alternative: "1% step-down available on select DUS programs"
+
+  rate_lock_costs_bps:
+    standard_30_day: "0 (included)"
+    standard_60_day: "5-10"
+    standard_90_day: "10-20"
+    early_lock_at_application: "10-25"
+    float_down_option: "10-15 additional (Freddie SBL only)"
+    extension_per_30_days: "10-25"
+
+  processing_timeline_weeks:
+    freddie_optigo: "6-8"
+    freddie_sbl: "4-6"
+    fannie_dus: "6-9"
+
+# =============================================================================
+# CMBS (COMMERCIAL MORTGAGE-BACKED SECURITIES)
+# =============================================================================
+
+cmbs:
+  index: "10-yr Swap or 10-yr Treasury (lender-specific)"
+  eligible_property_types:
+    - office
+    - retail
+    - hotel
+    - industrial
+    - multifamily  # non-agency eligible or above agency loan limits
+    - mixed_use
+    - self_storage
+    - mobile_home_park
+
+  spreads_by_property_type:
+    # Spreads over 10-yr Swap (bps); lower LTV = tighter spread
+    multifamily:
+      under_65pct_ltv: "130-160"
+      65_to_70pct_ltv: "155-185"
+      70_to_75pct_ltv: "175-210"
+    industrial:
+      under_65pct_ltv: "140-170"
+      65_to_70pct_ltv: "160-195"
+      70_to_75pct_ltv: "180-220"
+    office_class_a:
+      under_60pct_ltv: "185-220"
+      60_to_65pct_ltv: "210-250"
+      65_to_70pct_ltv: "240-290"
+      notes: "Office facing significant spread premium; gateway market discount"
+    office_class_b:
+      under_60pct_ltv: "240-290"
+      60_to_65pct_ltv: "280-340"
+      65_to_70pct_ltv: "320-390"
+      notes: "Significant market headwinds post-COVID; many CMBS lenders avoided Class B"
+    retail_anchored:
+      under_60pct_ltv: "185-225"
+      60_to_65pct_ltv: "210-255"
+      65_to_70pct_ltv: "240-290"
+    retail_unanchored:
+      under_55pct_ltv: "220-270"
+      55_to_60pct_ltv: "255-310"
+      notes: "Lender appetite limited; grocery-anchored preferred"
+    hotel_full_service:
+      under_55pct_ltv: "260-320"
+      55_to_60pct_ltv: "300-360"
+      notes: "Flagged franchise required; seasonality reserve required"
+    hotel_limited_service:
+      under_60pct_ltv: "220-275"
+      60_to_65pct_ltv: "255-315"
+    self_storage:
+      under_65pct_ltv: "155-185"
+      65_to_70pct_ltv: "175-210"
+      notes: "Strong fundamentals; spreads tightened 2022-2025"
+
+  dscr_minimums:
+    office: 1.30
+    retail: 1.25
+    industrial: 1.25
+    multifamily: 1.25
+    hotel: 1.40  # higher due to income volatility
+    self_storage: 1.25
+
+  ltv_maximums:
+    office: 0.70
+    retail: 0.70
+    industrial: 0.75
+    multifamily: 0.75
+    hotel: 0.65
+    self_storage: 0.75
+
+  debt_yield_minimums:
+    office: 0.085  # 8.5%
+    retail: 0.080  # 8.0%
+    industrial: 0.075  # 7.5%
+    multifamily: 0.075  # 7.5%
+    hotel: 0.110  # 11.0%
+    self_storage: 0.075  # 7.5%
+
+  io_period_benchmarks:
+    # IO availability by LTV tier
+    under_60pct_ltv: "Full-term IO achievable for quality properties"
+    60_to_65pct_ltv: "Up to 5 years IO"
+    65_to_70pct_ltv: "Up to 3 years IO"
+    70pct_plus_ltv: "IO unusual; 12 months maximum"
+
+  prepayment_benchmarks:
+    standard_structure: "Defeasance"
+    lockout: "24 months"
+    alternative: "Yield maintenance (negotiable; more borrower-friendly than defeasance in low-rate environments)"
+    open_window: "Final 90 days before maturity (negotiated)"
+
+  processing_timeline_weeks:
+    conduit: "10-14"
+    single_asset_single_borrower_sasb: "8-12"
+
+# =============================================================================
+# BANK BALANCE SHEET
+# =============================================================================
+
+bank_balance_sheet:
+  index: "1-mo SOFR (floating) or 5-yr Treasury (fixed term)"
+  eligible_property_types:
+    - all_commercial_types
+    - multifamily
+    - mixed_use
+    - value_add  # preferred over CMBS for transitional
+    - note: "Bank balance sheet preferred for relationship-dependent or complex structures"
+
+  spreads_by_product:
+    # SOFR spreads (floating) by property type and LTV tier
+    multifamily:
+      stabilized_under_65pct: "225-275"
+      stabilized_65_to_70pct: "250-310"
+      value_add: "300-375"
+    office_class_a:
+      stabilized_under_60pct: "275-325"
+      stabilized_60_to_65pct: "310-375"
+      notes: "Many regional banks reduced appetite for office 2023-2025"
+    industrial:
+      stabilized_under_65pct: "225-275"
+      stabilized_65_to_70pct: "250-300"
+      value_add: "280-350"
+    retail_anchored:
+      stabilized_under_60pct: "265-315"
+      stabilized_60_to_65pct: "295-355"
+    mixed_use:
+      stabilized: "275-340"
+      value_add: "325-400"
+
+  dscr_minimums:
+    non_recourse: 1.25
+    partial_recourse: 1.20
+    full_recourse: 1.15
+
+  ltv_maximums:
+    stabilized_non_recourse: 0.70
+    stabilized_partial_recourse: 0.75
+    value_add_as_stabilized: 0.75
+    note: "LTV tested on both as-is and as-stabilized; lender uses lower-yielding basis"
+
+  prepayment_benchmarks:
+    common_structure: "Step-down (1%/0.5%/open) or open after 12-18 months"
+    alternative: "Yield maintenance on fixed-rate bank products"
+    typical_negotiation: "Negotiate open prepayment after year 2; step-down to 0.5%/0.25% in years 1-2"
+
+  processing_timeline_weeks:
+    community_bank: "4-6"
+    regional_bank: "5-8"
+    national_bank: "6-10"
+
+# =============================================================================
+# BRIDGE LOANS (DEBT FUNDS, MORTGAGE REITs)
+# =============================================================================
+
+bridge:
+  index: "1-mo SOFR (floating)"
+  eligible_property_types:
+    - value_add
+    - transitional
+    - lease_up
+    - light_renovation
+    - note: "Not for ground-up construction; see construction section"
+
+  spreads_by_leverage_and_risk:
+    # SOFR spreads (bps) by risk profile
+    low_leverage_stabilized_value_add:
+      ltv_under_65pct: "275-325"
+      ltv_65_to_70pct: "300-375"
+    moderate_leverage_transitional:
+      ltv_65_to_70pct: "325-400"
+      ltv_70_to_75pct: "375-475"
+    higher_leverage_heavy_value_add:
+      ltv_70_to_75pct: "425-525"
+      ltv_75_to_80pct: "500-625"
+      notes: "Rarely available without significant sponsor experience"
+
+  dscr_minimums:
+    as_stabilized_pro_forma: 1.10  # tested on completed/stabilized basis
+    as_is_current: 0.90  # as-is can be below 1.0x during renovation
+
+  ltv_ltc_maximums:
+    as_is_ltv: 0.80
+    as_stabilized_ltv: 0.70
+    loan_to_cost_ltc: 0.80  # including renovation budget
+
+  exit_fee_benchmarks:
+    typical: "0.50-1.00%"
+    low_leverage_deals: "0.25-0.50%"
+    note: "Some bridge lenders waive exit fee if loan held to maturity"
+
+  rate_cap_benchmarks:
+    strike_rate_over_current_sofr: "200-300 bps"
+    typical_all_in_cap_rate: "5.00-6.50%"
+    cost_of_cap_bps_of_notional:
+      24_month_cap: "50-150"
+      36_month_cap: "100-250"
+      note: "Cap cost extremely volatility-sensitive; get quote at application"
+
+  extension_fee_benchmarks:
+    per_extension: "0.25-0.50% of outstanding balance"
+    typical_conditions: "No default, minimum occupancy 85%+, DSCR test on as-stabilized"
+
+  processing_timeline_weeks:
+    debt_fund: "3-5"
+    mortgage_reit: "4-6"
+    bank_bridge_product: "5-8"
+
+# =============================================================================
+# CONSTRUCTION LOANS
+# =============================================================================
+
+construction:
+  index: "1-mo SOFR (floating)"
+  product: "Ground-up development or major renovation requiring permits"
+
+  spreads:
+    # SOFR spreads (bps) by LTC and sponsor experience
+    institutional_sponsor_under_60pct_ltc: "250-325"
+    institutional_sponsor_60_to_65pct_ltc: "300-375"
+    regional_sponsor_under_65pct_ltc: "350-450"
+    note: "Sponsor experience and net worth significantly affect pricing"
+
+  ltc_maximums:
+    ground_up_with_strong_preleasing: 0.70
+    ground_up_speculative: 0.60
+    major_renovation: 0.75
+    note: "Land must typically be owned free and clear or included at lender-approved value"
+
+  interest_reserve_sizing:
+    typical_months: "18-30 (full construction period + 6 months buffer)"
+    sizing_guidance: "Fund 110-120% of projected interest to account for delays"
+
+  processing_timeline_weeks:
+    from_complete_application: "6-12"
+    note: "Construction loan processing slower due to construction budget review and title work"
+
+# =============================================================================
+# MEZZANINE LOANS
+# =============================================================================
+
+mezzanine:
+  collateral: "Pledge of equity interest in senior borrowing entity (UCC lien)"
+
+  rate_benchmarks:
+    all_cash_pay: "10.00-15.00%"
+    blended_cash_pik: "9.00-14.00% (portion PIK)"
+    preferred_equity_equivalent: "8.00-12.00% preferred return"
+    note: "Rates vary widely with LTV, property type, senior lender, and market conditions"
+
+  leverage_benchmarks:
+    combined_senior_plus_mezz_ltv: "75-85%"
+    mezz_loan_to_value: "65-80% (combined); mezz fills 65-80% vs senior alone"
+
+  term_benchmarks:
+    typical: "Coterminous with or shorter than senior loan"
+
+  intercreditor_benchmarks:
+    cure_period_for_mezz_lender: "30-60 days after senior loan default"
+    mezz_purchase_option_window: "60-90 days"
+    senior_lender_standstill: "60-120 days"
+    transfer_consent: "Required from senior lender"
+
+# =============================================================================
+# RED FLAG THRESHOLDS (USED IN WORKFLOW 7)
+# =============================================================================
+
+red_flag_thresholds:
+  spread_premium_to_flag_bps: 25  # flag if above benchmark by this amount
+  cash_sweep_dscr_tight_trigger: 1.20  # flag if trigger is above this
+  reserve_escrow_months_max: 6  # flag if upfront escrow exceeds this
+  prepayment_exit_cost_points_flag: 2.0  # flag if projected exit cost exceeds 2 points
+  replacement_reserve_max_per_unit: 400  # flag if exceeds this (recently renovated)
+  replacement_reserve_max_per_sf: 0.25  # flag if exceeds this psf (commercial)

@@ -1,17 +1,19 @@
 # CRE Skills Registry
 # Generated: 2026-03-17
-# Total Skills: 69 (3 existing deployed + 66 new planned)
+# Updated: 2026-03-25
+# Total Skills: 98 (3 existing deployed + 77 planned + 18 new deployed)
 
 metadata:
-  version: "1.0"
+  version: "1.3"
   generated: "2026-03-17"
-  total_skills: 69
+  updated: "2026-03-25"
+  total_skills: 98
   categories: 16
   source_prompts_audited: 155
-  gap_fill_prompts_added: 25
+  gap_fill_prompts_added: 32
   prompts_merged: 85
   prompts_retired: 33
-  workflow_coverage: "85%"
+  workflow_coverage: "97%"
 
 # ============================================================================
 # EXISTING DEPLOYED SKILLS (3)
@@ -979,4 +981,436 @@ skills:
     source_prompts: []
     chains_to: []
     chains_from: [rent-roll-formatter]
+    daily_ops_support: []
+
+  # ============================================================================
+  # NEW SKILLS -- DEPLOYED 2026-03-25 (8 skills: 6 deepened stubs + 2 new)
+  # ============================================================================
+
+  - slug: title-commitment-reviewer
+    name: Title Commitment Reviewer
+    category: 04-due-diligence
+    priority: P1
+    phase: 2
+    status: deployed
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: [psa-redline-strategy, closing-checklist-tracker]
+    chains_from: [dd-command-center]
+    daily_ops_support: []
+
+  - slug: tenant-credit-analyzer
+    name: Tenant Credit Analyzer
+    category: 04-due-diligence
+    priority: P1
+    phase: 2
+    status: deployed
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: [acquisition-underwriting-engine, loan-sizing-engine]
+    chains_from: [rent-roll-analyzer]
+    daily_ops_support: []
+
+  - slug: term-sheet-builder
+    name: Term Sheet Builder
+    category: 05-capital-markets
+    priority: P1
+    phase: 2
+    status: deployed
+    effort_hours: 2
+    plan_file: ""
+    source_prompts: []
+    chains_to: [loan-document-reviewer]
+    chains_from: [loan-sizing-engine, capital-stack-optimizer]
+    daily_ops_support: []
+
+  - slug: loan-document-reviewer
+    name: Loan Document Reviewer
+    category: legal
+    priority: P1
+    phase: 2
+    status: deployed
+    effort_hours: 4
+    plan_file: ""
+    source_prompts: []
+    chains_to: [closing-checklist-tracker, debt-covenant-monitor]
+    chains_from: [term-sheet-builder]
+    daily_ops_support: []
+
+  - slug: transfer-document-preparer
+    name: Transfer Document Preparer
+    category: legal
+    priority: P1
+    phase: 2
+    status: deployed
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: [closing-checklist-tracker]
+    chains_from: [psa-redline-strategy]
+    daily_ops_support: []
+
+  - slug: funds-flow-calculator
+    name: Funds Flow Calculator
+    category: closing
+    priority: P0
+    phase: 2
+    status: deployed
+    effort_hours: 2
+    plan_file: ""
+    source_prompts: []
+    chains_to: []
+    chains_from: [closing-checklist-tracker]
+    daily_ops_support: []
+
+  - slug: lease-option-structurer
+    name: Lease Option Structurer
+    category: 08-leasing
+    priority: P1
+    phase: 2
+    status: deployed
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: [lease-document-factory, tenant-retention-engine]
+    chains_from: [lease-negotiation-analyzer, rent-optimization-planner]
+    daily_ops_support: []
+
+  - slug: lease-trade-out-analyzer
+    name: Lease Trade-Out Analyzer
+    category: 08-leasing
+    priority: P1
+    phase: 2
+    status: deployed
+    effort_hours: 2
+    plan_file: ""
+    source_prompts: []
+    chains_to: [lease-up-war-room, lease-negotiation-analyzer]
+    chains_from: [tenant-retention-engine, rent-optimization-planner]
+    daily_ops_support: []
+
+  # ============================================================================
+  # LP INTELLIGENCE (3 skills)
+  # ============================================================================
+
+  - slug: lp-data-request-generator
+    name: LP Data Request Generator
+    category: investor-relations
+    priority: P1
+    phase: 3
+    status: planned
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: [gp-performance-evaluator]
+    chains_from: [quarterly-investor-update]
+    daily_ops_support: []
+
+  - slug: gp-performance-evaluator
+    name: GP Performance Evaluator
+    category: investor-relations
+    priority: P1
+    phase: 3
+    status: planned
+    effort_hours: 4
+    plan_file: ""
+    source_prompts: []
+    chains_to: [fund-terms-comparator]
+    chains_from: [lp-data-request-generator, performance-attribution]
+    daily_ops_support: []
+
+  - slug: fund-terms-comparator
+    name: Fund Terms Comparator
+    category: investor-relations
+    priority: P1
+    phase: 3
+    status: planned
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: []
+    chains_from: [gp-performance-evaluator, fund-formation-toolkit]
+    daily_ops_support: []
+
+  # ============================================================================
+  # v1.0.0 DEPLOYED SKILLS (14 skills -- gap fills from initial deployment)
+  # ============================================================================
+
+  - slug: building-systems-maintenance-manager
+    name: Building Systems Maintenance Manager
+    category: 16-daily-operations
+    priority: P1
+    phase: 3
+    status: deployed
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: [work-order-triage, capex-prioritizer]
+    chains_from: [property-performance-dashboard]
+    daily_ops_support: []
+
+  - slug: compliance-regulatory-response-kit
+    name: Compliance & Regulatory Response Kit
+    category: 16-daily-operations
+    priority: P2
+    phase: 3
+    status: deployed
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: [insurance-risk-manager]
+    chains_from: [property-operations-admin-toolkit]
+    daily_ops_support: []
+
+  - slug: construction-procurement-contracts-engine
+    name: Construction Procurement & Contracts Engine
+    category: 10-development
+    priority: P2
+    phase: 3
+    status: deployed
+    effort_hours: 4
+    plan_file: ""
+    source_prompts: []
+    chains_to: [construction-project-command-center, construction-budget-gc-analyzer]
+    chains_from: [dev-proforma-engine]
+    daily_ops_support: []
+
+  - slug: construction-project-command-center
+    name: Construction Project Command Center
+    category: 10-development
+    priority: P1
+    phase: 3
+    status: deployed
+    effort_hours: 4
+    plan_file: ""
+    source_prompts: []
+    chains_to: [post-close-onboarding-transition]
+    chains_from: [construction-procurement-contracts-engine, construction-budget-gc-analyzer]
+    daily_ops_support: []
+
+  - slug: crisis-special-situations-playbook
+    name: Crisis & Special Situations Playbook
+    category: 16-daily-operations
+    priority: P2
+    phase: 3
+    status: deployed
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: [workout-playbook, insurance-risk-manager]
+    chains_from: []
+    daily_ops_support: []
+
+  - slug: fund-operations-compliance-dashboard
+    name: Fund Operations & Compliance Dashboard
+    category: 09-investor-relations
+    priority: P2
+    phase: 3
+    status: deployed
+    effort_hours: 4
+    plan_file: ""
+    source_prompts: []
+    chains_to: [quarterly-investor-update, lp-data-request-generator]
+    chains_from: [fund-formation-toolkit]
+    daily_ops_support: []
+
+  - slug: insurance-risk-manager
+    name: Insurance & Risk Manager
+    category: 16-daily-operations
+    priority: P2
+    phase: 3
+    status: deployed
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: [compliance-regulatory-response-kit]
+    chains_from: [crisis-special-situations-playbook, property-operations-admin-toolkit]
+    daily_ops_support: []
+
+  - slug: investor-lifecycle-manager
+    name: Investor Lifecycle Manager
+    category: 09-investor-relations
+    priority: P1
+    phase: 3
+    status: deployed
+    effort_hours: 4
+    plan_file: ""
+    source_prompts: []
+    chains_to: [quarterly-investor-update, capital-raise-machine]
+    chains_from: [fund-operations-compliance-dashboard]
+    daily_ops_support: []
+
+  - slug: lease-document-factory
+    name: Lease Document Factory
+    category: 08-leasing
+    priority: P1
+    phase: 3
+    status: deployed
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: [lease-abstract-extractor, estoppel-certificate-generator]
+    chains_from: [lease-option-structurer, lease-negotiation-analyzer]
+    daily_ops_support: []
+
+  - slug: leasing-operations-engine
+    name: Leasing Operations Engine
+    category: 08-leasing
+    priority: P1
+    phase: 3
+    status: deployed
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: [lease-up-war-room, tenant-retention-engine]
+    chains_from: [leasing-strategy-marketing-planner]
+    daily_ops_support: []
+
+  - slug: leasing-strategy-marketing-planner
+    name: Leasing Strategy & Marketing Planner
+    category: 08-leasing
+    priority: P1
+    phase: 3
+    status: deployed
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: [leasing-operations-engine, lease-up-war-room]
+    chains_from: [market-cycle-positioner, comp-snapshot]
+    daily_ops_support: []
+
+  - slug: post-close-onboarding-transition
+    name: Post-Close Onboarding & Transition
+    category: 10-development
+    priority: P1
+    phase: 3
+    status: deployed
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: [annual-budget-engine, property-performance-dashboard]
+    chains_from: [construction-project-command-center, closing-checklist-tracker]
+    daily_ops_support: []
+
+  - slug: property-operations-admin-toolkit
+    name: Property Operations Admin Toolkit
+    category: 16-daily-operations
+    priority: P2
+    phase: 3
+    status: deployed
+    effort_hours: 2
+    plan_file: ""
+    source_prompts: []
+    chains_to: [compliance-regulatory-response-kit, insurance-risk-manager]
+    chains_from: [building-systems-maintenance-manager]
+    daily_ops_support: []
+
+  - slug: tenant-event-planner
+    name: Tenant Event Planner
+    category: 16-daily-operations
+    priority: P2
+    phase: 3
+    status: deployed
+    effort_hours: 2
+    plan_file: ""
+    source_prompts: []
+    chains_to: [tenant-retention-engine]
+    chains_from: [property-operations-admin-toolkit]
+    daily_ops_support: []
+
+  # ============================================================================
+  # ORCHESTRATOR GAP-CLOSING SKILLS (7 skills -- deployed 2026-03-25)
+  # ============================================================================
+
+  - slug: sec-reg-d-compliance
+    name: SEC Reg D Compliance
+    category: 09-investor-relations
+    priority: P1
+    phase: 3
+    status: deployed
+    effort_hours: 4
+    plan_file: ""
+    source_prompts: []
+    chains_to: [fund-formation-toolkit, capital-raise-machine, lp-pitch-deck-builder]
+    chains_from: [fund-operations-compliance-dashboard]
+    daily_ops_support: []
+
+  - slug: monte-carlo-return-simulator
+    name: Monte Carlo Return Simulator
+    category: 02-underwriting-analysis
+    priority: P1
+    phase: 3
+    status: deployed
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: [sensitivity-stress-test, ic-memo-generator]
+    chains_from: [acquisition-underwriting-engine, portfolio-allocator]
+    daily_ops_support: []
+
+  - slug: property-management-operations
+    name: Property Management Operations
+    category: 07-asset-management
+    priority: P1
+    phase: 3
+    status: deployed
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: [work-order-triage, building-systems-maintenance-manager, vendor-invoice-validator]
+    chains_from: [post-close-onboarding-transition, annual-budget-engine]
+    daily_ops_support: []
+
+  - slug: distribution-notice-generator
+    name: Distribution Notice Generator
+    category: 09-investor-relations
+    priority: P1
+    phase: 3
+    status: deployed
+    effort_hours: 2
+    plan_file: ""
+    source_prompts: []
+    chains_to: [quarterly-investor-update]
+    chains_from: [jv-waterfall-architect, partnership-allocation-engine]
+    daily_ops_support: []
+
+  - slug: 1031-pipeline-manager
+    name: 1031 Pipeline Manager
+    category: 03-deal-structuring
+    priority: P1
+    phase: 3
+    status: deployed
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: [1031-exchange-executor, deal-quick-screen, acquisition-underwriting-engine]
+    chains_from: [disposition-strategy-engine, portfolio-allocator]
+    daily_ops_support: []
+
+  - slug: deal-attribution-tracker
+    name: Deal Attribution Tracker
+    category: 15-portfolio-strategy
+    priority: P1
+    phase: 3
+    status: deployed
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: [performance-attribution, quarterly-investor-update, ic-memo-generator]
+    chains_from: [acquisition-underwriting-engine, disposition-strategy-engine]
+    daily_ops_support: []
+
+  - slug: emerging-manager-evaluator
+    name: Emerging Manager Evaluator
+    category: 09-investor-relations
+    priority: P1
+    phase: 3
+    status: deployed
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: [gp-performance-evaluator, fund-terms-comparator]
+    chains_from: [lp-data-request-generator, capital-raise-machine]
     daily_ops_support: []

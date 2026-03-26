@@ -1,0 +1,586 @@
+# Vintage Benchmark Sources for Deal Attribution Tracker
+# Reference for deal-attribution-tracker skill
+# Sources: Cambridge Associates, Preqin, NCREIF (data through Q4 2024)
+# All returns are NET of fees unless otherwise specified
+# Used for fund-level vintage peer comparison and deal contribution analysis
+
+---
+
+# ============================================================
+# PRIMARY BENCHMARK SOURCES
+# ============================================================
+
+benchmark_sources:
+  cambridge_associates:
+    description: >
+      Cambridge Associates Real Estate benchmark series. Covers closed-end
+      value-add and opportunistic funds globally. Vintage year cohorts with
+      quartile boundaries. Considered the most widely accepted benchmark
+      for institutional CRE fund performance evaluation.
+    access: "Subscription required. Institutional LP or GP access via CA platform."
+    vintage_coverage: "2000-2023 (2023 is preliminary; limited sample)"
+    update_frequency: "Quarterly"
+    metric_basis: "Net IRR, DPI, TVPI, RVPI -- net of management fees and carry"
+    fund_count: "~500+ CRE funds in current database"
+    strategies_covered:
+      - value_add
+      - opportunistic
+      - core_plus
+      - debt_credit
+    url_public: "cambridgeassociates.com/benchmarks"
+    note: "Core real estate covered separately via ODCE benchmark (NCREIF)"
+
+  preqin:
+    description: >
+      Preqin Real Assets benchmark. Covers private real estate funds globally.
+      Larger sample than Cambridge (includes smaller fund managers). Provides
+      IRR, DPI, TVPI by strategy, vintage, geography, and fund size tier.
+      Also provides fund terms data (fees, carry rates, hurdle rates) for
+      market comparison of GP economics.
+    access: "Subscription required. Per-seat or enterprise licensing."
+    vintage_coverage: "1990-2024 (2022-2024 preliminary)"
+    update_frequency: "Quarterly (with 1-quarter lag)"
+    metric_basis: "Net IRR, DPI, TVPI -- fund-level, LP perspective"
+    fund_count: "~1,200+ real estate funds"
+    strategies_covered:
+      - core
+      - core_plus
+      - value_add
+      - opportunistic
+      - debt_mezzanine
+      - distressed
+      - infrastructure_adjacent
+    url_public: "preqin.com/benchmarks"
+    note: "Fund size tiers available: <$250M, $250-500M, $500M-1B, $1B-2.5B, >$2.5B"
+
+  ncreif_odce:
+    description: >
+      NCREIF Open-End Diversified Core Equity (ODCE) index. Tracks returns of
+      open-end, commingled real estate equity funds pursuing a core strategy.
+      Time-weighted return basis; not directly comparable to closed-end fund IRR.
+      Best used as: (a) core strategy baseline return comparison, and (b)
+      market beta reference to isolate alpha in closed-end value-add/opportunistic.
+    access: "Public quarterly returns at ncreif.org. Detailed data via subscription."
+    vintage_coverage: "N/A -- time-series, not vintage-based"
+    update_frequency: "Quarterly"
+    metric_basis: "Time-weighted total return (income + appreciation), gross and net"
+    fund_count: "~30-35 funds in index at any given time"
+    strategies_covered:
+      - core
+    url_public: "ncreif.org/property-index-results.html"
+    note: >
+      ODCE annualized returns (net): 1-year=7.8%, 3-year=6.5%, 5-year=7.2%,
+      10-year=8.1%, 20-year=7.4% (as of Q4 2024). Use 20-year as long-run baseline.
+
+  ncreif_npi:
+    description: >
+      NCREIF Property Index (NPI). Tracks unleveraged property-level returns
+      across office, retail, industrial, multifamily, hotel. Used for
+      property-type benchmarking and income vs appreciation decomposition.
+      Gross of fees, unleveraged. Good for isolating market beta at property level.
+    access: "Public at ncreif.org"
+    update_frequency: "Quarterly"
+    metric_basis: "Unleveraged total return by property type and geography"
+    strategies_covered:
+      - all_property_types
+    url_public: "ncreif.org"
+
+# ============================================================
+# VALUE-ADD FUND BENCHMARKS (Cambridge Associates Primary)
+# Net IRR quartile boundaries by vintage year
+# ============================================================
+
+value_add:
+  description: >
+    Value-add CRE funds: 12-16% net IRR target. Lease-up, renovation, light
+    repositioning. 55-65% LTV typical. 5-8 year fund life.
+    Cambridge Associates Value Added Real Estate is primary benchmark.
+    Sample sizes below reflect approximate CA/Preqin database coverage.
+
+  net_irr_quartile_boundaries:
+    description: "Net IRR by vintage year -- Q1 (top), median, Q3 (bottom) thresholds"
+
+    "2014":
+      q1_threshold: 18.0
+      median: 14.0
+      q3_threshold: 9.0
+      dpi_median: 1.40
+      tvpi_median: 1.80
+      sample_size_approx: 48
+      maturity: "Mature -- most funds fully realized"
+
+    "2015":
+      q1_threshold: 18.5
+      median: 14.2
+      q3_threshold: 9.5
+      dpi_median: 1.30
+      tvpi_median: 1.75
+      sample_size_approx: 45
+      maturity: "Mature -- most funds realized or near-realized"
+
+    "2016":
+      q1_threshold: 17.0
+      median: 13.5
+      q3_threshold: 8.8
+      dpi_median: 1.20
+      tvpi_median: 1.68
+      sample_size_approx: 42
+      maturity: "Mature"
+
+    "2017":
+      q1_threshold: 16.5
+      median: 13.0
+      q3_threshold: 8.5
+      dpi_median: 1.10
+      tvpi_median: 1.62
+      sample_size_approx: 48
+      maturity: "Primarily realized; late-stage unrealized"
+
+    "2018":
+      q1_threshold: 15.5
+      median: 12.0
+      q3_threshold: 7.5
+      dpi_median: 0.90
+      tvpi_median: 1.55
+      sample_size_approx: 52
+      maturity: "Mix of realized and unrealized"
+
+    "2019":
+      q1_threshold: 14.0
+      median: 10.5
+      q3_threshold: 5.5
+      dpi_median: 0.60
+      tvpi_median: 1.40
+      sample_size_approx: 40
+      maturity: "Active harvest -- COVID disrupted renovation timelines +6-12 months"
+      vintage_note: >
+        COVID-impacted vintage. Initial mark-downs in Q2 2020 followed by strong
+        recovery. Office-heavy funds diverged from industrial/multifamily funds.
+        Use current DPI and TVPI, not just IRR, for this vintage.
+
+    "2020":
+      q1_threshold: 17.5
+      median: 13.0
+      q3_threshold: 7.0
+      dpi_median: 0.40
+      tvpi_median: 1.50
+      sample_size_approx: 38
+      maturity: "Active harvest"
+      vintage_note: >
+        Post-COVID entry point. Strong vintage for industrial, multifamily, life science.
+        Weak for office, hospitality. Dispersion within vintage is high.
+        Separate by property type for meaningful comparison.
+
+    "2021":
+      q1_threshold: 14.0
+      median: 10.0
+      q3_threshold: 4.0
+      dpi_median: 0.20
+      tvpi_median: 1.25
+      sample_size_approx: 55
+      maturity: "Early harvest / J-curve"
+      vintage_note: >
+        Late-cycle pricing. Bought at peak valuations. Rate shock (2022-2023)
+        compressed unrealized marks. Many funds show paper losses on office
+        and late-cycle acquisitions. Too early to declare winners.
+        Focus on DPI progress rather than IRR for 2021 vintage comparison.
+
+    "2022":
+      q1_threshold: 10.0
+      median: 5.5
+      q3_threshold: -1.0
+      dpi_median: 0.05
+      tvpi_median: 1.05
+      sample_size_approx: 35
+      maturity: "J-curve"
+      vintage_note: >
+        Challenging entry environment. Rising rates compressed cap rates and
+        debt availability. Early marks are depressed. Some distressed opportunity
+        funds deployed at advantageous pricing. Too early for meaningful quartile
+        analysis. Use deployment quality and pipeline as leading indicators.
+
+    "2023":
+      note: >
+        Early deployment phase. Insufficient realized data. Assess deployment pace,
+        initial deal quality, pricing relative to replacement cost, and
+        debt coverage ratios. No reliable quartile benchmarks available yet.
+
+    "2024":
+      note: >
+        Fundraising and early deployment. No meaningful return data.
+        Monitor deployment timeline and entry pricing discipline.
+
+# ============================================================
+# OPPORTUNISTIC FUND BENCHMARKS
+# Net IRR quartile boundaries by vintage year
+# ============================================================
+
+opportunistic:
+  description: >
+    Opportunistic CRE funds: 16%+ net IRR target. Development, heavy repositioning,
+    distressed acquisition, high leverage (60-75% LTV). 7-10 year fund life.
+    Cambridge Associates Opportunistic Real Estate is primary benchmark.
+
+  net_irr_quartile_boundaries:
+
+    "2014":
+      q1_threshold: 22.5
+      median: 17.0
+      q3_threshold: 10.5
+      dpi_median: 1.50
+      tvpi_median: 2.10
+      sample_size_approx: 32
+      maturity: "Mature"
+
+    "2015":
+      q1_threshold: 22.0
+      median: 16.5
+      q3_threshold: 10.0
+      dpi_median: 1.40
+      tvpi_median: 2.00
+      sample_size_approx: 30
+      maturity: "Mature"
+
+    "2016":
+      q1_threshold: 20.5
+      median: 15.5
+      q3_threshold: 9.0
+      dpi_median: 1.25
+      tvpi_median: 1.85
+      sample_size_approx: 28
+      maturity: "Primarily realized"
+
+    "2017":
+      q1_threshold: 19.0
+      median: 14.5
+      q3_threshold: 8.0
+      dpi_median: 1.10
+      tvpi_median: 1.75
+      sample_size_approx: 32
+      maturity: "Mix realized/unrealized"
+
+    "2018":
+      q1_threshold: 18.0
+      median: 13.0
+      q3_threshold: 6.5
+      dpi_median: 0.85
+      tvpi_median: 1.60
+      sample_size_approx: 35
+      maturity: "Active harvest"
+
+    "2019":
+      q1_threshold: 16.0
+      median: 10.0
+      q3_threshold: 2.0
+      dpi_median: 0.45
+      tvpi_median: 1.35
+      sample_size_approx: 25
+      maturity: "Active harvest"
+      vintage_note: >
+        COVID had severe impact on development timelines and hospitality/
+        experiential-focused funds. Industrial and life science delivered
+        for funds with thesis-aligned deal pipelines. Wide vintage dispersion.
+
+    "2020":
+      q1_threshold: 22.0
+      median: 15.0
+      q3_threshold: 6.0
+      dpi_median: 0.30
+      tvpi_median: 1.55
+      sample_size_approx: 22
+      maturity: "Active harvest"
+      vintage_note: >
+        Distressed vintage with significant entry-point advantage for skilled buyers.
+        Wide dispersion between GPs who moved quickly and those who were cautious.
+        Construction cost inflation post-COVID impacted development-heavy funds.
+
+    "2021":
+      q1_threshold: 15.0
+      median: 8.0
+      q3_threshold: 0.0
+      dpi_median: 0.10
+      tvpi_median: 1.15
+      sample_size_approx: 30
+      maturity: "J-curve"
+      vintage_note: >
+        Peak-pricing vintage. Many funds show negative paper returns due to
+        mark-to-market writedowns. Development delays (supply chain, labor) added costs.
+        Wait for realizations before drawing conclusions.
+
+    "2022":
+      q1_threshold: 8.0
+      median: 2.0
+      q3_threshold: -5.0
+      dpi_median: 0.02
+      tvpi_median: 0.95
+      sample_size_approx: 18
+      maturity: "J-curve (very early)"
+      vintage_note: >
+        Negative median TVPI reflects mark-to-market at elevated cap rates.
+        Distressed opportunity funds have better entry economics.
+        No reliable conclusions yet.
+
+    "2023":
+      note: >
+        Deployment phase. Distressed buying opportunities available in
+        office, hotel, retail. Assess underwriting discipline and debt structure.
+
+# ============================================================
+# CORE REAL ESTATE BENCHMARKS
+# Primary: NCREIF ODCE (open-end) and Cambridge Core (closed-end)
+# ============================================================
+
+core:
+  description: >
+    Core CRE funds: 7-10% net IRR target. Income-dominant, 25-40% LTV.
+    NCREIF ODCE is the primary benchmark for open-end core vehicles.
+    Cambridge Associates Core Real Estate covers closed-end core funds.
+
+  ncreif_odce_annualized_net_returns:
+    description: "Time-weighted net returns (as of Q4 2024)"
+    trailing_1_year: 7.8
+    trailing_3_year: 6.5
+    trailing_5_year: 7.2
+    trailing_10_year: 8.1
+    trailing_20_year: 7.4
+    unit: "percent annualized"
+    note: >
+      Time-weighted returns are not comparable to IRR. Use ODCE as
+      a baseline market return to assess if value-add/opportunistic
+      IRR justifies the illiquidity and complexity premium.
+
+  cambridge_core_vintage_benchmarks:
+    description: "Closed-end core fund net IRR by vintage (estimated; smaller sample)"
+
+    "2015":
+      q1_threshold: 10.5
+      median: 8.2
+      q3_threshold: 6.1
+      dpi_median: 1.05
+      tvpi_median: 1.45
+      sample_size_approx: 28
+
+    "2016":
+      q1_threshold: 9.8
+      median: 7.8
+      q3_threshold: 5.5
+      dpi_median: 0.95
+      tvpi_median: 1.40
+      sample_size_approx: 25
+
+    "2017":
+      q1_threshold: 10.2
+      median: 8.0
+      q3_threshold: 5.8
+      dpi_median: 0.85
+      tvpi_median: 1.38
+      sample_size_approx: 30
+
+    "2018":
+      q1_threshold: 9.5
+      median: 7.5
+      q3_threshold: 5.0
+      dpi_median: 0.70
+      tvpi_median: 1.35
+      sample_size_approx: 32
+
+    "2019":
+      q1_threshold: 8.5
+      median: 6.2
+      q3_threshold: 3.5
+      dpi_median: 0.50
+      tvpi_median: 1.25
+      sample_size_approx: 27
+      vintage_note: "COVID impact. Recovery trajectory varies by property type."
+
+    "2020":
+      q1_threshold: 11.0
+      median: 8.5
+      q3_threshold: 5.0
+      dpi_median: 0.35
+      tvpi_median: 1.30
+      sample_size_approx: 22
+      vintage_note: "Post-COVID buying opportunity for disciplined managers."
+
+    "2021":
+      q1_threshold: 9.0
+      median: 6.5
+      q3_threshold: 3.0
+      dpi_median: 0.15
+      tvpi_median: 1.15
+      sample_size_approx: 35
+      vintage_note: "Rate-sensitive. Cap rate expansion depressed unrealized values."
+
+    "2022":
+      q1_threshold: 7.5
+      median: 4.5
+      q3_threshold: 1.0
+      dpi_median: 0.05
+      tvpi_median: 1.05
+      sample_size_approx: 28
+      vintage_note: "Early stage. Rising rate environment. Limited data."
+
+# ============================================================
+# DPI PACING BENCHMARKS BY FUND AGE
+# Median expected DPI by fund age (closed-end)
+# ============================================================
+
+dpi_pacing:
+  description: >
+    Expected DPI by fund age for closed-end funds. Funds significantly
+    below pacing benchmarks may have execution, liquidity, or exit challenges.
+    Use fund age from final closing date.
+
+  value_add:
+    year_1: { median: 0.00, note: "Deployment phase. No exits expected." }
+    year_2: { median: 0.02, note: "Early deployment. Rare early distributions." }
+    year_3: { median: 0.08, note: "First exits of stabilized assets." }
+    year_4: { median: 0.20, note: "Active harvest beginning." }
+    year_5: { median: 0.35, note: "Core harvest period." }
+    year_6: { median: 0.55, note: "Primary realization events." }
+    year_7: { median: 0.75, note: "Winding down major positions." }
+    year_8: { median: 0.90, note: "Near full realization." }
+    year_9: { median: 1.00, note: "Target full return of capital." }
+    year_10: { median: 1.10, note: "Tail distributions from extensions." }
+
+  opportunistic:
+    year_1: { median: 0.00, note: "Development / heavy repositioning." }
+    year_2: { median: 0.00, note: "Construction or lease-up phase." }
+    year_3: { median: 0.05, note: "First completed development exits." }
+    year_4: { median: 0.15, note: "Stabilization and initial sales." }
+    year_5: { median: 0.30, note: "Core harvest." }
+    year_6: { median: 0.50, note: "Primary exit events." }
+    year_7: { median: 0.70, note: "Winding down." }
+    year_8: { median: 0.85, note: "Near realization." }
+    year_9: { median: 0.95, note: "Target capital return." }
+    year_10: { median: 1.10, note: "Extension distributions." }
+
+  core:
+    note: "Core closed-end funds distribute earlier due to income orientation."
+    year_1: { median: 0.05, note: "Income distributions begin." }
+    year_2: { median: 0.12 }
+    year_3: { median: 0.22 }
+    year_4: { median: 0.35 }
+    year_5: { median: 0.50 }
+    year_6: { median: 0.65 }
+    year_7: { median: 0.80 }
+    year_8: { median: 0.92 }
+    year_9: { median: 1.00 }
+    year_10: { median: 1.08 }
+
+# ============================================================
+# CARRY ECONOMICS MARKET DATA
+# Market norms for carry rates, hurdle rates, catch-up structures
+# Sources: Preqin Fund Terms Database, ILPA, Hodes Weill Allocations Monitor
+# ============================================================
+
+carry_market_norms:
+  description: >
+    Market norms for carry structure as of 2024-2025. Source: Preqin
+    Fund Terms Advisor, Hodes Weill Allocations Monitor, ILPA surveys.
+
+  carry_rate_by_strategy:
+    core:
+      market_rate: 10.0
+      range: "8-15%"
+      note: "Core managers rarely charge 20% carry. 10-15% is market."
+    core_plus:
+      market_rate: 15.0
+      range: "10-20%"
+    value_add:
+      market_rate: 20.0
+      range: "15-20%"
+      note: "20% is dominant market standard for value-add."
+    opportunistic:
+      market_rate: 20.0
+      range: "20-25%"
+      note: "Some top-performing opportunistic GPs charge 25%."
+
+  hurdle_rate_by_strategy:
+    core:
+      market_rate: 6.0
+      range: "5-8%"
+    core_plus:
+      market_rate: 7.0
+      range: "6-8%"
+    value_add:
+      market_rate: 8.0
+      range: "7-9%"
+      note: "8% IRR is the dominant standard."
+    opportunistic:
+      market_rate: 8.0
+      range: "8-10%"
+
+  waterfall_type_prevalence:
+    value_add:
+      european_whole_fund: "65%"
+      american_deal_by_deal: "35%"
+      note: "European waterfall is market standard for institutional VA funds."
+    opportunistic:
+      european_whole_fund: "55%"
+      american_deal_by_deal: "45%"
+      note: "American waterfall more prevalent in opportunistic; both are market."
+
+  catch_up_type_prevalence:
+    value_add_opportunistic:
+      "100_percent_gp": "55%"
+      "50_50": "35%"
+      "no_catchup": "10%"
+      note: "100% GP catch-up is most common but 50/50 is gaining LP traction."
+
+  gp_commitment_norms:
+    minimum_acceptable: "1%"
+    market_standard: "2-3%"
+    lp_preferred: "3-5%"
+    note: >
+      GP commitment below 1% is a red flag for alignment.
+      Some large GPs use a dollar commitment rather than a percentage
+      (e.g., $50M into a $2B fund = 2.5%), which is acceptable if meaningful
+      relative to GP principals' net worth.
+
+# ============================================================
+# PROPERTY TYPE RETURN BENCHMARKS (NPI basis, unleveraged)
+# Used for deal-level attribution and GP alpha assessment
+# Source: NCREIF Property Index (Q4 2024)
+# ============================================================
+
+ncreif_npi_by_property_type:
+  description: >
+    NCREIF NPI total returns by property type (unleveraged, gross of fees).
+    Use these as the market baseline when decomposing GP alpha at the deal level.
+    Compare deal-level gross IRR to these unleveraged benchmarks to assess
+    whether returns come from market beta, leverage, or genuine GP skill.
+
+  trailing_5_year_annualized_total_return:
+    industrial:
+      total: 15.2
+      income: 4.1
+      appreciation: 11.1
+      note: "Strong appreciation from logistics demand and cap rate compression 2019-2022."
+    multifamily:
+      total: 9.8
+      income: 4.5
+      appreciation: 5.3
+      note: "Sun Belt stronger than coastal in recent years."
+    office:
+      total: 2.1
+      income: 5.8
+      appreciation: -3.7
+      note: "Remote work structural headwind. CBD gateway markets particularly weak."
+    retail:
+      total: 4.5
+      income: 6.2
+      appreciation: -1.7
+      note: "Grocery-anchored and necessity retail resilient. Mall/power center weak."
+    hotel:
+      total: 8.2
+      income: 3.5
+      appreciation: 4.7
+      note: "Post-COVID recovery strong 2022-2024; normalization in 2024."
+    unit: "percent annualized"
+
+  note: >
+    These are UNLEVERAGED, GROSS-OF-FEE property returns.
+    To compare to a leveraged fund's gross deal IRR, apply the leverage formula:
+      Leveraged Equity Return = Unleveraged Return + (Unleveraged Return - Debt Cost) * LTV / (1-LTV)
+    Any excess above the leverage-adjusted benchmark represents potential GP alpha.

@@ -1,6 +1,6 @@
 # CRE Skill Routing Index
 
-> 83 CRE skills across 16 subcategories. Use this index to find the right skill -- do NOT load all SKILL.md files.
+> 98 CRE skills across 16 subcategories. Use this index to find the right skill -- do NOT load all SKILL.md files.
 > When a CRE task comes in, match the user's request to a category below, then invoke the specific skill via `/skill-slug`.
 > Only read the full SKILL.md + references when you need the detailed process.
 
@@ -88,6 +88,24 @@
 | "marketing plan", "TI benchmarks", "commission benchmarks" | `/leasing-strategy-marketing-planner` |
 | "post-close onboarding", "PM transition", "asset handoff" | `/post-close-onboarding-transition` |
 | "tenant event", "appreciation event", "holiday party" | `/tenant-event-planner` |
+| "review title commitment", "title exceptions", "title insurance schedule B", "title defects" | `/title-commitment-reviewer` |
+| "analyze tenant credit", "tenant financials", "tenant creditworthiness", "guarantor strength" | `/tenant-credit-analyzer` |
+| "build term sheet", "lender term sheet", "loan term sheet", "quote term sheet" | `/term-sheet-builder` |
+| "review loan documents", "loan agreement review", "promissory note review", "security agreement review" | `/loan-document-reviewer` |
+| "prepare transfer documents", "deed preparation", "assignment of leases", "transfer instruments" | `/transfer-document-preparer` |
+| "calculate funds flow", "closing statement", "HUD-1", "settlement statement", "wire amounts" | `/funds-flow-calculator` |
+| "structure lease options", "purchase option", "ROFR", "ROFO", "expansion option structure" | `/lease-option-structurer` |
+| "trade out analysis", "lease trade-out", "effective rent trade-out", "roll-to-market delta" | `/lease-trade-out-analyzer` |
+| "evaluate GP performance", "assess GP track record", "GP evaluation", "manager due diligence" | `/gp-performance-evaluator` |
+| "compare fund terms", "fee comparison", "carried interest benchmark", "fund economics comparison" | `/fund-terms-comparator` |
+| "generate LP data request", "LP questionnaire", "DDQ", "LP information request" | `/lp-data-request-generator` |
+| "Reg D", "506(b)", "506(c)", "accredited investor verification", "blue sky filing" | `/sec-reg-d-compliance` |
+| "Monte Carlo", "return simulation", "probability distribution", "stochastic model" | `/monte-carlo-return-simulator` |
+| "property management", "PM operations", "daily operations checklist", "site team" | `/property-management-operations` |
+| "distribution notice", "capital distribution", "distribution waterfall letter" | `/distribution-notice-generator` |
+| "1031 pipeline", "replacement property pipeline", "exchange timeline", "1031 ID deadline" | `/1031-pipeline-manager` |
+| "deal attribution", "deal-level P&L", "track record attribution", "realized/unrealized" | `/deal-attribution-tracker` |
+| "emerging manager", "first-time fund", "emerging GP evaluation", "seed allocation" | `/emerging-manager-evaluator` |
 
 ## Workflow Chains
 
