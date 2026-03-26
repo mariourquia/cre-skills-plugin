@@ -41,6 +41,7 @@ User provides any combination of the following. The skill fills gaps with conser
 | Expense ratio or per-unit expenses | Optional | 45% of EGI (multifamily), 35% (industrial) |
 | Capex budget or condition notes | Optional | $1,500/unit/year reserve |
 | Broker notes or OM link | Optional | -- |
+| deal_scale | string | optional | "institutional" (default) or "small-operator" -- adjusts benchmarks and defaults |
 
 If fewer than 3 of the 4 required fields are present, ask clarifying questions (max 5). Otherwise, proceed with defaults.
 
@@ -109,6 +110,30 @@ Estimate IRR range under three scenarios:
 - **KEEP** if: cap rate > 6.0%, DSCR > 1.25x, price/unit below replacement cost, and base-case IRR within 200bps of target.
 - **KEEP with conditions** (mapped from MAYBE): everything else. Specify conditions.
 
+### Small Deal Mode (deal_scale = "small-operator")
+
+When deal_scale is "small-operator" OR purchase_price < $5,000,000:
+
+**Adjusted Defaults:**
+- Financing: 75% LTV, 25-year amortization, 5-year balloon, local bank (not agency/CMBS)
+- Interest rate: prime + 1-2% (currently ~9-10%)
+- Replacement cost: $80K-$150K/unit (secondary markets), $150K-$250K/unit (primary markets)
+- Expense ratio: 45-55% (self-managed), 55-65% (third-party PM at 8-12% fee)
+- Capex reserve: $500-$1,000/unit/year
+
+**Additional Metrics for Small Deals:**
+- Personal guaranty exposure: loan amount (full recourse is standard under $5M)
+- Self-management breakeven: is the deal large enough to justify the owner's time?
+- Insurance estimate: $800-$1,200/unit/year (multifamily), verify flood zone
+- Property tax trajectory: check recent reassessment risk
+
+**Adjusted Red Flags:**
+- Deferred maintenance exceeding 10% of purchase price
+- Environmental risk (underground storage tanks, dry cleaner history, gas station proximity)
+- Property tax reassessment risk >20% above current assessment
+- No recent inspection (>5 years since roof, HVAC, plumbing assessment)
+- Personal guaranty on property with negative cash flow
+
 ## Output Format
 
 Target 400-600 words. Single-page, skimmable.
@@ -175,3 +200,12 @@ Two columns, 3 bullets each. Concrete and specific to this deal, not generic.
 - **Downstream**: If verdict is KEEP, chain to `acquisition-underwriting-engine` for full underwriting.
 - **Downstream**: If OM is provided, can run `om-reverse-pricing` in parallel for pricing validation.
 - **Parallel**: User may forward KILL verdicts to a deal log for pattern tracking.
+
+## Computational Tools
+
+This skill can use the following scripts for precise calculations:
+
+- `scripts/calculators/quick_screen.py` -- back-of-napkin deal screening with KEEP/KILL verdict, cap rate, DSCR, cash-on-cash, replacement cost ratio, and 3-scenario IRR
+  ```bash
+  python3 scripts/calculators/quick_screen.py --json '{"purchase_price": 8500000, "noi": 510000, "units_or_sf": 48, "unit_type": "units", "market_rent_per_unit": 1350, "in_place_rent_per_unit": 1100, "loan_amount": 5525000, "rate": 0.065, "amort_years": 30, "replacement_cost_estimate": 10500000}'
+  ```

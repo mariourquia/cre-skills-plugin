@@ -76,9 +76,30 @@ budget:                         # for marketing_plan
   channel_allocation: object    # budget by channel
   prior_year_spend: number
   prior_year_results: object    # inquiries, tours, proposals, leases
+
+brand_guidelines:               # optional, auto-loaded from ~/.cre-skills/brand-guidelines.json
+  type: object
+  description: Brand config (colors, fonts, disclaimers, contact info, number formatting). Auto-loaded, user can override.
 ```
 
 ## Process
+
+### Step 0: Load Brand Guidelines (Auto)
+
+Before generating any deliverable:
+1. Check if `~/.cre-skills/brand-guidelines.json` exists
+2. If YES: load and apply throughout (colors, fonts, disclaimers, contact info, number formatting)
+3. If NO: ask the user:
+   > "I don't have your brand guidelines saved yet. Would you like to set them up now with `/cre-skills:brand-config`? Or I can proceed with professional defaults."
+   - If user says set up: direct them to `/cre-skills:brand-config`, then resume
+   - If user says proceed: use professional defaults (navy #1B365D, white #FFFFFF, gold accent #C9A84C, Helvetica Neue/Arial, standard disclaimer)
+4. Apply loaded or default guidelines to all output sections:
+   - Color references in any formatting instructions
+   - Company name in headers/footers
+   - Disclaimer text at the bottom of every page/section
+   - Confidentiality notice on cover
+   - Contact block on final page/section
+   - Number formatting preferences throughout
 
 ### Step 1: Marketing Material Creation
 

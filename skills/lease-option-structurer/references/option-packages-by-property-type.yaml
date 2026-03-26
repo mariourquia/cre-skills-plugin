@@ -1,0 +1,363 @@
+# Option Packages by Property Type
+# Standard option menus, notice periods, fee structures, and constraints
+# for each major CRE asset class. Use as the baseline before adjusting
+# for market position, tenant profile, and landlord priorities.
+
+# ============================================================
+# ANCHORED RETAIL
+# ============================================================
+anchored_retail:
+  description: "Shopping center with 1+ anchor tenants (grocery, big-box, department).
+    Anchors typically 20K-120K SF; inlines 1K-6K SF."
+
+  anchor_tenant:
+    standard_options:
+      renewal:
+        count: 2
+        term_years: 5
+        rent_basis: "FMV with floor at in-place + 5%"
+        notice_months: 12
+        exercise_window: "12-month window ending 12 months before expiration"
+        notes: "Anchors rarely leave; renewal is a formality. Negotiate rent reset."
+      rofo_on_adjacent:
+        scope: "Adjacent anchor pad or major wing only"
+        trigger: "Landlord's intent to lease or sell adjacent anchor space"
+        response_days: 15
+        notes: "Grocers and big-box retailers routinely request adjacent ROFO."
+      exclusive_use:
+        scope: "Primary product category (e.g., grocery, home improvement)"
+        carveouts: "Specialty formats, incidental sales (<10% of adjacent tenant SF)"
+        notes: "Critical for anchors. Non-compliance may permit rent reduction."
+
+    anchor_only_options:
+      purchase_option:
+        terms: "FMV by independent appraisal, exercisable at renewal commencement"
+        notes: "Rare. Accept only for institutional tenants. Requires lender consent."
+      co_tenancy_cure:
+        description: "Rent reduction right if center occupancy drops below threshold"
+        threshold: "80-85% of total GLA excluding anchor"
+        remedy: "Reduced rent (e.g., percentage rent only) for duration of shortfall"
+        notes: "This is a defensive right from anchor's perspective. Negotiate cure period."
+
+    avoid_granting:
+      - "Contraction right (anchor must stay whole)"
+      - "Termination option (co-tenancy cascade risk)"
+      - "Relocation right (anchor buildout is specialized)"
+
+  inline_tenant:
+    standard_options:
+      renewal:
+        count: 1
+        term_years: 5
+        rent_basis: "FMV, no floor (market determines)"
+        notice_months: 6
+        exercise_window: "6-month window ending 6 months before expiration"
+      co_tenancy_kick_out:
+        description: "Rent reduction or termination if anchor goes dark or vacates"
+        trigger_event: "Anchor vacates for more than 90-180 consecutive days"
+        remedy_phase_1: "Rent to percentage rent only (typically 6-8% of sales)"
+        remedy_phase_2: "Termination right if anchor vacancy exceeds 12 months"
+        notes: "Standard in retail. Negotiate cure period and replacement anchor definition."
+      exclusive_use:
+        scope: "Specific product category relevant to tenant's primary use"
+        carveouts: "Big-box incidental, grocery food court, temporary tenants"
+        notes: "Narrowly define the exclusive. 'Restaurant' is too broad. Use product category."
+
+    avoid_granting:
+      - "Expansion right (inline space rarely contiguous or controllable)"
+      - "Termination option (too easy to exercise; retail is volatile)"
+      - "Purchase option (retail investors need clean cap on exit)"
+
+# ============================================================
+# CLASS A OFFICE
+# ============================================================
+class_a_office:
+  description: "Trophy and institutional-quality office towers and campuses.
+    Rents typically 20-50% above market average. Tenants value amenities and address."
+
+  large_tenant_above_20pct_nra:
+    standard_options:
+      renewal:
+        count: 2
+        term_years: 5
+        rent_basis: "FMV, bilateral appraisal with baseball arbitration fallback"
+        notice_months: 12
+        exercise_window: "9-month window, no holdover permitted"
+        floor: "In-place rent (FMV cannot be less than current rent)"
+        notes: "Floor is critical in rising market. FMV ceiling is usually not granted."
+      expansion_rofo:
+        scope: "Contiguous floors or suites within same building section"
+        trigger: "Landlord's intent to market any qualifying space"
+        response_days: 10
+        notes: "Limit scope to truly contiguous space. Portfolio-wide ROFO is too broad."
+      contraction:
+        max_pct: 25
+        timing: "No earlier than year 4 of a 10-year lease"
+        notice_months: 15
+        fee_formula: "Unamortized TI + unamortized LC + 6 months rent on surrendered space"
+        notes: "Contraction must be whole-floor increments if possible."
+      termination:
+        timing: "No earlier than year 6 of a 10-year lease"
+        notice_months: 18
+        fee_formula: "Unamortized TI + unamortized LC + 9-12 months rent"
+        notes: "Grant only if needed to win the deal. Always include notice and fee."
+      rofr_on_building_sale:
+        scope: "Building only; excludes portfolio or entity-level sale"
+        response_days: 30
+        notes: "Grant to investment-grade anchor tenants only. Requires lender consent."
+
+    creditworthy_only:
+      purchase_option:
+        terms: "FMV by two appraisers (averaged); exercisable in any renewal term"
+        notes: "Accept from institutional tenants occupying >40% NRA only."
+
+  standard_tenant_5_to_20pct_nra:
+    standard_options:
+      renewal:
+        count: 1
+        term_years: 5
+        rent_basis: "FMV, landlord and tenant each name appraiser; split difference"
+        notice_months: 9
+        floor: "In-place rent"
+      expansion_rofo:
+        scope: "Immediately adjacent suite only (same floor, same wing)"
+        trigger: "Space becomes vacant and landlord decides to lease it"
+        response_days: 10
+      contraction:
+        notes: "Not standard for tenants under 20% of NRA. Negotiate hard against."
+      termination:
+        notes: "Not standard for mid-size tenants. Grant only in extreme tenant market."
+
+    avoid_granting:
+      - "ROFR on adjacent space (ROFO sufficient)"
+      - "Purchase option (too valuable for mid-size tenant)"
+      - "Portfolio-wide ROFO"
+
+  small_tenant_under_5pct_nra:
+    standard_options:
+      renewal:
+        count: 1
+        term_years: 3
+        rent_basis: "FMV"
+        notice_months: 6
+    avoid_granting:
+      - "Expansion right (any type)"
+      - "Contraction right"
+      - "Termination option"
+      - "ROFO or ROFR"
+      - "Purchase option"
+
+# ============================================================
+# CLASS B OFFICE
+# ============================================================
+class_b_office:
+  description: "Mid-quality office with functional amenities. Typical tenants are
+    professional services, government, nonprofit, small-to-mid business."
+
+  standard_options:
+    renewal:
+      count: 1
+      term_years: 5
+      rent_basis: "FMV, landlord determines; tenant may dispute with appraisal"
+      notice_months: 9
+      notes: "Simpler process than Class A. FMV by landlord-appointed appraiser is standard."
+    expansion_rofo:
+      scope: "Adjacent suite only; no floor-wide ROFO"
+      trigger: "Space is vacated and landlord intends to offer it to market"
+      response_days: 15
+
+  avoid_granting:
+    - "Termination option (Class B markets less liquid; re-leasing takes longer)"
+    - "Purchase option (often below replacement cost; avoid)"
+    - "ROFR on building sale"
+    - "Contraction (rarely justified unless tenant >15% NRA)"
+
+  notes: "Class B tenants often have lower credit. Counter with more security (LOC),
+    not more options. Option packages should be conservative to preserve refinancing."
+
+# ============================================================
+# BULK INDUSTRIAL
+# ============================================================
+bulk_industrial:
+  description: "Distribution centers, fulfillment centers, cold storage. 100K-1M+ SF.
+    Single or dual-tenant. Long-term leases (10-20 years) are norm."
+
+  single_tenant:
+    standard_options:
+      renewal:
+        count: 2
+        term_years: 5
+        rent_basis: "FMV with floor at in-place + 3%"
+        notice_months: 18
+        notes: "18-month notice required -- alternative sites need lead time."
+      rofo_on_adjacent_building:
+        scope: "Adjacent building in same business park (if landlord owns)"
+        trigger: "Adjacent building becomes available to lease"
+        response_days: 15
+      expansion_must_take:
+        description: "Committed expansion: tenant obligated to take additional building
+          or section at agreed date."
+        terms: "Rent pre-agreed or FMV with floor; 12-month construction notice"
+        notes: "Preferred over expansion option. Commits tenant to growth."
+      purchase_option:
+        terms: "FMV by appraisal. Sale-leaseback potential -- underwrite separately."
+        timing: "Exercisable in final year of any renewal term"
+        notes: "Industrial purchase options are more common than office. Monitor cap rate."
+
+    avoid_granting:
+      - "Contraction (bulk industrial not meaningfully divisible)"
+      - "Termination (use is specialized; re-leasing time is long)"
+      - "ROFR on building sale (unless extremely strong tenant requires it)"
+
+  multi_tenant:
+    standard_options:
+      renewal:
+        count: 1
+        term_years: 5
+        rent_basis: "FMV"
+        notice_months: 12
+      rofo_on_adjacent_bay:
+        scope: "Immediately adjacent bay within same building"
+        response_days: 10
+    avoid_granting:
+      - "Contraction"
+      - "Termination"
+      - "Purchase option (multi-tenant industrial -- too complex)"
+
+# ============================================================
+# LAST-MILE INDUSTRIAL
+# ============================================================
+last_mile_industrial:
+  description: "Infill, urban-adjacent distribution. 20K-80K SF. High land cost.
+    Premium rents. Tenant demand often exceeds supply."
+
+  standard_options:
+    renewal:
+      count: 1
+      term_years: 5
+      rent_basis: "FMV (market often rises significantly -- protect with no ceiling)"
+      notice_months: 12
+      notes: "Last-mile markets are landlord markets in most metros. Push for FMV, no floor."
+    rofo_on_adjacent_building:
+      scope: "Adjacent building in landlord's portfolio only"
+      response_days: 10
+      notes: "Portfolio ROFO only if landlord has 2+ buildings in same market."
+
+  avoid_granting:
+    - "Contraction (infill sites are constrained)"
+    - "Termination (strong market; demand supports landlord position)"
+    - "ROFR on space (market conditions favor landlord)"
+    - "Purchase option (last-mile land values are rising; avoid fixed price)"
+
+  notes: "Last-mile is a landlord's market in most gateway metros as of mid-2025.
+    Option packages should be minimal. Tenants who demand aggressive packages
+    should be educated on replacement cost and alternative site scarcity."
+
+# ============================================================
+# FLEX / R&D
+# ============================================================
+flex_rd:
+  description: "Mixed office/lab/light industrial. 5K-40K SF per tenant.
+    Users: tech, biotech, advanced manufacturing, defense. High TI in R&D configuration."
+
+  life_science_tenant:
+    standard_options:
+      renewal:
+        count: 2
+        term_years: 5
+        rent_basis: "FMV with floor (in-place rent) -- life science rents are volatile"
+        notice_months: 12
+      expansion_rofo:
+        scope: "Adjacent suite; same building preferred"
+        response_days: 10
+      must_take_expansion:
+        description: "Committed expansion at year 3 or 5 for growing biotech"
+        notes: "Structure as must-take to avoid ROFR market chill"
+      rofr_on_building:
+        scope: "Building only; excludes entity-level or portfolio transactions"
+        response_days: 20
+        notes: "Life science anchor tenants routinely require building ROFR.
+          Grant to lead tenant in purpose-built lab building only."
+
+    avoid_granting:
+      - "Termination option (lab TI at $300-500/SF cannot be amortized with termination)"
+      - "Contraction (specialized lab configuration; remnant space is unleaseble)"
+      - "Fixed-price purchase option (life science campus values are volatile)"
+
+  standard_tech_tenant:
+    standard_options:
+      renewal:
+        count: 1
+        term_years: 5
+        rent_basis: "FMV"
+        notice_months: 9
+      expansion_rofo:
+        scope: "Adjacent suite only"
+        response_days: 10
+      contraction:
+        timing: "After year 3 of a 7-year lease"
+        max_pct: 30
+        notice_months: 12
+        fee: "Unamortized TI + LC + 3 months rent"
+
+# ============================================================
+# MEDICAL OFFICE
+# ============================================================
+medical_office:
+  description: "Physician practices, outpatient clinics, dental, behavioral health.
+    2K-15K SF. Extremely high TI ($100-250/SF). Very sticky -- rarely relocates.
+    Strong personal guarantee standard."
+
+  standard_options:
+    renewal:
+      count: 2
+      term_years: 5
+      rent_basis: "FMV with floor at in-place + 3%"
+      notice_months: 12
+      notes: "Medical tenants are the best renewal risk. Make renewal terms clear and predictable."
+    rofo_on_adjacent_suite:
+      scope: "Immediately adjacent suite within same medical building"
+      trigger: "Adjacent suite becomes vacant"
+      response_days: 15
+      notes: "Medical practices like to control adjacency (referral network, shared waiting)."
+
+  avoid_granting:
+    - "Termination option (TI cannot be recovered from medical buildout)"
+    - "Contraction right (plumbing, HVAC, lead shielding are fixed)"
+    - "Purchase option (medical office cap rates are compressed; avoid fixed price)"
+    - "ROFR on building sale (MOB investors pay premium; ROFR destroys buyer pool)"
+
+  notes: "Medical tenants are the most credit-stable commercial tenants outside government.
+    The risk is TI concentration -- if they do leave, the space requires $150-250/SF
+    to re-configure. Option packages should be conservative (protect TI investment)
+    but renewal-friendly (reward long-term commitment with predictable renewal terms)."
+
+# ============================================================
+# OPTION NOTICE PERIOD QUICK REFERENCE
+# ============================================================
+notice_period_reference:
+  renewal:
+    lease_under_5yr: "6 months before expiration"
+    lease_5_to_10yr: "9-12 months before expiration"
+    lease_over_10yr: "12-18 months before expiration"
+    anchor_any:      "12-18 months (operational complexity)"
+    industrial_any:  "18-24 months (alternative site search time)"
+
+  expansion:
+    rofo_response:   "10-15 business days from offer delivery"
+    rofr_response:   "5-10 business days from offer delivery"
+    must_take:       "12 months construction notice standard"
+
+  contraction:
+    standard:        "12-15 months before effective date"
+    large_space:     "15-18 months (>20,000 SF)"
+    industrial:      "18-24 months (dock door reconfiguration)"
+
+  termination:
+    standard:        "12-18 months before effective date"
+    large_tenant:    "18-24 months (>30,000 SF)"
+    anchor:          "Typically not granted"
+
+  purchase:
+    election_period: "180 days before exercise date"
+    closing_period:  "90-180 days after election"

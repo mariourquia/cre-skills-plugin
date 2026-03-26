@@ -1,0 +1,396 @@
+# Tenant Credit Benchmarks
+# Reference data for tenant-credit-analyzer skill
+# Last updated: mid-2025 market conditions
+# All benchmarks are national averages; adjust for market tier and submarket conditions
+
+---
+
+# ============================================================
+# OCCUPANCY COST RATIO (OCR) BENCHMARKS
+# OCR = Total Occupancy Cost (Base Rent + NNN/CAM) / Tenant Gross Revenue
+# ============================================================
+
+occupancy_cost_ratio:
+
+  retail:
+    description: >
+      Retail OCR is the most scrutinized credit metric. ICSC defines "healthy" retail
+      as OCR below 10-12% for inline soft goods. Higher OCR is tolerable for
+      service-oriented tenants (medical, personal care) who have captive demand
+      and limited alternatives. Grocery anchors operate at very low OCR because
+      of thin gross margins -- low rent as % of sales is essential to their model.
+
+    by_format:
+      grocery_anchor:
+        benchmark_low: 1.0
+        benchmark_high: 3.5
+        flag_threshold: 4.0
+        unit: "% of gross sales"
+        notes: "Grocery operates on 1-2% net margins; OCR above 4% is existential"
+
+      big_box_anchor_general_merchandise:
+        benchmark_low: 1.5
+        benchmark_high: 4.0
+        flag_threshold: 5.0
+        unit: "% of gross sales"
+        examples: ["Walmart", "Target", "Home Depot", "Costco"]
+
+      big_box_anchor_specialty:
+        benchmark_low: 3.0
+        benchmark_high: 7.0
+        flag_threshold: 8.0
+        unit: "% of gross sales"
+        examples: ["Best Buy", "PetSmart", "Dick's Sporting Goods"]
+
+      inline_soft_goods:
+        benchmark_low: 8.0
+        benchmark_high: 12.0
+        flag_threshold: 14.0
+        unit: "% of gross sales"
+        examples: ["Apparel", "gifts", "accessories", "home goods"]
+        notes: "Highest-risk inline category; secular demand shift to e-commerce"
+
+      inline_food_and_beverage:
+        casual_dining:
+          benchmark_low: 6.0
+          benchmark_high: 10.0
+          flag_threshold: 12.0
+          unit: "% of gross sales"
+        fast_food_qsr:
+          benchmark_low: 8.0
+          benchmark_high: 13.0
+          flag_threshold: 15.0
+          unit: "% of gross sales"
+          notes: "QSR tolerates higher OCR due to higher gross margins (60-70%)"
+        coffee_beverage:
+          benchmark_low: 10.0
+          benchmark_high: 15.0
+          flag_threshold: 18.0
+          unit: "% of gross sales"
+          notes: "Starbucks typically 10-15%; independently-operated coffee shop flag at 12%"
+
+      service_retail:
+        personal_care_salon_spa:
+          benchmark_low: 10.0
+          benchmark_high: 16.0
+          flag_threshold: 18.0
+          unit: "% of gross revenue"
+        dry_cleaner_laundry:
+          benchmark_low: 12.0
+          benchmark_high: 18.0
+          flag_threshold: 20.0
+          unit: "% of gross revenue"
+          notes: "Service retail tolerates higher OCR due to limited e-commerce substitution"
+        nail_salon:
+          benchmark_low: 12.0
+          benchmark_high: 20.0
+          flag_threshold: 22.0
+          unit: "% of gross revenue"
+          notes: "Thin margins and high owner-dependency; treat as Tier D unless 5+ years established"
+
+      medical_dental_retail:
+        benchmark_low: 5.0
+        benchmark_high: 9.0
+        flag_threshold: 11.0
+        unit: "% of gross collections"
+        notes: "Medical uses have stable demand; use gross collections (not billings) as revenue base"
+
+      fitness_gym:
+        benchmark_low: 7.0
+        benchmark_high: 12.0
+        flag_threshold: 15.0
+        unit: "% of gross revenue"
+        notes: "High fixed cost model; vulnerable to economic cycles and competition"
+
+  office:
+    description: >
+      Office OCR is expressed as rent + operating expenses as % of tenant revenue.
+      Professional services firms (law, consulting, financial) have high revenue-per-headcount,
+      supporting higher absolute rents. Technology and startup tenants often show high OCR
+      during growth phases; evaluate trajectory not current level.
+
+    by_sector:
+      law_firm:
+        benchmark_low: 8.0
+        benchmark_high: 14.0
+        flag_threshold: 16.0
+        unit: "% of gross revenue"
+        notes: "Large firms (Am Law 200): typically 8-11%. Smaller firms: 12-14%"
+
+      financial_services:
+        benchmark_low: 6.0
+        benchmark_high: 12.0
+        flag_threshold: 14.0
+        unit: "% of gross revenue"
+        notes: "Includes banks, asset managers, insurance companies"
+
+      technology:
+        benchmark_low: 10.0
+        benchmark_high: 18.0
+        flag_threshold: 22.0
+        unit: "% of gross revenue"
+        notes: >
+          Startups may tolerate OCR 15-25% in growth phase; evaluate revenue growth rate.
+          Mature tech: target below 15%.
+
+      consulting_advisory:
+        benchmark_low: 10.0
+        benchmark_high: 16.0
+        flag_threshold: 18.0
+        unit: "% of gross revenue"
+
+      healthcare_system_office:
+        benchmark_low: 5.0
+        benchmark_high: 10.0
+        flag_threshold: 12.0
+        unit: "% of gross collections"
+
+      government_ngo:
+        benchmark_low: 8.0
+        benchmark_high: 15.0
+        flag_threshold: 18.0
+        unit: "% of annual budget"
+        notes: "Government tenants: stable but flag if rent exceeds 15% of agency budget allocation"
+
+  industrial:
+    description: >
+      Industrial OCR is the most favorable across property types. Logistics and e-commerce
+      operators generate very high revenue-per-SF, keeping OCR naturally low.
+      Manufacturing tenants have higher OCR due to lower revenue-per-SF operations.
+
+    by_use:
+      logistics_3pl:
+        benchmark_low: 2.0
+        benchmark_high: 5.0
+        flag_threshold: 7.0
+        unit: "% of gross revenue"
+        notes: "3PLs with diversified client base: treat favorably. Single-client 3PLs: apply concentration discount"
+
+      ecommerce_fulfillment:
+        benchmark_low: 2.0
+        benchmark_high: 5.0
+        flag_threshold: 6.0
+        unit: "% of gross revenue"
+
+      cold_storage:
+        benchmark_low: 4.0
+        benchmark_high: 8.0
+        flag_threshold: 10.0
+        unit: "% of gross revenue"
+        notes: "Specialized operators; limited competition but limited demand pool for re-leasing"
+
+      manufacturing_light:
+        benchmark_low: 5.0
+        benchmark_high: 10.0
+        flag_threshold: 12.0
+        unit: "% of gross revenue"
+
+      manufacturing_heavy:
+        benchmark_low: 4.0
+        benchmark_high: 8.0
+        flag_threshold: 10.0
+        unit: "% of gross revenue"
+        notes: "Evaluate commodity exposure and export dependency separately"
+
+# ============================================================
+# CONCENTRATION THRESHOLDS
+# ============================================================
+
+concentration_thresholds:
+
+  hhi:
+    diversified_max: 1500
+    moderate_min: 1500
+    moderate_max: 2500
+    high_concentration_min: 2500
+    dominant_tenant_min: 5000
+    description: >
+      HHI below 1,500 indicates healthy diversification.
+      HHI above 2,500 signals single-tenant-equivalent risk even if nominally multi-tenant.
+      HHI above 5,000 should be underwritten identically to a single-tenant NNN asset.
+
+  single_tenant_thresholds:
+    flag_no_ig_rating: 40.0        # % of total rent; flag if this % comes from non-IG tenant
+    flag_any_tenant: 50.0          # flag if any single tenant exceeds this % regardless of credit
+    treat_as_single_tenant: 65.0   # underwrite as single-tenant if one tenant exceeds this %
+    unit: "% of total base rent"
+
+  top_3_tenants:
+    flag_threshold: 60.0
+    critical_threshold: 75.0
+    unit: "% of total base rent"
+    description: >
+      If top 3 tenants represent over 60% of rent, diversification benefit is limited.
+      Over 75%, the portfolio credit quality is almost entirely determined by those 3 tenants.
+
+  lease_expiration_clustering:
+    single_year_flag: 25.0          # % of rent expiring in any one year
+    two_year_window_flag: 40.0      # % of rent expiring in any 24-month window
+    anchor_warning_months: 36       # months to anchor expiration to flag
+    unit: "% of total base rent for expiration thresholds; months for anchor"
+
+  sector_concentration:
+    single_sector_flag: 40.0        # % of rent from one NAICS sector
+    declining_sector_flag: 20.0     # % of rent from sectors in secular decline
+    unit: "% of total base rent"
+
+# ============================================================
+# INDUSTRY SECTOR RISK ADJUSTMENTS
+# ============================================================
+
+sector_risk_adjustments:
+  description: >
+    Apply these qualitative adjustments to shadow ratings when a tenant operates in a sector
+    with identifiable systemic risk. These adjustments are in addition to individual financial
+    ratio scoring. Maximum combined adjustment: +/- 15 points on 100-point scoring matrix.
+
+  positive_adjustments:
+    healthcare_services:
+      adjustment: +5
+      rationale: "Non-discretionary demand; limited e-commerce substitution"
+    grocery_food:
+      adjustment: +5
+      rationale: "Essential services; omnichannel model sustains physical locations"
+    logistics_ecommerce:
+      adjustment: +5
+      rationale: "Secular demand tailwinds; e-commerce growth drives industrial demand"
+    government_services:
+      adjustment: +8
+      rationale: "Low default probability; stable funding; renewal expectation high"
+    utilities_energy:
+      adjustment: +3
+      rationale: "Regulated revenue base; limited competitive disruption"
+    auto_service_repair:
+      adjustment: +3
+      rationale: "Local demand; limited e-commerce substitution; aging vehicle fleet tailwind"
+
+  negative_adjustments:
+    traditional_retail_apparel:
+      adjustment: -8
+      rationale: "Secular shift to e-commerce; department store contraction ongoing"
+      examples: ["Department stores", "specialty apparel", "shoe stores"]
+    entertainment_cinema:
+      adjustment: -6
+      rationale: "Streaming substitution; post-COVID attendance recovery incomplete"
+    fitness_gym_boutique:
+      adjustment: -4
+      rationale: "Cyclical and competitive; high churn in boutique segment"
+    print_media:
+      adjustment: -10
+      rationale: "Terminal secular decline"
+    legacy_office_intensive:
+      adjustment: -5
+      rationale: "Remote work structural shift; large office footprints under strategic review"
+      applies_to: "Office tenants with > 15,000 SF and leases > 5 years"
+    commodity_manufacturing:
+      adjustment: -4
+      rationale: "Exposed to import competition and commodity price cycles"
+    casual_dining_restaurant:
+      adjustment: -3
+      rationale: "Competitive and thin-margin; vulnerable to labor cost inflation"
+
+# ============================================================
+# MINIMUM FINANCIAL RATIOS BY TIER
+# ============================================================
+
+minimum_ratios_by_tier:
+  description: >
+    These are minimum thresholds for shadow tier assignment. A tenant failing any
+    single critical threshold is downgraded one tier, regardless of other ratios.
+
+  tier_a_shadow:
+    current_ratio_min: 1.5
+    debt_to_ebitda_max: 3.0
+    rent_coverage_min: 2.5
+    ebitda_margin_min: 8.0
+    revenue_trend: "Positive or stable (2 of 3 years showing growth)"
+
+  tier_b_shadow:
+    current_ratio_min: 1.2
+    debt_to_ebitda_max: 4.5
+    rent_coverage_min: 1.8
+    ebitda_margin_min: 5.0
+    revenue_trend: "Flat acceptable; one year of modest decline tolerable"
+
+  tier_c_shadow:
+    current_ratio_min: 1.0
+    debt_to_ebitda_max: 6.0
+    rent_coverage_min: 1.3
+    ebitda_margin_min: 3.0
+    revenue_trend: "Declining trend must be disclosed; 2 consecutive years flags Tier D"
+
+  tier_d_shadow:
+    # Tenant falls to Tier D if ANY of the following apply:
+    triggers:
+      - "Current ratio < 1.0"
+      - "Debt-to-EBITDA > 6.0x"
+      - "Rent coverage < 1.3x"
+      - "Revenue decline in 2 consecutive years"
+      - "No financial data available for any year"
+      - "EBITDA margin < 0% (operating at a loss)"
+      - "Active bankruptcy or restructuring"
+
+# ============================================================
+# GUARANTY QUALITY BENCHMARKS
+# ============================================================
+
+guaranty_quality:
+
+  personal_guaranty:
+    minimum_net_worth_multiple: 2.0          # net worth as multiple of annual rent
+    strong_net_worth_multiple: 5.0           # strong guarantor threshold
+    minimum_liquid_assets_multiple: 1.0      # liquid assets as multiple of annual rent
+    preferred_scope: "Full personal guaranty of entire lease term"
+    acceptable_scope: "Guaranty covering minimum 24 months of rent obligation"
+    flag_scope: "Good-guy guaranty or capped guaranty below 18 months"
+
+  parent_guaranty:
+    minimum_coverage_ratio: 3.0              # parent EBITDA as multiple of guaranteed rent
+    strong_coverage_ratio: 5.0
+    burn_off_minimum_years: 5                # guaranty burn-off should not occur in first 5 years
+    flag_condition: "Parent on CreditWatch Negative or outlook changed to Negative in prior 12 months"
+
+  quality_scoring:
+    quality_a:
+      description: "Corporate parent, IG rated, no burn-off, full guaranty"
+      effective_credit_uplift: "Full -- treat tenant as if rated at parent level"
+    quality_b:
+      description: "Corporate parent, HY rated, burn-off > 5 years"
+      effective_credit_uplift: "Partial -- average tenant and parent rating for pre-burn-off period"
+    quality_c:
+      description: "Personal guaranty, net worth > 3x rent, full guaranty"
+      effective_credit_uplift: "Moderate -- adds 1 shadow tier of uplift"
+    quality_d:
+      description: "Personal guaranty, net worth < 2x rent, OR capped/good-guy guaranty"
+      effective_credit_uplift: "Minimal -- note existence but do not rely on for underwriting"
+    quality_e:
+      description: "No guaranty"
+      effective_credit_uplift: "None -- flag for any non-credit tenant > 5% of rent"
+
+# ============================================================
+# MARKET TIER ADJUSTMENTS
+# ============================================================
+
+market_tier_adjustments:
+  description: >
+    Adjust default probability assumptions and recovery rates based on market tier.
+    Tier 1 markets have deeper re-leasing demand pools and faster absorption.
+    Tier 3 markets have shallower demand and longer dark periods.
+
+  tier_1_markets:
+    examples: ["New York", "Los Angeles", "Chicago", "San Francisco", "Boston", "Washington DC", "Seattle", "Miami"]
+    default_probability_adjustment: -0.05    # reduce assumed PD by 5% for NR tenants (market depth)
+    recovery_rate_adjustment: +0.05          # increase recovery by 5% (faster re-leasing)
+    dark_period_adjustment_months: -2        # assume 2 months faster re-leasing vs national avg
+
+  tier_2_markets:
+    examples: ["Dallas", "Atlanta", "Phoenix", "Denver", "Austin", "Charlotte", "Nashville", "Tampa"]
+    default_probability_adjustment: 0.00     # no adjustment (use base tables)
+    recovery_rate_adjustment: 0.00
+    dark_period_adjustment_months: 0
+
+  tier_3_markets:
+    examples: ["Secondary and tertiary metros; suburban exurbs; rural markets"]
+    default_probability_adjustment: +0.05    # increase assumed PD by 5% (thinner demand)
+    recovery_rate_adjustment: -0.08          # reduce recovery by 8% (longer dark period)
+    dark_period_adjustment_months: +4        # assume 4 months longer re-leasing vs national avg

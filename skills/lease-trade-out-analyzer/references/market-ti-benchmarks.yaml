@@ -1,0 +1,434 @@
+# Market TI, LC, Vacancy, and Make-Ready Benchmarks
+# Source: CBRE, JLL, Cushman & Wakefield mid-2025 market data; institutional AM norms
+# NOTE: These are benchmarks. User must validate against current submarket comps.
+# Values represent typical ranges; actual deals vary by building class, market tier, and negotiation.
+
+metadata:
+  version: "0.1.0"
+  vintage: "2025-Q2"
+  stale_warning: "Refresh from current broker market reports before using in final recommendations."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TENANT IMPROVEMENT ALLOWANCES ($/SF)
+# ─────────────────────────────────────────────────────────────────────────────
+tenant_improvement_allowances:
+
+  office:
+    class_a:
+      market_tier_1:  # NYC, SF, LA, Boston, Chicago CBD
+        new_tenant_cold_shell:
+          low: 80
+          mid: 120
+          high: 175
+        new_tenant_warm_shell:
+          low: 50
+          mid: 75
+          high: 110
+        new_tenant_second_gen:
+          low: 20
+          mid: 40
+          high: 65
+        renewal_cosmetic:
+          low: 5
+          mid: 12
+          high: 20
+        renewal_substantial:
+          low: 20
+          mid: 35
+          high: 50
+      market_tier_2:  # Austin, Denver, Nashville, Raleigh, Phoenix
+        new_tenant_cold_shell:
+          low: 60
+          mid: 90
+          high: 130
+        new_tenant_warm_shell:
+          low: 35
+          mid: 55
+          high: 80
+        new_tenant_second_gen:
+          low: 15
+          mid: 30
+          high: 50
+        renewal_cosmetic:
+          low: 5
+          mid: 10
+          high: 18
+        renewal_substantial:
+          low: 15
+          mid: 28
+          high: 45
+      market_tier_3:  # Secondary/tertiary markets
+        new_tenant_cold_shell:
+          low: 35
+          mid: 55
+          high: 80
+        new_tenant_warm_shell:
+          low: 20
+          mid: 35
+          high: 55
+        new_tenant_second_gen:
+          low: 8
+          mid: 18
+          high: 30
+        renewal_cosmetic:
+          low: 3
+          mid: 7
+          high: 15
+        renewal_substantial:
+          low: 10
+          mid: 20
+          high: 35
+    class_b:
+      # Apply 60-75% of Class A benchmarks
+      scaling_factor: 0.65
+      notes: "Class B TI is typically 60-75% of Class A for the same market tier and space condition."
+    class_c:
+      # Apply 35-50% of Class A benchmarks
+      scaling_factor: 0.42
+      notes: "Class C TI is typically 35-50% of Class A. Tenants often prefer as-is deals."
+
+  retail:
+    anchor_space:  # >20,000 SF, grocery/big box/department
+      new_tenant:
+        low: 35
+        mid: 60
+        high: 100
+      renewal:
+        low: 0
+        mid: 8
+        high: 20
+      notes: "Anchor TI varies enormously. Grocery anchors often self-fund. Big-box negotiates hard. Range reflects market norms, not grocery-specific deals."
+    junior_anchor:  # 5,000-20,000 SF
+      new_tenant:
+        low: 20
+        mid: 40
+        high: 70
+      renewal:
+        low: 0
+        mid: 5
+        high: 15
+    inline_retail:  # <5,000 SF
+      new_tenant:
+        low: 10
+        mid: 25
+        high: 50
+      renewal:
+        low: 0
+        mid: 3
+        high: 10
+      notes: "Inline TI varies by build-out required. Food & beverage tenants need more (plumbing, exhaust). Apparel/service tenants need less."
+    restaurant_food_beverage:  # specialty; high build-out cost
+      new_tenant:
+        low: 50
+        mid: 80
+        high: 150
+      renewal:
+        low: 5
+        mid: 15
+        high: 30
+      notes: "F&B TI is the highest in retail due to plumbing, exhaust, grease traps, HVAC load. Factor in landlord-funded vs. tenant-funded splits."
+
+  industrial:
+    warehouse_distribution:
+      new_tenant:
+        low: 2
+        mid: 5
+        high: 12
+      renewal:
+        low: 0
+        mid: 1
+        high: 4
+      notes: "Industrial TI is minimal. Often limited to dock levelers, office build-out (if any), and lighting upgrades."
+    flex_industrial:  # mixed office/warehouse
+      new_tenant:
+        low: 8
+        mid: 18
+        high: 35
+      renewal:
+        low: 2
+        mid: 6
+        high: 15
+    cold_storage_specialized:
+      new_tenant:
+        low: 30
+        mid: 60
+        high: 120
+      renewal:
+        low: 5
+        mid: 15
+        high: 30
+      notes: "Cold storage TI is equipment-heavy. Most is tenant-funded. Landlord TI is limited to structural and base building systems."
+
+  multifamily:
+    unit_turn_renovation:
+      cosmetic:  # paint, clean, minor repairs
+        low: 500
+        mid: 1500
+        high: 3500
+        unit: "$/unit"
+      light_renovation:  # new appliances, counters, fixtures
+        low: 5000
+        mid: 10000
+        high: 18000
+        unit: "$/unit"
+      full_renovation:  # gut rehab
+        low: 20000
+        mid: 40000
+        high: 75000
+        unit: "$/unit"
+    notes: "Multifamily 'TI' is the unit turn cost. Trade-out economics are simple: market rent minus turn cost vs. renewal with no turn cost."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# LEASING COMMISSIONS (% of aggregate base rent over lease term)
+# ─────────────────────────────────────────────────────────────────────────────
+leasing_commissions:
+
+  office:
+    new_lease:
+      market_tier_1:
+        low: 4.0
+        mid: 5.0
+        high: 6.0
+        unit: "% of aggregate rent"
+      market_tier_2:
+        low: 3.5
+        mid: 4.5
+        high: 5.5
+        unit: "% of aggregate rent"
+      market_tier_3:
+        low: 3.0
+        mid: 4.0
+        high: 5.0
+        unit: "% of aggregate rent"
+    renewal:
+      standard:
+        low: 1.5
+        mid: 2.5
+        high: 3.5
+        unit: "% of aggregate renewal rent"
+      notes: "Renewal commissions are typically 50-75% of new lease commission. Some markets have flat-fee renewals. Direct deals with no broker: 0%."
+    tiered_structure:  # common for large leases
+      years_1_to_3: 5.0
+      years_4_to_5: 3.0
+      years_6_plus: 2.0
+      unit: "% of annual rent for applicable years"
+      notes: "Tiered LC reduces total commission on longer leases. Negotiate tiered structure for leases >5 years."
+
+  retail:
+    new_lease:
+      low: 4.0
+      mid: 5.5
+      high: 7.0
+      unit: "% of aggregate rent"
+    renewal:
+      low: 1.0
+      mid: 2.0
+      high: 3.5
+      unit: "% of aggregate renewal rent"
+    notes: "Retail LCs can also be quoted as $/SF flat. Common in lower-rent markets: $2-5/SF flat for inline tenants."
+
+  industrial:
+    new_lease:
+      low: 3.0
+      mid: 4.0
+      high: 5.0
+      unit: "% of aggregate rent"
+    renewal:
+      low: 1.0
+      mid: 1.75
+      high: 2.5
+      unit: "% of aggregate renewal rent"
+
+  multifamily:
+    per_unit_flat:
+      low: 500
+      mid: 1000
+      high: 2000
+      unit: "$/unit"
+    one_month_rent:
+      description: "Common for broker-represented residents; equals first month's rent"
+    renewal:
+      low: 0
+      mid: 0
+      high: 500
+      unit: "$/unit (most renewals have no LC)"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# VACANCY DURATION BENCHMARKS (months of expected downtime)
+# ─────────────────────────────────────────────────────────────────────────────
+vacancy_duration:
+
+  office:
+    tight_market:  # submarket vacancy < 7%
+      small_suite:  # <5,000 SF
+        low: 2
+        mid: 4
+        high: 6
+      mid_suite:  # 5,000-20,000 SF
+        low: 3
+        mid: 6
+        high: 9
+      large_block:  # >20,000 SF
+        low: 4
+        mid: 9
+        high: 14
+    balanced_market:  # submarket vacancy 7-12%
+      small_suite:
+        low: 4
+        mid: 6
+        high: 10
+      mid_suite:
+        low: 6
+        mid: 9
+        high: 14
+      large_block:
+        low: 9
+        mid: 15
+        high: 24
+    soft_market:  # submarket vacancy > 12%
+      small_suite:
+        low: 6
+        mid: 10
+        high: 18
+      mid_suite:
+        low: 10
+        mid: 15
+        high: 24
+      large_block:
+        low: 15
+        mid: 24
+        high: 36
+
+  retail:
+    tight_market:
+      inline_small:  # <3,000 SF
+        low: 2
+        mid: 4
+        high: 6
+      inline_large:  # 3,000-10,000 SF
+        low: 3
+        mid: 6
+        high: 10
+      anchor:  # >15,000 SF
+        low: 6
+        mid: 12
+        high: 24
+    balanced_market:
+      inline_small:
+        low: 3
+        mid: 6
+        high: 10
+      inline_large:
+        low: 6
+        mid: 10
+        high: 16
+      anchor:
+        low: 12
+        mid: 18
+        high: 36
+    soft_market:
+      inline_small:
+        low: 6
+        mid: 10
+        high: 18
+      inline_large:
+        low: 10
+        mid: 16
+        high: 30
+      anchor:
+        low: 18
+        mid: 30
+        high: 60
+        notes: "Anchor vacancy in soft retail can exceed 5 years. Dark anchor scenarios require full portfolio analysis."
+
+  industrial:
+    tight_market:  # submarket vacancy < 5%
+      low: 1
+      mid: 3
+      high: 5
+    balanced_market:  # submarket vacancy 5-10%
+      low: 2
+      mid: 5
+      high: 8
+    soft_market:  # submarket vacancy > 10%
+      low: 4
+      mid: 8
+      high: 14
+    notes: "Industrial vacancy is the shortest of all property types. Demand from e-commerce and nearshoring has kept most markets tight. Speculative development in some markets (2023-2025) softened conditions -- validate locally."
+
+  multifamily:
+    occupied_to_occupied:
+      low: 7
+      mid: 21
+      high: 45
+      unit: "days"
+    notes: "Multifamily trade-out is measured in days not months. Turn time (clean, repair, re-list) is the key variable. Seasonal effects: summer turns faster than winter."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# MAKE-READY COST BENCHMARKS ($/SF)
+# ─────────────────────────────────────────────────────────────────────────────
+make_ready_costs:
+
+  office:
+    cosmetic_refresh:  # broom-clean, paint touch-up, replace carpet tiles
+      low: 2
+      mid: 4
+      high: 8
+    moderate_refresh:  # new paint throughout, polish floors, ceiling tile replacement
+      low: 5
+      mid: 8
+      high: 15
+    substantial_refresh:  # new flooring, paint, lighting, HVAC servicing, door hardware
+      low: 12
+      mid: 18
+      high: 30
+    notes: "Make-ready is distinct from TI. Make-ready brings the space to marketable condition. TI builds out the space to tenant specification. Always price both separately."
+
+  retail:
+    broom_clean:  # remove prior tenant fixtures, clean, minor patch/paint
+      low: 1
+      mid: 3
+      high: 6
+    shell_restoration:  # remove all improvements, restore to blank shell
+      low: 5
+      mid: 10
+      high: 20
+    food_and_beverage_decommission:  # grease trap removal, plumbing capping, exhaust removal
+      low: 10
+      mid: 25
+      high: 50
+      notes: "F&B make-ready is significantly more expensive than standard retail. Prior restaurant spaces often require $20-50/SF to demise properly."
+
+  industrial:
+    standard:  # sweep, minor repair, dock leveler check
+      low: 0.50
+      mid: 1.50
+      high: 3.00
+    office_demolition:  # remove prior tenant's office build-out
+      low: 2
+      mid: 5
+      high: 10
+
+  multifamily:
+    light_turn:
+      low: 500
+      mid: 1500
+      high: 3500
+      unit: "$/unit"
+    standard_turn:
+      low: 2000
+      mid: 4000
+      high: 8000
+      unit: "$/unit"
+    notes: "Multifamily make-ready and unit-turn are the same concept. See TI section for renovation cost ranges."
+
+# ─────────────────────────────────────────────────────────────────────────────
+# USAGE NOTES
+# ─────────────────────────────────────────────────────────────────────────────
+usage_notes:
+  - "Always verify benchmarks against current broker market data for the specific submarket."
+  - "TI amounts are landlord contribution only. Tenant may self-fund additional improvements above the allowance."
+  - "LC rates quoted above are total commission (listing broker + tenant rep combined). Split is typically 50/50."
+  - "For deals where the landlord controls the listing broker and tenant rep is external, the tenant rep receives their portion; listing broker may share or accept reduced split."
+  - "Vacancy duration is the median expected downtime for available space of the given size in the given market condition. It is NOT a guarantee -- actual downtime depends on space quality, asking rent, and specific market dynamics."
+  - "Make-ready costs are pre-TI costs borne by the landlord regardless of new tenant build-out requirements."
