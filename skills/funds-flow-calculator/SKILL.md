@@ -788,3 +788,17 @@ Present results in this order:
 - **Downstream**: none -- funds flow is the terminal output of the acquisition workflow; executed settlement statement becomes the authoritative record of the transaction economics
 - **Peer**: title company's settlement statement must match this output dollar-for-dollar; reconcile any variance before funding; if a discrepancy exists, identify the line item and resolve before authorizing disbursement
 - **1031 Exchange**: if seller is conducting a 1031 exchange, the seller's net proceeds line routes to QI (not to seller directly); confirm QI wire instructions are in the file; 1031-exchange-executor manages exchange mechanics separately
+
+## Computational Tools
+
+This skill can use the following scripts for precise calculations:
+
+- `scripts/calculators/proration_calculator.py` -- property tax, rent, insurance, and CAM/OpEx prorations with actual/365, actual/360, and 30/360 support
+  ```bash
+  python3 scripts/calculators/proration_calculator.py --json '{"closing_date": "2026-03-15", "annual_tax": 180000, "tax_paid_through": "2025-12-31", "monthly_rent": 125000, "rent_collected_through": "2026-03-31", "insurance_annual": 42000, "insurance_paid_through": "2026-06-30"}'
+  ```
+
+- `scripts/calculators/transfer_tax.py` -- state and local transfer tax for all 50 states + DC with tiered rate handling
+  ```bash
+  python3 scripts/calculators/transfer_tax.py --json '{"state": "NY", "county": "New York", "purchase_price": 15000000, "property_type": "commercial"}'
+  ```

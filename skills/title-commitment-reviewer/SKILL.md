@@ -764,3 +764,12 @@ Present findings in this order:
 - **Downstream**: Residual risk items feed equity-waterfall-modeler if cure costs affect the deal economics (e.g., a large mechanic's lien payoff reduces seller proceeds and affects the cap stack)
 - **Peer**: Legal review agent uses this skill's output as the basis for final pre-closing title confirmation; the peer agent does not re-run the full analysis but validates cure completion against the cure path matrix
 - **Peer**: survey-review-agent handles full ALTA/NSPS survey analysis for complex multi-parcel assemblages; this skill's Survey Cross-Reference workflow is sufficient for standard single-property reviews
+
+## Computational Tools
+
+This skill can use the following scripts for precise calculations:
+
+- `scripts/calculators/transfer_tax.py` -- state and local transfer tax for all 50 states + DC (used for transfer tax validation in title review)
+  ```bash
+  python3 scripts/calculators/transfer_tax.py --json '{"state": "FL", "purchase_price": 5000000, "property_type": "commercial"}'
+  ```

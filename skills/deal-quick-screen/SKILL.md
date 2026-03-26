@@ -175,3 +175,12 @@ Two columns, 3 bullets each. Concrete and specific to this deal, not generic.
 - **Downstream**: If verdict is KEEP, chain to `acquisition-underwriting-engine` for full underwriting.
 - **Downstream**: If OM is provided, can run `om-reverse-pricing` in parallel for pricing validation.
 - **Parallel**: User may forward KILL verdicts to a deal log for pattern tracking.
+
+## Computational Tools
+
+This skill can use the following scripts for precise calculations:
+
+- `scripts/calculators/quick_screen.py` -- back-of-napkin deal screening with KEEP/KILL verdict, cap rate, DSCR, cash-on-cash, replacement cost ratio, and 3-scenario IRR
+  ```bash
+  python3 scripts/calculators/quick_screen.py --json '{"purchase_price": 8500000, "noi": 510000, "units_or_sf": 48, "unit_type": "units", "market_rent_per_unit": 1350, "in_place_rent_per_unit": 1100, "loan_amount": 5525000, "rate": 0.065, "amort_years": 30, "replacement_cost_estimate": 10500000}'
+  ```

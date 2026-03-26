@@ -47,8 +47,26 @@ Do NOT trigger for: monthly property dashboards (use property-performance-dashbo
 | `value_add_progress` | object | no | units_renovated, total_planned, rent_premium_achieved, budget_spent, budget_total |
 | `next_quarter_priorities` | list | no | 3-5 priorities for upcoming quarter |
 | `risk_factors` | list | no | active risk factors being monitored |
+| `brand_guidelines` | object | no | Brand config from ~/.cre-skills/brand-guidelines.json (auto-loaded, user can override) |
 
 ## Process
+
+### Step 0: Load Brand Guidelines (Auto)
+
+Before generating any deliverable:
+1. Check if `~/.cre-skills/brand-guidelines.json` exists
+2. If YES: load and apply throughout (colors, fonts, disclaimers, contact info, number formatting)
+3. If NO: ask the user:
+   > "I don't have your brand guidelines saved yet. Would you like to set them up now with `/cre-skills:brand-config`? Or I can proceed with professional defaults."
+   - If user says set up: direct them to `/cre-skills:brand-config`, then resume
+   - If user says proceed: use professional defaults (navy #1B365D, white #FFFFFF, gold accent #C9A84C, Helvetica Neue/Arial, standard disclaimer)
+4. Apply loaded or default guidelines to all output sections:
+   - Color references in any formatting instructions
+   - Company name in headers/footers
+   - Disclaimer text at the bottom of every page/section
+   - Confidentiality notice on cover
+   - Contact block on final page/section
+   - Number formatting preferences throughout
 
 ### Subject Line
 

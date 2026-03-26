@@ -50,7 +50,7 @@ curl -fsSL https://raw.githubusercontent.com/mariourquia/cre-skills-plugin/main/
 
 ### macOS DMG (Double-Click Installer)
 
-Download `cre-skills-v1.0.0.dmg` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
+Download `cre-skills-v2.0.0.dmg` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
 
 1. Open the DMG
 2. Double-click "CRE Skills Installer"
@@ -162,6 +162,50 @@ Each chain has a detailed workflow document in `routing/workflows/` with step-by
 
 ---
 
+## Brand Guidelines
+
+Skills that produce investor-facing deliverables (pitch decks, IC memos, investor updates, offering packages, leasing marketing materials) automatically load your brand guidelines from `~/.cre-skills/brand-guidelines.json`.
+
+Run `/cre-skills:brand-config` to set up your brand colors, fonts, disclaimers, and contact info once. All future deliverables will use your brand automatically.
+
+### What Gets Saved
+
+| Setting | Description |
+|---------|-------------|
+| Company/fund name | Appears in all headers and footers |
+| Primary, secondary, accent colors | Applied to formatting instructions |
+| Heading and body fonts | Referenced in all layout directives |
+| Layout style | `minimal`, `corporate`, `boutique`, or `institutional` |
+| Number format | `full` ($1,234,567), `abbreviated` ($1.2M), or `both` |
+| Units preference | `psf`, `per_unit`, or `auto` |
+| Disclaimer text | Appended to every page/section |
+| Confidentiality notice | Applied to cover pages |
+| Contact information block | Placed on final page of deliverables |
+| Logo file path | Referenced (not embedded) |
+
+### Skills That Auto-Load Brand Guidelines
+
+| Skill | Deliverable Type |
+|-------|-----------------|
+| `lp-pitch-deck-builder` | LP pitch decks (16-slide) |
+| `ic-memo-generator` | Investment committee memos |
+| `quarterly-investor-update` | Quarterly LP letters and reports |
+| `capital-raise-machine` | LP packs, capital call notices, onboarding materials |
+| `fund-formation-toolkit` | PPM drafting guidance, fund term materials |
+| `disposition-prep-kit` | Offering packages, buyer marketing materials |
+| `investor-lifecycle-manager` | LP meeting prep, benchmark reports, GIPS composites |
+| `leasing-strategy-marketing-planner` | Leasing flyers, brochures, marketing plans |
+
+### First-Use Behavior
+
+On first invocation of any deliverable skill, if no brand guidelines file exists, the skill will prompt:
+
+> "I don't have your brand guidelines saved yet. Would you like to set them up now with `/cre-skills:brand-config`? Or I can proceed with professional defaults."
+
+Professional defaults: navy `#1B365D`, white `#FFFFFF`, gold accent `#C9A84C`, Helvetica Neue/Arial fonts, standard CRE disclaimer language.
+
+---
+
 ## Project Structure
 
 ```
@@ -216,7 +260,9 @@ cre-skills-plugin/
 
 ## License
 
-[MIT](LICENSE)
+[Apache 2.0](LICENSE)
+
+See [NOTICE](NOTICE) for attribution and patent grant details.
 
 ---
 

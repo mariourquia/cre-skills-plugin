@@ -527,3 +527,12 @@ Present results in this order:
 - **Upstream**: tenant-retention-engine (full portfolio retention analysis), rent-optimization-planner (rent gap identification that surfaces trade-out candidates)
 - **Downstream**: lease-up-war-room (activates when trade-out is selected), lease-negotiation-analyzer (takes over once trade-out or renewal path is committed), lease-option-structurer (structures the specific renewal option or new lease terms)
 - **Lateral**: comp-snapshot (market rent and TI benchmarks), noi-sprint-plan (trade-out or renewal decision is a direct NOI driver)
+
+## Computational Tools
+
+This skill can use the following scripts for precise calculations:
+
+- `scripts/calculators/npv_trade_out.py` -- renewal vs trade-out NPV comparison with breakeven analysis and sensitivity grid
+  ```bash
+  python3 scripts/calculators/npv_trade_out.py --json '{"current_rent_psf": 28.00, "market_rent_psf": 35.00, "renewal_rent_psf": 32.00, "renewal_ti_psf": 5.00, "new_ti_psf": 25.00, "lc_pct_renewal": 0.025, "lc_pct_new": 0.05, "vacancy_months": 4, "make_ready_psf": 5.00, "sf": 10000, "lease_term_years": 5, "discount_rate": 0.07, "annual_escalation": 0.03, "carrying_cost_psf_monthly": 2.50}'
+  ```

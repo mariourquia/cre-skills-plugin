@@ -42,7 +42,9 @@ function appendRecord(record) {
 
 function readStdinSync() {
   try {
-    return readFileSync('/dev/stdin', 'utf8');
+    // Use file descriptor 0 (stdin) directly -- works on macOS, Linux, and Windows.
+    // '/dev/stdin' is not available on Windows; fd 0 is cross-platform.
+    return readFileSync(0, 'utf8');
   } catch {
     return '';
   }

@@ -193,3 +193,12 @@ Present results in this order:
 - **Upstream**: rent-roll-analyzer (pre-normalized rent roll), deal-underwriting-assistant (equity-side needs debt inputs)
 - **Downstream**: mezz-pref-structurer (senior sizing determines gap), capital-stack-optimizer (senior is first input), refi-decision-analyzer (sizing methodology for maturity analysis)
 - **Peer**: sensitivity-stress-test (rate sensitivity methodology shared)
+
+## Computational Tools
+
+This skill can use the following scripts for precise calculations:
+
+- `scripts/calculators/debt_sizing.py` -- sizes loan against simultaneous DSCR, LTV, and debt yield constraints with rate sensitivity grid
+  ```bash
+  python3 scripts/calculators/debt_sizing.py --json '{"noi": 1500000, "property_value": 20000000, "target_dscr": 1.25, "target_ltv": 0.65, "target_debt_yield": 0.09, "rate": 0.065, "amortization_years": 30, "io_years": 2}'
+  ```
