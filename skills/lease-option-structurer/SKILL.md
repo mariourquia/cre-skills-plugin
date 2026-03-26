@@ -644,3 +644,12 @@ Present results in this order:
 - **Upstream**: lease-negotiation-analyzer (complex deal terms inform option structuring); rent-optimization-planner (market rent projections are inputs to FMV renewal option modeling)
 - **Downstream**: lease-document-factory (selected option package becomes term sheet language for lease drafting); tenant-retention-engine (renewal option design is a retention lever at expiration)
 - **Peer**: tenant-delinquency-workout (a tenant in default loses the right to exercise options -- verify default status before modeling option exercise); cam-reconciliation-calculator (lease structure affects what expenses pass through in option periods)
+
+## Computational Tools
+
+This skill can use the following scripts for precise calculations:
+
+- `scripts/calculators/option_valuation.py` -- termination fee calculation, cap rate impact by option type, and conservative/moderate/aggressive package comparison
+  ```bash
+  python3 scripts/calculators/option_valuation.py --json '{"ti_total": 250000, "ti_amortization_months": 120, "lc_total": 95000, "lc_amortization_months": 120, "months_remaining": 72, "market_rent_psf": 35.00, "sf": 10000, "expected_vacancy_months": 6, "releasing_cost_psf": 30.00, "discount_rate": 0.07, "noi": 2000000, "cap_rate": 0.055, "tenant_pct_of_nra": 0.25}'
+  ```

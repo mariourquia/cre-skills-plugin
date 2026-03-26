@@ -648,3 +648,17 @@ Present results in this order:
 - **Downstream**: rate lock decision feeds closing-checklist-tracker with lock expiry deadline
 - **Parallel**: if floating rate, rate-cap sourcing begins in parallel with loan processing
 - **Downstream**: reserve structure and covenant package feed debt-covenant-monitor for ongoing asset management
+
+## Computational Tools
+
+This skill can use the following scripts for precise calculations:
+
+- `scripts/calculators/debt_sizing.py` -- sizes loan against DSCR, LTV, and debt yield constraints with rate sensitivity grid (validates term sheet sizing)
+  ```bash
+  python3 scripts/calculators/debt_sizing.py --json '{"noi": 1500000, "property_value": 20000000, "target_dscr": 1.25, "target_ltv": 0.65, "target_debt_yield": 0.09, "rate": 0.065, "amortization_years": 30, "io_years": 2}'
+  ```
+
+- `scripts/calculators/covenant_tester.py` -- tests DSCR, LTV, and debt yield covenants against projections (validates terms against business plan)
+  ```bash
+  python3 scripts/calculators/covenant_tester.py --json '{"noi_by_year": [1200000, 1250000, 1300000], "loan_amount": 10000000, "rate": 0.065, "amortization_years": 30, "io_years": 2, "dscr_covenant": 1.25, "ltv_covenant": 0.75}'
+  ```

@@ -678,3 +678,12 @@ Present results in this order:
 - **Downstream**: complete document package feeds closing-checklist-tracker for closing condition tracking; funds-flow-calculator requires entity and conveyance structure to calculate transfer taxes and proration allocations
 - **Peer**: 1031-exchange-executor governs exchange mechanics and QI coordination in detail; this skill handles the closing documents specifically needed for the exchange
 - **Post-closing**: post-close-onboarding-transition receives the executed assignment package and tenant notices to manage the property management transition
+
+## Computational Tools
+
+This skill can use the following scripts for precise calculations:
+
+- `scripts/calculators/transfer_tax.py` -- state and local transfer tax for all 50 states + DC with tiered rate handling (NYC mansion tax, NJ graduated fee, WA REET tiers)
+  ```bash
+  python3 scripts/calculators/transfer_tax.py --json '{"state": "NY", "county": "New York", "purchase_price": 15000000, "property_type": "commercial"}'
+  ```

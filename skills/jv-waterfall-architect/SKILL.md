@@ -130,3 +130,12 @@ Mode-dependent (see Process above). Mode A produces a term sheet document. Mode 
 - **Downstream**: `dd-command-center` (JV structure informs DD scope and LP approval gates).
 - **Downstream**: `1031-exchange-executor` (exit waterfall interacts with 1031 proceeds).
 - **Lateral**: Mode C output feeds directly into LP pitch materials.
+
+## Computational Tools
+
+This skill can use the following scripts for precise calculations:
+
+- `scripts/calculators/waterfall_calculator.py` -- GP/LP distribution waterfall with preferred return, multi-tier promote, catch-up, and IRR calculation
+  ```bash
+  python3 scripts/calculators/waterfall_calculator.py --json '{"lp_equity": 9000000, "gp_equity": 1000000, "preferred_return": 0.08, "tiers": [{"hurdle_irr": 0.08, "gp_split": 0.20, "lp_split": 0.80}, {"hurdle_irr": 0.12, "gp_split": 0.30, "lp_split": 0.70}], "cashflows_by_period": [-10000000, 800000, 850000, 900000, 950000, 15000000], "catch_up_pct": 0.50}'
+  ```

@@ -624,3 +624,12 @@ Present results in this order:
 - **Downstream**: Default probabilities and expected loss calculations feed loan-sizing-engine for credit underwriting and LTV/DSCR stress testing.
 - **Downstream**: Co-tenancy clause inventory feeds lease-negotiation-analyzer when renegotiating leases during asset management.
 - **Related**: For new lease proposals on space being marketed, use tenant-credit-analyzer proactively on the prospective tenant before executing LOI (feed output to lease-negotiation-analyzer).
+
+## Computational Tools
+
+This skill can use the following scripts for precise calculations:
+
+- `scripts/calculators/tenant_credit_scorer.py` -- HHI concentration, WALT-weighted credit score, expected loss by tenant, OCR analysis
+  ```bash
+  python3 scripts/calculators/tenant_credit_scorer.py --json '{"tenants": [{"name": "Walgreens", "annual_rent": 378000, "sf": 14700, "lease_remaining_years": 6.5, "credit_rating": "Baa2", "revenue": 2500000, "property_type": "retail"}, {"name": "Local Restaurant", "annual_rent": 128000, "sf": 3200, "lease_remaining_years": 1.5, "credit_rating": null, "revenue": 850000, "property_type": "retail"}]}'
+  ```

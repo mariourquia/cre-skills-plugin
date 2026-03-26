@@ -49,22 +49,40 @@ Before beginning document review, ask the following if not already provided. Wro
    are incompatible with a new value-add strategy. Assumption approval also
    requires substitute guarantor review.
 
-4. Any environmental indemnity concerns?
-   Why it matters: environmental indemnity is typically unlimited in personal
-   liability. If a Phase I flagged RECs (recognized environmental conditions),
-   the guarantor's exposure is uncapped and the scope of indemnity determines
-   what risk is assumed.
+4. What loan type? (Agency/Freddie/Fannie, CMBS, bank balance sheet, bridge, construction)
+   Why it matters: covenant packages, cash management requirements, servicer behavior in
+   default, and prepayment structures differ fundamentally by loan type. CMBS has no
+   workout flexibility post-securitization. Agency has standardized forms with lender
+   additions warranting scrutiny. Bank loans may carry partial or full recourse.
 
-5. What is the deal strategy post-closing?
+5. Any environmental indemnity concerns flagged in Phase I or Phase II?
+   Why it matters: environmental indemnity is typically unlimited personal liability with
+   no cap and no sunset. If Phase I flagged RECs (recognized environmental conditions),
+   the guarantor's exposure is uncapped and the scope of indemnity determines the risk
+   assumed. Pre-existing conditions carve-out is critical if Phase II confirmed contamination.
+
+6. Are there cross-default provisions with other loans?
+   Why it matters: cross-default with unrelated loans means a default on an unrelated
+   asset (other properties, personal obligations, other entity debt) triggers default here.
+   Map every cross-default provision against the borrower's full debt schedule. This is
+   systemic risk that most sponsors underestimate.
+
+7. What state is the property in?
+   Why it matters: foreclosure timelines range from 30 days (Texas power of sale) to
+   18+ months (New York judicial). Receivership standards, deficiency judgment rules, and
+   statutory cure periods are all state-specific. Lender remedy speed defines the
+   borrower's exposure window if the business plan underperforms.
+
+8. What is the deal strategy post-closing?
    Why it matters: renovation plans, leasing plans, property management changes,
-   affiliate transactions, and capital improvements all have loan document
-   approval thresholds. A business plan that is incompatible with loan covenants
-   creates immediate default risk.
+   affiliate transactions, and capital improvements all have loan document approval
+   thresholds. A business plan incompatible with loan covenants creates immediate
+   default risk.
 
-6. What is the target hold period and exit strategy?
-   Why it matters: prepayment structure, transfer provisions, and assumption rights
-   all affect exit. A loan with no transfer right (no one-time transfer allowed)
-   cannot be sold without payoff -- critical on CMBS with defeasance prepayment.
+9. What is the target hold period and exit strategy?
+   Why it matters: prepayment structure, transfer provisions, and assumption rights all
+   affect exit. A loan with no transfer right cannot be sold without payoff -- critical
+   on CMBS with defeasance prepayment.
 ```
 
 ## Branch Logic
@@ -647,6 +665,219 @@ Note: UCC foreclosure on mezzanine collateral (equity pledge):
 
 **Output**: Default categorization table with cure periods, remedies, and foreclosure timeline for the property's state.
 
+### Workflow 8: Intercreditor Analysis
+
+Required when mezzanine debt or preferred equity is present. The intercreditor agreement governs the rights of each lender relative to the other and to the borrower. It is frequently the most negotiated document in a complex capital stack. Do not let a mezz lender sign without this analysis complete.
+
+```
+INTERCREDITOR AGREEMENT KEY PROVISIONS
+
+Subordination Terms:
+  Payment subordination: confirm mezz loan payments are blocked during senior default
+    What is the blocking period? (typically duration of senior default + cure period)
+    Is interest blocked or just principal? (interest typically blocked; PIK provision)
+  Lien subordination: mezz UCC lien on entity interests is subordinate to senior mortgage
+    Confirm: mezz lender cannot foreclose on entity interests in a way that disrupts
+    senior lender's mortgage without senior lender consent during standstill
+  Modification subordination: confirm scope
+    Standard: mezz loan subordinate to senior loan modifications that do not materially
+    impair mezz position
+    Flag: unlimited modification subordination (senior can raise rate, shorten maturity,
+    add reserves without mezz consent) -- this destroys mezz collateral value
+
+Standstill Period:
+  Duration: [X] days after mezz receives notice of senior default
+    Market: 90-180 days is standard range; 90 days = mezz-friendly; 180 days = senior-friendly
+  What is blocked during standstill?
+    Standard blocks: UCC foreclosure on entity interests; transfer of entity interests;
+    appointment of new manager; interference with property operations
+    Flag: standstill blocks mezz lender from even receiving information on property
+  What is permitted during standstill?
+    Standard permissions: cure senior defaults; preserve collateral value; receive notices;
+    exercise purchase option
+  Standstill extension: does standstill automatically extend if cure period is extended?
+    Flag: open-ended standstill extensions give senior lender indefinite control
+
+Cure Rights:
+  Which defaults are curable by mezz lender?
+    Monetary defaults: always curable (pay the missed payment)
+    Non-monetary defaults: sometimes curable (fix the covenant breach by removing offending
+    condition); sometimes not (SPE violations, unauthorized transfers already completed)
+  Cure period: mezz typically gets same cure period as borrower + [X] days additional
+    Market: borrower cure period + 10-30 days for mezz
+  Cure cost reimbursement: mezz cure costs added to mezz loan balance (confirm mechanics)
+  Number of cure opportunities: unlimited (mezz-friendly) vs. limited per default type
+
+Purchase Option:
+  Right to purchase senior loan: at par + accrued interest + lender fees and costs
+    Confirm: fees and costs definition -- does this include prepayment premium? (flag if yes)
+  Exercise period: [X] days after senior default notice
+    Market: 10-30 days to exercise; longer is mezz-friendly
+  Exercise mechanics: binding election + wire of purchase price within [X] days
+    Flag: very short wire period (5 business days) without financing contingency
+  Effect of exercise: mezz lender steps into senior lender position; borrower's
+    obligations unchanged; mezz can then negotiate workout or foreclose on mortgage
+    as senior lender
+
+Transfer Restrictions in Intercreditor:
+  Senior lender approval for mezz foreclosure and transfer of entity interests
+    Market: senior lender consent required; consent not to be unreasonably withheld
+    Flag: senior lender can withhold consent in its sole discretion (eliminates mezz remedy)
+  Qualified transferee definition: who can mezz lender transfer to after foreclosure?
+    Must be an "Approved Mezzanine Transferee" as defined -- verify definition is workable
+  CMBS rating agency confirmation (RACA): if senior loan is in CMBS trust, assumption by
+    mezz lender after foreclosure may require RACA (60-90 day process; adds cost and delay)
+    Flag: RACA requirement without reasonable timeline in intercreditor
+
+Consent Rights on Senior Loan Modifications:
+  Modifications requiring mezz lender consent (negotiate for these):
+    [ ] Rate increase on senior loan
+    [ ] Shortened maturity of senior loan
+    [ ] Acceleration of amortization schedule
+    [ ] Increase in required reserves
+    [ ] Addition of new covenants not in original loan agreement
+    [ ] Additional security requirements beyond original collateral
+  Modifications not requiring mezz consent (acceptable):
+    [ ] Extension of senior loan maturity (beneficial to mezz lender)
+    [ ] Rate decrease on senior loan
+    [ ] Waiver of technical covenant breach not affecting economic terms
+
+Preferred Equity vs. Mezzanine Intercreditor:
+  Preferred equity = equity interest, not debt; foreclosure is removal of managing member
+    (governed by operating agreement), not UCC Article 9 foreclosure
+  Recognition agreement: senior lender acknowledges preferred equity structure and agrees
+    not to disrupt preferred equity cure and removal rights
+  Key recognition agreement provisions:
+    [ ] Senior lender recognizes preferred equity position and cure rights
+    [ ] Preferred equity holder gets same notice as mezz lender on senior default
+    [ ] Senior lender consents to preferred equity's right to remove managing member
+    [ ] Transfer of property after removal not blocked by senior loan transfer restrictions
+
+Intercreditor Risk Rating:
+  LOW RISK: standstill 90-120 days; unlimited cure rights; purchase option; mezz consent
+    on material senior modifications; RACA process defined with timeline
+  MODERATE RISK: standstill 120-150 days; limited cure rights; purchase option present;
+    no consent rights on senior modifications
+  HIGH RISK: standstill 180+ days; cure rights limited to monetary only; no purchase option;
+    no consent rights; RACA required with no defined timeline
+```
+
+**Output**: Intercreditor provisions summary table, standstill/cure/purchase option analysis, modification consent rights, and risk rating (Low/Moderate/High) with specific provisions driving the rating.
+
+---
+
+## Worked Example: $35M CMBS Loan Covenant Stress Test
+
+**Deal configuration**: $35,000,000 CMBS loan, 10-year term, 5-year interest-only period, 4.85% fixed rate, 75% LTV based on $46.67M appraised value. DSCR covenant: minimum 1.25x (breach triggers lender notice and 30-day cure period). Cash sweep trigger: DSCR < 1.15x for two consecutive quarterly tests. Testing methodology: trailing 12-month NOI divided by annualized debt service, tested quarterly. Stabilized underwriting NOI: $2,980,000.
+
+**Step 1: Compute Annual Debt Service**
+
+```
+Interest-only period (Years 1-5):
+  Annual debt service = $35,000,000 * 4.85% = $1,697,500/year
+
+Amortizing period (Years 6-10) -- 30-year amortization at 4.85%:
+  Monthly payment (standard amortization formula):
+    P = 35,000,000; r = 4.85%/12 = 0.4042%; n = 360
+    Monthly payment = $184,487
+    Annual debt service = $184,487 * 12 = $2,213,844/year
+```
+
+**Step 2: DSCR at Stabilized Underwriting**
+
+```
+Stabilized NOI:        $2,980,000
+IO debt service:       $1,697,500
+DSCR (stabilized):     1.755x   -- well above 1.25x covenant floor
+Debt yield:            $2,980,000 / $35,000,000 = 8.51%  -- above 7.5% CMBS floor
+LTV:                   75.0% (at appraised value)
+Conclusion: loan passes all tests at stabilization.
+```
+
+**Step 3: Year-by-Year Covenant Stress Test**
+
+```
+Assumptions: Property is a 180-unit multifamily. Business plan = value-add renovation.
+Year 1: Renovation underway; 12 units offline; occupancy 85%.
+Year 2: Renovation continues; 88% occupancy; rent-ups proceeding.
+Year 3: Renovation complete but 3 tenants on 9-month abatements; 82% economic occupancy.
+Year 4: Abatements expire; full lease-up; 94% occupancy.
+Year 5: Stabilized; 95% occupancy; NOI normalized.
+
+Year 1: NOI = $2,410,000
+  DSCR = $2,410,000 / $1,697,500 = 1.420x  -- passes 1.25x covenant; passes 1.15x sweep trigger
+
+Year 2: NOI = $2,245,000
+  DSCR = $2,245,000 / $1,697,500 = 1.323x  -- passes 1.25x covenant; passes 1.15x sweep trigger
+
+Year 3: NOI = $1,953,125 (abatements + reduced occupancy)
+  DSCR = $1,953,125 / $1,697,500 = 1.151x
+  -- BREACHES 1.25x covenant (1.151x < 1.25x): lender sends notice; 30-day cure clock starts
+  -- AT THRESHOLD for 1.15x sweep trigger (1.151x is marginally above 1.15x)
+  -- If Year 3 Q3 and Q4 both test at 1.151x, cash sweep activates in Q4
+
+Year 4: NOI = $2,720,000 (abatements expire; lease-up completes)
+  DSCR = $2,720,000 / $1,697,500 = 1.602x  -- back above both thresholds
+  Cash sweep deactivates; covenant breach cured.
+
+Year 5: NOI = $2,975,000 (fully stabilized)
+  DSCR = $2,975,000 / $1,697,500 = 1.752x  -- performing as underwritten
+```
+
+**Step 4: Year 3 Cash Sweep Impact Model**
+
+```
+If Year 3 Q3 and Q4 DSCR both below 1.15x -- cash sweep activates for ~6 months:
+
+Annual gross revenue (82% occupancy, 180 units at $1,500/mo average): ~$2.66M
+Operating expenses (34% expense ratio): ~$905,000
+NOI: ~$1,755,000 (annualized, Q3-Q4 period)
+Annual debt service (IO): $1,697,500
+
+Revenue waterfall during cash sweep:
+  Operating expenses:       $905,000  (first priority)
+  Debt service:             $1,697,500
+  Required reserve deposits: ~$175,000 (replacement reserve $972/unit/yr)
+  Available for distribution: max $0 (NOI barely covers operating expenses + debt service)
+  Excess cash swept to lender reserve: $0 (all cash consumed)
+
+Distribution impact:
+  Projected pre-sweep distribution (Year 3 plan): ~$280,500/year
+  Actual distribution (cash sweep active): $0
+  Equity yield impact: ~150-200 bps reduction in CoC return for Year 3
+
+Key insight: The CMBS cash sweep at 1.15x DSCR, combined with a value-add lease-up
+strategy, creates a 12-18 month window where distributions are eliminated. This is
+a known risk that must be modeled into LP return projections before closing. Cash
+reserve at the entity level should be sized to cover LP preferred return distributions
+during this period to avoid LP default under the JV agreement.
+```
+
+**Step 5: Covenant Cure Options in Year 3**
+
+```
+Option A: Cash deposit to NOI reserve
+  Lender accepts deposit into a NOI reserve that is "grossed up" into DSCR calculation
+  Required deposit to restore DSCR to 1.25x:
+    Target NOI for 1.25x DSCR: 1.25 * $1,697,500 = $2,121,875
+    Shortfall vs. actual NOI: $2,121,875 - $1,953,125 = $168,750
+    Annualized deposit needed: ~$168,750
+  This is a practical cure option for a well-capitalized sponsor
+
+Option B: Letter of credit
+  LOC = [X] months of debt service (typically 3-6 months per loan docs)
+  LOC amount: 6 months * ($1,697,500/12) * 6 = $848,750
+  LOC cost: ~75-100 bps/year = ~$6,365-$8,488/year (acceptable)
+
+Option C: Improve actual NOI within 30-day cure period
+  Required NOI increase: +$168,750 (~8.6% improvement in 30 days)
+  Practical for Year 3 scenario: difficult during abatement period
+  More achievable in Year 4 when abatements expire naturally
+
+Recommendation for Year 3: Pre-fund LOC at closing as Year 3 covenant insurance.
+Cost is known, finite, and avoids special servicer transfer.
+```
+
 ---
 
 ## Output Format
@@ -655,12 +886,13 @@ Present results in this order:
 
 1. **Document Inventory** -- complete / incomplete; missing documents with severity
 2. **Economic Terms Delta** -- term sheet vs. loan docs; all variances flagged
-3. **Covenant Summary** -- financial covenants with thresholds, testing dates, cure periods; monitoring calendar
-4. **Carve-Out Analysis** -- categorized table; guarantor exposure quantification; non-standard items flagged
-5. **Cash Management Review** -- lockbox type, waterfall, sweep triggers, distribution conditions
+3. **Covenant Summary** -- financial covenants with thresholds, testing dates, cure periods; Year 1-5 stress test results; monitoring calendar
+4. **Carve-Out Analysis** -- categorized table; guarantor exposure quantification; non-standard items flagged with negotiating position
+5. **Cash Management Review** -- lockbox type, waterfall, sweep triggers, distribution conditions, trapped cash scenario
 6. **Transfer and Assumption** -- one-time transfer right availability, conditions, exit strategy impact
-7. **Default and Remedy Summary** -- events of default, cure periods, foreclosure timeline
-8. **Red Flags** -- consolidated priority list of material issues requiring action before closing
+7. **Default and Remedy Summary** -- events of default, cure periods, cross-default exposure, state foreclosure timeline
+8. **Intercreditor Analysis** (if mezz/preferred equity present) -- standstill, cure rights, purchase option, consent rights, risk rating
+9. **Red Flags** -- consolidated priority list (Critical / Significant / Minor) with recommended action before closing
 
 ---
 
@@ -694,3 +926,12 @@ Present results in this order:
 - **Downstream**: cash management structure feeds property-performance-dashboard for distribution forecasting
 - **Parallel**: environmental indemnity scope informs acquisition-underwriting-engine on contingent liability
 - **Parallel**: if mezzanine is present, intercreditor review must be completed simultaneously with senior loan document review -- they affect each other's enforceability
+
+## Computational Tools
+
+This skill can use the following scripts for precise calculations:
+
+- `scripts/calculators/covenant_tester.py` -- DSCR, LTV, and debt yield covenant testing against multi-year projections with breach detection and cash sweep triggers
+  ```bash
+  python3 scripts/calculators/covenant_tester.py --json '{"noi_by_year": [1200000, 1250000, 1300000, 1350000, 1400000], "loan_amount": 10000000, "rate": 0.065, "amortization_years": 30, "io_years": 2, "property_value_by_year": [16000000, 16500000, 17000000, 17500000, 18000000], "dscr_covenant": 1.25, "ltv_covenant": 0.75, "cash_sweep_dscr": 1.15}'
+  ```
