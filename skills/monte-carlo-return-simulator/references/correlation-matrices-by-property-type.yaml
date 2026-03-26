@@ -1,0 +1,224 @@
+# Correlation Matrices by Property Type
+# Used by: monte-carlo-return-simulator
+#
+# Each matrix defines pairwise correlations between stochastic variables
+# for Monte Carlo simulation of CRE investment returns.
+#
+# Variables:
+#   rent_growth    - Annual rent growth rate
+#   exit_cap       - Exit (terminal) capitalization rate
+#   vacancy        - Stabilized vacancy rate
+#   expense_growth - Annual operating expense growth rate
+#   refi_rate      - Interest rate at refinance or floating rate reset
+#   capex_overrun  - Capital expenditure overrun factor (value-add only)
+#   absorption     - Absorption pace in months (lease-up only)
+#
+# Correlation values range from -1.0 to +1.0.
+# Sources: NCREIF property index decomposition, CBRE cap rate surveys,
+#          Federal Reserve interest rate data, author calibration.
+# All matrices are symmetric and positive semi-definite.
+
+multifamily:
+  description: "Multifamily / apartment. Tighter correlations due to essential housing demand."
+  variables: [rent_growth, exit_cap, vacancy, expense_growth, refi_rate]
+  matrix:
+    rent_growth:
+      rent_growth: 1.00
+      exit_cap: -0.30
+      vacancy: -0.55
+      expense_growth: 0.25
+      refi_rate: -0.15
+    exit_cap:
+      rent_growth: -0.30
+      exit_cap: 1.00
+      vacancy: 0.35
+      expense_growth: -0.10
+      refi_rate: 0.60
+    vacancy:
+      rent_growth: -0.55
+      exit_cap: 0.35
+      vacancy: 1.00
+      expense_growth: -0.05
+      refi_rate: 0.15
+    expense_growth:
+      rent_growth: 0.25
+      exit_cap: -0.10
+      vacancy: -0.05
+      expense_growth: 1.00
+      refi_rate: 0.35
+    refi_rate:
+      rent_growth: -0.15
+      exit_cap: 0.60
+      vacancy: 0.15
+      expense_growth: 0.35
+      refi_rate: 1.00
+
+office:
+  description: "Office. Higher vacancy volatility, stronger rent-vacancy correlation due to tenant concentration."
+  variables: [rent_growth, exit_cap, vacancy, expense_growth, refi_rate]
+  matrix:
+    rent_growth:
+      rent_growth: 1.00
+      exit_cap: -0.35
+      vacancy: -0.60
+      expense_growth: 0.20
+      refi_rate: -0.20
+    exit_cap:
+      rent_growth: -0.35
+      exit_cap: 1.00
+      vacancy: 0.45
+      expense_growth: -0.10
+      refi_rate: 0.65
+    vacancy:
+      rent_growth: -0.60
+      exit_cap: 0.45
+      vacancy: 1.00
+      expense_growth: -0.10
+      refi_rate: 0.25
+    expense_growth:
+      rent_growth: 0.20
+      exit_cap: -0.10
+      vacancy: -0.10
+      expense_growth: 1.00
+      refi_rate: 0.30
+    refi_rate:
+      rent_growth: -0.20
+      exit_cap: 0.65
+      vacancy: 0.25
+      expense_growth: 0.30
+      refi_rate: 1.00
+
+industrial:
+  description: "Industrial / logistics. Tight vacancy, structural demand tailwinds, lower correlation magnitudes."
+  variables: [rent_growth, exit_cap, vacancy, expense_growth, refi_rate]
+  matrix:
+    rent_growth:
+      rent_growth: 1.00
+      exit_cap: -0.25
+      vacancy: -0.40
+      expense_growth: 0.15
+      refi_rate: -0.10
+    exit_cap:
+      rent_growth: -0.25
+      exit_cap: 1.00
+      vacancy: 0.30
+      expense_growth: -0.05
+      refi_rate: 0.55
+    vacancy:
+      rent_growth: -0.40
+      exit_cap: 0.30
+      vacancy: 1.00
+      expense_growth: -0.05
+      refi_rate: 0.15
+    expense_growth:
+      rent_growth: 0.15
+      exit_cap: -0.05
+      vacancy: -0.05
+      expense_growth: 1.00
+      refi_rate: 0.30
+    refi_rate:
+      rent_growth: -0.10
+      exit_cap: 0.55
+      vacancy: 0.15
+      expense_growth: 0.30
+      refi_rate: 1.00
+
+retail:
+  description: "Retail. Highest volatility, e-commerce disruption risk, wider correlations in downside."
+  variables: [rent_growth, exit_cap, vacancy, expense_growth, refi_rate]
+  matrix:
+    rent_growth:
+      rent_growth: 1.00
+      exit_cap: -0.40
+      vacancy: -0.65
+      expense_growth: 0.20
+      refi_rate: -0.20
+    exit_cap:
+      rent_growth: -0.40
+      exit_cap: 1.00
+      vacancy: 0.50
+      expense_growth: -0.15
+      refi_rate: 0.60
+    vacancy:
+      rent_growth: -0.65
+      exit_cap: 0.50
+      vacancy: 1.00
+      expense_growth: -0.10
+      refi_rate: 0.25
+    expense_growth:
+      rent_growth: 0.20
+      exit_cap: -0.15
+      vacancy: -0.10
+      expense_growth: 1.00
+      refi_rate: 0.30
+    refi_rate:
+      rent_growth: -0.20
+      exit_cap: 0.60
+      vacancy: 0.25
+      expense_growth: 0.30
+      refi_rate: 1.00
+
+hotel:
+  description: "Hotel / hospitality. Revenue per available room replaces rent; highest cyclicality."
+  variables: [rent_growth, exit_cap, vacancy, expense_growth, refi_rate]
+  notes: "rent_growth represents RevPAR growth for hotel assets."
+  matrix:
+    rent_growth:
+      rent_growth: 1.00
+      exit_cap: -0.45
+      vacancy: -0.70
+      expense_growth: 0.30
+      refi_rate: -0.25
+    exit_cap:
+      rent_growth: -0.45
+      exit_cap: 1.00
+      vacancy: 0.55
+      expense_growth: -0.10
+      refi_rate: 0.65
+    vacancy:
+      rent_growth: -0.70
+      exit_cap: 0.55
+      vacancy: 1.00
+      expense_growth: -0.15
+      refi_rate: 0.30
+    expense_growth:
+      rent_growth: 0.30
+      exit_cap: -0.10
+      vacancy: -0.15
+      expense_growth: 1.00
+      refi_rate: 0.35
+    refi_rate:
+      rent_growth: -0.25
+      exit_cap: 0.65
+      vacancy: 0.30
+      expense_growth: 0.35
+      refi_rate: 1.00
+
+# Extended variables for value-add strategies
+# Append these correlations to the base property-type matrix when applicable.
+
+value_add_extensions:
+  description: "Additional correlations for capex overrun and absorption pace variables in value-add deals."
+  additional_variables: [capex_overrun, absorption]
+  correlations_with_base:
+    capex_overrun:
+      rent_growth: -0.10
+      exit_cap: 0.15
+      vacancy: 0.10
+      expense_growth: 0.40
+      refi_rate: 0.20
+      capex_overrun: 1.00
+      absorption: 0.30
+    absorption:
+      rent_growth: -0.35
+      exit_cap: 0.25
+      vacancy: 0.50
+      expense_growth: 0.05
+      refi_rate: 0.15
+      capex_overrun: 0.30
+      absorption: 1.00
+  notes: |
+    capex_overrun correlates positively with expense_growth (both driven by construction/labor cost inflation)
+    and positively with absorption (projects that run over budget often have delayed lease-up).
+    absorption correlates strongly with vacancy (market weakness slows both existing and new leasing)
+    and negatively with rent_growth (weak demand slows absorption and compresses rents).

@@ -1,0 +1,285 @@
+# dst-evaluation-framework.yaml
+# Delaware Statutory Trust (DST) evaluation reference for 1031-pipeline-manager skill.
+# Due diligence checklist, fee analysis template, and sponsor track record criteria.
+# DSTs serve as a fallback in active 1031 exchange pipelines when timeline pressure
+# or candidate uncertainty threatens exchange completion.
+
+meta:
+  last_reviewed: "2025-08-01"
+  disclaimer: "DST investments are securities offered under SEC Regulation D. This framework is for educational and analytical purposes. All DST investments require review by a registered representative and securities attorney. Past sponsor performance does not guarantee future results."
+  applicable_regulations:
+    - "SEC Regulation D (Rule 506(b) or 506(c) private placement)"
+    - "IRS Revenue Ruling 2004-86 (DST qualification for 1031 exchange)"
+    - "FINRA suitability requirements for private placements"
+
+# =============================================================================
+# DST DUE DILIGENCE CHECKLIST
+# =============================================================================
+
+due_diligence_checklist:
+
+  # ---------------------------------------------------------------------------
+  legal_structure:
+    description: "Verify DST legal structure meets IRS requirements for 1031 eligibility"
+    items:
+      - check: "DST is organized as a Delaware Statutory Trust under Delaware law"
+        critical: true
+        note: "Must be a trust, not an LLC or LP, for 1031 qualification per Rev. Rul. 2004-86"
+
+      - check: "Trust agreement limits trustee powers to the 'seven deadly sins' restrictions"
+        critical: true
+        note: "Trustee cannot: (1) renegotiate lease terms, (2) accept new tenants, (3) renegotiate or refinance debt, (4) make capital expenditures beyond normal maintenance, (5) make distributions other than from cash flow, (6) invest cash other than in short-term obligations, (7) renegotiate management agreements"
+
+      - check: "Each investor receives a beneficial interest in the trust (not a partnership interest)"
+        critical: true
+        note: "Partnership classification would disqualify for 1031 treatment"
+
+      - check: "Offering is made under SEC Regulation D (typically Rule 506(b) or 506(c))"
+        critical: true
+
+      - check: "Accredited investor verification completed"
+        critical: true
+
+  # ---------------------------------------------------------------------------
+  sponsor_evaluation:
+    description: "Evaluate DST sponsor's track record, financial stability, and reputation"
+    items:
+      - criterion: "Years in business"
+        minimum: 10
+        preferred: 15
+        scoring: "10+ years = 8 points; 15+ years = 10 points; <10 years = 5 points; <5 years = 2 points (high risk)"
+
+      - criterion: "Number of full-cycle DSTs completed"
+        minimum: 5
+        preferred: 15
+        scoring: "5+ completed = 7 points; 15+ completed = 10 points; <5 completed = 3 points"
+        note: "Full-cycle means acquired, operated, and disposed. In-flight DSTs don't count."
+
+      - criterion: "Average investor return vs. projections"
+        acceptable: "Within 1% of projected return"
+        red_flag: "Returns consistently below projections by >2%"
+        scoring: "Meets/exceeds projections = 10; within 1% = 8; within 2% = 5; >2% below = 2"
+
+      - criterion: "Any defaults, foreclosures, or capital calls"
+        acceptable: "None"
+        red_flag: "Any foreclosure or unplanned capital call"
+        scoring: "Zero events = 10; 1 event with explanation = 5; multiple events = 1"
+        note: "A single default during 2020 COVID may be forgivable with context. Multiple defaults indicate structural issues."
+
+      - criterion: "AUM (assets under management)"
+        minimum: "$500M"
+        preferred: "$2B+"
+        scoring: "$2B+ = 10; $500M-$2B = 8; $250M-$500M = 5; <$250M = 3"
+
+      - criterion: "Litigation history"
+        acceptable: "No material unresolved litigation with investors"
+        red_flag: "Investor lawsuits alleging fraud, misrepresentation, or breach of fiduciary duty"
+
+      - criterion: "Regulatory actions"
+        acceptable: "No SEC, FINRA, or state regulatory actions"
+        red_flag: "Any enforcement action"
+
+  # ---------------------------------------------------------------------------
+  property_evaluation:
+    description: "Evaluate the underlying real estate asset(s) in the DST"
+    items:
+      - criterion: "Property type"
+        preferred: ["multifamily", "industrial", "medical_office", "grocery_anchored_retail", "essential_service_retail"]
+        acceptable: ["general_office", "student_housing", "self_storage"]
+        higher_risk: ["hotel", "single_tenant_retail", "senior_living"]
+        note: "Property type risk mirrors direct CRE investment risk. Multifamily and industrial have strongest fundamentals as of 2025."
+
+      - criterion: "Occupancy"
+        minimum: "90%"
+        preferred: "95%+"
+        red_flag: "<85%"
+        note: "DST restrictions prevent re-leasing flexibility. Low occupancy at acquisition is a permanent risk."
+
+      - criterion: "Weighted average lease term (WALT)"
+        minimum: "5 years"
+        preferred: "7+ years"
+        red_flag: "<3 years"
+        note: "With DST's inability to renegotiate leases, long WALT is essential."
+
+      - criterion: "Property age and condition"
+        preferred: "Built or renovated within last 15 years"
+        acceptable: "Well-maintained Class B"
+        red_flag: "Deferred maintenance or capital needs exceeding reserves"
+        note: "DST restrictions limit capital expenditures to normal maintenance. Significant capex needs create default risk."
+
+      - criterion: "Location and market fundamentals"
+        evaluation: "Population growth, employment growth, supply pipeline, submarket vacancy trends"
+        note: "Apply same market analysis as direct acquisition"
+
+      - criterion: "Tenant quality"
+        evaluation: "Credit rating, industry stability, lease guarantees"
+        preferred: "Investment-grade tenants or strong regional operators"
+        red_flag: "Single tenant with declining industry or weak financials"
+
+  # ---------------------------------------------------------------------------
+  debt_analysis:
+    description: "Analyze the DST's debt structure and refinancing risk"
+    items:
+      - criterion: "LTV ratio"
+        typical_range: "50-65%"
+        red_flag: ">70% LTV"
+        note: "Higher leverage amplifies both returns and risk. DST cannot refinance if property value declines."
+
+      - criterion: "Interest rate type"
+        preferred: "Fixed rate for full projected hold period"
+        acceptable: "Fixed rate with maturity within 1 year of projected disposition"
+        red_flag: "Floating rate without cap"
+        note: "DST cannot renegotiate or refinance debt. A rate reset mid-hold can destroy returns."
+
+      - criterion: "Loan maturity vs. projected hold"
+        preferred: "Maturity >= projected hold period + 1 year buffer"
+        red_flag: "Maturity before projected disposition"
+        note: "If loan matures before disposition, DST must repay or default. Cannot refinance."
+
+      - criterion: "Non-recourse to investors"
+        required: true
+        note: "All DST debt must be non-recourse to individual investors. Verify in loan documents."
+
+      - criterion: "Carve-out guarantees"
+        evaluation: "Standard bad-boy carve-outs are normal. Broad personal guarantees by sponsor are acceptable."
+        red_flag: "Any personal guarantee required from DST investors"
+
+# =============================================================================
+# FEE ANALYSIS TEMPLATE
+# =============================================================================
+
+fee_analysis:
+  description: "Comprehensive fee analysis for DST offerings. All fees reduce investor returns."
+
+  upfront_fees:
+    acquisition_fee:
+      typical_range: "1.5% - 3.0% of purchase price"
+      red_flag: ">4%"
+      description: "Fee paid to sponsor for sourcing and acquiring the property"
+      example_5m: "$75,000 - $150,000"
+
+    financing_fee:
+      typical_range: "0.5% - 1.5% of loan amount"
+      red_flag: ">2%"
+      description: "Fee for arranging debt financing"
+      example_3m_loan: "$15,000 - $45,000"
+
+    legal_and_organizational:
+      typical_range: "1.0% - 2.0% of offering size"
+      description: "Legal, accounting, and organizational costs of the DST"
+      example_10m_offering: "$100,000 - $200,000"
+
+    selling_commission:
+      typical_range: "5% - 7% of investor equity"
+      description: "Commission paid to broker-dealer and registered representative"
+      note: "This is the largest upfront cost. Paid from investor's equity contribution."
+      example_500k_investment: "$25,000 - $35,000"
+
+    total_upfront_load:
+      typical_range: "10% - 15% of investor equity"
+      note: "Investor's equity is immediately reduced by this amount. $500K invested may have only $425K-$450K working."
+
+  ongoing_fees:
+    asset_management_fee:
+      typical_range: "0.75% - 1.5% of asset value per year"
+      red_flag: ">2%"
+      description: "Annual fee for ongoing asset management"
+      example_5m_annual: "$37,500 - $75,000"
+
+    property_management_fee:
+      typical_range: "3% - 6% of gross revenue"
+      description: "Fee for day-to-day property management (may be affiliate of sponsor)"
+      note: "If property manager is sponsor affiliate, scrutinize for above-market fees"
+
+  disposition_fees:
+    disposition_fee:
+      typical_range: "1% - 2% of sale price"
+      description: "Fee paid to sponsor at property disposition"
+      example_6m_sale: "$60,000 - $120,000"
+
+    promote_or_performance_fee:
+      typical_range: "10% - 15% of returns above a hurdle (typically 6-7%)"
+      description: "Incentive fee paid to sponsor if returns exceed target"
+      note: "Aligns sponsor interests but reduces investor upside"
+
+  total_fee_example:
+    investment_amount: 500000
+    hold_period_years: 7
+    property_value_at_acquisition: 5000000
+    property_value_at_disposition: 6000000
+    gross_cash_yield: "5.5%"
+    calculation:
+      upfront_load: "$60,000 (12% of $500K equity)"
+      annual_asset_mgmt: "$5,250/year (1.05% of $500K * 7 years = $36,750)"
+      disposition_fee: "$1,200 (pro rata share of 1% of $6M)"
+      total_fees_over_hold: "$97,950"
+      as_percent_of_equity: "19.6%"
+      annualized_fee_drag: "2.8% per year"
+    comparison:
+      gross_projected_return: "8.5% annualized"
+      net_of_fees_return: "5.7% annualized"
+      tax_cost_if_no_exchange: "$120,000 (on $500K of gain)"
+      breakeven: "Fees roughly equal tax cost over 7-year hold. DST is marginal in this case."
+
+# =============================================================================
+# COST COMPARISON: DST vs. PAYING THE TAX
+# =============================================================================
+
+cost_comparison_framework:
+  description: "Framework for comparing DST fallback cost to simply paying the tax and investing net proceeds directly."
+
+  inputs:
+    - "Exchange value (QI proceeds to invest)"
+    - "Estimated gain (determines tax if no exchange)"
+    - "Effective tax rate (federal LTCG + NIIT + state)"
+    - "DST projected gross return"
+    - "DST total fee drag (annualized)"
+    - "DST hold period"
+    - "Alternative investment return (if pay tax and invest directly)"
+
+  methodology: |
+    1. Calculate tax cost if no exchange:
+       Tax = gain * effective_tax_rate
+
+    2. Calculate DST net return over hold period:
+       DST_net = exchange_value * (1 + net_return)^hold_years - exchange_value
+       Where net_return = gross_return - annualized_fee_drag
+
+    3. Calculate alternative investment net return:
+       After_tax_capital = exchange_value - tax_cost
+       Alt_net = after_tax_capital * (1 + alt_return)^hold_years - after_tax_capital
+
+    4. Compare:
+       If DST_net > Alt_net: DST is superior (exchange worth preserving)
+       If DST_net < Alt_net: Pay the tax (liquidity + control + higher return)
+
+  decision_rules:
+    - "If exchange value > $1M and tax rate > 30%: DST almost always wins"
+    - "If exchange value < $200K and tax rate < 25%: paying tax often wins"
+    - "If DST annualized fee drag > 3%: question the specific DST, not the strategy"
+    - "If exchanger needs liquidity within 5 years: pay the tax (DSTs are illiquid)"
+
+# =============================================================================
+# DST CLOSING PROCESS (FOR EXCHANGE DEADLINE PURPOSES)
+# =============================================================================
+
+closing_process:
+  description: "Steps and timeline for closing a DST investment within a 1031 exchange"
+
+  timeline:
+    day_1: "Contact DST sponsor or placement agent. Request PPM and subscription documents."
+    day_2_3: "Review PPM (Private Placement Memorandum). Complete suitability questionnaire."
+    day_3_5: "Complete subscription agreement. Provide accredited investor documentation."
+    day_5_7: "Subscription accepted by sponsor. Wire instructions provided."
+    day_7_10: "QI wires exchange proceeds to DST closing agent per sponsor instructions."
+    day_10_14: "Closing confirmed. Beneficial interest certificate issued."
+    total_days: "5-14 business days from initial contact to close"
+
+  note: "This speed is the primary advantage of DST as a 1031 fallback. Direct acquisitions take 60-120 days. DSTs can close in under 2 weeks."
+
+  requirements:
+    - "DST must be identified on the Day 45 identification letter"
+    - "DST must have available allocation (popular DSTs sell out quickly)"
+    - "Exchanger must be accredited investor"
+    - "QI must wire directly to DST closing agent (exchanger never touches funds)"
+    - "Subscription agreement must reference 1031 exchange"

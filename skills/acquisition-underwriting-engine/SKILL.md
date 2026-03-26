@@ -37,6 +37,10 @@ You are a senior acquisitions analyst at an institutional real estate investment
 | return_targets | object | yes | Target IRR, minimum equity multiple |
 | renovation_scope | object | conditional | Required if value-add; budget, scope, timeline |
 | portfolio_detail | array | conditional | Required if multi-asset; per-property breakdown |
+| tax_rate_federal | number | optional | Federal marginal tax rate (default 0.37) |
+| tax_rate_state | number | optional | State income tax rate (default 0.05) |
+| cost_seg_available | boolean | optional | Whether cost segregation study is available |
+| investor_type | string | optional | auto-loaded from deal config if available |
 
 ## Process
 
@@ -132,6 +136,45 @@ For portfolio: portfolio premium/discount analysis, cherry-pick vs. buy-all.
 
 5-7 bullet executive summary with clear recommendation and 1-sentence rationale.
 
+### Step 10: After-Tax Return Modeling (Optional, Auto-Triggered for Family Office Investors)
+
+When investorType is "family-office", "individual-hnw", or "small-operator", OR when the user requests after-tax analysis:
+
+**10a. Depreciation Schedule**
+- Residential (27.5 yr) or commercial (39 yr) straight-line
+- If cost segregation study available or requested: apply accelerated depreciation from cost-segregation-analyzer output
+- Track annual depreciation deduction and cumulative depreciation taken
+
+**10b. Annual After-Tax Cash Flow**
+- Pre-tax cash flow (from Step 4 operating proforma)
+- Less: taxable income = NOI - interest expense - depreciation
+- Tax liability = taxable income x marginal rate (federal + state + NIIT where applicable)
+- After-tax cash flow = pre-tax cash flow - tax liability
+- After-tax cash-on-cash = after-tax cash flow / equity invested
+
+**10c. Disposition Tax Impact**
+- Capital gain = sale price - adjusted basis (purchase price - cumulative depreciation + capital improvements)
+- Depreciation recapture at 25% (Section 1250)
+- Capital gain at applicable rate (federal + state + NIIT)
+- Net after-tax proceeds = sale price - remaining debt - selling costs - total tax
+- After-tax IRR and equity multiple using after-tax cash flows and after-tax reversion
+
+**10d. Tax Strategy Comparison**
+- Scenario A: Sell and pay taxes (baseline)
+- Scenario B: 1031 exchange (defer all gain, cost basis carries)
+- Scenario C: Installment sale (spread gain over 2-5 years)
+- Scenario D: Hold through estate (stepped-up basis, eliminate recapture)
+- NPV comparison of all 4 scenarios
+
+**10e. After-Tax Return Summary Table**
+| Metric | Pre-Tax | After-Tax | Delta |
+|--------|---------|-----------|-------|
+| Cash-on-Cash (Yr 1) | X% | X% | -X% |
+| IRR | X% | X% | -X% |
+| Equity Multiple | X.Xx | X.Xx | -X.Xx |
+
+Cross-reference: cost-segregation-analyzer, 1031-exchange-executor, opportunity-zone-underwriter
+
 ## Output Format
 
 ### Section 1: Executive Summary (5-7 bullets)
@@ -144,6 +187,7 @@ For portfolio: portfolio premium/discount analysis, cherry-pick vs. buy-all.
 ### Section 8: Risk Assessment
 ### Conditional: Value-Add (value creation bridge, renovation timeline, cost benchmarking)
 ### Conditional: Portfolio (property-by-property allocation, tiering, premium/discount analysis)
+### Conditional: After-Tax (depreciation schedule, after-tax cash flows, disposition tax impact, tax strategy comparison, pre-tax vs after-tax summary)
 
 ## Red Flags & Failure Modes
 
@@ -159,5 +203,8 @@ For portfolio: portfolio premium/discount analysis, cherry-pick vs. buy-all.
 - **Upstream**: Receives screened deals from `deal-quick-screen` that pass initial filter.
 - **Upstream**: Receives cleaned rent roll from `rent-roll-analyzer`.
 - **Downstream**: Feeds base case to `sensitivity-stress-test` for deeper stress testing.
+- **Downstream**: Feeds base case to `monte-carlo-return-simulator` for probabilistic return analysis.
+- **Downstream**: After-tax modeling integrates with `cost-segregation-analyzer` for accelerated depreciation and `1031-exchange-executor` for tax-deferred disposition.
 - **Peer**: `deal-underwriting-assistant` is the orchestration wrapper; this skill is the calculation engine.
 - **Cross-ref**: `market-memo-generator` provides market data for growth assumptions and cycle positioning.
+- **Cross-ref**: `opportunity-zone-underwriter` for OZ-specific tax benefits that interact with after-tax modeling.
