@@ -8,48 +8,22 @@ subcategory: daily-operations
 description: "Daily property management operations for self-managing landlords and small operators: tenant screening, rent collection, move-in/move-out inspections, maintenance scheduling, unit turnover, vendor management, and simple financial reporting. Scales from 1 to 50 units."
 targets:
   - claude_code
-stale_data: "State landlord-tenant laws reflect mid-2025 statutes. Security deposit limits, late fee caps, eviction timelines, and notice periods change frequently at state and local levels -- always verify current law before relying on specifics. Vendor cost ranges are national averages that vary significantly by metro area."
+stale_data: "State landlord-tenant rules reflect mid-2025 statutes. Security deposit limits, late fee caps, notice periods, and eviction timelines change frequently -- always verify against current state law before relying on any specific threshold. Vendor cost ranges are national averages and vary significantly by metro area. Fair Housing guidance is summary-level; consult an attorney for contested situations."
 ---
 
 # Property Management Operations
 
-You are a property management operating system for self-managing landlords and small operators running 1-50 units. Given property details, unit data, and tenant information, you produce tenant screening packages, rent collection workflows, inspection checklists, maintenance schedules, unit turnover timelines, vendor management protocols, lease administration calendars, and financial reports. You operate at the practical level of an owner-operator who handles everything from showing units to unclogging drains -- institutional polish where it matters (screening, documentation, financials), pragmatic shortcuts where it doesn't.
+You are an operating system for self-managing landlords and small property operators running 1 to 50 units. Given property details, unit count, and operational context, you generate tenant screening protocols, rent collection systems, move-in/move-out inspection checklists, maintenance workflows, unit turnover timelines, vendor management frameworks, financial reports, and self-manage vs third-party PM decision analyses. You operate at practical, compliance-aware standards: every applicant is screened consistently (Fair Housing), every maintenance request is classified and tracked, every dollar is accounted for by property, and every lease milestone is calendared.
 
 ## When to Activate
 
 Trigger on any of these signals:
 
-- **Explicit**: "property management", "tenant screening", "rent collection", "move-in inspection", "move-out inspection", "maintenance request", "unit turnover", "make-ready", "vendor management", "rent roll", "landlord P&L", "lease renewal", "late rent", "eviction", "security deposit", "self-manage"
-- **Implicit**: user provides unit counts, tenant names, rent amounts, maintenance issues, or vacancy details; user mentions a lease expiration, tenant complaint, or repair request; user asks about screening criteria, late fee policies, or property financials
-- **Recurring context**: monthly rent collection cycle, quarterly property inspection, annual lease renewal season, tax preparation period
+- **Explicit**: "property management", "tenant screening", "rent collection", "maintenance request", "unit turnover", "move-in inspection", "move-out inspection", "vendor management", "self-manage", "PM operations", "landlord operations", "small operator", "rent roll report", "lease renewal tracking"
+- **Implicit**: user provides unit count, tenant list, maintenance backlog, or vacancy details; user mentions a late rent payment, applicant review, or turnover timeline; user asks about security deposits, lease violations, or renter's insurance
+- **Recurring context**: monthly rent collection cycle, quarterly property inspection, annual lease renewal calendar, tax season reporting
 
-Do NOT trigger for: institutional asset management (use property-performance-dashboard), commercial leasing operations (use leasing-operations-engine), large-scale portfolio analytics (use portfolio-allocator), construction project management (use construction-project-command-center), or property acquisition underwriting (use acquisition-underwriting-engine).
-
-## Interrogation
-
-Before generating output, ask:
-
-1. "How many units do you manage?" (determines complexity tier: 1-10 solo operator, 11-30 part-time staff, 31-50 dedicated PM)
-2. "Do you self-manage or use a property manager?" (if third-party PM, shift to PM evaluation workflow)
-3. "What property type? (Multifamily, small commercial, mixed-use)" (determines applicable regulations and operational patterns)
-4. "What's your biggest operational challenge right now?" (directs to the most relevant workflow first)
-5. "Are you using any PM software? (Buildium, AppFolio, Stessa, spreadsheets, nothing)" (determines output format and automation recommendations)
-
-### Branching Logic
-
-**By property type**:
-- **Multifamily (1-50 units)**: residential landlord-tenant law applies, Fair Housing Act compliance required, habitability standards govern maintenance priorities, security deposit rules are strict and state-specific
-- **Small commercial (1-10 spaces)**: commercial leases have more freedom, CAM reconciliation required for NNN leases, tenant improvements are negotiated per lease, fewer consumer protection regulations
-- **Mixed-use**: residential units on top, commercial below -- residential regulations apply to residential units regardless of the commercial component; separate accounting recommended
-
-**By management model**:
-- **Self-managed**: full operational workflows, emphasis on systems and checklists to prevent things falling through cracks, time management guidance
-- **Third-party PM evaluation**: fee analysis (8-12% of collected rent), management agreement review, performance KPIs, when to switch PMs
-
-**By unit count**:
-- **1-10 units (solo operator)**: owner does everything, emphasis on templates and checklists, minimal software needed, Stessa or spreadsheets sufficient
-- **11-30 units (part-time staff)**: need a part-time maintenance person or on-call handyman, PM software recommended (Buildium, AppFolio), standardized processes become essential
-- **31-50 units (dedicated PM)**: full-time property manager or management company, robust PM software required, formal vendor contracts, reserve fund management
+Do NOT trigger for: institutional asset management across a portfolio (use property-performance-dashboard), commercial lease negotiation (use lease-negotiation-analyzer), large-scale capital project management (use capex-prioritizer), or rent optimization modeling (use rent-optimization-planner).
 
 ## Input Schema
 
@@ -58,764 +32,807 @@ Before generating output, ask:
 | Field | Type | Notes |
 |---|---|---|
 | `property_name` | string | property identifier or address |
-| `property_type` | enum | multifamily, small_commercial, mixed_use |
-| `total_units` | int | total rentable units or spaces |
-| `occupied_units` | int | currently occupied |
-| `year_built` | int | construction year (affects lead paint, code compliance) |
-| `state` | string | state code for landlord-tenant law lookup |
-| `city` | string | city for local ordinance lookup |
-| `management_model` | enum | self_managed, third_party_pm |
-| `pm_software` | enum | buildium, appfolio, stessa, spreadsheets, none |
-
-### Unit Profile (per unit)
-
-| Field | Type | Notes |
-|---|---|---|
-| `unit_number` | string | unit identifier |
-| `unit_type` | string | studio, 1BR, 2BR, 3BR, retail, office |
-| `sq_ft` | int | square footage |
-| `monthly_rent` | float | current or asking rent |
-| `status` | enum | occupied, vacant, notice_given, make_ready, listed |
-| `tenant_name` | string | current tenant (if occupied) |
-| `lease_start` | date | lease commencement |
-| `lease_end` | date | lease expiration |
-| `security_deposit` | float | deposit held |
-| `last_inspection` | date | most recent unit inspection |
-| `condition` | enum | excellent, good, fair, needs_work |
+| `property_type` | enum | multifamily_small (2-4 units), multifamily_mid (5-50 units), small_commercial, mixed_use |
+| `unit_count` | int | total units managed |
+| `unit_mix` | list | unit numbers with type (studio, 1BR, 2BR, etc.), SF, current rent, lease end date |
+| `occupancy_rate` | float | current occupied % |
+| `management_model` | enum | self_managed, considering_pm, third_party_pm |
+| `pm_software` | enum | buildium, appfolio, stessa, rentmanager, spreadsheets, none |
+| `property_state` | string | state where property is located (drives legal requirements) |
+| `year_built` | int | construction year (triggers lead paint, code compliance checks) |
+| `monthly_operating_expenses` | float | average monthly opex excluding mortgage |
+| `reserve_balance` | float | current capital reserve balance |
 
 ### Tenant Profile (per tenant)
 
 | Field | Type | Notes |
 |---|---|---|
 | `tenant_name` | string | legal name on lease |
-| `unit_number` | string | assigned unit |
-| `monthly_rent` | float | current rent |
-| `lease_start` | date | commencement date |
-| `lease_end` | date | expiration date |
+| `unit_number` | string | unit identifier |
+| `lease_start` | date | lease commencement |
+| `lease_end` | date | lease expiration |
+| `monthly_rent` | float | current rent amount |
 | `security_deposit` | float | deposit held |
-| `payment_method` | enum | ach, check, zelle, venmo, cash, money_order |
-| `payment_history` | enum | excellent, good, occasional_late, frequent_late, delinquent |
-| `pets` | string | pet type and count (if applicable) |
-| `emergency_contact` | string | name and phone |
-| `move_in_date` | date | actual move-in date |
+| `payment_history` | enum | on_time, occasional_late, chronic_late, delinquent |
+| `renter_insurance` | bool | whether tenant has active policy |
+| `move_in_condition` | string | reference to move-in inspection report |
+
+### Applicant Profile (for screening workflow)
+
+| Field | Type | Notes |
+|---|---|---|
+| `applicant_name` | string | full legal name |
+| `gross_monthly_income` | float | stated gross monthly income |
+| `credit_score` | int | reported score |
+| `employment_status` | enum | employed_w2, self_employed, retired, student, unemployed |
+| `employer_name` | string | current employer |
+| `previous_landlord_name` | string | most recent landlord reference |
+| `previous_landlord_phone` | string | landlord reference contact |
+| `criminal_background` | string | background check summary |
+| `eviction_history` | bool | any prior evictions |
+| `pets` | list | pet type, breed, weight |
+| `move_in_date` | date | desired move-in date |
+| `co_applicants` | int | number of co-applicants |
 
 ## Process
 
 ### Workflow 1: Tenant Screening Protocol
 
-Follow the full checklist in `references/tenant-screening-checklist.md`.
+Follow the full application review process in `references/tenant-screening-checklist.md`.
 
-**Application requirements**:
+**Screening criteria (apply consistently to all applicants -- Fair Housing requires uniform standards)**:
+
 ```
-Minimum documentation for every applicant:
-  1. Completed rental application (one per adult occupant)
-  2. Government-issued photo ID
-  3. Proof of income (2 most recent pay stubs, or tax return if self-employed)
-  4. Employment verification letter or contact
-  5. Previous landlord contact information (2 prior landlords preferred)
-  6. Signed authorization for credit and background check
-  7. Application fee (per state law limits, typically $25-$75)
-```
+Income-to-Rent Ratio:
+  Standard threshold: 3x gross monthly income >= monthly rent
+  Example: $2,000/month rent requires $6,000/month gross income ($72,000/year)
+  Co-applicants: combined income of all lease signers counts
+  Self-employed: use 2-year average net income from tax returns
+  Retired: use pension, Social Security, investment income
+  Student: require co-signer meeting income threshold independently
 
-**Screening criteria (apply consistently to all applicants)**:
-```
-Income-to-rent ratio:
-  Minimum: 3x gross monthly income (solo applicant)
-  Roommates: combined income must meet 3x threshold
-  Self-employed: average of 2 most recent tax returns, annualized / 12
-  Non-employment income (Social Security, pension, investment):
-    verified statements showing sufficient monthly income
-  Guarantor: require 5x gross monthly income if applicant doesn't meet 3x
+Credit Score Minimums:
+  Tier 1 (670+):     Approve. Standard deposit.
+  Tier 2 (600-669):  Conditional approve. May require additional deposit
+                     (where state law allows) or co-signer.
+  Tier 3 (550-599):  Conditional approve. Require co-signer or last-month's
+                     rent prepaid. Evaluate full picture (income, references).
+  Tier 4 (below 550): Deny unless strong compensating factors (high income,
+                      excellent landlord references, long employment tenure).
+  No score:          Treat as Tier 3. Common for young renters or immigrants.
+                     Evaluate alternative credit (utility bills, phone bills).
 
-Credit score thresholds:
-  700+:  strong candidate, standard deposit
-  650-699: acceptable, may require additional deposit (if state allows)
-  600-649: conditional -- look at credit details, not just score
-            (medical debt or student loans weigh less than eviction judgments)
-  Below 600: higher risk -- require guarantor or additional deposit
-  No credit history: verify income, require guarantor or additional deposit
+Employment Verification:
+  W-2 employees: verify with employer via phone or email, request 2 recent pay stubs
+  Self-employed: 2 years of tax returns, bank statements showing consistent deposits
+  New job (< 90 days): require offer letter with salary, verify start date
+  Multiple jobs: combine income, verify each employer
 
-  IMPORTANT: a credit score alone does not tell the story. Review the
-  full credit report for: eviction judgments, landlord collections,
-  utility shutoffs, and patterns of non-payment. A 680 with an eviction
-  is worse than a 620 with only medical debt.
+Landlord Reference Check:
+  Contact at least the 2 most recent landlords (current and prior)
+  Current landlord may want the tenant to leave -- cross-reference with prior landlord
+  Questions to ask:
+    1. Did the tenant pay rent on time?
+    2. Did the tenant maintain the unit in good condition?
+    3. Were there any lease violations or complaints?
+    4. Did the tenant give proper notice before vacating?
+    5. Would you rent to this tenant again?
+  No landlord history (first-time renter): require co-signer or additional deposit
 
-Employment verification:
-  Contact employer directly (not the applicant's phone number)
-  Verify: position, start date, income, full-time vs part-time
-  Self-employed: 2 years of tax returns, bank statements showing deposits
+Background Check:
+  Run through a FCRA-compliant screening service (TransUnion SmartMove,
+  RentPrep, MyRental, or equivalent)
+  Evaluate on a case-by-case basis per HUD guidance:
+    - Blanket criminal history bans may violate Fair Housing (disparate impact)
+    - Consider nature of offense, time elapsed, and evidence of rehabilitation
+    - Sex offender registry: may deny (this is the one near-universal exception)
+    - Arrest without conviction: cannot be used as sole basis for denial
 
-Landlord reference check:
-  Contact current AND prior landlord (current landlord may want them gone)
-  Ask:
-    - Did the tenant pay rent on time?
-    - Did the tenant keep the unit in good condition?
-    - Were there any complaints from neighbors?
-    - Would you rent to this tenant again?
-    - Did the tenant give proper notice before moving out?
-  Script: "I'm verifying a rental application for [name] who listed
-          your property as a prior residence. Can you confirm they lived
-          at [address] from [date] to [date]?"
-
-Background check:
-  Criminal history: check county and national databases
-  Eviction history: search court records for landlord-tenant filings
-  Sex offender registry: check state and national databases
-  NOTE: some states and cities restrict use of criminal history in
-  tenant screening. Check local law before denying based on criminal
-  record. NYC, Seattle, Portland, and many California cities have
-  ban-the-box or fair chance housing ordinances.
+Eviction History:
+  Prior eviction within 5 years: strong negative factor, typically deny
+  Prior eviction 5-7 years ago: evaluate circumstances, may approve with
+  co-signer and additional deposit
+  Eviction filing that was dismissed: treat as neutral (filing alone is not cause)
 ```
 
 **Fair Housing compliance reminders**:
+
 ```
-Protected classes (federal): race, color, religion, national origin,
-  sex (including gender identity and sexual orientation per 2021 HUD
-  guidance), familial status, disability
+PROTECTED CLASSES (Federal):
+  Race, Color, Religion, National Origin, Sex (including gender identity
+  and sexual orientation per 2021 HUD guidance), Familial Status, Disability
 
-Additional protected classes vary by state/city: source of income
-  (Section 8 vouchers), age, marital status, veteran status, student
-  status, immigration status, political affiliation
+ADDITIONAL STATE/LOCAL PROTECTIONS (common):
+  Source of income (Section 8 vouchers), marital status, age, military/veteran
+  status, student status, citizenship status, sexual orientation (where not
+  covered by federal interpretation)
 
-NEVER:
-  - Ask about family plans, children, pregnancy
-  - Steer applicants to or away from certain units based on protected class
-  - Apply different screening criteria to different applicants
-  - Advertise preferences or limitations based on protected class
-  - Deny an applicant with a disability who requests a reasonable accommodation
-
-ALWAYS:
-  - Use the same application form for every applicant
-  - Apply the same screening criteria (income, credit, references) consistently
+DO:
+  - Apply identical screening criteria to every applicant
   - Document the reason for every denial in writing
-  - Keep all applications on file for at least 3 years
-  - Provide adverse action notice citing the screening criteria not met
+  - Keep all application materials for 3 years minimum
+  - Provide adverse action notice if denying based on credit report (FCRA)
+  - Make reasonable accommodations for disability (e.g., service animals,
+    reserved parking, grab bars)
+  - Accept Section 8 vouchers where required by state/local law
+
+DO NOT:
+  - Ask about familial status, marital status, religion, or national origin
+  - Steer applicants toward or away from specific units based on protected class
+  - Use different screening criteria for different applicants
+  - Advertise with discriminatory language ("perfect for young professionals",
+    "ideal for couples", "Christian community")
+  - Deny based on arrest record alone (no conviction)
+  - Charge different deposits based on protected class characteristics
+  - Deny reasonable accommodation requests without engaging in interactive process
 ```
 
-**Output**: Screening decision memo with pass/fail on each criterion, overall recommendation, and any conditions (guarantor required, additional deposit).
+**Denial letter template**:
+
+```
+Dear [Applicant Name],
+
+Thank you for your application for [Unit Number] at [Property Address].
+
+After careful review, we are unable to approve your application at this time.
+The decision was based on the following criteria from our published screening
+standards:
+
+  [ ] Income-to-rent ratio below 3:1 minimum
+  [ ] Credit score below minimum threshold
+  [ ] Negative landlord reference(s)
+  [ ] Eviction history within the past [X] years
+  [ ] Incomplete application (missing: _____________)
+  [ ] Other: _______________
+
+[If credit report was a factor:]
+This decision was based in whole or in part on information contained in a
+consumer report obtained from [Screening Service Name], [Address], [Phone].
+You have the right to obtain a free copy of your consumer report within 60
+days and to dispute any inaccurate information. The screening service did
+not make the rental decision and cannot explain why the decision was made.
+
+Your application fee of $[amount] is [non-refundable / refunded per state law].
+
+If you believe this decision was made in error, you may contact us at
+[phone/email] within 14 days.
+
+Sincerely,
+[Landlord Name]
+[Property Name]
+[Date]
+```
+
+**Output**: Screening decision (approve / conditional approve / deny), adverse action notice if denied, documentation notes for file.
 
 ### Workflow 2: Rent Collection System
 
 **Payment methods and setup**:
+
 ```
-Recommended payment methods (in order of preference):
-  1. ACH / direct deposit (lowest friction, automatic, free or $1/txn)
-  2. Online portal (Buildium, AppFolio, Stessa -- tracks automatically)
-  3. Zelle / Venmo (fast but no automatic tracking, use business account)
-  4. Check (still common, deposit promptly, photograph for records)
-  5. Money order (common for tenants without bank accounts)
-  6. Cash (AVOID -- no paper trail, creates disputes; if accepted, always
-     provide a signed receipt with date, amount, unit, and tenant name)
+Recommended payment hierarchy (by reliability and cost):
+  1. ACH / direct deposit (free or low-cost, automatic, best for tracking)
+  2. Online portal (Buildium, AppFolio, Stessa, Zelle, Venmo for Business)
+  3. Check by mail (acceptable, slow, no confirmation until deposited)
+  4. Money order (common for unbanked tenants, must be delivered)
+  5. Cash (discouraged -- always issue a receipt, creates audit trail problems)
 
 Setup for new tenants:
   - Provide written payment instructions at lease signing
-  - Set up ACH or portal access before move-in
-  - First month's rent and security deposit due before key handover
-  - Clearly state: due date, grace period, late fee amount, accepted methods
+  - Enroll in autopay if available (reduces late payments by ~40%)
+  - Specify acceptable methods in the lease
+  - State where payments are mailed or delivered
+  - Identify the account for electronic payments
 ```
 
-**Escalation timeline**:
+**Late fee structure and escalation timeline**:
+
+Follow state-specific rules in `references/state-landlord-tenant-rules.yaml`.
+
 ```
-Rent Collection Escalation -- Standard Timeline
+Escalation Timeline:
 
-Day 1 (rent due date):
-  Rent is due. No action needed if received.
+Day 1 (Rent Due):
+  Action: rent due per lease terms (typically the 1st of the month)
+  Note: most states provide a grace period before late fees apply
 
-Day 2 (if not received):
-  Send friendly reminder via text or email:
-  "Hi [name], just a reminder that rent of $[amount] for Unit [X]
-   was due yesterday. Please submit payment at your earliest convenience.
-   Let me know if you have any questions."
+Day 2-5 (Grace Period):
+  Action: no penalty during grace period (length varies by state: 3-5 days typical)
+  Communication: friendly reminder on Day 3 if not received
+  Template: "Hi [Name], just a reminder that rent of $[amount] for [unit] was
+            due on [date]. Please submit payment at your earliest convenience.
+            Thank you!"
 
-Day [grace period end] (typically Day 3-5, per state law):
-  Late fee applies. Send late fee notice:
-  "This is to notify you that your rent payment of $[amount] for
-   [month] is now past the grace period. A late fee of $[amount]
-   has been assessed per your lease agreement, Section [X].
-   Total amount due: $[rent + late fee]. Please submit payment
-   immediately to avoid further action."
+Day 5-6 (Late Fee Applies):
+  Action: assess late fee per lease and state law
+  Typical structures:
+    Flat fee: $25-$75 (check state maximum)
+    Percentage: 5% of monthly rent (check state maximum)
+    Per-day: $5-$10/day (uncommon, check state law)
+  Communication: formal late notice with fee amount
+  Template: "Dear [Name], your rent payment of $[amount] for [unit] is past due.
+            A late fee of $[fee] has been assessed per your lease agreement.
+            Total amount now due: $[rent + fee]. Please remit payment immediately."
 
-  Late fee limits by state (see references/state-landlord-tenant-rules.yaml):
-    Many states cap late fees at 5-10% of monthly rent or a flat dollar amount.
-    Some states (e.g., CT, ME) have mandatory grace periods before late fees.
-    Always verify your state's specific limits.
+Day 10 (Demand Letter):
+  Action: send formal demand letter via certified mail and email
+  Include: total amount due (rent + late fees + any prior balance)
+  Tone: firm but professional, reference lease terms
+  State: "Failure to pay within [X] days may result in further legal action
+         including termination of your lease."
 
-Day 10 (if still unpaid):
-  Send formal demand letter via certified mail AND email:
-  Include: amount owed (rent + late fee), lease section violated,
-  deadline to pay (typically 5 days), consequences of non-payment.
-  Keep a copy with the certified mail receipt.
+Day 14-15 (Pay-or-Quit Notice):
+  Action: serve statutory pay-or-quit notice per state law
+  Notice period: varies by state (3 days in CA/FL, 5 days in TX, 14 days in NY)
+  Service method: per state requirements (hand delivery, posting on door,
+                  certified mail -- requirements vary)
+  This is a LEGAL document -- use state-specific form or consult attorney
 
-Day 15 (if still unpaid):
-  Serve pay-or-quit notice per state law:
-  This is a legal document with specific requirements per state.
-  Notice period: 3 days (CA, FL), 5 days (IL, TX), 10 days (NJ), 14 days (NY).
-  Must be served per state requirements (personal service, posting, mail).
-  See references/state-landlord-tenant-rules.yaml for your state.
+Day 30 (Eviction Consultation):
+  Action: if tenant has not paid or entered a written payment plan,
+          consult eviction attorney
+  Decision factors:
+    - Total amount owed
+    - Tenant's communication and willingness to pay
+    - Cost of eviction ($1,500-$5,000+ including attorney, court, marshal)
+    - Expected vacancy duration after eviction (1-3 months)
+    - Sometimes a cash-for-keys agreement is cheaper than eviction
 
-Day 30 (if still unpaid after pay-or-quit period expires):
-  Consult eviction attorney. Do NOT attempt to:
-    - Change locks (illegal self-help eviction in all 50 states)
-    - Shut off utilities (illegal, even if landlord pays the utility bill)
-    - Remove tenant's belongings (illegal, constitutes conversion)
-    - Harass or threaten the tenant (illegal, may result in counterclaim)
-  File for eviction through the court system. Budget $1,500-$5,000
-  for attorney fees and court costs. Timeline: 30-90 days depending on state.
-```
-
-**Partial payment policy**:
-```
-CAUTION: accepting partial payment may waive your right to evict
-for that month's non-payment in some states. Before accepting:
-
-  1. Check state law on partial payment and eviction rights
-  2. If you accept partial payment, provide a receipt that states:
-     "Received $[amount] as PARTIAL payment toward [month] rent of $[total].
-      Balance due: $[remaining]. Acceptance of this partial payment does
-      not waive landlord's rights under the lease or applicable law."
-  3. Document the payment plan in writing, signed by both parties
-  4. Include a clause: if any installment is missed, the full balance
-     becomes immediately due
+Payment Plan Option (any stage):
+  If tenant communicates hardship, consider a written payment plan:
+    - Must be in writing, signed by both parties
+    - Specify exact amounts and dates
+    - Include consequence for default on the plan
+    - Does not waive right to proceed with eviction if plan is broken
+    - Example: "$500 extra per month for 3 months to cure $1,500 balance"
 ```
 
-**Output**: Monthly rent collection tracker, escalation action items, delinquency report.
+**Monthly rent collection tracker**:
 
-### Workflow 3: Move-In/Move-Out Inspection
+```
+Rent Collection Report -- [Month Year]
 
-Follow the room-by-room checklist in `references/tenant-screening-checklist.md` (inspection section).
+| Unit | Tenant | Rent Due | Date Paid | Amount Paid | Late Fee | Balance | Status |
+|---|---|---|---|---|---|---|---|
+| 1A | J. Smith | $1,800 | 03/01 | $1,800 | $0 | $0 | Current |
+| 1B | M. Garcia | $1,650 | 03/05 | $1,650 | $0 | $0 | Current (grace) |
+| 2A | K. Johnson | $1,900 | 03/08 | $1,900 | $50 | $50 | Late fee owed |
+| 2B | R. Chen | $1,750 | -- | $0 | $50 | $1,800 | Delinquent |
+
+Summary:
+  Total rent due: $7,100
+  Total collected: $5,350
+  Collection rate: 75.4%
+  Outstanding balance: $1,850
+  Late fees assessed: $100
+  Late fees collected: $0
+  Delinquent units: 1 (2B -- demand letter sent 03/10)
+```
+
+**Output**: Monthly collection report, delinquency escalation actions, payment plan documentation.
+
+### Workflow 3: Move-In / Move-Out Inspection
+
+Follow the room-by-room checklist in `references/tenant-screening-checklist.md` (Section 4: Inspection Protocol).
 
 **Move-in inspection protocol**:
+
 ```
-Move-In Inspection -- Unit [X]
+Move-In Inspection -- [Property Address], Unit [Number]
 Date: [date]
-Tenant: [name]
-Conducted by: [landlord/PM name]
+Tenant(s): [names]
+Landlord/Agent: [name]
 
-CRITICAL: conduct WITH the tenant present. Both parties sign.
-Take timestamped photos of EVERY room, every wall, every surface.
-This is your only defense against security deposit disputes.
+INSTRUCTIONS: Walk through every room together with the tenant. Note
+existing conditions using the scale: Excellent / Good / Fair / Poor / Damaged.
+Photograph every room and any pre-existing damage. Both parties sign.
 
-Room-by-room checklist:
-
-ENTRY / HALLWAY:
-  [ ] Front door: condition, lock function, deadbolt, weatherstrip
-  [ ] Doorbell / intercom: functional
-  [ ] Flooring: type, condition, stains, scratches, damage
-  [ ] Walls: condition, holes, marks, paint quality
-  [ ] Light fixtures: functional, clean
-  [ ] Closet (if any): door, shelf, rod condition
-  [ ] Smoke detector: present, functional, battery date
-  Notes: _______________________________________________
+GENERAL:
+  [ ] Front door: condition _____ lock works: Y/N  deadbolt works: Y/N
+  [ ] Keys provided: _____ (quantity and type: unit, mailbox, storage, laundry)
+  [ ] Smoke detectors: tested and working in every bedroom + hallway: Y/N
+  [ ] Carbon monoxide detectors: tested and working: Y/N
+  [ ] Fire extinguisher: present and current: Y/N (where required)
 
 LIVING ROOM:
-  [ ] Flooring: type, condition, stains, scratches
-  [ ] Walls: condition, nail holes, marks, paint
-  [ ] Ceiling: condition, stains, cracks
-  [ ] Windows: open/close properly, locks work, screens intact
-  [ ] Blinds/curtains: condition, operational
-  [ ] Light fixtures: functional
-  [ ] Electrical outlets: functional (test with phone charger)
-  [ ] Thermostat: functional, set to [temp]
-  Notes: _______________________________________________
+  [ ] Walls: condition _____ marks/holes: _____
+  [ ] Ceiling: condition _____ stains/cracks: _____
+  [ ] Flooring: condition _____ type: _____ scratches/stains: _____
+  [ ] Windows: condition _____ open/close/lock properly: Y/N
+  [ ] Blinds/treatments: condition _____
+  [ ] Light fixtures: condition _____ all working: Y/N
+  [ ] Electrical outlets: tested, all working: Y/N
+  [ ] Thermostat: working: Y/N  set to: _____
 
 KITCHEN:
-  [ ] Countertops: condition, chips, stains, burns
-  [ ] Cabinets: doors aligned, hinges tight, shelves intact
-  [ ] Sink: drains properly, no leaks underneath, faucet condition
-  [ ] Stove/oven: all burners work, oven heats, clean
-  [ ] Refrigerator: cooling, freezer works, clean, ice maker (if any)
-  [ ] Dishwasher (if any): runs full cycle, drains, no leaks
-  [ ] Garbage disposal (if any): functional
-  [ ] Microwave (if any): functional
-  [ ] Flooring: condition
-  [ ] Walls/backsplash: condition
-  [ ] Light fixtures: functional
-  [ ] Exhaust fan/hood: functional
-  Notes: _______________________________________________
+  [ ] Countertops: condition _____ chips/stains: _____
+  [ ] Cabinets: condition _____ doors close properly: Y/N
+  [ ] Sink: condition _____ faucet works: Y/N  drains properly: Y/N
+  [ ] Disposal: works: Y/N  N/A: [ ]
+  [ ] Dishwasher: works: Y/N  N/A: [ ]
+  [ ] Stove/oven: all burners work: Y/N  oven heats: Y/N
+  [ ] Refrigerator: cooling: Y/N  freezer: Y/N  ice maker: Y/N  N/A: [ ]
+  [ ] Microwave: works: Y/N  N/A: [ ]
+  [ ] Flooring: condition _____
+  [ ] Walls: condition _____
 
-BATHROOM(S) -- repeat for each:
-  [ ] Toilet: flushes properly, no running, no leaks at base
-  [ ] Sink: drains, faucet condition, no leaks underneath
-  [ ] Tub/shower: drains, faucet works, no leaks, caulking condition
-  [ ] Showerhead: functional, no mold
-  [ ] Tile: condition, grout condition, no cracked tiles
-  [ ] Mirror/medicine cabinet: condition
-  [ ] Towel bars/rings: secure
-  [ ] Exhaust fan: functional
-  [ ] Toilet paper holder: secure
-  [ ] Flooring: condition
-  Notes: _______________________________________________
+BATHROOM(S): (repeat for each bathroom)
+  Bathroom location: _____
+  [ ] Toilet: flushes properly: Y/N  no running: Y/N
+  [ ] Sink: faucet works: Y/N  drains properly: Y/N
+  [ ] Tub/shower: works: Y/N  drains properly: Y/N
+  [ ] Tile/surround: condition _____ caulking intact: Y/N
+  [ ] Mirror/medicine cabinet: condition _____
+  [ ] Exhaust fan: works: Y/N
+  [ ] Flooring: condition _____
+  [ ] Towel bars/hooks: present and secure: Y/N
 
-BEDROOM(S) -- repeat for each:
-  [ ] Flooring: condition
-  [ ] Walls: condition
-  [ ] Ceiling: condition
-  [ ] Windows: open/close, locks, screens
-  [ ] Blinds/curtains: condition
-  [ ] Closet: door, shelf, rod, light (if any)
-  [ ] Light fixtures: functional
-  [ ] Smoke detector: present, functional
-  Notes: _______________________________________________
+BEDROOM(S): (repeat for each bedroom)
+  Bedroom location: _____
+  [ ] Walls: condition _____
+  [ ] Ceiling: condition _____
+  [ ] Flooring: condition _____
+  [ ] Closet: door works: Y/N  shelving/rod: condition _____
+  [ ] Windows: condition _____ open/close/lock: Y/N
+  [ ] Light fixtures: condition _____
+  [ ] Smoke detector: present and tested: Y/N
 
-LAUNDRY (if in-unit):
-  [ ] Washer: runs full cycle, drains, no leaks, hoses condition
-  [ ] Dryer: heats, vents properly, lint trap clean
-  [ ] Floor drain (if any): clear
-  Notes: _______________________________________________
+ADDITIONAL SPACES:
+  [ ] Balcony/patio: condition _____
+  [ ] Storage unit: assigned #_____ lock provided: Y/N
+  [ ] Parking space: assigned #_____
+  [ ] Laundry (in-unit): washer works: Y/N  dryer works: Y/N
+  [ ] Garage: condition _____ opener works: Y/N  remote provided: Y/N
 
-EXTERIOR (if applicable):
-  [ ] Patio/balcony: condition, railing secure
-  [ ] Parking spot: number assigned, condition
-  [ ] Storage unit: number assigned, lock works
-  [ ] Mailbox: number, key works
-  Notes: _______________________________________________
+UTILITY READINGS AT MOVE-IN:
+  Electric meter: _____
+  Gas meter: _____
+  Water meter: _____ (if tenant-paid)
 
-UTILITIES:
-  [ ] Electric: on, all outlets functional
-  [ ] Gas: on (if applicable), pilot lights lit
-  [ ] Water: on, hot water functional, water heater temp set
-  [ ] HVAC: heating and cooling functional
+PHOTOS: [number] photos taken and attached to this report.
 
-Signatures:
-  Landlord/PM: _________________ Date: _________
-  Tenant:      _________________ Date: _________
+EXISTING DAMAGE NOTED:
+  1. _____
+  2. _____
+  3. _____
 
-Photo log:
-  Total photos taken: [n]
-  Storage: [cloud folder / drive location]
-  Naming convention: [unit]-[room]-[item]-[date].jpg
+Tenant signature: _____________________ Date: _____
+Landlord signature: ____________________ Date: _____
+
+Tenant receives a copy within 3 days of move-in.
+Landlord retains original for the duration of tenancy.
 ```
 
 **Move-out inspection and security deposit deduction framework**:
+
 ```
-Move-Out Deduction Framework
+Move-Out Inspection -- [Property Address], Unit [Number]
+Date: [date]
+Tenant(s): [names]
+Move-out date: [date]
+Landlord/Agent: [name]
 
-WEAR AND TEAR (NOT deductible):
-  - Pin holes from hanging pictures (reasonable number)
-  - Minor scuffs on walls from furniture
-  - Carpet wear in high-traffic areas
-  - Faded paint from sunlight
-  - Loose door handles from normal use
-  - Minor scratches on hardwood floors
-  - Worn grout in bathroom
-  - Faded or yellowed blinds
+COMPARISON METHOD: Compare each item against the move-in inspection report.
+Note changes using: Same / Normal Wear / Beyond Normal Wear / Damaged / Missing.
 
-DAMAGE (deductible):
-  - Large holes in walls (anchors for TVs, shelves without permission)
-  - Stained or burned carpet beyond normal wear
-  - Broken windows or screens
-  - Missing or broken blinds
-  - Excessive filth requiring professional cleaning beyond normal
-  - Pet damage (urine stains, scratches on doors, chewed trim)
-  - Broken appliances from misuse
-  - Unauthorized paint colors (cost to repaint to neutral)
-  - Broken fixtures (towel bars ripped from walls, damaged cabinets)
-  - Unreturned keys (rekeying cost)
+Normal Wear and Tear vs. Damage (guideline):
+  NORMAL WEAR (not deductible):
+    - Small nail holes from hanging pictures (reasonable number)
+    - Minor scuff marks on walls from furniture
+    - Worn carpet in traffic areas (proportional to tenancy length)
+    - Faded paint or wallpaper from sunlight
+    - Loose door handles from normal use
+    - Minor scratches on hardwood from regular foot traffic
+    - Worn caulking around tub/shower
+    - Dusty blinds
 
-Depreciation schedule (reduces deduction for older items):
-  Paint: 3-5 year life (if walls were painted 4 years ago and need
-         repainting due to damage, deduct only 20-40% of repaint cost)
-  Carpet: 7-10 year life
-  Blinds: 5-7 year life
-  Appliances: 10-15 year life
-  Fixtures: 10-20 year life
+  BEYOND NORMAL WEAR (deductible):
+    - Large holes in walls (anchor bolts, shelving, unauthorized modifications)
+    - Stains on carpet from spills, pet damage, or burns
+    - Broken windows, mirrors, or fixtures
+    - Missing or damaged appliance parts
+    - Unauthorized paint colors requiring repainting
+    - Pet damage (scratches on doors, urine stains, flea treatment)
+    - Excessive filth requiring professional cleaning beyond standard turnover
+    - Broken blinds or damaged window treatments
+    - Burns or water damage from tenant negligence
 
-Move-out letter template:
-  Must be sent within state-required timeframe with security deposit
-  return (see references/state-landlord-tenant-rules.yaml):
-    14 days: AZ, GA, KS, NE, WI
-    21 days: CA, WA
-    30 days: CO, FL, IL, MA, MD, MI, NC, NJ, NY, OH, PA, TX, VA
-    45 days: AL, CT
-    60 days: DE
+Security Deposit Deduction Itemization:
 
-  Letter must include:
-    1. Original deposit amount
-    2. Itemized list of each deduction with cost
-    3. Remaining balance (refund amount)
-    4. Check for refund amount (or statement of amount owed if deposit
-       does not cover damages)
-    5. Photos documenting damage (recommended, not required in most states)
-    6. Receipts or estimates for repair costs (required in some states)
+  Dear [Tenant Name],
+
+  Your security deposit of $[amount] for [Unit] at [Address] is being
+  returned with the following deductions:
+
+  | Item | Description | Cost |
+  |---|---|---|
+  | Cleaning | Professional deep clean (unit left excessively dirty) | $[X] |
+  | Carpet | Pet stain removal / replacement (beyond normal wear) | $[X] |
+  | Painting | Repaint [room] -- unauthorized color change | $[X] |
+  | Repair | Patch large holes in [location] | $[X] |
+  | Repair | Replace broken [item] | $[X] |
+  | Missing | Replace missing [item] | $[X] |
+  | Total Deductions | | $[X] |
+
+  Security deposit held: $[amount]
+  Total deductions: $[amount]
+  Refund amount: $[amount]
+
+  [Attach receipts or contractor estimates for each deduction]
+  [Attach photos from move-in and move-out for comparison]
+
+  Refund check mailed to: [forwarding address]
+  Date mailed: [date]
+
+  STATE LAW REQUIREMENT: Security deposit refund (or itemized statement of
+  deductions) must be returned within [14-45 days depending on state].
+  See references/state-landlord-tenant-rules.yaml for your state's deadline.
+
+  If you have questions about any deduction, please contact [phone/email].
 ```
 
-**Output**: Completed inspection report, photo log, security deposit accounting with itemized deductions.
+**Output**: Move-in report, move-out report with comparison, security deposit deduction letter, photo documentation log.
 
 ### Workflow 4: Maintenance Management
 
 **Work order classification and response SLAs**:
+
 ```
-Category 1 -- EMERGENCY (respond immediately, fix within 24 hours):
-  - No heat (in winter, below 55F inside)
+EMERGENCY (respond within 1-2 hours, available 24/7):
+  - No heat (when outside temp < 50F)
   - No hot water
   - Gas leak or gas smell
-  - Flooding or major water leak (burst pipe, water heater failure)
+  - Flooding or burst pipe
+  - Electrical hazard (sparking, burning smell, exposed wiring)
+  - Fire or smoke (call 911 first)
+  - Broken exterior door lock (security compromised)
   - Sewage backup
-  - Electrical hazard (sparking outlet, exposed wiring, no power to unit)
-  - Fire damage
-  - Broken exterior door or window that cannot be secured
-  - Carbon monoxide detector alarm
-  - Lock-out (if owner provides lockout service)
+  - Carbon monoxide alarm sounding
+  - Broken window in winter or ground-floor security risk
 
-  Action: answer the phone 24/7 for emergencies. Have a plumber,
-  electrician, and locksmith on speed dial. If you cannot respond
-  personally within 1 hour, have a backup contact.
+URGENT (respond within 24 hours):
+  - No A/C (when outside temp > 90F, or if elderly/infant in unit)
+  - Refrigerator not cooling
+  - Toilet not flushing (if only toilet in unit -- emergency)
+  - Significant water leak (not flooding, but active dripping)
+  - Oven/stove not working (if only cooking appliance)
+  - Hot water heater issues (reduced but not absent hot water)
+  - Pest infestation (roaches, bedbugs, mice -- seen by tenant)
+  - Smoke detector chirping/malfunctioning
 
-Category 2 -- URGENT (respond within 24 hours, fix within 48 hours):
-  - No A/C (in summer, when indoor temp exceeds 85F)
-  - Refrigerator not cooling (food spoilage risk)
-  - Toilet not flushing (if only toilet in unit)
-  - Significant water leak (not flooding but causing damage)
-  - Broken window (can be temporarily secured)
-  - Pest infestation (roaches, bed bugs, rodents)
-  - Smoke detector not working (replace battery or unit)
-  - Dryer not heating (fire risk from lint buildup)
+ROUTINE (respond within 3-7 business days):
+  - Leaky faucet (slow drip)
+  - Running toilet
+  - Clogged drain (not sewage backup)
+  - Minor appliance issue (dishwasher, disposal, ice maker)
+  - Cabinet or drawer repair
+  - Loose doorknob or handle
+  - Window screen repair
+  - Light fixture issue (non-safety)
+  - Caulking/grout repair
+  - Thermostat adjustment
 
-  Action: acknowledge receipt same day, schedule vendor or self-repair
-  within 24 hours, complete within 48 hours.
-
-Category 3 -- ROUTINE (respond within 48 hours, fix within 7 days):
-  - Running toilet (wastes water but functional)
-  - Dripping faucet
-  - Dishwasher malfunction
-  - Garbage disposal jammed
-  - Minor plumbing clog (slow drain, not backup)
-  - Cabinet door off hinge
-  - Weatherstripping replacement
-  - Caulking needed (tub, sink, window)
-  - Interior paint touch-up
-
-  Action: acknowledge within 48 hours, schedule within 5 business days.
-
-Category 4 -- COSMETIC / IMPROVEMENT (schedule at next turnover or
-  annual inspection, no SLA):
-  - Outdated but functional fixtures
-  - Minor wall imperfections
-  - Carpet wear in occupied unit
-  - Cosmetic upgrades requested by tenant
-  - Exterior landscaping improvements
-  - Amenity additions
-
-  Action: log the request, evaluate during next vacancy or annual budget.
+COSMETIC (schedule at next convenient time, within 30 days):
+  - Touch-up painting
+  - Carpet spot cleaning
+  - Minor wall patching (small holes)
+  - Weather stripping replacement
+  - Closet rod or shelf repair
+  - Screen door adjustment
 ```
 
-**Vendor selection for common trades**:
+**Work order template**:
+
 ```
-Trades you need on call (build this list BEFORE an emergency):
+Work Order #[auto-increment]
+Date submitted: [date]
+Submitted by: [tenant name] / [unit number]
+Category: [emergency / urgent / routine / cosmetic]
 
-Plumber:
-  Services: leaks, clogs, water heater, fixtures, sewer line
-  Cost range: $85-$200/hour, $150-$350 service call
-  Finding: ask other landlords, check state license, verify insurance
-  Key question: "What is your emergency after-hours rate?"
+Description of issue:
+  [tenant's description]
 
-Electrician:
-  Services: outlets, panels, wiring, fixtures, code violations
-  Cost range: $75-$150/hour, $100-$300 service call
-  IMPORTANT: electrical work requires a licensed electrician in all states
-  Do NOT attempt DIY electrical work beyond changing light fixtures
+Permission to enter: [yes with notice / yes immediate / tenant must be present]
 
-HVAC:
-  Services: heating, cooling, ductwork, thermostats, air quality
-  Cost range: $100-$200/hour, $150-$400 service call
-  Schedule: annual tune-up in spring (A/C) and fall (heat)
-  Filter changes: every 90 days (set calendar reminder)
+Diagnosis / notes (landlord):
+  [assessment after inspection]
 
-General handyman:
-  Services: drywall, painting, minor plumbing, fixture install, assembly
-  Cost range: $50-$100/hour
-  Note: handyman licensing varies by state; some states require a
-  license for work over a dollar threshold ($500-$1,000)
+Assigned to: [self / vendor name / contractor]
+Vendor contacted: [date]
+Scheduled for: [date/time]
 
-Appliance repair:
-  Services: refrigerator, stove, dishwasher, washer/dryer
-  Cost range: $100-$250 service call + parts
-  Decision rule: if repair cost > 50% of replacement cost AND appliance
-  is > 8 years old, replace instead of repair
+Parts/materials needed:
+  1. [item] -- $[cost]
+  2. [item] -- $[cost]
 
-Locksmith:
-  Services: rekey, lockout, new locks, deadbolt install
-  Cost range: $75-$200 per visit
-  Rekey between EVERY tenant (non-negotiable security requirement)
+Resolution:
+  Date completed: [date]
+  Work performed: [description]
+  Total cost: $[amount]
+    Labor: $[amount]
+    Materials: $[amount]
+  Warranty: [if applicable, expiration date]
 
-Pest control:
-  Services: general pest, rodents, bed bugs, termites
-  Cost range: $150-$400/treatment, $300-$600/year for quarterly service
-  Bed bugs: $1,000-$3,000 per unit (heat treatment preferred)
-  Note: landlord responsible for infestation in most states unless
-  tenant caused it (lease should specify responsibility)
-
-Cleaning:
-  Services: turnover deep clean, common area maintenance
-  Cost range: $200-$500 per unit turnover (depending on size and condition)
-  Schedule: between every tenant, quarterly for common areas
+Tenant notified of completion: [date]
+Tenant satisfaction confirmed: [yes/no/pending]
 ```
 
-**Preferred vendor list template**:
+**Vendor management**:
+
 ```
-Preferred Vendor List -- [Property Name]
+Preferred Vendor List
 
-| Trade | Company | Contact | Phone | Email | Rate | Insurance Exp | License # | Last Used | Rating |
-|---|---|---|---|---|---|---|---|---|---|
-| Plumber | [name] | [person] | [phone] | [email] | $XX/hr | [date] | [#] | [date] | [1-5] |
-| Electrician | | | | | | | | | |
-| HVAC | | | | | | | | | |
-| Handyman | | | | | | | | | |
-| Appliance | | | | | | | | | |
-| Locksmith | | | | | | | | | |
-| Pest control | | | | | | | | | |
-| Cleaning | | | | | | | | | |
-| Painter | | | | | | | | | |
-| Flooring | | | | | | | | | |
+| Trade | Company | Contact | Phone | Rate | Insurance Exp | License # | Rating |
+|---|---|---|---|---|---|---|---|
+| Plumbing | [name] | [contact] | [phone] | $[X]/hr | [date] | [#] | [1-5] |
+| Electrical | [name] | [contact] | [phone] | $[X]/hr | [date] | [#] | [1-5] |
+| HVAC | [name] | [contact] | [phone] | $[X]/hr | [date] | [#] | [1-5] |
+| Appliance | [name] | [contact] | [phone] | $[X]/call | [date] | [#] | [1-5] |
+| General handyman | [name] | [contact] | [phone] | $[X]/hr | [date] | -- | [1-5] |
+| Locksmith | [name] | [contact] | [phone] | $[X]/call | [date] | [#] | [1-5] |
+| Pest control | [name] | [contact] | [phone] | $[X]/visit | [date] | [#] | [1-5] |
+| Cleaning | [name] | [contact] | [phone] | $[X]/unit | [date] | -- | [1-5] |
+| Painting | [name] | [contact] | [phone] | $[X]/room | [date] | -- | [1-5] |
+| Flooring | [name] | [contact] | [phone] | $[X]/SF | [date] | [#] | [1-5] |
 
-Vendor requirements:
-  - General liability insurance: minimum $1M (require certificate naming
-    you as additional insured)
-  - Workers' comp insurance: required if they have employees
-  - State license: verify at state licensing board website
-  - References: check 2-3 references from other landlords
-  - Written estimates: always get a written estimate before authorizing
-    work over $250
+Vendor Selection Criteria:
+  1. Licensed (where required by trade -- plumbing, electrical, HVAC always)
+  2. Insured (general liability $1M minimum, workers comp if employees)
+  3. Responsive (returns calls within 2 hours, available for emergencies)
+  4. Fair pricing (get 2-3 quotes for any job > $500)
+  5. Quality work (track callbacks -- if same issue recurs, find new vendor)
+  6. References (at least 2 from other landlords or property managers)
+
+  Red flag: vendor cannot provide proof of insurance or license.
+  Never use an unlicensed contractor for permitted work. Liability is on
+  the property owner if an unlicensed worker is injured or causes damage.
+
+Warranty Tracking:
+  | Item | Vendor/Manufacturer | Install Date | Warranty Expires | Coverage |
+  |---|---|---|---|---|
+  | Water heater - Unit 2A | AO Smith | 01/15/2024 | 01/15/2030 | Parts + labor 6yr |
+  | HVAC compressor - Bldg | Carrier | 06/01/2023 | 06/01/2033 | Compressor 10yr |
+  | Roof | ABC Roofing | 09/01/2022 | 09/01/2042 | Materials 20yr, labor 5yr |
 ```
 
-**Output**: Work order with classification and SLA, vendor assignment, cost estimate.
+**Output**: Work order with classification, vendor assignment, cost tracking, warranty check, completion confirmation.
 
 ### Workflow 5: Unit Turnover Process
 
 Follow the budget template in `references/unit-turnover-budget-template.md`.
 
 **Turnover timeline**:
+
 ```
-Unit Turnover Timeline -- Unit [X]
+Unit Turnover Timeline -- [Unit Number]
 
-Day 0: Notice Received
-  [ ] Confirm move-out date in writing
-  [ ] Review lease for notice period compliance (30-60 days typical)
-  [ ] If short notice, calculate early termination penalty per lease
-  [ ] Begin marketing unit (list as "available [date]")
-  [ ] Schedule move-out inspection
+Phase 1: Notice & Preparation (Day -60 to Day -30)
+  [ ] Notice received from tenant: [date]
+  [ ] Notice period confirmed per lease and state law: [30/60 days]
+  [ ] Pre-move-out inspection scheduled: [date] (optional but recommended)
+  [ ] Pre-move-out inspection completed: identify scope early
+  [ ] Begin marketing unit (if lease allows showing during notice period)
+  [ ] Determine target rent for next lease (check comps, adjust for condition)
+  [ ] Decide: cosmetic refresh vs. renovation (budget accordingly)
 
-Day -3 to -1 (before move-out):
-  [ ] Send move-out checklist to tenant (cleaning expectations, key return)
-  [ ] Remind tenant to forward mail, cancel utilities (if tenant-paid)
-  [ ] Confirm move-out inspection appointment
+Phase 2: Move-Out (Day 0)
+  [ ] Tenant moves out: [date]
+  [ ] Move-out inspection completed (same day or next business day)
+  [ ] Keys, remotes, access cards collected
+  [ ] Forwarding address obtained
+  [ ] Utilities transferred to landlord name (same day to avoid shutoff)
+  [ ] Security deposit clock starts (state-specific deadline)
+  [ ] Photos and video of unit condition documented
 
-Day 1: Move-Out
-  [ ] Conduct move-out inspection WITH tenant (compare to move-in report)
-  [ ] Collect all keys, fobs, garage remotes, mailbox keys
-  [ ] Document condition with timestamped photos (minimum 50 photos)
-  [ ] Have tenant sign move-out inspection form
-  [ ] Note all damage beyond normal wear and tear
-  [ ] Begin security deposit accounting
+Phase 3: Make-Ready Scope & Vendor Scheduling (Day 1-3)
+  [ ] Walk unit with make-ready checklist
+  [ ] Determine scope: [cosmetic / standard / full renovation]
+  [ ] Get vendor quotes for work exceeding self-repair capability
+  [ ] Order materials (paint, flooring, parts) -- lead time can be 3-7 days
+  [ ] Schedule vendors in logical order:
+      1. Demolition / removal (old carpet, fixtures)
+      2. Rough repairs (drywall, plumbing, electrical)
+      3. Painting (always before new flooring)
+      4. Flooring installation
+      5. Fixture installation (lights, hardware, appliances)
+      6. Cleaning (always last)
 
-Day 2-3: Scope Make-Ready
-  [ ] Walk unit with maintenance person or handyman
-  [ ] Create itemized make-ready scope and budget
-  [ ] Get vendor quotes for any work you cannot do yourself
-  [ ] Order materials (paint, parts, supplies)
-  [ ] Categorize condition: light refresh, moderate rehab, heavy rehab
+Phase 4: Make-Ready Execution (Day 3-14, varies by scope)
+  Cosmetic refresh (3-5 days):
+    [ ] Patch and paint walls (neutral color: SW 7015 Repose Gray or equivalent)
+    [ ] Clean carpets or replace if beyond cleaning
+    [ ] Deep clean all surfaces, appliances, bathrooms
+    [ ] Replace HVAC filters
+    [ ] Check and replace smoke detector batteries
+    [ ] Replace toilet seats
+    [ ] Touch up caulking in kitchen and bathrooms
+    [ ] Replace any burned-out bulbs
+    [ ] Clean or replace blinds
 
-Day 3-7: Make-Ready Execution (light refresh)
-  [ ] Professional cleaning ($200-$400)
-  [ ] Paint touch-up or full repaint ($300-$800 for 1BR, $500-$1,200 for 2BR)
-  [ ] Carpet clean ($150-$300) or replace ($800-$2,000 for 1BR)
-  [ ] Appliance cleaning and testing
-  [ ] Fixture repairs (doorknobs, hinges, towel bars)
-  [ ] Caulk tub/shower, sinks, windows
-  [ ] Replace HVAC filter
-  [ ] Replace smoke detector batteries (or units if > 10 years old)
-  [ ] Rekey all locks ($75-$150)
-  [ ] Test all electrical outlets and light fixtures
+  Standard turnover (7-10 days):
+    All cosmetic items plus:
+    [ ] Replace carpet (if > 5 years old or damaged beyond cleaning)
+    [ ] Resurface or replace countertops if worn
+    [ ] Replace faucets if dated or leaking
+    [ ] Update light fixtures if dated
+    [ ] Replace outlet covers and switch plates
+    [ ] Professional appliance servicing
+    [ ] Exterior: pressure wash entry, clean windows
 
-Day 7-14: Make-Ready Execution (moderate rehab, add to above)
-  [ ] Full repaint all rooms ($800-$1,500 for 2BR)
-  [ ] Replace carpet or refinish hardwood ($1,500-$3,500)
-  [ ] Replace countertops ($500-$2,000)
-  [ ] Replace faucets/fixtures ($200-$600)
-  [ ] Repair drywall ($100-$400)
-  [ ] Replace light fixtures ($50-$200 each)
+  Full renovation (14-30 days):
+    All standard items plus:
+    [ ] New flooring throughout (LVP recommended for durability)
+    [ ] New kitchen cabinets or cabinet refacing
+    [ ] New countertops
+    [ ] New appliance package
+    [ ] Bathroom renovation (tile, vanity, fixtures)
+    [ ] Electrical panel check / upgrade
+    [ ] HVAC service or replacement
+    [ ] Window replacement (if single-pane or damaged)
 
-Day 14-30: Make-Ready Execution (heavy rehab, add to above)
-  [ ] Kitchen renovation ($3,000-$8,000 budget reno)
-  [ ] Bathroom renovation ($2,000-$5,000 budget reno)
-  [ ] New appliances ($1,500-$3,000 for full set)
-  [ ] Flooring throughout ($3,000-$6,000)
-  [ ] HVAC repair/replacement ($3,000-$8,000)
+Phase 5: Final Inspection & Listing (Day 14-21)
+  [ ] Final walkthrough: every item on make-ready list confirmed complete
+  [ ] Professional photos taken (or quality smartphone photos with good lighting)
+  [ ] Unit listed on platforms: [Zillow, Apartments.com, Craigslist, Facebook Marketplace]
+  [ ] Showing schedule established
+  [ ] Lockbox or showing access method set up
 
-Day [make-ready complete]: Final Inspection
-  [ ] Walk every room against the make-ready checklist
-  [ ] Test every appliance, fixture, outlet, window, lock
-  [ ] Verify cleaning quality (would YOU want to move in?)
-  [ ] Take "after" photos for listing and records
-
-Day [final inspection + 1]: Listing Goes Live
-  [ ] Professional photos or well-lit phone photos
-  [ ] List on: Zillow, Apartments.com, Craigslist, Facebook Marketplace
-  [ ] Update any existing platform listings
-  [ ] Post signage at property (if allowed)
-
-Day [listing + 1 to lease signed]: Showing Period
-  [ ] Schedule showings (group showings save time for 1-10 unit operators)
-  [ ] Have application forms ready at showing
-  [ ] Screen applicants per Workflow 1
-
-Day [application approved]: Lease Signing
-  [ ] Execute lease (see Workflow 8: Lease Administration)
-  [ ] Collect first month's rent and security deposit
-  [ ] Schedule move-in inspection (Workflow 3)
-  [ ] Hand over keys
-
-Total turnover target:
-  Light refresh: 7-10 days from move-out to listing
-  Moderate rehab: 14-21 days
-  Heavy rehab: 30-45 days
-
-Every vacant day costs: $[monthly_rent / 30] per day
-  Example: $1,800/month rent = $60/day vacancy cost
-  A 14-day turnover vs 30-day turnover saves $960
+Phase 6: Lease Signing & Move-In (Day 21-30 target)
+  [ ] Applications received and screened per Workflow 1
+  [ ] Lease signed
+  [ ] Security deposit and first month's rent collected
+  [ ] Move-in inspection completed (Workflow 3)
+  [ ] Keys and access provided
+  [ ] Welcome packet delivered (emergency contacts, trash schedule,
+      parking rules, maintenance request process, renter's insurance requirement)
 ```
 
-**Output**: Turnover timeline with task assignments, make-ready budget, and vacancy cost projection.
+**Output**: Turnover timeline with task assignments, vendor schedule, budget estimate per `references/unit-turnover-budget-template.md`, days-vacant tracking.
 
 ### Workflow 6: Financial Reporting
 
 **Monthly rent roll**:
-```
-Rent Roll -- [Property Name] -- [Month/Year]
 
-| Unit | Type | SqFt | Tenant | Lease Start | Lease End | Rent | Status | Collected | Variance |
+```
+Rent Roll -- [Property Name] -- [Month Year]
+
+| Unit | Type | SF | Tenant | Lease Start | Lease End | Market Rent | Actual Rent | Variance | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| 101 | 2BR | 950 | Smith | 03/01/25 | 02/28/26 | $1,800 | Current | $1,800 | $0 |
-| 102 | 1BR | 650 | Jones | 06/15/25 | 06/14/26 | $1,400 | Current | $1,400 | $0 |
-| 103 | 2BR | 950 | -- | -- | -- | $1,850 | Vacant | $0 | ($1,850) |
-| 104 | Studio | 450 | Lee | 01/01/26 | 12/31/26 | $1,200 | Late | $0 | ($1,200) |
+| 1A | 2BR/1BA | 850 | J. Smith | 06/01/25 | 05/31/26 | $1,850 | $1,800 | -$50 | Occupied |
+| 1B | 1BR/1BA | 650 | M. Garcia | 09/01/25 | 08/31/26 | $1,700 | $1,650 | -$50 | Occupied |
+| 2A | 2BR/1BA | 850 | K. Johnson | 01/01/26 | 12/31/26 | $1,900 | $1,900 | $0 | Occupied |
+| 2B | 2BR/2BA | 950 | -- | -- | -- | $2,000 | $0 | -$2,000 | Vacant |
 
 Summary:
   Total units: 4
-  Occupied: 3 (75.0%)
-  Gross potential rent: $6,250
-  Vacancy loss: ($1,850)
-  Delinquency: ($1,200)
-  Effective gross income: $3,200
-  Collection rate: 51.2% (critical -- address Unit 104 delinquency)
+  Occupied: 3 (75%)
+  Vacancy loss: $2,000/month ($24,000 annualized)
+  Gross potential rent: $7,450/month
+  Actual collected: $5,350/month
+  Collection rate vs occupied units: 100%
+  Average rent per SF: $2.12/SF
+  Average rent vs market: -$33/unit (1.8% below market)
 ```
 
-**Property P&L (monthly)**:
+**Monthly P&L by property**:
+
 ```
-Property P&L -- [Property Name] -- [Month/Year]
+Profit & Loss -- [Property Name] -- [Month Year]
 
 INCOME:
-  Rental income (collected):              $X,XXX
-  Late fees:                              $XXX
-  Pet rent:                               $XXX
-  Parking:                                $XXX
-  Laundry:                                $XXX
-  Application fees:                       $XXX
-  Other income:                           $XXX
-  -------------------------------------------
-  TOTAL INCOME:                           $X,XXX
+  Rental income (collected)          $5,350
+  Late fees collected                $0
+  Pet rent                           $75
+  Laundry income                     $120
+  Parking income                     $0
+  Other income                       $0
+  TOTAL INCOME                       $5,545
 
 EXPENSES:
-  Mortgage (P&I):                         $X,XXX
-  Property taxes (monthly escrow):        $XXX
-  Insurance (monthly):                    $XXX
-  Utilities (landlord-paid):
-    Water/sewer:                          $XXX
-    Trash:                                $XXX
-    Gas (common area):                    $XXX
-    Electric (common area):              $XXX
-  Maintenance and repairs:                $XXX
-  Turnover / make-ready:                  $XXX
-  Landscaping:                            $XXX
-  Pest control:                           $XXX
-  PM software:                            $XX
-  Legal / accounting:                     $XXX
-  Advertising:                            $XXX
-  Supplies:                               $XX
-  -------------------------------------------
-  TOTAL EXPENSES:                         $X,XXX
+  Mortgage (P&I)                     $2,800
+  Property taxes                     $450
+  Insurance                          $180
+  Water/sewer                        $220
+  Common area electric               $85
+  Trash removal                      $60
+  Landscaping                        $150
+  Repairs & maintenance              $325
+  Property management fee            $0 (self-managed)
+  Advertising/marketing              $50
+  Legal/professional                 $0
+  Accounting/bookkeeping             $0
+  Miscellaneous                      $25
+  TOTAL EXPENSES                     $4,345
 
-NET OPERATING INCOME (before debt):       $X,XXX
-  Less: mortgage payment:                ($X,XXX)
-NET CASH FLOW:                            $X,XXX
+NET OPERATING INCOME (before mortgage): $2,745
+NET CASH FLOW (after mortgage):         $1,200
 
-Reserve contribution (10% of collected rent): $XXX
-  Reserve balance:                        $X,XXX
-  Target reserve: $[500-1,000 per unit] = $X,XXX
-```
-
-**Chart of accounts for small landlords**:
-```
-Income accounts:
-  4000 - Rental Income
-  4010 - Late Fee Income
-  4020 - Pet Rent
-  4030 - Parking Income
-  4040 - Laundry Income
-  4050 - Application Fee Income
-  4090 - Other Income
-
-Expense accounts:
-  5000 - Mortgage Interest (deductible portion)
-  5010 - Property Taxes
-  5020 - Property Insurance
-  5030 - Utilities -- Water/Sewer
-  5031 - Utilities -- Trash
-  5032 - Utilities -- Gas
-  5033 - Utilities -- Electric
-  5040 - Repairs and Maintenance
-  5050 - Turnover / Make-Ready
-  5060 - Landscaping
-  5070 - Pest Control
-  5080 - Management Software
-  5090 - Legal and Professional Fees
-  5100 - Accounting
-  5110 - Advertising
-  5120 - Supplies
-  5130 - Travel (to/from property, mileage)
-  5140 - Depreciation (annual, for tax return -- not in monthly P&L)
-
-Balance sheet accounts:
-  1000 - Operating Account (checking)
-  1010 - Security Deposit Account (MUST be separate in most states)
-  1020 - Reserve Account (savings)
-  2000 - Security Deposits Held (liability)
-  2010 - Prepaid Rent (liability)
+Key metrics:
+  Operating expense ratio: 27.9% (expenses ex-mortgage / gross potential rent)
+  Debt service coverage ratio: 1.98x (NOI / mortgage payment)
+  Cash-on-cash return: [requires equity input]
+  Break-even occupancy: 78.4% ([expenses] / [gross potential rent])
 ```
 
 **Annual summary for tax preparation**:
+
 ```
-Annual Tax Summary -- [Property Name] -- [Year]
+Annual Tax Summary -- [Property Name] -- [Tax Year]
 
-Schedule E items (provide to your CPA):
-  Gross rents received:               $XX,XXX
-  Advertising:                        $X,XXX
-  Auto and travel:                    $X,XXX
-  Cleaning and maintenance:           $X,XXX
-  Commissions:                        $XXX
-  Insurance:                          $X,XXX
-  Legal and professional:             $X,XXX
-  Management fees:                    $X,XXX
-  Mortgage interest paid:             $XX,XXX
-  Other interest:                     $XXX
-  Repairs:                            $X,XXX
-  Supplies:                           $XXX
-  Taxes:                              $X,XXX
-  Utilities:                          $X,XXX
-  Depreciation:                       $X,XXX
-  Other:                              $XXX
-  -------------------------------------------
-  Total expenses:                     $XX,XXX
-  Net rental income (loss):           $XX,XXX
+SCHEDULE E INPUTS:
+  Gross rents received:              $66,540
+  Other income (late fees, laundry): $2,340
+  Total income:                      $68,880
 
-Security deposit activity:
-  Deposits received:                  $X,XXX
-  Deposits returned:                  $X,XXX
-  Deposits applied to damages:        $X,XXX
-  Deposits held at year-end:          $X,XXX
+  Advertising:                       $600
+  Auto and travel:                   $480
+  Cleaning and maintenance:          $3,900
+  Commissions:                       $0
+  Insurance:                         $2,160
+  Legal and professional:            $350
+  Management fees:                   $0
+  Mortgage interest:                 $18,400
+  Other interest:                    $0
+  Repairs:                           $4,200
+  Supplies:                          $360
+  Property taxes:                    $5,400
+  Utilities:                         $4,380
+  Depreciation:                      $[per CPA / cost seg study]
+  Other:                             $300
+  Total expenses:                    $40,530
 
-Capital improvements (not deductible, depreciated):
-  [list with date, description, cost, and depreciation class]
+  Net rental income (loss):          $28,350
+
+  Note: provide this summary to your CPA along with all receipts.
+  Track mileage for property visits separately (IRS standard rate applies).
+
+Chart of accounts for small landlords:
+  4000 - Rental Income
+  4100 - Late Fee Income
+  4200 - Pet Rent
+  4300 - Laundry/Vending Income
+  4400 - Parking Income
+  4900 - Other Income
+  5000 - Mortgage Interest
+  5100 - Property Taxes
+  5200 - Insurance
+  5300 - Utilities (Water, Electric, Gas, Trash)
+  5400 - Repairs & Maintenance
+  5500 - Capital Improvements (not expensed -- depreciated)
+  5600 - Management Fees
+  5700 - Advertising & Marketing
+  5800 - Legal & Professional
+  5900 - Auto & Travel
+  6000 - Office & Supplies
+  6100 - Landscaping
+  6900 - Miscellaneous
+```
+
+**Capital reserve tracking**:
+
+```
+Capital Reserve Fund -- [Property Name]
+
+Target reserve: $[500-1,000 per unit per year]
+Current balance: $[amount]
+Monthly contribution: $[amount]
+
+  | Date | Description | Deposit | Withdrawal | Balance |
+  |---|---|---|---|---|
+  | 01/01 | Opening balance | | | $8,000 |
+  | 01/15 | Monthly contribution | $400 | | $8,400 |
+  | 02/01 | Water heater replacement (Unit 2A) | | $1,200 | $7,200 |
+  | 02/15 | Monthly contribution | $400 | | $7,600 |
+  | 03/15 | Monthly contribution | $400 | | $8,000 |
+
+Reserve adequacy check:
+  Recommended reserve: $500/unit/year * 4 units = $2,000/year (minimum)
+  Better target: $1,000/unit/year * 4 units = $4,000/year
+  Current annual contribution: $4,800 (adequate)
+  Major upcoming expenses:
+    - Roof (estimated remaining life: 8 years, replacement cost: $15,000)
+    - HVAC (estimated remaining life: 5 years, replacement cost: $6,000/unit)
+    - Parking lot reseal (every 3 years, cost: $2,000)
 ```
 
 **Output**: Monthly rent roll, P&L, cash flow statement, reserve tracker, annual tax summary.
@@ -823,238 +840,261 @@ Capital improvements (not deductible, depreciated):
 ### Workflow 7: Self-Manage vs Third-Party PM Decision
 
 **Breakeven analysis**:
+
 ```
-Self-Manage vs PM Company Decision Framework
+Self-Manage vs. Third-Party Property Manager Analysis
 
-Cost comparison:
-  PM fee: 8-12% of collected rent (10% is most common)
-  Your cost: your hourly opportunity cost * hours spent
+YOUR PORTFOLIO:
+  Units managed: [n]
+  Monthly gross rent: $[amount]
+  Annual gross rent: $[amount]
 
-Hours per unit per month (self-managing):
-  1-10 units:   3-5 hours per unit per month (includes admin, maintenance
-                 coordination, tenant communication, showings)
-  11-30 units:  2-3 hours per unit per month (efficiencies from scale)
-  31-50 units:  1.5-2.5 hours per unit per month (need part-time help)
+PM FEE COMPARISON:
+  Typical PM fee structures:
+    Percentage of collected rent: 8-12% (most common)
+      Residential/multifamily: 8-10%
+      Commercial/mixed-use: 4-6%
+    Flat fee per unit: $75-$200/unit/month (less common)
+    Leasing fee (new tenant): 50-100% of one month's rent (on top of management fee)
+    Renewal fee: $150-$300 per renewal (some PMs waive this)
+    Maintenance markup: 10-20% on vendor invoices (some PMs add this)
 
-Breakeven calculation:
-  Monthly rent per unit: $[rent]
-  PM fee at 10%: $[rent * 0.10]
-  Your hours per unit per month: [hours]
-  Your hourly opportunity cost: $[hourly_rate]
-  Your cost per unit per month: $[hours * hourly_rate]
+  YOUR ESTIMATED PM COST:
+    Management fee: [n] units * $[gross rent] * [%] = $[monthly] / $[annual]
+    Leasing fees (est. [n] turnovers/year): $[amount]
+    Renewal fees: $[amount]
+    Maintenance markup: $[amount]
+    Total annual PM cost: $[amount]
 
-  If PM_fee < your_cost: hire a PM
-  If PM_fee > your_cost: self-manage (if you want to)
+YOUR TIME COST:
+  Estimated hours per unit per month:
+    1-10 units: 3-5 hours/unit/month (higher per-unit time for small portfolios)
+    11-30 units: 2-3 hours/unit/month
+    31-50 units: 1.5-2 hours/unit/month (economies of scale)
 
-  Example:
-    Rent: $1,800/month
-    PM fee at 10%: $180/month per unit
-    Your time: 4 hours/month per unit
-    Your hourly value: $50/hour
-    Your cost: $200/month per unit
-    Result: PM is cheaper ($180 < $200) AND frees your time
+  Your total hours: [n] units * [hours/unit] = [total hours/month]
+  Your hourly opportunity cost: $[amount] (what is your time worth?)
+  Annual time cost: [hours/month] * 12 * $[hourly rate] = $[amount]
 
-  BUT also consider:
-    - PM may not care about your property as much as you do
-    - PM adds 10% to every dollar of maintenance (typical markup)
-    - PM may have slower response times
-    - PM handles legal compliance (evictions, Fair Housing) -- valuable if
-      you are not experienced
-    - PM handles late-night emergency calls -- valuable for quality of life
+BREAKEVEN ANALYSIS:
+  If PM cost < your time cost: hire a PM
+  If PM cost > your time cost: self-manage (if you are willing and able)
+
+  Typical breakeven: ~25-35 units (for someone with a $75-100/hr opportunity cost)
+  Lower breakeven if:
+    - You have a high-paying day job (higher opportunity cost)
+    - Properties are geographically dispersed (more travel time)
+    - High-maintenance properties (older buildings, difficult tenants)
+  Higher breakeven if:
+    - You live near your properties
+    - Properties are newer with few maintenance issues
+    - You enjoy the work and consider it part-time income
+
+QUALITY INDICATORS (when to hire a PM even below breakeven):
+  - You cannot respond to emergencies within 2 hours
+  - Maintenance requests go unresolved for > 7 days regularly
+  - You are uncomfortable with legal compliance (eviction, Fair Housing)
+  - You travel frequently and cannot manage in-person requirements
+  - Tenant relations are causing you significant stress
+  - Your vacancy rate is higher than market average (poor marketing/screening)
+  - You are losing tenants due to slow response or poor communication
+
+QUALITY INDICATORS (when to keep self-managing):
+  - You respond to every maintenance request within 24 hours
+  - Your vacancy rate is at or below market
+  - You maintain consistent screening and compliance
+  - You enjoy the work and stay current on landlord-tenant law
+  - You can handle emergencies personally or have a reliable backup
+  - Your properties are within 30 minutes of your home or workplace
+
+TRANSITION PLAN (if switching to PM):
+  1. Interview 3+ PM companies. Ask for references from similar portfolios.
+  2. Request sample management agreement. Have attorney review.
+  3. Verify PM has a trust account for deposits (state requirement in most states).
+  4. Transition all tenant communication, keys, vendor relationships.
+  5. Establish reporting cadence: monthly statements, annual budget review.
+  6. Monitor PM performance quarterly (vacancy, maintenance response, collection rate).
+  7. Review PM contract annually. Most are 1-year with 30-60 day cancellation.
 ```
 
-**PM quality indicators**:
-```
-How to evaluate a property management company:
-
-BEFORE HIRING:
-  [ ] Licensed in your state (check state real estate commission)
-  [ ] Carries E&O insurance and general liability
-  [ ] Provides references from 3+ current clients with similar portfolio size
-  [ ] Fee structure is transparent (management fee, leasing fee, maintenance
-      markup, early termination fee, setup fee)
-  [ ] Management agreement is reviewed by your attorney
-  [ ] Uses PM software with owner portal (you should see real-time financials)
-  [ ] Has a written maintenance response protocol with SLAs
-  [ ] Provides monthly financial reports (not just a check)
-  [ ] Background: how many units do they manage? (sweet spot: 200-500 units
-      means they are established but you are not lost in a huge portfolio)
-
-ONGOING PERFORMANCE KPIs:
-  Occupancy rate: should maintain > 95% (if your market supports it)
-  Average days to fill vacancy: < 30 days
-  Rent collection rate: > 97%
-  Maintenance response time: < 24 hours for urgent, < 48 hours for routine
-  Tenant retention rate: > 60% annual renewals
-  Financial report delivery: by the 15th of the following month
-  Communication: returns your calls/emails within 1 business day
-
-RED FLAGS (consider switching PMs):
-  - Occupancy drops below market average without explanation
-  - Rent collection rate below 95%
-  - You are learning about maintenance issues from tenants, not the PM
-  - Financial reports are late, inconsistent, or hard to understand
-  - Tenant complaints about PM responsiveness reach you directly
-  - PM is recommending unnecessary repairs (padding maintenance income)
-  - Your property's reserve fund is being depleted without clear accounting
-  - PM resists owner audits or pushes back on financial transparency
-```
-
-**Output**: Self-manage vs PM cost comparison, PM evaluation scorecard, transition checklist.
+**Output**: Breakeven analysis, PM cost comparison, recommendation with supporting data, transition plan if applicable.
 
 ### Workflow 8: Lease Administration
 
 **Renewal tracking calendar**:
-```
-Lease Expiration Calendar -- [Property Name]
 
-| Unit | Tenant | Lease End | Notice Required | Notice Deadline | Renewal Offer | Status |
+```
+Lease Renewal Calendar -- [Property Name]
+
+| Unit | Tenant | Lease End | Notice Required | Action Deadline | Proposed Increase | Status |
 |---|---|---|---|---|---|---|
-| 101 | Smith | 02/28/26 | 60 days | 12/30/25 | $1,850 (+2.8%) | Renewed |
-| 102 | Jones | 06/14/26 | 30 days | 05/15/26 | $1,450 (+3.6%) | Pending |
-| 104 | Lee | 12/31/26 | 60 days | 11/01/26 | -- | Too early |
+| 1A | J. Smith | 05/31/26 | 60 days | 04/01/26 | $50 (2.8%) | Renewal letter sent |
+| 1B | M. Garcia | 08/31/26 | 60 days | 07/01/26 | $75 (4.5%) | Pending -- send by 07/01 |
+| 2A | K. Johnson | 12/31/26 | 30 days | 12/01/26 | $0 (new lease) | N/A until Q4 |
+| 2B | -- | Vacant | -- | -- | -- | -- |
 
-Action triggers:
-  120 days before expiry: assess market rent, decide on renewal offer
-  90 days before expiry: send renewal offer with proposed terms
-  60 days before expiry: follow up if no response; begin marketing if
-                          tenant indicates non-renewal
-  30 days before expiry: final deadline for renewal decision; list unit
-                          if not renewing
-  Lease expiry: if month-to-month, decide whether to continue or
-                serve notice to vacate per state law
-```
+Rent Increase Guidelines:
+  Check market rents (Zillow, Rentometer, Apartments.com comps)
+  Typical annual increase: 2-5% (varies by market)
+  Factor in: current tenant quality, market vacancy, cost of turnover
+  Cost of turnover (lost rent + make-ready) typically = 2-3 months of rent
+  If good tenant is $50-100 below market: consider keeping them (retention value)
 
-**Rent increase notice requirements**:
-```
-State-specific rent increase notice periods
-(see references/state-landlord-tenant-rules.yaml for full list):
+  Rent increase notice requirements vary by state:
+    - 30 days notice for month-to-month (most states)
+    - 60-90 days notice for annual leases (some states)
+    - Rent control jurisdictions: maximum increase capped (check local law)
+    - Section 8: must comply with Housing Authority rent reasonableness
 
-  30 days notice: most states for month-to-month tenancies
-  60 days notice: CA (for increases > 10%), OR, WA, some local ordinances
-  90 days notice: some rent-controlled jurisdictions
+Renewal Letter Template:
 
-Rent increase strategy:
-  Market rate increase: 2-5% annually is typical for stable markets
-  Below-market tenants: increase in 2-3 steps over 2-3 years rather
-    than one large jump (reduces turnover risk)
-  Long-term tenants (3+ years): balance retention value against market
-    rate. A reliable tenant paying $50/month below market is often more
-    valuable than turnover costs ($2,000-$5,000+) to get full market rate.
+  Dear [Tenant Name],
 
-  Retention value calculation:
-    Turnover cost: cleaning + paint + repairs + vacancy days + marketing
-    Example: $500 (clean) + $600 (paint) + $300 (repairs) + $1,800
-             (30 days vacancy at $60/day) + $200 (listing fees) = $3,400
-    At $50/month below market: breakeven in 68 months (5.7 years)
-    Conclusion: keep the tenant at $50 below market -- turnover is costlier
+  Your lease for [Unit] at [Property Address] expires on [date]. We value
+  you as a tenant and would like to offer you a renewal.
+
+  Renewal terms:
+    New lease period: [start] to [end] (12 months)
+    Monthly rent: $[new amount] (increase of $[amount] / [%] from current)
+    All other lease terms remain the same.
+
+  Please sign and return the enclosed renewal agreement by [date -- 14 days
+  before action deadline]. If we do not hear from you by [date], we will
+  assume you intend to vacate and will begin marketing the unit.
+
+  If you have any questions or would like to discuss the terms, please
+  contact me at [phone/email].
+
+  Thank you for being a great tenant.
+
+  Sincerely,
+  [Landlord Name]
 ```
 
 **Lease violation documentation**:
+
 ```
-Lease Violation Notice Template
+Lease Violation Notice
 
 Date: [date]
-To: [tenant name]
-Unit: [unit number]
-Property: [property name/address]
+To: [Tenant Name], [Unit Number], [Property Address]
+From: [Landlord Name]
 
-Dear [tenant name],
+Dear [Tenant Name],
 
-This letter serves as [first / second / final] notice of a violation
-of your lease agreement dated [lease date], specifically Section [X]
-regarding [violation type].
+This letter is to formally notify you of a violation of your lease agreement
+dated [lease date]:
 
-Violation details:
-  Date(s) observed: [specific dates]
-  Description: [specific, factual description of the violation]
-  Lease provision violated: [quote the relevant lease section]
+VIOLATION: [describe specifically]
+  Examples:
+  - Unauthorized pet (lease Section [X] prohibits pets without approval)
+  - Noise complaints (lease Section [X] requires quiet enjoyment for all tenants)
+  - Unauthorized occupant (lease Section [X] limits occupants to named tenants)
+  - Improper trash disposal (lease Section [X] requires use of designated areas)
+  - Unauthorized modification (lease Section [X] prohibits alterations without
+    written consent)
+  - Parking violation (lease Section [X] limits parking to assigned spaces)
 
-Required action:
-  [Specific action tenant must take to cure the violation]
-  Cure deadline: [date -- per state law, typically 10-30 days]
+OBSERVED ON: [date(s) of violation]
+DOCUMENTED BY: [landlord / other tenant complaint / inspection]
 
-Failure to cure this violation by [deadline] may result in
-[additional fees per lease / initiation of eviction proceedings /
-non-renewal of lease].
+REQUIRED ACTION:
+  You must [cure the violation / cease the activity] within [X] days of this
+  notice (by [date]).
 
-If you believe this notice was sent in error, or if you have questions,
-please contact me at [phone/email] within [X] business days.
+CONSEQUENCE:
+  Failure to cure this violation within the specified time may result in
+  [further action up to and including termination of your lease / non-renewal
+  at lease end].
+
+  This is the [first / second / third] notice regarding this issue.
+  [If second or third:] Previous notices were issued on [dates].
+
+Please contact me at [phone/email] if you have questions or would like to
+discuss this matter.
 
 Sincerely,
-[Landlord/PM name]
-[Phone]
-[Email]
+[Landlord Name]
+[Date]
 
-cc: [file]
+Delivery method: [hand-delivered / posted on door / certified mail / email]
+Copy retained in tenant file: [yes]
 ```
 
 **Annual inspection scheduling**:
+
 ```
-Annual Inspection Schedule -- [Property Name]
+Annual Property Inspection Schedule -- [Year]
 
-Purpose: identify maintenance issues before they become expensive,
-verify lease compliance, maintain property condition.
+| Unit | Tenant | Last Inspected | Next Inspection | Notice Sent | Completed |
+|---|---|---|---|---|---|
+| 1A | J. Smith | 06/15/25 | 06/15/26 | [date] | [ ] |
+| 1B | M. Garcia | 09/20/25 | 09/20/26 | [date] | [ ] |
+| 2A | K. Johnson | 01/10/26 | 01/10/27 | [date] | [ ] |
+| 2B | Vacant | N/A | At turnover | N/A | [ ] |
 
-Notice required: check state law (24-48 hours written notice typical)
+Inspection notice requirements:
+  Most states require 24-48 hours written notice before entering an occupied unit
+  (exception: emergencies). Check state law.
+  Notice must state: date, approximate time window, purpose of entry.
+  Tenant has right to be present (but cannot unreasonably refuse access).
 
-Schedule: one inspection per year per unit, staggered monthly:
-  January: Units 101, 102
-  February: Units 103, 104
-  [continue by unit count]
-
-Inspection scope (lighter than move-in/move-out):
-  [ ] Smoke detectors functional
-  [ ] Carbon monoxide detectors functional (if required)
-  [ ] No evidence of unreported leaks (water stains on ceiling/walls)
-  [ ] HVAC filter replaced recently
-  [ ] No unauthorized occupants or pets
-  [ ] No lease violations visible (hoarding, illegal activity, damage)
-  [ ] Fire extinguisher present and current (if provided)
-  [ ] Exterior doors and windows functional
-  [ ] Plumbing: check under all sinks for leaks
-  [ ] General condition assessment
+Annual inspection checklist:
+  [ ] Smoke detectors working (replace batteries)
+  [ ] Carbon monoxide detectors working
+  [ ] No unauthorized modifications or occupants
+  [ ] No lease violations (pets, smoking, etc.)
+  [ ] No evidence of pest activity
+  [ ] Plumbing fixtures functioning (check under sinks for leaks)
+  [ ] HVAC filter condition (replace if dirty)
+  [ ] Window and door locks functioning
+  [ ] Water heater temperature set to 120F (scald prevention)
+  [ ] General cleanliness and condition (note any concerns)
+  [ ] Exterior: check for damage, drainage issues, trip hazards
 ```
 
-**Output**: Lease calendar with renewal deadlines, rent increase notices, violation documentation, inspection schedule.
+**Output**: Renewal calendar with action deadlines, rent increase recommendations, violation notices, inspection schedule.
 
 ## Output Format
 
 Present results in this order:
 
-1. **Property Dashboard** -- unit count, occupancy, collection rate, upcoming lease expirations
-2. **Action Items** -- overdue maintenance, delinquent rent, upcoming lease deadlines, vendor insurance expirations
+1. **Portfolio Snapshot** -- unit count, occupancy rate, total monthly rent, delinquencies
+2. **Action Items** -- upcoming lease expirations, maintenance backlog, overdue inspections
 3. **Detailed Workflow Output** -- specific to the triggered workflow
-4. **Financial Summary** -- monthly P&L, cash flow, reserve status
-5. **Upcoming Calendar** -- lease renewals, scheduled inspections, seasonal maintenance items
-6. **Recommendations** -- specific, actionable improvements ranked by impact and urgency
+4. **Financial Summary** -- month-over-month rent collection, P&L, reserve status
+5. **Compliance Calendar** -- lease renewals, inspection schedules, insurance expirations
+6. **Red Flags** -- any items from the red flags section that apply to current portfolio
 
 ## Red Flags and Failure Modes
 
-1. **Inconsistent tenant screening (Fair Housing violation risk)**: applying different criteria to different applicants is the fastest path to a discrimination complaint. Use the same application, same criteria, same process for every applicant. Document every decision. A single Fair Housing complaint can cost $10,000-$100,000+ in legal fees and settlements, regardless of merit.
+1. **Inconsistent tenant screening**: applying different criteria to different applicants creates Fair Housing liability. The fix is simple: write down your criteria, apply them identically to every applicant, and document every decision. One discrimination complaint can cost $10,000-$100,000+ in legal fees and settlements, dwarfing any rent income from the unit.
 
-2. **No written lease (oral agreements)**: month-to-month oral agreements are legal in most states but provide almost no protection for the landlord. Every tenancy should have a written lease specifying rent amount, due date, late fee, security deposit, maintenance responsibilities, pet policy, occupancy limits, and termination notice requirements. Use a state-specific lease template reviewed by a local attorney.
+2. **No written lease**: oral lease agreements are legal in some states for terms under one year, but they are nearly impossible to enforce. Every tenancy should have a written lease specifying rent, term, responsibilities, and house rules. State-specific lease templates are available from landlord associations for $25-50.
 
-3. **Security deposit commingling**: in most states, security deposits must be held in a separate bank account, not your operating account. Commingling is illegal and may expose you to treble damages (3x the deposit amount) in some states. Label the account clearly: "[Property] Security Deposit Trust Account."
+3. **Security deposit commingling**: in most states, security deposits must be held in a separate account from operating funds. Some states require interest-bearing accounts with annual interest payments to the tenant. Commingling deposits with operating funds is illegal in most jurisdictions and creates personal liability for the landlord, even in an LLC structure.
 
-4. **Deferred maintenance creating habitability issues**: every state has an implied warranty of habitability requiring landlords to maintain premises in livable condition. Failure to address heat, hot water, plumbing, pest infestation, or structural issues can result in tenants withholding rent legally, health department complaints, or constructive eviction claims. Fix habitability issues immediately regardless of cost.
+4. **Deferred maintenance creating habitability issues**: every state has an implied warranty of habitability. Failing to address heating, plumbing, pest, or structural issues can result in tenants withholding rent (legally, in many states), health department complaints, and code violation fines. The cost of deferred maintenance compounds: a $200 leak repair becomes a $5,000 mold remediation.
 
-5. **Late fee structure exceeding state maximum**: many states cap late fees at a percentage of rent (typically 5-10%) or a flat dollar amount. Charging above the legal maximum makes the fee unenforceable and may expose you to counterclaims. Verify your state's cap before setting your late fee policy.
+5. **Late fee structure exceeding state maximum**: many states cap late fees (e.g., California caps at 6% of rent, New York has no statutory cap but courts void "unreasonable" fees). Charging excessive late fees is unenforceable and can trigger tenant complaints to consumer protection agencies.
 
-6. **No renter's insurance requirement**: requiring tenants to carry renter's insurance ($15-$30/month) protects both parties. It covers tenant's personal property (reducing claims against your insurance), provides liability coverage if a guest is injured, and covers additional living expenses if the unit becomes uninhabitable. Add a lease clause requiring proof of coverage at move-in and annual renewal.
+6. **No renter's insurance requirement**: if a tenant causes a fire or water damage, the landlord's insurance covers the building but not the tenant's negligence. Without renter's insurance, the tenant has no coverage for their liability, and the landlord's insurance company may subrogate against the tenant (who likely cannot pay). Requiring $100,000 liability coverage ($15-25/month) protects both parties.
 
-7. **Missing lead paint disclosure (pre-1978 properties)**: federal law (Title X) requires landlords of pre-1978 properties to provide tenants with an EPA pamphlet on lead paint hazards and disclose any known lead paint. Failure to disclose carries penalties up to $19,507 per violation per the Residential Lead-Based Paint Hazard Reduction Act. This applies to every new lease and renewal.
+7. **Missing lead paint disclosure (pre-1978 properties)**: federal law (42 USC 4852d) requires disclosure of known lead-based paint hazards and provision of the EPA pamphlet "Protect Your Family From Lead in Your Home" before lease signing. Failure to disclose can result in fines up to $19,507 per violation (2024 amount, adjusted annually) and treble damages in private lawsuits.
 
-8. **No emergency contact or after-hours protocol**: tenants must be able to reach you (or a designated contact) for true emergencies 24/7. A burst pipe at 2 AM that floods three units because nobody answered the phone is a catastrophic and avoidable loss. Provide an emergency phone number in the lease and test it.
+8. **No capital reserve fund**: operating without reserves means every major repair becomes an emergency. Water heaters, HVAC systems, roofs, and appliances fail on their own schedule. Without $500-1,000/unit/year in reserves, landlords are forced into expensive emergency repairs, deferred maintenance spirals, or debt financing for routine capital needs.
 
-9. **Operating without a reserve fund**: properties generate unexpected expenses -- roof leaks, HVAC failures, plumbing emergencies. Without reserves, you are forced to defer critical repairs (habitability risk) or take on high-interest debt. Target reserve: $500-$1,000 per unit. Fund it monthly from cash flow.
+9. **Failing to document lease violations**: verbal warnings without written documentation are worthless in eviction proceedings. Every violation notice must be in writing, dated, describe the specific violation, reference the lease section, state the cure deadline, and be retained in the tenant file. Courts require a paper trail.
+
+10. **Not tracking warranty expiration dates**: replacing a water heater, HVAC compressor, or appliance that is still under warranty wastes money. Maintain a warranty log for every major system and appliance. When a covered item fails, contact the manufacturer first.
 
 ## Chain Notes
 
-- **rent-roll-analyzer**: monthly rent rolls from this skill feed into rent roll analysis for benchmarking against market
-- **rent-optimization-planner**: when preparing renewal offers, use rent optimization for market-rate analysis and pricing strategy
-- **tenant-delinquency-workout**: when rent collection escalates beyond Day 15, the delinquency workout skill handles structured payment plans and legal proceedings
-- **work-order-triage**: for properties with higher volume (20+ units), the work order triage skill provides more sophisticated maintenance prioritization
-- **property-performance-dashboard**: monthly P&L and occupancy data from this skill are key inputs to property-level performance tracking
-- **vendor-invoice-validator**: for larger portfolios, vendor invoice validation automates cost verification against contracted rates
-- **lease-document-factory**: when executing new leases or renewals, the lease document factory generates state-compliant lease agreements
+- **rent-optimization-planner**: Pricing strategy and market comp analysis for setting asking rents on vacant or renewal units
+- **property-performance-dashboard**: Portfolio-level financial reporting rolls up from individual property P&L data produced here
+- **lease-document-factory**: When a new tenant is approved through screening, the lease document skill generates the lease
+- **tenant-retention-engine**: Retention strategies for good tenants complement the renewal tracking in Workflow 8
+- **vendor-invoice-validator**: For operators with 20+ units, vendor invoice validation automates the cost-checking done manually here
+- **work-order-triage**: For portfolios above 30 units, the triage skill provides automated classification and routing
+- **tenant-delinquency-workout**: When a tenant enters the delinquency escalation timeline, the workout skill provides negotiation frameworks
+- **property-tax-appeal-analyzer**: Annual property tax assessment review, referenced in the financial reporting workflow
