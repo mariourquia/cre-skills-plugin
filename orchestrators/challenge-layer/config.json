@@ -1,0 +1,439 @@
+{
+  "$schema": "Challenge Layer - Post-Pipeline Perspective Agent Configuration",
+  "version": "1.0.0",
+  "description": "Post-pipeline challenge layer. After the 5-phase acquisition pipeline produces a verdict (GO/CONDITIONAL/NO-GO), these perspective agents stress-test and re-evaluate that verdict before final IC presentation.",
+  "tiers": {
+    "tier1": {
+      "description": "Always-run agents. Critical to verdict validation. Execute on every deal regardless of verdict or attributes.",
+      "executionOrder": "sequential",
+      "estimatedMinutes": 16,
+      "totalBudgetTokens": 42000,
+      "agents": [
+        {
+          "agent": "cre-veteran",
+          "file": "cre-veteran.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputSet": "standard",
+          "maxOutputTokens": 1500,
+          "estimatedMinutes": 2,
+          "purpose": "Institutional gut-check. Flags pattern mismatches vs. 30 years of deal flow, routes to any specialist concerns not yet surfaced.",
+          "outputKey": "veteran_challenge"
+        },
+        {
+          "agent": "ic-challenger",
+          "file": "lens-contrarian.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputSet": "standard",
+          "maxOutputTokens": 1500,
+          "estimatedMinutes": 2,
+          "purpose": "Invert the pipeline consensus. Identify crowded-trade dynamics, mean-reversion risk, and variant perceptions that underwriting missed.",
+          "outputKey": "ic_challenge"
+        },
+        {
+          "agent": "lens-risk-manager",
+          "file": "lens-risk-manager.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputSet": "standard",
+          "maxOutputTokens": 1800,
+          "estimatedMinutes": 3,
+          "purpose": "8-dimension downside audit: leverage, liquidity, tail risk, covenant exposure, stress scenarios beyond pipeline defaults.",
+          "outputKey": "risk_challenge"
+        },
+        {
+          "agent": "perspective-appraiser",
+          "file": "lens-quantitative.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputSet": "full",
+          "maxOutputTokens": 2000,
+          "estimatedMinutes": 3,
+          "purpose": "Independent valuation re-underwrite. Reconstructs cap rate, DCF, and sensitivity grids from first principles to verify pipeline figures.",
+          "outputKey": "appraisal_challenge"
+        },
+        {
+          "agent": "perspective-legal",
+          "file": "lens-qualitative.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputSet": "minimal",
+          "maxOutputTokens": 800,
+          "estimatedMinutes": 1,
+          "purpose": "Qualitative legal and title risk overlay. Flags narrative-level title exceptions, zoning edge cases, and estoppel variance concerns.",
+          "outputKey": "legal_challenge"
+        },
+        {
+          "agent": "perspective-lender",
+          "file": "lens-quantitative.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputSet": "standard",
+          "maxOutputTokens": 1200,
+          "estimatedMinutes": 2,
+          "purpose": "Lender credit box stress-test. Re-runs DSCR, debt yield, and LTV against agency, CMBS, and life-company credit constraints.",
+          "outputKey": "lender_challenge"
+        },
+        {
+          "agent": "buyer-dynamic",
+          "file": null,
+          "model": "claude-sonnet-4-6[1m]",
+          "inputSet": "standard",
+          "maxOutputTokens": 1200,
+          "estimatedMinutes": 2,
+          "purpose": "Buyer-type-specific IC challenge. Agent selected at runtime from buyer roster based on deal investorType attribute.",
+          "outputKey": "buyer_challenge",
+          "runtimeSelection": {
+            "field": "deal.investorType",
+            "mapping": {
+              "pension-fund": "buyer-pension-fund.md",
+              "private-equity": "buyer-private-equity.md",
+              "reit": "buyer-reit.md",
+              "family-office": "buyer-family-office.md",
+              "syndicator": "buyer-syndicator.md",
+              "default": "buyer-private-equity.md"
+            }
+          }
+        },
+        {
+          "agent": "lens-qualitative",
+          "file": "lens-qualitative.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputSet": "standard",
+          "maxOutputTokens": 1200,
+          "estimatedMinutes": 2,
+          "purpose": "Market narrative and demographic trajectory challenge. Evaluates neighborhood arc, competitive supply pipeline, and tenant-quality drift.",
+          "outputKey": "qualitative_challenge"
+        }
+      ]
+    },
+    "tier2": {
+      "description": "Conditional agents. Triggered by deal attributes detected in pipeline output. Executed as parallel groups per trigger.",
+      "executionOrder": "parallel-groups",
+      "totalBudgetTokens": 24000,
+      "triggers": [
+        {
+          "triggerId": "environmental-rec",
+          "condition": "deal.dueDiligence.redFlags includes 'environmental-contamination' OR deal.phase2.environmentalScore < 70",
+          "agents": [
+            {
+              "agent": "lens-esg-impact",
+              "file": "lens-esg-impact.md",
+              "model": "claude-sonnet-4-6[1m]",
+              "inputSet": "full",
+              "maxOutputTokens": 1800,
+              "purpose": "TCFD, CRREM stranding, and climate physical risk overlay on environmental REC findings. Quantifies remediation optionality."
+            }
+          ],
+          "rationale": "Environmental Phase I/II findings introduce unquantified liability. ESG lens required to bound tail exposure before IC."
+        },
+        {
+          "triggerId": "high-capex",
+          "condition": "deal.capex.immediate > 500000 OR deal.capex.fiveYear > deal.purchasePrice * 0.10",
+          "agents": [
+            {
+              "agent": "lens-quantitative",
+              "file": "lens-quantitative.md",
+              "model": "claude-sonnet-4-6[1m]",
+              "inputSet": "full",
+              "maxOutputTokens": 1500,
+              "purpose": "Re-underwrites returns with capex timing, carry cost, and phased deployment sensitivity. Validates IRR bridge assumption."
+            }
+          ],
+          "rationale": "High capex deals require independent confirmation that post-renovation return projection survives Monte Carlo stress."
+        },
+        {
+          "triggerId": "entitlement-dependency",
+          "condition": "deal.strategy == 'value-add' AND deal.entitlementRisk == true OR deal.zoningVarianceRequired == true",
+          "agents": [
+            {
+              "agent": "lens-qualitative",
+              "file": "lens-qualitative.md",
+              "model": "claude-sonnet-4-6[1m]",
+              "inputSet": "standard",
+              "maxOutputTokens": 1200,
+              "purpose": "Political and regulatory narrative risk. Evaluates municipality posture, community opposition likelihood, and entitlement timeline realism."
+            },
+            {
+              "agent": "lens-contrarian",
+              "file": "lens-contrarian.md",
+              "model": "claude-sonnet-4-6[1m]",
+              "inputSet": "minimal",
+              "maxOutputTokens": 800,
+              "purpose": "Variant perception on entitlement probability. Stress-tests approval timeline assumption against comparable municipal track records."
+            }
+          ],
+          "rationale": "Entitlement dependency is a binary event risk. Requires both qualitative political read and contrarian timeline stress."
+        },
+        {
+          "triggerId": "insurance-flags",
+          "condition": "deal.legal.insuranceFlags.length > 0 OR deal.legal.floodZone == 'AE' OR deal.legal.windstormExclusion == true",
+          "agents": [
+            {
+              "agent": "lens-risk-manager",
+              "file": "lens-risk-manager.md",
+              "model": "claude-sonnet-4-6[1m]",
+              "inputSet": "standard",
+              "maxOutputTokens": 1200,
+              "purpose": "Uninsurable condition and flood zone tail risk assessment. Maps insurance gaps to lender covenant and NOI volatility exposure."
+            },
+            {
+              "agent": "lens-esg-impact",
+              "file": "lens-esg-impact.md",
+              "model": "claude-sonnet-4-6[1m]",
+              "inputSet": "minimal",
+              "maxOutputTokens": 800,
+              "purpose": "Climate physical risk overlay on insurance flags. Evaluates TCFD alignment and future insurability trajectory."
+            }
+          ],
+          "rationale": "Insurance gaps and flood zone classification create lender, operational, and exit liquidity risk requiring dedicated stress analysis."
+        },
+        {
+          "triggerId": "large-lease-roll",
+          "condition": "deal.rentRoll.rollover12Month > 0.25 OR deal.rentRoll.anchorTenantExpiry == true",
+          "agents": [
+            {
+              "agent": "lens-qualitative",
+              "file": "lens-qualitative.md",
+              "model": "claude-sonnet-4-6[1m]",
+              "inputSet": "standard",
+              "maxOutputTokens": 1200,
+              "purpose": "Tenant retention probability and re-leasing narrative. Evaluates market absorption capacity and competing availabilities."
+            },
+            {
+              "agent": "lens-quantitative",
+              "file": "lens-quantitative.md",
+              "model": "claude-sonnet-4-6[1m]",
+              "inputSet": "full",
+              "maxOutputTokens": 1500,
+              "purpose": "Vacancy carry and re-leasing cost sensitivity. Quantifies NOI bridge and cash-on-cash breakeven under downside re-leasing assumptions."
+            }
+          ],
+          "rationale": "Rollover > 25% in 12 months is a primary cash flow risk event requiring independent re-leasing probability and cost stress."
+        },
+        {
+          "triggerId": "conditional-verdict",
+          "condition": "pipeline.verdict == 'CONDITIONAL'",
+          "agents": [
+            {
+              "agent": "cre-veteran",
+              "file": "cre-veteran.md",
+              "model": "claude-sonnet-4-6[1m]",
+              "inputSet": "full",
+              "maxOutputTokens": 2000,
+              "purpose": "Second-pass veteran review at full context depth. Distinguishes structurable CONDITIONAL from disguised NO-GO. Proposes concrete conditions precedent."
+            },
+            {
+              "agent": "lens-contrarian",
+              "file": "lens-contrarian.md",
+              "model": "claude-sonnet-4-6[1m]",
+              "inputSet": "standard",
+              "maxOutputTokens": 1000,
+              "purpose": "Contrarian challenge on whether CONDITIONAL conditions are achievable or aspirational. Tests price re-trade probability."
+            }
+          ],
+          "rationale": "CONDITIONAL verdicts require deeper scrutiny to separate genuine optionality from pipeline confirmation bias."
+        },
+        {
+          "triggerId": "high-ltv",
+          "condition": "deal.financing.ltv > 0.70 OR deal.financing.ltv > thresholds.primaryCriteria.ltv.maxConditional",
+          "agents": [
+            {
+              "agent": "lens-risk-manager",
+              "file": "lens-risk-manager.md",
+              "model": "claude-sonnet-4-6[1m]",
+              "inputSet": "standard",
+              "maxOutputTokens": 1200,
+              "purpose": "Leverage stress at high LTV. Evaluates covenant breach scenarios, margin call risk, and refinance optionality at maturity."
+            },
+            {
+              "agent": "buyer-pension-fund",
+              "file": "buyer-pension-fund.md",
+              "model": "claude-sonnet-4-6[1m]",
+              "inputSet": "minimal",
+              "maxOutputTokens": 600,
+              "purpose": "Institutional leverage tolerance check. Confirms deal remains marketable to ODCE and core-plus buyers at current LTV."
+            }
+          ],
+          "rationale": "LTV above 70% compresses exit buyer pool and increases refinance risk. Independent leverage discipline review required."
+        },
+        {
+          "triggerId": "value-add-strategy",
+          "condition": "deal.strategy == 'value-add' OR deal.strategy == 'opportunistic'",
+          "agents": [
+            {
+              "agent": "lens-quantitative",
+              "file": "lens-quantitative.md",
+              "model": "claude-sonnet-4-6[1m]",
+              "inputSet": "full",
+              "maxOutputTokens": 1800,
+              "purpose": "Value-add business plan stress-test. Monte Carlo on renovation timeline, cost overrun, lease-up velocity, and exit cap rate expansion."
+            },
+            {
+              "agent": "buyer-private-equity",
+              "file": "buyer-private-equity.md",
+              "model": "claude-sonnet-4-6[1m]",
+              "inputSet": "standard",
+              "maxOutputTokens": 1000,
+              "purpose": "PE buyer's IRR and equity multiple re-underwrite. Validates 15-20% net IRR target survivability under base, downside, and stress scenarios."
+            }
+          ],
+          "rationale": "Value-add and opportunistic strategies carry execution risk not fully captured by pipeline phase agents. Requires dedicated business plan stress."
+        }
+      ]
+    },
+    "tier3": {
+      "description": "On-request agents. User-triggered for additional perspective before IC or during deal team deliberation.",
+      "budgetPerAgent": 6000,
+      "agents": [
+        {
+          "agent": "buyer-pension-fund",
+          "file": "buyer-pension-fund.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputSet": "standard",
+          "maxOutputTokens": 1200,
+          "purpose": "Core/long-hold pension fund perspective. $50B+ ODCE mandate lens, GRESB requirements, 90-120 day DD expectations, max 40% LTV."
+        },
+        {
+          "agent": "buyer-private-equity",
+          "file": "buyer-private-equity.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputSet": "standard",
+          "maxOutputTokens": 1200,
+          "purpose": "Opportunistic PE perspective. $5B dry powder, 15-20% net IRR, 65-75% LTV, 3-5 year hold, exit-driven underwriting."
+        },
+        {
+          "agent": "buyer-reit",
+          "file": "buyer-reit.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputSet": "standard",
+          "maxOutputTokens": 1200,
+          "purpose": "Public REIT perspective. FFO/AFFO accretion lens, NAV methodology, analyst reaction awareness, sector-focused capital allocation."
+        },
+        {
+          "agent": "buyer-family-office",
+          "file": "buyer-family-office.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputSet": "standard",
+          "maxOutputTokens": 1200,
+          "purpose": "Family office perspective. 10-30 year generational hold, after-tax optimization, 1031/cost seg/estate planning, operational simplicity preference."
+        },
+        {
+          "agent": "buyer-syndicator",
+          "file": "buyer-syndicator.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputSet": "standard",
+          "maxOutputTokens": 1200,
+          "purpose": "Multifamily syndicator perspective. Deal-by-deal capital raise, 50-200 accredited investors, GP fee economics, 75-80% LTV, Sun Belt value-add lens."
+        },
+        {
+          "agent": "lens-esg-impact",
+          "file": "lens-esg-impact.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputSet": "standard",
+          "maxOutputTokens": 1200,
+          "purpose": "Full ESG/impact analysis. GRESB, TCFD, CRREM stranding, climate physical and transition risk, social impact, governance quality."
+        },
+        {
+          "agent": "disposition-strategist",
+          "file": "cre-veteran.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputSet": "standard",
+          "maxOutputTokens": 1000,
+          "purpose": "Exit optionality analysis. Evaluates hold-sell-recapitalize decision tree, buyer universe depth, and optimal exit timing across scenarios."
+        },
+        {
+          "agent": "capital-markets-specialist",
+          "file": "lens-quantitative.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputSet": "full",
+          "maxOutputTokens": 1500,
+          "purpose": "Capital stack optimization. Debt/equity mix, mezz layering, preferred equity structures, recourse vs. non-recourse tradeoffs."
+        },
+        {
+          "agent": "property-manager",
+          "file": "lens-qualitative.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputSet": "standard",
+          "maxOutputTokens": 1000,
+          "purpose": "Operational feasibility and property management challenge. Evaluates OpEx assumptions, maintenance reserve adequacy, and management platform fit."
+        },
+        {
+          "agent": "acquisitions-analyst",
+          "file": "lens-quantitative.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputSet": "full",
+          "maxOutputTokens": 1800,
+          "purpose": "Junior analyst cross-check. Independent model rebuild from rent roll and OpEx to verify pipeline arithmetic and assumption consistency."
+        },
+        {
+          "agent": "lens-quantitative",
+          "file": "lens-quantitative.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputSet": "full",
+          "maxOutputTokens": 2000,
+          "purpose": "Full quantitative deep-dive. DCF, sensitivity grids, Monte Carlo framing, regression benchmarks, and breakeven analysis on demand."
+        }
+      ]
+    }
+  },
+  "synthesis": {
+    "agent": "deal-team-lead",
+    "file": "deal-team-lead.md",
+    "model": "claude-opus-4-6[1m]",
+    "inputSet": "all-tier-outputs",
+    "maxOutputTokens": 3000,
+    "estimatedMinutes": 3,
+    "purpose": "Synthesizes all tier outputs into a final challenge layer summary. Structures disagreement across agents, elevates unresolved issues, and produces a revised verdict recommendation for IC.",
+    "outputFormat": {
+      "sections": [
+        "challenge-summary",
+        "verdict-confirmation-or-revision",
+        "unresolved-disagreements",
+        "conditions-precedent",
+        "ic-recommendation"
+      ]
+    }
+  },
+  "contextScoping": {
+    "description": "Token budget tiers for agent inputs. Agents receive the smallest input set that covers their analytical mandate.",
+    "inputSets": {
+      "minimal": {
+        "tokens": 700,
+        "includes": [
+          "deal summary (name, address, asset type, strategy, purchase price)",
+          "key metrics (cap rate, DSCR, LTV, cash-on-cash, IRR)",
+          "pipeline verdict (GO/CONDITIONAL/NO-GO)",
+          "top 3 red flags from pipeline"
+        ]
+      },
+      "standard": {
+        "tokens": 2200,
+        "includes": [
+          "all minimal fields",
+          "rent roll summary (unit mix, occupancy, WALT, top-5 tenants)",
+          "financial summary (NOI, NOI margin, expense ratio, debt service)",
+          "market data (submarket vacancy, rent growth, supply pipeline)",
+          "underwriting assumptions (rent growth, exit cap, hold period, capex)",
+          "phase-level red flags and data gaps from all 5 pipeline phases"
+        ]
+      },
+      "full": {
+        "tokens": 5500,
+        "includes": [
+          "all standard fields",
+          "phase-specific detail outputs from all 5 pipeline phases",
+          "full pro forma (year-by-year NOI, debt service, distributions)",
+          "stress test scenarios (base, downside, severe downside)",
+          "all tier1 and triggered tier2 agent outputs from this challenge layer run"
+        ]
+      }
+    }
+  },
+  "executionConfig": {
+    "maxConcurrentTier2Groups": 3,
+    "tier1TimeoutMinutes": 25,
+    "tier2TimeoutMinutes": 15,
+    "tier3TimeoutMinutes": 10,
+    "synthesisTimeoutMinutes": 5,
+    "totalBudgetTokensMax": 90000,
+    "failurePolicy": "continue-on-agent-failure",
+    "minimumTier1AgentsRequired": 6,
+    "verdictChangeRequiresHumanConfirmation": true
+  }
+}

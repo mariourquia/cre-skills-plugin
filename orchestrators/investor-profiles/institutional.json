@@ -1,0 +1,58 @@
+{
+  "$schema": "Investor Profile - Institutional (Pension Fund, Endowment, Sovereign Wealth)",
+  "investorType": "institutional",
+  "teamComposition": {
+    "tier1Override": {
+      "buyerAgent": "buyer-pension-fund",
+      "additionalAgents": ["lens-esg-impact"],
+      "removeAgents": []
+    },
+    "tier2Bias": {
+      "alwaysTrigger": ["perspective-environmental"],
+      "neverTrigger": ["aggressive-gp"]
+    }
+  },
+  "primaryCriteria": {
+    "dscr": {
+      "pass": 1.35,
+      "conditional": 1.25,
+      "fail": 1.15,
+      "description": "Debt Service Coverage Ratio"
+    },
+    "ltv": {
+      "maxPass": 0.40,
+      "maxConditional": 0.50,
+      "fail": 0.60,
+      "description": "Loan to Value Ratio"
+    },
+    "cashOnCash": {
+      "pass": 0.05,
+      "conditional": 0.04,
+      "fail": 0.03,
+      "description": "Annual cash flow / equity invested"
+    },
+    "debtYield": {
+      "pass": 0.10,
+      "conditional": 0.09,
+      "fail": 0.08,
+      "description": "NOI / loan amount"
+    },
+    "capRateSpread": {
+      "pass": 150,
+      "conditional": 100,
+      "fail": 50,
+      "unit": "bps",
+      "description": "Cap rate minus debt rate in basis points"
+    }
+  },
+  "dealbreakers": [
+    "Active title dispute",
+    "Environmental contamination (unquantified)",
+    "Tenant concentration >25%",
+    "Value-add execution risk",
+    "Leverage above 50% LTV",
+    "DSCR <1.15"
+  ],
+  "reportingVariant": "institutional",
+  "allowedStrategies": ["core", "core-plus"]
+}

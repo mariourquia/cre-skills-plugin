@@ -1,0 +1,1209 @@
+{
+  "orchestratorId": "hold-period-monitor",
+  "version": "2.0.0",
+  "entityType": "property",
+  "description": "Seven-phase asset management pipeline: onboards post-acquisition, sets annual budget, monitors performance quarterly (recurring loop), manages leasing strategy, plans capital expenditures, evaluates exit and intervention triggers, and dispatches action plans when thresholds are breached. Coordinates 18+ specialist agents and wires in 18 CRE skills across all phases. Terminal verdict: CONTINUE (hold as planned), INTERVENE (NOI remediation required), or EXIT (disposition conditions met).",
+  "model": "claude-opus-4-6[1m]",
+  "phases": [
+    {
+      "phaseId": "onboarding",
+      "name": "Post-Acquisition Onboarding",
+      "weight": 0.10,
+      "agents": [
+        {
+          "agentId": "asset-manager-lead",
+          "file": "agents/asset-management/asset-manager-lead.md",
+          "model": "claude-opus-4-6[1m]",
+          "inputs": ["config/deal.json", "acquisition closing data (from handoff)", "property management contracts", "insurance policies", "vendor contracts"],
+          "outputs": ["onboarding checklist", "PM transition plan", "vendor contract inventory", "insurance transfer status", "baseline property profile"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/post-close-onboarding-transition.md"
+          ],
+          "maxTimeoutMinutes": 45,
+          "validationRules": [
+            {
+              "ruleId": "onboarding-checklist-complete",
+              "description": "Onboarding checklist must be generated with all critical items addressed or flagged.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "pm-transition-plan-present",
+              "description": "Property management transition plan must be non-null with timeline and responsible parties.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        },
+        {
+          "agentId": "property-manager",
+          "file": "agents/asset-management/property-manager.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "acquisition closing data", "property management contracts", "vendor contracts", "utility accounts"],
+          "outputs": ["PM setup status", "vendor transition checklist", "utility transfer status", "tenant communication plan", "operating account setup"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/post-close-onboarding-transition.md",
+            "skills/coi-compliance-checker.md"
+          ],
+          "maxTimeoutMinutes": 35
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "holdPeriod",
+        "passConditions": [
+          {
+            "conditionId": "onboarding-complete",
+            "description": "All critical onboarding items addressed: PM transition, vendor contracts, insurance transfers, utility accounts, tenant notifications.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "property-profile-established",
+            "description": "Baseline property profile established with unit mix, rent roll, lease expirations, and operating history.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "partial-vendor-transition",
+            "description": "Some vendor contracts still in transition; interim arrangements in place.",
+            "propagateIfFailed": false
+          },
+          {
+            "conditionId": "missing-historical-data",
+            "description": "Prior owner provided incomplete historical operating data; budget will use acquisition pro forma assumptions.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "pm-transition-blocked",
+            "description": "Property management transition cannot proceed due to contractual or regulatory obstacle.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": []
+      },
+      "dataForDownstreamContract": {
+        "onboardingChecklist": {
+          "type": "object",
+          "required": true,
+          "description": "Completed onboarding checklist with status of each critical item."
+        },
+        "propertyProfile": {
+          "type": "object",
+          "required": true,
+          "description": "Baseline property profile: unit mix, current rent roll, lease expirations, operating history, vendor inventory."
+        },
+        "vendorInventory": {
+          "type": "array",
+          "required": true,
+          "description": "Inventory of all vendor contracts with terms, expiration dates, and transition status."
+        }
+      }
+    },
+    {
+      "phaseId": "budget-setup",
+      "name": "Annual Budget Setup",
+      "weight": 0.10,
+      "agents": [
+        {
+          "agentId": "annual-budget-agent",
+          "file": "agents/hold-period/annual-budget-agent.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "acquisition outputs", "onboarding property profile", "prior year actuals (if available)", "business plan targets"],
+          "outputs": ["annual operating budget", "capex budget", "NOI target by quarter", "variance thresholds"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/annual-budget-engine.md",
+            "skills/variance-narrative-generator.md"
+          ],
+          "maxTimeoutMinutes": 40,
+          "validationRules": [
+            {
+              "ruleId": "noi-target-present",
+              "description": "Annual NOI target and quarterly milestones must be non-null.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "budget-balances",
+              "description": "Total revenue - Total OpEx = NOI within 0.5% tolerance.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        },
+        {
+          "agentId": "debt-service-scheduler",
+          "file": "agents/hold-period/debt-service-scheduler.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "final debt terms from acquisition closing", "amortization schedule"],
+          "outputs": ["debt service schedule", "IO period calendar", "balloon date", "DSCR tracking baseline"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 20
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "onboarding",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "propertyProfile",
+              "critical": true,
+              "description": "Baseline property profile required to build accurate annual budget."
+            },
+            {
+              "key": "vendorInventory",
+              "critical": false,
+              "description": "Vendor contracts inform operating expense budget line items."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "holdPeriod",
+        "passConditions": [
+          {
+            "conditionId": "budget-approved",
+            "description": "Annual operating and capex budgets are complete with quarterly NOI milestones.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "debt-schedule-complete",
+            "description": "Full debt service schedule produced through maturity with balloon date confirmed.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "budget-based-on-partial-data",
+            "description": "Budget built on acquisition pro forma without first-year actuals; variance thresholds widened.",
+            "propagateIfFailed": false
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "debt-schedule-missing",
+            "description": "Cannot build debt service schedule due to missing loan document data from acquisition.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": []
+      },
+      "dataForDownstreamContract": {
+        "annualBudget": {
+          "type": "object",
+          "required": true,
+          "description": "Approved annual operating and capex budget with quarterly NOI milestones."
+        },
+        "debtServiceSchedule": {
+          "type": "object",
+          "required": true,
+          "description": "Full debt service schedule with monthly payments, IO periods, and balloon date."
+        },
+        "varianceThresholds": {
+          "type": "object",
+          "required": true,
+          "description": "NOI and occupancy variance thresholds that trigger the intervention pathway."
+        }
+      }
+    },
+    {
+      "phaseId": "performance-monitoring",
+      "name": "Quarterly Performance Monitoring",
+      "weight": 0.25,
+      "loopConfig": {
+        "type": "recurring",
+        "frequency": "quarterly",
+        "triggerCondition": "Quarter-end actuals available or 90 days since last cycle.",
+        "maxIterations": 40,
+        "exitConditions": [
+          "overallVerdict == EXIT",
+          "property disposed",
+          "debt maturity reached",
+          "hold period business plan completed"
+        ],
+        "carryForwardData": ["priorQuarterDashboard", "cumulativeVarianceTrend", "dscrHistory", "occupancyTrend"]
+      },
+      "agents": [
+        {
+          "agentId": "performance-dashboard-agent",
+          "file": "agents/hold-period/performance-dashboard-agent.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "current quarter actuals", "annual budget", "prior quarter checkpoint"],
+          "outputs": ["quarterly performance dashboard", "NOI vs budget variance", "occupancy trend", "rent growth vs market", "YTD summary"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/property-performance-dashboard.md",
+            "skills/variance-narrative-generator.md"
+          ],
+          "maxTimeoutMinutes": 30,
+          "validationRules": [
+            {
+              "ruleId": "variance-calculated",
+              "description": "NOI variance vs budget must be calculated in dollars and percentage.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        },
+        {
+          "agentId": "dscr-monitor",
+          "file": "agents/hold-period/dscr-monitor.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "current quarter NOI actuals", "debt service schedule"],
+          "outputs": ["trailing 12-month DSCR", "covenant compliance status", "lender reporting flag"],
+          "critical": true,
+          "dependencies": ["performance-dashboard-agent"],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 20
+        },
+        {
+          "agentId": "capex-tracker",
+          "file": "agents/hold-period/capex-tracker.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "capex budget", "capital spend actuals to date"],
+          "outputs": ["capex spend vs budget", "reserve balance", "deferred items log"],
+          "critical": false,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/capex-prioritizer.md"
+          ],
+          "maxTimeoutMinutes": 20
+        },
+        {
+          "agentId": "leasing-monitor",
+          "file": "agents/asset-management/leasing-manager.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "current rent roll", "lease expiration schedule", "market rent data", "prior quarter leasing metrics"],
+          "outputs": ["lease expiration exposure", "trade-out opportunity analysis", "renewal pipeline status", "leasing velocity metrics"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/rent-optimization-planner.md",
+            "skills/lease-trade-out-analyzer.md",
+            "skills/tenant-retention-engine.md"
+          ],
+          "maxTimeoutMinutes": 25
+        },
+        {
+          "agentId": "operations-analyst",
+          "file": "agents/asset-management/operations-analyst.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "current quarter expense actuals", "vendor invoices", "insurance certificates", "property tax assessments"],
+          "outputs": ["expense benchmarking report", "vendor performance scorecard", "insurance compliance status", "property tax assessment review", "CAM reconciliation status"],
+          "critical": false,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/cam-reconciliation-calculator.md",
+            "skills/coi-compliance-checker.md",
+            "skills/vendor-invoice-validator.md",
+            "skills/property-tax-appeal-analyzer.md",
+            "skills/building-systems-maintenance-manager.md"
+          ],
+          "maxTimeoutMinutes": 30
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "budget-setup",
+          "requiredStatus": ["COMPLETED"],
+          "requiredDataKeys": [
+            {
+              "key": "annualBudget",
+              "critical": true,
+              "description": "Budget required as the baseline for quarterly variance analysis."
+            },
+            {
+              "key": "debtServiceSchedule",
+              "critical": true,
+              "description": "Debt service schedule required for DSCR monitoring."
+            },
+            {
+              "key": "varianceThresholds",
+              "critical": true,
+              "description": "Variance thresholds required to determine if trigger-evaluation phase is activated."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "holdPeriod",
+        "passConditions": [
+          {
+            "conditionId": "noi-within-variance",
+            "description": "Trailing NOI is within the approved variance threshold vs budget.",
+            "metricPath": "dashboard.noiVariancePct",
+            "operator": "lte",
+            "thresholdRef": "holdPeriod.maxNoiVariancePct",
+            "propagateIfFailed": false
+          },
+          {
+            "conditionId": "dscr-covenant-compliant",
+            "description": "T12 DSCR is at or above lender covenant minimum.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "occupancy-stable",
+            "description": "Physical occupancy is within 200bps of budget target.",
+            "propagateIfFailed": false
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "noi-variance-warning",
+            "description": "NOI variance is between 5-10% below budget; trigger-evaluation phase activated.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "occupancy-trending-down",
+            "description": "Occupancy declined more than 300bps from prior quarter; watch flag set.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "lease-rollover-concentration",
+            "description": "More than 25% of rent roll expires in the next 6 months; leasing strategy phase escalated.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "expense-overrun",
+            "description": "Total operating expenses exceed budget by more than 5%; operational review recommended.",
+            "propagateIfFailed": false
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "dscr-covenant-breach",
+            "description": "T12 DSCR is below lender covenant minimum; cure period may apply.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "occupancy-crisis",
+            "description": "Physical occupancy dropped below 80%; immediate intervention required.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "dscrCovenantBreach",
+          "lenderAccelerationNotice"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "quarterlyDashboard": {
+          "type": "object",
+          "required": true,
+          "description": "Current quarter performance dashboard with all variance metrics."
+        },
+        "dscrStatus": {
+          "type": "object",
+          "required": true,
+          "description": "T12 DSCR value, covenant threshold, and compliance status."
+        },
+        "triggerFlags": {
+          "type": "array",
+          "required": true,
+          "description": "List of breach flags that activate the trigger-evaluation phase. Empty array if all metrics are within thresholds."
+        },
+        "leasingMetrics": {
+          "type": "object",
+          "required": true,
+          "description": "Lease expiration exposure, renewal pipeline, trade-out opportunities, and leasing velocity."
+        },
+        "operationsMetrics": {
+          "type": "object",
+          "required": false,
+          "description": "Expense benchmarking, vendor performance, insurance and tax compliance status."
+        }
+      }
+    },
+    {
+      "phaseId": "leasing-strategy",
+      "name": "Leasing Strategy",
+      "weight": 0.15,
+      "agents": [
+        {
+          "agentId": "leasing-manager",
+          "file": "agents/asset-management/leasing-manager.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "current rent roll", "lease expiration schedule", "market rent data", "quarterly dashboard leasing metrics", "tenant retention priorities"],
+          "outputs": ["renewal strategy by tenant", "trade-out analysis", "lease-up campaign plan", "rent optimization recommendations", "concession strategy"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/lease-negotiation-analyzer.md",
+            "skills/rent-optimization-planner.md",
+            "skills/lease-trade-out-analyzer.md",
+            "skills/lease-option-structurer.md",
+            "skills/tenant-retention-engine.md",
+            "skills/lease-compliance-auditor.md"
+          ],
+          "maxTimeoutMinutes": 35,
+          "validationRules": [
+            {
+              "ruleId": "renewal-strategy-per-expiring-lease",
+              "description": "Every lease expiring in the next 12 months must have a renewal/trade-out recommendation.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "rent-optimization-actionable",
+              "description": "Rent optimization recommendations must include specific dollar amounts and implementation timeline.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
+        },
+        {
+          "agentId": "property-manager-leasing",
+          "file": "agents/asset-management/property-manager.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "renewal strategy", "lease-up campaign plan", "tenant communication templates"],
+          "outputs": ["tenant engagement tracker", "concession log", "lease execution status", "prospect pipeline"],
+          "critical": false,
+          "dependencies": ["leasing-manager"],
+          "skillRefs": [
+            "skills/tenant-retention-engine.md"
+          ],
+          "maxTimeoutMinutes": 25
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "performance-monitoring",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "leasingMetrics",
+              "critical": true,
+              "description": "Current leasing metrics required to formulate strategy."
+            },
+            {
+              "key": "quarterlyDashboard",
+              "critical": true,
+              "description": "Performance context needed for rent optimization decisions."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "holdPeriod",
+        "passConditions": [
+          {
+            "conditionId": "leasing-plan-complete",
+            "description": "Renewal and trade-out strategy exists for every lease expiring in the next 12 months.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "rent-optimization-actionable",
+            "description": "Rent optimization recommendations are specific and implementable.",
+            "propagateIfFailed": false
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "high-rollover-risk",
+            "description": "More than 30% of revenue at risk in next 12 months; enhanced retention strategy required.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "below-market-rents",
+            "description": "Average in-place rents are more than 10% below market; trade-out program recommended.",
+            "propagateIfFailed": false
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "no-leasing-strategy",
+            "description": "Leasing strategy agent failed to produce actionable plan after all retries.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": []
+      },
+      "dataForDownstreamContract": {
+        "leasingPlan": {
+          "type": "object",
+          "required": true,
+          "description": "Complete leasing strategy: renewals, trade-outs, lease-up campaign, rent optimization targets."
+        },
+        "revenueImpactProjection": {
+          "type": "object",
+          "required": true,
+          "description": "Projected revenue impact of leasing strategy implementation over the next 4 quarters."
+        }
+      }
+    },
+    {
+      "phaseId": "capital-planning",
+      "name": "Capital Planning",
+      "weight": 0.10,
+      "agents": [
+        {
+          "agentId": "capex-prioritizer-agent",
+          "file": "agents/hold-period/capex-prioritizer-agent.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "capex tracker output", "deferred items log", "reserve balance", "exit trigger assessment", "building condition data"],
+          "outputs": ["prioritized capex list", "ROI by capex item", "defer vs execute recommendation", "reserve adequacy assessment"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/capex-prioritizer.md"
+          ],
+          "maxTimeoutMinutes": 30,
+          "validationRules": [
+            {
+              "ruleId": "capex-items-prioritized",
+              "description": "All known capex items must be ranked by priority with ROI estimates.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        },
+        {
+          "agentId": "construction-manager",
+          "file": "agents/asset-management/construction-manager.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "prioritized capex list", "value-add renovation plan", "contractor bids", "permit requirements"],
+          "outputs": ["construction timeline", "budget vs actual tracker", "change order log", "completion milestones", "value-add ROI tracking"],
+          "critical": false,
+          "dependencies": ["capex-prioritizer-agent"],
+          "skillRefs": [
+            "skills/work-order-triage.md"
+          ],
+          "maxTimeoutMinutes": 25
+        },
+        {
+          "agentId": "maintenance-manager",
+          "file": "agents/asset-management/maintenance-manager.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "building systems inventory", "work order history", "preventive maintenance schedule", "warranty information"],
+          "outputs": ["maintenance schedule", "work order triage recommendations", "building systems health report", "warranty tracking"],
+          "critical": false,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/building-systems-maintenance-manager.md",
+            "skills/work-order-triage.md"
+          ],
+          "maxTimeoutMinutes": 25
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "performance-monitoring",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "quarterlyDashboard",
+              "critical": false,
+              "description": "Performance data informs capex prioritization relative to NOI targets."
+            }
+          ]
+        },
+        {
+          "phaseId": "budget-setup",
+          "requiredStatus": ["COMPLETED"],
+          "requiredDataKeys": [
+            {
+              "key": "annualBudget",
+              "critical": true,
+              "description": "Capex budget allocation from annual budget sets the capital planning envelope."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "holdPeriod",
+        "passConditions": [
+          {
+            "conditionId": "capex-plan-complete",
+            "description": "All capital items prioritized with ROI analysis and defer/execute recommendation.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "reserves-adequate",
+            "description": "Capital reserves are sufficient to fund all execute-now items plus a 10% contingency.",
+            "propagateIfFailed": false
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "deferred-maintenance-growing",
+            "description": "Deferred maintenance backlog increased by more than 15% from prior quarter; risk escalation recommended.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "value-add-behind-schedule",
+            "description": "Value-add renovation program is more than 30 days behind schedule.",
+            "propagateIfFailed": false
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "reserve-shortfall",
+            "description": "Capital reserves insufficient to fund critical deferred maintenance items.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": []
+      },
+      "dataForDownstreamContract": {
+        "capexPlan": {
+          "type": "object",
+          "required": true,
+          "description": "Prioritized capex list with ROI, timeline, and defer/execute recommendations."
+        },
+        "reserveStatus": {
+          "type": "object",
+          "required": true,
+          "description": "Current reserve balance, funded items, and adequacy assessment."
+        },
+        "valueAddProgress": {
+          "type": "object",
+          "required": false,
+          "description": "Value-add renovation progress: completion %, budget vs actual, ROI tracking."
+        }
+      }
+    },
+    {
+      "phaseId": "tenant-management",
+      "name": "Tenant Management",
+      "weight": 0.10,
+      "agents": [
+        {
+          "agentId": "tenant-retention-agent",
+          "file": "agents/hold-period/tenant-retention-agent.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "at-risk tenant list", "lease expiration schedule", "market rent data", "tenant payment history", "tenant satisfaction data"],
+          "outputs": ["retention strategy per tenant", "renewal offer terms", "replacement leasing plan", "delinquency workout recommendations"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/tenant-retention-engine.md",
+            "skills/tenant-delinquency-workout.md"
+          ],
+          "maxTimeoutMinutes": 30,
+          "validationRules": [
+            {
+              "ruleId": "retention-strategy-complete",
+              "description": "Every at-risk tenant must have a retention or replacement strategy.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        },
+        {
+          "agentId": "lease-compliance-auditor",
+          "file": "agents/asset-management/lease-compliance-auditor.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "lease abstracts", "tenant files", "CAM reconciliation data", "insurance certificates"],
+          "outputs": ["compliance audit report", "lease violation log", "CAM reconciliation status", "insurance certificate tracker"],
+          "critical": false,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/lease-compliance-auditor.md",
+            "skills/cam-reconciliation-calculator.md",
+            "skills/coi-compliance-checker.md"
+          ],
+          "maxTimeoutMinutes": 25
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "performance-monitoring",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "leasingMetrics",
+              "critical": true,
+              "description": "Leasing metrics identify at-risk tenants and expiration exposure."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "holdPeriod",
+        "passConditions": [
+          {
+            "conditionId": "tenant-retention-plan-active",
+            "description": "Retention strategies in place for all at-risk tenants.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "lease-compliance-current",
+            "description": "No material lease violations outstanding.",
+            "propagateIfFailed": false
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "delinquency-workout-active",
+            "description": "One or more tenants in active delinquency workout; recovery plan in place.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "cam-reconciliation-pending",
+            "description": "CAM reconciliation in progress; preliminary estimates used.",
+            "propagateIfFailed": false
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "material-lease-violations",
+            "description": "Material lease violations discovered requiring legal intervention.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": []
+      },
+      "dataForDownstreamContract": {
+        "tenantRetentionPlan": {
+          "type": "object",
+          "required": true,
+          "description": "Tenant retention strategies, renewal offers, and replacement plans."
+        },
+        "complianceStatus": {
+          "type": "object",
+          "required": false,
+          "description": "Lease compliance audit results, violation log, CAM reconciliation status."
+        },
+        "delinquencyWorkouts": {
+          "type": "array",
+          "required": false,
+          "description": "Active delinquency workout plans with recovery timelines."
+        }
+      }
+    },
+    {
+      "phaseId": "reposition-trigger-evaluation",
+      "name": "Reposition and Trigger Evaluation",
+      "weight": 0.10,
+      "agents": [
+        {
+          "agentId": "exit-trigger-evaluator",
+          "file": "agents/hold-period/exit-trigger-evaluator.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "quarterly dashboard", "market cycle data", "hold period targets", "acquisition basis", "cumulative performance history"],
+          "outputs": ["exit trigger assessment", "IRR-to-date", "remaining upside analysis", "optimal exit window estimate", "reposition feasibility"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/noi-sprint-plan.md",
+            "skills/property-performance-dashboard.md"
+          ],
+          "maxTimeoutMinutes": 30
+        },
+        {
+          "agentId": "intervention-screener",
+          "file": "agents/hold-period/intervention-screener.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "trigger flags", "quarterly dashboard", "DSCR status", "leasing plan", "capex plan"],
+          "outputs": ["intervention necessity assessment", "root cause diagnosis", "recommended intervention type", "severity classification"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/noi-sprint-plan.md"
+          ],
+          "maxTimeoutMinutes": 25
+        },
+        {
+          "agentId": "tenant-retention-screener",
+          "file": "agents/hold-period/tenant-retention-screener.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "current rent roll", "lease expiration schedule", "market rent data", "tenant retention plan"],
+          "outputs": ["lease rollover risk", "at-risk tenant list", "retention priority ranking"],
+          "critical": false,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/tenant-retention-engine.md"
+          ],
+          "maxTimeoutMinutes": 20
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "performance-monitoring",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "quarterlyDashboard",
+              "critical": true,
+              "description": "Performance data required for exit and intervention trigger evaluation."
+            },
+            {
+              "key": "triggerFlags",
+              "critical": true,
+              "description": "Trigger flags from monitoring phase determine which evaluation paths activate."
+            }
+          ]
+        },
+        {
+          "phaseId": "leasing-strategy",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "leasingPlan",
+              "critical": false,
+              "description": "Leasing strategy context informs whether exit or intervention is appropriate."
+            }
+          ]
+        },
+        {
+          "phaseId": "capital-planning",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "capexPlan",
+              "critical": false,
+              "description": "Capital plan status informs reposition feasibility and exit timing."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "holdPeriod",
+        "passConditions": [
+          {
+            "conditionId": "no-exit-trigger",
+            "description": "IRR-to-date and remaining upside analysis support continuing the hold period.",
+            "propagateIfFailed": false
+          },
+          {
+            "conditionId": "no-intervention-required",
+            "description": "Intervention screener confirms performance issues are within normal variance.",
+            "propagateIfFailed": false
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "exit-window-approaching",
+            "description": "Exit trigger evaluation finds optimal window within 2 quarters; disposition pre-work recommended.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "minor-intervention-needed",
+            "description": "Intervention screener recommends operational changes; action-dispatch phase activated.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "reposition-opportunity",
+            "description": "Market conditions support property repositioning (class upgrade, amenity package, target demographic shift).",
+            "propagateIfFailed": false
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "forced-exit-trigger",
+            "description": "DSCR covenant breach or debt maturity approaching within 6 months forces immediate exit evaluation.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": []
+      },
+      "dataForDownstreamContract": {
+        "exitTriggerAssessment": {
+          "type": "object",
+          "required": true,
+          "description": "Exit trigger analysis including IRR-to-date and optimal exit window."
+        },
+        "interventionRequired": {
+          "type": "boolean",
+          "required": true,
+          "description": "True if action-dispatch phase should activate this quarter."
+        },
+        "recommendedActions": {
+          "type": "array",
+          "required": false,
+          "description": "List of recommended interventions if interventionRequired is true."
+        },
+        "repositionAssessment": {
+          "type": "object",
+          "required": false,
+          "description": "Reposition feasibility analysis if market conditions support a strategy shift."
+        },
+        "overallVerdict": {
+          "type": "string",
+          "required": true,
+          "description": "CONTINUE, INTERVENE, or EXIT. Determines next cycle behavior and cross-chain handoffs."
+        }
+      }
+    },
+    {
+      "phaseId": "operational-excellence",
+      "name": "Operational Excellence and Action Dispatch",
+      "weight": 0.10,
+      "agents": [
+        {
+          "agentId": "noi-sprint-agent",
+          "file": "agents/hold-period/noi-sprint-agent.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "quarterly dashboard", "intervention assessment", "market rent data", "leasing plan", "capex plan"],
+          "outputs": ["NOI sprint plan", "90-day action items", "revenue upside initiatives", "OpEx reduction targets", "accountability assignments"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/noi-sprint-plan.md"
+          ],
+          "maxTimeoutMinutes": 35,
+          "validationRules": [
+            {
+              "ruleId": "sprint-plan-has-items",
+              "description": "NOI sprint plan must contain at least one revenue initiative and one expense reduction target.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        },
+        {
+          "agentId": "tenant-retention-action-agent",
+          "file": "agents/hold-period/tenant-retention-agent.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "at-risk tenant list", "lease expiration schedule", "market rent data", "intervention assessment"],
+          "outputs": ["retention execution plan", "renewal offer packages", "replacement leasing timeline", "delinquency workout actions"],
+          "critical": false,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/tenant-retention-engine.md",
+            "skills/tenant-delinquency-workout.md"
+          ],
+          "maxTimeoutMinutes": 25
+        },
+        {
+          "agentId": "variance-narrator",
+          "file": "agents/asset-management/variance-narrator.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "quarterly dashboard", "NOI sprint plan", "leasing plan", "capex plan"],
+          "outputs": ["quarterly variance narrative", "management commentary", "investor reporting package", "action item tracking report"],
+          "critical": false,
+          "dependencies": ["noi-sprint-agent"],
+          "skillRefs": [
+            "skills/variance-narrative-generator.md"
+          ],
+          "maxTimeoutMinutes": 20
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "reposition-trigger-evaluation",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "interventionRequired",
+              "critical": true,
+              "description": "If false, action-dispatch phase runs in maintenance mode; if true, full NOI sprint activated."
+            },
+            {
+              "key": "recommendedActions",
+              "critical": false,
+              "description": "Recommended action types to direct agent focus."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "holdPeriod",
+        "passConditions": [
+          {
+            "conditionId": "action-plan-complete",
+            "description": "NOI sprint plan or maintenance action plan is complete and ready for execution.",
+            "propagateIfFailed": false
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "partial-actions-only",
+            "description": "Only maintenance-mode actions completed; NOI sprint not triggered this quarter.",
+            "propagateIfFailed": false
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "noi-sprint-failed",
+            "description": "NOI sprint agent failed after all retries; manual intervention required.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": []
+      },
+      "dataForDownstreamContract": {
+        "quarterlyActionPlan": {
+          "type": "object",
+          "required": true,
+          "description": "Approved quarterly action plan for property management execution. Fed back into next monitoring cycle as prior-quarter context."
+        },
+        "varianceNarrative": {
+          "type": "object",
+          "required": false,
+          "description": "Quarterly variance narrative for investor reporting."
+        }
+      }
+    }
+  ],
+  "checkpointConfig": {
+    "basePath": "data/checkpoints/hold-period",
+    "agentLevelTracking": true,
+    "statusValues": {
+      "ONBOARDING": "Post-acquisition onboarding in progress.",
+      "ACTIVE": "Hold period in progress; quarterly monitoring cycle running.",
+      "INTERVENTION": "Active intervention underway; NOI sprint or retention plan executing.",
+      "EXIT_PREP": "Exit triggers met; disposition orchestrator handoff initiated.",
+      "COMPLETED": "Hold period ended; property disposed or refinanced."
+    },
+    "verdictValues": {
+      "CONTINUE": "Performance within thresholds; hold period continues per business plan.",
+      "INTERVENE": "Performance below thresholds; NOI remediation plan activated.",
+      "EXIT": "Exit conditions met; handoff to disposition-strategy orchestrator."
+    },
+    "loopTracker": {
+      "currentCycle": 0,
+      "totalCycles": 0,
+      "cycleHistory": [],
+      "cumulativeVerdicts": {
+        "CONTINUE": 0,
+        "INTERVENE": 0,
+        "EXIT": 0
+      }
+    }
+  },
+  "crossChainHandoffs": [
+    {
+      "direction": "inbound",
+      "counterpartOrchestrator": "multifamily-acquisition",
+      "triggerCondition": "Counterpart 'multifamily-acquisition' phase 'closing' verdict == PROCEED or CONDITIONAL",
+      "dataContract": {
+        "propertyId": {
+          "type": "string",
+          "required": true,
+          "description": "Property identifier to initialize hold-period monitoring.",
+          "sourcePhase": "closing",
+          "sourcePath": "propertyId"
+        },
+        "closingDate": {
+          "type": "string",
+          "required": true,
+          "description": "Closing date to initialize the quarterly monitoring cycle calendar.",
+          "sourcePhase": "closing",
+          "sourcePath": "closingDate"
+        },
+        "acquisitionCost": {
+          "type": "number",
+          "required": true,
+          "description": "Acquisition basis for IRR-to-date calculation.",
+          "sourcePhase": "closing",
+          "sourcePath": "acquisitionCost"
+        },
+        "debtTerms": {
+          "type": "object",
+          "required": true,
+          "description": "Executed debt terms for debt service scheduling.",
+          "sourcePhase": "closing",
+          "sourcePath": "debtTerms"
+        },
+        "icMemo": {
+          "type": "object",
+          "required": false,
+          "description": "IC memo as reference for hold-period business plan targets.",
+          "sourcePhase": "underwriting",
+          "sourcePath": "icMemo"
+        }
+      }
+    },
+    {
+      "direction": "outbound",
+      "counterpartOrchestrator": "disposition-strategy",
+      "triggerCondition": "Phase 'reposition-trigger-evaluation' dataForDownstream.overallVerdict == EXIT",
+      "dataContract": {
+        "propertyId": {
+          "type": "string",
+          "required": true,
+          "description": "Property identifier for disposition orchestrator.",
+          "sourcePhase": "reposition-trigger-evaluation",
+          "sourcePath": "exitTriggerAssessment.propertyId"
+        },
+        "exitTriggerAssessment": {
+          "type": "object",
+          "required": true,
+          "description": "Exit trigger analysis including IRR-to-date for disposition pricing guidance.",
+          "sourcePhase": "reposition-trigger-evaluation",
+          "sourcePath": "exitTriggerAssessment"
+        },
+        "acquisitionCost": {
+          "type": "number",
+          "required": true,
+          "description": "Acquisition basis for disposition return calculation.",
+          "sourcePhase": "budget-setup",
+          "sourcePath": "annualBudget.acquisitionCost"
+        },
+        "holdPeriodPerformance": {
+          "type": "object",
+          "required": true,
+          "description": "Cumulative hold period performance data: NOI trend, occupancy trend, capex spent, IRR-to-date.",
+          "sourcePhase": "performance-monitoring",
+          "sourcePath": "cumulativePerformance"
+        }
+      }
+    },
+    {
+      "direction": "outbound",
+      "counterpartOrchestrator": "portfolio-management",
+      "triggerCondition": "Every completed performance-monitoring cycle",
+      "dataContract": {
+        "propertyId": {
+          "type": "string",
+          "required": true,
+          "description": "Property identifier for portfolio-level aggregation."
+        },
+        "quarterlyDashboard": {
+          "type": "object",
+          "required": true,
+          "description": "Property-level quarterly performance data for portfolio roll-up."
+        },
+        "dscrStatus": {
+          "type": "object",
+          "required": true,
+          "description": "DSCR compliance status for portfolio-level debt monitoring."
+        },
+        "holdPeriodVerdict": {
+          "type": "string",
+          "required": true,
+          "description": "CONTINUE, INTERVENE, or EXIT verdict for portfolio-level awareness."
+        }
+      }
+    }
+  ],
+  "executionConfig": {
+    "concurrency": {
+      "maxConcurrentPhases": 2,
+      "maxAgentsPerPhase": 6
+    },
+    "timeouts": {
+      "defaultAgentMinutes": 30,
+      "defaultPhaseMinutes": 120,
+      "pipelineMinutes": 480,
+      "loopCycleMinutes": 360
+    },
+    "retryPolicy": {
+      "maxAttempts": 3,
+      "backoffStrategy": "exponential",
+      "baseDelayMs": 10000
+    },
+    "pollingIntervalMs": 30000,
+    "stalledPollThreshold": 10,
+    "logging": {
+      "categories": [
+        "ACTION",
+        "FINDING",
+        "INFO",
+        "PHASE",
+        "ERROR",
+        "DATA_GAP",
+        "COMPLETE",
+        "LAUNCH",
+        "RETRY",
+        "TIMEOUT",
+        "VERDICT",
+        "HANDOFF",
+        "LOOP_CYCLE",
+        "INTERVENTION"
+      ]
+    }
+  }
+}

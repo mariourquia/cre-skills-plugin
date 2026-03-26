@@ -1,0 +1,954 @@
+{
+  "orchestratorId": "multifamily-acquisition",
+  "version": "1.0.0",
+  "entityType": "deal",
+  "description": "Five-phase multifamily acquisition pipeline: due diligence, underwriting, financing, legal, and closing. Coordinates 21 specialist agents across all phases to produce an IC memo, funded term sheet, and executed closing package. Terminal deliverable is a PROCEED / CONDITIONAL / KILL verdict handed off to the hold-period-monitor orchestrator on closing.",
+  "model": "claude-opus-4-6[1m]",
+  "phases": [
+    {
+      "phaseId": "due-diligence",
+      "name": "Due Diligence",
+      "weight": 0.25,
+      "orchestratorFile": "orchestrators/due-diligence-orchestrator.md",
+      "agents": [
+        {
+          "agentId": "rent-roll-analyst",
+          "file": "agents/due-diligence/rent-roll-analyst.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "rent roll document"],
+          "outputs": ["rent-roll analysis", "unit mix summary", "loss-to-lease calculation"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/underwriting-calc.md",
+            "skills/multifamily-benchmarks.md"
+          ],
+          "maxTimeoutMinutes": 30,
+          "validationRules": [
+            {
+              "ruleId": "unit-count-present",
+              "description": "Total unit count must be non-null and match deal.json unitCount within 0 variance.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "loss-to-lease-calculated",
+              "description": "Loss-to-lease value in dollars and percentage must be present.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
+        },
+        {
+          "agentId": "opex-analyst",
+          "file": "agents/due-diligence/opex-analyst.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "T-12 operating statement"],
+          "outputs": ["opex analysis", "per-unit expenses", "anomaly flags"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/multifamily-benchmarks.md",
+            "skills/underwriting-calc.md"
+          ],
+          "maxTimeoutMinutes": 30
+        },
+        {
+          "agentId": "physical-inspection",
+          "file": "agents/due-diligence/physical-inspection.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "inspection reports"],
+          "outputs": ["physical condition report", "capex estimates"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 30
+        },
+        {
+          "agentId": "market-study",
+          "file": "agents/due-diligence/market-study.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "market data"],
+          "outputs": ["market analysis", "comp set", "rent comps"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 45
+        },
+        {
+          "agentId": "environmental-review",
+          "file": "agents/due-diligence/environmental-review.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "Phase I ESA"],
+          "outputs": ["environmental assessment", "remediation needs"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 30
+        },
+        {
+          "agentId": "legal-title-review",
+          "file": "agents/due-diligence/legal-title-review.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "title commitment", "survey", "market-study output"],
+          "outputs": ["title analysis", "exception review", "encumbrances"],
+          "critical": true,
+          "dependencies": ["market-study", "rent-roll-analyst"],
+          "skillRefs": [
+            "skills/legal-checklist.md"
+          ],
+          "maxTimeoutMinutes": 30
+        },
+        {
+          "agentId": "tenant-credit",
+          "file": "agents/due-diligence/tenant-credit.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "tenant financial data", "rent roll"],
+          "outputs": ["tenant credit analysis", "concentration risk"],
+          "critical": false,
+          "dependencies": ["rent-roll-analyst"],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 30
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "dueDiligence",
+        "passConditions": [
+          {
+            "conditionId": "all-critical-agents-complete",
+            "description": "All 6 critical DD agents completed successfully with no FAILED status.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "no-phase-ii-required",
+            "description": "Environmental review finds no conditions requiring Phase II ESA.",
+            "metricPath": "environmentalReview.phase2Required",
+            "operator": "eq",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "no-title-cloud",
+            "description": "Title review finds no unresolvable clouds on title or encumbrances that cannot be cured at closing.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "tenant-credit-incomplete",
+            "description": "Tenant credit agent failed or produced incomplete results; concentration risk is unknown.",
+            "propagateIfFailed": false
+          },
+          {
+            "conditionId": "minor-deferred-maintenance",
+            "description": "Physical inspection flags deferred maintenance items below the dealbreaker capex threshold.",
+            "propagateIfFailed": false
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "phase-ii-esa-required",
+            "description": "Environmental review requires Phase II ESA; deal cannot proceed until cleared.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "critical-agent-failure",
+            "description": "One or more critical DD agents failed after all retry attempts.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "environmentalLien",
+          "unresolvableTitleCloud",
+          "phase2ESARequired",
+          "zoningNonCompliance"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "rentRoll": {
+          "type": "object",
+          "required": true,
+          "description": "Validated rent roll with unit mix, in-place rents, loss-to-lease, and vacancy schedule. Required by financial-model-builder."
+        },
+        "opexAnalysis": {
+          "type": "object",
+          "required": true,
+          "description": "Normalized T-12 expenses with per-unit benchmarks and anomaly flags. Required by financial-model-builder."
+        },
+        "capexEstimates": {
+          "type": "object",
+          "required": true,
+          "description": "Deferred maintenance and capex reserve schedule from physical inspection. Required by financial-model-builder."
+        },
+        "marketComps": {
+          "type": "object",
+          "required": true,
+          "description": "Rent comps and market analysis supporting underwriting assumptions."
+        },
+        "environmentalStatus": {
+          "type": "string",
+          "required": true,
+          "description": "CLEAN, MONITOR, or PHASE2_REQUIRED. Blocks pipeline if PHASE2_REQUIRED."
+        },
+        "titleStatus": {
+          "type": "string",
+          "required": true,
+          "description": "CLEAR, CONDITIONAL, or CLOUDED. CLOUDED blocks pipeline."
+        },
+        "tenantCreditSummary": {
+          "type": "object",
+          "required": false,
+          "description": "Tenant concentration risk and creditworthiness summary. Non-critical; may be flagged as unknown if agent failed."
+        }
+      },
+      "selfReviewProtocol": {
+        "crossAgentValidations": [
+          {
+            "checkId": "unit-count-consistency",
+            "agentsInvolved": ["rent-roll-analyst", "physical-inspection"],
+            "description": "Total unit count from rent roll must match physical inspection unit count.",
+            "tolerance": "0%",
+            "actionOnMismatch": "block_verdict"
+          },
+          {
+            "checkId": "opex-gross-revenue-ratio",
+            "agentsInvolved": ["rent-roll-analyst", "opex-analyst"],
+            "description": "OpEx as % of gross revenue must be within market benchmarks (30-55% for multifamily).",
+            "tolerance": "5%",
+            "actionOnMismatch": "log_warning"
+          }
+        ],
+        "confidenceScoringRules": {
+          "baseScore": 100,
+          "deductions": {
+            "perNullKeyMetric": 5,
+            "perCrossPhasesMismatch": 10,
+            "perDataGap": 2,
+            "perFailedNonCriticalAgent": 5,
+            "perConditionalUpstream": 10,
+            "perMissingReport": 15
+          },
+          "categories": {
+            "HIGH": 90,
+            "MEDIUM": 70,
+            "LOW": 50,
+            "VERY_LOW": 0
+          }
+        }
+      }
+    },
+    {
+      "phaseId": "underwriting",
+      "name": "Underwriting",
+      "weight": 0.20,
+      "orchestratorFile": "orchestrators/underwriting-orchestrator.md",
+      "agents": [
+        {
+          "agentId": "financial-model-builder",
+          "file": "agents/underwriting/financial-model-builder.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "all due-diligence outputs"],
+          "outputs": ["base case financial model", "pro forma"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/underwriting-calc.md",
+            "skills/multifamily-benchmarks.md"
+          ],
+          "maxTimeoutMinutes": 45,
+          "validationRules": [
+            {
+              "ruleId": "noi-math-check",
+              "description": "NOI = EGI - Total OpEx within 1% tolerance.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "dscr-present",
+              "description": "DSCR must be non-null in base case output.",
+              "actionOnFailure": "halt_phase"
+            }
+          ]
+        },
+        {
+          "agentId": "scenario-analyst",
+          "file": "agents/underwriting/scenario-analyst.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "base case financial model"],
+          "outputs": ["27 scenario analyses", "sensitivity results"],
+          "critical": true,
+          "dependencies": ["financial-model-builder"],
+          "skillRefs": [
+            "skills/underwriting-calc.md",
+            "skills/risk-scoring.md"
+          ],
+          "maxTimeoutMinutes": 60,
+          "retryPolicy": {
+            "maxAttempts": 3,
+            "backoffStrategy": "exponential",
+            "baseDelayMs": 15000
+          },
+          "validationRules": [
+            {
+              "ruleId": "scenario-count",
+              "description": "Exactly 27 scenarios must be present in the output.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        },
+        {
+          "agentId": "ic-memo-writer",
+          "file": "agents/underwriting/ic-memo-writer.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "all due-diligence outputs", "all underwriting outputs"],
+          "outputs": ["investment committee memo"],
+          "critical": true,
+          "dependencies": ["financial-model-builder", "scenario-analyst"],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 45
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "due-diligence",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "rentRoll",
+              "critical": true,
+              "description": "Validated rent roll required to build financial model."
+            },
+            {
+              "key": "opexAnalysis",
+              "critical": true,
+              "description": "Normalized T-12 expenses required for OpEx underwriting."
+            },
+            {
+              "key": "capexEstimates",
+              "critical": true,
+              "description": "CapEx reserve schedule required for hold period NOI model."
+            },
+            {
+              "key": "environmentalStatus",
+              "critical": true,
+              "description": "Environmental status must be CLEAN or MONITOR; PHASE2_REQUIRED blocks launch."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "underwriting",
+        "passConditions": [
+          {
+            "conditionId": "base-case-irr-meets-threshold",
+            "description": "Base case levered IRR >= threshold from thresholds.underwriting.minIRR.",
+            "metricPath": "financialModel.baseCase.leveredIRR",
+            "operator": "gte",
+            "thresholdRef": "underwriting.minIRR",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "base-case-dscr-meets-threshold",
+            "description": "Base case DSCR >= threshold from thresholds.underwriting.minDSCR.",
+            "metricPath": "financialModel.baseCase.dscr",
+            "operator": "gte",
+            "thresholdRef": "underwriting.minDSCR",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "scenarios-passing",
+            "description": "At least 18 of 27 scenarios pass all return thresholds.",
+            "propagateIfFailed": false
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "marginal-irr",
+            "description": "Base case IRR is within 100bps below threshold; deal may be negotiable on price.",
+            "propagateIfFailed": false
+          },
+          {
+            "conditionId": "few-passing-scenarios",
+            "description": "10-17 of 27 scenarios pass; deal proceeds with IC disclosure of downside risk.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "irr-below-floor",
+            "description": "Base case levered IRR is more than 200bps below minimum threshold.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "negative-dscr",
+            "description": "DSCR is below 1.0 in base case.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "dscrBelow1",
+          "negativeEquityReturn",
+          "irrBelowHurdleFloor"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "baseCase": {
+          "type": "object",
+          "required": true,
+          "description": "Base case financial model including NOI, DSCR, IRR, EM, and cash-on-cash for every year of the hold period."
+        },
+        "scenarioSummary": {
+          "type": "object",
+          "required": true,
+          "description": "27-scenario sensitivity matrix with pass/fail flags per threshold."
+        },
+        "icMemo": {
+          "type": "object",
+          "required": true,
+          "description": "IC memo draft with deal summary, investment thesis, risk factors, and return profile."
+        },
+        "loanAssumptions": {
+          "type": "object",
+          "required": true,
+          "description": "Assumed debt terms (LTV, rate, amortization, IO period) for financing phase to validate against actual lender quotes."
+        }
+      },
+      "selfReviewProtocol": {
+        "confidenceScoringRules": {
+          "baseScore": 100,
+          "deductions": {
+            "perNullKeyMetric": 10,
+            "perCrossPhasesMismatch": 10,
+            "perDataGap": 3,
+            "perFailedNonCriticalAgent": 5,
+            "perConditionalUpstream": 10,
+            "perMissingReport": 20
+          },
+          "categories": {
+            "HIGH": 90,
+            "MEDIUM": 70,
+            "LOW": 50,
+            "VERY_LOW": 0
+          }
+        }
+      }
+    },
+    {
+      "phaseId": "financing",
+      "name": "Financing",
+      "weight": 0.20,
+      "orchestratorFile": "orchestrators/financing-orchestrator.md",
+      "agents": [
+        {
+          "agentId": "lender-outreach",
+          "file": "agents/financing/lender-outreach.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "underwriting outputs"],
+          "outputs": ["lender list", "outreach results", "initial quotes"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/lender-criteria.md"
+          ],
+          "maxTimeoutMinutes": 30
+        },
+        {
+          "agentId": "quote-comparator",
+          "file": "agents/financing/quote-comparator.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "lender quotes"],
+          "outputs": ["quote comparison matrix", "recommendation"],
+          "critical": true,
+          "dependencies": ["lender-outreach"],
+          "skillRefs": [
+            "skills/underwriting-calc.md",
+            "skills/lender-criteria.md"
+          ],
+          "maxTimeoutMinutes": 30
+        },
+        {
+          "agentId": "term-sheet-builder",
+          "file": "agents/financing/term-sheet-builder.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "selected quote"],
+          "outputs": ["term sheet draft", "negotiation points"],
+          "critical": true,
+          "dependencies": ["quote-comparator"],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 30
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "underwriting",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "baseCase",
+              "critical": true,
+              "description": "Base case model with NOI and DSCR needed to size the loan."
+            },
+            {
+              "key": "loanAssumptions",
+              "critical": true,
+              "description": "Assumed debt terms to benchmark against lender quotes."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "financing",
+        "passConditions": [
+          {
+            "conditionId": "term-sheet-executed",
+            "description": "At least one lender has issued a term sheet at or better than underwritten loan assumptions.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "dscr-preserved",
+            "description": "Actual debt terms do not cause DSCR to fall below minimum threshold.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "higher-rate-than-modeled",
+            "description": "Best available rate is 25-50bps above underwritten assumption; IRR impact modeled and within acceptable range.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "no-qualified-lenders",
+            "description": "No lenders willing to provide terms meeting minimum DSCR and LTV requirements.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "debt-terms-kill-returns",
+            "description": "Best available debt terms cause IRR to fall below deal-level minimum hurdle.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "noViableDebtSource",
+          "dscrImpactBelowFloor"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "termSheet": {
+          "type": "object",
+          "required": true,
+          "description": "Executed or in-negotiation term sheet with rate, LTV, amortization, IO period, and covenants."
+        },
+        "lenderName": {
+          "type": "string",
+          "required": true,
+          "description": "Selected lender name for loan document review in legal phase."
+        },
+        "actualLoanAssumptions": {
+          "type": "object",
+          "required": true,
+          "description": "Actual debt terms replacing modeled assumptions for use in legal loan doc review."
+        }
+      }
+    },
+    {
+      "phaseId": "legal",
+      "name": "Legal",
+      "weight": 0.25,
+      "orchestratorFile": "orchestrators/legal-orchestrator.md",
+      "earlyStartCriteria": {
+        "upstreamPhase": "due-diligence",
+        "completionThreshold": 0.80,
+        "earlyStartAgents": ["psa-reviewer", "title-survey-reviewer", "estoppel-tracker"],
+        "blockedAgentsRequire": ["financing", "underwriting"]
+      },
+      "agents": [
+        {
+          "agentId": "psa-reviewer",
+          "file": "agents/legal/psa-reviewer.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "PSA document"],
+          "outputs": ["PSA analysis", "risk flags", "deadline calendar"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/legal-checklist.md"
+          ],
+          "maxTimeoutMinutes": 45
+        },
+        {
+          "agentId": "title-survey-reviewer",
+          "file": "agents/legal/title-survey-reviewer.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "title commitment", "survey", "due-diligence title output"],
+          "outputs": ["title/survey review", "exception analysis"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/legal-checklist.md"
+          ],
+          "maxTimeoutMinutes": 30
+        },
+        {
+          "agentId": "estoppel-tracker",
+          "file": "agents/legal/estoppel-tracker.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "rent roll", "tenant list"],
+          "outputs": ["estoppel status tracking", "discrepancy flags"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 30
+        },
+        {
+          "agentId": "loan-doc-reviewer",
+          "file": "agents/legal/loan-doc-reviewer.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "loan documents", "financing outputs"],
+          "outputs": ["loan doc review", "compliance check"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/legal-checklist.md"
+          ],
+          "maxTimeoutMinutes": 45
+        },
+        {
+          "agentId": "insurance-coordinator",
+          "file": "agents/legal/insurance-coordinator.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "insurance requirements", "property data"],
+          "outputs": ["insurance compliance", "coverage verification"],
+          "critical": false,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 30
+        },
+        {
+          "agentId": "transfer-doc-preparer",
+          "file": "agents/legal/transfer-doc-preparer.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "entity docs", "deal terms"],
+          "outputs": ["transfer document drafts", "entity verification"],
+          "critical": false,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 30
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "underwriting",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "icMemo",
+              "critical": false,
+              "description": "IC memo for legal team context on deal structure and risk factors."
+            }
+          ]
+        },
+        {
+          "phaseId": "financing",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "termSheet",
+              "critical": true,
+              "description": "Term sheet required for loan doc review."
+            },
+            {
+              "key": "lenderName",
+              "critical": true,
+              "description": "Lender name required to route loan documents."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "closing",
+        "passConditions": [
+          {
+            "conditionId": "all-critical-legal-agents-complete",
+            "description": "PSA review, title review, estoppel tracking, and loan doc review all completed successfully.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "no-unresolved-psa-issues",
+            "description": "No outstanding PSA issues flagged as deal-blocking.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "estoppels-match-rent-roll",
+            "description": "All tenant estoppels received and confirm rent roll with no material discrepancies.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "outstanding-estoppels",
+            "description": "One or more minor tenant estoppels outstanding but not material to deal economics.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "insurance-gap",
+            "description": "Insurance coordinator flagged a coverage gap being resolved prior to closing.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "psa-material-breach",
+            "description": "PSA review identifies a seller representation that cannot be cured prior to closing.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "loan-doc-noncompliance",
+            "description": "Loan documents contain terms materially different from the executed term sheet.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "sellerRepBreach",
+          "loanDocMaterialVariance",
+          "titleNotClearable"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "psaDeadlines": {
+          "type": "object",
+          "required": true,
+          "description": "PSA deadline calendar with closing date, contingency periods, and notice requirements."
+        },
+        "estoppelPackage": {
+          "type": "object",
+          "required": true,
+          "description": "Complete estoppel package with status per tenant and any discrepancy flags."
+        },
+        "loanDocStatus": {
+          "type": "string",
+          "required": true,
+          "description": "APPROVED, CONDITIONAL, or REJECTED. REJECTED blocks closing phase."
+        },
+        "insuranceClearance": {
+          "type": "boolean",
+          "required": false,
+          "description": "True if all required insurance certificates are in place. False triggers a closing condition."
+        }
+      }
+    },
+    {
+      "phaseId": "closing",
+      "name": "Closing",
+      "weight": 0.10,
+      "orchestratorFile": "orchestrators/closing-orchestrator.md",
+      "agents": [
+        {
+          "agentId": "closing-coordinator",
+          "file": "agents/closing/closing-coordinator.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "all prior phase outputs"],
+          "outputs": ["closing checklist", "readiness assessment"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/legal-checklist.md"
+          ],
+          "maxTimeoutMinutes": 45
+        },
+        {
+          "agentId": "funds-flow-manager",
+          "file": "agents/closing/funds-flow-manager.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "loan terms", "purchase price", "prorations"],
+          "outputs": ["funds flow memo", "wire instructions"],
+          "critical": true,
+          "dependencies": ["closing-coordinator"],
+          "skillRefs": [
+            "skills/underwriting-calc.md"
+          ],
+          "maxTimeoutMinutes": 30
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "legal",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "psaDeadlines",
+              "critical": true,
+              "description": "Closing date from PSA deadline calendar."
+            },
+            {
+              "key": "loanDocStatus",
+              "critical": true,
+              "description": "Loan doc status must be APPROVED or CONDITIONAL to proceed to closing."
+            },
+            {
+              "key": "estoppelPackage",
+              "critical": true,
+              "description": "Estoppel package required for closing conditions checklist."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "closing",
+        "passConditions": [
+          {
+            "conditionId": "all-closing-conditions-cleared",
+            "description": "Closing checklist shows all conditions cleared; no outstanding items.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "funds-flow-confirmed",
+            "description": "Funds flow memo prepared and wire instructions verified.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "minor-conditions-outstanding",
+            "description": "One or two minor post-closing conditions outstanding but not deal-blocking.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "closing-condition-uncleared",
+            "description": "A material closing condition cannot be cleared by the scheduled closing date.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "fundsFlowShortfall",
+          "lenderFundingRefusal",
+          "psaExpiredUnextended"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "closingDate": {
+          "type": "string",
+          "required": true,
+          "description": "Actual closing date in ISO 8601 format. Seeds the hold-period-monitor orchestrator."
+        },
+        "acquisitionCost": {
+          "type": "number",
+          "required": true,
+          "description": "Total all-in acquisition cost including purchase price, closing costs, and reserves."
+        },
+        "debtTerms": {
+          "type": "object",
+          "required": true,
+          "description": "Final executed loan terms for hold-period financial modeling."
+        },
+        "propertyId": {
+          "type": "string",
+          "required": true,
+          "description": "Property identifier for cross-chain handoff to hold-period-monitor."
+        }
+      }
+    }
+  ],
+  "challengeLayer": {
+    "configRef": "config/challenge-layer.json",
+    "applyToPhases": ["due-diligence", "underwriting", "financing"],
+    "challengeModel": "claude-opus-4-6[1m]"
+  },
+  "investorParametrization": {
+    "configRef": "config/scenarios/core-plus.json",
+    "parameterNamespace": "/strategies/core-plus",
+    "overridableFields": [
+      "underwriting.minIRR",
+      "underwriting.minDSCR",
+      "underwriting.minEM",
+      "financing.maxLTV",
+      "dueDiligence.maxCapexAllowance"
+    ]
+  },
+  "checkpointConfig": {
+    "basePath": "data/status",
+    "agentLevelTracking": true,
+    "verdictValues": {
+      "PROCEED": "All phases cleared; pipeline hands off to hold-period-monitor at closing.",
+      "CONDITIONAL": "Pipeline proceeds with open conditions logged and propagated to IC.",
+      "KILL": "Pipeline terminated; deal is not viable at current terms or risk profile."
+    }
+  },
+  "crossChainHandoffs": [
+    {
+      "direction": "outbound",
+      "counterpartOrchestrator": "hold-period-monitor",
+      "triggerCondition": "Phase 'closing' verdict == PROCEED or CONDITIONAL",
+      "dataContract": {
+        "propertyId": {
+          "type": "string",
+          "required": true,
+          "description": "Property identifier for hold-period asset management.",
+          "sourcePhase": "closing",
+          "sourcePath": "propertyId"
+        },
+        "closingDate": {
+          "type": "string",
+          "required": true,
+          "description": "Closing date to initialize hold period budget calendar.",
+          "sourcePhase": "closing",
+          "sourcePath": "closingDate"
+        },
+        "acquisitionCost": {
+          "type": "number",
+          "required": true,
+          "description": "All-in acquisition cost as the basis for return tracking.",
+          "sourcePhase": "closing",
+          "sourcePath": "acquisitionCost"
+        },
+        "debtTerms": {
+          "type": "object",
+          "required": true,
+          "description": "Final debt terms for hold-period debt service modeling.",
+          "sourcePhase": "closing",
+          "sourcePath": "debtTerms"
+        },
+        "icMemo": {
+          "type": "object",
+          "required": false,
+          "description": "IC memo as reference for hold-period business plan targets.",
+          "sourcePhase": "underwriting",
+          "sourcePath": "icMemo"
+        }
+      }
+    }
+  ],
+  "executionConfig": {
+    "concurrency": {
+      "maxConcurrentPhases": 2,
+      "maxAgentsPerPhase": 7
+    },
+    "timeouts": {
+      "defaultAgentMinutes": 30,
+      "defaultPhaseMinutes": 120,
+      "pipelineMinutes": 480
+    },
+    "retryPolicy": {
+      "maxAttempts": 3,
+      "backoffStrategy": "exponential",
+      "baseDelayMs": 10000
+    },
+    "pollingIntervalMs": 30000,
+    "stalledPollThreshold": 10,
+    "logging": {
+      "categories": [
+        "ACTION",
+        "FINDING",
+        "INFO",
+        "PHASE",
+        "ERROR",
+        "DATA_GAP",
+        "COMPLETE",
+        "LAUNCH",
+        "RETRY",
+        "TIMEOUT",
+        "VERDICT",
+        "HANDOFF"
+      ]
+    }
+  }
+}

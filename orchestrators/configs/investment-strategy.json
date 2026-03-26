@@ -1,0 +1,709 @@
+{
+  "orchestratorId": "investment-strategy-formulator",
+  "version": "1.0.0",
+  "entityType": "fund",
+  "description": "Five-phase investment strategy formulation pipeline: capital profile assessment, market cycle positioning, strategy formulation, portfolio construction targets, and strategy memo production. Coordinates specialist agents to translate available capital and market conditions into a structured investment strategy with allocation targets, concentration limits, and pacing models. Terminal deliverable is a DEPLOY/REVISE/HOLD verdict with an approved strategy memo handed off to fund-management or acquisition orchestrators.",
+  "model": "claude-opus-4-6[1m]",
+  "phases": [
+    {
+      "phaseId": "capital-profile-assessment",
+      "name": "Capital Profile Assessment",
+      "weight": 0.15,
+      "orchestratorFile": "orchestrators/investment-strategy-orchestrator.md",
+      "agents": [
+        {
+          "agentId": "portfolio-strategist",
+          "file": "agents/strategy/portfolio-strategist.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["capital commitment data", "investor mandate documents", "fund terms", "LP constraints"],
+          "outputs": ["capital profile document", "deployment timeline", "return targets", "constraint matrix"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/fund-formation-toolkit.md"
+          ],
+          "maxTimeoutMinutes": 30,
+          "validationRules": [
+            {
+              "ruleId": "capital-amount-present",
+              "description": "Total committed capital and available capital for deployment must be non-null and positive.",
+              "actionOnFailure": "halt_phase"
+            },
+            {
+              "ruleId": "return-targets-present",
+              "description": "Net IRR target, equity multiple target, and preferred return hurdle must be specified.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "deployment-timeline-present",
+              "description": "Deployment start date, investment period end date, and fund maturity date must be specified.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "capitalProfile",
+        "passConditions": [
+          {
+            "conditionId": "capital-profile-complete",
+            "description": "Capital profile document contains total committed capital, deployment timeline, return targets, leverage constraints, and investor mandate requirements.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "constraint-matrix-populated",
+            "description": "Constraint matrix specifies geographic limits, asset class limits, concentration limits, and leverage policy.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "ambiguous-mandate",
+            "description": "Investor mandate contains conflicting or ambiguous requirements that must be resolved in strategy formulation.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "partial-commitment-data",
+            "description": "Committed capital data is incomplete; pacing model will use conservative assumptions.",
+            "propagateIfFailed": false
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "insufficient-capital-data",
+            "description": "Cannot determine total available capital or deployment timeline from provided inputs.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "noCapitalAvailable",
+          "mandateViolation"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "capitalProfile": {
+          "type": "object",
+          "required": true,
+          "description": "Complete capital profile including committed capital, available capital, deployment timeline, return targets, and investor mandate constraints. Required by all downstream phases."
+        },
+        "deploymentTimeline": {
+          "type": "object",
+          "required": true,
+          "description": "Investment period start/end dates, fund maturity date, expected deployment pacing. Required by portfolio construction targets phase."
+        }
+      },
+      "selfReviewProtocol": {
+        "confidenceScoringRules": {
+          "baseScore": 100,
+          "deductions": {
+            "perNullKeyMetric": 10,
+            "perCrossPhasesMismatch": 10,
+            "perDataGap": 3,
+            "perFailedNonCriticalAgent": 5,
+            "perConditionalUpstream": 10,
+            "perMissingReport": 15
+          },
+          "categories": {
+            "HIGH": 90,
+            "MEDIUM": 70,
+            "LOW": 50,
+            "VERY_LOW": 0
+          }
+        }
+      }
+    },
+    {
+      "phaseId": "market-cycle-positioning",
+      "name": "Market Cycle Positioning",
+      "weight": 0.20,
+      "agents": [
+        {
+          "agentId": "chief-investment-officer-cycle",
+          "file": "agents/strategy/chief-investment-officer.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["capital profile", "current market conditions", "historical cycle data"],
+          "outputs": ["cycle position diagnosis", "strategy-by-cycle performance matrix", "timing recommendation"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/market-cycle-positioner.md",
+            "skills/supply-demand-forecast.md"
+          ],
+          "maxTimeoutMinutes": 45,
+          "validationRules": [
+            {
+              "ruleId": "cycle-position-determined",
+              "description": "Current cycle position must be classified as one of: recovery, expansion, hyper-supply, recession with supporting indicators.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "strategy-matrix-populated",
+              "description": "Strategy performance matrix must map at least 4 strategy types against the current and projected cycle positions.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        },
+        {
+          "agentId": "portfolio-strategist-cycle",
+          "file": "agents/strategy/portfolio-strategist.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["capital profile", "macro-economic indicators", "rate environment"],
+          "outputs": ["macro environment assessment", "rate cycle analysis", "historical strategy returns by vintage"],
+          "critical": false,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/market-cycle-positioner.md"
+          ],
+          "maxTimeoutMinutes": 30
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "capital-profile-assessment",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "capitalProfile",
+              "critical": true,
+              "description": "Capital profile required to evaluate which strategies are feasible given capital constraints and return targets."
+            },
+            {
+              "key": "deploymentTimeline",
+              "critical": true,
+              "description": "Deployment timeline required to assess cycle exposure over the investment period."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "cyclePositioning",
+        "passConditions": [
+          {
+            "conditionId": "cycle-position-confirmed",
+            "description": "Cycle position diagnosed with high confidence based on at least 5 supporting indicators.",
+            "propagateIfFailed": false
+          },
+          {
+            "conditionId": "strategy-recommendations-generated",
+            "description": "At least 2 strategy recommendations generated with projected performance at current and forecasted cycle positions.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "cycle-transition-uncertainty",
+            "description": "Current cycle position is at a transition point with indicators pointing in conflicting directions; strategy must account for multiple scenarios.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "no-viable-strategy-at-cycle",
+            "description": "Current cycle position and capital constraints eliminate all viable strategies from the performance matrix.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "cyclePositionIncompatibleWithMandate"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "cycleAssessment": {
+          "type": "object",
+          "required": true,
+          "description": "Current cycle position diagnosis with supporting indicators, direction of movement, and confidence level. Required by strategy formulation phase."
+        },
+        "strategyMatrix": {
+          "type": "object",
+          "required": true,
+          "description": "Strategy-by-cycle performance matrix showing historical and projected returns for each strategy type at the current cycle position. Required by strategy formulation phase."
+        }
+      }
+    },
+    {
+      "phaseId": "strategy-formulation",
+      "name": "Strategy Formulation",
+      "weight": 0.30,
+      "agents": [
+        {
+          "agentId": "chief-investment-officer",
+          "file": "agents/strategy/chief-investment-officer.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["capital profile", "cycle assessment", "strategy matrix", "research findings (if available)"],
+          "outputs": ["investment strategy document", "property type allocation", "geographic allocation", "leverage policy", "return targets by tier"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/market-cycle-positioner.md",
+            "skills/portfolio-allocator.md"
+          ],
+          "maxTimeoutMinutes": 60,
+          "retryPolicy": {
+            "maxAttempts": 3,
+            "backoffStrategy": "exponential",
+            "baseDelayMs": 15000
+          },
+          "validationRules": [
+            {
+              "ruleId": "strategy-type-selected",
+              "description": "A primary strategy (core/core-plus/value-add/opportunistic) must be selected with rationale.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "allocation-targets-sum",
+              "description": "Property type allocation percentages must sum to 100%. Geographic allocation percentages must sum to 100%.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "return-targets-consistent",
+              "description": "Return targets must be internally consistent: net IRR >= preferred return, equity multiple consistent with hold period and IRR.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        },
+        {
+          "agentId": "portfolio-strategist-formulation",
+          "file": "agents/strategy/portfolio-strategist.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["capital profile", "cycle assessment", "strategy matrix"],
+          "outputs": ["risk-return analysis", "peer comparison", "stress test results"],
+          "critical": false,
+          "dependencies": ["chief-investment-officer"],
+          "skillRefs": [
+            "skills/portfolio-allocator.md",
+            "skills/performance-attribution.md"
+          ],
+          "maxTimeoutMinutes": 30
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "capital-profile-assessment",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "capitalProfile",
+              "critical": true,
+              "description": "Capital constraints and return targets required to formulate achievable strategy."
+            }
+          ]
+        },
+        {
+          "phaseId": "market-cycle-positioning",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "cycleAssessment",
+              "critical": true,
+              "description": "Cycle position required to select optimal strategy type and timing."
+            },
+            {
+              "key": "strategyMatrix",
+              "critical": true,
+              "description": "Strategy performance matrix required to validate selected strategy against historical performance."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "strategyFormulation",
+        "passConditions": [
+          {
+            "conditionId": "strategy-complete",
+            "description": "Investment strategy document specifies strategy type, property type allocation, geographic allocation, leverage policy, hold period, and return targets.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "strategy-meets-mandate",
+            "description": "Formulated strategy satisfies all investor mandate constraints from the capital profile.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "return-targets-achievable",
+            "description": "Historical strategy performance at the current cycle position supports the stated return targets within reasonable confidence.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "strategy-requires-market-tailwind",
+            "description": "Return targets are achievable only with continued favorable cycle conditions; downside scenario produces below-target returns.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "narrow-geographic-focus",
+            "description": "Geographic allocation concentrated in 2 or fewer MSAs; portfolio diversification risk flagged.",
+            "propagateIfFailed": false
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "strategy-mandate-conflict",
+            "description": "No strategy formulation satisfies both investor mandate constraints and achievable return targets at the current cycle position.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "allocation-internally-inconsistent",
+            "description": "Property type or geographic allocations conflict with leverage policy or hold period assumptions.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "mandateViolation",
+          "returnTargetUnachievable"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "investmentStrategy": {
+          "type": "object",
+          "required": true,
+          "description": "Complete investment strategy document with strategy type, property type allocation, geographic allocation, leverage policy, hold period, and return targets. Required by portfolio construction and strategy memo phases."
+        },
+        "allocationTargets": {
+          "type": "object",
+          "required": true,
+          "description": "Specific allocation targets by property type, geography, vintage, and strategy tier. Required by portfolio construction targets phase."
+        }
+      },
+      "selfReviewProtocol": {
+        "crossAgentValidations": [
+          {
+            "checkId": "strategy-cycle-alignment",
+            "agentsInvolved": ["chief-investment-officer", "portfolio-strategist-formulation"],
+            "description": "Selected strategy type must be consistent with the cycle assessment recommendation. Value-add in recession without distress mandate is flagged.",
+            "tolerance": "exact",
+            "actionOnMismatch": "log_warning"
+          }
+        ],
+        "confidenceScoringRules": {
+          "baseScore": 100,
+          "deductions": {
+            "perNullKeyMetric": 10,
+            "perCrossPhasesMismatch": 15,
+            "perDataGap": 3,
+            "perFailedNonCriticalAgent": 5,
+            "perConditionalUpstream": 10,
+            "perMissingReport": 20
+          },
+          "categories": {
+            "HIGH": 90,
+            "MEDIUM": 70,
+            "LOW": 50,
+            "VERY_LOW": 0
+          }
+        }
+      }
+    },
+    {
+      "phaseId": "portfolio-construction-targets",
+      "name": "Portfolio Construction Targets",
+      "weight": 0.20,
+      "agents": [
+        {
+          "agentId": "portfolio-strategist-construction",
+          "file": "agents/strategy/portfolio-strategist.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["investment strategy", "capital profile", "market research (if available)"],
+          "outputs": ["portfolio construction plan", "concentration limits", "pacing model", "vintage targets"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/portfolio-allocator.md",
+            "skills/performance-attribution.md"
+          ],
+          "maxTimeoutMinutes": 45,
+          "validationRules": [
+            {
+              "ruleId": "concentration-limits-defined",
+              "description": "Single-asset, single-market, and single-property-type concentration limits must be specified as percentages of total NAV.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "pacing-model-complete",
+              "description": "Pacing model must specify target deployment by quarter with cumulative deployment percentage across the investment period.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "equity-check-ranges",
+              "description": "Minimum and maximum equity check sizes must be defined and consistent with total capital and concentration limits.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        },
+        {
+          "agentId": "chief-investment-officer-portfolio",
+          "file": "agents/strategy/chief-investment-officer.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["investment strategy", "allocation targets", "portfolio construction plan"],
+          "outputs": ["portfolio review and approval", "risk budget allocation", "rebalancing triggers"],
+          "critical": true,
+          "dependencies": ["portfolio-strategist-construction"],
+          "skillRefs": [
+            "skills/portfolio-allocator.md"
+          ],
+          "maxTimeoutMinutes": 30
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "strategy-formulation",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "investmentStrategy",
+              "critical": true,
+              "description": "Investment strategy required to translate into specific portfolio construction parameters."
+            },
+            {
+              "key": "allocationTargets",
+              "critical": true,
+              "description": "Allocation targets required to build concentration limits and pacing model."
+            }
+          ]
+        },
+        {
+          "phaseId": "capital-profile-assessment",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "capitalProfile",
+              "critical": true,
+              "description": "Total capital and deployment timeline required for pacing model and equity check sizing."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "portfolioConstruction",
+        "passConditions": [
+          {
+            "conditionId": "construction-plan-complete",
+            "description": "Portfolio construction plan specifies concentration limits, pacing model, vintage targets, equity check ranges, and rebalancing triggers.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "plan-consistent-with-strategy",
+            "description": "Construction plan parameters are internally consistent with the formulated investment strategy and capital profile.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "aggressive-pacing",
+            "description": "Pacing model requires deploying more than 40% of capital in the first 12 months; execution risk flagged.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "construction-infeasible",
+            "description": "Portfolio construction targets cannot be met given capital constraints, market size, and investment period duration.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "constructionInfeasible"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "portfolioConstructionPlan": {
+          "type": "object",
+          "required": true,
+          "description": "Complete portfolio construction plan with concentration limits, pacing model, vintage targets, equity check ranges, and rebalancing triggers. Required by strategy memo and downstream fund management."
+        },
+        "concentrationLimits": {
+          "type": "object",
+          "required": true,
+          "description": "Explicit concentration limits by asset type, geography, single-asset, and tenant exposure. Required by acquisition orchestrator for deal-level compliance checks."
+        }
+      }
+    },
+    {
+      "phaseId": "strategy-memo-production",
+      "name": "Strategy Memo Production",
+      "weight": 0.15,
+      "agents": [
+        {
+          "agentId": "chief-investment-officer-memo",
+          "file": "agents/strategy/chief-investment-officer.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["all Phase 1-4 outputs"],
+          "outputs": ["investment strategy memo", "executive summary", "allocation charts", "risk-return analysis"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 45,
+          "validationRules": [
+            {
+              "ruleId": "memo-completeness",
+              "description": "Strategy memo must contain executive summary, capital profile, cycle analysis, strategy rationale, allocation targets, portfolio construction plan, risk analysis, and approval recommendation.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "portfolio-construction-targets",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "portfolioConstructionPlan",
+              "critical": true,
+              "description": "Portfolio construction plan required for the construction targets section of the strategy memo."
+            },
+            {
+              "key": "concentrationLimits",
+              "critical": true,
+              "description": "Concentration limits required for the risk management section of the strategy memo."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "strategyMemo",
+        "passConditions": [
+          {
+            "conditionId": "memo-produced",
+            "description": "Complete strategy memo produced with all required sections and supporting analysis.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "memo-with-open-items",
+            "description": "Strategy memo produced but flags open items requiring stakeholder input before deployment begins.",
+            "propagateIfFailed": false
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "memo-generation-failed",
+            "description": "Memo writer failed to produce a complete strategy memo after all retry attempts.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": []
+      },
+      "dataForDownstreamContract": {
+        "strategyMemo": {
+          "type": "object",
+          "required": true,
+          "description": "Complete investment strategy memo with executive summary, capital profile, cycle analysis, strategy rationale, allocation targets, portfolio construction plan, and risk analysis. Terminal deliverable of the strategy pipeline."
+        }
+      }
+    }
+  ],
+  "challengeLayer": {
+    "configRef": "config/challenge-layer.json",
+    "applyToPhases": ["market-cycle-positioning", "strategy-formulation", "portfolio-construction-targets"],
+    "challengeModel": "claude-opus-4-6[1m]"
+  },
+  "investorParametrization": {
+    "configRef": "config/scenarios/core-plus.json",
+    "parameterNamespace": "/strategies/core-plus",
+    "overridableFields": [
+      "strategyFormulation.targetNetIRR",
+      "strategyFormulation.targetEquityMultiple",
+      "strategyFormulation.maxLeverage",
+      "portfolioConstruction.maxSingleAssetConcentration",
+      "portfolioConstruction.maxGeographicConcentration",
+      "capitalProfile.preferredReturnHurdle"
+    ]
+  },
+  "checkpointConfig": {
+    "basePath": "data/status",
+    "agentLevelTracking": true,
+    "verdictValues": {
+      "DEPLOY": "Strategy approved; pipeline hands off fund formation parameters and deal screening criteria to fund-management and acquisition orchestrators.",
+      "REVISE": "Strategy framework sound but requires revision on specific parameters (leverage, allocation, pacing) before deployment begins.",
+      "HOLD": "Strategy formulation deferred; market cycle conditions or capital availability do not support deployment at this time."
+    }
+  },
+  "crossChainHandoffs": [
+    {
+      "direction": "inbound",
+      "counterpartOrchestrator": "market-research-intelligence",
+      "triggerCondition": "research.verdict == 'INVEST' AND research-memo-production.status == 'COMPLETED'",
+      "dataContract": {
+        "researchMemo": {
+          "type": "object",
+          "required": false,
+          "description": "Market research memo with opportunity map and target profiles informing strategy formulation."
+        },
+        "targetAcquisitionProfiles": {
+          "type": "array",
+          "required": false,
+          "description": "Target acquisition profiles from research to align strategy with identified opportunities."
+        },
+        "submarketScorecard": {
+          "type": "array",
+          "required": false,
+          "description": "Submarket scorecards providing granular market data for geographic allocation decisions."
+        }
+      }
+    },
+    {
+      "direction": "outbound",
+      "counterpartOrchestrator": "multifamily-acquisition",
+      "triggerCondition": "strategy-memo-production.verdict == 'DEPLOY'",
+      "dataContract": {
+        "investmentStrategy": {
+          "type": "object",
+          "required": true,
+          "description": "Approved investment strategy with deal screening criteria, return targets, and leverage policy for acquisition pipeline.",
+          "sourcePhase": "strategy-formulation",
+          "sourcePath": "investmentStrategy"
+        },
+        "concentrationLimits": {
+          "type": "object",
+          "required": true,
+          "description": "Concentration limits that the acquisition orchestrator must validate against before issuing a GO verdict.",
+          "sourcePhase": "portfolio-construction-targets",
+          "sourcePath": "concentrationLimits"
+        },
+        "portfolioConstructionPlan": {
+          "type": "object",
+          "required": false,
+          "description": "Portfolio construction plan for pacing and vintage diversification context during deal evaluation.",
+          "sourcePhase": "portfolio-construction-targets",
+          "sourcePath": "portfolioConstructionPlan"
+        }
+      }
+    }
+  ],
+  "executionConfig": {
+    "concurrency": {
+      "maxConcurrentPhases": 1,
+      "maxAgentsPerPhase": 3
+    },
+    "timeouts": {
+      "defaultAgentMinutes": 30,
+      "defaultPhaseMinutes": 90,
+      "pipelineMinutes": 360
+    },
+    "retryPolicy": {
+      "maxAttempts": 3,
+      "backoffStrategy": "exponential",
+      "baseDelayMs": 10000
+    },
+    "pollingIntervalMs": 30000,
+    "stalledPollThreshold": 10,
+    "logging": {
+      "categories": [
+        "ACTION",
+        "FINDING",
+        "INFO",
+        "PHASE",
+        "ERROR",
+        "DATA_GAP",
+        "COMPLETE",
+        "LAUNCH",
+        "RETRY",
+        "TIMEOUT",
+        "VERDICT",
+        "HANDOFF"
+      ]
+    }
+  }
+}

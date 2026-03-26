@@ -1,0 +1,46 @@
+{
+  "$schema": "Investor Profile - Family Office (Direct Real Estate)",
+  "investorType": "family-office",
+  "teamComposition": {
+    "tier1Override": {
+      "buyerAgent": "buyer-family-office",
+      "additionalAgents": [],
+      "removeAgents": []
+    },
+    "tier2Bias": {
+      "alwaysTrigger": [],
+      "neverTrigger": []
+    }
+  },
+  "primaryCriteria": {
+    "dscr": {
+      "pass": 1.35,
+      "conditional": 1.25,
+      "fail": 1.15,
+      "description": "Debt Service Coverage Ratio"
+    },
+    "ltv": {
+      "maxPass": 0.60,
+      "maxConditional": 0.65,
+      "fail": 0.75,
+      "description": "Loan to Value Ratio"
+    }
+  },
+  "familyOfficeSpecific": {
+    "afterTaxFocus": "mandatory",
+    "costSegmentationGating": true,
+    "operationalBurdenHours": {
+      "target": 5,
+      "max": 10,
+      "unit": "hours/week"
+    }
+  },
+  "dealbreakers": [
+    "Management-intensive without operating partner",
+    "Leverage >65% LTV",
+    "Market family has no knowledge/relationships",
+    "Sellers unwilling to accommodate 1031 timing"
+  ],
+  "reportingVariant": "family-office",
+  "allowedStrategies": ["core", "core-plus"]
+}

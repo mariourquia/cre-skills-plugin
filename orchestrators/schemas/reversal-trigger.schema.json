@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "reversal-trigger.schema.json",
+  "title": "Verdict Reversal Trigger",
+  "description": "Specific conditions that would change the deal verdict",
+  "type": "object",
+  "required": [
+    "id",
+    "condition",
+    "trigger_threshold",
+    "probability",
+    "verdict_change",
+    "reason",
+    "monitoring"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^trigger_[0-9]{3}$",
+      "description": "Unique identifier for this reversal trigger (e.g., trigger_001)"
+    },
+    "condition": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable description of the condition that triggers reversal"
+    },
+    "current_value": {
+      "description": "Current observed value of the metric or condition being monitored"
+    },
+    "trigger_threshold": {
+      "description": "Value or state at which the trigger fires and the verdict would change"
+    },
+    "probability": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Estimated probability that this trigger fires within the investment horizon (0.0-1.0)"
+    },
+    "verdict_change": {
+      "type": "string",
+      "enum": [
+        "GO->CONDITIONAL",
+        "GO->NO-GO",
+        "CONDITIONAL->GO",
+        "CONDITIONAL->NO-GO"
+      ],
+      "description": "The verdict transition that occurs if this trigger fires"
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["critical", "high", "medium"],
+      "description": "Severity of the verdict impact if this trigger fires"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Explanation of why this condition would flip the verdict"
+    },
+    "monitoring": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Data source or process used to track whether this trigger is approaching"
+    },
+    "mitigation": {
+      "type": "string",
+      "description": "Action that could prevent or neutralize this trigger"
+    }
+  },
+  "additionalProperties": true
+}

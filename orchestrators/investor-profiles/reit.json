@@ -1,0 +1,41 @@
+{
+  "$schema": "Investor Profile - REIT (Publicly Traded or Non-Traded)",
+  "investorType": "reit",
+  "teamComposition": {
+    "tier1Override": {
+      "buyerAgent": "buyer-reit",
+      "additionalAgents": [],
+      "removeAgents": []
+    },
+    "tier2Bias": {
+      "alwaysTrigger": [],
+      "neverTrigger": []
+    }
+  },
+  "primaryCriteria": {
+    "dscr": {
+      "pass": 1.40,
+      "conditional": 1.30,
+      "fail": 1.20,
+      "description": "Debt Service Coverage Ratio"
+    },
+    "ltv": {
+      "maxPass": 0.50,
+      "maxConditional": 0.60,
+      "fail": 0.70,
+      "description": "Loan to Value Ratio"
+    }
+  },
+  "reitSpecific": {
+    "ffoAccretionRequired": true,
+    "navDilutionConstraint": "zero"
+  },
+  "dealbreakers": [
+    "FFO-dilutive on day one with no path to accretion",
+    "Off-strategy property type or geography",
+    "Tenant credit below investment grade (single-tenant)",
+    "Portfolio concentration >regional weight + 50%"
+  ],
+  "reportingVariant": "reit",
+  "allowedStrategies": ["core", "core-plus"]
+}

@@ -1,0 +1,49 @@
+{
+  "$schema": "Investor Profile - Syndicator (Multifamily GP / Sponsor)",
+  "investorType": "syndicator",
+  "teamComposition": {
+    "tier1Override": {
+      "buyerAgent": "buyer-syndicator",
+      "additionalAgents": ["aggressive-gp"],
+      "removeAgents": []
+    },
+    "tier2Bias": {
+      "alwaysTrigger": [],
+      "neverTrigger": []
+    }
+  },
+  "primaryCriteria": {
+    "dscr": {
+      "pass": 1.10,
+      "conditional": 1.0,
+      "fail": 0.90,
+      "description": "Debt Service Coverage Ratio"
+    },
+    "ltv": {
+      "maxPass": 0.80,
+      "maxConditional": 0.82,
+      "fail": 0.85,
+      "description": "Loan to Value Ratio"
+    }
+  },
+  "syndicatorSpecific": {
+    "rentGapRequirement": {
+      "pass": 250,
+      "conditional": 150,
+      "unit": "$/unit/month",
+      "description": "Rent gap between in-place rents and market rents"
+    },
+    "valueAddNOIGrowth": {
+      "minimum": 0.30,
+      "description": "Minimum projected NOI growth from value-add plan"
+    }
+  },
+  "dealbreakers": [
+    "Rent gap <$150/unit/month",
+    "Value-add NOI growth <20%",
+    "Outside Sun Belt without strong growth story",
+    "Units <100 or >400"
+  ],
+  "reportingVariant": "syndicator",
+  "allowedStrategies": ["value-add", "opportunistic"]
+}

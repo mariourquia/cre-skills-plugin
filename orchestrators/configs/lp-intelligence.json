@@ -1,0 +1,866 @@
+{
+  "orchestratorId": "lp-intelligence",
+  "version": "1.0.0",
+  "entityType": "fund",
+  "description": "Five-phase LP intelligence pipeline: GP evaluation, data request formulation, performance monitoring, portfolio oversight, and re-up decision. Coordinates 3 specialist agents across all phases to evaluate GP relationships, benchmark fund performance, analyze fee structures, and produce a re-up recommendation. This orchestrator inverts the standard GP-centric perspective -- it serves Limited Partners evaluating and managing their General Partner allocations. Terminal deliverable is a RE_UP / HOLD_POSITION / REDUCE / EXIT verdict with supporting analysis.",
+  "model": "claude-opus-4-6[1m]",
+  "phases": [
+    {
+      "phaseId": "gp-evaluation",
+      "name": "GP Evaluation",
+      "weight": 0.20,
+      "orchestratorFile": "orchestrators/lp-intelligence-orchestrator.md",
+      "agents": [
+        {
+          "agentId": "lp-advisor",
+          "file": "agents/lp/lp-advisor.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "GP marketing materials", "prior fund PPMs", "GP track record data", "reference check notes"],
+          "outputs": ["GP scorecard", "team stability assessment", "strategy execution rating", "governance evaluation"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/performance-attribution",
+            "skills/fund-formation-toolkit",
+            "skills/fund-terms-comparator"
+          ],
+          "maxTimeoutMinutes": 45,
+          "validationRules": [
+            {
+              "ruleId": "gp-scorecard-complete",
+              "description": "GP scorecard must have non-null scores for all five dimensions: team, track record, strategy, terms, governance.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "track-record-verified",
+              "description": "At least one prior fund's DPI/TVPI/IRR must be verified against provided data.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
+        },
+        {
+          "agentId": "fund-analyst",
+          "file": "agents/lp/fund-analyst.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "GP track record data", "prior fund financial statements", "vintage benchmark data"],
+          "outputs": ["return decomposition", "fee drag analysis", "peer benchmarking", "vintage comparison"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/gp-performance-evaluator",
+            "skills/performance-attribution",
+            "skills/jv-waterfall-architect"
+          ],
+          "maxTimeoutMinutes": 60,
+          "validationRules": [
+            {
+              "ruleId": "return-metrics-calculated",
+              "description": "DPI, TVPI, and net IRR must be non-null for the current fund.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "fee-drag-computed",
+              "description": "Gross-to-net spread must be calculated and expressed in basis points.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "gpEvaluation",
+        "passConditions": [
+          {
+            "conditionId": "gp-top-quartile",
+            "description": "GP track record is top-quartile for strategy and vintage based on verified data.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "team-stable",
+            "description": "No key person departures in prior 24 months and all key principals remain committed.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "terms-at-market",
+            "description": "Fund terms are at or below market median for the strategy and fund size category.",
+            "propagateIfFailed": false
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "median-performance-strong-thesis",
+            "description": "Track record is second-quartile but strategy thesis is differentiated and compelling.",
+            "propagateIfFailed": false
+          },
+          {
+            "conditionId": "above-market-terms-justified",
+            "description": "Terms are above 75th percentile but offset by top-decile gross performance.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "below-median-returns",
+            "description": "Track record is third or fourth quartile for vintage and strategy.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "key-person-instability",
+            "description": "Key person departure or pending departure identified with no succession plan.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "strategy-drift",
+            "description": "Current fund strategy materially different from prior funds without LP consent or disclosure.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "fraudOrMisrepresentation",
+          "regulatoryAction",
+          "unresolvedLPLitigation",
+          "keyPersonDepartureNoSuccession"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "gpScorecard": {
+          "type": "object",
+          "required": true,
+          "description": "GP scorecard with scores across five dimensions (team, track record, strategy, terms, governance) and supporting rationale. Required by all downstream phases."
+        },
+        "peerComparison": {
+          "type": "object",
+          "required": true,
+          "description": "Peer GP comparison matrix showing relative positioning on returns, fees, team, and strategy."
+        },
+        "returnDecomposition": {
+          "type": "object",
+          "required": true,
+          "description": "Decomposition of GP returns into income, appreciation, leverage, and fee components for each prior fund."
+        },
+        "feeDragAnalysis": {
+          "type": "object",
+          "required": true,
+          "description": "Gross-to-net spread analysis across all prior funds, expressed in bps and as percentage of gross returns."
+        }
+      },
+      "selfReviewProtocol": {
+        "crossAgentValidations": [
+          {
+            "checkId": "return-consistency",
+            "agentsInvolved": ["lp-advisor", "fund-analyst"],
+            "description": "GP scorecard track record rating must be consistent with fund-analyst's quantitative return analysis.",
+            "tolerance": "0",
+            "actionOnMismatch": "block_verdict"
+          },
+          {
+            "checkId": "fee-assessment-consistency",
+            "agentsInvolved": ["lp-advisor", "fund-analyst"],
+            "description": "LP advisor's terms assessment must align with fund-analyst's fee drag computation.",
+            "tolerance": "0",
+            "actionOnMismatch": "log_warning"
+          }
+        ],
+        "confidenceScoringRules": {
+          "baseScore": 100,
+          "deductions": {
+            "perNullKeyMetric": 5,
+            "perCrossPhasesMismatch": 10,
+            "perDataGap": 2,
+            "perFailedNonCriticalAgent": 5,
+            "perConditionalUpstream": 10,
+            "perMissingReport": 15
+          },
+          "categories": {
+            "HIGH": 90,
+            "MEDIUM": 70,
+            "LOW": 50,
+            "VERY_LOW": 0
+          }
+        }
+      }
+    },
+    {
+      "phaseId": "data-request-formulation",
+      "name": "Data Request Formulation",
+      "weight": 0.15,
+      "orchestratorFile": "orchestrators/lp-intelligence-orchestrator.md",
+      "agents": [
+        {
+          "agentId": "lp-advisor",
+          "file": "agents/lp/lp-advisor.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "GP scorecard from Phase 1", "fund type and structure"],
+          "outputs": ["data request templates", "benchmark standards", "red flag checklist"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/lp-data-request-generator",
+            "skills/quarterly-investor-update"
+          ],
+          "maxTimeoutMinutes": 30
+        },
+        {
+          "agentId": "allocation-committee-member",
+          "file": "agents/lp/allocation-committee-member.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "GP scorecard from Phase 1", "LP portfolio context"],
+          "outputs": ["IC-grade data requirements", "governance compliance checklist", "concentration monitoring template"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/lp-data-request-generator",
+            "skills/portfolio-allocator"
+          ],
+          "maxTimeoutMinutes": 30
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "gp-evaluation",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "gpScorecard",
+              "critical": true,
+              "description": "GP scorecard required to calibrate data request depth and focus areas."
+            },
+            {
+              "key": "feeDragAnalysis",
+              "critical": false,
+              "description": "Fee drag data helps formulate fee-transparency-specific data requests."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "dataRequest",
+        "passConditions": [
+          {
+            "conditionId": "comprehensive-data-request",
+            "description": "Data request templates generated for all four request types (initial DD, quarterly, annual, re-up).",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "partial-template-coverage",
+            "description": "Templates generated for initial DD and quarterly but annual and re-up templates incomplete.",
+            "propagateIfFailed": false
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "no-templates-generated",
+            "description": "No usable data request templates produced. Phase is non-functional.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": []
+      },
+      "dataForDownstreamContract": {
+        "dataRequestTemplates": {
+          "type": "object",
+          "required": true,
+          "description": "Structured data request templates for initial DD, quarterly monitoring, annual review, and re-up evaluation."
+        },
+        "benchmarkStandards": {
+          "type": "object",
+          "required": true,
+          "description": "Benchmark sources and standards to compare GP-provided data against (NCREIF, Cambridge Associates, Preqin, etc.)."
+        },
+        "redFlagChecklist": {
+          "type": "object",
+          "required": false,
+          "description": "List of red flags to monitor in GP reporting with trigger thresholds and escalation rules."
+        }
+      }
+    },
+    {
+      "phaseId": "performance-monitoring",
+      "name": "Performance Monitoring",
+      "weight": 0.25,
+      "orchestratorFile": "orchestrators/lp-intelligence-orchestrator.md",
+      "agents": [
+        {
+          "agentId": "fund-analyst",
+          "file": "agents/lp/fund-analyst.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "quarterly GP reports", "capital account statements", "deal-level performance data"],
+          "outputs": ["performance dashboard", "fee drag update", "benchmark comparison", "deal-level dispersion analysis", "attribution verification"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/gp-performance-evaluator",
+            "skills/performance-attribution",
+            "skills/jv-waterfall-architect"
+          ],
+          "maxTimeoutMinutes": 60,
+          "validationRules": [
+            {
+              "ruleId": "vintage-benchmark-comparison",
+              "description": "Current fund DPI and TVPI must be compared against vintage peer benchmarks.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "dispersion-analysis-complete",
+              "description": "Deal-level return dispersion analysis must include Gini coefficient or similar concentration metric.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
+        },
+        {
+          "agentId": "lp-advisor",
+          "file": "agents/lp/lp-advisor.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "fund-analyst performance output", "GP communications", "market conditions"],
+          "outputs": ["qualitative performance assessment", "GP responsiveness rating", "strategy adherence evaluation"],
+          "critical": true,
+          "dependencies": ["fund-analyst"],
+          "skillRefs": [
+            "skills/gp-performance-evaluator",
+            "skills/performance-attribution"
+          ],
+          "maxTimeoutMinutes": 30
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "gp-evaluation",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "gpScorecard",
+              "critical": true,
+              "description": "GP scorecard provides baseline against which current performance is measured."
+            },
+            {
+              "key": "returnDecomposition",
+              "critical": true,
+              "description": "Historical return decomposition needed for trend analysis."
+            }
+          ]
+        },
+        {
+          "phaseId": "data-request-formulation",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "benchmarkStandards",
+              "critical": true,
+              "description": "Benchmark sources required to contextualize GP performance."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "performanceMonitoring",
+        "passConditions": [
+          {
+            "conditionId": "above-peer-median",
+            "description": "Fund net returns are above vintage peer median for DPI and TVPI.",
+            "metricPath": "performanceMonitoring.vintagePercentile",
+            "operator": "gte",
+            "thresholdRef": "performanceMonitoring.minVintagePercentile",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "fee-drag-at-market",
+            "description": "Gross-to-net spread is at or below market average for the strategy and fund size.",
+            "propagateIfFailed": false
+          },
+          {
+            "conditionId": "attribution-defensible",
+            "description": "Return attribution shows manager alpha, not just market beta and leverage.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "below-median-recovery-possible",
+            "description": "Fund is below vintage peer median but unrealized portfolio shows recovery potential.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "fee-drag-elevated-but-gross-strong",
+            "description": "Fee drag above market average but gross returns compensate.",
+            "propagateIfFailed": false
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "bottom-quartile-performance",
+            "description": "Fund net returns are in bottom quartile for vintage year.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "excessive-fee-drag",
+            "description": "Gross-to-net spread exceeds 300 bps and is above 90th percentile for the strategy.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "single-deal-concentration",
+            "description": "More than 50% of fund value is concentrated in a single deal with unverifiable NAV marks.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "bottomDecilePerformance",
+          "navManipulationSuspected",
+          "distributionReinvestmentWithoutConsent",
+          "unreportedRelatedPartyTransactions"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "performanceMonitoring": {
+          "type": "object",
+          "required": true,
+          "description": "Performance monitoring dashboard with current DPI, TVPI, net IRR, vintage percentile, and trend data."
+        },
+        "feeDragAnalysis": {
+          "type": "object",
+          "required": true,
+          "description": "Updated fee drag analysis with gross-to-net spread, management fee load, promote projections."
+        },
+        "dealLevelDispersion": {
+          "type": "object",
+          "required": true,
+          "description": "Deal-level return dispersion showing individual deal contributions to fund performance."
+        },
+        "attributionVerification": {
+          "type": "object",
+          "required": false,
+          "description": "Decomposition of returns into income, appreciation, leverage, market beta, and manager alpha."
+        }
+      },
+      "selfReviewProtocol": {
+        "confidenceScoringRules": {
+          "baseScore": 100,
+          "deductions": {
+            "perNullKeyMetric": 10,
+            "perCrossPhasesMismatch": 10,
+            "perDataGap": 3,
+            "perFailedNonCriticalAgent": 5,
+            "perConditionalUpstream": 10,
+            "perMissingReport": 20
+          },
+          "categories": {
+            "HIGH": 90,
+            "MEDIUM": 70,
+            "LOW": 50,
+            "VERY_LOW": 0
+          }
+        }
+      }
+    },
+    {
+      "phaseId": "portfolio-oversight",
+      "name": "Portfolio Oversight",
+      "weight": 0.20,
+      "orchestratorFile": "orchestrators/lp-intelligence-orchestrator.md",
+      "agents": [
+        {
+          "agentId": "allocation-committee-member",
+          "file": "agents/lp/allocation-committee-member.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "LP total CRE portfolio data", "all GP fund data"],
+          "outputs": ["LP portfolio dashboard", "concentration analysis", "liquidity forecast", "vintage analysis"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/portfolio-allocator",
+            "skills/sensitivity-stress-test"
+          ],
+          "maxTimeoutMinutes": 45,
+          "validationRules": [
+            {
+              "ruleId": "concentration-analysis-complete",
+              "description": "Concentration analysis must cover geography, property type, vintage, and GP dimensions.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "liquidity-forecast-produced",
+              "description": "Net cash flow forecast (capital calls vs distributions) must cover at least 5-year horizon.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
+        },
+        {
+          "agentId": "fund-analyst",
+          "file": "agents/lp/fund-analyst.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "allocation-committee-member portfolio output", "cross-fund data"],
+          "outputs": ["cross-fund correlation analysis", "total exposure quantification", "allocation drift measurement"],
+          "critical": true,
+          "dependencies": ["allocation-committee-member"],
+          "skillRefs": [
+            "skills/portfolio-allocator",
+            "skills/sensitivity-stress-test",
+            "skills/performance-attribution"
+          ],
+          "maxTimeoutMinutes": 30
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "performance-monitoring",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "performanceMonitoring",
+              "critical": true,
+              "description": "Current fund performance data required for cross-fund portfolio analysis."
+            },
+            {
+              "key": "feeDragAnalysis",
+              "critical": false,
+              "description": "Fee drag data contextualizes total cost of LP portfolio."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "portfolioOversight",
+        "passConditions": [
+          {
+            "conditionId": "diversification-adequate",
+            "description": "No single GP exceeds concentration limit, no single geography exceeds limit, vintage diversification adequate.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "liquidity-sufficient",
+            "description": "Net cash flow forecast shows no liquidity shortfalls in any quarter of the forecast horizon.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "concentration-borderline",
+            "description": "One or more concentration metrics within 10% of limit but not breached.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "vintage-clustering",
+            "description": "More than 40% of committed capital in a single vintage year.",
+            "propagateIfFailed": false
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "concentration-breach",
+            "description": "One or more concentration limits breached. Requires rebalancing action.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "liquidity-shortfall",
+            "description": "Capital call forecast exceeds available liquidity in one or more quarters.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "singleGPExceeds50PercentOfCREAllocation",
+          "totalCREAllocationExceedsPortfolioLimit"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "lpPortfolioOverview": {
+          "type": "object",
+          "required": true,
+          "description": "Complete LP portfolio dashboard with allocation breakdown by GP, geography, property type, and vintage."
+        },
+        "liquidityForecast": {
+          "type": "object",
+          "required": true,
+          "description": "Quarterly net cash flow forecast showing expected capital calls, distributions, and net position."
+        },
+        "concentrationAnalysis": {
+          "type": "object",
+          "required": true,
+          "description": "Multi-dimensional concentration analysis with limit breach flags and proximity warnings."
+        }
+      }
+    },
+    {
+      "phaseId": "re-up-decision",
+      "name": "Re-Up Decision",
+      "weight": 0.20,
+      "orchestratorFile": "orchestrators/lp-intelligence-orchestrator.md",
+      "agents": [
+        {
+          "agentId": "lp-advisor",
+          "file": "agents/lp/lp-advisor.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "all prior phase outputs", "GP next-fund materials", "current market conditions"],
+          "outputs": ["re-up recommendation memo", "commitment sizing recommendation", "negotiation points"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/gp-performance-evaluator",
+            "skills/fund-terms-comparator",
+            "skills/performance-attribution"
+          ],
+          "maxTimeoutMinutes": 45
+        },
+        {
+          "agentId": "allocation-committee-member",
+          "file": "agents/lp/allocation-committee-member.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "LP portfolio overview", "concentration analysis", "lp-advisor recommendation"],
+          "outputs": ["portfolio-fit assessment", "allocation impact analysis", "governance compliance verification"],
+          "critical": true,
+          "dependencies": ["lp-advisor"],
+          "skillRefs": [
+            "skills/portfolio-allocator",
+            "skills/fund-terms-comparator"
+          ],
+          "maxTimeoutMinutes": 30
+        },
+        {
+          "agentId": "fund-analyst",
+          "file": "agents/lp/fund-analyst.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "GP next-fund terms", "prior fund fee data", "market fee benchmarks"],
+          "outputs": ["next-fund fee analysis", "terms comparison vs prior fund", "total cost of ownership projection"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/fund-terms-comparator",
+            "skills/gp-performance-evaluator",
+            "skills/jv-waterfall-architect"
+          ],
+          "maxTimeoutMinutes": 30
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "gp-evaluation",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "gpScorecard",
+              "critical": true,
+              "description": "GP scorecard baseline for re-up evaluation."
+            }
+          ]
+        },
+        {
+          "phaseId": "performance-monitoring",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "performanceMonitoring",
+              "critical": true,
+              "description": "Current performance data drives the quantitative re-up analysis."
+            },
+            {
+              "key": "feeDragAnalysis",
+              "critical": true,
+              "description": "Fee economics are central to the re-up decision."
+            },
+            {
+              "key": "dealLevelDispersion",
+              "critical": false,
+              "description": "Deal-level dispersion informs conviction about GP skill vs luck."
+            }
+          ]
+        },
+        {
+          "phaseId": "portfolio-oversight",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "lpPortfolioOverview",
+              "critical": true,
+              "description": "Portfolio context required to size commitment and assess concentration impact."
+            },
+            {
+              "key": "liquidityForecast",
+              "critical": true,
+              "description": "Liquidity forecast needed to determine capital availability for re-up."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "reUpDecision",
+        "passConditions": [
+          {
+            "conditionId": "re-up-recommended",
+            "description": "GP passes all evaluation criteria, portfolio fit confirmed, terms acceptable, liquidity available.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "re-up-with-reduced-commitment",
+            "description": "GP passes evaluation but concentration limits or liquidity constraints require reduced commitment size.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "re-up-contingent-on-term-negotiation",
+            "description": "Performance supports re-up but terms require negotiation (fee reduction, co-invest rights, etc.).",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "no-re-up",
+            "description": "GP evaluation, performance, or portfolio fit does not support re-commitment.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "exit-recommended",
+            "description": "Performance is sufficiently poor or risks sufficiently high that secondary sale should be explored.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "gpFraudOrMisrepresentation",
+          "lpPortfolioConcentrationBreach",
+          "lpLiquidityShortfall",
+          "regulatoryOrComplianceViolation"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "reUpRecommendation": {
+          "type": "object",
+          "required": true,
+          "description": "Final re-up recommendation with verdict (RE_UP / HOLD_POSITION / REDUCE / EXIT), commitment sizing, and supporting rationale."
+        },
+        "negotiationPoints": {
+          "type": "object",
+          "required": false,
+          "description": "Specific term negotiation points if re-upping with improved terms. Includes target management fee, carry, preferred return, co-invest rights."
+        },
+        "alternativeGPOptions": {
+          "type": "object",
+          "required": false,
+          "description": "If reducing or exiting, list of alternative GP options for redeployment of CRE allocation."
+        }
+      }
+    }
+  ],
+  "challengeLayer": {
+    "configRef": "config/challenge-layers/lp-intelligence.json",
+    "applyToPhases": ["gp-evaluation", "performance-monitoring", "re-up-decision"],
+    "challengeModel": "claude-opus-4-6[1m]",
+    "tier1Agents": ["skeptical-lp", "lens-risk-manager", "ic-challenger"],
+    "tier2Triggers": [
+      {
+        "condition": "GP terms above 75th percentile in any dimension",
+        "agent": "lens-contrarian",
+        "rationale": "Evaluate whether above-market terms are justified by performance."
+      },
+      {
+        "condition": "Fund is closed-end with greater than 50% unrealized",
+        "agent": "lens-quantitative",
+        "rationale": "Stress-test NAV marks on unrealized portfolio."
+      }
+    ]
+  },
+  "investorParametrization": {
+    "configRef": "config/investor-profiles/institutional-lp.json",
+    "parameterNamespace": "/lp-profiles/institutional",
+    "overridableFields": [
+      "gpEvaluation.minVintagePercentile",
+      "gpEvaluation.maxFeeSpread",
+      "portfolioOversight.maxSingleGPConcentration",
+      "portfolioOversight.maxGeographyConcentration",
+      "reUpDecision.minPerformancePercentile"
+    ],
+    "supportedProfiles": [
+      {
+        "profileId": "institutional-lp",
+        "description": "ODCE comparison framework. GIPS verification. ILPA reporting standards. LPAC representation requirements."
+      },
+      {
+        "profileId": "family-office-lp",
+        "description": "Co-invest rights evaluation. K-1 complexity assessment. Relationship quality measurement. Tax planning integration."
+      },
+      {
+        "profileId": "individual-lp",
+        "description": "Fee transparency focus. Liquidity needs assessment. Accreditation compliance. Education component for fund mechanics."
+      }
+    ]
+  },
+  "checkpointConfig": {
+    "basePath": "data/status",
+    "agentLevelTracking": true,
+    "verdictValues": {
+      "RE_UP": "All phases cleared; LP should commit to GP's next fund at or above current level.",
+      "HOLD_POSITION": "Mixed signals; maintain current fund commitment but do not increase exposure.",
+      "REDUCE": "Concerns identified; complete current commitment but reduce or decline next fund.",
+      "EXIT": "Significant issues; seek secondary sale of current position and do not re-commit."
+    }
+  },
+  "crossChainHandoffs": [
+    {
+      "direction": "inbound",
+      "counterpartOrchestrator": "fund-management",
+      "triggerCondition": "Fund management orchestrator produces quarterly LP report",
+      "dataContract": {
+        "fundPerformanceData": {
+          "type": "object",
+          "required": true,
+          "description": "Quarterly fund performance data from the GP's fund management orchestrator.",
+          "sourcePhase": "monitoring",
+          "sourcePath": "quarterlyReport"
+        },
+        "capitalAccountStatement": {
+          "type": "object",
+          "required": true,
+          "description": "LP capital account statement with contributions, distributions, and NAV.",
+          "sourcePhase": "monitoring",
+          "sourcePath": "capitalAccounts"
+        }
+      }
+    },
+    {
+      "direction": "outbound",
+      "counterpartOrchestrator": "portfolio-management",
+      "triggerCondition": "Phase 'portfolio-oversight' produces updated LP portfolio view",
+      "dataContract": {
+        "lpCREAllocation": {
+          "type": "object",
+          "required": true,
+          "description": "LP's total CRE allocation across all GPs for portfolio-level analysis.",
+          "sourcePhase": "portfolio-oversight",
+          "sourcePath": "lpPortfolioOverview"
+        }
+      }
+    }
+  ],
+  "executionConfig": {
+    "concurrency": {
+      "maxConcurrentPhases": 2,
+      "maxAgentsPerPhase": 3
+    },
+    "timeouts": {
+      "defaultAgentMinutes": 30,
+      "defaultPhaseMinutes": 90,
+      "pipelineMinutes": 360
+    },
+    "retryPolicy": {
+      "maxAttempts": 3,
+      "backoffStrategy": "exponential",
+      "baseDelayMs": 10000
+    },
+    "pollingIntervalMs": 30000,
+    "stalledPollThreshold": 10,
+    "logging": {
+      "categories": [
+        "ACTION",
+        "FINDING",
+        "INFO",
+        "PHASE",
+        "ERROR",
+        "DATA_GAP",
+        "COMPLETE",
+        "LAUNCH",
+        "RETRY",
+        "TIMEOUT",
+        "VERDICT",
+        "HANDOFF"
+      ]
+    }
+  }
+}

@@ -1,0 +1,199 @@
+{
+  "$schema": "Strategy Matrix - Maps Strategy x InvestorType to allowed/excluded combos with underwriting parameters",
+  "core": {
+    "institutional": {
+      "allowed": true,
+      "maxLTV": 0.40,
+      "targetIRR": 0.07,
+      "reportVariant": "institutional"
+    },
+    "private-equity": {
+      "allowed": false,
+      "reason": "Core too stable"
+    },
+    "reit": {
+      "allowed": true,
+      "maxLTV": 0.50,
+      "targetIRR": 0.07,
+      "reportVariant": "reit"
+    },
+    "family-office": {
+      "allowed": true,
+      "maxLTV": 0.60,
+      "targetIRR": 0.07,
+      "reportVariant": "family-office"
+    },
+    "syndicator": {
+      "allowed": false,
+      "reason": "Core too stable"
+    },
+    "family-office-extended": {
+      "allowed": true,
+      "maxLTV": 0.60,
+      "targetIRR": 0.07,
+      "afterTaxIRRRequired": true,
+      "reportVariant": "family-office-extended",
+      "reason": "Core matches long-hold, low-management-burden, and wealth-preservation mandate; after-tax return must be computed alongside pre-tax IRR"
+    },
+    "individual-hnw": {
+      "allowed": true,
+      "maxLTV": 0.65,
+      "targetIRR": 0.07,
+      "reportVariant": "simplified",
+      "reason": "Core appropriate for HNW individual seeking stable cash flow with limited operational involvement; illiquidity period typically manageable"
+    },
+    "small-operator": {
+      "allowed": true,
+      "maxLTV": 0.75,
+      "targetIRR": 0.07,
+      "reportVariant": "owner-operator",
+      "reason": "Core assets (stabilized, low-maintenance) align with small operator's limited management bandwidth; recourse debt still standard at this investor scale"
+    }
+  },
+  "core-plus": {
+    "institutional": {
+      "allowed": true,
+      "maxLTV": 0.45,
+      "targetIRR": 0.09,
+      "reportVariant": "institutional"
+    },
+    "private-equity": {
+      "allowed": false,
+      "reason": "Core too stable"
+    },
+    "reit": {
+      "allowed": true,
+      "maxLTV": 0.55,
+      "targetIRR": 0.09,
+      "reportVariant": "reit"
+    },
+    "family-office": {
+      "allowed": true,
+      "maxLTV": 0.60,
+      "targetIRR": 0.09,
+      "reportVariant": "family-office"
+    },
+    "syndicator": {
+      "allowed": false,
+      "reason": "Core too stable"
+    },
+    "family-office-extended": {
+      "allowed": true,
+      "maxLTV": 0.60,
+      "targetIRR": 0.09,
+      "afterTaxIRRRequired": true,
+      "reportVariant": "family-office-extended",
+      "reason": "Core-plus light value-add acceptable if operating partner is in place and execution risk is contained; after-tax return computed alongside pre-tax"
+    },
+    "individual-hnw": {
+      "allowed": true,
+      "maxLTV": 0.70,
+      "targetIRR": 0.09,
+      "reportVariant": "simplified",
+      "reason": "Core-plus acceptable for HNW individual if value-add execution does not require hands-on involvement; education component on execution risk required"
+    },
+    "small-operator": {
+      "allowed": true,
+      "maxLTV": 0.80,
+      "targetIRR": 0.09,
+      "reportVariant": "owner-operator",
+      "reason": "Core-plus is primary sweet spot for small operators -- light renovation or lease-up within self-management capability; personal guaranty modeled at this LTV level"
+    }
+  },
+  "value-add": {
+    "institutional": {
+      "allowed": false,
+      "reason": "Execution risk misaligned"
+    },
+    "private-equity": {
+      "allowed": true,
+      "maxLTV": 0.75,
+      "targetIRR": 0.15,
+      "reportVariant": "private-equity"
+    },
+    "reit": {
+      "allowed": true,
+      "maxLTV": 0.60,
+      "targetIRR": 0.12,
+      "reportVariant": "reit"
+    },
+    "family-office": {
+      "allowed": false,
+      "reason": "Too operationally intensive"
+    },
+    "syndicator": {
+      "allowed": true,
+      "maxLTV": 0.80,
+      "targetIRR": 0.18,
+      "reportVariant": "syndicator"
+    },
+    "family-office-extended": {
+      "allowed": false,
+      "reason": "Value-add execution intensity exceeds operational simplicity mandate; requires dedicated operating partner with full accountability -- only permitted as co-invest with institutional-quality operator and explicit family office IC approval"
+    },
+    "individual-hnw": {
+      "allowed": true,
+      "maxLTV": 0.70,
+      "targetIRR": 0.12,
+      "reportVariant": "simplified",
+      "conditions": [
+        "Execution managed entirely by experienced sponsor -- no hands-on involvement from investor",
+        "Business plan must be explainable in plain language",
+        "Illiquidity period clearly defined and within 7-year max",
+        "Single investment does not exceed 15% of liquid net worth"
+      ],
+      "reason": "Value-add as passive LP investment acceptable; direct ownership of value-add property by individual HNW investor excluded unless investor has operating capability"
+    },
+    "small-operator": {
+      "allowed": true,
+      "maxLTV": 0.80,
+      "targetIRR": 0.14,
+      "reportVariant": "owner-operator",
+      "conditions": [
+        "Value-add scope must be within operator's self-management capability (unit refreshes, minor renovation -- not gut rehab)",
+        "Capital reserve must cover full renovation budget plus 20% contingency before acquisition closes",
+        "DSCR at stabilized NOI must pass 1.20 threshold; in-place DSCR at 1.00 minimum",
+        "Deferred maintenance must be fully scoped -- not estimated -- prior to LOI"
+      ],
+      "reason": "Light value-add is core competency for small operators managing their own properties; heavy renovation or repositioning exceeds typical small operator capability and capital"
+    }
+  },
+  "opportunistic": {
+    "institutional": {
+      "allowed": false,
+      "reason": "Execution risk misaligned"
+    },
+    "private-equity": {
+      "allowed": true,
+      "maxLTV": 0.78,
+      "targetIRR": 0.20,
+      "reportVariant": "private-equity"
+    },
+    "reit": {
+      "allowed": false,
+      "reason": "High leverage incompatible"
+    },
+    "family-office": {
+      "allowed": false,
+      "reason": "Too operationally intensive"
+    },
+    "syndicator": {
+      "allowed": true,
+      "maxLTV": 0.82,
+      "targetIRR": 0.22,
+      "reportVariant": "syndicator"
+    },
+    "family-office-extended": {
+      "allowed": false,
+      "reason": "Opportunistic strategies require full-time operational intensity, development risk, or entitlement execution that directly conflicts with operational simplicity mandate and long-hold bias; excluded without exception"
+    },
+    "individual-hnw": {
+      "allowed": false,
+      "reason": "Opportunistic deal complexity, leverage levels, illiquidity duration, and execution risk are mismatched with individual HNW investor risk profile, liquidity constraints, and education requirements; excluded"
+    },
+    "small-operator": {
+      "allowed": false,
+      "reason": "Opportunistic strategies (ground-up development, entitlement plays, distressed workout) require institutional capital reserves, specialized expertise, and organizational capacity that small operators (1-10 properties) do not have; excluded"
+    }
+  }
+}

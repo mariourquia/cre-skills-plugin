@@ -1,0 +1,851 @@
+{
+  "orchestratorId": "development-pipeline",
+  "version": "1.0.0",
+  "entityType": "project",
+  "description": "Six-phase ground-up development pipeline: land analysis, entitlement, pro forma, construction, lease-up, and stabilization. Coordinates land-residual-hbu-analyzer, entitlement-feasibility, dev-proforma-engine, construction-budget-gc-analyzer, and lease-up-war-room. Terminal verdict: BUILD (project proceeds), KILL (not viable at current program or costs), or DEFER (viable but market timing unfavorable).",
+  "model": "claude-opus-4-6[1m]",
+  "phases": [
+    {
+      "phaseId": "land-analysis",
+      "name": "Land Analysis",
+      "weight": 0.15,
+      "agents": [
+        {
+          "agentId": "land-residual-hbu-agent",
+          "file": "agents/development/land-residual-hbu-agent.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "land parcel data", "zoning code", "market rents by product type", "comparable land sales"],
+          "outputs": ["highest and best use analysis", "land residual value by program type", "maximum supportable land cost", "program comparison matrix"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 45,
+          "validationRules": [
+            {
+              "ruleId": "land-residual-calculated",
+              "description": "Land residual value must be calculated for at least two program types.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "hbu-conclusion-present",
+              "description": "HBU conclusion must identify the optimal program with supporting rationale.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
+        },
+        {
+          "agentId": "zoning-feasibility-screener",
+          "file": "agents/development/zoning-feasibility-screener.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "land parcel data", "zoning code", "overlay districts", "development standards"],
+          "outputs": ["by-right development capacity", "variance requirements", "FAR and height limit analysis", "parking requirements"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 30
+        },
+        {
+          "agentId": "site-due-diligence-screener",
+          "file": "agents/development/site-due-diligence-screener.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "land parcel data", "ALTA survey", "Phase I ESA", "utility availability"],
+          "outputs": ["site constraint summary", "utility connection feasibility", "environmental flags", "topographic considerations"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 30
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "development",
+        "passConditions": [
+          {
+            "conditionId": "land-cost-within-residual",
+            "description": "Contracted or target land price is at or below the maximum supportable land cost from residual analysis.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "no-fatal-site-constraints",
+            "description": "Site due diligence screener found no fatal physical or environmental constraints.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "zoning-supports-program",
+            "description": "HBU program is achievable under current zoning or reasonable entitlement path.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "land-cost-at-top-of-range",
+            "description": "Land cost is within 10% of maximum supportable residual; project viable only at above-market rent assumptions.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "variance-required",
+            "description": "Optimal program requires a variance; entitlement risk elevated.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "land-cost-exceeds-residual",
+            "description": "Land cost exceeds maximum supportable residual at any viable program type.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "fatal-environmental-constraint",
+            "description": "Site has a fatal environmental constraint (e.g., wetlands, contamination) that cannot be remediated within budget.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "landCostAboveResidual",
+          "fatalEnvironmentalConstraint",
+          "noViableProgram"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "hbuProgram": {
+          "type": "object",
+          "required": true,
+          "description": "Highest and best use program with unit mix, FAR, and market rent assumptions."
+        },
+        "maxSupportableLandCost": {
+          "type": "number",
+          "required": true,
+          "description": "Maximum land cost supportable by the HBU program at target returns."
+        },
+        "zoningCapacity": {
+          "type": "object",
+          "required": true,
+          "description": "By-right and entitlement-dependent development capacity constraints."
+        },
+        "siteConstraints": {
+          "type": "object",
+          "required": true,
+          "description": "Site constraint summary including utility connections, topography, and environmental status."
+        }
+      }
+    },
+    {
+      "phaseId": "entitlement",
+      "name": "Entitlement",
+      "weight": 0.15,
+      "agents": [
+        {
+          "agentId": "entitlement-feasibility-agent",
+          "file": "agents/development/entitlement-feasibility-agent.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "HBU program", "zoning capacity", "local planning regulations", "comparable approvals in submarket"],
+          "outputs": ["entitlement pathway analysis", "timeline estimate", "approval risk assessment", "community opposition factors", "permit cost estimate"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 40
+        },
+        {
+          "agentId": "entitlement-cost-estimator",
+          "file": "agents/development/entitlement-cost-estimator.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "HBU program", "jurisdiction data", "impact fee schedules"],
+          "outputs": ["entitlement cost estimate", "impact fees by category", "soft cost budget for entitlement phase"],
+          "critical": false,
+          "dependencies": ["entitlement-feasibility-agent"],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 25
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "land-analysis",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "hbuProgram",
+              "critical": true,
+              "description": "HBU program required to assess entitlement path for the specific use."
+            },
+            {
+              "key": "zoningCapacity",
+              "critical": true,
+              "description": "Zoning constraints required to identify entitlement gaps."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "development",
+        "passConditions": [
+          {
+            "conditionId": "entitlement-achievable",
+            "description": "Entitlement pathway is achievable within the project timeline and budget.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "entitlement-timeline-acceptable",
+            "description": "Estimated entitlement timeline is within acceptable range for project feasibility.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "entitlement-risk-elevated",
+            "description": "Community opposition or discretionary approvals create entitlement risk; pro forma contingency increased.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "entitlement-not-achievable",
+            "description": "Required entitlements cannot be obtained for the HBU program within a viable project timeline.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "entitlementImpossible",
+          "impactFeesKillFeasibility"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "entitlementPathway": {
+          "type": "object",
+          "required": true,
+          "description": "Entitlement strategy, timeline, and key milestones for pro forma scheduling."
+        },
+        "entitlementCostBudget": {
+          "type": "number",
+          "required": true,
+          "description": "Total entitlement cost estimate including permits, fees, and soft costs."
+        },
+        "entitlementRiskScore": {
+          "type": "string",
+          "required": true,
+          "description": "LOW, MEDIUM, or HIGH entitlement risk rating for pro forma contingency sizing."
+        }
+      }
+    },
+    {
+      "phaseId": "proforma",
+      "name": "Development Pro Forma",
+      "weight": 0.20,
+      "agents": [
+        {
+          "agentId": "dev-proforma-agent",
+          "file": "agents/development/dev-proforma-agent.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "HBU program", "entitlement pathway", "construction cost estimate", "market rents", "exit cap rate assumption"],
+          "outputs": ["development pro forma", "total project cost by line item", "stabilized NOI projection", "development IRR", "equity multiple", "yield on cost"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 50,
+          "validationRules": [
+            {
+              "ruleId": "yield-on-cost-present",
+              "description": "Yield on cost (stabilized NOI / total project cost) must be non-null.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "development-spread-calculated",
+              "description": "Development spread (yield on cost minus exit cap rate) must be calculated.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "irr-calculated",
+              "description": "Development IRR must be calculated for base case, bull, and bear scenarios.",
+              "actionOnFailure": "halt_phase"
+            }
+          ]
+        },
+        {
+          "agentId": "pro-forma-sensitizer",
+          "file": "agents/development/pro-forma-sensitizer.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "development pro forma", "market assumptions"],
+          "outputs": ["sensitivity matrix for rents, costs, and cap rates", "breakeven analysis", "scenarios where IRR falls below hurdle"],
+          "critical": true,
+          "dependencies": ["dev-proforma-agent"],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 35
+        },
+        {
+          "agentId": "dev-capital-stack-analyzer",
+          "file": "agents/development/dev-capital-stack-analyzer.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "total project cost", "development pro forma", "construction loan market"],
+          "outputs": ["construction loan sizing", "equity requirement", "LP/GP structure recommendation", "construction-to-perm financing path"],
+          "critical": true,
+          "dependencies": ["dev-proforma-agent"],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 35
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "entitlement",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "entitlementPathway",
+              "critical": true,
+              "description": "Entitlement timeline required for pro forma construction and lease-up scheduling."
+            },
+            {
+              "key": "entitlementCostBudget",
+              "critical": true,
+              "description": "Entitlement costs required as a line item in total project cost."
+            },
+            {
+              "key": "entitlementRiskScore",
+              "critical": true,
+              "description": "Risk score required to size pro forma contingency."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "development",
+        "passConditions": [
+          {
+            "conditionId": "yield-on-cost-exceeds-spread-threshold",
+            "description": "Yield on cost exceeds exit cap rate by at least the minimum development spread threshold.",
+            "metricPath": "proforma.developmentSpread",
+            "operator": "gte",
+            "thresholdRef": "development.minDevelopmentSpread",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "development-irr-meets-hurdle",
+            "description": "Development IRR at base case meets or exceeds fund hurdle rate.",
+            "metricPath": "proforma.developmentIRR",
+            "operator": "gte",
+            "thresholdRef": "development.minIRR",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "thin-development-spread",
+            "description": "Development spread is between minimum threshold and 50bps above; project viable but execution risk is elevated.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "negative-development-spread",
+            "description": "Yield on cost is below exit cap rate; development destroys value vs stabilized acquisition.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "irr-below-hurdle-floor",
+            "description": "Development IRR is more than 200bps below fund hurdle rate at base case.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "negativeDevelopmentSpread",
+          "constructionCostOverrunKillsFeasibility"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "developmentProforma": {
+          "type": "object",
+          "required": true,
+          "description": "Full development pro forma with total project cost, stabilized NOI, and return metrics."
+        },
+        "totalProjectCost": {
+          "type": "number",
+          "required": true,
+          "description": "Total all-in project cost as the basis for construction loan sizing."
+        },
+        "constructionEquityRequirement": {
+          "type": "number",
+          "required": true,
+          "description": "Equity required for construction phase."
+        },
+        "constructionTimeline": {
+          "type": "object",
+          "required": true,
+          "description": "Construction start, completion, and lease-up timeline for construction phase scheduling."
+        }
+      }
+    },
+    {
+      "phaseId": "construction",
+      "name": "Construction",
+      "weight": 0.25,
+      "agents": [
+        {
+          "agentId": "construction-budget-gc-agent",
+          "file": "agents/development/construction-budget-gc-agent.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "development pro forma", "construction drawings", "GC bids", "construction timeline"],
+          "outputs": ["construction budget variance analysis", "GC bid comparison matrix", "schedule risk flags", "contingency adequacy assessment"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 45,
+          "validationRules": [
+            {
+              "ruleId": "gc-bids-compared",
+              "description": "At least two GC bids must be compared in the bid matrix.",
+              "actionOnFailure": "flag_data_gap"
+            },
+            {
+              "ruleId": "contingency-assessed",
+              "description": "Contingency adequacy relative to construction complexity must be assessed.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        },
+        {
+          "agentId": "construction-draw-manager",
+          "file": "agents/development/construction-draw-manager.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "construction loan agreement", "draw schedule", "GC pay applications"],
+          "outputs": ["draw schedule compliance", "budget-to-actual tracking", "lender inspection coordination flags", "change order log"],
+          "critical": true,
+          "dependencies": ["construction-budget-gc-agent"],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 35
+        },
+        {
+          "agentId": "construction-risk-monitor",
+          "file": "agents/development/construction-risk-monitor.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "construction timeline", "draw schedule", "budget-to-actual", "weather risk", "supply chain flags"],
+          "outputs": ["schedule delay risk assessment", "cost overrun probability", "insurance adequacy check", "force majeure flags"],
+          "critical": false,
+          "dependencies": ["construction-draw-manager"],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 25
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "proforma",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "totalProjectCost",
+              "critical": true,
+              "description": "Total project cost baseline for construction budget variance tracking."
+            },
+            {
+              "key": "constructionTimeline",
+              "critical": true,
+              "description": "Approved construction timeline for schedule monitoring."
+            },
+            {
+              "key": "constructionEquityRequirement",
+              "critical": true,
+              "description": "Equity requirement for construction loan sizing."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "development",
+        "passConditions": [
+          {
+            "conditionId": "construction-within-budget",
+            "description": "Budget-to-actual variance is within approved contingency limits.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "schedule-on-track",
+            "description": "Construction completion date is within 30 days of pro forma completion date.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "minor-cost-overrun",
+            "description": "Costs are 5-10% over budget; within contingency reserve but warrant monitoring.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "schedule-delay-minor",
+            "description": "Schedule delayed 30-60 days; lease-up pro forma adjusted.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "cost-overrun-exceeds-contingency",
+            "description": "Construction cost overruns exceed the entire contingency reserve; additional equity required.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "schedule-delay-material",
+            "description": "Schedule delayed more than 90 days; lease-up assumptions require pro forma revision.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "gcInsolvency",
+          "constructionLoanDefault",
+          "constructionHalt"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "constructionCompletionDate": {
+          "type": "string",
+          "required": true,
+          "description": "Actual or projected construction completion date for lease-up scheduling."
+        },
+        "revisedTotalProjectCost": {
+          "type": "number",
+          "required": true,
+          "description": "Updated total project cost including all change orders and contingency draws."
+        },
+        "constructionLoanStatus": {
+          "type": "string",
+          "required": true,
+          "description": "IN_COMPLIANCE, COVENANT_WATCH, or DEFAULT. DEFAULT blocks lease-up phase."
+        }
+      }
+    },
+    {
+      "phaseId": "lease-up",
+      "name": "Lease-Up",
+      "weight": 0.15,
+      "agents": [
+        {
+          "agentId": "lease-up-war-room-agent",
+          "file": "agents/development/lease-up-war-room-agent.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "construction completion date", "market rents", "competitive supply", "leasing strategy", "concession budget"],
+          "outputs": ["lease-up velocity tracker", "absorption rate vs pro forma", "rent concession burn rate", "occupancy trajectory", "weekly leasing report"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 35,
+          "validationRules": [
+            {
+              "ruleId": "absorption-rate-calculated",
+              "description": "Weekly absorption rate vs pro forma absorption must be calculated.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        },
+        {
+          "agentId": "lease-up-pricing-optimizer",
+          "file": "agents/development/lease-up-pricing-optimizer.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "lease-up velocity", "market comps", "concession burn rate", "stabilization date target"],
+          "outputs": ["unit pricing recommendations", "concession strategy adjustment", "revenue optimization vs velocity tradeoff analysis"],
+          "critical": false,
+          "dependencies": ["lease-up-war-room-agent"],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 25
+        },
+        {
+          "agentId": "construction-to-perm-coordinator",
+          "file": "agents/development/construction-to-perm-coordinator.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "occupancy trajectory", "stabilization date estimate", "permanent financing market", "construction loan maturity"],
+          "outputs": ["construction-to-perm timing analysis", "permanent financing term sheet targets", "lender outreach timing recommendation"],
+          "critical": true,
+          "dependencies": ["lease-up-war-room-agent"],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 25
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "construction",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "constructionCompletionDate",
+              "critical": true,
+              "description": "Completion date required to initiate lease-up tracking."
+            },
+            {
+              "key": "revisedTotalProjectCost",
+              "critical": true,
+              "description": "Updated project cost for revised yield-on-cost calculation."
+            },
+            {
+              "key": "constructionLoanStatus",
+              "critical": true,
+              "description": "Loan status required; DEFAULT blocks lease-up phase."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "development",
+        "passConditions": [
+          {
+            "conditionId": "absorption-on-track",
+            "description": "Actual absorption rate is within 15% of pro forma absorption rate.",
+            "propagateIfFailed": false
+          },
+          {
+            "conditionId": "stabilization-path-clear",
+            "description": "Occupancy trajectory projects stabilization within the pro forma stabilization window.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "absorption-below-pro-forma",
+            "description": "Absorption is 15-30% below pro forma; stabilization delayed by 1-2 quarters.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "absorption-severely-lagging",
+            "description": "Absorption is more than 30% below pro forma; lease-up strategy requires fundamental revision.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "constructionLoanMaturityExtensionUnavailable"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "occupancyAtStabilization": {
+          "type": "number",
+          "required": true,
+          "description": "Projected or actual occupancy at economic stabilization."
+        },
+        "stabilizationDate": {
+          "type": "string",
+          "required": true,
+          "description": "Actual or projected stabilization date in ISO 8601 format."
+        },
+        "stabilizedNOI": {
+          "type": "number",
+          "required": true,
+          "description": "Actual or projected stabilized NOI at full occupancy."
+        },
+        "revisedYieldOnCost": {
+          "type": "number",
+          "required": true,
+          "description": "Revised yield on cost based on actual construction costs and stabilized NOI."
+        }
+      }
+    },
+    {
+      "phaseId": "stabilization",
+      "name": "Stabilization & Exit",
+      "weight": 0.10,
+      "agents": [
+        {
+          "agentId": "stabilization-verifier",
+          "file": "agents/development/stabilization-verifier.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "occupancy trajectory", "stabilized NOI", "T-3 operating statement", "debt service schedule"],
+          "outputs": ["stabilization confirmation", "DSCR at stabilization", "permanent loan eligibility", "final yield on cost vs pro forma"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 30
+        },
+        {
+          "agentId": "exit-path-evaluator",
+          "file": "agents/development/exit-path-evaluator.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/deal.json", "stabilized NOI", "market cap rates", "total project cost", "fund hold period"],
+          "outputs": ["sale vs hold analysis at stabilization", "value-creation realized", "realized IRR at sale", "cap rate sensitivity table"],
+          "critical": true,
+          "dependencies": ["stabilization-verifier"],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 30
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "lease-up",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "stabilizationDate",
+              "critical": true,
+              "description": "Stabilization date required for final project accounting."
+            },
+            {
+              "key": "stabilizedNOI",
+              "critical": true,
+              "description": "Stabilized NOI required for exit value calculation."
+            },
+            {
+              "key": "revisedYieldOnCost",
+              "critical": true,
+              "description": "Final yield on cost for comparison to pro forma targets."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "development",
+        "passConditions": [
+          {
+            "conditionId": "stabilization-confirmed",
+            "description": "Property is at or above economic stabilization threshold for 90+ days.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "irr-target-achieved",
+            "description": "Realized development IRR meets or exceeds the fund hurdle rate.",
+            "propagateIfFailed": false
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "irr-below-target-within-range",
+            "description": "Realized IRR is below target but within 100bps; value creation confirmed despite below-target returns.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "stabilization-not-achieved",
+            "description": "Property failed to reach economic stabilization within the permanent loan eligibility window.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "permanentLoanNotAvailable"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "stabilizationConfirmed": {
+          "type": "boolean",
+          "required": true,
+          "description": "True if property has achieved economic stabilization."
+        },
+        "realizedIRR": {
+          "type": "number",
+          "required": true,
+          "description": "Realized development IRR from land acquisition through stabilization."
+        },
+        "finalYieldOnCost": {
+          "type": "number",
+          "required": true,
+          "description": "Final yield on cost for fund performance reporting."
+        },
+        "exitPath": {
+          "type": "string",
+          "required": true,
+          "description": "SELL or HOLD. SELL triggers handoff to disposition orchestrator. HOLD triggers hold-period-monitor."
+        }
+      }
+    }
+  ],
+  "checkpointConfig": {
+    "basePath": "data/checkpoints/development",
+    "agentLevelTracking": true,
+    "statusValues": {
+      "LAND_CONTROL": "Land under contract; entitlement not yet initiated.",
+      "ENTITLEMENT": "Entitlement process underway.",
+      "PERMITTED": "Entitlement complete; ready for construction financing.",
+      "CONSTRUCTION": "Construction in progress.",
+      "LEASE_UP": "Construction complete; property in lease-up.",
+      "STABILIZED": "Property stabilized.",
+      "EXITED": "Property sold or transferred to hold-period-monitor."
+    },
+    "verdictValues": {
+      "BUILD": "Project proceeds; all phase gates cleared and pro forma supports development.",
+      "KILL": "Project not viable; fundamental economics do not support development at current costs or market.",
+      "DEFER": "Project viable but market timing unfavorable; defer until market conditions improve."
+    }
+  },
+  "crossChainHandoffs": [
+    {
+      "direction": "outbound",
+      "counterpartOrchestrator": "hold-period-monitor",
+      "triggerCondition": "Phase 'stabilization' dataForDownstream.exitPath == HOLD",
+      "dataContract": {
+        "propertyId": {
+          "type": "string",
+          "required": true,
+          "description": "Property identifier for hold-period asset management.",
+          "sourcePhase": "stabilization",
+          "sourcePath": "propertyId"
+        },
+        "acquisitionCost": {
+          "type": "number",
+          "required": true,
+          "description": "Total project cost as the basis for hold-period return tracking.",
+          "sourcePhase": "proforma",
+          "sourcePath": "totalProjectCost"
+        },
+        "stabilizationDate": {
+          "type": "string",
+          "required": true,
+          "description": "Stabilization date to initialize hold period monitoring cycle.",
+          "sourcePhase": "lease-up",
+          "sourcePath": "stabilizationDate"
+        }
+      }
+    },
+    {
+      "direction": "outbound",
+      "counterpartOrchestrator": "disposition-strategy",
+      "triggerCondition": "Phase 'stabilization' dataForDownstream.exitPath == SELL",
+      "dataContract": {
+        "propertyId": {
+          "type": "string",
+          "required": true,
+          "description": "Property identifier for disposition strategy.",
+          "sourcePhase": "stabilization",
+          "sourcePath": "propertyId"
+        },
+        "stabilizedNOI": {
+          "type": "number",
+          "required": true,
+          "description": "Stabilized NOI for disposition pricing.",
+          "sourcePhase": "lease-up",
+          "sourcePath": "stabilizedNOI"
+        },
+        "acquisitionCost": {
+          "type": "number",
+          "required": true,
+          "description": "Total project cost as the disposition basis.",
+          "sourcePhase": "proforma",
+          "sourcePath": "totalProjectCost"
+        }
+      }
+    }
+  ],
+  "executionConfig": {
+    "concurrency": {
+      "maxConcurrentPhases": 1,
+      "maxAgentsPerPhase": 4
+    },
+    "timeouts": {
+      "defaultAgentMinutes": 35,
+      "defaultPhaseMinutes": 120,
+      "pipelineMinutes": 600
+    },
+    "retryPolicy": {
+      "maxAttempts": 3,
+      "backoffStrategy": "exponential",
+      "baseDelayMs": 10000
+    },
+    "pollingIntervalMs": 30000,
+    "stalledPollThreshold": 10,
+    "logging": {
+      "categories": [
+        "ACTION",
+        "FINDING",
+        "INFO",
+        "PHASE",
+        "ERROR",
+        "DATA_GAP",
+        "COMPLETE",
+        "LAUNCH",
+        "RETRY",
+        "TIMEOUT",
+        "VERDICT",
+        "HANDOFF"
+      ]
+    }
+  }
+}

@@ -1,5 +1,5 @@
 ---
-description: "Agent roster index for the CRE skills plugin. Lists all agents grouped by category with one-line descriptions. Used by deal-team-lead to select agents for multi-agent analysis. Includes 8 pre-built team compositions for common CRE tasks."
+description: "Agent roster index for the CRE skills plugin. Lists all 54 agents grouped by 13 categories with one-line descriptions. Used by deal-team-lead to select agents for multi-agent analysis. Includes 10 pre-built team compositions for common CRE tasks."
 ---
 
 # CRE Agent Roster
@@ -28,6 +28,62 @@ Provide different analytical frameworks for the same data. Deploy when you need 
 | Risk Manager | `lens-risk-manager.md` | Downside focus: tail risk, stress testing, leverage discipline, liquidity analysis, covenant monitoring, 8-dimension risk taxonomy |
 | ESG/Impact Specialist | `lens-esg-impact.md` | Sustainability lens: GRESB, TCFD, CRREM stranding, climate physical/transition risk, social impact, governance quality |
 
+## Research & Strategy Agents
+
+Lifecycle agents for market research, investment strategy formulation, and portfolio construction. Used by the research-intelligence, investment-strategy, and portfolio-management orchestrators.
+
+| Agent | File | Description |
+|-------|------|-------------|
+| Market Research Analyst | `research/market-research-analyst.md` | Systematic market research across macro, submarket, and competitive dimensions, opportunity identification and ranking |
+| Submarket Specialist | `research/submarket-specialist.md` | Submarket deep-dive analysis, competitive set mapping, supply pipeline assessment, rent growth forecasting |
+| Chief Investment Officer | `strategy/chief-investment-officer.md` | Senior strategy formulation, market cycle positioning, portfolio construction review, strategy memo production |
+| Portfolio Strategist | `strategy/portfolio-strategist.md` | Capital profile assessment, macro positioning, risk-return analysis, portfolio construction targets and pacing models |
+
+## Asset Management Agents
+
+Lifecycle agents for post-acquisition property operations. Used by the hold-period orchestrator.
+
+| Agent | File | Description |
+|-------|------|-------------|
+| Asset Manager Lead | `asset-management/asset-manager-lead.md` | Senior asset manager overseeing property performance, budget planning, capex governance, and exit trigger evaluation |
+| Leasing Manager | `asset-management/leasing-manager.md` | Leasing strategy specialist, lease optimization, renewal strategy, lease-up execution, rent roll analysis |
+
+## Portfolio Agents
+
+Lifecycle agents for portfolio-level oversight. Used by the portfolio-management orchestrator.
+
+| Agent | File | Description |
+|-------|------|-------------|
+| Portfolio Manager | `portfolio/portfolio-manager.md` | Portfolio-level allocation, rebalancing, composition analysis, and strategy compliance oversight |
+| Risk Officer | `portfolio/risk-officer.md` | Concentration risk analysis, stress testing, tail risk assessment, covenant exposure monitoring |
+
+## Fund Management Agents
+
+Lifecycle agents for fund operations. Used by the fund-management orchestrator.
+
+| Agent | File | Description |
+|-------|------|-------------|
+| Fund Controller | `fund/fund-controller.md` | Fund accounting, NAV calculation, waterfall execution, carried interest accrual, K-1 data packages, clawback liability |
+| Investor Relations Associate | `fund/investor-relations-associate.md` | LP communications, quarterly reporting, subscription processing, AML/KYC, distribution notices, side letter tracking |
+
+## Disposition Agents
+
+Lifecycle agents for sell-side execution. Used by the disposition orchestrator.
+
+| Agent | File | Description |
+|-------|------|-------------|
+| Disposition Manager | `disposition/disposition-manager.md` | Sell-side process coordination, buyer targeting, call-for-offers, offer comparison, retrade defense, estoppel collection |
+
+## LP Intelligence Agents
+
+Lifecycle agents serving Limited Partners evaluating GP allocations. Used by the lp-intelligence orchestrator.
+
+| Agent | File | Description |
+|-------|------|-------------|
+| LP Advisor | `lp/lp-advisor.md` | Senior LP advisor, GP relationship evaluation, re-up strategy, fund selection, allocation recommendations |
+| Fund Analyst | `lp/fund-analyst.md` | Quantitative fund analysis, performance decomposition, DPI/TVPI/IRR benchmarking, fee drag analysis |
+| Allocation Committee Member | `lp/allocation-committee-member.md` | Institutional allocation committee perspective, capital allocation governance, concentration limits, mandate compliance |
+
 ## Composite Agents
 
 General-purpose and orchestration agents for broad CRE tasks.
@@ -35,7 +91,7 @@ General-purpose and orchestration agents for broad CRE tasks.
 | Agent | File | Description |
 |-------|------|-------------|
 | CRE Veteran | `cre-veteran.md` | 30-year generalist across all CRE functions, default first-call agent, routes to specialists, provides institutional context |
-| Deal Team Lead | `deal-team-lead.md` | Multi-agent orchestrator: assembles 3-5 agent teams, structures disagreement, synthesizes recommendations, manages 8 pre-built teams |
+| Deal Team Lead | `deal-team-lead.md` | Multi-agent orchestrator: assembles 3-5 agent teams, structures disagreement, synthesizes recommendations, manages 10 pre-built teams |
 
 ---
 
@@ -84,6 +140,16 @@ Standard agent teams for common CRE tasks. The deal-team-lead assembles these or
 **When**: Rapid assessment and action plan for portfolio distress.
 **Agents**: Risk Manager, CRE Veteran, Quantitative Analyst, Contrarian Analyst.
 **Sequence**: Risk Manager -> Veteran -> Quantitative -> Contrarian -> Synthesis.
+
+### 9. Portfolio Review
+**When**: Quarterly or annual portfolio-level assessment and rebalancing analysis.
+**Agents**: Portfolio Manager, Risk Officer, Quantitative Analyst, CRE Veteran.
+**Sequence**: Portfolio Manager -> Risk Officer -> Quantitative -> Veteran -> Synthesis.
+
+### 10. LP Due Diligence
+**When**: Evaluating a GP's fund for commitment or re-up.
+**Agents**: LP Advisor, Fund Analyst, Allocation Committee Member, Skeptical LP, Risk Manager.
+**Sequence**: LP Advisor -> Fund Analyst -> Risk Manager -> Skeptical LP -> Allocation Committee -> Synthesis.
 
 ---
 

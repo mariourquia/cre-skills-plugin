@@ -1,0 +1,626 @@
+# Blended Fee Benchmarks -- CRE Private Equity Fund Management
+# Data reflects mid-2025 institutional fundraising market
+# Sources: Preqin, Cambridge Associates, fund formation practice (approximate ranges)
+# Use for benchmarking only. Verify current terms with placement agents.
+
+metadata:
+  last_updated: "2026-03-26"
+  data_as_of: "mid-2025"
+  sources:
+    - "Preqin Global Real Estate Report 2024-2025 (approximate ranges)"
+    - "Cambridge Associates Real Estate Benchmark (approximate ranges)"
+    - "Fund formation practice norms from institutional IR teams"
+  note: >
+    All figures are approximate market ranges. Actual terms depend on GP track
+    record, fund size, market conditions, LP relationship, and negotiating
+    leverage. First-time fund GPs typically receive 10-20% less favorable terms
+    than established managers at the same strategy/size.
+
+---
+
+# =============================================================================
+# MANAGEMENT FEE BENCHMARKS BY STRATEGY AND FUND SIZE
+# =============================================================================
+
+management_fee_benchmarks:
+
+  # ---------------------------------------------------------------------------
+  # CORE STRATEGY
+  # Open-end or long-hold closed-end. NCREIF ODCE comps.
+  # Lower fees, larger fund sizes, institutional-only.
+  # ---------------------------------------------------------------------------
+  core:
+    description: >
+      Stabilized, income-producing properties. Low leverage (20-40% LTV).
+      Typically open-end or closed-end with long (12-15 year) terms.
+    standard_fee_range:
+      low_bps: 75
+      high_bps: 125
+      typical_bps: 100
+      basis: "NAV or committed capital (open-end typically on NAV)"
+    blended_fee_range:
+      description: "Blended rate after LP concessions on full LP ledger"
+      low_bps: 65
+      high_bps: 110
+      typical_bps: 88
+    by_fund_size:
+      - size_label: "Small Core (<$500M)"
+        standard_fee_bps: 100
+        blended_fee_bps: 90
+        typical_concession_bps: 10
+      - size_label: "Mid Core ($500M-$2B)"
+        standard_fee_bps: 90
+        blended_fee_bps: 80
+        typical_concession_bps: 10
+      - size_label: "Large Core ($2B+)"
+        standard_fee_bps: 75
+        blended_fee_bps: 68
+        typical_concession_bps: 7
+
+  # ---------------------------------------------------------------------------
+  # CORE-PLUS STRATEGY
+  # Light value-creation. NCREIF open-end alternatives or closed-end.
+  # ---------------------------------------------------------------------------
+  core_plus:
+    description: >
+      Light value-add, modest lease-up or capex. Leverage 35-55% LTV.
+      Closed-end 10-12 year funds. Some value creation alongside income.
+    standard_fee_range:
+      low_bps: 100
+      high_bps: 150
+      typical_bps: 125
+      basis: "committed capital (investment period), invested capital or NAV (post)"
+    blended_fee_range:
+      description: "Blended rate after all LP concessions"
+      low_bps: 88
+      high_bps: 135
+      typical_bps: 113
+    by_fund_size:
+      - size_label: "Small Core-Plus (<$300M)"
+        standard_fee_bps: 140
+        blended_fee_bps: 128
+        typical_concession_bps: 12
+      - size_label: "Mid Core-Plus ($300M-$1B)"
+        standard_fee_bps: 125
+        blended_fee_bps: 113
+        typical_concession_bps: 12
+      - size_label: "Large Core-Plus ($1B+)"
+        standard_fee_bps: 110
+        blended_fee_bps: 98
+        typical_concession_bps: 12
+
+  # ---------------------------------------------------------------------------
+  # VALUE-ADD STRATEGY
+  # Most common institutional closed-end CRE fund strategy.
+  # ---------------------------------------------------------------------------
+  value_add:
+    description: >
+      Repositioning, re-leasing, light development. Leverage 55-70% LTV.
+      10-year closed-end with 2-year extensions. Target gross IRR 12-18%.
+    standard_fee_range:
+      low_bps: 125
+      high_bps: 175
+      typical_bps: 150
+      basis: "committed capital (investment period), invested capital or NAV (harvesting)"
+    blended_fee_range:
+      description: "Blended rate after all LP concessions"
+      low_bps: 112
+      high_bps: 158
+      typical_bps: 133
+    by_fund_size:
+      - size_label: "Small Value-Add (<$150M)"
+        standard_fee_bps: 165
+        blended_fee_bps: 153
+        typical_concession_bps: 12
+      - size_label: "Mid Value-Add ($150M-$500M)"
+        standard_fee_bps: 150
+        blended_fee_bps: 133
+        typical_concession_bps: 17
+      - size_label: "Large Value-Add ($500M-$1B)"
+        standard_fee_bps: 140
+        blended_fee_bps: 120
+        typical_concession_bps: 20
+      - size_label: "Mega Value-Add ($1B+)"
+        standard_fee_bps: 125
+        blended_fee_bps: 108
+        typical_concession_bps: 17
+
+  # ---------------------------------------------------------------------------
+  # OPPORTUNISTIC STRATEGY
+  # Ground-up development, distressed, value creation at highest risk tier.
+  # ---------------------------------------------------------------------------
+  opportunistic:
+    description: >
+      Ground-up development, significant leasing risk, distressed acquisitions.
+      Leverage 60-80% LTV. Target gross IRR 15-25%+.
+      10-year closed-end, sometimes 12-year for development-heavy funds.
+    standard_fee_range:
+      low_bps: 150
+      high_bps: 200
+      typical_bps: 175
+      basis: "committed capital (investment period), invested capital (post)"
+    blended_fee_range:
+      description: "Blended rate after all LP concessions"
+      low_bps: 133
+      high_bps: 178
+      typical_bps: 155
+    by_fund_size:
+      - size_label: "Small Opportunistic (<$100M)"
+        standard_fee_bps: 185
+        blended_fee_bps: 170
+        typical_concession_bps: 15
+      - size_label: "Mid Opportunistic ($100M-$400M)"
+        standard_fee_bps: 175
+        blended_fee_bps: 155
+        typical_concession_bps: 20
+      - size_label: "Large Opportunistic ($400M-$1B)"
+        standard_fee_bps: 160
+        blended_fee_bps: 138
+        typical_concession_bps: 22
+      - size_label: "Mega Opportunistic ($1B+)"
+        standard_fee_bps: 150
+        blended_fee_bps: 128
+        typical_concession_bps: 22
+
+---
+
+# =============================================================================
+# CONCESSION RANGES BY COMMITMENT SIZE
+# Discount from standard fee in basis points
+# =============================================================================
+
+concession_ranges_by_commitment:
+  description: >
+    Typical management fee discount from standard rate granted by LP tier.
+    These are per-LP concessions, not blended fund economics.
+    Actual concessions depend on GP/LP negotiating leverage and market conditions.
+  note: >
+    Concessions should be modeled against MFN cascade before granting.
+    A 30 bps anchor concession with 30 MFN-eligible LPs could cost 5-10x
+    the direct concession value in cascade.
+
+  tiers:
+    - tier: "Anchor"
+      commitment_as_pct_of_target: ">15%"
+      typical_commitment_example_300m_fund: "$45M+"
+      concession_range_bps:
+        low: 15
+        high: 30
+        market_median: 22
+      notes: >
+        At 30+ bps below standard, anchor is setting a deep MFN floor.
+        GPs should model full MFN cascade before granting >25 bps.
+        Anchor exclusions from MFN are standard and should be in fund docs.
+
+    - tier: "Strategic"
+      commitment_as_pct_of_target: "5-15%"
+      typical_commitment_example_300m_fund: "$15M-$45M"
+      concession_range_bps:
+        low: 10
+        high: 20
+        market_median: 14
+      notes: >
+        10 bps is near-universal at this commitment level.
+        Strategic LPs near anchor threshold (13-15%) may receive up to 20 bps.
+        Watch MFN floor: if strategic LP gets 20 bps and is MFN-eligible,
+        all other MFN-eligible LPs ratchet.
+
+    - tier: "Standard"
+      commitment_as_pct_of_target: "1-5%"
+      typical_commitment_example_300m_fund: "$3M-$15M"
+      concession_range_bps:
+        low: 0
+        high: 10
+        market_median: 5
+      notes: >
+        Concessions here (0-10 bps) are typically only for early closers.
+        Avoid individual fee negotiations at this tier.
+        Direct LPs to commitment-tier schedule in PPM where possible.
+        MFN cascade risk is disproportionate at this tier.
+
+    - tier: "Emerging"
+      commitment_as_pct_of_target: "<1%"
+      typical_commitment_example_300m_fund: "<$3M"
+      concession_range_bps:
+        low: 0
+        high: 0
+        market_median: 0
+      notes: >
+        Standard terms only. No side letter fee negotiation.
+        MFN clauses for emerging LPs should be rejected or strictly limited.
+        Exception: seed investor programs or emerging GP programs with
+        strategic rationale may receive concessions outside this range.
+
+---
+
+# =============================================================================
+# EARLY CLOSER DISCOUNT NORMS
+# =============================================================================
+
+early_closer_discounts:
+  description: >
+    Discount from standard management fee for LPs who close at or before
+    the first close date. Rewards early commitment and reduces GP execution
+    risk on the raise.
+  note: >
+    Early closer discounts should be excluded from MFN scope.
+    Define exclusion explicitly: "early closer discounts granted in
+    consideration of first-close commitment are excluded from MFN."
+
+  benchmarks:
+    - scenario: "First close (full first-close discount)"
+      discount_bps:
+        low: 5
+        high: 15
+        market_median: 10
+      typical_structure: >
+        Flat fee reduction (e.g., 1.50% -> 1.40%) for all LPs signing
+        by first close date. Applies for fund life.
+
+    - scenario: "First close discount -- small fund (<$150M)"
+      discount_bps:
+        low: 0
+        high: 10
+        market_median: 5
+      typical_structure: >
+        Small funds often cannot afford early closer discounts due to
+        tighter GP economics. May offer co-invest priority instead.
+
+    - scenario: "Second close (partial early closer)"
+      discount_bps:
+        low: 0
+        high: 7
+        market_median: 3
+      typical_structure: >
+        Rare -- some GPs offer a smaller second-close discount.
+        Not market standard for all strategies.
+
+    - scenario: "Anchor with early close accelerator"
+      discount_bps:
+        low: 5
+        high: 15
+        market_median: 10
+      typical_structure: >
+        Anchor LP who closes early receives early closer discount stacked
+        on top of anchor fee concession. Total discount can reach 35-40 bps
+        below standard. Requires full MFN cascade modeling.
+
+---
+
+# =============================================================================
+# GP COMMITMENT BENCHMARKS
+# =============================================================================
+
+gp_commitment_benchmarks:
+  description: >
+    GP commitment as a percentage of total fund size. Signals GP alignment.
+    Most institutional LPs require minimum 1% cash GP commitment.
+  note: >
+    Fee waiver commitments (GP foregoes management fee to fulfill GP commit)
+    are increasingly scrutinized. Most institutional LPs want cash >= 50%
+    of total GP commitment.
+
+  by_fund_size:
+    - size_label: "Seed Fund (<$50M)"
+      gp_commitment_pct_of_fund:
+        low: 2.0
+        high: 5.0
+        market_median: 3.0
+      cash_pct_of_gp_commit:
+        minimum_institutional: 50
+        typical: 75
+      notes: >
+        Small/seed funds -- GP principals often invest a higher pct because
+        absolute dollar is manageable. Cash commitment preferred.
+
+    - size_label: "Small Fund ($50M-$200M)"
+      gp_commitment_pct_of_fund:
+        low: 1.0
+        high: 3.0
+        market_median: 2.0
+      cash_pct_of_gp_commit:
+        minimum_institutional: 50
+        typical: 70
+      notes: >
+        1% minimum cash is broadly expected. Fee waiver can fill the balance.
+
+    - size_label: "Mid Fund ($200M-$500M)"
+      gp_commitment_pct_of_fund:
+        low: 1.0
+        high: 2.5
+        market_median: 1.5
+      cash_pct_of_gp_commit:
+        minimum_institutional: 50
+        typical: 60
+      notes: >
+        Absolute dollar of GP commit is larger -- $3M-$7.5M at 1.5%.
+        GPs often use a mix of cash and fee waiver. Institutional LPs
+        increasingly want 100% cash at this fund size.
+
+    - size_label: "Large Fund ($500M-$1B)"
+      gp_commitment_pct_of_fund:
+        low: 1.0
+        high: 2.0
+        market_median: 1.2
+      cash_pct_of_gp_commit:
+        minimum_institutional: 100
+        typical: 100
+      notes: >
+        Large fund GPs are expected to make 100% cash commitments.
+        Fee waiver commitment is rejected by most large institutional LPs.
+
+    - size_label: "Mega Fund ($1B+)"
+      gp_commitment_pct_of_fund:
+        low: 1.0
+        high: 1.5
+        market_median: 1.0
+      cash_pct_of_gp_commit:
+        minimum_institutional: 100
+        typical: 100
+      notes: >
+        1% cash on a $1B fund = $10M. This is achievable for established GPs
+        but requires GP entity to have liquidity. Sovereign wealth LPs and
+        public pensions may require higher GP commit.
+
+---
+
+# =============================================================================
+# ORGANIZATIONAL EXPENSE CAP BENCHMARKS
+# =============================================================================
+
+org_expense_cap_benchmarks:
+  description: >
+    Hard cap on organizational (formation) expenses charged to the fund.
+    Includes legal, accounting, placement agent, regulatory filing costs
+    for setting up the fund entity.
+  note: >
+    Org expenses in excess of cap are borne by GP. Caps have tightened
+    as LP scrutiny of fees has increased post-2020.
+
+  by_fund_size:
+    - size_label: "Small Fund (<$150M)"
+      org_expense_cap_usd:
+        low: 250000
+        high: 600000
+        typical: 400000
+      as_bps_of_target: 26.7  # 400K / 150M
+      notes: >
+        Small funds have highest org cost as pct of fund. Cap is harder
+        to negotiate below $250K due to fixed legal costs.
+
+    - size_label: "Mid Fund ($150M-$500M)"
+      org_expense_cap_usd:
+        low: 400000
+        high: 1000000
+        typical: 650000
+      as_bps_of_target: 2.2  # 650K / 300M midpoint
+      notes: >
+        $500K-$700K is the most common range. Placement agent fees
+        (2-3% of commitments raised) are often separate and not in cap.
+
+    - size_label: "Large Fund ($500M-$1B)"
+      org_expense_cap_usd:
+        low: 750000
+        high: 1500000
+        typical: 1000000
+      as_bps_of_target: 1.3  # 1M / 750M midpoint
+      notes: >
+        Institutional LPs at this fund size scrutinize any cap above $1M.
+        Placement agent fees negotiated separately; typically 0.75-1.5% on
+        commitments raised.
+
+    - size_label: "Mega Fund ($1B+)"
+      org_expense_cap_usd:
+        low: 1000000
+        high: 2500000
+        typical: 1500000
+      as_bps_of_target: 0.15  # 1.5M / 1B
+      notes: >
+        Large fund org expenses are largely fixed; bps impact is de minimis.
+        Focus of negotiation shifts to placement agent fee structure.
+
+---
+
+# =============================================================================
+# FEE STEP-DOWN BENCHMARKS
+# =============================================================================
+
+fee_step_down_benchmarks:
+  description: >
+    Management fee step-down: reduction in fee rate after the investment period
+    ends. Standard practice to align fee with remaining portfolio management
+    activity.
+  note: >
+    "Basis" change (from committed capital to invested capital or NAV) is
+    often as impactful as the rate step-down and should be modeled separately.
+
+  by_strategy:
+    - strategy: "Value-Add / Opportunistic (typical structure)"
+      investment_period_years: 5
+      rate_during_investment_period: "Standard rate (e.g., 1.50%)"
+      rate_after_investment_period:
+        reduction_bps_from_standard:
+          low: 25
+          high: 75
+          typical: 50
+        resulting_rate_example: "1.00% if standard was 1.50% and 50 bps step"
+      basis_change:
+        from: "committed capital"
+        to: "invested capital or NAV"
+        note: >
+          Basis change from committed to invested capital typically provides
+          40-60% reduction in fee base as portfolio is sold down in year 6-10.
+          This is often more economically significant than the rate step-down.
+
+    - strategy: "Core-Plus (typical structure)"
+      investment_period_years: 5
+      rate_during_investment_period: "Standard rate (e.g., 1.25%)"
+      rate_after_investment_period:
+        reduction_bps_from_standard:
+          low: 15
+          high: 40
+          typical: 25
+        resulting_rate_example: "1.00% if standard was 1.25% and 25 bps step"
+      basis_change:
+        from: "committed capital"
+        to: "invested capital or NAV"
+
+    - strategy: "Core (if closed-end)"
+      investment_period_years: 7
+      rate_during_investment_period: "Standard rate (e.g., 1.00%)"
+      rate_after_investment_period:
+        reduction_bps_from_standard:
+          low: 10
+          high: 25
+          typical: 15
+        resulting_rate_example: "0.85% if standard was 1.00% and 15 bps step"
+      basis_change:
+        from: "committed capital"
+        to: "NAV"
+
+---
+
+# =============================================================================
+# FEE OFFSET BENCHMARKS
+# =============================================================================
+
+fee_offset_benchmarks:
+  description: >
+    Management fee offset: deal fees collected by GP from fund assets
+    (acquisition fees, disposition fees, financing fees, management fees
+    from properties) offset against LP management fee liability.
+    100% offset = LPs pay $0 incremental management fee for every $1 of
+    deal fees collected by GP from the fund.
+  note: >
+    Higher fee offset is more LP-friendly. 100% offset is market standard
+    for most institutional funds. Sub-50% offset is rare and aggressively
+    resisted by institutional LPs.
+
+  market_standard_by_strategy:
+    - strategy: "Value-Add / Opportunistic"
+      offset_pct:
+        low: 80
+        high: 100
+        institutional_floor: 80
+        market_median: 100
+      notes: >
+        100% offset is the institutional standard for value-add and
+        opportunistic funds. Anything below 80% is typically rejected
+        by pension and endowment LPs.
+
+    - strategy: "Core-Plus"
+      offset_pct:
+        low: 75
+        high: 100
+        institutional_floor: 75
+        market_median: 90
+      notes: >
+        80-100% range. Lower end acceptable only for first-time GPs.
+
+    - strategy: "Core"
+      offset_pct:
+        low: 50
+        high: 100
+        institutional_floor: 50
+        market_median: 75
+      notes: >
+        Core funds generate fewer deal fees due to lower transaction velocity.
+        50% offset still seen in some open-end core structures.
+
+---
+
+# =============================================================================
+# CARRY / PROMOTE BENCHMARKS
+# =============================================================================
+
+carry_promote_benchmarks:
+  description: >
+    Carried interest / promote: GP's share of profits above the preferred return
+    hurdle. Standard fund structure: 80% LP / 20% GP split above preferred return.
+  note: >
+    Carry benchmarks are highly consistent across institutional CRE funds.
+    Unlike management fees, carry is rarely negotiated below 15% for
+    established managers. First-time GPs may accept 10-15%.
+
+  standard_carry:
+    - strategy: "Value-Add / Opportunistic"
+      carry_pct:
+        market_standard: 20
+        minimum_for_established_gp: 15
+        first_time_gp_range: "10-20"
+      preferred_return:
+        range: "7-9%"
+        market_standard: 8
+      waterfall:
+        american: "Deal-by-deal return of capital + preferred + catch-up + carry"
+        european: "Full return of all capital across fund before any carry"
+        market_trend: >
+          European waterfall strongly preferred by institutional LPs.
+          American waterfall typical only for value-add funds in US market
+          with relationship LPs.
+      catch_up:
+        range: "0-100%"
+        market_standard: 100
+        notes: >
+          100% GP catch-up means GP gets 100% of profits above preferred
+          return until GP has received its 20% cut. Then splits 80/20.
+          Some institutional LPs push for 50% catch-up or no catch-up.
+
+    - strategy: "Core-Plus"
+      carry_pct:
+        market_standard: 15
+        range: "10-20"
+      preferred_return:
+        range: "6-8%"
+        market_standard: 7
+      waterfall:
+        market_trend: "European waterfall universal for institutional core-plus"
+
+    - strategy: "Core"
+      carry_pct:
+        market_standard: 10
+        range: "5-15"
+      preferred_return:
+        range: "5-7%"
+        market_standard: 6
+      waterfall:
+        market_trend: "European waterfall; some open-end funds use return-of-NAV tests"
+
+---
+
+# =============================================================================
+# QUICK REFERENCE SUMMARY
+# =============================================================================
+
+quick_reference:
+  description: >
+    One-line per-strategy summary for rapid benchmarking. Use for
+    initial positioning in LP negotiations.
+
+  value_add_300m_fund_typical_deal:
+    standard_fee: "1.50% on committed capital"
+    blended_fee_after_concessions: "1.33%"
+    anchor_fee_typical: "1.25-1.30%"
+    strategic_fee_typical: "1.30-1.40%"
+    standard_lp_fee: "1.40-1.50%"
+    early_closer_discount: "10 bps"
+    fee_step_down: "50 bps after 5-year investment period"
+    fee_offset: "100%"
+    carry: "20%"
+    preferred_return: "8%"
+    gp_commitment: "1.5% cash"
+    org_expense_cap: "$650K"
+
+  opportunistic_200m_fund_typical_deal:
+    standard_fee: "1.75% on committed capital"
+    blended_fee_after_concessions: "1.55%"
+    anchor_fee_typical: "1.45-1.55%"
+    strategic_fee_typical: "1.55-1.65%"
+    standard_lp_fee: "1.65-1.75%"
+    early_closer_discount: "10-15 bps"
+    fee_step_down: "50 bps after 5-year investment period"
+    fee_offset: "100%"
+    carry: "20%"
+    preferred_return: "8%"
+    gp_commitment: "2.0% cash"
+    org_expense_cap: "$500K"

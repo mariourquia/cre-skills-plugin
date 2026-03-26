@@ -1,0 +1,194 @@
+{
+  "$schema": "Investor Profile - Individual High-Net-Worth (Accredited Investor, Direct or Syndication LP)",
+  "investorType": "individual-hnw",
+  "teamComposition": {
+    "tier1Override": {
+      "buyerAgent": "buyer-family-office",
+      "additionalAgents": [],
+      "removeAgents": ["lens-esg-impact", "aggressive-gp"]
+    },
+    "tier2Bias": {
+      "alwaysTrigger": [],
+      "neverTrigger": ["aggressive-gp", "perspective-environmental"]
+    }
+  },
+  "primaryCriteria": {
+    "dscr": {
+      "pass": 1.25,
+      "conditional": 1.15,
+      "fail": 1.05,
+      "description": "Debt Service Coverage Ratio"
+    },
+    "ltv": {
+      "maxPass": 0.65,
+      "maxConditional": 0.70,
+      "fail": 0.80,
+      "description": "Loan to Value Ratio"
+    },
+    "cashOnCash": {
+      "pass": 0.06,
+      "conditional": 0.05,
+      "fail": 0.04,
+      "description": "Annual cash flow / equity invested"
+    }
+  },
+  "accreditedInvestorCompliance": {
+    "status": {
+      "incomeTest": {
+        "thresholdIndividual": 200000,
+        "thresholdJoint": 300000,
+        "consecutiveYearsRequired": 2,
+        "expectationCurrentYear": true,
+        "unit": "USD/year"
+      },
+      "netWorthTest": {
+        "threshold": 1000000,
+        "excludesPrimaryResidence": true,
+        "unit": "USD"
+      },
+      "professionalCertification": {
+        "qualifyingLicenses": ["Series 7", "Series 65", "Series 82"],
+        "note": "Knowledgeable employees of a qualifying fund also qualify"
+      },
+      "verificationMethod": "self-certification or third-party verification letter (CPA, attorney, broker-dealer)"
+    },
+    "offeringTypeAwareness": {
+      "regD506b": {
+        "generalSolicitation": false,
+        "nonAccreditedInvestorsAllowed": true,
+        "nonAccreditedMax": 35,
+        "sophisticationRequiredForNonAccredited": true,
+        "disclosureRequirementsIfNonAccredited": "Regulation D disclosure documents required"
+      },
+      "regD506c": {
+        "generalSolicitation": true,
+        "onlyAccreditedInvestors": true,
+        "accreditationVerificationRequired": "third-party verification required (not self-certification)",
+        "advertisingAllowed": true
+      },
+      "preferredOffering": "506(b) for relationship-sourced investments; 506(c) acceptable if GP has verified accreditation process"
+    },
+    "investmentSuitabilityLimits": {
+      "maxSingleInvestmentAsPercentOfLiquidNetWorth": 0.15,
+      "maxTotalCREExposureAsPercentOfNetWorth": 0.40,
+      "flagAboveThreshold": true
+    }
+  },
+  "reportingRequirements": {
+    "variant": "simplified",
+    "frequency": "monthly",
+    "format": {
+      "primary": "one-page email summary",
+      "secondary": "annual tax package",
+      "avoidFormats": ["GIPS-compliant composites", "ODCE benchmarking", "attribution analysis with decomposed components"]
+    },
+    "plainLanguageMetrics": {
+      "enforce": true,
+      "glossaryRequired": true,
+      "examplesRequired": true,
+      "avoidJargon": ["cap rate spread to Treasuries", "debt yield", "DSCR floor covenant", "NCREIF TBI"],
+      "preferMetrics": ["cash-on-cash return", "total return", "cash distributions received", "property value vs purchase price"]
+    },
+    "visualDashboardPreferred": true,
+    "narrativeLength": {
+      "max": 500,
+      "unit": "words per monthly update"
+    }
+  },
+  "k1BurdenManagement": {
+    "targetK1Count": {
+      "manageable": 5,
+      "conditional": 8,
+      "unwieldy": 10,
+      "description": "Number of K-1s issued to investor per tax year across all real estate investments"
+    },
+    "flagThreshold": 8,
+    "flagAction": "Alert investor and advisor when K-1 count would exceed 8 if new investment added; quantify incremental tax preparation cost",
+    "estimatedCostPerAdditionalK1": {
+      "range": "500-2000",
+      "unit": "USD",
+      "note": "Incremental CPA cost per additional K-1 for a mid-complexity individual return"
+    },
+    "preferSimpleStructures": {
+      "preferred": ["single-purpose LLC with pass-through K-1", "direct ownership (Schedule E)"],
+      "avoid": ["fund-of-funds with multiple K-1 layers", "tiered entity structures with multiple pass-throughs"]
+    },
+    "timing": {
+      "k1IssuanceTarget": "March 15 or earlier",
+      "flagLateK1s": true,
+      "extensionImpact": "Late K-1s force investor extension; flag sponsors with history of late issuance"
+    }
+  },
+  "liquidityConstraints": {
+    "illiquidityRiskFlag": {
+      "enforce": true,
+      "maxIlliquidityYears": 7,
+      "flagAbove": 5,
+      "dealbreaker": "Illiquid for > 7 years without exit mechanism"
+    },
+    "exitMechanisms": {
+      "preferred": ["redemption rights after hold period", "secondary market listing", "co-investor right of first refusal"],
+      "minimumRequired": "at least one identified exit path beyond forced liquidation"
+    },
+    "forcedExitRisk": {
+      "acknowledge": true,
+      "note": "Individual investors may face personal liquidity events (health, divorce, job loss) that necessitate exit at non-optimal times",
+      "mitigant": "Prefer investments with secondary market viability or redemption rights"
+    },
+    "distributionPreference": {
+      "cashDistribution": "preferred over reinvestment",
+      "minimumDistributionFrequency": "quarterly",
+      "deferralRisk": "Flag if sponsor has history of distribution deferral without clear cure plan"
+    },
+    "concentrationLimit": {
+      "maxSingleInvestmentAsPercentOfLiquidNetWorth": 0.15,
+      "maxTotalCREAsPercentOfNetWorth": 0.40
+    }
+  },
+  "educationComponent": {
+    "enforce": true,
+    "educationLevel": "informed-layperson",
+    "requireExplanations": true,
+    "sections": {
+      "whatThisMeans": "Every skill output must include a plain-language 'What this means for you' section",
+      "keyAssumptions": "All modeling assumptions must be listed and explained, not just stated",
+      "glossaryEmbedded": "Embed inline definitions for any term not in common financial vocabulary",
+      "comparisonContext": "Provide comparisons to familiar benchmarks (S&P 500, savings rate, bond yield) where applicable"
+    },
+    "conceptsToExplain": [
+      "cap rate and why it matters",
+      "DSCR and debt service",
+      "cash-on-cash vs IRR",
+      "depreciation and tax shelter math",
+      "waterfall and promote mechanics (in LP investments)",
+      "J-curve effect in closed-end funds",
+      "1031 exchange basics",
+      "K-1 and pass-through taxation"
+    ],
+    "outputSimplification": {
+      "prefer": "executive summary first, detail on request",
+      "avoid": "assumption tables without context, unexplained variance analysis"
+    }
+  },
+  "orchestratorPhaseModifications": {
+    "marketResearch": "Simplified output. Focus on 2-3 target markets with plain-language rationale. Skip macro MSA sweep -- go directly to 'is this market worth investing in for me?' framing.",
+    "strategy": "Return-focused with simple structures. Avoid complex JV waterfalls. Strategy should be explainable in a single paragraph. Prefer co-invest or direct ownership over fund structures.",
+    "acquisition": "Cap deal size to accredited investor suitability limits (max 15% of liquid net worth per deal). Simplified DD output with plain-language risk summary. Illiquidity period prominently flagged.",
+    "assetManagement": "Monthly one-page email summary. Plain-language metrics only. Annual in-person or video property update. No attribution analysis.",
+    "portfolio": "Single-asset or small-portfolio view (max 5-8 investments). No NCREIF benchmarking. Simple dashboard: what I own, what it earns, what it's worth.",
+    "disposition": "Explain tax implications in plain language with dollar amounts, not percentages only. 1031 education component mandatory. Model the after-tax proceeds scenario before recommending action.",
+    "lpIntelligence": "Primary use case for this investor type. Focus on fee transparency (total expense ratio), distribution track record, plain-language performance vs projections."
+  },
+  "dealbreakers": [
+    "Personal guaranty exposure > 2x liquid net worth",
+    "K-1 complexity exceeding tax advisor capacity",
+    "Illiquid for > 7 years without exit mechanism",
+    "Total CRE exposure > 40% of net worth",
+    "Single investment > 15% of liquid net worth",
+    "Sponsor without track record of on-time K-1 issuance",
+    "Complex multi-tier entity structure with 3+ K-1 layers",
+    "No identified exit path beyond hope-and-hold liquidation"
+  ],
+  "reportingVariant": "simplified",
+  "allowedStrategies": ["core", "core-plus", "value-add"]
+}

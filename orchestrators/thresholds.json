@@ -1,0 +1,367 @@
+{
+  "$schema": "Investment Thresholds - Agents use these for go/no-go decisions",
+  "verdict": {
+    "PASS": "All primary criteria met, no dealbreakers",
+    "FAIL": "Any dealbreaker present OR multiple primary criteria fail",
+    "CONDITIONAL": "Marginal on some criteria but no dealbreakers"
+  },
+  "primaryCriteria": {
+    "dscr": { "pass": 1.25, "conditional": 1.0, "fail": 1.0, "description": "Debt Service Coverage Ratio" },
+    "capRateSpread": { "pass": 100, "conditional": 0, "fail": 0, "unit": "bps", "description": "Cap rate minus debt rate in basis points" },
+    "cashOnCash": { "pass": 0.08, "conditional": 0.05, "fail": 0.05, "description": "Annual cash flow / equity invested" },
+    "debtYield": { "pass": 0.09, "conditional": 0.07, "fail": 0.07, "description": "NOI / loan amount" },
+    "ltv": { "maxPass": 0.75, "maxConditional": 0.80, "fail": 0.80, "description": "Loan to value ratio" }
+  },
+  "secondaryCriteria": {
+    "occupancy": { "strong": 0.95, "acceptable": 0.90, "concern": 0.85, "distressed": 0.80 },
+    "expenseRatio": { "excellent": 0.40, "good": 0.45, "acceptable": 0.50, "concern": 0.55 },
+    "rentToMarket": { "upside": 0.90, "atMarket": 1.0, "aboveMarket": 1.05, "overpriced": 1.10 },
+    "capRate": { "strong": 0.07, "acceptable": 0.055, "marginal": 0.045, "fail": 0.04 },
+    "pricePerUnit": { "description": "Compared to market comps and replacement cost" }
+  },
+  "dealbreakers": [
+    "Active title dispute or lis pendens",
+    "Property in bankruptcy estate",
+    "Dissolved entity ownership",
+    "Active environmental contamination (unquantified)",
+    "Demolition order or condemnation",
+    "Criminal activity nexus",
+    "Fraud in title chain",
+    "DSCR below 0.80 without clear value-add thesis",
+    "Structural failure requiring demolition",
+    "Uninsurable property condition"
+  ],
+  "riskScore": {
+    "lowRisk": { "min": 90, "max": 100, "action": "Proceed with standard DD" },
+    "lowMediumRisk": { "min": 75, "max": 89, "action": "Proceed with enhanced DD" },
+    "mediumRisk": { "min": 60, "max": 74, "action": "Enhanced DD required, price adjustment likely" },
+    "mediumHighRisk": { "min": 40, "max": 59, "action": "Significant concerns, major discount required" },
+    "highRisk": { "min": 0, "max": 39, "action": "Not recommended" }
+  },
+  "strategyThresholds": {
+    "core": { "minDSCR": 1.30, "maxHighRisks": 0, "maxMediumRisks": 2, "minRiskScore": 85 },
+    "core-plus": { "minDSCR": 1.20, "maxHighRisks": 1, "maxMediumRisks": 3, "minRiskScore": 75 },
+    "value-add": { "minDSCR": 1.0, "maxHighRisks": 2, "maxMediumRisks": 5, "minRiskScore": 60 },
+    "opportunistic": { "minDSCR": 0.0, "maxHighRisks": 3, "maxMediumRisks": 10, "minRiskScore": 40 }
+  },
+  "dueDiligence": {
+    "maxRedFlags": 3,
+    "maxDataGaps": 5,
+    "criticalRedFlagCategories": [
+      "environmental-contamination",
+      "structural-failure",
+      "title-defect",
+      "zoning-violation",
+      "flood-zone-uninsurable"
+    ],
+    "minAgentsComplete": 5,
+    "minCriticalAgentsComplete": 4,
+    "criticalAgents": [
+      "rent-roll-analyst",
+      "opex-analyst",
+      "environmental-review",
+      "legal-title-review"
+    ],
+    "agentTimeouts": {
+      "default_minutes": 30,
+      "market-study_minutes": 45,
+      "environmental-review_minutes": 45
+    }
+  },
+  "underwriting": {
+    "minIRR": 0.15,
+    "minEquityMultiple": 1.8,
+    "minDSCR": 1.25,
+    "minCashOnCash": 0.08,
+    "maxLTV": 0.75,
+    "minScenariosPassingAll": 18,
+    "totalScenarios": 27,
+    "baseCase": {
+      "minNOI": 0,
+      "maxCapRate": 0.08,
+      "minCapRate": 0.04
+    },
+    "stressTest": {
+      "maxVacancyRate": 0.15,
+      "maxExpenseRatio": 0.55,
+      "maxInterestRate": 0.08
+    }
+  },
+  "financing": {
+    "maxLTV": 0.75,
+    "minDSCR": 1.25,
+    "maxInterestRate": 0.08,
+    "minLoanTerm_years": 5,
+    "maxOriginationFee_pct": 0.02,
+    "minLenderQuotes": 3,
+    "preferredLoanTypes": ["agency", "CMBS", "bank", "life-company"],
+    "maxPrepaymentPenalty": "yield-maintenance",
+    "agentTimeouts": {
+      "default_minutes": 30,
+      "lender-outreach_minutes": 60
+    }
+  },
+  "legal": {
+    "maxOpenViolations": 0,
+    "maxTitleExceptions": 5,
+    "requiredInsuranceCoverage": ["general-liability", "property", "umbrella", "flood"],
+    "estoppelReturnRate_min_pct": 0.80,
+    "maxEstoppelVariance_pct": 0.05,
+    "maxPendingLitigation": 0,
+    "criticalDocuments": [
+      "title-commitment",
+      "survey",
+      "estoppel-certificates",
+      "insurance-binders",
+      "loan-documents"
+    ],
+    "agentTimeouts": {
+      "default_minutes": 30,
+      "estoppel-tracker_minutes": 90,
+      "loan-doc-reviewer_minutes": 45
+    }
+  },
+  "closing": {
+    "requiredPreClosingItems": [
+      "title-clear",
+      "survey-approved",
+      "insurance-bound",
+      "loan-docs-signed",
+      "estoppels-collected",
+      "funds-wired"
+    ],
+    "maxClosingCostVariance_pct": 0.05,
+    "requiredFundsFlowApprovals": ["buyer", "seller", "lender", "title-company"],
+    "postClosingDeadline_days": 30,
+    "agentTimeouts": {
+      "default_minutes": 30,
+      "funds-flow-manager_minutes": 45
+    }
+  },
+  "primaryCriteriaByInvestorType": {
+    "institutional": {
+      "dscr": { "pass": 1.35, "conditional": 1.25, "fail": 1.15, "description": "Debt Service Coverage Ratio" },
+      "ltv": { "maxPass": 0.40, "maxConditional": 0.50, "fail": 0.60, "description": "Loan to value ratio" },
+      "cashOnCash": { "pass": 0.05, "conditional": 0.04, "fail": 0.03, "description": "Annual cash flow / equity invested" },
+      "debtYield": { "pass": 0.10, "conditional": 0.09, "fail": 0.08, "description": "NOI / loan amount" },
+      "capRateSpread": { "pass": 150, "conditional": 100, "fail": 50, "unit": "bps", "description": "Cap rate minus debt rate in basis points" }
+    },
+    "pe": {
+      "dscr": { "pass": 1.15, "conditional": 1.0, "fail": 0.85, "description": "Debt Service Coverage Ratio" },
+      "ltv": { "maxPass": 0.75, "maxConditional": 0.78, "fail": 0.80, "description": "Loan to value ratio" },
+      "cashOnCash": { "pass": 0.08, "conditional": 0.05, "fail": 0.02, "description": "Annual cash flow / equity invested" },
+      "debtYield": { "pass": 0.08, "conditional": 0.07, "fail": 0.06, "description": "NOI / loan amount" },
+      "capRateSpread": { "pass": 50, "conditional": 0, "fail": -50, "unit": "bps", "description": "Cap rate minus debt rate in basis points" }
+    },
+    "reit": {
+      "dscr": { "pass": 1.40, "conditional": 1.30, "fail": 1.20, "description": "Debt Service Coverage Ratio" },
+      "ltv": { "maxPass": 0.50, "maxConditional": 0.60, "fail": 0.70, "description": "Loan to value ratio" },
+      "cashOnCash": { "pass": 0.06, "conditional": 0.05, "fail": 0.04, "description": "Annual cash flow / equity invested" },
+      "debtYield": { "pass": 0.09, "conditional": 0.08, "fail": 0.07, "description": "NOI / loan amount" },
+      "capRateSpread": { "pass": 100, "conditional": 50, "fail": 0, "unit": "bps", "description": "Cap rate minus debt rate in basis points" }
+    },
+    "familyOffice": {
+      "dscr": { "pass": 1.35, "conditional": 1.25, "fail": 1.15, "description": "Debt Service Coverage Ratio" },
+      "ltv": { "maxPass": 0.60, "maxConditional": 0.65, "fail": 0.75, "description": "Loan to value ratio" },
+      "cashOnCash": { "pass": 0.05, "conditional": 0.04, "fail": 0.03, "description": "Annual cash flow / equity invested" },
+      "debtYield": { "pass": 0.09, "conditional": 0.08, "fail": 0.07, "description": "NOI / loan amount" },
+      "capRateSpread": { "pass": 100, "conditional": 50, "fail": 0, "unit": "bps", "description": "Cap rate minus debt rate in basis points" }
+    },
+    "syndicator": {
+      "dscr": { "pass": 1.10, "conditional": 1.0, "fail": 0.90, "description": "Debt Service Coverage Ratio" },
+      "ltv": { "maxPass": 0.80, "maxConditional": 0.82, "fail": 0.85, "description": "Loan to value ratio" },
+      "cashOnCash": { "pass": 0.07, "conditional": 0.05, "fail": 0.03, "description": "Annual cash flow / equity invested" },
+      "debtYield": { "pass": 0.075, "conditional": 0.065, "fail": 0.055, "description": "NOI / loan amount" },
+      "capRateSpread": { "pass": 25, "conditional": 0, "fail": -50, "unit": "bps", "description": "Cap rate minus debt rate in basis points" }
+    }
+  },
+  "secondaryCriteriaByInvestorType": {
+    "institutional": {
+      "occupancy": { "strong": 0.97, "acceptable": 0.93, "concern": 0.90, "distressed": 0.85 },
+      "expenseRatio": { "excellent": 0.35, "good": 0.40, "acceptable": 0.45, "concern": 0.50 },
+      "rentToMarket": { "upside": 0.85, "atMarket": 1.0, "aboveMarket": 1.03, "overpriced": 1.07 },
+      "capRate": { "strong": 0.065, "acceptable": 0.055, "marginal": 0.045, "fail": 0.04 },
+      "wale_years": { "strong": 7, "acceptable": 5, "concern": 3, "distressed": 1 }
+    },
+    "pe": {
+      "occupancy": { "strong": 0.90, "acceptable": 0.80, "concern": 0.70, "distressed": 0.60 },
+      "expenseRatio": { "excellent": 0.45, "good": 0.50, "acceptable": 0.55, "concern": 0.65 },
+      "rentToMarket": { "upside": 0.70, "atMarket": 0.90, "aboveMarket": 1.05, "overpriced": 1.15 },
+      "capRate": { "strong": 0.08, "acceptable": 0.065, "marginal": 0.055, "fail": 0.045 },
+      "wale_years": { "strong": 3, "acceptable": 1, "concern": 0.5, "distressed": 0 }
+    },
+    "reit": {
+      "occupancy": { "strong": 0.96, "acceptable": 0.92, "concern": 0.88, "distressed": 0.82 },
+      "expenseRatio": { "excellent": 0.38, "good": 0.43, "acceptable": 0.48, "concern": 0.53 },
+      "rentToMarket": { "upside": 0.88, "atMarket": 1.0, "aboveMarket": 1.04, "overpriced": 1.08 },
+      "capRate": { "strong": 0.07, "acceptable": 0.058, "marginal": 0.048, "fail": 0.042 },
+      "wale_years": { "strong": 8, "acceptable": 5, "concern": 3, "distressed": 1 }
+    },
+    "familyOffice": {
+      "occupancy": { "strong": 0.95, "acceptable": 0.90, "concern": 0.85, "distressed": 0.80 },
+      "expenseRatio": { "excellent": 0.40, "good": 0.45, "acceptable": 0.50, "concern": 0.55 },
+      "rentToMarket": { "upside": 0.90, "atMarket": 1.0, "aboveMarket": 1.05, "overpriced": 1.10 },
+      "capRate": { "strong": 0.07, "acceptable": 0.055, "marginal": 0.045, "fail": 0.04 },
+      "wale_years": { "strong": 5, "acceptable": 3, "concern": 1.5, "distressed": 0.5 }
+    },
+    "syndicator": {
+      "occupancy": { "strong": 0.88, "acceptable": 0.80, "concern": 0.72, "distressed": 0.65 },
+      "expenseRatio": { "excellent": 0.48, "good": 0.53, "acceptable": 0.58, "concern": 0.65 },
+      "rentToMarket": { "upside": 0.75, "atMarket": 0.92, "aboveMarket": 1.05, "overpriced": 1.15 },
+      "capRate": { "strong": 0.075, "acceptable": 0.060, "marginal": 0.050, "fail": 0.043 },
+      "wale_years": { "strong": 2, "acceptable": 1, "concern": 0.5, "distressed": 0 }
+    }
+  },
+  "dealbreakersByInvestorType": {
+    "institutional": [
+      "Active title dispute or lis pendens",
+      "Property in bankruptcy estate",
+      "Dissolved entity ownership",
+      "Active environmental contamination (unquantified)",
+      "Demolition order or condemnation",
+      "Criminal activity nexus",
+      "Fraud in title chain",
+      "DSCR below 1.15",
+      "Structural failure requiring demolition",
+      "Uninsurable property condition",
+      "LTV exceeding 0.60",
+      "Occupancy below 0.85",
+      "WALE below 1 year",
+      "Any pending litigation with exposure exceeding 5% of purchase price",
+      "Non-institutional market or sub-market"
+    ],
+    "pe": [
+      "Active title dispute or lis pendens",
+      "Property in bankruptcy estate",
+      "Dissolved entity ownership",
+      "Active environmental contamination (unquantified)",
+      "Demolition order or condemnation",
+      "Fraud in title chain",
+      "DSCR below 0.85 without approved business plan",
+      "Structural failure requiring demolition",
+      "Uninsurable property condition",
+      "LTV exceeding 0.80",
+      "No identifiable value-creation path",
+      "Regulatory or zoning barrier blocking intended repositioning"
+    ],
+    "reit": [
+      "Active title dispute or lis pendens",
+      "Property in bankruptcy estate",
+      "Dissolved entity ownership",
+      "Active environmental contamination (unquantified)",
+      "Demolition order or condemnation",
+      "Criminal activity nexus",
+      "Fraud in title chain",
+      "DSCR below 1.20",
+      "Structural failure requiring demolition",
+      "Uninsurable property condition",
+      "LTV exceeding 0.70",
+      "Occupancy below 0.82",
+      "Asset outside approved REIT property-type mandate",
+      "UPREIT tax structure incompatible with seller",
+      "Environmental liability exceeding approved reserve threshold"
+    ],
+    "familyOffice": [
+      "Active title dispute or lis pendens",
+      "Property in bankruptcy estate",
+      "Dissolved entity ownership",
+      "Active environmental contamination (unquantified)",
+      "Demolition order or condemnation",
+      "Criminal activity nexus",
+      "Fraud in title chain",
+      "DSCR below 1.15",
+      "Structural failure requiring demolition",
+      "Uninsurable property condition",
+      "LTV exceeding 0.75",
+      "Reputation risk associated with asset or seller",
+      "Liquidity lockup period exceeding family investment policy statement limits"
+    ],
+    "syndicator": [
+      "Active title dispute or lis pendens",
+      "Property in bankruptcy estate",
+      "Dissolved entity ownership",
+      "Active environmental contamination (unquantified)",
+      "Demolition order or condemnation",
+      "Fraud in title chain",
+      "DSCR below 0.90 without approved value-add business plan",
+      "Structural failure requiring demolition",
+      "Uninsurable property condition",
+      "LTV exceeding 0.85",
+      "Preferred return structure incompatible with debt terms",
+      "SEC Regulation D compliance barrier",
+      "Projected investor IRR below 12% in base case"
+    ]
+  },
+  "strategyThresholdsByInvestorType": {
+    "institutional": {
+      "allowedStrategies": ["core", "core-plus"],
+      "core": { "minDSCR": 1.40, "maxHighRisks": 0, "maxMediumRisks": 1, "minRiskScore": 90, "maxLTV": 0.45, "minOccupancy": 0.95 },
+      "core-plus": { "minDSCR": 1.30, "maxHighRisks": 0, "maxMediumRisks": 2, "minRiskScore": 82, "maxLTV": 0.55, "minOccupancy": 0.90 }
+    },
+    "pe": {
+      "allowedStrategies": ["value-add", "opportunistic"],
+      "value-add": { "minDSCR": 1.05, "maxHighRisks": 2, "maxMediumRisks": 6, "minRiskScore": 55, "maxLTV": 0.78, "minOccupancy": 0.70 },
+      "opportunistic": { "minDSCR": 0.0, "maxHighRisks": 4, "maxMediumRisks": 12, "minRiskScore": 35, "maxLTV": 0.80, "minOccupancy": 0.50 }
+    },
+    "reit": {
+      "allowedStrategies": ["core", "core-plus"],
+      "core": { "minDSCR": 1.45, "maxHighRisks": 0, "maxMediumRisks": 1, "minRiskScore": 88, "maxLTV": 0.50, "minOccupancy": 0.92 },
+      "core-plus": { "minDSCR": 1.35, "maxHighRisks": 0, "maxMediumRisks": 3, "minRiskScore": 78, "maxLTV": 0.60, "minOccupancy": 0.88 }
+    },
+    "familyOffice": {
+      "allowedStrategies": ["core", "core-plus", "value-add"],
+      "core": { "minDSCR": 1.35, "maxHighRisks": 0, "maxMediumRisks": 2, "minRiskScore": 85, "maxLTV": 0.55, "minOccupancy": 0.92 },
+      "core-plus": { "minDSCR": 1.25, "maxHighRisks": 1, "maxMediumRisks": 3, "minRiskScore": 75, "maxLTV": 0.65, "minOccupancy": 0.87 },
+      "value-add": { "minDSCR": 1.10, "maxHighRisks": 2, "maxMediumRisks": 5, "minRiskScore": 60, "maxLTV": 0.75, "minOccupancy": 0.75 }
+    },
+    "syndicator": {
+      "allowedStrategies": ["value-add", "opportunistic"],
+      "value-add": { "minDSCR": 1.0, "maxHighRisks": 3, "maxMediumRisks": 7, "minRiskScore": 50, "maxLTV": 0.82, "minOccupancy": 0.65 },
+      "opportunistic": { "minDSCR": 0.0, "maxHighRisks": 5, "maxMediumRisks": 15, "minRiskScore": 30, "maxLTV": 0.85, "minOccupancy": 0.50 }
+    }
+  },
+  "thresholdSelectionProtocol": {
+    "description": "Defines how agents select and merge the correct threshold set for a given deal",
+    "steps": [
+      {
+        "step": 1,
+        "action": "Read investorType from deal.json",
+        "field": "deal.investorType",
+        "validValues": ["institutional", "pe", "reit", "familyOffice", "syndicator"]
+      },
+      {
+        "step": 2,
+        "action": "Read investmentStrategy from deal.json",
+        "field": "deal.investmentStrategy",
+        "validValues": ["core", "core-plus", "value-add", "opportunistic"]
+      },
+      {
+        "step": 3,
+        "action": "Look up strategyThresholdsByInvestorType[investorType][strategy]",
+        "description": "Retrieve the strategy-level threshold overrides for the resolved investor type. If the strategy key is not present within the investor type node, proceed to step 4."
+      },
+      {
+        "step": 4,
+        "action": "If strategy not in allowedStrategies -> EXCLUDED",
+        "description": "If deal.investmentStrategy is not listed in strategyThresholdsByInvestorType[investorType].allowedStrategies, the deal is immediately excluded from further evaluation. No scoring is performed."
+      },
+      {
+        "step": 5,
+        "action": "Merge investor overrides with base thresholds",
+        "description": "Start with base primaryCriteria and secondaryCriteria. Overlay primaryCriteriaByInvestorType[investorType] values, then overlay strategyThresholdsByInvestorType[investorType][strategy] values. Investor-type fields take precedence over base fields. Strategy-level fields take precedence over investor-type fields.",
+        "mergeOrder": ["primaryCriteria (base)", "primaryCriteriaByInvestorType[investorType]", "strategyThresholdsByInvestorType[investorType][strategy]"]
+      },
+      {
+        "step": 6,
+        "action": "Apply merged thresholds to all downstream agents",
+        "description": "Pass the merged threshold object to every agent in the pipeline (underwriting, financing, due diligence, legal, closing). Agents must not reference the base threshold sections directly -- they must use the merged object provided by the orchestrator."
+      }
+    ],
+    "notes": [
+      "investorType and investmentStrategy are required fields in deal.json. Missing fields are a fatal validation error.",
+      "dealbreakersByInvestorType[investorType] is appended to (not replaced by) the base dealbreakers array.",
+      "thresholdSelectionProtocol is executed once at orchestration start and the merged result is cached for the session.",
+      "If investorType is not recognized, fall back to base thresholds and log a warning."
+    ]
+  }
+}

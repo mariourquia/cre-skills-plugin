@@ -1,0 +1,1144 @@
+{
+  "orchestratorId": "fund-management",
+  "version": "2.0.0",
+  "entityType": "fund",
+  "description": "Six-phase fund management pipeline: fund formation, capital raise, capital deployment, monitoring and reporting, distributions, and exit/wind-down. Coordinates fund-formation-toolkit, lp-pitch-deck-builder, capital-raise-machine, portfolio-allocator, quarterly-investor-update, performance-attribution, jv-waterfall-architect, partnership-allocation-engine, fund-operations-compliance-dashboard, and investor-lifecycle-manager. Includes GP economics tracking across management fees, carried interest, co-invest, and clawback. Terminal verdict: DEPLOY (fund deploying as planned), HOLD (deployment paused pending market or LP conditions), or WIND-DOWN (fund entering exit and distribution phase).",
+  "model": "claude-opus-4-6[1m]",
+  "phases": [
+    {
+      "phaseId": "fund-formation",
+      "name": "Fund Formation",
+      "weight": 0.10,
+      "orchestratorFile": "orchestrators/fund-management-orchestrator.md",
+      "agents": [
+        {
+          "agentId": "fund-structure-designer",
+          "file": "agents/fund-management/fund-structure-designer.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["fund strategy brief", "target asset class", "target geography", "target fund size", "GP track record"],
+          "outputs": ["fund structure recommendation", "GP/LP economics", "carried interest structure", "preferred return hurdle", "fee schedule", "GP co-invest commitment", "clawback provisions"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/fund-formation-toolkit.md"
+          ],
+          "maxTimeoutMinutes": 40,
+          "validationRules": [
+            {
+              "ruleId": "gp-economics-complete",
+              "description": "GP economics must include management fee, carried interest percentage, preferred return hurdle, GP co-invest amount, and clawback terms.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "fee-schedule-validated",
+              "description": "Fee schedule must specify management fee basis (committed vs invested capital), step-down schedule, and organizational expense cap.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        },
+        {
+          "agentId": "legal-docs-coordinator",
+          "file": "agents/fund-management/legal-docs-coordinator.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["fund structure recommendation", "target jurisdictions", "SEC registration status", "investor types"],
+          "outputs": ["LPA key terms summary", "PPM outline", "regulatory checklist", "subscription agreement framework", "side letter policy"],
+          "critical": true,
+          "dependencies": ["fund-structure-designer"],
+          "skillRefs": [
+            "skills/fund-formation-toolkit.md"
+          ],
+          "maxTimeoutMinutes": 35,
+          "validationRules": [
+            {
+              "ruleId": "lpa-key-terms-present",
+              "description": "LPA key terms must cover distribution waterfall, key man provisions, investment restrictions, GP removal, and fund term/extension.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        },
+        {
+          "agentId": "investment-policy-drafter",
+          "file": "agents/fund-management/investment-policy-drafter.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["fund structure recommendation", "target asset class", "target geography", "return targets", "risk parameters"],
+          "outputs": ["investment policy statement", "diversification guidelines", "concentration limits", "hold period parameters", "leverage policy", "co-investment policy"],
+          "critical": true,
+          "dependencies": ["fund-structure-designer"],
+          "skillRefs": [
+            "skills/fund-formation-toolkit.md",
+            "skills/portfolio-allocator.md"
+          ],
+          "maxTimeoutMinutes": 30
+        },
+        {
+          "agentId": "fund-counsel",
+          "file": "agents/fund-management/fund-counsel.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["fund structure recommendation", "target investor types", "target jurisdictions", "SEC registration status"],
+          "outputs": ["Reg D 506(b) vs 506(c) analysis", "state blue sky compliance matrix", "ERISA considerations", "CFIUS review requirements", "anti-money laundering program outline"],
+          "critical": false,
+          "dependencies": ["fund-structure-designer"],
+          "skillRefs": [
+            "skills/fund-formation-toolkit.md"
+          ],
+          "maxTimeoutMinutes": 30
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "fundManagement",
+        "passConditions": [
+          {
+            "conditionId": "fund-structure-complete",
+            "description": "Fund structure including GP economics, LPA key terms, investment policy, and fee schedule is fully defined.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "regulatory-path-clear",
+            "description": "Legal docs coordinator and fund counsel confirm regulatory path is clear for the target investor universe.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "gp-economics-aligned",
+            "description": "GP economics (management fee, carry, co-invest) are market-competitive and aligned with fund strategy.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "legal-docs-pending",
+            "description": "LPA and PPM are being drafted; fund can proceed to capital raise with term sheet.",
+            "propagateIfFailed": false
+          },
+          {
+            "conditionId": "regulatory-review-pending",
+            "description": "Blue sky filings or ERISA analysis in progress but not expected to block capital raise.",
+            "propagateIfFailed": false
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "regulatory-barrier",
+            "description": "Regulatory requirements cannot be met for the target investor class or geography.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "gp-economics-non-viable",
+            "description": "GP economics cannot support fund operations at the target fund size; management fee insufficient to cover operating costs.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "secRegistrationRequired",
+          "lpaStructuralDefect",
+          "erisaPlanAssetViolation"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "fundTerms": {
+          "type": "object",
+          "required": true,
+          "description": "Complete fund terms including GP economics, fees, preferred return, carry, hold period, and clawback provisions."
+        },
+        "investmentPolicy": {
+          "type": "object",
+          "required": true,
+          "description": "Investment policy statement with asset class, geography, leverage, and concentration parameters."
+        },
+        "targetFundSize": {
+          "type": "number",
+          "required": true,
+          "description": "Target fund size in dollars for capital raise planning."
+        },
+        "gpEconomics": {
+          "type": "object",
+          "required": true,
+          "description": "GP economics package: management fee schedule, carry structure, co-invest commitment, clawback, catch-up."
+        },
+        "regulatoryFramework": {
+          "type": "object",
+          "required": false,
+          "description": "Reg D exemption type, blue sky filing requirements, ERISA status."
+        }
+      }
+    },
+    {
+      "phaseId": "capital-raise",
+      "name": "Capital Raise",
+      "weight": 0.15,
+      "agents": [
+        {
+          "agentId": "lp-pitch-deck-agent",
+          "file": "agents/fund-management/lp-pitch-deck-agent.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["fund terms", "investment policy", "GP track record", "market opportunity thesis", "target fund size"],
+          "outputs": ["LP pitch deck", "fund one-pager", "track record summary table", "market opportunity slides", "fee disclosure schedule"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/lp-pitch-deck-builder.md"
+          ],
+          "maxTimeoutMinutes": 40
+        },
+        {
+          "agentId": "capital-raise-machine-agent",
+          "file": "agents/fund-management/capital-raise-machine-agent.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["fund terms", "investment policy", "LP pitch deck", "target LP universe", "capital raise timeline"],
+          "outputs": ["LP outreach pipeline", "meeting tracker", "soft circle log", "commitment status by LP", "capital raise progress vs target"],
+          "critical": true,
+          "dependencies": ["lp-pitch-deck-agent"],
+          "skillRefs": [
+            "skills/capital-raise-machine.md"
+          ],
+          "maxTimeoutMinutes": 35
+        },
+        {
+          "agentId": "lp-diligence-coordinator",
+          "file": "agents/fund-management/lp-diligence-coordinator.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["fund terms", "LP meeting tracker", "due diligence questionnaire responses"],
+          "outputs": ["LP DDQ response tracker", "common LP concern synthesis", "GP response templates", "data room completion status"],
+          "critical": false,
+          "dependencies": ["capital-raise-machine-agent"],
+          "skillRefs": [
+            "skills/capital-raise-machine.md"
+          ],
+          "maxTimeoutMinutes": 30
+        },
+        {
+          "agentId": "investor-relations-associate",
+          "file": "agents/fund/investor-relations-associate.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["fund terms", "LP outreach pipeline", "subscription documents", "AML/KYC requirements"],
+          "outputs": ["subscription processing status", "AML/KYC compliance tracker", "LP onboarding checklist", "side letter tracking matrix", "investor communication log"],
+          "critical": false,
+          "dependencies": ["capital-raise-machine-agent"],
+          "skillRefs": [
+            "skills/capital-raise-machine.md",
+            "skills/investor-lifecycle-manager.md"
+          ],
+          "maxTimeoutMinutes": 30
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "fund-formation",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "fundTerms",
+              "critical": true,
+              "description": "Fund terms required for LP pitch deck and capital raise materials."
+            },
+            {
+              "key": "targetFundSize",
+              "critical": true,
+              "description": "Target fund size required for capital raise progress tracking."
+            },
+            {
+              "key": "gpEconomics",
+              "critical": true,
+              "description": "GP economics required for fee disclosure in LP materials."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "fundManagement",
+        "passConditions": [
+          {
+            "conditionId": "first-close-achieved",
+            "description": "Committed capital reaches first close threshold (typically 50-60% of target fund size).",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "subscription-docs-complete",
+            "description": "All committed LPs have executed subscription agreements and passed AML/KYC.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "soft-circles-sufficient",
+            "description": "Soft-circled commitments exceed target fund size; formal commitments lagging but expected.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "below-first-close-threshold",
+            "description": "Committed capital below first close threshold; fund may proceed at smaller initial deployment.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "no-investor-interest",
+            "description": "Capital raise pipeline shows insufficient investor interest at proposed terms; fund not viable.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "insufficientLPCommitmentsForMinimumFundSize",
+          "amlKycFailureOnMajorLP"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "committedCapital": {
+          "type": "number",
+          "required": true,
+          "description": "Total committed LP capital at first close in dollars."
+        },
+        "lpRoster": {
+          "type": "array",
+          "required": true,
+          "description": "List of committed LPs with commitment amounts, investor type classifications, and side letter provisions."
+        },
+        "deployableCapital": {
+          "type": "number",
+          "required": true,
+          "description": "Committed capital minus management fees and fund expenses available for investment."
+        },
+        "gpCoInvest": {
+          "type": "number",
+          "required": true,
+          "description": "GP co-investment commitment amount in dollars."
+        }
+      }
+    },
+    {
+      "phaseId": "deployment",
+      "name": "Capital Deployment",
+      "weight": 0.20,
+      "agents": [
+        {
+          "agentId": "portfolio-allocator-agent",
+          "file": "agents/fund-management/portfolio-allocator-agent.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["fund terms", "investment policy", "deployable capital", "pipeline deals", "current portfolio positions"],
+          "outputs": ["allocation recommendation per deal", "portfolio concentration analysis", "diversification compliance check", "remaining deployment capacity", "vintage year tracking"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/portfolio-allocator.md"
+          ],
+          "maxTimeoutMinutes": 40,
+          "validationRules": [
+            {
+              "ruleId": "concentration-limits-checked",
+              "description": "Each allocation recommendation must include concentration limit compliance check against investment policy.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "remaining-capacity-calculated",
+              "description": "Remaining deployment capacity must be calculated after each allocation.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "vintage-diversification-tracked",
+              "description": "Vintage year allocation must be tracked against pacing model.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
+        },
+        {
+          "agentId": "deployment-pace-monitor",
+          "file": "agents/fund-management/deployment-pace-monitor.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["fund terms", "committed capital", "deployment timeline", "deals closed to date", "pipeline deals"],
+          "outputs": ["deployment pace analysis", "days-to-full-deployment projection", "pipeline adequacy assessment", "J-curve impact modeling", "management fee drag analysis"],
+          "critical": true,
+          "dependencies": ["portfolio-allocator-agent"],
+          "skillRefs": [
+            "skills/portfolio-allocator.md"
+          ],
+          "maxTimeoutMinutes": 30
+        },
+        {
+          "agentId": "ic-deal-approver",
+          "file": "agents/fund-management/ic-deal-approver.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["portfolio allocation recommendation", "deal IC memos", "fund investment policy", "current portfolio exposure"],
+          "outputs": ["IC approval status by deal", "policy compliance flags", "approved deployment amount per deal", "co-investment allocation (if applicable)"],
+          "critical": true,
+          "dependencies": ["portfolio-allocator-agent"],
+          "skillRefs": [],
+          "maxTimeoutMinutes": 35
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "capital-raise",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "deployableCapital",
+              "critical": true,
+              "description": "Deployable capital required to constrain allocation recommendations."
+            },
+            {
+              "key": "lpRoster",
+              "critical": true,
+              "description": "LP roster for concentration and investor type compliance tracking."
+            },
+            {
+              "key": "gpCoInvest",
+              "critical": false,
+              "description": "GP co-invest amount for co-investment allocation tracking."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "fundManagement",
+        "passConditions": [
+          {
+            "conditionId": "deployment-on-pace",
+            "description": "Deployment pace is within fund investment period timeline.",
+            "propagateIfFailed": false
+          },
+          {
+            "conditionId": "diversification-compliant",
+            "description": "Portfolio allocations comply with investment policy concentration limits.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "deployment-behind-pace",
+            "description": "Deployment pace is lagging; pipeline must be accelerated to meet investment period deadline.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "concentration-approaching-limits",
+            "description": "One or more concentration limits are within 10% of maximum; future allocations constrained.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "concentration-limit-breach",
+            "description": "Proposed allocation would breach investment policy concentration limits.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "investment-period-expiring",
+            "description": "Investment period will expire with more than 20% of committed capital undeployed.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "investmentPolicyViolation",
+          "regulatoryConcentrationBreach"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "portfolioSnapshot": {
+          "type": "object",
+          "required": true,
+          "description": "Current portfolio of assets with cost basis, NAV, vintage, asset type, and leverage."
+        },
+        "deployedCapital": {
+          "type": "number",
+          "required": true,
+          "description": "Total capital deployed to date across all portfolio positions."
+        },
+        "remainingDeploymentCapacity": {
+          "type": "number",
+          "required": true,
+          "description": "Remaining deployable capital for monitoring phase LP reporting."
+        },
+        "gpEconomicsToDate": {
+          "type": "object",
+          "required": true,
+          "description": "GP economics tracker: management fees earned, organizational expenses, co-invest deployed."
+        }
+      }
+    },
+    {
+      "phaseId": "monitoring-reporting",
+      "name": "Monitoring & Reporting",
+      "weight": 0.25,
+      "agents": [
+        {
+          "agentId": "quarterly-investor-update-agent",
+          "file": "agents/fund-management/quarterly-investor-update-agent.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["fund terms", "portfolio snapshot", "quarterly performance data by asset", "market conditions summary"],
+          "outputs": ["quarterly investor letter", "fund-level NAV statement", "per-asset performance summary", "capital account statements by LP", "deployment progress update"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/quarterly-investor-update.md"
+          ],
+          "maxTimeoutMinutes": 45,
+          "validationRules": [
+            {
+              "ruleId": "nav-calculated",
+              "description": "Fund NAV must be calculated for the quarter-end date using consistent valuation methodology.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "capital-accounts-balanced",
+              "description": "Sum of LP capital account statements plus GP capital must equal total fund NAV.",
+              "actionOnFailure": "halt_phase"
+            }
+          ]
+        },
+        {
+          "agentId": "performance-attribution-agent",
+          "file": "agents/fund-management/performance-attribution-agent.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["fund terms", "portfolio snapshot", "asset-level performance data", "benchmark index data"],
+          "outputs": ["TVPI and DPI calculation", "net IRR by vintage year", "performance attribution by asset type and geography", "benchmark comparison", "J-curve position assessment"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/performance-attribution.md"
+          ],
+          "maxTimeoutMinutes": 40,
+          "validationRules": [
+            {
+              "ruleId": "tvpi-dpi-calculated",
+              "description": "TVPI and DPI must both be calculated with supporting call and distribution schedules.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "irr-methodology-consistent",
+              "description": "IRR calculation must use consistent cash flow timing methodology (daily vs monthly).",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
+        },
+        {
+          "agentId": "risk-dashboard-agent",
+          "file": "agents/fund-management/risk-dashboard-agent.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["portfolio snapshot", "asset-level performance data", "market conditions", "debt covenant statuses"],
+          "outputs": ["fund-level risk dashboard", "watch list assets", "covenant breach flags", "liquidity analysis", "interest rate exposure summary"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/fund-operations-compliance-dashboard.md"
+          ],
+          "maxTimeoutMinutes": 30
+        },
+        {
+          "agentId": "fund-controller",
+          "file": "agents/fund/fund-controller.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["fund terms", "GP economics", "portfolio snapshot", "capital call schedule", "distribution history", "LP capital accounts"],
+          "outputs": ["NAV reconciliation", "capital account maintenance report", "management fee calculation", "carried interest accrual", "GP clawback tracking", "K-1 data preparation"],
+          "critical": true,
+          "dependencies": ["quarterly-investor-update-agent"],
+          "skillRefs": [
+            "skills/jv-waterfall-architect.md",
+            "skills/partnership-allocation-engine.md",
+            "skills/fund-operations-compliance-dashboard.md"
+          ],
+          "maxTimeoutMinutes": 45,
+          "validationRules": [
+            {
+              "ruleId": "nav-reconciliation-balanced",
+              "description": "NAV reconciliation must balance: beginning NAV + contributions + income - distributions - expenses +/- revaluations = ending NAV.",
+              "actionOnFailure": "halt_phase"
+            },
+            {
+              "ruleId": "carry-accrual-validated",
+              "description": "Carried interest accrual must be computed against the full distribution waterfall including preferred return, catch-up, and residual split.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "k1-data-complete",
+              "description": "K-1 data package must include allocable income, deductions, credits, and separately stated items for each LP.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
+        },
+        {
+          "agentId": "lp-relations-manager",
+          "file": "agents/fund-management/lp-relations-manager.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["quarterly investor letter", "capital account statements", "LP-specific reporting requirements", "side letter obligations"],
+          "outputs": ["LP distribution trigger analysis", "LP consent item log", "LP reporting compliance status", "side letter compliance tracker", "LPAC agenda items"],
+          "critical": false,
+          "dependencies": ["quarterly-investor-update-agent", "fund-controller"],
+          "skillRefs": [
+            "skills/investor-lifecycle-manager.md"
+          ],
+          "maxTimeoutMinutes": 25
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "deployment",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "portfolioSnapshot",
+              "critical": true,
+              "description": "Portfolio snapshot required as the basis for quarterly performance reporting."
+            },
+            {
+              "key": "deployedCapital",
+              "critical": true,
+              "description": "Deployed capital required for TVPI and fund-level return calculation."
+            },
+            {
+              "key": "gpEconomicsToDate",
+              "critical": true,
+              "description": "GP economics tracker required for management fee and carry accrual calculations."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "fundManagement",
+        "passConditions": [
+          {
+            "conditionId": "quarterly-reporting-complete",
+            "description": "Quarterly investor update, capital account statements, and NAV reconciliation are complete and accurate.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "fund-performance-on-track",
+            "description": "Fund TVPI is at or above NAV-adjusted target for the vintage year and investment period elapsed.",
+            "propagateIfFailed": false
+          },
+          {
+            "conditionId": "k1-data-prepared",
+            "description": "K-1 data package is complete for all LPs for the current tax year.",
+            "propagateIfFailed": false
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "watch-list-assets",
+            "description": "Risk dashboard flags one or more assets on watch list; hold-period-monitor interventions underway.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "performance-below-target",
+            "description": "Fund TVPI is below target but within recoverable range given remaining hold period.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "covenant-approaching-breach",
+            "description": "One or more debt covenants are within 10% of breach threshold across portfolio assets.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "fund-performance-severely-impaired",
+            "description": "Fund TVPI indicates LP capital is impaired; LP communication and remediation plan required.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "nav-reconciliation-failure",
+            "description": "NAV reconciliation does not balance; capital accounts cannot be reported to LPs.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "lpCovenantBreach",
+          "gpKeyManDefault",
+          "navReconciliationImbalance"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "fundNAV": {
+          "type": "number",
+          "required": true,
+          "description": "Current fund NAV at quarter-end."
+        },
+        "tvpi": {
+          "type": "number",
+          "required": true,
+          "description": "Total value to paid-in capital ratio at quarter-end."
+        },
+        "dpi": {
+          "type": "number",
+          "required": true,
+          "description": "Distributions to paid-in capital ratio at quarter-end."
+        },
+        "netIRR": {
+          "type": "number",
+          "required": true,
+          "description": "Net IRR to LPs at quarter-end."
+        },
+        "watchListAssets": {
+          "type": "array",
+          "required": true,
+          "description": "List of assets flagged on risk watch list. Empty if no assets are flagged."
+        },
+        "exitReadyAssets": {
+          "type": "array",
+          "required": true,
+          "description": "List of assets meeting exit criteria for wind-down phase prioritization."
+        },
+        "gpCarryAccrual": {
+          "type": "number",
+          "required": true,
+          "description": "Current GP carried interest accrual based on unrealized and realized gains."
+        },
+        "capitalAccountsByLP": {
+          "type": "object",
+          "required": true,
+          "description": "Capital account balances by LP at quarter-end for distribution waterfall input."
+        }
+      }
+    },
+    {
+      "phaseId": "distributions",
+      "name": "Distributions",
+      "weight": 0.10,
+      "agents": [
+        {
+          "agentId": "fund-controller-distributions",
+          "file": "agents/fund/fund-controller.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["fund terms", "GP economics", "capital accounts by LP", "distribution event triggers", "realized proceeds from asset sales"],
+          "outputs": ["distribution waterfall calculation", "preferred return accrual by LP", "catch-up allocation", "residual split allocation", "GP carried interest distribution", "clawback assessment"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/jv-waterfall-architect.md",
+            "skills/partnership-allocation-engine.md"
+          ],
+          "maxTimeoutMinutes": 40,
+          "validationRules": [
+            {
+              "ruleId": "waterfall-tiers-sequential",
+              "description": "Distribution waterfall must flow sequentially: return of capital, preferred return, GP catch-up, residual split. No tier may be funded before prior tiers are fully satisfied.",
+              "actionOnFailure": "halt_phase"
+            },
+            {
+              "ruleId": "preferred-return-accrual-correct",
+              "description": "Preferred return accrual must be compounded per LPA terms (simple vs compound, annual vs quarterly) and prorated for partial periods.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "clawback-assessment-current",
+              "description": "GP clawback liability must be assessed against cumulative distributions vs cumulative preferred return.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        },
+        {
+          "agentId": "investor-relations-distributions",
+          "file": "agents/fund/investor-relations-associate.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["distribution waterfall calculation", "LP capital accounts", "distribution wire instructions", "LP communication preferences"],
+          "outputs": ["distribution notice by LP", "wire instruction confirmation", "capital account update post-distribution", "distribution summary for quarterly report"],
+          "critical": true,
+          "dependencies": ["fund-controller-distributions"],
+          "skillRefs": [
+            "skills/investor-lifecycle-manager.md"
+          ],
+          "maxTimeoutMinutes": 25
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "monitoring-reporting",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "capitalAccountsByLP",
+              "critical": true,
+              "description": "LP capital account balances required for distribution waterfall calculation."
+            },
+            {
+              "key": "gpCarryAccrual",
+              "critical": true,
+              "description": "GP carry accrual required to validate distribution waterfall against carry entitlement."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "fundManagement",
+        "passConditions": [
+          {
+            "conditionId": "waterfall-balanced",
+            "description": "Distribution waterfall calculation balances: total distributions = sum of all tier allocations across all partners.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "distribution-notices-sent",
+            "description": "All LP distribution notices have been prepared with correct amounts and wire instructions.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "clawback-liability-exists",
+            "description": "GP has a potential clawback liability based on current distribution trajectory; reserve or guarantee may be required.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "waterfall-calculation-error",
+            "description": "Distribution waterfall does not balance; LP amounts do not reconcile to available proceeds.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "waterfallImbalance",
+          "unauthorizedGPDistribution"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "distributionsMade": {
+          "type": "object",
+          "required": true,
+          "description": "Distribution amounts by LP and by waterfall tier for the distribution event."
+        },
+        "cumulativeDistributions": {
+          "type": "number",
+          "required": true,
+          "description": "Total cumulative distributions to all partners since fund inception."
+        },
+        "gpCarryDistributed": {
+          "type": "number",
+          "required": true,
+          "description": "Total GP carried interest distributed to date."
+        },
+        "clawbackLiability": {
+          "type": "number",
+          "required": true,
+          "description": "Current GP clawback liability, if any. Zero if no liability exists."
+        }
+      }
+    },
+    {
+      "phaseId": "exit-wind-down",
+      "name": "Exit & Wind-Down",
+      "weight": 0.20,
+      "agents": [
+        {
+          "agentId": "exit-sequencer",
+          "file": "agents/fund-management/exit-sequencer.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["fund terms", "portfolio snapshot", "exit ready assets", "fund life remaining", "LP distribution waterfall", "market conditions"],
+          "outputs": ["asset exit sequencing plan", "target exit timeline by asset", "projected distribution schedule", "anticipated fund wind-down date", "tax-optimized exit ordering"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/disposition-strategy-engine.md",
+            "skills/market-cycle-positioner.md"
+          ],
+          "maxTimeoutMinutes": 40,
+          "validationRules": [
+            {
+              "ruleId": "all-assets-sequenced",
+              "description": "Every portfolio asset must have an assigned exit sequence, target timeline, and exit method (sale, recap, write-off).",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "exit-timeline-within-fund-life",
+              "description": "All exit timelines must fall within fund term plus any approved extensions.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
+        },
+        {
+          "agentId": "fund-performance-reporter",
+          "file": "agents/fund-management/fund-performance-reporter.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["fund terms", "performance attribution outputs", "realized IRRs by asset", "LP capital accounts", "carried interest schedule", "cumulative distributions"],
+          "outputs": ["final fund performance report", "realized net IRR", "realized TVPI and DPI", "GP carry calculation", "LP final distribution amounts", "attribution by asset and vintage"],
+          "critical": true,
+          "dependencies": ["exit-sequencer"],
+          "skillRefs": [
+            "skills/performance-attribution.md"
+          ],
+          "maxTimeoutMinutes": 40,
+          "validationRules": [
+            {
+              "ruleId": "carry-calculation-complete",
+              "description": "GP carried interest must be calculated against the full distribution waterfall including all tiers.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "lp-distributions-balance",
+              "description": "Sum of LP final distributions must equal net proceeds minus GP carry and fund expenses.",
+              "actionOnFailure": "halt_phase"
+            },
+            {
+              "ruleId": "clawback-resolved",
+              "description": "Any GP clawback liability must be resolved before final distributions.",
+              "actionOnFailure": "halt_phase"
+            }
+          ]
+        },
+        {
+          "agentId": "lp-final-distribution-coordinator",
+          "file": "agents/fund-management/lp-final-distribution-coordinator.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["GP carry calculation", "LP final distribution amounts", "LP banking details", "tax reporting requirements", "clawback resolution"],
+          "outputs": ["distribution wire schedule", "K-1 data package", "fund dissolution checklist", "final audit coordination", "GP clawback resolution documentation"],
+          "critical": true,
+          "dependencies": ["fund-performance-reporter"],
+          "skillRefs": [
+            "skills/partnership-allocation-engine.md"
+          ],
+          "maxTimeoutMinutes": 30
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "monitoring-reporting",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "tvpi",
+              "critical": true,
+              "description": "TVPI required for final fund performance reporting."
+            },
+            {
+              "key": "exitReadyAssets",
+              "critical": true,
+              "description": "Exit-ready asset list required for exit sequencing."
+            },
+            {
+              "key": "capitalAccountsByLP",
+              "critical": true,
+              "description": "LP capital accounts required for final distribution calculation."
+            }
+          ]
+        },
+        {
+          "phaseId": "distributions",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "cumulativeDistributions",
+              "critical": true,
+              "description": "Cumulative distributions required to calculate final distributions and clawback."
+            },
+            {
+              "key": "clawbackLiability",
+              "critical": true,
+              "description": "Outstanding clawback liability must be resolved before final distributions."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "fundManagement",
+        "passConditions": [
+          {
+            "conditionId": "all-assets-exited",
+            "description": "All portfolio assets have been disposed, recapitalized, or written off; no remaining positions.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "distributions-complete",
+            "description": "Final LP distributions and GP carry have been calculated, clawback resolved, and wire schedule produced.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "k1-final-issued",
+            "description": "Final K-1 packages have been prepared for all LPs for the wind-down tax year.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "residual-assets-remaining",
+            "description": "One or more assets remain; fund life extension requested or assets being sold individually.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "audit-pending",
+            "description": "Final fund audit not yet complete; distributions calculated but wire schedule pending audit sign-off.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "waterfall-calculation-error",
+            "description": "LP distribution amounts do not balance against net proceeds; manual reconciliation required.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "unresolved-clawback",
+            "description": "GP clawback liability cannot be resolved; fund dissolution blocked.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "unresolvedClawbackLiability",
+          "auditQualification"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "fundWindDownComplete": {
+          "type": "boolean",
+          "required": true,
+          "description": "True when all assets are exited, distributions wired, K-1s issued, and fund dissolution initiated."
+        },
+        "realizedFundIRR": {
+          "type": "number",
+          "required": true,
+          "description": "Final realized net IRR for the fund across all vintages."
+        },
+        "realizedTVPI": {
+          "type": "number",
+          "required": true,
+          "description": "Final realized total value to paid-in capital."
+        },
+        "realizedDPI": {
+          "type": "number",
+          "required": true,
+          "description": "Final distributions to paid-in capital."
+        },
+        "gpCarryRealized": {
+          "type": "number",
+          "required": true,
+          "description": "Total GP carried interest realized across the fund life."
+        },
+        "clawbackResolution": {
+          "type": "object",
+          "required": true,
+          "description": "Clawback resolution status: amount, method (return, guarantee release), and documentation."
+        }
+      }
+    }
+  ],
+  "checkpointConfig": {
+    "basePath": "data/checkpoints/fund-management",
+    "agentLevelTracking": true,
+    "statusValues": {
+      "FORMATION": "Fund structure being established; not yet in market.",
+      "FUNDRAISING": "Capital raise underway; not yet at first close.",
+      "FIRST_CLOSE": "First close achieved; deployment can begin.",
+      "DEPLOYING": "Capital deployment in progress.",
+      "INVESTED": "Fully deployed; monitoring phase active.",
+      "DISTRIBUTING": "Ongoing distributions being calculated and paid.",
+      "EXITING": "Exit sequencing underway; assets being disposed.",
+      "WOUND_DOWN": "All assets exited; final distributions complete; fund dissolution initiated."
+    },
+    "verdictValues": {
+      "DEPLOY": "Fund is actively deploying capital per investment policy and schedule.",
+      "HOLD": "Deployment paused; market conditions or LP issues require resolution before proceeding.",
+      "WIND-DOWN": "Fund has entered wind-down phase; exit sequencing underway."
+    }
+  },
+  "crossChainHandoffs": [
+    {
+      "direction": "outbound",
+      "counterpartOrchestrator": "multifamily-acquisition",
+      "triggerCondition": "Phase 'deployment' IC approval granted for a specific deal",
+      "dataContract": {
+        "approvedAllocation": {
+          "type": "number",
+          "required": true,
+          "description": "Approved equity allocation for the specific acquisition from fund capital.",
+          "sourcePhase": "deployment",
+          "sourcePath": "allocations.dealId.approvedAmount"
+        },
+        "fundTerms": {
+          "type": "object",
+          "required": true,
+          "description": "Fund waterfall economics for JV structuring in the acquisition pipeline.",
+          "sourcePhase": "fund-formation",
+          "sourcePath": "fundTerms"
+        },
+        "gpCoInvestAllocation": {
+          "type": "number",
+          "required": false,
+          "description": "GP co-investment allocation for the deal, if any.",
+          "sourcePhase": "deployment",
+          "sourcePath": "allocations.dealId.gpCoInvest"
+        }
+      }
+    },
+    {
+      "direction": "outbound",
+      "counterpartOrchestrator": "development-pipeline",
+      "triggerCondition": "Phase 'deployment' IC approval granted for a development project",
+      "dataContract": {
+        "approvedAllocation": {
+          "type": "number",
+          "required": true,
+          "description": "Approved equity commitment for the development project.",
+          "sourcePhase": "deployment",
+          "sourcePath": "allocations.projectId.approvedAmount"
+        },
+        "fundTerms": {
+          "type": "object",
+          "required": true,
+          "description": "Fund return requirements for development pipeline pro forma.",
+          "sourcePhase": "fund-formation",
+          "sourcePath": "fundTerms"
+        }
+      }
+    },
+    {
+      "direction": "inbound",
+      "counterpartOrchestrator": "disposition-strategy",
+      "triggerCondition": "Counterpart 'disposition-strategy' phase 'closing-execution' status == COMPLETED",
+      "dataContract": {
+        "grossSalePrice": {
+          "type": "number",
+          "required": true,
+          "description": "Gross sale proceeds for fund NAV update and LP distribution calculation.",
+          "sourcePhase": "closing-execution",
+          "sourcePath": "grossSalePrice"
+        },
+        "lpDistributions": {
+          "type": "object",
+          "required": true,
+          "description": "LP distribution amounts by investor from disposition waterfall.",
+          "sourcePhase": "closing-execution",
+          "sourcePath": "lpDistributions"
+        },
+        "realizedIRR": {
+          "type": "number",
+          "required": true,
+          "description": "Realized asset-level IRR for fund performance attribution.",
+          "sourcePhase": "closing-execution",
+          "sourcePath": "realizedIRR"
+        }
+      }
+    }
+  ],
+  "executionConfig": {
+    "concurrency": {
+      "maxConcurrentPhases": 1,
+      "maxAgentsPerPhase": 6
+    },
+    "timeouts": {
+      "defaultAgentMinutes": 40,
+      "defaultPhaseMinutes": 150,
+      "pipelineMinutes": 720
+    },
+    "retryPolicy": {
+      "maxAttempts": 3,
+      "backoffStrategy": "exponential",
+      "baseDelayMs": 10000
+    },
+    "pollingIntervalMs": 30000,
+    "stalledPollThreshold": 10,
+    "logging": {
+      "categories": [
+        "ACTION",
+        "FINDING",
+        "INFO",
+        "PHASE",
+        "ERROR",
+        "DATA_GAP",
+        "COMPLETE",
+        "LAUNCH",
+        "RETRY",
+        "TIMEOUT",
+        "VERDICT",
+        "HANDOFF",
+        "DISTRIBUTION",
+        "GP_ECONOMICS"
+      ]
+    }
+  }
+}

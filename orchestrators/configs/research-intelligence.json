@@ -1,0 +1,701 @@
+{
+  "orchestratorId": "market-research-intelligence",
+  "version": "1.0.0",
+  "entityType": "portfolio",
+  "description": "Five-phase market research and intelligence pipeline: macro screening, submarket deep dive, competitive set analysis, opportunity identification, and research memo production. Coordinates specialist agents to systematically identify target markets, submarkets, and acquisition opportunities before deals enter the pipeline. Terminal deliverable is an INVEST/MONITOR/PASS verdict with a ranked opportunity map handed off to the investment-strategy-formulator or acquisition orchestrator.",
+  "model": "claude-opus-4-6[1m]",
+  "phases": [
+    {
+      "phaseId": "macro-screening",
+      "name": "Macro Screening",
+      "weight": 0.15,
+      "orchestratorFile": "orchestrators/research-intelligence-orchestrator.md",
+      "agents": [
+        {
+          "agentId": "market-research-analyst",
+          "file": "agents/research/market-research-analyst.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/research-brief.json", "investment strategy brief", "geographic constraints"],
+          "outputs": ["MSA ranking matrix", "macro-economic filter results", "disqualified market rationale"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/market-cycle-positioner.md",
+            "skills/supply-demand-forecast.md"
+          ],
+          "maxTimeoutMinutes": 45,
+          "validationRules": [
+            {
+              "ruleId": "msa-list-non-empty",
+              "description": "At least one target MSA must be identified in the output ranking matrix.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "scoring-criteria-present",
+              "description": "Each ranked MSA must have scores for population growth, job growth, wage growth, supply pipeline, and regulatory environment.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
+        },
+        {
+          "agentId": "macro-data-aggregator",
+          "file": "agents/research/market-research-analyst.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["config/research-brief.json", "macro-economic datasets", "census data"],
+          "outputs": ["population growth rankings", "employment growth rankings", "wage growth rankings", "migration flow data"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/supply-demand-forecast.md"
+          ],
+          "maxTimeoutMinutes": 30
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "macroScreening",
+        "passConditions": [
+          {
+            "conditionId": "target-msas-identified",
+            "description": "At least 3 target MSAs identified with scores above the minimum threshold on all 5 macro filters.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "all-critical-agents-complete",
+            "description": "Both macro screening agents completed successfully with no FAILED status.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "borderline-markets-present",
+            "description": "1-2 MSAs score within 10% of threshold cutoff on one or more filters; flagged for deeper Phase 2 analysis.",
+            "propagateIfFailed": false
+          },
+          {
+            "conditionId": "data-gaps-in-macro-filters",
+            "description": "One or more macro filter dimensions used estimated or stale data; confidence reduced.",
+            "propagateIfFailed": false
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "no-qualifying-msas",
+            "description": "Zero MSAs pass the minimum threshold on all 5 macro filters given current strategy constraints.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "critical-agent-failure",
+            "description": "One or more critical macro screening agents failed after all retry attempts.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "noQualifyingMarkets",
+          "geographicConstraintViolation"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "targetMSAList": {
+          "type": "array",
+          "required": true,
+          "description": "Ranked list of target MSAs with scoring matrix across population growth, job growth, wage growth, supply pipeline, and regulatory environment. Required by submarket-deep-dive phase."
+        },
+        "macroFilters": {
+          "type": "object",
+          "required": true,
+          "description": "Applied filter criteria and thresholds used in the screening. Enables downstream phases to contextualize the MSA selection rationale."
+        },
+        "disqualifiedMSAs": {
+          "type": "array",
+          "required": false,
+          "description": "MSAs that were evaluated but did not meet criteria, with rationale for each disqualification."
+        }
+      },
+      "selfReviewProtocol": {
+        "confidenceScoringRules": {
+          "baseScore": 100,
+          "deductions": {
+            "perNullKeyMetric": 5,
+            "perCrossPhasesMismatch": 10,
+            "perDataGap": 3,
+            "perFailedNonCriticalAgent": 5,
+            "perConditionalUpstream": 10,
+            "perMissingReport": 15
+          },
+          "categories": {
+            "HIGH": 90,
+            "MEDIUM": 70,
+            "LOW": 50,
+            "VERY_LOW": 0
+          }
+        }
+      }
+    },
+    {
+      "phaseId": "submarket-deep-dive",
+      "name": "Submarket Deep Dive",
+      "weight": 0.25,
+      "agents": [
+        {
+          "agentId": "submarket-specialist",
+          "file": "agents/research/submarket-specialist.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["target MSA list from Phase 1", "submarket boundaries", "property type focus"],
+          "outputs": ["submarket scorecards", "rent growth projections", "cap rate context", "absorption forecast"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/submarket-truth-serum.md",
+            "skills/supply-demand-forecast.md"
+          ],
+          "maxTimeoutMinutes": 60,
+          "validationRules": [
+            {
+              "ruleId": "scorecard-per-submarket",
+              "description": "Each target MSA must have at least 2 submarket scorecards with rent trend, vacancy, and absorption data.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "rent-growth-projection-present",
+              "description": "Each scorecard must include a 1-year and 3-year rent growth projection.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
+        },
+        {
+          "agentId": "comp-snapshot-agent",
+          "file": "agents/research/market-research-analyst.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["target MSA list", "submarket boundaries", "recent transaction data"],
+          "outputs": ["comparable sales analysis", "rent comp matrix", "cap rate benchmarks"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/comp-snapshot.md",
+            "skills/supply-demand-forecast.md"
+          ],
+          "maxTimeoutMinutes": 45
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "macro-screening",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "targetMSAList",
+              "critical": true,
+              "description": "Ranked MSA list required to identify which submarkets to analyze."
+            },
+            {
+              "key": "macroFilters",
+              "critical": false,
+              "description": "Filter criteria provide context for submarket evaluation priorities."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "submarketAnalysis",
+        "passConditions": [
+          {
+            "conditionId": "investable-submarkets-identified",
+            "description": "At least 2 submarkets across target MSAs have rent growth above threshold, vacancy below threshold, and positive absorption forecast.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "cap-rate-context-established",
+            "description": "Market cap rate ranges established for each target submarket with at least 3 comparable data points.",
+            "propagateIfFailed": false
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "mixed-signals-in-submarkets",
+            "description": "One or more submarkets show conflicting indicators (e.g., strong rent growth but rising vacancy); requires competitive set analysis to resolve.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "no-investable-submarkets",
+            "description": "No submarkets in the target MSA list meet the minimum investability criteria on rent growth, vacancy, and absorption.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "noInvestableSubmarkets",
+          "supplyPipelineExceedsAbsorption"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "submarketScorecard": {
+          "type": "array",
+          "required": true,
+          "description": "Scored submarket profiles with rent trends, vacancy, absorption, supply pipeline, and demographic indicators. Required by competitive-set-analysis and opportunity-identification phases."
+        },
+        "rentTrends": {
+          "type": "object",
+          "required": true,
+          "description": "Trailing and projected rent growth by submarket and unit type. Required for opportunity identification and downstream underwriting."
+        },
+        "capRateContext": {
+          "type": "object",
+          "required": true,
+          "description": "Market cap rate ranges by submarket, asset class, and vintage. Required for opportunity identification pricing context."
+        }
+      },
+      "selfReviewProtocol": {
+        "crossAgentValidations": [
+          {
+            "checkId": "rent-trend-consistency",
+            "agentsInvolved": ["submarket-specialist", "comp-snapshot-agent"],
+            "description": "Rent growth projections from submarket analysis must be directionally consistent with recent comp transaction implied rent levels.",
+            "tolerance": "10%",
+            "actionOnMismatch": "log_warning"
+          }
+        ],
+        "confidenceScoringRules": {
+          "baseScore": 100,
+          "deductions": {
+            "perNullKeyMetric": 5,
+            "perCrossPhasesMismatch": 10,
+            "perDataGap": 3,
+            "perFailedNonCriticalAgent": 5,
+            "perConditionalUpstream": 10,
+            "perMissingReport": 15
+          },
+          "categories": {
+            "HIGH": 90,
+            "MEDIUM": 70,
+            "LOW": 50,
+            "VERY_LOW": 0
+          }
+        }
+      }
+    },
+    {
+      "phaseId": "competitive-set-analysis",
+      "name": "Competitive Set Analysis",
+      "weight": 0.20,
+      "agents": [
+        {
+          "agentId": "market-research-analyst-competitive",
+          "file": "agents/research/market-research-analyst.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["submarket scorecards", "recent transaction data", "public REIT portfolio data"],
+          "outputs": ["buyer universe map", "recent trade analysis", "capital flow assessment", "competitive positioning"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/comp-snapshot.md",
+            "skills/reit-profile-builder.md"
+          ],
+          "maxTimeoutMinutes": 45,
+          "validationRules": [
+            {
+              "ruleId": "buyer-universe-populated",
+              "description": "At least 5 active buyers identified in target submarkets with transaction history or stated acquisition criteria.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
+        },
+        {
+          "agentId": "reit-flow-analyst",
+          "file": "agents/research/market-research-analyst.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["public REIT filings", "institutional transaction databases", "capital markets data"],
+          "outputs": ["institutional capital flow analysis", "REIT submarket exposure", "bid-ask spread estimates"],
+          "critical": false,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/reit-profile-builder.md"
+          ],
+          "maxTimeoutMinutes": 30
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "submarket-deep-dive",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "submarketScorecard",
+              "critical": true,
+              "description": "Submarket profiles required to scope competitive analysis to relevant trade areas."
+            },
+            {
+              "key": "capRateContext",
+              "critical": true,
+              "description": "Cap rate context required to assess recent trade pricing relative to market."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "competitiveAnalysis",
+        "passConditions": [
+          {
+            "conditionId": "competitive-landscape-mapped",
+            "description": "Buyer universe, recent trades, and capital flows mapped for all target submarkets.",
+            "propagateIfFailed": false
+          },
+          {
+            "conditionId": "pricing-context-established",
+            "description": "Recent trade analysis provides per-unit and per-square-foot pricing context for opportunity identification.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "limited-transaction-data",
+            "description": "Fewer than 3 comparable transactions in one or more target submarkets in the trailing 24 months.",
+            "propagateIfFailed": false
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "overcrowded-market",
+            "description": "All target submarkets show compressed cap rates, high institutional presence, and no identifiable basis advantage. No differentiated entry point exists.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "noCompetitiveAdvantage"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "competitiveSet": {
+          "type": "object",
+          "required": true,
+          "description": "Buyer universe, recent trade analysis, and competitive positioning for each target submarket. Required for opportunity identification."
+        },
+        "capitalFlows": {
+          "type": "object",
+          "required": false,
+          "description": "Institutional capital flow analysis including REIT submarket exposure and acquisition activity trends."
+        }
+      }
+    },
+    {
+      "phaseId": "opportunity-identification",
+      "name": "Opportunity Identification",
+      "weight": 0.25,
+      "agents": [
+        {
+          "agentId": "market-research-analyst-opportunities",
+          "file": "agents/research/market-research-analyst.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["all Phase 1-3 outputs", "investment strategy constraints"],
+          "outputs": ["opportunity map", "target acquisition profiles", "thesis statement per opportunity"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/market-cycle-positioner.md",
+            "skills/submarket-truth-serum.md"
+          ],
+          "maxTimeoutMinutes": 45,
+          "validationRules": [
+            {
+              "ruleId": "opportunity-map-non-empty",
+              "description": "At least one opportunity must be identified with a target profile and investment thesis.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "thesis-per-opportunity",
+              "description": "Each identified opportunity must have a written thesis statement with supporting data points.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
+        },
+        {
+          "agentId": "submarket-specialist-synthesis",
+          "file": "agents/research/submarket-specialist.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["submarket scorecards", "competitive set analysis", "market cycle position"],
+          "outputs": ["submarket opportunity ranking", "entry timing assessment", "risk-adjusted opportunity scores"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/market-cycle-positioner.md",
+            "skills/submarket-truth-serum.md"
+          ],
+          "maxTimeoutMinutes": 30
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "submarket-deep-dive",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "submarketScorecard",
+              "critical": true,
+              "description": "Submarket scorecards required to identify where thesis holds and assets may be mispriced."
+            },
+            {
+              "key": "rentTrends",
+              "critical": true,
+              "description": "Rent trends required for opportunity sizing and return estimation."
+            }
+          ]
+        },
+        {
+          "phaseId": "competitive-set-analysis",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "competitiveSet",
+              "critical": true,
+              "description": "Competitive set required to identify where basis advantage or mispricing exists."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "opportunityIdentification",
+        "passConditions": [
+          {
+            "conditionId": "opportunities-identified",
+            "description": "At least 2 actionable opportunities identified with target profiles specifying property type, vintage range, size range, cap rate range, and target submarkets.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "thesis-validated",
+            "description": "Each opportunity thesis is supported by at least 3 quantitative data points from Phases 1-3.",
+            "propagateIfFailed": false
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "narrow-opportunity-set",
+            "description": "Only 1 opportunity identified; pipeline concentration risk if sole thesis fails.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "timing-sensitive-opportunity",
+            "description": "Opportunity window is cycle-dependent and may close within 6-12 months.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "no-opportunities",
+            "description": "No actionable opportunities identified across all target submarkets given current strategy constraints and competitive landscape.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "noActionableOpportunities"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "opportunityMap": {
+          "type": "object",
+          "required": true,
+          "description": "Structured map of identified opportunities with target profiles, thesis statements, and supporting data. Required for research memo and downstream acquisition pipeline seeding."
+        },
+        "targetAcquisitionProfiles": {
+          "type": "array",
+          "required": true,
+          "description": "Specific acquisition target profiles with property type, vintage, size, cap rate range, target submarkets, and basis targets. Directly feeds acquisition orchestrator deal screening."
+        }
+      }
+    },
+    {
+      "phaseId": "research-memo-production",
+      "name": "Research Memo Production",
+      "weight": 0.15,
+      "agents": [
+        {
+          "agentId": "memo-writer",
+          "file": "agents/research/market-research-analyst.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": ["all Phase 1-4 outputs"],
+          "outputs": ["market research memo", "executive summary", "submarket rankings", "opportunity recommendations"],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/market-memo-generator.md"
+          ],
+          "maxTimeoutMinutes": 45,
+          "validationRules": [
+            {
+              "ruleId": "memo-completeness",
+              "description": "Research memo must contain executive summary, macro analysis, submarket deep dives, competitive landscape, and opportunity recommendations sections.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "opportunity-identification",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "opportunityMap",
+              "critical": true,
+              "description": "Opportunity map required to produce recommendations section of research memo."
+            },
+            {
+              "key": "targetAcquisitionProfiles",
+              "critical": true,
+              "description": "Target profiles required for actionable next steps section."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "researchMemo",
+        "passConditions": [
+          {
+            "conditionId": "memo-produced",
+            "description": "Complete research memo produced with all required sections and supporting data.",
+            "propagateIfFailed": true
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "memo-with-caveats",
+            "description": "Memo produced but one or more sections flagged as having data gaps or reduced confidence.",
+            "propagateIfFailed": false
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "memo-generation-failed",
+            "description": "Memo writer agent failed to produce a complete research memo after all retry attempts.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": []
+      },
+      "dataForDownstreamContract": {
+        "researchMemo": {
+          "type": "object",
+          "required": true,
+          "description": "Complete market research memo with executive summary, macro analysis, submarket rankings, competitive landscape, and opportunity recommendations. Terminal deliverable of the research pipeline."
+        }
+      }
+    }
+  ],
+  "challengeLayer": {
+    "configRef": "config/challenge-layer.json",
+    "applyToPhases": ["macro-screening", "submarket-deep-dive", "opportunity-identification"],
+    "challengeModel": "claude-opus-4-6[1m]"
+  },
+  "investorParametrization": {
+    "configRef": "config/scenarios/core-plus.json",
+    "parameterNamespace": "/strategies/core-plus",
+    "overridableFields": [
+      "macroScreening.minPopulationGrowth",
+      "macroScreening.minJobGrowth",
+      "submarketAnalysis.minRentGrowth",
+      "submarketAnalysis.maxVacancy",
+      "opportunityIdentification.minCapRateSpread",
+      "opportunityIdentification.targetPropertyTypes"
+    ]
+  },
+  "checkpointConfig": {
+    "basePath": "data/status",
+    "agentLevelTracking": true,
+    "verdictValues": {
+      "INVEST": "Research identifies actionable opportunities; pipeline hands off target profiles to acquisition orchestrator or investment strategy formulator.",
+      "MONITOR": "Research identifies potential but timing or conditions are not yet favorable; set watch triggers and re-evaluate on schedule.",
+      "PASS": "No viable opportunities identified in target markets at current conditions; redirect research to alternative geographies or strategies."
+    }
+  },
+  "crossChainHandoffs": [
+    {
+      "direction": "outbound",
+      "counterpartOrchestrator": "investment-strategy-formulator",
+      "triggerCondition": "research-memo-production.verdict == 'INVEST' OR research-memo-production.verdict == 'MONITOR'",
+      "dataContract": {
+        "researchMemo": {
+          "type": "object",
+          "required": true,
+          "description": "Complete market research memo with opportunity map and target profiles. Informs investment strategy formulation.",
+          "sourcePhase": "research-memo-production",
+          "sourcePath": "researchMemo"
+        },
+        "targetAcquisitionProfiles": {
+          "type": "array",
+          "required": true,
+          "description": "Specific acquisition target profiles for strategy alignment and deal pipeline seeding.",
+          "sourcePhase": "opportunity-identification",
+          "sourcePath": "targetAcquisitionProfiles"
+        },
+        "submarketScorecard": {
+          "type": "array",
+          "required": false,
+          "description": "Submarket scorecards providing granular market data for strategy formulation.",
+          "sourcePhase": "submarket-deep-dive",
+          "sourcePath": "submarketScorecard"
+        }
+      }
+    },
+    {
+      "direction": "outbound",
+      "counterpartOrchestrator": "multifamily-acquisition",
+      "triggerCondition": "research-memo-production.verdict == 'INVEST'",
+      "dataContract": {
+        "targetAcquisitionProfiles": {
+          "type": "array",
+          "required": true,
+          "description": "Target acquisition profiles to seed deal screening criteria in the acquisition pipeline.",
+          "sourcePhase": "opportunity-identification",
+          "sourcePath": "targetAcquisitionProfiles"
+        },
+        "submarketScorecard": {
+          "type": "array",
+          "required": false,
+          "description": "Submarket context for acquisition-level market study agents.",
+          "sourcePhase": "submarket-deep-dive",
+          "sourcePath": "submarketScorecard"
+        },
+        "competitiveSet": {
+          "type": "object",
+          "required": false,
+          "description": "Competitive landscape data to inform acquisition pricing and negotiation strategy.",
+          "sourcePhase": "competitive-set-analysis",
+          "sourcePath": "competitiveSet"
+        }
+      }
+    }
+  ],
+  "executionConfig": {
+    "concurrency": {
+      "maxConcurrentPhases": 2,
+      "maxAgentsPerPhase": 4
+    },
+    "timeouts": {
+      "defaultAgentMinutes": 30,
+      "defaultPhaseMinutes": 90,
+      "pipelineMinutes": 360
+    },
+    "retryPolicy": {
+      "maxAttempts": 3,
+      "backoffStrategy": "exponential",
+      "baseDelayMs": 10000
+    },
+    "pollingIntervalMs": 30000,
+    "stalledPollThreshold": 10,
+    "logging": {
+      "categories": [
+        "ACTION",
+        "FINDING",
+        "INFO",
+        "PHASE",
+        "ERROR",
+        "DATA_GAP",
+        "COMPLETE",
+        "LAUNCH",
+        "RETRY",
+        "TIMEOUT",
+        "VERDICT",
+        "HANDOFF"
+      ]
+    }
+  }
+}
