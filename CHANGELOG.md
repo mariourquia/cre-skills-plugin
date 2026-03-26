@@ -3,13 +3,15 @@
 ## [2.0.0] - 2026-03-25
 
 ### Added
-- 11 new skills (total: 91 skills): title-commitment-reviewer, tenant-credit-analyzer,
+- 18 new skills (total: 98 skills): title-commitment-reviewer, tenant-credit-analyzer,
   term-sheet-builder, loan-document-reviewer, transfer-document-preparer, funds-flow-calculator,
   lease-option-structurer, lease-trade-out-analyzer, gp-performance-evaluator, fund-terms-comparator,
-  lp-data-request-generator
-- 9 Python calculator scripts (zero dependencies): debt_sizing, covenant_tester, npv_trade_out,
+  lp-data-request-generator, sec-reg-d-compliance, monte-carlo-return-simulator,
+  property-management-operations, distribution-notice-generator, 1031-pipeline-manager,
+  deal-attribution-tracker, emerging-manager-evaluator
+- 10 Python calculator scripts (zero dependencies): debt_sizing, covenant_tester, npv_trade_out,
   option_valuation, proration_calculator, quick_screen, tenant_credit_scorer, transfer_tax,
-  waterfall_calculator
+  waterfall_calculator, monte_carlo_simulator
 - Brand guidelines system: auto-loads from ~/.cre-skills/brand-guidelines.json for 8 deliverable skills
 - PostToolUse hook (telemetry-capture.mjs) -- tracks skill invocations when telemetry is opt-in
 - Stop hook (session-summary.mjs) -- writes session_end record and optional feedback prompt

@@ -17,16 +17,16 @@
 
 # CRE Skills Plugin
 
-A Claude plugin delivering **91 institutional-grade commercial real estate skills** covering the full investment lifecycle -- deal sourcing, screening, underwriting, structuring, due diligence, capital markets, market research, asset management, leasing, investor relations, development, disposition, tax planning, ESG, portfolio strategy, and daily property operations. Each skill includes structured process logic, reference documents, chain connections to other skills, and Python calculators for precise quantitative output. Deploy as a plugin in Claude Code, Claude Desktop, or Claude.ai and get an entire CRE acquisitions shop in your terminal.
+A Claude plugin delivering **98 institutional-grade commercial real estate skills** covering the full investment lifecycle -- deal sourcing, screening, underwriting, structuring, due diligence, capital markets, market research, asset management, leasing, investor relations, development, disposition, tax planning, ESG, portfolio strategy, and daily property operations. Each skill includes structured process logic, reference documents, chain connections to other skills, and Python calculators for precise quantitative output. Deploy as a plugin in Claude Code, Claude Desktop, or Claude.ai and get an entire CRE acquisitions shop in your terminal.
 
 ## Key Stats
 
 | Metric | Count |
 |--------|-------|
-| Skills | **91** |
+| Skills | **98** |
 | Expert Agents | **40** |
-| Reference Files | **202** |
-| Python Calculators | **9** |
+| Reference Files | **211** |
+| Python Calculators | **10** |
 | Workflow Chains | **6** |
 | Slash Commands | **6** |
 | Skill Categories | **16** |
@@ -35,7 +35,7 @@ A Claude plugin delivering **91 institutional-grade commercial real estate skill
 
 ## What's New in v2.0.0
 
-**11 new production-quality skills**: title-commitment-reviewer, tenant-credit-analyzer, term-sheet-builder, loan-document-reviewer, transfer-document-preparer, funds-flow-calculator, lease-option-structurer, lease-trade-out-analyzer, gp-performance-evaluator, fund-terms-comparator, lp-data-request-generator.
+**18 new production-quality skills**: title-commitment-reviewer, tenant-credit-analyzer, term-sheet-builder, loan-document-reviewer, transfer-document-preparer, funds-flow-calculator, lease-option-structurer, lease-trade-out-analyzer, gp-performance-evaluator, fund-terms-comparator, lp-data-request-generator, sec-reg-d-compliance, monte-carlo-return-simulator, property-management-operations, distribution-notice-generator, 1031-pipeline-manager, deal-attribution-tracker, emerging-manager-evaluator.
 
 **9 Python calculators** (zero dependencies): debt sizing, covenant testing, NPV trade-out analysis, option valuation, proration calculation, tenant credit scoring, waterfall distribution, transfer tax (50 states + DC), quick screen IRR/CoC.
 
@@ -130,26 +130,26 @@ Raleigh NC, $42M asking, 2018 vintage, 93% occupied, $2.6M NOI, rents 12% below 
 
 ## Skill Categories
 
-### By Category (16 subcategories, 91 skills)
+### By Category (16 subcategories, 98 skills)
 
 | # | Category | Count | Key Skills |
 |---|----------|-------|------------|
 | 01 | **Deal Screening** | 2 | `deal-quick-screen`, `om-reverse-pricing` |
-| 02 | **Underwriting & Analysis** | 3 | `acquisition-underwriting-engine`, `rent-roll-analyzer`, `sensitivity-stress-test` |
-| 03 | **Deal Structuring** | 5 | `loi-offer-builder`, `psa-redline-strategy`, `jv-waterfall-architect`, `1031-exchange-executor`, `creative-seller-financing` |
-| 04 | **Due Diligence** | 2 | `dd-command-center`, `distressed-acquisition-playbook` |
-| 05 | **Capital Markets** | 6 | `loan-sizing-engine`, `capital-stack-optimizer`, `refi-decision-analyzer`, `mezz-pref-structurer`, `debt-portfolio-monitor`, `workout-playbook` |
+| 02 | **Underwriting & Analysis** | 4 | `acquisition-underwriting-engine`, `rent-roll-analyzer`, `sensitivity-stress-test`, `monte-carlo-return-simulator` |
+| 03 | **Deal Structuring** | 6 | `loi-offer-builder`, `psa-redline-strategy`, `jv-waterfall-architect`, `1031-exchange-executor`, `creative-seller-financing`, `1031-pipeline-manager` |
+| 04 | **Due Diligence** | 4 | `dd-command-center`, `distressed-acquisition-playbook`, `title-commitment-reviewer`, `tenant-credit-analyzer` |
+| 05 | **Capital Markets** | 7 | `loan-sizing-engine`, `capital-stack-optimizer`, `refi-decision-analyzer`, `mezz-pref-structurer`, `debt-portfolio-monitor`, `workout-playbook`, `term-sheet-builder` |
 | 06 | **Market Research** | 4 | `submarket-truth-serum`, `comp-snapshot`, `supply-demand-forecast`, `market-cycle-positioner` |
-| 07 | **Asset Management** | 6 | `annual-budget-engine`, `property-performance-dashboard`, `capex-prioritizer`, `noi-sprint-plan`, `lease-compliance-auditor`, `tenant-delinquency-workout` |
+| 07 | **Asset Management** | 7 | `annual-budget-engine`, `property-performance-dashboard`, `capex-prioritizer`, `noi-sprint-plan`, `lease-compliance-auditor`, `tenant-delinquency-workout`, `property-management-operations` |
 | 08 | **Leasing** | 9 | `tenant-retention-engine`, `lease-up-war-room`, `lease-negotiation-analyzer`, `rent-optimization-planner`, `leasing-operations-engine`, `leasing-strategy-marketing-planner`, `lease-document-factory`, `lease-option-structurer`, `lease-trade-out-analyzer` |
-| 09 | **Investor Relations** | 5 | `ic-memo-generator`, `quarterly-investor-update`, `lp-pitch-deck-builder`, `capital-raise-machine`, `fund-formation-toolkit` |
+| 09 | **Investor Relations** | 10 | `ic-memo-generator`, `quarterly-investor-update`, `lp-pitch-deck-builder`, `capital-raise-machine`, `fund-formation-toolkit`, `fund-operations-compliance-dashboard`, `investor-lifecycle-manager`, `sec-reg-d-compliance`, `distribution-notice-generator`, `emerging-manager-evaluator` |
 | 10 | **Development** | 7 | `dev-proforma-engine`, `land-residual-hbu-analyzer`, `entitlement-feasibility`, `construction-budget-gc-analyzer`, `construction-project-command-center`, `construction-procurement-contracts-engine`, `post-close-onboarding-transition` |
 | 11 | **Disposition** | 2 | `disposition-strategy-engine`, `disposition-prep-kit` |
 | 12 | **Deal Sourcing** | 1 | `sourcing-outreach-system` |
 | 13 | **Tax & Entity** | 3 | `cost-segregation-analyzer`, `opportunity-zone-underwriter`, `partnership-allocation-engine` |
 | 14 | **ESG & Climate** | 2 | `carbon-audit-compliance`, `climate-risk-assessment` |
-| 15 | **Portfolio Strategy** | 2 | `portfolio-allocator`, `performance-attribution` |
-| 16 | **Daily Operations** | 32 | `t12-normalizer`, `rent-roll-formatter`, `cam-reconciliation-calculator`, `debt-covenant-monitor`, `lease-abstract-extractor`, `estoppel-certificate-generator`, `cpi-escalation-calculator`, `variance-narrative-generator`, `closing-checklist-tracker`, `vendor-invoice-validator`, `property-tax-appeal-analyzer`, `coi-compliance-checker`, `work-order-triage`, `lender-compliance-certificate`, `stacking-plan-builder`, `building-systems-maintenance-manager`, `fund-operations-compliance-dashboard`, `investor-lifecycle-manager`, `insurance-risk-manager`, `compliance-regulatory-response-kit`, `crisis-special-situations-playbook`, `property-operations-admin-toolkit`, `tenant-event-planner`, `tenant-credit-analyzer`, `title-commitment-reviewer`, `term-sheet-builder`, `loan-document-reviewer`, `transfer-document-preparer`, `funds-flow-calculator`, `gp-performance-evaluator`, `fund-terms-comparator`, `lp-data-request-generator` |
+| 15 | **Portfolio Strategy** | 3 | `portfolio-allocator`, `performance-attribution`, `deal-attribution-tracker` |
+| 16 | **Daily Operations** | 27 | `t12-normalizer`, `rent-roll-formatter`, `cam-reconciliation-calculator`, `debt-covenant-monitor`, `lease-abstract-extractor`, `estoppel-certificate-generator`, `cpi-escalation-calculator`, `variance-narrative-generator`, `closing-checklist-tracker`, `vendor-invoice-validator`, `property-tax-appeal-analyzer`, `coi-compliance-checker`, `work-order-triage`, `lender-compliance-certificate`, `stacking-plan-builder`, `building-systems-maintenance-manager`, `insurance-risk-manager`, `compliance-regulatory-response-kit`, `crisis-special-situations-playbook`, `property-operations-admin-toolkit`, `tenant-event-planner`, `loan-document-reviewer`, `transfer-document-preparer`, `funds-flow-calculator`, `gp-performance-evaluator`, `fund-terms-comparator`, `lp-data-request-generator` |
 
 ---
 
@@ -190,7 +190,7 @@ The **Deal Team Lead** agent assembles multi-agent teams from 8 pre-built compos
 
 ## Python Calculators
 
-9 standalone Python scripts (zero external dependencies) that agents can execute for precise quantitative output.
+10 standalone Python scripts (zero external dependencies) that agents can execute for precise quantitative output.
 
 | Script | Skill | Calculations |
 |--------|-------|-------------|
@@ -203,6 +203,7 @@ The **Deal Team Lead** agent assembles multi-agent teams from 8 pre-built compos
 | `tenant_credit_scorer.py` | tenant-credit-analyzer | HHI, WALT, expected annual loss, OCR |
 | `proration_calculator.py` | funds-flow-calculator | Per diem prorations (actual/365, 30/360) |
 | `transfer_tax.py` | transfer-document-preparer | All 50 states + DC with tiered rates |
+| `monte_carlo_simulator.py` | monte-carlo-return-simulator | Stochastic return distributions, confidence intervals, tail risk |
 
 All calculators are in `scripts/calculators/`. Run directly with `python3 scripts/calculators/<script>.py`.
 
@@ -292,7 +293,7 @@ cre-skills-plugin/
     telemetry-capture.mjs  # Tracks skill invocations (opt-in)
     session-summary.mjs    # Session end record and feedback
   scripts/
-    calculators/           # 9 Python calculator scripts
+    calculators/           # 10 Python calculator scripts
     install.sh             # Fresh install with v1->v2 migration
     update.sh              # Pull latest, detect breaking changes
     uninstall.sh           # Clean removal with data preservation

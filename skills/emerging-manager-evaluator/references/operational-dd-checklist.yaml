@@ -1,0 +1,216 @@
+# Operational Due Diligence Checklist
+# Reference for emerging-manager-evaluator skill
+# 50+ item checklist for assessing emerging manager operational infrastructure
+# Organized by tier (1 = mandatory, 2 = expected for funds > $100M, 3 = best practice for funds > $250M)
+# Status values: confirmed, pending, missing, not_applicable
+
+checklist_metadata:
+  version: "1.0"
+  standard_references:
+    - "ILPA Principles 3.0 (2019)"
+    - "ILPA Operational Due Diligence Framework (2022)"
+    - "SEC RIA Registration Thresholds (updated 2024)"
+    - "NCREIF Operational Guidance for CRE Fund Managers"
+
+tier_1_mandatory:
+  description: "All items required before institutional LP will commit. Missing items are blocking."
+
+  fund_administration:
+    - item: "Fund administrator is an independent third party (not GP affiliate or related party)"
+      critical: true
+      failure_consequence: "Automatic RED FLAG. Related-party fund admin disqualifies investment."
+      verification: "Review fund administrator engagement agreement. Confirm no ownership or revenue-sharing arrangement between GP and administrator."
+    - item: "Fund administrator name and institutional quality confirmed"
+      acceptable_administrators:
+        - "Alter Domus"
+        - "NAV Consulting"
+        - "Citco"
+        - "SS&C GlobeOp"
+        - "SEI Investments"
+        - "JTC Group"
+        - "Apex Fund Services"
+        - "Ultimus Fund Solutions"
+      note: "Boutique or regional administrators may be acceptable for funds < $100M; confirm AUM under administration."
+    - item: "Fund administrator contracted or letter of intent executed before first close"
+      critical: true
+    - item: "Fund administrator responsible for: NAV calculation, capital account statements, investor reporting, waterfall calculations"
+      note: "Verify scope in engagement agreement. Partial admin outsourcing (e.g., GP handles waterfall internally) increases operational risk."
+
+  legal_counsel:
+    - item: "Fund formation legal counsel is institutional quality CRE fund specialist"
+      acceptable_firms_examples:
+        - "Kirkland & Ellis"
+        - "Latham & Watkins"
+        - "Proskauer Rose"
+        - "Fried Frank"
+        - "DLA Piper (Real Estate)"
+        - "Goodwin Procter"
+        - "Ropes & Gray"
+        - "Paul Hastings"
+      note: "Not exhaustive. Accept any AmLaw 100 firm with demonstrated CRE fund formation practice."
+    - item: "LPA draft reviewed and finalized before first close"
+    - item: "Subscription agreement and side letter templates prepared"
+
+  audit:
+    - item: "Auditor is a recognized accounting firm with CRE fund experience"
+      acceptable_auditors:
+        - "Deloitte"
+        - "PwC"
+        - "EY"
+        - "KPMG"
+        - "BDO (Real Estate practice)"
+        - "RSM (Real Estate practice)"
+        - "Grant Thornton"
+        - "Marcum LLP"
+      note: "Big 4 preferred for funds > $500M. Regional firms acceptable for smaller funds."
+    - item: "Auditor is independent from any GP affiliate or related party"
+      critical: true
+    - item: "Audit engagement letter executed before or at first close"
+    - item: "Auditor will produce audited financial statements within 120 days of fiscal year end"
+
+  key_person_provisions:
+    - item: "Key person(s) named by name in the LPA"
+    - item: "Key person suspension trigger defined (departure, death, disability, conviction)"
+    - item: "Investment period automatically suspends upon key person trigger"
+    - item: "LP vote mechanism defined for continuation after suspension"
+    - item: "Cure period defined (typically 180 days to identify replacement, seek LP approval)"
+
+  gp_commitment:
+    - item: "GP commits minimum 1% of total fund commitments"
+      minimum_acceptable: "1%"
+      best_practice: "2%+"
+    - item: "GP commitment is funded in cash (not subscription line, deferred comp, or carry reinvestment)"
+      critical: true
+      note: "Non-cash GP commitment does not align GP downside with LP. It is not equivalent."
+    - item: "GP commitment funded on same schedule as LP capital calls (not deferred to end)"
+
+  fund_structure:
+    - item: "Fund structure legal opinion provided (confirming pass-through tax treatment)"
+    - item: "Subscription documents include anti-money laundering (AML) and know-your-customer (KYC) procedures"
+    - item: "ERISA qualification status confirmed (VCOC, REOC, or 25% threshold)"
+
+tier_2_expected:
+  description: "Expected for funds > $100M. Absence of these items should be flagged and require credible remediation plan."
+
+  compliance:
+    - item: "Investment Adviser Registration: GP has confirmed whether SEC or state RIA registration is required"
+      threshold_note: "SEC registration required if AUM > $150M. State registration for AUM $25M-$150M (varies by state)."
+    - item: "If registration required: registration application filed or confirmed timetable before first capital call"
+    - item: "Compliance policies and procedures manual in place (Code of Ethics, Conflicts of Interest, Insider Trading)"
+    - item: "Compliance officer or compliance consultant identified"
+      note_fund_size:
+        under_100M: "Part-time or outsourced compliance acceptable"
+        100M_to_200M: "Outsourced compliance from established firm required"
+        over_200M: "Dedicated compliance function required; part-time is a RED FLAG"
+      acceptable_outsourced_compliance:
+        - "ACA Group"
+        - "Foreside Financial Group"
+        - "Compliance Science"
+        - "Oyster Consulting"
+    - item: "Form ADV Part 1 and Part 2 prepared (if RIA)"
+    - item: "Privacy policy (Regulation S-P) in place for registered advisers"
+
+  financial_infrastructure:
+    - item: "CFO or outsourced CFO function identified for fund-level accounting"
+      acceptable_outsourced:
+        - "Standish Management"
+        - "Citco (CFO services)"
+        - "JTC Group (CFO services)"
+    - item: "Chart of accounts and accounting software established"
+    - item: "Capital call and distribution process documented (with controls)"
+    - item: "Banking relationships established: operating account, capital account, distribution account"
+    - item: "Wire transfer authorization controls (dual control, approval matrix)"
+
+  cybersecurity:
+    - item: "Written cybersecurity policy in place"
+    - item: "Multi-factor authentication (MFA) on all fund management systems"
+    - item: "Secure investor portal for document delivery (not email attachments for capital calls)"
+      acceptable_portals:
+        - "Andromeda (iLevel)"
+        - "Juniper Square"
+        - "DealCloud"
+        - "InvestorFlow"
+        - "Dynamo Software"
+    - item: "Incident response plan for cybersecurity breach"
+    - item: "Employee cybersecurity training program"
+    - item: "Data encryption for sensitive investor data at rest and in transit"
+
+  business_continuity:
+    - item: "Business Continuity Plan (BCP) documented"
+    - item: "Disaster Recovery Plan (DRP) for technology systems"
+    - item: "Offsite data backup with tested restoration procedure"
+    - item: "Critical vendor contact list maintained"
+    - item: "BCP tested within prior 12 months (or credible plan to test)"
+
+  investor_reporting:
+    - item: "Quarterly report template prepared (financial summary, NAV, deal updates, pipeline)"
+    - item: "Capital account statement template prepared"
+    - item: "ILPA reporting template adopted or equivalent disclosure level committed"
+    - item: "Report delivery timeline committed in LPA: quarterly reports within 45 days of quarter end"
+    - item: "Annual report delivery timeline committed: audited financials within 120 days of fiscal year end"
+
+tier_3_best_practice:
+  description: "Best practice for funds > $250M. LP advisory boards with governance authority are increasingly standard for first-time institutional funds at this size."
+
+  governance:
+    - item: "LP Advisory Committee (LPAC) included in LPA"
+      composition: "3-7 independent LP representatives; no management fee payers with < 5% commitment unless all LPs are < 5%"
+    - item: "LPAC authority covers: conflict approvals, related-party transactions, key person events, valuation disputes"
+    - item: "LPAC meeting frequency: at least annually; called within 30 days of key person trigger"
+    - item: "GP provides LPAC with audited financials, deal status reports, and expense reports"
+    - item: "Side letters disclosed to LPAC (not necessarily full text, but existence and material terms)"
+
+  valuation:
+    - item: "Independent third-party valuation for all assets at least annually"
+    - item: "Third-party valuation semi-annually for assets > $10M or assets representing > 10% of NAV"
+    - item: "Valuation policy documented and disclosed to LPs"
+    - item: "Valuation methodology consistent with NCREIF or INREV standards"
+    - item: "GP cannot modify third-party appraiser values without LPAC review"
+
+  insurance:
+    - item: "Directors and Officers (D&O) liability insurance in place for management company"
+    - item: "Errors and Omissions (E&O) insurance in place for investment management activities"
+    - item: "Property insurance at fund-level (separate from D&O)"
+    - item: "Fidelity / crime bond for fund employees with financial access"
+
+  co_investment_policy:
+    - item: "Co-investment policy documented in LPA or side letter (allocation process, LP right of first offer)"
+    - item: "GP co-investment allocation process disclosed to all LPs"
+    - item: "No co-investment fee charged to LP advisory board members (emerging GP best practice)"
+
+  related_party_controls:
+    - item: "Related party transaction policy documented"
+    - item: "All potential conflicts of interest disclosed in ADV Part 2 (if registered)"
+    - item: "No fee income to GP affiliates from fund portfolio without LPAC approval"
+    - item: "GP certifies no undisclosed related-party relationships with service providers"
+
+checklist_scoring:
+  scoring_methodology: |
+    Tier 1 items (18 items): 2 points each if confirmed; -5 points if missing (penalty for critical items)
+    Tier 2 items (25 items): 1 point each if confirmed
+    Tier 3 items (19 items): 0.5 points each if confirmed
+    Maximum raw score: 36 (T1) + 25 (T2) + 9.5 (T3) = 70.5
+
+    Normalized to 100:
+    Score = (Raw Points / 70.5) * 100
+
+    Threshold interpretation (same as SKILL.md):
+      85-100: Institutional quality for emerging manager
+      70-84:  Acceptable with monitoring
+      55-69:  Elevated risk; require completion milestones
+      < 55:   Not ready for institutional capital
+
+  critical_item_failures:
+    description: "Any single critical item missing triggers a minimum-30-point deduction before normalization, regardless of other items."
+    critical_items:
+      - "Fund administrator is an independent third party"
+      - "Auditor is independent from any GP affiliate"
+      - "GP commitment is funded in cash"
+      - "Compliance officer for fund > $200M is not part-time/outsourced"
+
+  conditional_pass_criteria: |
+    Operational score 55-69 may receive conditional pass if:
+    1. All Tier 1 items are in place OR have written completion commitment with specific date
+    2. GP provides written infrastructure plan with milestone dates for missing Tier 2 items
+    3. LP includes milestone completion as closing condition in subscription agreement
+    Conditional pass maximum: 3/5 on Operational Readiness dimension in scorecard

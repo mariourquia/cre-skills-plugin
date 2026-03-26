@@ -1,6 +1,6 @@
 # CRE Skill Routing Index
 
-> 91 CRE skills across 16 subcategories. Use this index to find the right skill -- do NOT load all SKILL.md files.
+> 98 CRE skills across 16 subcategories. Use this index to find the right skill -- do NOT load all SKILL.md files.
 > When a CRE task comes in, match the user's request to a category below, then invoke the specific skill via `/skill-slug`.
 > Only read the full SKILL.md + references when you need the detailed process.
 
@@ -99,6 +99,13 @@
 | "evaluate GP performance", "assess GP track record", "GP evaluation", "manager due diligence" | `/gp-performance-evaluator` |
 | "compare fund terms", "fee comparison", "carried interest benchmark", "fund economics comparison" | `/fund-terms-comparator` |
 | "generate LP data request", "LP questionnaire", "DDQ", "LP information request" | `/lp-data-request-generator` |
+| "Reg D", "506(b)", "506(c)", "accredited investor verification", "blue sky filing" | `/sec-reg-d-compliance` |
+| "Monte Carlo", "return simulation", "probability distribution", "stochastic model" | `/monte-carlo-return-simulator` |
+| "property management", "PM operations", "daily operations checklist", "site team" | `/property-management-operations` |
+| "distribution notice", "capital distribution", "distribution waterfall letter" | `/distribution-notice-generator` |
+| "1031 pipeline", "replacement property pipeline", "exchange timeline", "1031 ID deadline" | `/1031-pipeline-manager` |
+| "deal attribution", "deal-level P&L", "track record attribution", "realized/unrealized" | `/deal-attribution-tracker` |
+| "emerging manager", "first-time fund", "emerging GP evaluation", "seed allocation" | `/emerging-manager-evaluator` |
 
 ## Workflow Chains
 
