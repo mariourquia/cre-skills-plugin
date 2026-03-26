@@ -39,6 +39,8 @@ General-purpose and orchestration agents for broad CRE tasks.
 
 ---
 
+---
+
 ## Pre-Built Team Compositions
 
 Standard agent teams for common CRE tasks. The deal-team-lead assembles these or builds custom teams.

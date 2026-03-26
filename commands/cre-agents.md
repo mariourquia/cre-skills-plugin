@@ -5,7 +5,7 @@ description: "List available CRE expert agents and pre-built team compositions f
 
 # CRE Expert Agents
 
-Read the agent index at `${CLAUDE_PLUGIN_ROOT}/agents/_index.md` and present the available agents and team compositions to the user.
+Read the agent index at `${CLAUDE_PLUGIN_ROOT}/agents/_index.md` and present the available agents and team compositions to the user. The roster includes 40 agents across buyer, lens, function, challenge, titan, stakeholder, and composite categories.
 
 If the user specified a team or task ("$ARGUMENTS"), recommend the appropriate team composition and offer to spawn the agents.
 
@@ -22,5 +22,7 @@ If the user specified a team or task ("$ARGUMENTS"), recommend the appropriate t
 **Buyer Types (5)**: buyer-pension-fund, buyer-private-equity, buyer-reit, buyer-family-office, buyer-syndicator
 
 **Analytical Lenses (5)**: lens-quantitative, lens-qualitative, lens-contrarian, lens-risk-manager, lens-esg-impact
+
+**Lifecycle Orchestrator (14)**: market-research-analyst, submarket-specialist, chief-investment-officer, portfolio-strategist, asset-manager-lead, leasing-manager, portfolio-manager, risk-officer, fund-controller, investor-relations-associate, disposition-manager, lp-advisor, fund-analyst, allocation-committee-member
 
 **Composite (2)**: cre-veteran, deal-team-lead

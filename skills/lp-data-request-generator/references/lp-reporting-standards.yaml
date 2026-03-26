@@ -1,0 +1,257 @@
+# LP Reporting Standards Reference
+# Reference data for lp-data-request-generator skill
+# Defines institutional reporting standards and benchmarks
+# Last updated: mid-2025
+
+---
+
+# ============================================================
+# ILPA REPORTING STANDARDS (v3.0, 2024)
+# Institutional Limited Partners Association
+# ============================================================
+
+ilpa:
+  description: >
+    ILPA Reporting Template is the industry standard for private fund
+    reporting. Most institutional LPs require ILPA-compliant reporting
+    as a condition of commitment. Non-compliance is a governance concern.
+
+  version: "3.0"
+  last_updated: "2024"
+
+  required_deliverables:
+    quarterly:
+      - item: "Capital Account Statement"
+        description: "LP-specific statement showing contributions, distributions, ending NAV, and unreturned capital"
+        format: "ILPA Capital Account Template (Excel)"
+        delivery_deadline: "60 calendar days post quarter-end"
+        notes: "Must include commitment, called capital, recallable distributions, remaining commitment"
+
+      - item: "Fund-Level Performance"
+        description: "Gross and net IRR, DPI, TVPI, RVPI computed since inception"
+        format: "ILPA Performance Template (Excel)"
+        delivery_deadline: "60 calendar days"
+        notes: "Both gross and net metrics are mandatory. Since-inception and annualized."
+
+      - item: "NAV Bridge"
+        description: "Reconciliation of beginning-to-ending NAV with all components"
+        format: "ILPA NAV Bridge Template"
+        delivery_deadline: "60 calendar days"
+        notes: "Components: beginning NAV, contributions, distributions, income, appreciation/depreciation, fees, ending NAV"
+
+      - item: "Portfolio Summary"
+        description: "Investment-level summary with status, strategy, and current marks"
+        format: "ILPA Portfolio Summary Template"
+        delivery_deadline: "60 calendar days"
+        notes: "Must include: investment name, type, acquisition date, cost, current fair value, MOIC"
+
+      - item: "Fee and Expense Report"
+        description: "All fees charged to fund and LP"
+        format: "ILPA Fee Template"
+        delivery_deadline: "60 calendar days"
+        notes: "Management fee, transaction fees, monitoring fees, organizational expenses, fee offsets"
+
+    annual:
+      - item: "Audited Financial Statements"
+        description: "Fund-level audited financials with audit opinion"
+        format: "PDF (GAAP or IFRS compliant)"
+        delivery_deadline: "120 calendar days post year-end"
+        notes: "Qualified or adverse opinion is a red flag"
+
+      - item: "Tax Package (K-1)"
+        description: "US partnership tax reporting"
+        format: "IRS K-1 + state supplements"
+        delivery_deadline: "March 15 (US partnerships)"
+        notes: "Late K-1 delivery is common but should not exceed April 15"
+
+      - item: "Annual Governance Report"
+        description: "LPAC meetings, conflicts, LP votes, side letter compliance"
+        format: "Narrative (PDF)"
+        delivery_deadline: "120 calendar days"
+
+# ============================================================
+# GIPS (Global Investment Performance Standards)
+# CFA Institute
+# ============================================================
+
+gips:
+  description: >
+    GIPS is the global standard for investment performance reporting.
+    Compliance is voluntary but expected by sophisticated institutional LPs.
+    GIPS verification provides independent assurance of performance calculation methodology.
+
+  version: "2020"
+  applicable_to: "Firms with discretionary assets under management"
+
+  key_requirements:
+    - requirement: "Firm-wide compliance"
+      description: "GIPS compliance is on a firm-wide basis, not fund-by-fund"
+
+    - requirement: "Composite construction"
+      description: "Funds with similar strategy grouped into composites for performance reporting"
+
+    - requirement: "Return calculation"
+      description: "Time-weighted returns for open-end; since-inception IRR for closed-end"
+
+    - requirement: "Fair value hierarchy"
+      description: "Investments valued at fair value per GAAP/IFRS fair value hierarchy"
+
+    - requirement: "Verification"
+      description: "Independent verification of GIPS compliance by third-party verifier"
+      red_flag: "Claiming GIPS compliance without third-party verification"
+
+    - requirement: "Error correction"
+      description: "Errors in composite performance must be corrected and disclosed within one quarter"
+
+# ============================================================
+# INREV (European Standard)
+# ============================================================
+
+inrev:
+  description: >
+    INREV (European Association for Investors in Non-Listed Real Estate Vehicles)
+    provides reporting guidelines for European non-listed real estate vehicles.
+    Required by most European institutional investors.
+
+  applicable_to: "Non-listed real estate vehicles marketed to European investors"
+
+  key_guidelines:
+    - "Standardized NAV calculation methodology"
+    - "Vehicle-level performance measurement (TWR and IRR)"
+    - "Fee and expense disclosure template"
+    - "Risk reporting framework"
+    - "ESG/sustainability reporting template"
+    - "INREV Performance Fee Disclosure Template"
+
+# ============================================================
+# DELIVERY TIMING BENCHMARKS
+# ============================================================
+
+delivery_standards:
+  description: >
+    Industry-standard delivery timelines for LP reporting.
+    Measured in calendar days from period end.
+    GPs failing these deadlines should be flagged.
+
+  quarterly_report:
+    best_practice: 45
+    acceptable: 60
+    late: 75
+    red_flag: 90
+    unit: "calendar days post quarter-end"
+
+  annual_audit:
+    best_practice: 90
+    acceptable: 120
+    late: 150
+    red_flag: 180
+    unit: "calendar days post year-end"
+
+  k1_tax_package:
+    best_practice: "March 1"
+    acceptable: "March 15"
+    late: "April 15"
+    red_flag: "After April 15 (requires LP to file extensions)"
+
+  capital_call_notice:
+    minimum: 10
+    best_practice: 15
+    short_notice_flag: 5
+    unit: "business days before funding date"
+
+  distribution_timing:
+    best_practice: 15
+    acceptable: 30
+    late: 45
+    unit: "calendar days after realization event"
+
+# ============================================================
+# BENCHMARK SOURCES
+# ============================================================
+
+benchmark_sources:
+  description: "Authoritative sources for vintage peer comparison by strategy"
+
+  core:
+    primary:
+      name: "NCREIF ODCE (Open-End Diversified Core Equity)"
+      description: "Gold standard for core CRE fund performance comparison"
+      update_frequency: "Quarterly"
+      coverage: "US open-end core real estate funds"
+      metric_type: "Time-weighted return (net of fees)"
+    secondary:
+      name: "Cambridge Associates Core Real Estate"
+      description: "Vintage year benchmarks for closed-end core funds"
+      update_frequency: "Quarterly"
+      coverage: "US and global core real estate funds"
+      metric_type: "Since-inception IRR (net)"
+
+  value_add:
+    primary:
+      name: "Cambridge Associates Value Added Real Estate"
+      description: "Primary vintage benchmark for value-add CRE funds"
+      update_frequency: "Quarterly"
+      coverage: "US and global value-add real estate funds"
+      metric_type: "Since-inception IRR (net), DPI, TVPI"
+    secondary:
+      name: "Preqin Value Add Real Estate Benchmark"
+      description: "Alternative vintage benchmark with broader coverage"
+      update_frequency: "Quarterly"
+      coverage: "Global value-add real estate funds"
+
+  opportunistic:
+    primary:
+      name: "Cambridge Associates Opportunistic Real Estate"
+      description: "Primary vintage benchmark for opportunistic CRE funds"
+      update_frequency: "Quarterly"
+      coverage: "US and global opportunistic real estate funds"
+      metric_type: "Since-inception IRR (net), DPI, TVPI"
+    secondary:
+      name: "Preqin Opportunistic Real Estate Benchmark"
+      description: "Alternative vintage benchmark"
+      update_frequency: "Quarterly"
+
+  debt_credit:
+    primary:
+      name: "Cliffwater Direct Lending Index"
+      description: "Benchmark for private credit strategies"
+      update_frequency: "Quarterly"
+    secondary:
+      name: "Bloomberg US Aggregate Bond Index"
+      description: "Public market reference for relative value context"
+
+# ============================================================
+# MINIMUM DATA THRESHOLDS
+# ============================================================
+
+minimum_data_thresholds:
+  description: >
+    Minimum data quality standards. If a GP cannot meet these
+    minimums, the LP should either decline to invest or demand
+    a side letter with enhanced reporting provisions.
+
+  initial_dd:
+    required_items: 30
+    critical_items: 15
+    acceptable_completion_rate: 0.90
+    notes: "GP must provide at least 90% of critical items before commitment"
+
+  quarterly:
+    required_items: 10
+    critical_items: 6
+    acceptable_completion_rate: 0.95
+    late_delivery_tolerance: 2
+    notes: "Two consecutive late deliveries triggers escalation"
+
+  annual:
+    required_items: 18
+    critical_items: 10
+    acceptable_completion_rate: 0.95
+    audit_opinion: "unqualified"
+    notes: "Qualified audit opinion requires immediate follow-up"
+
+  re_up:
+    required_items: 10
+    critical_items: 7
+    acceptable_completion_rate: 1.00
+    notes: "All critical items must be provided before re-up decision"

@@ -96,6 +96,9 @@
 | "calculate funds flow", "closing statement", "HUD-1", "settlement statement", "wire amounts" | `/funds-flow-calculator` |
 | "structure lease options", "purchase option", "ROFR", "ROFO", "expansion option structure" | `/lease-option-structurer` |
 | "trade out analysis", "lease trade-out", "effective rent trade-out", "roll-to-market delta" | `/lease-trade-out-analyzer` |
+| "evaluate GP performance", "assess GP track record", "GP evaluation", "manager due diligence" | `/gp-performance-evaluator` |
+| "compare fund terms", "fee comparison", "carried interest benchmark", "fund economics comparison" | `/fund-terms-comparator` |
+| "generate LP data request", "LP questionnaire", "DDQ", "LP information request" | `/lp-data-request-generator` |
 
 ## Workflow Chains
 

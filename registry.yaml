@@ -1,13 +1,13 @@
 # CRE Skills Registry
 # Generated: 2026-03-17
 # Updated: 2026-03-25
-# Total Skills: 77 (3 existing deployed + 66 planned + 8 new deployed)
+# Total Skills: 91 (3 existing deployed + 77 planned + 11 new deployed)
 
 metadata:
-  version: "1.1"
+  version: "1.2"
   generated: "2026-03-17"
   updated: "2026-03-25"
-  total_skills: 77
+  total_skills: 91
   categories: 16
   source_prompts_audited: 155
   gap_fill_prompts_added: 25
@@ -1089,4 +1089,47 @@ skills:
     source_prompts: []
     chains_to: [lease-up-war-room, lease-negotiation-analyzer]
     chains_from: [tenant-retention-engine, rent-optimization-planner]
+    daily_ops_support: []
+
+  # ============================================================================
+  # LP INTELLIGENCE (3 skills)
+  # ============================================================================
+
+  - slug: lp-data-request-generator
+    name: LP Data Request Generator
+    category: investor-relations
+    priority: P1
+    phase: 3
+    status: planned
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: [gp-performance-evaluator]
+    chains_from: [quarterly-investor-update]
+    daily_ops_support: []
+
+  - slug: gp-performance-evaluator
+    name: GP Performance Evaluator
+    category: investor-relations
+    priority: P1
+    phase: 3
+    status: planned
+    effort_hours: 4
+    plan_file: ""
+    source_prompts: []
+    chains_to: [fund-terms-comparator]
+    chains_from: [lp-data-request-generator, performance-attribution]
+    daily_ops_support: []
+
+  - slug: fund-terms-comparator
+    name: Fund Terms Comparator
+    category: investor-relations
+    priority: P1
+    phase: 3
+    status: planned
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: []
+    chains_from: [gp-performance-evaluator, fund-formation-toolkit]
     daily_ops_support: []
