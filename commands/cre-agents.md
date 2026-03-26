@@ -1,6 +1,6 @@
 ---
 name: cre-agents
-description: "List available CRE expert agents and pre-built team compositions for multi-agent analysis. Works across all 91 CRE skills."
+description: "List available CRE expert agents and pre-built team compositions for multi-agent analysis. Works across all 98 CRE skills."
 ---
 
 # CRE Expert Agents

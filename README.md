@@ -25,7 +25,7 @@ A Claude plugin delivering **98 institutional-grade commercial real estate skill
 |--------|-------|
 | Skills | **98** |
 | Expert Agents | **40** |
-| Reference Files | **211** |
+| Reference Files | **221** |
 | Python Calculators | **10** |
 | Workflow Chains | **6** |
 | Slash Commands | **6** |
@@ -37,7 +37,7 @@ A Claude plugin delivering **98 institutional-grade commercial real estate skill
 
 **18 new production-quality skills**: title-commitment-reviewer, tenant-credit-analyzer, term-sheet-builder, loan-document-reviewer, transfer-document-preparer, funds-flow-calculator, lease-option-structurer, lease-trade-out-analyzer, gp-performance-evaluator, fund-terms-comparator, lp-data-request-generator, sec-reg-d-compliance, monte-carlo-return-simulator, property-management-operations, distribution-notice-generator, 1031-pipeline-manager, deal-attribution-tracker, emerging-manager-evaluator.
 
-**9 Python calculators** (zero dependencies): debt sizing, covenant testing, NPV trade-out analysis, option valuation, proration calculation, tenant credit scoring, waterfall distribution, transfer tax (50 states + DC), quick screen IRR/CoC.
+**10 Python calculators** (zero dependencies): debt sizing, covenant testing, NPV trade-out analysis, option valuation, proration calculation, tenant credit scoring, waterfall distribution, transfer tax (50 states + DC), quick screen IRR/CoC.
 
 **Brand guidelines system**: Set up once with `/cre-skills:brand-config`. All investor-facing deliverables (IC memos, pitch decks, quarterly updates, offering packages) auto-load your colors, fonts, disclaimers, and contact info.
 

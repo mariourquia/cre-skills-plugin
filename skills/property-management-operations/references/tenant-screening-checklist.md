@@ -1,426 +1,395 @@
 # Tenant Screening Checklist Reference
 
-Complete application review process, Fair Housing compliance protocol, income verification methods, landlord reference scripts, and adverse action notice templates. All examples use a baseline 12-unit multifamily property in a mid-tier market with average rents of $1,500-$2,000/month.
+Full application review process, Fair Housing compliance guide, adverse action procedures, and move-in/move-out inspection protocol. All examples use a baseline 4-unit multifamily property in a mid-Atlantic market with rents ranging from $1,650-$2,000/month.
 
 ---
 
-## 1. Application Review Process
+## 1. Application Review Workflow
 
-### Step-by-Step Screening Workflow
+### Step-by-Step Screening Process
 
 ```
-APPLICATION RECEIVED
-  |
-  v
-Step 1: Completeness Check (5 minutes)
-  [ ] All fields filled in (name, SSN, DOB, current address, employment, income)
-  [ ] All adult occupants have submitted separate applications
-  [ ] Government-issued photo ID provided (copy front and back)
-  [ ] Application fee received ($25-$75, per state law)
-  [ ] Signed authorization for credit and background check
-  [ ] 2 most recent pay stubs OR tax return (if self-employed)
-  [ ] If incomplete: return to applicant with list of missing items
-      DO NOT begin screening until application is complete
-  |
-  v
-Step 2: Income Verification (30-60 minutes)
-  Method 1 -- W-2 Employee:
-    [ ] Review 2 most recent pay stubs
-    [ ] Calculate gross monthly income:
-        Bi-weekly pay stubs: (gross per period * 26) / 12
-        Semi-monthly pay stubs: gross per period * 2
-        Weekly pay stubs: (gross per period * 52) / 12
-    [ ] Verify income meets 3x rent threshold:
-        Required income: $[rent] * 3 = $[minimum]
-        Applicant income: $[calculated]
-        PASS: income >= minimum
-        FAIL: income < minimum (offer guarantor option)
-    [ ] Call employer to verify:
-        - Position and start date
-        - Full-time vs part-time
-        - Likelihood of continued employment
-        IMPORTANT: call the employer's main number (verify online),
-        NOT the number the applicant provided
+STEP 1: Application Receipt
+  [ ] Application form complete (all fields filled)
+  [ ] Application fee collected ($30-$75, check state maximum)
+  [ ] Government-issued photo ID verified
+  [ ] Social Security number or ITIN provided (for credit/background check)
+  [ ] Co-applicant information complete (if applicable)
+  [ ] Pet addendum complete (if applicable)
+  [ ] Consent to background and credit check signed
 
-  Method 2 -- Self-Employed:
-    [ ] Request 2 most recent federal tax returns (1040 + Schedule C or K-1)
-    [ ] Calculate average annual net income from both years
-    [ ] Divide by 12 for monthly income
-    [ ] If income is highly variable, use the lower of the two years
-    [ ] Request 3 months of bank statements showing regular deposits
-    [ ] Look for: consistent deposit patterns, average monthly balance > 3x rent
-    [ ] If income is from a business: request business license and 1 year of
-        business bank statements
+STEP 2: Income Verification (target: 3x gross monthly income)
+  Source documentation required by employment type:
 
-  Method 3 -- Non-Employment Income:
-    [ ] Social Security: request benefits letter (ssa.gov letter)
-    [ ] Pension/Retirement: request most recent statement
-    [ ] Investment income: request brokerage statements (3 months)
-    [ ] Alimony/Child support: request court order and 3 months bank statements
-    [ ] Housing voucher (Section 8): request voucher letter from housing authority
-        NOTE: many states and cities prohibit discrimination based on source of
-        income, including Section 8 vouchers. Check local law.
-  |
-  v
-Step 3: Credit Check (15-30 minutes)
-  Services: TransUnion SmartMove, MyRental, RentPrep, or through PM software
-  Cost: $25-$40 per applicant (charged to applicant via application fee)
+  W-2 Employee:
+    [ ] 2 most recent pay stubs (verify employer name, pay frequency, gross pay)
+    [ ] Calculate: gross monthly income = [pay period amount] * [periods per month]
+        Weekly: multiply by 4.33
+        Bi-weekly: multiply by 2.17
+        Semi-monthly: multiply by 2
+        Monthly: use as-is
+    [ ] Verify employer by phone or email (HR department or supervisor)
+    [ ] If new job (< 90 days): require offer letter with salary
 
-  Review checklist:
-    [ ] Credit score recorded: ___
-    [ ] Credit score tier:
-        700+:   Strong -- standard deposit
-        650-699: Acceptable -- standard deposit, note any concerning items
-        600-649: Conditional -- review details below
-        Below 600: High risk -- guarantor required
-        No score: Thin file -- verify income strongly, consider guarantor
+  Self-Employed:
+    [ ] 2 most recent federal tax returns (Schedule C or K-1)
+    [ ] Calculate: average net income over 2 years
+    [ ] 3 most recent bank statements (verify consistent deposits)
+    [ ] Business license or registration (if applicable)
+    [ ] CPA letter (optional but helpful)
 
-    [ ] Review for disqualifying items:
-        - Eviction judgment: DISQUALIFY (unless > 7 years old and explained)
-        - Landlord collection: DISQUALIFY (indicates rent non-payment)
-        - Utility shutoff for non-payment: YELLOW FLAG (pattern of non-payment)
-        - Bankruptcy: review age and type
-            Chapter 7 > 3 years old: consider (debts discharged)
-            Chapter 7 < 3 years old: higher risk
-            Chapter 13 (active plan): verify plan payments are current
+  Retired / Fixed Income:
+    [ ] Social Security award letter (annual)
+    [ ] Pension statement
+    [ ] Investment/retirement account statements (if claiming investment income)
+    [ ] Calculate: total monthly fixed income from all documented sources
 
-    [ ] Review for context (do NOT auto-disqualify):
-        - Medical debt: common, often involuntary, low predictive value
-        - Student loans: look at payment status, not balance
-        - Old collections (> 3 years): less relevant than recent history
-        - Authorized user accounts: applicant is not the primary debtor
+  Student:
+    [ ] Co-signer required (co-signer must meet income threshold independently)
+    [ ] Student financial aid award letter (if claiming as income)
+    [ ] Employment verification (if employed part-time)
 
-    [ ] Debt-to-income ratio check:
-        Monthly debt payments (from credit report): $___
-        Monthly gross income: $___
-        DTI ratio: ___% (ideal: < 40% including proposed rent)
-  |
-  v
-Step 4: Background Check (concurrent with credit)
-  [ ] Criminal history check (county + national)
-      NOTE ON CRIMINAL HISTORY:
-        - Check local law FIRST. Many jurisdictions restrict or prohibit
-          use of criminal history in tenant screening:
-            NYC: Fair Chance for Housing Act (2024)
-            Seattle: Fair Chance Housing Ordinance
-            Portland: Fair Access in Renting Ordinance
-            San Francisco, Oakland, Berkeley: various restrictions
-            New Jersey: Fair Chance in Housing Act
-            Cook County IL: Just Housing Amendment
-        - Where permitted, use individualized assessment:
-            Nature of offense
-            Time since offense
-            Evidence of rehabilitation
-            Relevance to tenancy
-        - DO NOT use arrest records (arrests are not convictions)
-        - DO NOT apply blanket policies ("no felonies ever")
-        - HUD guidance (2016): blanket criminal history policies have
-          disparate impact and may violate Fair Housing Act
+  Section 8 / Housing Voucher:
+    [ ] Voucher amount confirmation from Housing Authority
+    [ ] Tenant's portion of rent: verify tenant income covers their share at 3x
+    [ ] Request Approval Letter (RTA) from Housing Authority
+    [ ] Note: in jurisdictions requiring acceptance of vouchers, you cannot deny
+        based on the voucher itself -- screen the tenant on all other criteria normally
 
-  [ ] Eviction history check (court records)
-      - Search county court records in current and prior jurisdictions
-      - Look for: filings (even if dismissed), judgments, writs of possession
-      - Note: a filing that was dismissed may indicate a dispute, not default
+  Multiple Income Sources:
+    [ ] Document each source separately
+    [ ] Sum all verified sources for total gross monthly income
+    [ ] All sources must be documented -- verbal claims without documentation
+        do not count toward the threshold
 
-  [ ] Sex offender registry check
-      - National Sex Offender Public Website (nsopw.gov)
-      - State-specific registry
-  |
-  v
-Step 5: Landlord Reference Check (20-30 minutes)
-  Contact BOTH current AND prior landlord.
-  WHY BOTH: current landlord may give a positive reference just to
-  get a problem tenant to move out.
+STEP 3: Credit Check
+  Run through FCRA-compliant service. Evaluate the following:
 
-  Prior Landlord Script:
-  "Hi, my name is [your name] and I'm a property owner verifying a
-  rental application. [Applicant name] listed your property at [address]
-  as a prior residence from [dates]. May I ask a few questions?"
+  [ ] Credit score (see tier system in SKILL.md Workflow 1)
+  [ ] Open collections: how many, total amount, age of accounts
+      - Medical collections: weigh less heavily (common and often disputed)
+      - Utility collections: weigh more heavily (indicates non-payment pattern)
+  [ ] Bankruptcies: discharged > 3 years ago with clean history since = less concern
+  [ ] Judgments: landlord-tenant judgments are serious (indicates prior non-payment)
+  [ ] Current delinquencies: active past-due accounts (30/60/90 day)
+  [ ] Debt-to-income ratio: total monthly debt payments / gross monthly income
+      Target: < 45% including proposed rent
+  [ ] Credit history length: thin file (< 2 years) is not a denial -- use other factors
 
-  Questions:
-    1. "Can you confirm [name] rented from [date] to [date]?"
-       Answer: ___
+  Compensating factors for low credit scores:
+    - Income significantly exceeds 3x threshold (e.g., 4-5x)
+    - Strong landlord references (2+ years, on-time payment)
+    - Large savings balance (3-6 months of rent in reserve)
+    - Willing to pay additional deposit (where state law allows)
+    - Willing to provide co-signer who meets all criteria independently
+    - Credit issues are old (3+ years) with improving trend
 
-    2. "What was the monthly rent?"
-       Answer: $___
+STEP 4: Landlord Reference Check
+  Contact the 2 most recent landlords. IMPORTANT: current landlord may give
+  a positive reference just to get rid of a problem tenant. Always contact
+  the prior landlord as well.
 
-    3. "Did [name] pay rent on time consistently?"
-       Answer: ___
-       Follow-up if "mostly" or "usually": "How often was rent late?
-       By how many days?"
+  Questions to ask (use this script):
+  "Hi, I'm [your name], a landlord in [city]. [Applicant name] has applied
+  to rent from me and listed you as a previous landlord. Do you have a moment
+  to answer a few questions?"
 
-    4. "Was the unit left in good condition when they moved out?"
-       Answer: ___
-       Follow-up if no: "What were the issues?"
+  [ ] Q1: Can you confirm that [applicant] rented from you at [address]
+          from [date] to [date]? (verify dates match application)
+  [ ] Q2: Did [applicant] pay rent on time consistently?
+          Follow-up: Were there any late payments? How many in [term]?
+  [ ] Q3: Did [applicant] maintain the property in good condition?
+  [ ] Q4: Were there any lease violations, noise complaints, or other issues?
+  [ ] Q5: Did [applicant] provide proper notice before vacating?
+  [ ] Q6: Was the security deposit returned in full?
+          Follow-up if no: what were the deductions for?
+  [ ] Q7: Would you rent to [applicant] again?
+          (This is the most revealing question -- hesitation is a red flag)
 
-    5. "Were there any complaints from neighbors or lease violations?"
-       Answer: ___
+  Cannot reach landlord:
+    - Try 3 times over 3 business days
+    - If unreachable: note in file, proceed with other verification
+    - Consider requiring additional deposit if landlord reference is
+      unverifiable and other factors are borderline
 
-    6. "Did [name] give proper notice before moving out?"
-       Answer: ___
+  No prior landlord (first-time renter):
+    - Common for young adults, recent immigrants, or people leaving
+      family homes
+    - Require co-signer or additional deposit
+    - Weight other factors more heavily (income, credit, employment)
 
-    7. "Would you rent to [name] again?"
-       Answer: ___
-       This is the most important question. A "no" or hesitation
-       is a significant red flag.
+STEP 5: Background Check
+  Run criminal background and eviction check through FCRA-compliant service.
 
-  Current Landlord Script:
-    Same questions, but add:
-    8. "Why is [name] moving?"
-       Answer: ___
-       (Verify against what the applicant told you)
+  [ ] National criminal database search
+  [ ] Sex offender registry check (all 50 states)
+  [ ] National eviction records search
+  [ ] Terrorist watchlist (OFAC SDN list -- required for all housing providers)
 
-  [ ] Document all answers with date, time, and landlord contact name
-  [ ] If landlord is unresponsive after 2 attempts: note in file,
-      do not hold application indefinitely (3 business day limit)
-  |
-  v
-Step 6: Decision (same day if possible)
-  Compile screening scorecard:
+  Evaluation framework (per HUD guidance and local law):
+    Conviction records:
+      - Consider: nature and severity of offense
+      - Consider: time elapsed since offense
+      - Consider: evidence of rehabilitation
+      - Consider: relevance to tenancy (e.g., property damage, drug manufacturing)
+      - DO NOT apply blanket policies (e.g., "no felonies ever")
+      - HUD guidance: individualized assessment required
+      - Some cities ban criminal history screening entirely (check local law)
 
-  | Criterion | Result | Pass/Fail |
-  |---|---|---|
-  | Income >= 3x rent | $X,XXX vs $X,XXX | PASS / FAIL |
-  | Credit score >= threshold | XXX | PASS / CONDITIONAL / FAIL |
-  | No eviction history | Yes / No | PASS / FAIL |
-  | No landlord collections | Yes / No | PASS / FAIL |
-  | Positive landlord references | Yes / Mixed / No | PASS / CONDITIONAL / FAIL |
-  | Employment verified | Yes / No | PASS / FAIL |
-  | Background check clear | Yes / Issues | PASS / CONDITIONAL / FAIL |
-  | DTI ratio < 40% | XX% | PASS / CONDITIONAL / FAIL |
+    Arrest records (no conviction):
+      - Cannot be used as basis for denial
+      - Arrest is not evidence of criminal activity
+      - HUD explicitly prohibits denial based on arrest alone
 
-  Decision matrix:
-    All PASS: APPROVE -- proceed to lease
-    Any CONDITIONAL: APPROVE WITH CONDITIONS
-      Conditions may include: guarantor, additional deposit (per state law),
-      shorter lease term, requirement to set up autopay
-    Any FAIL on income or eviction: DENY
-    Borderline: use judgment, document reasoning
+    Eviction records:
+      - Prior eviction judgment: strong negative factor
+      - Eviction filing dismissed or settled: neutral (filing alone is not cause)
+      - Sealed eviction records: cannot be accessed or considered
+      - Some states restrict use of eviction records (check local law)
 
-  CRITICAL: apply the same criteria to every applicant. The decision
-  must be based on the criteria above, not on how the applicant looks,
-  sounds, or "seems."
+STEP 6: Decision and Notification
+  [ ] Score applicant against all criteria
+  [ ] Document decision and rationale
+  [ ] If approved: send approval letter with next steps (lease signing date,
+      deposit amount due, move-in date)
+  [ ] If conditionally approved: state conditions (co-signer, additional deposit)
+  [ ] If denied: send adverse action notice within 30 days (see template in SKILL.md)
+  [ ] Retain all application materials for 3 years minimum
 ```
 
 ---
 
-## 2. Fair Housing Do's and Don'ts
+## 2. Fair Housing Compliance Guide
 
-### Protected Classes
+### Protected Classes and Practical Implications
 
 ```
-FEDERAL (apply everywhere in the US):
-  1. Race
-  2. Color
-  3. Religion
-  4. National origin
-  5. Sex (including gender identity and sexual orientation per HUD guidance)
-  6. Familial status (families with children under 18, pregnant women)
-  7. Disability (physical or mental)
+FEDERAL PROTECTED CLASSES (Fair Housing Act + amendments):
 
-STATE AND LOCAL (varies -- check your jurisdiction):
-  - Source of income (Section 8 vouchers) -- required in CA, NY, NJ, OR, WA,
-    CT, MA, VT, and many cities
-  - Age
-  - Marital status
-  - Sexual orientation (separate from federal sex protection in some states)
-  - Gender identity/expression
-  - Veteran/military status
-  - Student status
-  - Immigration/citizenship status
-  - Political affiliation
-  - Victim of domestic violence
-  - Genetic information
+Race / Color:
+  Cannot: prefer or discourage applicants based on race or skin color
+  Applies to: advertising, screening, terms, maintenance, and all interactions
+  Common violations:
+    - Telling applicants of one race that no units are available when units exist
+    - Applying stricter screening to applicants of certain races
+    - Steering applicants to specific units or buildings based on race
+
+Religion:
+  Cannot: ask about religious affiliation or factor it into decisions
+  Common violations:
+    - Advertising in only religious publications
+    - Asking about church membership or religious practices
+    - Refusing to rent based on religious dietary practices (e.g., cooking smells)
+
+National Origin:
+  Cannot: discriminate based on country of origin, accent, or immigration status
+  Note: you CAN require legal residency documentation for lease purposes
+  Common violations:
+    - Requiring "US citizen only" (legal residents have equal rights)
+    - Applying language requirements not related to lease comprehension
+    - Denying based on accent, name, or appearance suggesting national origin
+
+Sex (including gender identity and sexual orientation):
+  Cannot: discriminate based on sex, gender identity, or sexual orientation
+  Per Bostock v. Clayton County (2020) and subsequent HUD interpretation
+  Common violations:
+    - Different terms for single women vs. single men
+    - Refusing to rent to same-sex couples
+    - Harassment based on gender identity
+
+Familial Status:
+  Cannot: discriminate against families with children under 18
+  Exceptions: designated senior housing (55+ with HUD certification)
+  Common violations:
+    - "Adults only" policies (except qualifying senior housing)
+    - Restricting families to ground-floor units
+    - Occupancy standards that disproportionately exclude families
+      (HUD guideline: 2 persons per bedroom is generally reasonable)
+    - Refusing to rent to pregnant women
+
+Disability:
+  Cannot: refuse to rent or impose different terms based on disability
+  Must: make reasonable accommodations and allow reasonable modifications
+  Reasonable accommodation examples:
+    - Allowing a service animal or emotional support animal (no pet deposit,
+      no breed restriction, no weight limit -- requires documentation)
+    - Reserved accessible parking space
+    - Allowing early lease termination for disability-related move to
+      accessible housing
+    - Flexible rent payment date if disability income arrives on specific dates
+  Reasonable modification examples (tenant typically pays):
+    - Grab bars in bathroom
+    - Ramp at entrance
+    - Lowered countertops or cabinets
+    - Visual doorbell/fire alarm for deaf tenants
+  Interactive process: if a tenant requests an accommodation, you must engage
+  in a good-faith discussion. You can request documentation of the disability
+  and the need for the accommodation, but you cannot request medical records
+  or diagnosis details.
+
+COMMON STATE/LOCAL ADDITIONS:
+
+Source of Income (SOI):
+  Many states and cities prohibit discrimination based on lawful source of
+  income, including Section 8 vouchers, disability payments, child support,
+  alimony, and public assistance.
+  States requiring SOI protection (partial list, verify current law):
+    CA, CT, DC, IL, MA, MD, MN, NJ, NY, OR, WA, and many cities in other states
+  If SOI is protected in your jurisdiction: you must accept voucher holders
+  and cannot advertise "no Section 8" or "no vouchers."
+
+Marital Status:
+  Protected in many states. Cannot ask "are you married?" or refuse to rent
+  to unmarried couples.
+
+Age:
+  Some states protect against age discrimination beyond familial status.
+
+Military/Veteran Status:
+  Some states add this as a protected class.
+
+Citizenship Status:
+  Cannot discriminate based on citizenship, though you can require legal
+  residency documentation.
 ```
 
 ### Advertising Compliance
 
 ```
-NEVER use these phrases in listings:
-  - "Perfect for young professionals" (age, familial status)
-  - "Great for singles" or "ideal for couples" (familial status, marital status)
-  - "Walking distance to [church/temple/mosque]" (religion)
-  - "English-speaking preferred" (national origin)
-  - "No children" or "adults only" (familial status -- unless senior housing
-    exemption applies: 62+ or 55+ with HUD certification)
-  - "No wheelchairs" or "must be able to climb stairs" (disability)
-  - "No Section 8" (source of income -- in many jurisdictions)
-  - "Female roommate wanted" (sex -- exception: shared living space)
+COMPLIANT ADVERTISING (describe the property, not the ideal tenant):
+  "Spacious 2-bedroom apartment with hardwood floors and updated kitchen.
+   Walking distance to subway. Laundry in building. $1,800/month."
 
-ALWAYS use these practices:
-  - Describe the PROPERTY, not the ideal TENANT
-  - "Spacious 2BR apartment with in-unit laundry" -- describes property
-  - Use the Equal Housing Opportunity logo on all advertising
-  - List objective facts: bedrooms, bathrooms, rent, location, amenities
-  - Include accessibility features if present (wheelchair accessible,
-    elevator, ground floor)
-```
+NON-COMPLIANT ADVERTISING (describes the ideal tenant):
+  "Perfect for young professionals" (age discrimination)
+  "Ideal for couples" (familial status discrimination)
+  "Great for mature adults" (age/familial status discrimination)
+  "Christian community" (religious discrimination)
+  "English speakers only" (national origin discrimination)
+  "No children" (familial status discrimination)
+  "Executive rental" (can imply racial/economic discrimination)
 
-### Reasonable Accommodations and Modifications
+BORDERLINE (avoid):
+  "Walking distance to [specific church]" (could imply religious preference)
+  "Near great schools" (could be seen as steering families, but generally OK
+   if factual and not used to exclude)
+  "Quiet building" (OK as description; not OK if enforced selectively)
 
-```
-Disability-related requests:
-
-Reasonable accommodation: a change in rules, policies, or services
-  Examples:
-    - Allowing an assistance animal in a no-pets building
-    - Providing a reserved parking spot closer to the unit
-    - Allowing a live-in aide
-    - Providing written (not just verbal) notices for a deaf tenant
-  Landlord obligation: grant unless it would be an undue financial
-  or administrative burden, or fundamentally alter the nature of
-  the housing operation
-  Cost: landlord bears the cost (no extra charge to tenant)
-
-Reasonable modification: a physical change to the unit or common area
-  Examples:
-    - Installing grab bars in bathroom
-    - Widening doorways for wheelchair access
-    - Installing a ramp at building entrance
-    - Lowering countertops or light switches
-  Landlord obligation: must allow the modification
-  Cost: tenant pays for the modification (in most cases)
-  Restoration: landlord may require tenant to restore the unit to
-  original condition at move-out (where reasonable)
-
-Process:
-  1. Tenant makes a request (does not need to be in writing or use
-     specific language -- "I need X because of my disability" is sufficient)
-  2. Landlord may request documentation of the disability-related need
-     (NOT the specific diagnosis -- just verification from a healthcare
-     provider that there is a disability-related need for the accommodation)
-  3. Engage in an interactive process to find a solution
-  4. Respond within 10 business days
-  5. Document the request, the process, and the outcome
+SAFE DESCRIPTIONS:
+  Physical features: rooms, SF, flooring, appliances, views, storage
+  Location features: transit, parks, shopping, restaurants
+  Building features: laundry, parking, elevator, gym, doorman
+  Lease terms: rent, deposit, lease length, pet policy, utilities included
 ```
 
 ---
 
-## 3. Adverse Action Notice Template
+## 3. Adverse Action Procedures
+
+### FCRA Compliance for Tenant Screening
 
 ```
-NOTICE OF ADVERSE ACTION
+When you deny an applicant based in whole or in part on information in a
+consumer report (credit report, background check, or tenant screening report),
+you must comply with the Fair Credit Reporting Act (FCRA):
 
-Date: [date]
+REQUIRED STEPS:
 
-To: [applicant name]
-    [applicant address]
+1. Provide written adverse action notice (within 30 days of decision)
+   Include:
+     - Name, address, and phone of the screening service
+     - Statement that the screening service did not make the decision
+     - Statement of applicant's right to obtain a free copy of the report
+       within 60 days
+     - Statement of applicant's right to dispute inaccurate information
+     - The specific reason(s) for denial (reference your published criteria)
 
-RE: Rental Application for [property address], Unit [number]
+2. Retain records
+     - Keep the application, screening report, decision documentation,
+       and adverse action notice for 3 years minimum
+     - Some states require longer retention
 
-Dear [applicant name],
+3. If using credit score as a factor:
+     - Provide the credit score used in the decision
+     - Provide the range of possible scores (e.g., 300-850)
+     - Provide up to 4 key factors that adversely affected the score
 
-After careful review of your rental application, we are unable to
-approve your tenancy at this time.
-
-The decision was based on the following criteria:
-
-  [ ] Income does not meet minimum requirement (3x monthly rent)
-  [ ] Credit score below minimum threshold
-  [ ] Negative rental history (eviction record or landlord reference)
-  [ ] Insufficient employment history or verification
-  [ ] Criminal history (per individualized assessment)
-  [ ] Incomplete application (missing required documentation)
-  [ ] Other: ________________________________
-
-[If credit report was a factor:]
-This decision was based in whole or in part on information obtained
-from a consumer reporting agency:
-
-  Agency: [TransUnion / Experian / Equifax / screening service name]
-  Address: [agency address]
-  Phone: [agency phone]
-
-Under the Fair Credit Reporting Act, you have the right to:
-  - Obtain a free copy of your consumer report from the agency within
-    60 days of this notice
-  - Dispute the accuracy or completeness of any information in the report
-  - The consumer reporting agency did not make this decision and cannot
-    explain why it was made
-
-[If applicant was denied and wishes to discuss:]
-If you have questions about this decision, you may contact:
-
-  [Landlord/PM name]
-  [Phone]
-  [Email]
-
-Your application fee of $[amount] is [non-refundable / will be refunded
-within X days] per [state law / our policy].
-
-Sincerely,
-[Landlord/PM name]
-[Property name]
+COMMON MISTAKES:
+  - Denying verbally without written notice (always put it in writing)
+  - Not identifying the screening service in the notice
+  - Stating "credit score too low" without specifying your threshold
+    (inconsistent screening = Fair Housing risk)
+  - Not retaining denial documentation (you need it if challenged)
 ```
 
 ---
 
-## 4. Guarantor Requirements
+## 4. Inspection Protocol
+
+### Photo Documentation Standards
 
 ```
-When to require a guarantor:
-  - Applicant income below 3x rent threshold
-  - Applicant credit score below 600
-  - Applicant has no credit history (first-time renter)
-  - Applicant is a student with limited income
-  - Applicant is newly employed (< 6 months at current job)
+MOVE-IN PHOTO PROTOCOL:
 
-Guarantor screening criteria:
-  - Income: 5x monthly rent (guarantor takes on risk, higher bar)
-  - Credit score: 700+ (guarantor must be creditworthy)
-  - Must complete full application and screening process
-  - Must sign a guaranty agreement (separate from the lease)
-  - Guarantor is jointly and severally liable for all lease obligations
+Equipment: smartphone with good camera is sufficient. Ensure date stamp
+is visible in photo metadata (most phones do this automatically).
 
-Guaranty agreement key terms:
-  - Guarantor unconditionally guarantees all rent and charges
-  - Guaranty survives lease renewal (or specify if limited to initial term)
-  - Guarantor waives right to require landlord to pursue tenant first
-  - Guarantor agrees to pay landlord's attorney fees if collection is needed
-  - Guarantor can be released only with landlord's written consent
+Minimum photos per room:
+  - 4 corner shots (standing in each corner, aiming at opposite corner)
+  - 1 floor close-up (showing condition)
+  - 1 ceiling shot (showing condition)
+  - Close-ups of any pre-existing damage (scratches, stains, holes, chips)
+  - Close-up of every appliance (showing condition and model number)
+  - Close-up of plumbing fixtures (showing condition)
 
-Alternative to personal guarantor:
-  - Institutional guarantor services: Insurent, TheGuarantor, Rhino
-  - Cost: typically one month's rent (paid by tenant)
-  - Coverage: guarantees rent up to a specified amount
-  - Useful for tenants who cannot find a personal guarantor
-  - Landlord should verify the institutional guarantor's coverage terms
+Storage: create a folder per unit per inspection date.
+  Example: /Unit_1A/2026-01-15_move-in/
+  Label photos: 1A_living-room_NE-corner.jpg, 1A_kitchen_sink-close.jpg
+
+Backup: store photos in cloud (Google Drive, iCloud, Dropbox) immediately.
+Do not rely solely on phone storage.
+
+MOVE-OUT COMPARISON PROTOCOL:
+
+Take photos from the same angles and positions as the move-in photos.
+Place move-in and move-out photos side-by-side for comparison.
+
+Document:
+  - Any damage not present at move-in
+  - Any missing items (fixtures, hardware, appliance parts)
+  - Cleanliness level (is professional cleaning needed?)
+  - Condition of items with finite useful life:
+      Paint: 3-5 year useful life (do not charge full repaint if paint is 4 years old)
+      Carpet: 5-7 year useful life (prorate replacement cost by remaining life)
+      Appliances: 10-15 year useful life
+      Blinds: 5 year useful life
+
+PRORATION EXAMPLE:
+  Carpet installed: January 2022
+  Expected life: 7 years (expires January 2029)
+  Tenant damages carpet in March 2026 (4 years into life, 3 years remaining)
+  Replacement cost: $1,400
+  Prorated deduction: $1,400 * (3/7) = $600
+  Tenant charged: $600 (not $1,400)
+  Rationale: tenant pays for the remaining useful life they destroyed,
+  not the full replacement. Charging full replacement for a 4-year-old
+  carpet is considered unreasonable by most courts.
 ```
 
----
-
-## 5. Application Processing Timeline
+### Security Deposit Handling by State
 
 ```
-Best practice timeline:
+Security deposit rules vary significantly by state. Key variables:
 
-Day 1: Application received
-  - Completeness check (same day)
-  - Order credit and background check (same day)
-  - Contact employers and landlord references (same day)
+| Variable | Range | Example States |
+|---|---|---|
+| Maximum deposit | 1-3 months | CA: 2 months, NY: 1 month, TX: no limit |
+| Interest required | yes/no | CT, IL, MD, NJ, NY: yes. Most states: no |
+| Separate account | yes/no | Most states: yes (separate from operating) |
+| Return deadline | 14-45 days | CA: 21 days, FL: 15-30 days, NY: 14 days |
+| Itemized statement | required/not | Most states: required with deductions |
+| Walk-through right | yes/no | CA: tenant has right to pre-move-out walk |
+| Penalty for late return | varies | CA: up to 2x deposit. NY: full refund if late |
 
-Day 2: Follow up on outstanding verifications
-  - Second attempt on unresponsive landlord references
-  - Review credit and background results (usually available in hours)
-
-Day 3: Decision
-  - Compile screening scorecard
-  - Make approval/denial/conditional decision
-  - Notify applicant in writing
-
-Maximum hold period: 3 business days from complete application
-  - If you cannot verify references in 3 days, make a conditional
-    decision and continue verification
-  - Holding applications longer than 3 days risks losing good tenants
-    to competing landlords
-  - If you have multiple applicants, process in order received
-    (first-come, first-served prevents discrimination claims)
-
-Multiple applicants:
-  - Screen in order of application receipt
-  - Approve the first qualified applicant
-  - Do NOT compare applicants against each other
-    (this opens the door to discrimination claims)
-  - Do NOT hold an apartment for a "better" applicant while
-    screening others
+See references/state-landlord-tenant-rules.yaml for state-specific rules.
 ```
