@@ -1,496 +1,389 @@
 # State Landlord-Tenant Rules Reference
-# Key rules for top 25 states by rental housing stock.
-# IMPORTANT: These are summaries as of mid-2025. State and local laws change
-# frequently. Always verify current statutes before relying on specifics.
-# Local ordinances (city/county) may impose stricter requirements.
+# Key rules for the top 25 states by rental housing stock.
+# Data reflects mid-2025 statutes. ALWAYS verify against current state law
+# before relying on specific thresholds -- these change frequently.
+#
+# Fields:
+#   security_deposit_max: maximum security deposit allowed
+#   deposit_return_days: days after move-out to return deposit or itemized statement
+#   deposit_interest: whether interest on deposits is required
+#   deposit_separate_account: whether a separate account is required
+#   late_fee_cap: statutory limit on late fees (null = no statutory cap)
+#   grace_period_days: statutory grace period before late fee may be assessed
+#   notice_to_quit_nonpayment_days: days in a pay-or-quit notice for nonpayment
+#   notice_to_terminate_monthly_days: days notice to terminate a month-to-month tenancy
+#   rent_increase_notice_days: days notice required before rent increase
+#   source_of_income_protected: whether source of income (Section 8) is protected
+#   rent_control: whether any form of rent control exists (state or local)
+#   lead_paint_state_rules: state-level lead paint rules beyond federal (pre-1978)
+#   eviction_timeline_estimate: rough estimate of uncontested eviction timeline
+#   notes: important state-specific considerations
 
 states:
-  AL:
-    name: Alabama
-    security_deposit:
-      limit: "1 month rent"
-      separate_account: false
-      return_deadline: "60 days"
-      itemized_statement: true
-    late_fees:
-      grace_period: "none required"
-      cap: "no statutory cap (must be reasonable)"
-    eviction:
-      pay_or_quit_notice: "7 days"
-      lease_violation_notice: "14 days"
-      timeline_estimate: "30-45 days"
-    rent_increase:
-      notice_required: "30 days (month-to-month)"
-    lead_paint_disclosure: "required if pre-1978 (federal)"
-    source_of_income_protection: false
-    notes: "Landlord-friendly state. Few tenant protections beyond federal."
+  california:
+    security_deposit_max: "2 months (unfurnished), 3 months (furnished)"
+    deposit_return_days: 21
+    deposit_interest: false
+    deposit_separate_account: false
+    late_fee_cap: "No statutory cap, but courts void 'unreasonable' fees. Industry norm: 5-6% of rent."
+    grace_period_days: 0
+    notice_to_quit_nonpayment_days: 3
+    notice_to_terminate_monthly_days: 30
+    rent_increase_notice_days: "30 days (increase < 10%), 90 days (increase >= 10%)"
+    source_of_income_protected: true
+    rent_control: true
+    lead_paint_state_rules: "State disclosure required for pre-1978. Some cities require inspections."
+    eviction_timeline_estimate: "45-90 days"
+    notes: "AB 1482 (2020) caps rent increases at 5% + CPI (max 10%) statewide for qualifying properties (15+ years old, with exemptions). Just cause eviction required for qualifying properties."
 
-  AZ:
-    name: Arizona
-    security_deposit:
-      limit: "1.5 months rent"
-      separate_account: false
-      return_deadline: "14 business days"
-      itemized_statement: true
-    late_fees:
-      grace_period: "5 days (if in lease)"
-      cap: "no statutory cap (must be reasonable)"
-    eviction:
-      pay_or_quit_notice: "5 days"
-      lease_violation_notice: "10 days (curable), 10 days (non-curable, health/safety)"
-      timeline_estimate: "30-45 days"
-    rent_increase:
-      notice_required: "30 days (month-to-month)"
-    lead_paint_disclosure: "required if pre-1978 (federal)"
-    source_of_income_protection: false
+  new_york:
+    security_deposit_max: "1 month rent (statewide since 2019 HSTPA)"
+    deposit_return_days: 14
+    deposit_interest: true
+    deposit_separate_account: true
+    late_fee_cap: "$50 or 5% of rent, whichever is less"
+    grace_period_days: 5
+    notice_to_quit_nonpayment_days: 14
+    notice_to_terminate_monthly_days: "30 days (tenancy < 1yr), 60 days (1-2yr), 90 days (2+yr)"
+    rent_increase_notice_days: "30 days (tenancy < 1yr), 60 days (1-2yr), 90 days (2+yr)"
+    source_of_income_protected: true
+    rent_control: true
+    lead_paint_state_rules: "NYC Local Law 1 requires lead paint inspections in buildings with children under 6."
+    eviction_timeline_estimate: "60-120+ days (NYC can be 6+ months)"
+    notes: "HSTPA (2019) eliminated most landlord-friendly provisions. Rent stabilization applies to many NYC units. Statewide good cause eviction law enacted 2024."
 
-  CA:
-    name: California
-    security_deposit:
-      limit: "1 month rent (unfurnished), 2 months (furnished) -- effective 2024"
-      separate_account: false
-      return_deadline: "21 days"
-      itemized_statement: true
-      photos_required: "recommended (case law supports)"
-    late_fees:
-      grace_period: "no statutory requirement (custom is 3-5 days)"
-      cap: "no statutory cap but must be 'reasonable' -- courts typically allow 5-10% of rent"
-    eviction:
-      pay_or_quit_notice: "3 days"
-      lease_violation_notice: "3 days (curable)"
-      timeline_estimate: "45-90 days (longer in rent-controlled cities)"
-    rent_increase:
-      notice_required: "30 days (< 10% increase), 90 days (> 10% increase)"
-      rent_control: "AB 1482 (Tenant Protection Act): caps annual increases at 5% + CPI or 10%, whichever is lower, for buildings 15+ years old. Exempt: single-family homes (if not corporate-owned), new construction < 15 years."
-    lead_paint_disclosure: "required if pre-1978 (federal + state)"
-    source_of_income_protection: true
-    notes: "Highly tenant-protective. Many cities have additional local ordinances (LA, SF, Oakland, Berkeley, San Jose). Always check local law."
+  texas:
+    security_deposit_max: "No statutory limit"
+    deposit_return_days: 30
+    deposit_interest: false
+    deposit_separate_account: false
+    late_fee_cap: "No statutory cap. Must be 'reasonable.' Industry norm: 10-12% of rent is generally upheld."
+    grace_period_days: 2
+    notice_to_quit_nonpayment_days: 3
+    notice_to_terminate_monthly_days: 30
+    rent_increase_notice_days: 30
+    source_of_income_protected: false
+    rent_control: false
+    lead_paint_state_rules: "Federal rules only."
+    eviction_timeline_estimate: "21-30 days"
+    notes: "Most landlord-friendly large state. No rent control preemption. Justice court handles evictions quickly. Lockouts for nonpayment are legal with specific notice requirements."
 
-  CO:
-    name: Colorado
-    security_deposit:
-      limit: "no statutory limit (but must be reasonable)"
-      separate_account: false
-      return_deadline: "30 days (60 days if stated in lease)"
-      itemized_statement: true
-    late_fees:
-      grace_period: "no statutory requirement"
-      cap: "$50 or 5% of rent, whichever is greater (effective 2023)"
-    eviction:
-      pay_or_quit_notice: "10 days"
-      lease_violation_notice: "10 days"
-      timeline_estimate: "30-60 days"
-    rent_increase:
-      notice_required: "21 days (month-to-month, effective 2023)"
-    lead_paint_disclosure: "required if pre-1978 (federal)"
-    source_of_income_protection: "yes (statewide, effective 2024)"
+  florida:
+    security_deposit_max: "No statutory limit"
+    deposit_return_days: "15 days (no deductions), 30 days (with deductions)"
+    deposit_interest: "Optional, but if held in interest-bearing account, must pay 75% of interest or 5% simple interest annually"
+    deposit_separate_account: true
+    late_fee_cap: "No statutory cap. Must be 'reasonable.'"
+    grace_period_days: 0
+    notice_to_quit_nonpayment_days: 3
+    notice_to_terminate_monthly_days: 15
+    rent_increase_notice_days: 30
+    source_of_income_protected: false
+    rent_control: false
+    lead_paint_state_rules: "Federal rules only."
+    eviction_timeline_estimate: "14-30 days (uncontested)"
+    notes: "Fast eviction process. Landlord must notify tenant within 30 days of receipt of deposit how and where deposit is held."
 
-  CT:
-    name: Connecticut
-    security_deposit:
-      limit: "2 months rent"
-      separate_account: true
-      return_deadline: "30 days (21 days if tenant provides forwarding address)"
-      itemized_statement: true
-      interest_required: true
-    late_fees:
-      grace_period: "9 days (mandatory)"
-      cap: "$5 or 5% of amount past due, whichever is less (for first month late in a year)"
-    eviction:
-      pay_or_quit_notice: "3 days (lapse of time notice)"
-      lease_violation_notice: "15 days (curable)"
-      timeline_estimate: "45-90 days"
-    rent_increase:
-      notice_required: "no statute (lease governs)"
-    lead_paint_disclosure: "required if pre-1978 (federal + state)"
-    source_of_income_protection: true
+  illinois:
+    security_deposit_max: "No statutory limit (but Chicago caps at 1.5 months)"
+    deposit_return_days: "30 days (45 days if deductions)"
+    deposit_interest: "Required in jurisdictions with 25+ units (Chicago, Evanston, others)"
+    deposit_separate_account: true
+    late_fee_cap: "$20/month for first $500 of rent, then 5% of amount over $500 (Chicago RLTO)"
+    grace_period_days: 5
+    notice_to_quit_nonpayment_days: 5
+    notice_to_terminate_monthly_days: 30
+    rent_increase_notice_days: 30
+    source_of_income_protected: true
+    rent_control: false
+    lead_paint_state_rules: "Chicago Lead Ordinance requires pre-1978 rental units to be inspected."
+    eviction_timeline_estimate: "30-60 days"
+    notes: "Chicago RLTO (Residential Landlord and Tenant Ordinance) is far more restrictive than state law. Significant penalties for non-compliance. Treat Chicago as its own jurisdiction."
 
-  FL:
-    name: Florida
-    security_deposit:
-      limit: "no statutory limit"
-      separate_account: true
-      return_deadline: "15 days (no deductions), 30 days (with deductions)"
-      itemized_statement: true
-      interest_or_surety_bond: "must either hold in interest-bearing account OR post surety bond"
-    late_fees:
-      grace_period: "no statutory requirement"
-      cap: "no statutory cap (must be reasonable)"
-    eviction:
-      pay_or_quit_notice: "3 days"
-      lease_violation_notice: "7 days (curable), 7 days (non-curable)"
-      timeline_estimate: "30-45 days"
-    rent_increase:
-      notice_required: "15 days (month-to-month)"
-    lead_paint_disclosure: "required if pre-1978 (federal)"
-    source_of_income_protection: false
-    notes: "Landlord-friendly state. No rent control preemption exists (no city can enact rent control)."
+  pennsylvania:
+    security_deposit_max: "2 months (first year), 1 month (subsequent years)"
+    deposit_return_days: 30
+    deposit_interest: "Required after 2 years of tenancy (interest-bearing escrow account)"
+    deposit_separate_account: true
+    late_fee_cap: "No statutory cap. Must be 'reasonable.'"
+    grace_period_days: 0
+    notice_to_quit_nonpayment_days: 10
+    notice_to_terminate_monthly_days: "15 days (lease < 1yr), 30 days (lease >= 1yr)"
+    rent_increase_notice_days: 30
+    source_of_income_protected: "Philadelphia yes, statewide no"
+    rent_control: false
+    lead_paint_state_rules: "Philadelphia requires lead-safe certification for pre-1978 rentals."
+    eviction_timeline_estimate: "30-60 days"
+    notes: "Security deposit reduction from 2 months to 1 month after first year is unique. Philadelphia has its own Fair Practices Ordinance with additional protections."
 
-  GA:
-    name: Georgia
-    security_deposit:
-      limit: "no statutory limit"
-      separate_account: "required only if landlord owns 10+ units"
-      return_deadline: "30 days"
-      itemized_statement: true
-    late_fees:
-      grace_period: "no statutory requirement"
-      cap: "no statutory cap"
-    eviction:
-      pay_or_quit_notice: "demand for possession (no specific day requirement)"
-      timeline_estimate: "30-45 days"
-    rent_increase:
-      notice_required: "60 days (month-to-month)"
-    lead_paint_disclosure: "required if pre-1978 (federal)"
-    source_of_income_protection: false
+  ohio:
+    security_deposit_max: "No statutory limit"
+    deposit_return_days: 30
+    deposit_interest: "Required if deposit > $50 and tenancy > 6 months (5% or actual interest)"
+    deposit_separate_account: false
+    late_fee_cap: "No statutory cap. Must be 'reasonable.'"
+    grace_period_days: 0
+    notice_to_quit_nonpayment_days: 3
+    notice_to_terminate_monthly_days: 30
+    rent_increase_notice_days: 30
+    source_of_income_protected: false
+    rent_control: false
+    lead_paint_state_rules: "Federal rules only."
+    eviction_timeline_estimate: "21-30 days"
+    notes: "Landlord-friendly state. No rent control. Relatively fast eviction process."
 
-  IL:
-    name: Illinois
-    security_deposit:
-      limit: "no statutory limit (Chicago: 1.5 months)"
-      separate_account: "required (interest-bearing in Chicago)"
-      return_deadline: "30 days (45 days in Chicago)"
-      itemized_statement: true
-      interest_required: "yes (in Chicago and some other municipalities)"
-    late_fees:
-      grace_period: "5 days (Chicago RLTO)"
-      cap: "$10/month first $500 rent + 5% on remainder (Chicago RLTO)"
-    eviction:
-      pay_or_quit_notice: "5 days"
-      lease_violation_notice: "10 days"
-      timeline_estimate: "45-90 days (longer in Cook County)"
-    rent_increase:
-      notice_required: "30 days (month-to-month)"
-    lead_paint_disclosure: "required if pre-1978 (federal)"
-    source_of_income_protection: "yes (statewide, effective 2024)"
-    notes: "Chicago RLTO is significantly more tenant-protective than state law. If property is in Chicago, follow RLTO."
+  georgia:
+    security_deposit_max: "No statutory limit"
+    deposit_return_days: 30
+    deposit_interest: false
+    deposit_separate_account: "Required if landlord owns 10+ units (escrow account)"
+    late_fee_cap: "No statutory cap. Must be 'reasonable.'"
+    grace_period_days: 0
+    notice_to_quit_nonpayment_days: "Immediate demand (no cure period)"
+    notice_to_terminate_monthly_days: 60
+    rent_increase_notice_days: 60
+    source_of_income_protected: false
+    rent_control: false
+    lead_paint_state_rules: "Federal rules only."
+    eviction_timeline_estimate: "14-30 days"
+    notes: "No statutory cure period for nonpayment -- landlord can demand immediate payment and file for dispossessory if not paid. Very landlord-friendly."
 
-  MA:
-    name: Massachusetts
-    security_deposit:
-      limit: "1 month rent"
-      separate_account: true
-      return_deadline: "30 days"
-      itemized_statement: true
-      interest_required: true
-      receipt_required: true
-      condition_statement_required: "within 10 days of move-in"
-    late_fees:
-      grace_period: "30 days (mandatory)"
-      cap: "no statutory cap but 30-day grace means limited practical impact"
-    eviction:
-      pay_or_quit_notice: "14 days"
-      lease_violation_notice: "30 days (curable)"
-      timeline_estimate: "60-120 days"
-    rent_increase:
-      notice_required: "rent period or 30 days, whichever is longer"
-    lead_paint_disclosure: "required if pre-1978 (federal + state -- state law is stricter)"
-    source_of_income_protection: true
-    notes: "Very tenant-protective. Strict security deposit law -- violations can result in treble damages. Lead paint law (Chapter 111, Section 197A) is stricter than federal."
+  north_carolina:
+    security_deposit_max: "1.5 months (week-to-week tenancy: 2 weeks), 2 months (month-to-month)"
+    deposit_return_days: 30
+    deposit_interest: false
+    deposit_separate_account: "Required (trust account or bond)"
+    late_fee_cap: "$15 or 5% of rent, whichever is greater"
+    grace_period_days: 5
+    notice_to_quit_nonpayment_days: 10
+    notice_to_terminate_monthly_days: 7
+    rent_increase_notice_days: 30
+    source_of_income_protected: false
+    rent_control: false
+    lead_paint_state_rules: "Federal rules only."
+    eviction_timeline_estimate: "14-30 days"
+    notes: "Late fee cap is specifically codified. Trust account for deposits required with landlord's name and address on the account."
 
-  MD:
-    name: Maryland
-    security_deposit:
-      limit: "2 months rent"
-      separate_account: true
-      return_deadline: "45 days"
-      itemized_statement: true
-      interest_required: "yes (if held > 6 months, rate set by state)"
-      receipt_required: true
-    late_fees:
-      grace_period: "no statutory requirement"
-      cap: "5% of monthly rent"
-    eviction:
-      pay_or_quit_notice: "immediate (failure to pay rent, file in court)"
-      lease_violation_notice: "30 days"
-      timeline_estimate: "45-60 days"
-    rent_increase:
-      notice_required: "1 month (month-to-month)"
-    lead_paint_disclosure: "required if pre-1978 (federal + state registration requirement)"
-    source_of_income_protection: "yes (statewide, 2020)"
+  michigan:
+    security_deposit_max: "1.5 months rent"
+    deposit_return_days: 30
+    deposit_interest: false
+    deposit_separate_account: "Required (regulated financial institution)"
+    late_fee_cap: "No statutory cap. Must be 'reasonable.'"
+    grace_period_days: 0
+    notice_to_quit_nonpayment_days: 7
+    notice_to_terminate_monthly_days: 30
+    rent_increase_notice_days: 30
+    source_of_income_protected: false
+    rent_control: false
+    lead_paint_state_rules: "State lead rules track federal. Detroit has additional requirements."
+    eviction_timeline_estimate: "30-45 days"
+    notes: "Landlord must provide tenant with inventory of existing damages within 7 days of move-in. Security deposit must be held in regulated financial institution."
 
-  MI:
-    name: Michigan
-    security_deposit:
-      limit: "1.5 months rent"
-      separate_account: true
-      return_deadline: "30 days"
-      itemized_statement: true
-    late_fees:
-      grace_period: "no statutory requirement"
-      cap: "no statutory cap"
-    eviction:
-      pay_or_quit_notice: "7 days"
-      lease_violation_notice: "30 days"
-      timeline_estimate: "30-60 days"
-    rent_increase:
-      notice_required: "1 rent period (month-to-month)"
-    lead_paint_disclosure: "required if pre-1978 (federal)"
-    source_of_income_protection: false
+  new_jersey:
+    security_deposit_max: "1.5 months rent"
+    deposit_return_days: 30
+    deposit_interest: true
+    deposit_separate_account: true
+    late_fee_cap: "No statutory cap. Courts void 'unconscionable' fees."
+    grace_period_days: 5
+    notice_to_quit_nonpayment_days: 30
+    notice_to_terminate_monthly_days: 30
+    rent_increase_notice_days: 30
+    source_of_income_protected: true
+    rent_control: "Local option (many municipalities have it)"
+    lead_paint_state_rules: "State registration and inspection requirements for pre-1978 multifamily."
+    eviction_timeline_estimate: "45-90 days"
+    notes: "Strong tenant protections. Interest on deposits required annually. Many municipalities have rent control ordinances. Anti-eviction act requires good cause for removal."
 
-  MN:
-    name: Minnesota
-    security_deposit:
-      limit: "no statutory limit"
-      separate_account: false
-      return_deadline: "21 days"
-      itemized_statement: true
-      interest_required: "yes (1% simple interest)"
-    late_fees:
-      grace_period: "no statutory requirement"
-      cap: "8% of overdue rent"
-    eviction:
-      pay_or_quit_notice: "14 days"
-      lease_violation_notice: "reasonable time to cure"
-      timeline_estimate: "30-60 days"
-    rent_increase:
-      notice_required: "1 rent period with written notice"
-    lead_paint_disclosure: "required if pre-1978 (federal)"
-    source_of_income_protection: true
+  virginia:
+    security_deposit_max: "2 months rent"
+    deposit_return_days: 45
+    deposit_interest: false
+    deposit_separate_account: false
+    late_fee_cap: "10% of periodic rent or 10% of remaining balance, whichever is less"
+    grace_period_days: 5
+    notice_to_quit_nonpayment_days: 5
+    notice_to_terminate_monthly_days: 30
+    rent_increase_notice_days: 30
+    source_of_income_protected: "Some localities"
+    rent_control: false
+    lead_paint_state_rules: "Federal rules only."
+    eviction_timeline_estimate: "21-45 days"
+    notes: "VRLTA (Virginia Residential Landlord Tenant Act) governs most residential tenancies. Specific late fee cap is codified at 10%."
 
-  NC:
-    name: North Carolina
-    security_deposit:
-      limit: "1.5 months rent (week-to-week: 2 weeks), 2 months (month-to-month)"
-      separate_account: true
-      return_deadline: "30 days"
-      itemized_statement: true
-    late_fees:
-      grace_period: "5 days (mandatory)"
-      cap: "$15 or 5% of rent, whichever is greater"
-    eviction:
-      pay_or_quit_notice: "10 days"
-      lease_violation_notice: "per lease terms"
-      timeline_estimate: "30-45 days"
-    rent_increase:
-      notice_required: "7 days (week-to-week), 30 days (month-to-month)"
-    lead_paint_disclosure: "required if pre-1978 (federal)"
-    source_of_income_protection: false
+  washington:
+    security_deposit_max: "No statutory limit"
+    deposit_return_days: 21
+    deposit_interest: false
+    deposit_separate_account: false
+    late_fee_cap: "No statutory cap. Must be 'reasonable.'"
+    grace_period_days: 0
+    notice_to_quit_nonpayment_days: 14
+    notice_to_terminate_monthly_days: 20
+    rent_increase_notice_days: 60
+    source_of_income_protected: true
+    rent_control: "No (but Seattle has specific protections)"
+    lead_paint_state_rules: "Federal rules only."
+    eviction_timeline_estimate: "30-60 days"
+    notes: "Just cause eviction law in Seattle (and statewide for some properties since 2021). 60-day rent increase notice is longer than most states."
 
-  NJ:
-    name: New Jersey
-    security_deposit:
-      limit: "1.5 months rent"
-      separate_account: true
-      return_deadline: "30 days"
-      itemized_statement: true
-      interest_required: true
-      bank_notification: "must notify tenant of bank name and account number"
-    late_fees:
-      grace_period: "5 days (mandatory)"
-      cap: "no statutory cap (must be reasonable)"
-    eviction:
-      pay_or_quit_notice: "30 days (habitual late payer), no cure period for non-payment"
-      lease_violation_notice: "3 days (if lease specifies)"
-      timeline_estimate: "60-120 days"
-    rent_increase:
-      notice_required: "30 days"
-    lead_paint_disclosure: "required if pre-1978 (federal + state)"
-    source_of_income_protection: true
-    notes: "NJ is extremely tenant-protective. Anti-Eviction Act limits grounds for eviction. Cannot evict simply because lease expired (must have cause). Rent control exists in many municipalities."
+  massachusetts:
+    security_deposit_max: "1 month rent"
+    deposit_return_days: 30
+    deposit_interest: true
+    deposit_separate_account: true
+    late_fee_cap: "No statutory cap. Must be 'reasonable.' $50 is common."
+    grace_period_days: 30
+    notice_to_quit_nonpayment_days: 14
+    notice_to_terminate_monthly_days: "30 days or rental period, whichever is longer"
+    rent_increase_notice_days: "30 days (or rental period)"
+    source_of_income_protected: true
+    rent_control: "No (repealed 1994)"
+    lead_paint_state_rules: "Strict lead paint law. Landlords must delead if child under 6 lives in pre-1978 unit."
+    eviction_timeline_estimate: "60-90 days"
+    notes: "Very strict security deposit statute. Failure to comply exactly can result in 3x damages. Must provide receipt for deposit, identify bank and account, pay 5% interest annually. 30-day grace period before late fees is uniquely long."
 
-  NY:
-    name: New York
-    security_deposit:
-      limit: "1 month rent (statewide since 2019 HSTPA)"
-      separate_account: true
-      return_deadline: "14 days"
-      itemized_statement: true
-      interest_required: "yes (for buildings with 6+ units)"
-    late_fees:
-      grace_period: "5 days (mandatory)"
-      cap: "$50 or 5% of monthly rent, whichever is less"
-    eviction:
-      pay_or_quit_notice: "14 days (rent demand)"
-      lease_violation_notice: "10 days (opportunity to cure)"
-      timeline_estimate: "60-180 days (NYC can be 6+ months)"
-    rent_increase:
-      notice_required: "30 days (< 5% or lease < 1 year), 60 days (5-10% or lease 1-2 years), 90 days (> 10% or lease > 2 years)"
-    lead_paint_disclosure: "required if pre-1978 (federal + NYC Local Law 1)"
-    source_of_income_protection: true
-    notes: "HSTPA (2019) dramatically changed landlord-tenant law statewide. NYC has additional protections (HPD, rent stabilization for qualifying buildings). Fair Chance for Housing Act (2024) limits criminal history screening in NYC."
+  arizona:
+    security_deposit_max: "1.5 months rent"
+    deposit_return_days: 14
+    deposit_interest: false
+    deposit_separate_account: false
+    late_fee_cap: "No statutory cap. Must be 'reasonable.'"
+    grace_period_days: 5
+    notice_to_quit_nonpayment_days: 5
+    notice_to_terminate_monthly_days: 30
+    rent_increase_notice_days: 30
+    source_of_income_protected: false
+    rent_control: false
+    lead_paint_state_rules: "Federal rules only."
+    eviction_timeline_estimate: "14-21 days"
+    notes: "Fast eviction process. 14-day deposit return is among the shortest. Landlord-friendly state."
 
-  OH:
-    name: Ohio
-    security_deposit:
-      limit: "no statutory limit"
-      separate_account: false
-      return_deadline: "30 days"
-      itemized_statement: true
-    late_fees:
-      grace_period: "no statutory requirement"
-      cap: "no statutory cap (must be reasonable)"
-    eviction:
-      pay_or_quit_notice: "3 days"
-      lease_violation_notice: "30 days"
-      timeline_estimate: "30-45 days"
-    rent_increase:
-      notice_required: "30 days (month-to-month)"
-    lead_paint_disclosure: "required if pre-1978 (federal)"
-    source_of_income_protection: false
+  tennessee:
+    security_deposit_max: "No statutory limit"
+    deposit_return_days: 30
+    deposit_interest: false
+    deposit_separate_account: "Required (separate from landlord's personal funds)"
+    late_fee_cap: "10% of past-due rent (statutory maximum)"
+    grace_period_days: 5
+    notice_to_quit_nonpayment_days: 14
+    notice_to_terminate_monthly_days: 30
+    rent_increase_notice_days: 30
+    source_of_income_protected: false
+    rent_control: false
+    lead_paint_state_rules: "Federal rules only."
+    eviction_timeline_estimate: "14-30 days"
+    notes: "Late fee cap at 10% is statutory. Relatively fast eviction process through General Sessions Court."
 
-  OR:
-    name: Oregon
-    security_deposit:
-      limit: "no statutory limit"
-      separate_account: false
-      return_deadline: "31 days"
-      itemized_statement: true
-    late_fees:
-      grace_period: "4 days after due date (mandatory for first late payment, can be waived for subsequent)"
-      cap: "reasonable and outlined in rental agreement"
-    eviction:
-      pay_or_quit_notice: "10 days (72 hours if 2nd notice in 12 months)"
-      lease_violation_notice: "14 days (curable), 10 days (non-curable)"
-      timeline_estimate: "30-60 days"
-    rent_increase:
-      notice_required: "90 days"
-      rent_control: "SB 608 (2019): caps annual increases at 7% + CPI. Exempt: buildings < 15 years old, subsidized housing."
-    lead_paint_disclosure: "required if pre-1978 (federal)"
-    source_of_income_protection: true
+  maryland:
+    security_deposit_max: "2 months rent"
+    deposit_return_days: 45
+    deposit_interest: "Required (simple interest at rate set annually by state)"
+    deposit_separate_account: true
+    late_fee_cap: "5% of monthly rent"
+    grace_period_days: 0
+    notice_to_quit_nonpayment_days: "Immediate (no notice required for nonpayment)"
+    notice_to_terminate_monthly_days: "30 days (most), 60 days (Baltimore City)"
+    rent_increase_notice_days: 30
+    source_of_income_protected: true
+    rent_control: "Some jurisdictions (Montgomery County, Takoma Park)"
+    lead_paint_state_rules: "Maryland has strict lead paint law for pre-1978 properties. Registration required. Must provide lead-free or lead-safe certification."
+    eviction_timeline_estimate: "30-60 days"
+    notes: "Late fee cap at 5% is one of the lowest. Security deposit interest rate set by the Commissioner of Financial Regulation annually. Strict lead paint requirements."
 
-  PA:
-    name: Pennsylvania
-    security_deposit:
-      limit: "2 months rent (first year), 1 month rent (subsequent years)"
-      separate_account: true
-      return_deadline: "30 days"
-      itemized_statement: true
-      interest_required: "yes (after 2 years, escrow in interest-bearing account)"
-    late_fees:
-      grace_period: "no statutory requirement"
-      cap: "no statutory cap"
-    eviction:
-      pay_or_quit_notice: "10 days"
-      lease_violation_notice: "15 days (curable)"
-      timeline_estimate: "45-60 days"
-    rent_increase:
-      notice_required: "30 days (month-to-month)"
-    lead_paint_disclosure: "required if pre-1978 (federal + Philadelphia has stricter local law)"
-    source_of_income_protection: "Philadelphia only (not statewide)"
+  indiana:
+    security_deposit_max: "No statutory limit"
+    deposit_return_days: 45
+    deposit_interest: false
+    deposit_separate_account: false
+    late_fee_cap: "No statutory cap. Must be 'reasonable.'"
+    grace_period_days: 0
+    notice_to_quit_nonpayment_days: 10
+    notice_to_terminate_monthly_days: 30
+    rent_increase_notice_days: 30
+    source_of_income_protected: false
+    rent_control: false
+    lead_paint_state_rules: "Federal rules only."
+    eviction_timeline_estimate: "21-30 days"
+    notes: "Landlord-friendly. No deposit limit. Relatively fast eviction process."
 
-  TN:
-    name: Tennessee
-    security_deposit:
-      limit: "no statutory limit"
-      separate_account: "not required (but must not commingle with personal funds)"
-      return_deadline: "30 days"
-      itemized_statement: true
-    late_fees:
-      grace_period: "5 days (mandatory)"
-      cap: "10% of amount past due"
-    eviction:
-      pay_or_quit_notice: "14 days"
-      lease_violation_notice: "30 days"
-      timeline_estimate: "30-45 days"
-    rent_increase:
-      notice_required: "30 days (month-to-month)"
-    lead_paint_disclosure: "required if pre-1978 (federal)"
-    source_of_income_protection: false
+  minnesota:
+    security_deposit_max: "No statutory limit"
+    deposit_return_days: 21
+    deposit_interest: "Required (1% simple interest)"
+    deposit_separate_account: false
+    late_fee_cap: "8% of overdue rent"
+    grace_period_days: 0
+    notice_to_quit_nonpayment_days: 14
+    notice_to_terminate_monthly_days: 30
+    rent_increase_notice_days: 30
+    source_of_income_protected: true
+    rent_control: "St. Paul has rent stabilization (3% cap, effective 2022)"
+    lead_paint_state_rules: "Federal rules only. Minneapolis has additional rental licensing requirements."
+    eviction_timeline_estimate: "30-45 days"
+    notes: "Late fee cap at 8% is statutory. Interest on deposits required. St. Paul rent stabilization is unique -- 3% annual cap regardless of CPI."
 
-  TX:
-    name: Texas
-    security_deposit:
-      limit: "no statutory limit"
-      separate_account: false
-      return_deadline: "30 days"
-      itemized_statement: true
-    late_fees:
-      grace_period: "2 days (mandatory)"
-      cap: "reasonable (courts generally allow 10-12% of rent)"
-    eviction:
-      pay_or_quit_notice: "3 days"
-      lease_violation_notice: "per lease terms"
-      timeline_estimate: "21-30 days (fastest in the US)"
-    rent_increase:
-      notice_required: "30 days (month-to-month)"
-    lead_paint_disclosure: "required if pre-1978 (federal)"
-    source_of_income_protection: false
-    notes: "Very landlord-friendly. Fast eviction process. No rent control (state preemption)."
+  colorado:
+    security_deposit_max: "No statutory limit"
+    deposit_return_days: "30 days (60 days if stated in lease)"
+    deposit_interest: false
+    deposit_separate_account: false
+    late_fee_cap: "$50 or 5% of past-due rent, whichever is greater (effective 2023)"
+    grace_period_days: 7
+    notice_to_quit_nonpayment_days: 10
+    notice_to_terminate_monthly_days: 21
+    rent_increase_notice_days: 30
+    source_of_income_protected: true
+    rent_control: false
+    lead_paint_state_rules: "Federal rules only."
+    eviction_timeline_estimate: "30-45 days"
+    notes: "Significant tenant protection reforms in 2023-2024. Late fee cap is new. 7-day grace period required. Source of income now protected."
 
-  VA:
-    name: Virginia
-    security_deposit:
-      limit: "2 months rent"
-      separate_account: false
-      return_deadline: "45 days"
-      itemized_statement: true
-    late_fees:
-      grace_period: "5 days (mandatory)"
-      cap: "10% of periodic rent or 10% of remaining balance, whichever is less"
-    eviction:
-      pay_or_quit_notice: "5 days (14 days for second offense in 12 months)"
-      lease_violation_notice: "21 days (curable), 30 days (non-curable)"
-      timeline_estimate: "30-45 days"
-    rent_increase:
-      notice_required: "30 days (month-to-month)"
-    lead_paint_disclosure: "required if pre-1978 (federal)"
-    source_of_income_protection: "yes (statewide, 2020)"
+  wisconsin:
+    security_deposit_max: "No statutory limit"
+    deposit_return_days: 21
+    deposit_interest: false
+    deposit_separate_account: false
+    late_fee_cap: "No statutory cap. Must be 'reasonable.'"
+    grace_period_days: 0
+    notice_to_quit_nonpayment_days: 5
+    notice_to_terminate_monthly_days: 28
+    rent_increase_notice_days: 28
+    source_of_income_protected: false
+    rent_control: false
+    lead_paint_state_rules: "State disclosure required for pre-1978. Stricter than federal in some respects."
+    eviction_timeline_estimate: "14-30 days"
+    notes: "Landlord must provide itemized deposit accounting within 21 days. 28-day notice period is unique. ATCP 134 (WI Admin Code) governs rental practices."
 
-  WA:
-    name: Washington
-    security_deposit:
-      limit: "no statutory limit"
-      separate_account: false
-      return_deadline: "21 days"
-      itemized_statement: true
-      receipts_required: "must provide receipts or documentation for deductions"
-    late_fees:
-      grace_period: "no statutory requirement"
-      cap: "no statutory cap"
-    eviction:
-      pay_or_quit_notice: "14 days"
-      lease_violation_notice: "10 days"
-      timeline_estimate: "30-60 days"
-    rent_increase:
-      notice_required: "60 days"
-    lead_paint_disclosure: "required if pre-1978 (federal)"
-    source_of_income_protection: true
-    notes: "Just Cause eviction statewide (2021, SB 5160). Cannot terminate tenancy without cause after first year."
+  connecticut:
+    security_deposit_max: "2 months rent"
+    deposit_return_days: 30
+    deposit_interest: true
+    deposit_separate_account: true
+    late_fee_cap: "No statutory cap. Must be 'reasonable.'"
+    grace_period_days: 9
+    notice_to_quit_nonpayment_days: 3
+    notice_to_terminate_monthly_days: 30
+    rent_increase_notice_days: 30
+    source_of_income_protected: true
+    rent_control: false
+    lead_paint_state_rules: "Connecticut has comprehensive lead paint statute for pre-1978 properties."
+    eviction_timeline_estimate: "30-60 days"
+    notes: "9-day grace period is one of the longest. Interest on deposits required annually. Source of income protected since 1990 (one of the earliest states)."
 
-  WI:
-    name: Wisconsin
-    security_deposit:
-      limit: "no statutory limit"
-      separate_account: false
-      return_deadline: "21 days"
-      itemized_statement: true
-    late_fees:
-      grace_period: "no statutory requirement"
-      cap: "no statutory cap (must be reasonable)"
-    eviction:
-      pay_or_quit_notice: "5 days (14 days for month-to-month)"
-      lease_violation_notice: "5 days"
-      timeline_estimate: "30-45 days"
-    rent_increase:
-      notice_required: "28 days (month-to-month)"
-    lead_paint_disclosure: "required if pre-1978 (federal)"
-    source_of_income_protection: false
-
-# Quick-Reference Summary Table
-# For the full nuances, always read the state-specific section above.
-#
-# State | Deposit Limit | Return Deadline | Pay-or-Quit | Late Fee Cap | Source of Income
-# AL    | 1 mo          | 60 days         | 7 days      | none         | No
-# AZ    | 1.5 mo        | 14 biz days     | 5 days      | none         | No
-# CA    | 1 mo          | 21 days         | 3 days      | reasonable   | Yes
-# CO    | none          | 30 days         | 10 days     | $50/5%       | Yes
-# CT    | 2 mo          | 30 days         | 3 days      | $5/5%        | Yes
-# FL    | none          | 15/30 days      | 3 days      | none         | No
-# GA    | none          | 30 days         | demand      | none         | No
-# IL    | none/1.5 CHI  | 30/45 days      | 5 days      | CHI formula  | Yes
-# MA    | 1 mo          | 30 days         | 14 days     | none (30d gp)| Yes
-# MD    | 2 mo          | 45 days         | immediate   | 5%           | Yes
-# MI    | 1.5 mo        | 30 days         | 7 days      | none         | No
-# MN    | none          | 21 days         | 14 days     | 8%           | Yes
-# NC    | 1.5-2 mo      | 30 days         | 10 days     | $15/5%       | No
-# NJ    | 1.5 mo        | 30 days         | varies      | reasonable   | Yes
-# NY    | 1 mo          | 14 days         | 14 days     | $50/5%       | Yes
-# OH    | none          | 30 days         | 3 days      | none         | No
-# OR    | none          | 31 days         | 10 days     | reasonable   | Yes
-# PA    | 2/1 mo        | 30 days         | 10 days     | none         | Philly only
-# TN    | none          | 30 days         | 14 days     | 10%          | No
-# TX    | none          | 30 days         | 3 days      | reasonable   | No
-# VA    | 2 mo          | 45 days         | 5 days      | 10%          | Yes
-# WA    | none          | 21 days         | 14 days     | none         | Yes
-# WI    | none          | 21 days         | 5/14 days   | reasonable   | No
+  oregon:
+    security_deposit_max: "No statutory limit"
+    deposit_return_days: 31
+    deposit_interest: false
+    deposit_separate_account: false
+    late_fee_cap: "Reasonable amount. $50/month is generally accepted; above $100 may be challenged."
+    grace_period_days: 4
+    notice_to_quit_nonpayment_days: "72 hours (first occurrence), 144 hours (repeat within 12 months)"
+    notice_to_terminate_monthly_days: "30 days (first year), 90 days (after first year, with cause)"
+    rent_increase_notice_days: 90
+    source_of_income_protected: true
+    rent_control: true
+    lead_paint_state_rules: "Federal rules only."
+    eviction_timeline_estimate: "30-45 days"
+    notes: "SB 608 (2019) caps rent increases at 7% + CPI statewide (with exemptions for new construction < 15 years). 90-day rent increase notice is among the longest. Just cause eviction after first year."
