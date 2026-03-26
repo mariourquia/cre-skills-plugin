@@ -284,7 +284,7 @@ cat > "$APP_DIR/Contents/Info.plist" << PLIST
     <key>LSMinimumSystemVersion</key>
     <string>12.0</string>
     <key>NSHumanReadableCopyright</key>
-    <string>MIT License - CRE Skills Plugin ${VERSION_CLEAN}</string>
+    <string>Apache License 2.0 - CRE Skills Plugin ${VERSION_CLEAN}</string>
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
 </dict>
@@ -350,7 +350,7 @@ cat > "$STAGING_DIR/$DMG_NAME/README.txt" << README
     ║     - Installs to ~/cre-skills-plugin            ║
     ║     - Detects Claude Code -> registers plugin    ║
     ║     - Detects Claude Desktop -> copies skills    ║
-    ║     - 80 institutional-grade CRE skills          ║
+    ║     - 88 institutional-grade CRE skills          ║
     ║                                                  ║
     ║   Requirements:                                  ║
     ║     - Claude Code CLI or Claude Desktop          ║
@@ -361,7 +361,7 @@ cat > "$STAGING_DIR/$DMG_NAME/README.txt" << README
     ║                                                  ║
     ╚══════════════════════════════════════════════════╝
 
-    80 skills | 40 agents | 6 workflow chains | 16 categories
+    88 skills | 40 agents | 6 workflow chains | 9 calculators
     Deal sourcing, underwriting, capital markets, leasing,
     asset management, investor relations, and more.
 
