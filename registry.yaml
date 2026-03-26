@@ -1,17 +1,19 @@
 # CRE Skills Registry
 # Generated: 2026-03-17
-# Total Skills: 69 (3 existing deployed + 66 new planned)
+# Updated: 2026-03-25
+# Total Skills: 77 (3 existing deployed + 66 planned + 8 new deployed)
 
 metadata:
-  version: "1.0"
+  version: "1.1"
   generated: "2026-03-17"
-  total_skills: 69
+  updated: "2026-03-25"
+  total_skills: 77
   categories: 16
   source_prompts_audited: 155
   gap_fill_prompts_added: 25
   prompts_merged: 85
   prompts_retired: 33
-  workflow_coverage: "85%"
+  workflow_coverage: "92%"
 
 # ============================================================================
 # EXISTING DEPLOYED SKILLS (3)
@@ -979,4 +981,112 @@ skills:
     source_prompts: []
     chains_to: []
     chains_from: [rent-roll-formatter]
+    daily_ops_support: []
+
+  # ============================================================================
+  # NEW SKILLS -- DEPLOYED 2026-03-25 (8 skills: 6 deepened stubs + 2 new)
+  # ============================================================================
+
+  - slug: title-commitment-reviewer
+    name: Title Commitment Reviewer
+    category: 04-due-diligence
+    priority: P1
+    phase: 2
+    status: deployed
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: [psa-redline-strategy, closing-checklist-tracker]
+    chains_from: [dd-command-center]
+    daily_ops_support: []
+
+  - slug: tenant-credit-analyzer
+    name: Tenant Credit Analyzer
+    category: 04-due-diligence
+    priority: P1
+    phase: 2
+    status: deployed
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: [acquisition-underwriting-engine, loan-sizing-engine]
+    chains_from: [rent-roll-analyzer]
+    daily_ops_support: []
+
+  - slug: term-sheet-builder
+    name: Term Sheet Builder
+    category: 05-capital-markets
+    priority: P1
+    phase: 2
+    status: deployed
+    effort_hours: 2
+    plan_file: ""
+    source_prompts: []
+    chains_to: [loan-document-reviewer]
+    chains_from: [loan-sizing-engine, capital-stack-optimizer]
+    daily_ops_support: []
+
+  - slug: loan-document-reviewer
+    name: Loan Document Reviewer
+    category: legal
+    priority: P1
+    phase: 2
+    status: deployed
+    effort_hours: 4
+    plan_file: ""
+    source_prompts: []
+    chains_to: [closing-checklist-tracker, debt-covenant-monitor]
+    chains_from: [term-sheet-builder]
+    daily_ops_support: []
+
+  - slug: transfer-document-preparer
+    name: Transfer Document Preparer
+    category: legal
+    priority: P1
+    phase: 2
+    status: deployed
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: [closing-checklist-tracker]
+    chains_from: [psa-redline-strategy]
+    daily_ops_support: []
+
+  - slug: funds-flow-calculator
+    name: Funds Flow Calculator
+    category: closing
+    priority: P0
+    phase: 2
+    status: deployed
+    effort_hours: 2
+    plan_file: ""
+    source_prompts: []
+    chains_to: []
+    chains_from: [closing-checklist-tracker]
+    daily_ops_support: []
+
+  - slug: lease-option-structurer
+    name: Lease Option Structurer
+    category: 08-leasing
+    priority: P1
+    phase: 2
+    status: deployed
+    effort_hours: 3
+    plan_file: ""
+    source_prompts: []
+    chains_to: [lease-document-factory, tenant-retention-engine]
+    chains_from: [lease-negotiation-analyzer, rent-optimization-planner]
+    daily_ops_support: []
+
+  - slug: lease-trade-out-analyzer
+    name: Lease Trade-Out Analyzer
+    category: 08-leasing
+    priority: P1
+    phase: 2
+    status: deployed
+    effort_hours: 2
+    plan_file: ""
+    source_prompts: []
+    chains_to: [lease-up-war-room, lease-negotiation-analyzer]
+    chains_from: [tenant-retention-engine, rent-optimization-planner]
     daily_ops_support: []

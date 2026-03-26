@@ -1,6 +1,6 @@
 # CRE Skill Routing Index
 
-> 83 CRE skills across 16 subcategories. Use this index to find the right skill -- do NOT load all SKILL.md files.
+> 91 CRE skills across 16 subcategories. Use this index to find the right skill -- do NOT load all SKILL.md files.
 > When a CRE task comes in, match the user's request to a category below, then invoke the specific skill via `/skill-slug`.
 > Only read the full SKILL.md + references when you need the detailed process.
 
@@ -88,6 +88,14 @@
 | "marketing plan", "TI benchmarks", "commission benchmarks" | `/leasing-strategy-marketing-planner` |
 | "post-close onboarding", "PM transition", "asset handoff" | `/post-close-onboarding-transition` |
 | "tenant event", "appreciation event", "holiday party" | `/tenant-event-planner` |
+| "review title commitment", "title exceptions", "title insurance schedule B", "title defects" | `/title-commitment-reviewer` |
+| "analyze tenant credit", "tenant financials", "tenant creditworthiness", "guarantor strength" | `/tenant-credit-analyzer` |
+| "build term sheet", "lender term sheet", "loan term sheet", "quote term sheet" | `/term-sheet-builder` |
+| "review loan documents", "loan agreement review", "promissory note review", "security agreement review" | `/loan-document-reviewer` |
+| "prepare transfer documents", "deed preparation", "assignment of leases", "transfer instruments" | `/transfer-document-preparer` |
+| "calculate funds flow", "closing statement", "HUD-1", "settlement statement", "wire amounts" | `/funds-flow-calculator` |
+| "structure lease options", "purchase option", "ROFR", "ROFO", "expansion option structure" | `/lease-option-structurer` |
+| "trade out analysis", "lease trade-out", "effective rent trade-out", "roll-to-market delta" | `/lease-trade-out-analyzer` |
 
 ## Workflow Chains
 
