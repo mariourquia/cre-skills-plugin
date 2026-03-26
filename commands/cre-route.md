@@ -1,6 +1,6 @@
 ---
 name: cre-route
-description: "Find the right CRE skill for your task. Reads the routing index and recommends which skill(s) to invoke. Covers 98 CRE skills across 16 subcategories."
+description: "Find the right CRE skill for your task. Reads the routing index and recommends which skill(s) to invoke. Covers 99 CRE skills across 16 subcategories."
 ---
 
 # CRE Skill Router
