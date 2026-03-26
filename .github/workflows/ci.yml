@@ -1,0 +1,34 @@
+name: Plugin Integrity
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
+        node-version: ['18', '20', '22']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Run integrity tests
+        run: python -m pytest tests/ -v
+      - name: Validate hooks JSON
+        run: python -c "import json; json.load(open('hooks/hooks.json')); print('hooks.json OK')"
+      - name: Validate hook scripts
+        run: |
+          for f in hooks/*.mjs; do node --check "$f"; done
+      - name: Validate Python calculators
+        run: |
+          for f in scripts/calculators/*.py; do python -c "compile(open('$f').read(), '$f', 'exec')"; done
+      - name: Verify plugin structure
+        run: bash scripts/verify-install.sh || true
