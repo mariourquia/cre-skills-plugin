@@ -1,0 +1,500 @@
+# Market Terms Benchmarks
+# Reference data for fund-terms-comparator skill
+# Sources: Preqin, Hodes Weill, ILPA surveys (mid-2025 data)
+# Benchmarks segmented by strategy, fund size, and fund type
+
+---
+
+# ============================================================
+# CLOSED-END COMMINGLED FUND BENCHMARKS
+# Most common CRE fund structure
+# ============================================================
+
+closed_end:
+
+  # --------------------------------------------------------
+  # MANAGEMENT FEE (on committed capital during IP)
+  # --------------------------------------------------------
+
+  management_fee:
+    description: >
+      Management fee is the GP's base compensation. Typically charged as a
+      percentage of committed capital during the investment period, then
+      steps down to invested capital or NAV post-investment period.
+      Size adjustment: funds >$2B typically pay 25 bps less than market median.
+
+    by_strategy:
+      core:
+        during_investment_period:
+          basis: "committed_capital"
+          percentile_10: 0.60
+          percentile_25: 0.75
+          median: 1.00
+          percentile_75: 1.25
+          percentile_90: 1.50
+          unit: "percent"
+        post_investment_period:
+          basis: "invested_capital_or_nav"
+          typical_step_down: 0.25
+          median: 0.75
+          notes: "Core funds typically step down to NAV basis"
+
+      core_plus:
+        during_investment_period:
+          basis: "committed_capital"
+          percentile_10: 0.85
+          percentile_25: 1.00
+          median: 1.25
+          percentile_75: 1.50
+          percentile_90: 1.65
+          unit: "percent"
+        post_investment_period:
+          basis: "invested_capital"
+          typical_step_down: 0.25
+          median: 1.00
+
+      value_add:
+        during_investment_period:
+          basis: "committed_capital"
+          percentile_10: 1.10
+          percentile_25: 1.25
+          median: 1.50
+          percentile_75: 1.75
+          percentile_90: 2.00
+          unit: "percent"
+        post_investment_period:
+          basis: "invested_capital"
+          typical_step_down: 0.25
+          median: 1.25
+
+      opportunistic:
+        during_investment_period:
+          basis: "committed_capital"
+          percentile_10: 1.25
+          percentile_25: 1.50
+          median: 1.75
+          percentile_75: 2.00
+          percentile_90: 2.25
+          unit: "percent"
+        post_investment_period:
+          basis: "invested_capital"
+          typical_step_down: 0.25
+          median: 1.50
+
+    by_fund_size:
+      small:
+        range: "< $500M"
+        premium: 0.25
+        notes: "Small funds typically charge 25 bps above median due to fixed cost spread"
+      mid:
+        range: "$500M - $2B"
+        premium: 0.00
+        notes: "Mid-size funds are at market median"
+      large:
+        range: "> $2B"
+        discount: 0.25
+        notes: "Large funds face fee pressure from institutional LPs; typically 25 bps below median"
+
+  # --------------------------------------------------------
+  # CARRIED INTEREST / PROMOTE
+  # --------------------------------------------------------
+
+  carried_interest:
+    description: >
+      Carried interest (promote) is the GP's performance-based compensation.
+      Charged as a percentage of profits above a preferred return hurdle.
+
+    by_strategy:
+      core:
+        carry_rate:
+          percentile_25: 10.0
+          median: 12.5
+          percentile_75: 15.0
+          unit: "percent of profits above hurdle"
+        hurdle_rate:
+          percentile_25: 6.0
+          median: 7.0
+          percentile_75: 8.0
+          unit: "percent IRR"
+        catch_up:
+          standard: "50/50"
+          gp_favorable: "100% GP"
+          prevalence_100pct: 0.35
+          prevalence_50_50: 0.55
+          prevalence_none: 0.10
+
+      core_plus:
+        carry_rate:
+          percentile_25: 12.5
+          median: 15.0
+          percentile_75: 17.5
+        hurdle_rate:
+          percentile_25: 7.0
+          median: 8.0
+          percentile_75: 8.0
+        catch_up:
+          standard: "50/50"
+          prevalence_100pct: 0.40
+          prevalence_50_50: 0.50
+
+      value_add:
+        carry_rate:
+          percentile_25: 17.5
+          median: 20.0
+          percentile_75: 20.0
+        hurdle_rate:
+          percentile_25: 7.0
+          median: 8.0
+          percentile_75: 9.0
+        catch_up:
+          standard: "50/50 or 100% GP"
+          prevalence_100pct: 0.45
+          prevalence_50_50: 0.45
+
+      opportunistic:
+        carry_rate:
+          percentile_25: 20.0
+          median: 20.0
+          percentile_75: 25.0
+        hurdle_rate:
+          percentile_25: 8.0
+          median: 8.0
+          percentile_75: 10.0
+        catch_up:
+          standard: "100% GP"
+          prevalence_100pct: 0.55
+          prevalence_50_50: 0.35
+
+    waterfall_type:
+      european:
+        description: "Whole-fund waterfall. LP-favorable."
+        prevalence: 0.55
+        notes: "Majority of institutional-quality funds use European waterfall"
+      american:
+        description: "Deal-by-deal waterfall. GP-favorable."
+        prevalence: 0.40
+        notes: "More common in opportunistic and smaller funds"
+      hybrid:
+        description: "European for clawback, American for distributions."
+        prevalence: 0.05
+
+  # --------------------------------------------------------
+  # GP COMMITMENT
+  # --------------------------------------------------------
+
+  gp_commitment:
+    description: >
+      GP's personal capital commitment to the fund. Strongest alignment mechanism.
+      Cash commitment is more meaningful than fee waiver.
+
+    by_strategy:
+      core:
+        percentile_25: 1.0
+        median: 2.0
+        percentile_75: 3.0
+        unit: "percent of fund size"
+      core_plus:
+        percentile_25: 1.5
+        median: 2.5
+        percentile_75: 3.5
+      value_add:
+        percentile_25: 2.0
+        median: 3.0
+        percentile_75: 5.0
+      opportunistic:
+        percentile_25: 2.0
+        median: 3.0
+        percentile_75: 5.0
+
+    form:
+      cash_only:
+        prevalence: 0.45
+        description: "GP commits cash out of pocket. Strongest alignment."
+      mixed:
+        prevalence: 0.35
+        description: "Combination of cash and fee waiver."
+        typical_mix: "60% cash, 40% fee waiver"
+      fee_waiver_only:
+        prevalence: 0.20
+        description: "GP commits by waiving management fee. Weakest alignment."
+        red_flag: true
+        notes: "GP does not actually invest personal capital. Reduces alignment."
+
+  # --------------------------------------------------------
+  # CLAWBACK
+  # --------------------------------------------------------
+
+  clawback:
+    description: >
+      Mechanism to return excess carried interest to LPs if later fund performance
+      does not justify early carry distributions.
+
+    types:
+      fund_level:
+        description: "Clawback tested against entire fund performance. LP-favorable."
+        prevalence: 0.60
+      deal_level:
+        description: "Clawback tested deal-by-deal. GP-favorable."
+        prevalence: 0.30
+      hybrid:
+        description: "Fund-level clawback with deal-level interim testing."
+        prevalence: 0.10
+
+    guaranty:
+      personal_guaranty:
+        description: "GP principals personally guarantee clawback obligations."
+        prevalence: 0.50
+        lp_favorable: true
+      no_guaranty:
+        description: "Clawback is obligation of GP entity only."
+        prevalence: 0.35
+        red_flag_with_american_waterfall: true
+      limited_guaranty:
+        description: "Guaranty capped at a percentage of carry received."
+        prevalence: 0.15
+
+    escrow:
+      carry_escrow:
+        description: "Portion of carry held in escrow pending clawback resolution."
+        typical_escrow: 0.30
+        prevalence: 0.40
+        notes: "30% of carry held in escrow is market standard for American waterfall"
+
+  # --------------------------------------------------------
+  # KEY PERSON CLAUSE
+  # --------------------------------------------------------
+
+  key_person:
+    description: >
+      Defines which individuals are critical to the fund and what happens
+      if they depart. LP protection mechanism.
+
+    trigger_events:
+      departure: "Key person leaves the firm"
+      incapacity: "Key person unable to devote substantially all professional time"
+      death: "Key person dies"
+      conviction: "Key person convicted of a felony"
+
+    consequences:
+      investment_period_suspension:
+        description: "No new investments until resolved."
+        prevalence: 0.70
+        lp_favorable: true
+      commitment_reduction:
+        description: "LPs can reduce unfunded commitment."
+        prevalence: 0.20
+      fund_termination:
+        description: "LPs can vote to terminate the fund."
+        prevalence: 0.10
+        most_lp_favorable: true
+
+    cure_period:
+      days_30:
+        prevalence: 0.15
+        lp_favorable: true
+      days_60:
+        prevalence: 0.35
+        market_standard: true
+      days_90:
+        prevalence: 0.35
+      days_120_plus:
+        prevalence: 0.15
+        gp_favorable: true
+
+  # --------------------------------------------------------
+  # FUND LIFE AND EXTENSIONS
+  # --------------------------------------------------------
+
+  fund_life:
+    description: "Base fund term and extension provisions."
+
+    base_term:
+      core:
+        typical: 10
+        range: "8-12"
+        unit: "years"
+      value_add:
+        typical: 8
+        range: "7-10"
+      opportunistic:
+        typical: 8
+        range: "7-10"
+
+    extensions:
+      number_of_extensions:
+        typical: 2
+        range: "1-3"
+      extension_length:
+        typical: 1
+        range: "1-2"
+        unit: "years per extension"
+      lp_consent:
+        first_extension_gp_discretion: 0.50
+        first_extension_lp_vote: 0.35
+        first_extension_lpac_consent: 0.15
+        second_extension_lp_vote: 0.80
+        notes: "Market trend toward requiring LP consent for all extensions"
+
+  # --------------------------------------------------------
+  # FEE OFFSETS
+  # --------------------------------------------------------
+
+  fee_offsets:
+    description: >
+      Percentage of transaction and other fees that offset (reduce)
+      the management fee. 100% offset is LP-favorable.
+
+    offset_percentage:
+      percentile_25: 80
+      median: 100
+      percentile_75: 100
+      unit: "percent"
+      notes: "100% offset is market standard for institutional funds"
+
+    fees_subject_to_offset:
+      - "Acquisition fees"
+      - "Disposition fees"
+      - "Construction management fees"
+      - "Financing fees"
+      - "Monitoring / consulting fees"
+      - "Break-up fees (when fund receives them)"
+
+  # --------------------------------------------------------
+  # ORGANIZATIONAL EXPENSES
+  # --------------------------------------------------------
+
+  organizational_expenses:
+    description: "Fund formation costs passed to LPs."
+
+    cap:
+      percentile_25: 0.50
+      median: 1.00
+      percentile_75: 1.50
+      unit: "percent of committed capital"
+      no_cap_prevalence: 0.10
+      notes: "Uncapped organizational expenses is a red flag"
+
+    includes:
+      - "Legal fees (fund formation)"
+      - "Regulatory filing fees"
+      - "Accounting/audit setup"
+      - "Printing and distribution of offering documents"
+
+    excludes_from_cap:
+      - "Placement agent fees (should be GP cost)"
+      - "GP travel and marketing"
+      - "GP overhead"
+
+# ============================================================
+# OPEN-END COMMINGLED FUND BENCHMARKS
+# ============================================================
+
+open_end:
+  description: >
+    Open-end funds have perpetual life with subscription and redemption features.
+    Common for core strategies. Different fee structure than closed-end.
+
+  management_fee:
+    core:
+      percentile_25: 0.65
+      median: 0.85
+      percentile_75: 1.10
+      basis: "NAV (quarterly)"
+      unit: "percent"
+
+    core_plus:
+      percentile_25: 0.80
+      median: 1.00
+      percentile_75: 1.25
+      basis: "NAV (quarterly)"
+
+  performance_fee:
+    description: "Performance fee based on returns above a benchmark, not IRR-based carry"
+    structure: "Typically 10-20% of returns above NCREIF ODCE or similar benchmark"
+    percentile_25: 10.0
+    median: 15.0
+    percentile_75: 20.0
+    unit: "percent of excess return"
+    high_water_mark: true
+    crystallization: "typically annual"
+
+  redemption:
+    notice_period:
+      percentile_25: 45
+      median: 60
+      percentile_75: 90
+      unit: "calendar days"
+    gate:
+      quarterly_gate: 5.0
+      annual_gate: 20.0
+      unit: "percent of NAV"
+      notes: "Redemption gates limit LP withdrawals per period"
+    queue:
+      description: "Redemption requests queued FIFO when gate is hit"
+      typical_queue_duration: "1-4 quarters during stress"
+
+# ============================================================
+# CO-INVESTMENT VEHICLE BENCHMARKS
+# ============================================================
+
+co_invest:
+  description: >
+    Deal-specific co-investment alongside a main fund.
+    Typically offered to large LPs as an additional benefit.
+
+  management_fee:
+    no_fee:
+      prevalence: 0.45
+      description: "No management fee on co-invest capital"
+    reduced_fee:
+      prevalence: 0.40
+      typical_rate: 0.50
+      unit: "percent"
+    full_fee:
+      prevalence: 0.15
+      notes: "Full main fund fee on co-invest is GP-unfavorable; resist"
+
+  carry:
+    no_carry:
+      prevalence: 0.30
+      description: "No carry on co-invest (most LP-favorable)"
+    reduced_carry:
+      prevalence: 0.50
+      typical_rate: 10.0
+      notes: "50% of main fund carry rate is typical"
+    full_carry:
+      prevalence: 0.20
+      notes: "Full main fund carry on co-invest is GP-favorable"
+
+# ============================================================
+# SEPARATE ACCOUNT BENCHMARKS
+# ============================================================
+
+separate_account:
+  description: >
+    Single-LP mandate with customized investment guidelines.
+    LP has maximum control and negotiating power.
+
+  management_fee:
+    percentile_25: 0.50
+    median: 0.75
+    percentile_75: 1.00
+    unit: "percent"
+    notes: "Separate accounts command lowest management fees"
+
+  incentive_fee:
+    percentile_25: 10.0
+    median: 12.5
+    percentile_75: 15.0
+    unit: "percent above hurdle"
+
+  hurdle:
+    typical: 7.0
+    range: "6.0-8.0"
+    unit: "percent IRR"
+
+  termination:
+    lp_termination_right: true
+    typical_notice: 180
+    unit: "calendar days"
+    notes: "LP typically has right to terminate with 6-12 month notice"

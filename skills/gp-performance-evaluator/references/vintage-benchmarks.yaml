@@ -1,0 +1,380 @@
+# Vintage Year Benchmarks for GP Performance Evaluation
+# Reference data for gp-performance-evaluator skill
+# Sources: Cambridge Associates, Preqin, NCREIF (mid-2025 data)
+# All returns are NET of fees unless otherwise specified
+
+---
+
+# ============================================================
+# CORE REAL ESTATE BENCHMARKS
+# Primary: NCREIF ODCE
+# Secondary: Cambridge Associates Core RE
+# ============================================================
+
+core:
+  description: >
+    Core CRE funds target 7-10% net IRR with income-dominant returns.
+    NCREIF ODCE is the primary benchmark for open-end core funds.
+    Cambridge Associates provides closed-end vintage benchmarks.
+
+  ncreif_odce_annualized:
+    description: "NCREIF ODCE annualized total returns (net of fees)"
+    note: "Time-weighted returns; not directly comparable to closed-end fund IRR"
+    trailing:
+      1_year: 7.8
+      3_year: 6.5
+      5_year: 7.2
+      10_year: 8.1
+      20_year: 7.4
+    unit: "percent"
+
+  vintage_benchmarks:
+    description: "Net IRR by vintage year -- quartile boundaries"
+
+    "2015":
+      top_quartile: 10.5
+      median: 8.2
+      bottom_quartile: 6.1
+      dpi_median: 1.05
+      tvpi_median: 1.45
+      sample_size: 28
+
+    "2016":
+      top_quartile: 9.8
+      median: 7.8
+      bottom_quartile: 5.5
+      dpi_median: 0.95
+      tvpi_median: 1.40
+      sample_size: 25
+
+    "2017":
+      top_quartile: 10.2
+      median: 8.0
+      bottom_quartile: 5.8
+      dpi_median: 0.85
+      tvpi_median: 1.38
+      sample_size: 30
+
+    "2018":
+      top_quartile: 9.5
+      median: 7.5
+      bottom_quartile: 5.0
+      dpi_median: 0.70
+      tvpi_median: 1.35
+      sample_size: 32
+
+    "2019":
+      top_quartile: 8.5
+      median: 6.2
+      bottom_quartile: 3.5
+      dpi_median: 0.50
+      tvpi_median: 1.25
+      sample_size: 27
+      notes: "COVID impact on 2019 vintage -- initial marks depressed, recovery underway"
+
+    "2020":
+      top_quartile: 11.0
+      median: 8.5
+      bottom_quartile: 5.0
+      dpi_median: 0.35
+      tvpi_median: 1.30
+      sample_size: 22
+      notes: "Post-COVID entry point beneficial for disciplined buyers"
+
+    "2021":
+      top_quartile: 9.0
+      median: 6.5
+      bottom_quartile: 3.0
+      dpi_median: 0.15
+      tvpi_median: 1.15
+      sample_size: 35
+      notes: "Rate-sensitive vintage. Cap rate expansion created mark-to-market pressure."
+
+    "2022":
+      top_quartile: 7.5
+      median: 4.5
+      bottom_quartile: 1.0
+      dpi_median: 0.05
+      tvpi_median: 1.05
+      sample_size: 28
+      notes: "Rising rate environment. Too early for meaningful return comparison. Use deployment quality as proxy."
+
+    "2023":
+      notes: "J-curve phase. Insufficient data for reliable vintage benchmarking. Assess deployment pace and initial deal quality."
+
+    "2024":
+      notes: "Fundraising and deployment phase. No meaningful return data yet."
+
+# ============================================================
+# VALUE-ADD REAL ESTATE BENCHMARKS
+# Primary: Cambridge Associates Value Added RE
+# ============================================================
+
+value_add:
+  description: >
+    Value-add CRE funds target 12-16% net IRR with appreciation-dominant returns.
+    Higher risk than core with active management, renovation, lease-up strategies.
+    Cambridge Associates Value Added Real Estate is the primary benchmark.
+
+  vintage_benchmarks:
+    description: "Net IRR by vintage year -- quartile boundaries"
+
+    "2015":
+      top_quartile: 18.5
+      median: 14.2
+      bottom_quartile: 9.5
+      dpi_median: 1.30
+      tvpi_median: 1.75
+      sample_size: 45
+
+    "2016":
+      top_quartile: 17.0
+      median: 13.5
+      bottom_quartile: 8.8
+      dpi_median: 1.20
+      tvpi_median: 1.68
+      sample_size: 42
+
+    "2017":
+      top_quartile: 16.5
+      median: 13.0
+      bottom_quartile: 8.5
+      dpi_median: 1.10
+      tvpi_median: 1.62
+      sample_size: 48
+
+    "2018":
+      top_quartile: 15.5
+      median: 12.0
+      bottom_quartile: 7.5
+      dpi_median: 0.90
+      tvpi_median: 1.55
+      sample_size: 52
+
+    "2019":
+      top_quartile: 14.0
+      median: 10.5
+      bottom_quartile: 5.5
+      dpi_median: 0.60
+      tvpi_median: 1.40
+      sample_size: 40
+      notes: "COVID-impacted vintage. Renovation timelines extended 6-12 months."
+
+    "2020":
+      top_quartile: 17.5
+      median: 13.0
+      bottom_quartile: 7.0
+      dpi_median: 0.40
+      tvpi_median: 1.50
+      sample_size: 38
+      notes: "Strong entry point. Distressed opportunities available."
+
+    "2021":
+      top_quartile: 14.0
+      median: 10.0
+      bottom_quartile: 4.0
+      dpi_median: 0.20
+      tvpi_median: 1.25
+      sample_size: 55
+      notes: "Late-cycle pricing. Rate shock in 2022-2023 compressed unrealized marks."
+
+    "2022":
+      top_quartile: 10.0
+      median: 5.5
+      bottom_quartile: -1.0
+      dpi_median: 0.05
+      tvpi_median: 1.05
+      sample_size: 35
+      notes: "Challenging environment. Many funds in J-curve with negative marks. Too early for reliable assessment."
+
+    "2023":
+      notes: "Early deployment phase. Assess deal quality and deployment pace."
+
+# ============================================================
+# OPPORTUNISTIC REAL ESTATE BENCHMARKS
+# Primary: Cambridge Associates Opportunistic RE
+# ============================================================
+
+opportunistic:
+  description: >
+    Opportunistic CRE funds target 16%+ net IRR with development, major repositioning,
+    distressed acquisition, and higher leverage strategies. Highest risk/return profile.
+
+  vintage_benchmarks:
+    description: "Net IRR by vintage year -- quartile boundaries"
+
+    "2015":
+      top_quartile: 22.0
+      median: 16.5
+      bottom_quartile: 10.0
+      dpi_median: 1.40
+      tvpi_median: 2.00
+      sample_size: 30
+
+    "2016":
+      top_quartile: 20.5
+      median: 15.5
+      bottom_quartile: 9.0
+      dpi_median: 1.25
+      tvpi_median: 1.85
+      sample_size: 28
+
+    "2017":
+      top_quartile: 19.0
+      median: 14.5
+      bottom_quartile: 8.0
+      dpi_median: 1.10
+      tvpi_median: 1.75
+      sample_size: 32
+
+    "2018":
+      top_quartile: 18.0
+      median: 13.0
+      bottom_quartile: 6.5
+      dpi_median: 0.85
+      tvpi_median: 1.60
+      sample_size: 35
+
+    "2019":
+      top_quartile: 16.0
+      median: 10.0
+      bottom_quartile: 2.0
+      dpi_median: 0.45
+      tvpi_median: 1.35
+      sample_size: 25
+      notes: "COVID impact severe on development and hospitality-heavy funds."
+
+    "2020":
+      top_quartile: 22.0
+      median: 15.0
+      bottom_quartile: 6.0
+      dpi_median: 0.30
+      tvpi_median: 1.55
+      sample_size: 22
+      notes: "Distressed vintage. Wide dispersion between winners and losers."
+
+    "2021":
+      top_quartile: 15.0
+      median: 8.0
+      bottom_quartile: 0.0
+      dpi_median: 0.10
+      tvpi_median: 1.15
+      sample_size: 30
+      notes: "Peak pricing vintage. Many funds underwater on mark-to-market basis."
+
+    "2022":
+      top_quartile: 8.0
+      median: 2.0
+      bottom_quartile: -5.0
+      dpi_median: 0.02
+      tvpi_median: 0.95
+      sample_size: 18
+      notes: "Very early. Negative marks common. Do not draw conclusions from current vintage data."
+
+# ============================================================
+# FEE BENCHMARKS BY STRATEGY AND SIZE
+# ============================================================
+
+fee_benchmarks:
+  description: >
+    Market fee benchmarks for gross-to-net spread analysis.
+    Sources: Preqin, Hodes Weill, ILPA fee studies (2024-2025).
+
+  gross_to_net_spread:
+    description: "Difference between gross IRR and net IRR in basis points"
+
+    core:
+      percentile_25: 80
+      median: 130
+      percentile_75: 180
+      percentile_90: 230
+      unit: "bps"
+
+    core_plus:
+      percentile_25: 120
+      median: 175
+      percentile_75: 240
+      percentile_90: 300
+      unit: "bps"
+
+    value_add:
+      percentile_25: 180
+      median: 260
+      percentile_75: 350
+      percentile_90: 430
+      unit: "bps"
+
+    opportunistic:
+      percentile_25: 250
+      median: 370
+      percentile_75: 470
+      percentile_90: 580
+      unit: "bps"
+
+  total_fee_load:
+    description: "Total annual fee load as bps of committed capital per year"
+
+    core:
+      percentile_25: 75
+      median: 110
+      percentile_75: 150
+      unit: "bps/year"
+
+    value_add:
+      percentile_25: 150
+      median: 215
+      percentile_75: 290
+      unit: "bps/year"
+
+    opportunistic:
+      percentile_25: 200
+      median: 300
+      percentile_75: 400
+      unit: "bps/year"
+
+# ============================================================
+# DPI PACING BENCHMARKS
+# Expected DPI by fund age (closed-end)
+# ============================================================
+
+dpi_pacing:
+  description: >
+    Expected DPI by fund age for closed-end funds. Funds significantly
+    below these pacing benchmarks may have liquidity or exit execution issues.
+
+  value_add:
+    year_1: { median: 0.00, note: "Deployment phase" }
+    year_2: { median: 0.02, note: "Early deployment" }
+    year_3: { median: 0.08, note: "First exits possible" }
+    year_4: { median: 0.20, note: "Harvest beginning" }
+    year_5: { median: 0.35, note: "Active harvest" }
+    year_6: { median: 0.55, note: "Primary harvest" }
+    year_7: { median: 0.75, note: "Winding down" }
+    year_8: { median: 0.90, note: "Near full realization" }
+    year_9: { median: 1.00, note: "Target full return of capital" }
+    year_10: { median: 1.10, note: "Tail distributions" }
+
+  opportunistic:
+    year_1: { median: 0.00 }
+    year_2: { median: 0.00 }
+    year_3: { median: 0.05 }
+    year_4: { median: 0.15 }
+    year_5: { median: 0.30 }
+    year_6: { median: 0.50 }
+    year_7: { median: 0.70 }
+    year_8: { median: 0.85 }
+    year_9: { median: 0.95 }
+    year_10: { median: 1.10 }
+
+  core:
+    note: "Core closed-end funds distribute earlier due to income orientation"
+    year_1: { median: 0.05 }
+    year_2: { median: 0.12 }
+    year_3: { median: 0.22 }
+    year_4: { median: 0.35 }
+    year_5: { median: 0.50 }
+    year_6: { median: 0.65 }
+    year_7: { median: 0.80 }
+    year_8: { median: 0.92 }
+    year_9: { median: 1.00 }
+    year_10: { median: 1.08 }

@@ -128,7 +128,7 @@ while IFS= read -r -d '' f; do
     fail_check "Empty reference file: ${f#"$REPO_ROOT/"}"
     REF_EMPTY=$((REF_EMPTY + 1))
   fi
-done < <(find "$REPO_ROOT/skills" -path "*/references/*.md" -print0)
+done < <(find "$REPO_ROOT/skills" -path "*/references/*" -type f -print0)
 
 if [ "$REF_EMPTY" -eq 0 ]; then
   pass "$REF_TOTAL reference files all non-empty"

@@ -46,7 +46,7 @@ class TestPluginStructure(unittest.TestCase):
     def test_skill_count_matches_plugin_json(self):
         """Verify skill count in plugin.json description matches actual"""
         skill_count = len(glob.glob(os.path.join(PLUGIN_ROOT, 'skills/*/SKILL.md')))
-        self.assertGreaterEqual(skill_count, 88, f'Expected >= 88 skills, found {skill_count}')
+        self.assertGreaterEqual(skill_count, 91, f'Expected >= 91 skills, found {skill_count}')
 
 if __name__ == '__main__':
     unittest.main()
