@@ -1,0 +1,496 @@
+# State-Specific Title Practices
+# Reference for SKILL.md Workflow 3 (Schedule B-II) and the state branching logic.
+# Data reflects mid-2025 market norms. Transfer tax rates and recording fees change;
+# confirm current rates with local counsel or title officer before closing.
+# Attorney state designation reflects current bar rules; consult local counsel for
+# any transaction where the attorney vs. title company distinction affects process.
+
+meta:
+  version: "1.0"
+  last_reviewed: "2025-07"
+  source_notes: >
+    Transfer tax rates from each state's department of revenue website.
+    Recording fees are county-level; amounts shown are typical ranges.
+    Attorney state list based on state bar unauthorized practice of law opinions.
+
+---
+
+attorney_states:
+  description: >
+    In these states, only a licensed attorney may conduct a title examination and render
+    a title opinion. Title insurance is issued based on the attorney's opinion, not a
+    title company search. Closings are typically handled by attorneys, not escrow officers.
+  states:
+    - AL
+    - CT
+    - DE
+    - GA
+    - MA
+    - ME
+    - NH
+    - NJ  # NJ is attorney state for residential; commercial practice varies
+    - NY
+    - SC
+    - VT
+    - WV
+  notes:
+    NY: >
+      New York City uses ACRIS (Automated City Register Information System) for recording.
+      Deed transfer tax (RPTT) and state transfer tax (TP-584) are paid at recording.
+      Co-ops are not real property; no title insurance issued. Proprietary lease review only.
+      421-a abatements are common B-II exceptions in NYC multifamily; note expiration date.
+    MA: >
+      Massachusetts uses the "Torrens" system in some counties (rare); standard recording in others.
+      Lenders commonly require a "mortgage title insurance policy" (Form 1 ALTA).
+    SC: >
+      South Carolina requires an attorney to close all real estate transactions.
+      Transfer deed stamps: $1.85 per $500 of consideration (one of the higher rates).
+    GA: >
+      Georgia is an attorney-state but title companies are common in commercial practice.
+      Transfer tax: $1.00 per $1,000 of consideration; paid by buyer.
+
+title_company_states:
+  description: >
+    In these states, title companies conduct the title search, issue the commitment, and
+    handle closing via licensed escrow officers. Attorneys are not required for closing
+    (though buyers/sellers may retain counsel for due diligence and negotiation).
+  states:
+    - AK
+    - AZ
+    - CA
+    - CO
+    - FL
+    - HI
+    - ID
+    - IL
+    - IN
+    - IA
+    - KS
+    - KY
+    - LA  # Louisiana uses civil law system; unique title practices
+    - MD
+    - MI
+    - MN
+    - MO
+    - MT
+    - NE
+    - NV
+    - NM
+    - ND
+    - OH
+    - OK
+    - OR
+    - PA
+    - SD
+    - TN
+    - TX
+    - UT
+    - VA
+    - WA
+    - WI
+    - WY
+
+---
+
+states:
+  AL:
+    type: attorney
+    policy_form: ALTA
+    transfer_tax_rate_per_1000: 1.00  # $1.00 per $1,000; paid by seller
+    recording_fee_range: "15-25 per page"
+    notes: >
+      Attorney opinion required. Transfer tax: $1.00 per $1,000. Mortgage tax: $1.50 per $1,000.
+
+  AK:
+    type: title_company
+    policy_form: ALTA
+    transfer_tax_rate_per_1000: 0  # No state transfer tax
+    recording_fee_range: "20-30 per page"
+    notes: >
+      No state transfer tax. Some municipalities (e.g., Sitka) have local transfer taxes.
+
+  AZ:
+    type: title_company
+    policy_form: ALTA
+    transfer_tax_rate_per_1000: 0  # No transfer tax
+    recording_fee_range: "15-30 per page"
+    notes: >
+      Arizona prohibits real property transfer taxes by constitutional amendment.
+      Deed of trust state (not mortgage); trustee's sale non-judicial foreclosure.
+      Community property state; confirm spousal consent for married sellers.
+
+  CA:
+    type: title_company
+    policy_form: CLTA  # California Land Title Association form; broader standard exceptions
+    transfer_tax_rate_per_1000: 1.10  # Base; Documentary Transfer Tax per $1,000 of consideration
+    county_transfer_tax_notes: >
+      Many CA counties and cities impose additional transfer taxes. Los Angeles: $4.50 per $1,000.
+      San Francisco: tiered up to $30.00 per $1,000 for properties over $25M (Measure ULA).
+      Santa Monica, Culver City, Oakland: separate city transfer taxes; confirm at commitment.
+    recording_fee_range: "15-25 per page"
+    notes: >
+      CLTA policy form is standard; ALTA available and common for institutional transactions.
+      Preliminary report (not commitment) is the California title document.
+      Proposition 13/19: transfer triggers reassessment; inform buyer; add to closing disclosure.
+      Mello-Roos / CFD assessments: always in B-II; obtain current balance from county.
+      Deed of trust state; non-judicial trustee's sale.
+      Community property state.
+
+  CO:
+    type: title_company
+    policy_form: ALTA
+    transfer_tax_rate_per_1000: 0  # No state transfer tax
+    recording_fee_range: "13-20 per page"
+    notes: >
+      No state transfer tax. Some counties have documentary fee ($0.01 per $100).
+      Deed of trust state; non-judicial public trustee's sale.
+
+  CT:
+    type: attorney
+    policy_form: ALTA
+    transfer_tax_rate_per_1000: 7.50  # $7.50 per $1,000 (one of highest in US)
+    additional_tax_notes: >
+      Municipal conveyance tax: $2.50 per $1,000. Total effective rate: $10.00 per $1,000.
+      For residential properties over $2.5M: surcharge applies. Commercial: confirm with counsel.
+    recording_fee_range: "60-80 per document"
+    notes: >
+      Attorney required for title examination and closing. High transfer tax state.
+      Mortgage state; judicial foreclosure required.
+
+  DE:
+    type: attorney
+    policy_form: ALTA
+    transfer_tax_rate_per_1000: 2.00  # State realty transfer tax: 2.0%; split between buyer and seller (1% each typical)
+    additional_tax_notes: >
+      County and municipal surtaxes apply. New Castle County: additional 1%. Wilmington: city tax.
+      Total effective rate can reach 4% in some jurisdictions.
+    recording_fee_range: "20-40 per document"
+    notes: >
+      Attorney state but title companies are widely used for commercial transactions.
+      Favorable for entity formation (Delaware LLC, LP); no impact on title review.
+      Mortgage state; judicial foreclosure.
+
+  FL:
+    type: title_company
+    policy_form: ALTA
+    transfer_tax_rate_per_1000: 7.00  # Documentary stamp tax on deed: $0.70 per $100 = $7.00 per $1,000
+    mortgage_tax_notes: >
+      Intangible tax on new mortgages: $0.002 per dollar of note ($2.00 per $1,000 loan).
+      Miami-Dade has a surtax on deeds: $0.45 per $100 above $100,000 consideration.
+    recording_fee_range: "10-15 per page"
+    notes: >
+      HOA super-priority: 12 months of assessments prime the first mortgage in FL (Section 720.3085).
+      HOA estoppel required at closing. Doc stamps and intangible tax due at closing.
+      Sinkhole-prone counties: Hillsborough, Hernando, Pasco, Pinellas, Sumter, Marion, Citrus.
+      Deed of trust state but FL uses mortgage form; judicial foreclosure (long timeline: 2+ years).
+      No income tax; no estate tax below federal exemption.
+
+  GA:
+    type: attorney
+    policy_form: ALTA
+    transfer_tax_rate_per_1000: 1.00  # $1.00 per $1,000 of consideration
+    recording_fee_range: "25-50 per page"
+    notes: >
+      Attorney state. Transfer tax paid by buyer.
+      Deed of trust state (security deed); non-judicial foreclosure with notice (one of the fastest).
+      Community property: no.
+
+  ID:
+    type: title_company
+    policy_form: ALTA
+    transfer_tax_rate_per_1000: 0  # No transfer tax
+    recording_fee_range: "10-20 per page"
+    notes: >
+      No state transfer tax. Deed of trust state; non-judicial foreclosure.
+      Community property state.
+
+  IL:
+    type: title_company
+    policy_form: ALTA
+    transfer_tax_rate_per_1000: 1.50  # State real estate transfer tax: $0.50 per $500 = $1.00 per $1,000 (buyer pays $0.50, seller pays $0.50)
+    additional_tax_notes: >
+      Chicago transfer tax: $10.50 per $1,000 ($3.75 buyer + $6.75 seller as of 2024).
+      Cook County: additional $0.25 per $500.
+    recording_fee_range: "20-50 per page"
+    notes: >
+      Mortgage state; judicial foreclosure. Chicago commercial real estate is complex tax environment.
+
+  MA:
+    type: attorney
+    policy_form: ALTA
+    transfer_tax_rate_per_1000: 4.56  # Excise tax: $4.56 per $1,000 (paid by seller)
+    recording_fee_range: "75-125 per document"
+    notes: >
+      Attorney state; attorney conducts title examination. One of the higher transfer tax states.
+      Mortgage state; judicial foreclosure.
+
+  MD:
+    type: title_company
+    policy_form: ALTA
+    transfer_tax_rate_per_1000: 5.00  # State transfer tax: 0.5%; county taxes vary significantly
+    additional_tax_notes: >
+      County transfer/recordation taxes vary widely: Montgomery County total ~2.5%, Baltimore City ~4%.
+      Buyer and seller split varies by county. Confirm with title officer.
+    recording_fee_range: "20-60 per page"
+    notes: >
+      Both mortgage and deed of trust instruments used. Judicial foreclosure.
+
+  NJ:
+    type: title_company  # NJ is effectively a title company state for commercial; attorney for residential
+    policy_form: ALTA
+    transfer_tax_rate_per_1000: 0  # Seller pays "realty transfer fee": tiered, ~$2-$5 per $1,000 for commercial
+    additional_tax_notes: >
+      Realty Transfer Fee (RTF): tiered by consideration. Over $1M: $6.05 per $1,000 (buyer pays $3.35/seller $2.70 illustrative).
+      Mansion Tax: 1% on residential >$1M; not applicable to commercial.
+    recording_fee_range: "15-30 per page"
+    notes: >
+      Attorneys widely used in NJ even for commercial; not strictly required.
+      Mortgage state; judicial foreclosure (lengthy; NJ is one of the slowest).
+      Confirm attorney vs. title company closing convention with local practice.
+
+  NV:
+    type: title_company
+    policy_form: ALTA
+    transfer_tax_rate_per_1000: 1.95  # Clark County: $1.95 per $500 = $3.90 per $1,000 (other counties vary)
+    recording_fee_range: "20-30 per page"
+    notes: >
+      HOA super-priority: NV HOA has a super-priority lien for 9 months of assessments.
+      HOA estoppel required. Deed of trust state; non-judicial foreclosure.
+      No income tax.
+
+  NY:
+    type: attorney
+    policy_form: ALTA
+    transfer_tax_rate_per_1000: 4.00  # NYS: $2.00/$500 = $4.00 per $1,000 (seller pays TP-584)
+    additional_tax_notes: >
+      NYC Real Property Transfer Tax (RPTT):
+        Residential (1-3 family): 1% if <=$500K; 1.425% if >$500K
+        All other (commercial, multifamily 4+ units): 1.425% if <=$500K; 2.625% if >$500K
+      NYC Mansion Tax (buyer): 1% on residential >$1M (escalating to 3.9% for $25M+)
+      NYC mortgage recording tax (new loans): 1.8% on loans < $500K; 1.925% on loans >= $500K
+      (buyer pays; significant cost on new acquisition financing in NYC)
+    recording_fee_range: "100-200 per document (NYC ACRIS) | 15-30 per page (upstate counties)"
+    notes: >
+      NYC uses ACRIS for recording; upstate counties use county clerk.
+      Attorney required for title examination. "Title closer" attends closing on behalf of title company.
+      421-a abatement exceptions: note expiration dates carefully; abatement end triggers reassessment.
+      Co-ops: shares are personal property; no title insurance. Proprietary lease review + board approval.
+      Condo sponsor units: review offering plan for right of first refusal or right to recapture.
+      Mortgage state; judicial foreclosure (CPLR Article 13; NY foreclosure can take 3-5+ years).
+      New York City is the most expensive transfer tax environment in the US for commercial transactions.
+
+  NC:
+    type: attorney  # NC attorneys required for title opinion; title companies process closings
+    policy_form: ALTA
+    transfer_tax_rate_per_1000: 2.00  # Excise tax (deed stamps): $1.00 per $500 = $2.00 per $1,000
+    recording_fee_range: "26-64 per document"
+    notes: >
+      Attorney opinion required for title examination. Deed of trust state; non-judicial foreclosure.
+
+  OH:
+    type: title_company
+    policy_form: ALTA
+    transfer_tax_rate_per_1000: 1.00  # Conveyance fee: $1.00 per $1,000 (county rate; some counties higher)
+    recording_fee_range: "28 first page + 8 per additional page"
+    notes: >
+      Mortgage state; judicial foreclosure. Conveyance fee varies by county; confirm with title officer.
+
+  PA:
+    type: title_company
+    policy_form: ALTA
+    transfer_tax_rate_per_1000: 10.00  # State: 1%; Philadelphia: 4.278%; total can reach ~4-6% in Philadelphia area
+    additional_tax_notes: >
+      State realty transfer tax: 1%. Local realty transfer tax: varies. Philadelphia total: ~4.278% local + 1% state.
+      Seller typically pays local; buyer pays state (negotiable).
+    recording_fee_range: "20-50 per document"
+    notes: >
+      Pennsylvania has one of the highest effective transfer tax burdens (Philadelphia).
+      Mechanic's lien: Pennsylvania Mechanic's Lien Law 1963; preliminary notice required.
+      Mortgage state; judicial foreclosure.
+
+  SC:
+    type: attorney
+    policy_form: ALTA
+    transfer_tax_rate_per_1000: 3.70  # Deed stamps: $1.85 per $500 = $3.70 per $1,000
+    recording_fee_range: "10-25 per page"
+    notes: >
+      Attorney required. One of the higher transfer tax rates. Mortgage state; judicial foreclosure.
+
+  TN:
+    type: title_company
+    policy_form: ALTA
+    transfer_tax_rate_per_1000: 3.70  # Transfer tax: $0.37 per $100 = $3.70 per $1,000
+    recording_fee_range: "15-25 per page"
+    notes: >
+      Deed of trust state; non-judicial foreclosure with 20-day notice. No income tax.
+
+  TX:
+    type: title_company
+    policy_form: TX_promulgated  # TDI-promulgated forms (T-1 through T-51)
+    transfer_tax_rate_per_1000: 0  # No state transfer tax
+    recording_fee_range: "25-35 per page"
+    notes: >
+      No transfer tax. TDI promulgated forms; title company cannot deviate from approved forms.
+      Mechanic's lien: constitutional right (TX Constitution Art. XVI §37); no advance waiver.
+      Joint check agreement and subcontractor lien waivers are the only protection.
+      Deed of trust state; non-judicial foreclosure (first Tuesday of month at county courthouse; one of fastest).
+      Survey: TX title companies almost always require survey; survey exception deletion is common.
+      Community property state. Homestead protections strong; confirm commercial status of property.
+      Texas franchise tax certificate (Form 05-305): required from TX Comptroller for any entity
+      selling Texas real property that is organized under Texas law.
+
+  VA:
+    type: title_company
+    policy_form: ALTA
+    transfer_tax_rate_per_1000: 2.50  # State grantor's tax: $0.50 per $500 = $1.00 per $1,000 (seller)
+    additional_tax_notes: >
+      State grantee's tax (buyer): $0.25 per $100. Northern Virginia (NVTA) regional tax: additional $0.25 per $100.
+      Total effective rate in NoVA can reach ~2.5% for buyer + seller combined.
+    recording_fee_range: "20-40 per document"
+    notes: >
+      Deed of trust state; non-judicial foreclosure. NOVA (Fairfax, Arlington, etc.) has additional regional taxes.
+
+  WA:
+    type: title_company
+    policy_form: ALTA
+    transfer_tax_rate_per_1000: 13.00  # REET: tiered; 1.3% on first $500K, up to 3.0% for amounts over $3M
+    additional_tax_notes: >
+      Real Estate Excise Tax (REET) is tiered:
+        Up to $500K: 1.1% (standard); cities may have additional rate
+        $500K to $1.5M: 1.28%
+        $1.5M to $3M: 2.75%
+        Over $3M: 3.0%
+      Seattle/King County: additional local rate. Confirm current tiered amounts.
+    recording_fee_range: "10-20 per page"
+    notes: >
+      REET is paid by the seller. Washington has one of the most progressive transfer tax structures.
+      Deed of trust state; non-judicial trustee's sale.
+      No income tax.
+
+  WV:
+    type: attorney
+    policy_form: ALTA
+    transfer_tax_rate_per_1000: 3.30  # Excise tax on deed: $1.10 per $500 = $2.20 per $1,000 state + county
+    recording_fee_range: "20-40 per page"
+    notes: >
+      Attorney state. Mortgage state; judicial foreclosure.
+
+---
+
+recording_requirements:
+  description: >
+    General recording requirements for deeds and mortgages/deeds of trust.
+    County recorder (or Register of Deeds / County Clerk) is the recording authority
+    in all states. Requirements below are general; confirm with title officer for
+    each specific county.
+
+  general_requirements:
+    - Instrument must be original (most counties); some accept certified copies
+    - Must have original signatures; electronically notarized signatures accepted in many states (RON)
+    - Notarization required for deeds and deeds of trust in all states
+    - Witnesses: required in FL (2 witnesses), SC, GA (1 witness), CT
+    - Grantor/Grantee index: recording indexed by grantor and grantee name; confirm names are spelled
+      consistently with prior chain instruments
+    - Legal description: must be included verbatim in the deed
+    - Return address: must appear on the first page
+    - Cover sheet: some states require a standardized cover sheet (CA, TX, FL)
+
+  remote_online_notarization:
+    description: >
+      RON is accepted for closing documents in most states as of 2025. However, some
+      states still require in-person notarization for deeds. Confirm with title officer.
+    states_requiring_in_person_for_deeds:
+      - NY  # NY RON is permitted for deeds but co-op boards typically require in-person
+      - GA  # In-person notarization for deeds still standard
+    states_with_full_ron_acceptance:
+      - FL
+      - TX
+      - VA
+      - CO
+      - AZ
+      - and most others as of 2025
+
+  recording_priority:
+    description: >
+      "First in time, first in right" is the baseline rule. Most states have a race-notice
+      statute (subsequent purchaser for value without notice who records first prevails) or a
+      notice statute (subsequent purchaser for value without notice prevails regardless of
+      recording order). A few states have a race statute (first to record prevails, period).
+    race_notice_states: [AK, AZ, CA, CO, FL, ID, IL, IN, IA, KS, ME, MA, MN, MO, MT, NE, NV, NH, NM, NY, NC, ND, OH, OR, PA, RI, SD, TX, UT, WA, WI, WY]
+    notice_states: [AL, AR, CT, DE, GA, HI, KY, MD, MI, NJ, SC, TN, VA, WV]
+    race_states: [LA, NC]  # NC is technically race-notice but treated as race in practice
+    implication_for_gap_coverage: >
+      In race-notice states, an instrument recorded in the gap period (between commitment and closing)
+      that the buyer has no actual notice of will defeat the buyer's title if that instrument is
+      recorded before the buyer's deed. This is why gap endorsements (ALTA 16) and gap indemnities
+      are critical in race-notice states.
+
+---
+
+lien_period_by_state:
+  description: >
+    Time within which a mechanic's or materialman's lien must be filed after last furnishing
+    of labor or materials. Any construction work completed within this period creates open
+    lien exposure at closing. Seller affidavit and lien waivers are the primary protection.
+  periods:
+    AZ: 120 days
+    CA: 90 days  # 60 days for owner-occupied residential; 90 days for commercial
+    CO: 4 months (commercial)
+    CT: 90 days
+    FL: 90 days  # "final furnishing"; notice of commencement required
+    GA: 90 days
+    IL: 4 months
+    MD: 180 days  # one of the longest lien periods in the US
+    MA: 90 days
+    NC: 120 days
+    NJ: 90 days
+    NY: 8 months  # New York has an unusually long lien period
+    OH: 75 days
+    PA: 6 months  # preliminary notice required within 30 days of first furnishing
+    SC: 90 days
+    TN: 90 days
+    TX: 15 days (subcontractors); 30 days (GC from completion or abandonment); must file by 15th of month following
+    VA: 90 days
+    WA: 90 days
+
+  notes: >
+    These are general commercial lien periods. Residential projects may differ.
+    Some states (TX) have strict notice requirements that must be satisfied before a lien
+    can be filed; failure to give notice defeats the lien right.
+    Always verify with local counsel for the specific project and state.
+
+---
+
+hoa_super_priority_states:
+  description: >
+    States where the HOA has a super-priority lien for unpaid assessments that primes
+    the first mortgage. This is a significant risk for lender policies.
+  states:
+    - AL  # Limited super-priority
+    - CO
+    - CT
+    - DC  # District of Columbia
+    - DE
+    - HI
+    - IL  # Limited
+    - MA
+    - MD
+    - MN
+    - MO
+    - NV  # 9 months of assessments prime first mortgage
+    - NJ
+    - OR
+    - PA
+    - RI
+    - TN  # Limited
+    - UT
+    - WA
+    - WI
+    FL: >
+      Florida HOA: 12 months of past-due assessments and 1% of the original mortgage amount
+      constitute the super-priority lien (Section 720.3085 and 718.116). Lender must receive
+      notice before foreclosing HOA lien.
+  notes: >
+    Super-priority lien rules vary by state in amount and priority. In all super-priority states,
+    obtain an HOA estoppel certificate confirming assessments are current. The lender's policy
+    should specifically address HOA priority risk; some endorsements provide limited coverage.

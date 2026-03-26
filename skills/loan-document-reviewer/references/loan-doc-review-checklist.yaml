@@ -1,0 +1,434 @@
+# Loan Document Review Checklist
+# Complete review checklist organized by document type
+# Use in Workflow 1 (Document Inventory) and as a running tracker through Workflows 2-7
+# Status values: PASS | FLAG | CRITICAL | N/A | PENDING
+
+metadata:
+  version: "1.0"
+  last_updated: "mid-2025"
+  usage: >
+    Work through each section in order. Mark each item with status.
+    FLAG = deviation from market standard; note the issue.
+    CRITICAL = requires resolution before closing.
+    N/A = not applicable to this loan type or deal structure.
+    PENDING = document received but not yet reviewed.
+
+# =============================================================================
+# SECTION 1: DOCUMENT INVENTORY
+# =============================================================================
+
+document_inventory:
+
+  core_loan_documents:
+    promissory_note:
+      required_for: [agency, cmbs, bank, bridge, construction, mezzanine]
+      review_checklist:
+        - item: "Loan amount matches term sheet"
+          type: CRITICAL
+        - item: "Interest rate (fixed or floating index + spread) matches term sheet"
+          type: CRITICAL
+        - item: "Maturity date matches term sheet"
+          type: CRITICAL
+        - item: "Payment dates correctly stated (monthly, typically)"
+          type: SIGNIFICANT
+        - item: "Late charge provision: standard 4-5% of overdue amount (flag if higher)"
+          type: MODERATE
+        - item: "Default rate: Prime + 5% or Note rate + 5% (flag if higher than +5%)"
+          type: SIGNIFICANT
+        - item: "Acceleration clause: standard (lender may accelerate on default)"
+          type: STANDARD
+        - item: "Prepayment provision: matches term sheet (defeasance/YM/step-down/open)"
+          type: CRITICAL
+        - item: "Cross-reference to loan agreement for additional terms"
+          type: STANDARD
+
+    loan_agreement:
+      required_for: [agency, cmbs, bank, bridge, construction, mezzanine]
+      review_checklist:
+        - item: "All economic terms match promissory note and term sheet"
+          type: CRITICAL
+        - item: "Financial covenant thresholds documented and match term sheet"
+          type: CRITICAL
+        - item: "IO period correctly stated and matches term sheet"
+          type: CRITICAL
+        - item: "Extension option count, term, and conditions match term sheet"
+          type: CRITICAL
+        - item: "Events of default complete and categorized"
+          type: SIGNIFICANT
+        - item: "Cure periods present for each event of default"
+          type: SIGNIFICANT
+        - item: "Cash management provisions present (or cross-reference to CMA)"
+          type: SIGNIFICANT
+        - item: "Reserve requirements match term sheet"
+          type: SIGNIFICANT
+        - item: "Permitted transfers section present"
+          type: SIGNIFICANT
+        - item: "Reporting requirements listed with deadlines"
+          type: MODERATE
+        - item: "Defined terms section: verify all key definitions"
+          type: MODERATE
+        - item: "Governing law clause (state where property is located)"
+          type: MODERATE
+        - item: "Dispute resolution: court or arbitration"
+          type: MODERATE
+
+    mortgage_or_deed_of_trust:
+      required_for: [agency, cmbs, bank, bridge, construction, mezzanine]
+      review_checklist:
+        - item: "Legal description of property matches title commitment"
+          type: CRITICAL
+        - item: "All parcels included in legal description"
+          type: CRITICAL
+        - item: "Assignee of rents provision present"
+          type: SIGNIFICANT
+        - item: "Due-on-sale clause present (triggers lender consent on transfer)"
+          type: STANDARD
+        - item: "Future advances provision (if construction: covers all future draws)"
+          type: SIGNIFICANT_IF_CONSTRUCTION
+        - item: "Additional security described (personal property, fixtures)"
+          type: MODERATE
+        - item: "Power of sale provision (non-judicial states only)"
+          type: STANDARD
+        - item: "Trustee identified and acceptable (deed of trust states)"
+          type: MODERATE
+
+    assignment_of_leases_and_rents:
+      required_for: [agency, cmbs, bank, bridge, construction]
+      review_checklist:
+        - item: "Absolute assignment (not conditional): lender has rents upon default without court order"
+          type: SIGNIFICANT
+        - item: "Covers all current and future leases"
+          type: STANDARD
+        - item: "Tenant notification requirements (some jurisdictions)"
+          type: MODERATE
+        - item: "License back to borrower to collect rents until default"
+          type: STANDARD
+        - item: "Revocation of license on default"
+          type: STANDARD
+
+  guaranty_documents:
+
+    carve_out_guaranty:
+      required_for: [agency, cmbs, bank, bridge, construction]  # non-recourse loans
+      review_checklist:
+        - item: "Standard bad-boy carve-outs present: see carve-out-analysis-guide.md"
+          type: STANDARD
+        - item: "No non-standard carve-outs: DSCR trigger, occupancy trigger, MAC"
+          type: CRITICAL
+        - item: "Springing full recourse triggers limited to bad acts and voluntary bankruptcy"
+          type: CRITICAL
+        - item: "Environmental indemnity limited to property boundary"
+          type: SIGNIFICANT
+        - item: "Guaranty scope: covers loan amount (not future advances beyond original)"
+          type: SIGNIFICANT
+        - item: "Guarantor identification matches term sheet"
+          type: CRITICAL
+        - item: "Guaranty is unconditional, irrevocable, and continuing"
+          type: STANDARD
+        - item: "No cap on guarantor liability (carve-out guaranty should be uncapped per category)"
+          type: STANDARD
+        - item: "Waiver of defenses: guarantor waives subrogation, contribution, and defenses"
+          type: STANDARD
+
+    completion_guaranty:
+      required_for: [construction, bridge_with_heavy_renovation]
+      review_checklist:
+        - item: "Type identified: full completion vs. budget completion"
+          type: CRITICAL
+        - item: "Definition of completion clearly stated (CO? Substantial completion?)"
+          type: CRITICAL
+        - item: "Burn-off conditions stated and achievable"
+          type: CRITICAL
+        - item: "Guarantor has sufficient net worth and liquidity to satisfy"
+          type: SIGNIFICANT
+        - item: "Cost overrun responsibility: guarantor liable for all overruns above contingency"
+          type: CRITICAL
+        - item: "GC performance bond reduces guarantor exposure (if applicable)"
+          type: MODERATE
+
+    full_or_partial_recourse_guaranty:
+      required_for: [bank_full_recourse, bridge_partial, construction_during_construction]
+      review_checklist:
+        - item: "Recourse amount matches term sheet (full loan / X% of loan)"
+          type: CRITICAL
+        - item: "Burn-off conditions stated, achievable, and match term sheet"
+          type: CRITICAL
+        - item: "Burn-off is automatic upon conditions being met (no lender discretion)"
+          type: SIGNIFICANT
+        - item: "Guarantor obligations during recourse period clearly defined"
+          type: SIGNIFICANT
+
+  environmental_documents:
+
+    environmental_indemnity_agreement:
+      required_for: [agency, cmbs, bank, bridge, construction, mezzanine]
+      review_checklist:
+        - item: "Scope limited to property boundary (not offsite migration from other sources)"
+          type: CRITICAL
+        - item: "Indemnitees include lender, successors, and assigns (standard)"
+          type: STANDARD
+        - item: "Indemnitor includes borrower and guarantor(s)"
+          type: STANDARD
+        - item: "Survival: indemnity survives loan payoff and foreclosure"
+          type: STANDARD
+        - item: "No dollar cap (environmental indemnity must be unlimited)"
+          type: STANDARD
+        - item: "No time limitation (environmental conditions can appear years later)"
+          type: STANDARD
+        - item: "Indemnity covers known conditions (if Phase I was clean)"
+          type: MODERATE
+        - item: "If Phase II was required: negotiate exclusion of known pre-closing conditions"
+          type: SIGNIFICANT
+
+  lien_and_security_documents:
+
+    ucc1_financing_statements:
+      required_for: [agency, cmbs, bank, bridge, construction, mezzanine]
+      review_checklist:
+        - item: "Filed in correct jurisdiction (state of borrower formation for personal property)"
+          type: CRITICAL
+        - item: "Collateral description: all personal property, fixtures, and lease assignments"
+          type: SIGNIFICANT
+        - item: "Secured party correctly identified as lender"
+          type: CRITICAL
+        - item: "Debtor correctly identified as borrower entity"
+          type: CRITICAL
+        - item: "Fixture filing in county where property is located"
+          type: SIGNIFICANT
+        - item: "For mezzanine: filed against mezz borrower entity (equity pledge collateral)"
+          type: CRITICAL_IF_MEZZ
+
+  cmbs_specific_documents:
+
+    cash_management_agreement:
+      required_for: [cmbs]
+      review_checklist:
+        - item: "Lockbox type: hard lockbox (CMBS standard)"
+          type: STANDARD
+        - item: "Cash waterfall matches loan agreement"
+          type: CRITICAL
+        - item: "Cash sweep trigger matches term sheet"
+          type: CRITICAL
+        - item: "Distribution conditions match term sheet"
+          type: CRITICAL
+        - item: "Reserve accounts identified and controlled by lender"
+          type: STANDARD
+        - item: "Account control agreement (ACA) reference"
+          type: SIGNIFICANT
+
+    spe_borrower_certificate:
+      required_for: [cmbs]
+      review_checklist:
+        - item: "Entity is a single-purpose entity: verified"
+          type: CRITICAL
+        - item: "Independent director: identified by name, non-economic interest"
+          type: CRITICAL
+        - item: "Separate bank accounts: confirmed no commingling"
+          type: CRITICAL
+        - item: "Organizational documents are CMBS-compliant"
+          type: CRITICAL
+        - item: "Representations are accurate: borrower has verified each"
+          type: CRITICAL
+
+  bridge_construction_documents:
+
+    disbursement_agreement:
+      required_for: [bridge_with_holdback, construction]
+      review_checklist:
+        - item: "Draw schedule or milestone list present"
+          type: CRITICAL
+        - item: "Draw conditions listed: inspection, lien releases, title continuation"
+          type: CRITICAL
+        - item: "Inspector identified (lender's 3rd-party construction manager)"
+          type: SIGNIFICANT
+        - item: "Retainage percentage stated (typically 5-10%)"
+          type: SIGNIFICANT
+        - item: "Retainage release conditions stated"
+          type: SIGNIFICANT
+        - item: "GC substitution: lender consent required"
+          type: SIGNIFICANT
+        - item: "Interest only charged on drawn amounts (not committed holdback)"
+          type: CRITICAL
+
+    rate_cap_agreement_and_assignment:
+      required_for: [bridge_floating, construction_floating]
+      review_checklist:
+        - item: "Rate cap is in place or commitment to purchase received"
+          type: CRITICAL
+        - item: "Strike rate matches loan agreement requirement"
+          type: CRITICAL
+        - item: "Term covers full loan term including all extensions"
+          type: CRITICAL
+        - item: "Counterparty rating meets lender minimum (typically A-/A3)"
+          type: CRITICAL
+        - item: "Assignment of rate cap to lender as additional collateral"
+          type: CRITICAL
+        - item: "Rate cap replacement provisions (counterparty downgrade)"
+          type: SIGNIFICANT
+        - item: "Cap maintenance: borrower must maintain cap for full loan term"
+          type: SIGNIFICANT
+
+  mezzanine_documents:
+
+    pledge_and_security_agreement:
+      required_for: [mezzanine]
+      review_checklist:
+        - item: "Pledged equity interest: 100% of equity in senior borrowing entity"
+          type: CRITICAL
+        - item: "UCC-1 filed in state of senior borrowing entity formation"
+          type: CRITICAL
+        - item: "Collateral description matches equity interest"
+          type: CRITICAL
+        - item: "Borrower's equity certificates (if certificated) delivered to mezz lender"
+          type: SIGNIFICANT
+        - item: "Equity transfer restrictions in organizational documents modified to permit pledge"
+          type: SIGNIFICANT
+
+    intercreditor_agreement:
+      required_for: [mezzanine, preferred_equity_with_senior_debt]
+      review_checklist:
+        - item: "Senior lender approved form (not mezz lender's form)"
+          type: STANDARD
+        - item: "Simultaneous notice of senior loan default to mezz lender"
+          type: CRITICAL
+        - item: "Cure period: 30 days monetary, 60 days non-monetary"
+          type: CRITICAL
+        - item: "Purchase option present with 30-day exercise window"
+          type: CRITICAL
+        - item: "Purchase price at par + accrued non-default interest (no default premium)"
+          type: CRITICAL
+        - item: "Senior lender standstill: 60-120 days"
+          type: CRITICAL
+        - item: "Amendment restrictions: senior lender cannot increase rate, shorten maturity without mezz consent"
+          type: CRITICAL
+        - item: "Transfer restrictions on mezz loan: senior lender consent requirements"
+          type: SIGNIFICANT
+        - item: "Enforcement rights: mezz lender UCC foreclosure rights preserved"
+          type: CRITICAL
+
+# =============================================================================
+# SECTION 2: CRITICAL CHECKLIST (PRE-CLOSING SIGN-OFF)
+# =============================================================================
+
+pre_closing_sign_off:
+  description: "All CRITICAL items must be resolved before funding. Review each."
+
+  economic_terms:
+    - "Loan amount confirmed"
+    - "Interest rate/spread confirmed"
+    - "Maturity date confirmed"
+    - "IO period confirmed"
+    - "Prepayment structure confirmed"
+    - "All fees confirmed (origination, exit, extension)"
+    - "Rate cap requirement confirmed and cap in place"
+
+  guaranty_and_recourse:
+    - "Guarantors confirmed and documents signed"
+    - "No non-standard carve-outs present"
+    - "Environmental indemnity scope limited to property boundary"
+    - "Completion guaranty (if applicable) signed by appropriate parties"
+
+  documentation_completeness:
+    - "All documents in Document Inventory received"
+    - "All documents signed and properly acknowledged"
+    - "Notarization complete where required"
+    - "All exhibits and schedules attached and verified"
+
+  title_and_recording:
+    - "Title commitment received with no unresolved exceptions"
+    - "Title insurance policy: ALTA lender's policy in loan amount"
+    - "All required endorsements obtained (see list below)"
+    - "Mortgage/deed of trust recorded"
+    - "UCC-1 financing statements filed"
+    - "Assignment of leases recorded (if required by state)"
+
+  title_endorsements_by_loan_type:
+    standard_required_for_all:
+      - "ALTA 9 (restrictions, encroachments, minerals)"
+      - "ALTA 8.1 (environmental lien)"
+      - "ALTA 17 (access)"
+      - "ALTA 28 (easement)"
+    cmbs_required:
+      - "ALTA 3.1 (zoning with parking)"
+      - "ALTA 6 (variable rate)"
+      - "ALTA 15 (nonimputation)"
+    multifamily:
+      - "ALTA 14 (future advance)"
+      - "ALTA 22 (location)"
+
+  reserves_and_escrows:
+    - "All upfront reserves funded at closing"
+    - "Escrow accounts established with correct depositories"
+    - "Reserve requirements match loan agreement"
+
+  third_party_reports:
+    - "Appraisal received, dated within 6 months of closing"
+    - "Phase I received, dated within 6 months of closing"
+    - "PCR received, with no critical deferred maintenance > reserve budget"
+    - "Survey received, certified to lender and title company"
+    - "Zoning report or letter received"
+    - "Flood determination received"
+
+  insurance:
+    - "Property insurance policy in force for replacement value"
+    - "General liability policy in force"
+    - "Flood insurance in force (if flood zone A or V)"
+    - "Terrorism insurance in force (if required by lender)"
+    - "Builder's risk in force (if construction)"
+    - "Lender listed as additional insured and loss payee"
+    - "Certificates delivered to lender"
+
+  entity_documents:
+    - "Borrower operating agreement / partnership agreement received"
+    - "Borrower certificate of good standing received"
+    - "Borrower organizational chart received"
+    - "Guarantor entity documents received (if guaranty by entity)"
+    - "Incumbency certificate received"
+    - "Authorizing resolutions received"
+    - "Borrower counsel opinion letter received (if required)"
+
+  tenant_documents_commercial:
+    - "SNDAs from major tenants received"
+    - "Estoppel certificates from major tenants received"
+    - "Rent roll certified by borrower received"
+    - "Executed leases for all tenants reviewed"
+    - "No undisclosed lease defaults or termination rights"
+
+# =============================================================================
+# SECTION 3: POST-CLOSING COVENANT MONITORING SETUP
+# =============================================================================
+
+post_closing_monitoring:
+  description: "Set up covenant monitoring calendar immediately after closing."
+
+  immediate_actions_at_closing:
+    - "Calendar first financial reporting date"
+    - "Calendar first DSCR testing date"
+    - "Calendar first reserve balance verification date"
+    - "Calendar insurance renewal dates"
+    - "Calendar tax payment dates"
+    - "Set up debt-covenant-monitor with all thresholds"
+    - "Distribute reporting responsibilities to asset manager and property manager"
+
+  ongoing_monitoring_frequency:
+    monthly:
+      - "Reserve account balance verification"
+      - "Tax and insurance escrow balance"
+      - "Rate cap status (floating loans)"
+      - "Debt service payment confirmed"
+    quarterly:
+      - "DSCR calculation and covenant test"
+      - "Occupancy covenant test"
+      - "Rent roll delivery to lender"
+      - "Quarterly P&L delivery"
+      - "Pipeline of lease expirations review"
+    semi_annual:
+      - "Guarantor financial statements (some lenders)"
+      - "Insurance coverage adequacy review"
+    annual:
+      - "Full financial statements delivery"
+      - "Guarantor personal financial statements"
+      - "Annual report delivery (some programs)"
+      - "Lender site inspection (if required)"
+      - "Title insurance update (if required)"
+      - "Review of all covenant thresholds against actual performance"
