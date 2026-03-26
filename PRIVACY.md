@@ -13,15 +13,26 @@ Telemetry is **disabled by default**. The user must explicitly enable it by sett
 
 When enabled, telemetry records ONLY:
 
+**Per skill invocation (PostToolUse hook):**
+
 | Field | Example | Purpose |
 |-------|---------|---------|
-| skill_slug | `acquisition-underwriting-engine` | Which skills are used most |
-| investor_type | `private-equity` | Which investor profiles are active |
-| workflow_chain | `acquisition-pipeline` | Which workflow chains are executed |
-| duration_minutes | `45` | Session length (rounded to nearest minute) |
-| verdict | `GO` | Outcome category only (no underlying data) |
+| event | `skill_invoked` | Event type identifier |
+| skill | `acquisition-underwriting-engine` | Which skill was used (slug only) |
 | date | `2026-03-26` | Date only (no time, no timezone) |
 | anonymous_id | `a1b2c3d4-...` | Random UUID generated at first run (no PII linkage) |
+
+**Per session summary (Stop hook):**
+
+| Field | Example | Purpose |
+|-------|---------|---------|
+| event | `session_end` | Event type identifier |
+| skills_used | `["skill-a", "skill-b"]` | Deduplicated list of skills used in session |
+| date | `2026-03-26` | Date only |
+| anonymous_id | `a1b2c3d4-...` | Same UUID as above |
+
+**Future fields (not yet collected, planned for a later version):**
+investor_type, workflow_chain, duration_minutes, verdict. These will be documented here before activation.
 
 **What is NEVER tracked:**
 - File paths, hostnames, IP addresses

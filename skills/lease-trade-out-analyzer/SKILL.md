@@ -522,6 +522,10 @@ Present results in this order:
 
 9. **Ignoring capital improvements needed regardless of path**: if the roof, HVAC, or lobby needs replacement regardless of the tenant decision, those costs are sunk and should be excluded from both scenarios. Including them inflates the apparent cost of both paths equally but can distort the comparison if allocated differently.
 
+10. **DSCR covenant breach during trade-out vacancy**: if the property has a loan with a DSCR covenant (typically 1.15-1.25x), a trade-out that creates 4-6 months of vacancy can push DSCR below the covenant threshold, triggering a cash sweep or lender action. ALWAYS model the DSCR impact of the vacancy period before recommending trade-out. If DSCR drops below cash sweep trigger (typically 1.10-1.15x), the trade-out may trap cash and prevent distributions for 6-12 months beyond the vacancy period. Cross-reference with loan-document-reviewer and debt-covenant-monitor.
+
+11. **Sunk cost trap in renewal TI analysis**: when comparing renewal vs trade-out, only include INCREMENTAL costs in the renewal scenario. The original TI from the initial lease is a sunk cost -- do not re-amortize it. The renewal scenario should include only: new renewal TI allowance, any LC on renewal, and free rent (if any). Comparing "zero TI renewal" against "$25/SF new TI trade-out" overstates the renewal advantage if the original lease included $20/SF TI that is now fully amortized.
+
 ## Chain Notes
 
 - **Upstream**: tenant-retention-engine (full portfolio retention analysis), rent-optimization-planner (rent gap identification that surfaces trade-out candidates)
