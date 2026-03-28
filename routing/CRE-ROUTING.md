@@ -1,6 +1,6 @@
 # CRE Skill Routing Index
 
-> 99 CRE skills across 16 subcategories. Use this index to find the right skill -- do NOT load all SKILL.md files.
+> 102 CRE skills across 16 subcategories. Use this index to find the right skill -- do NOT load all SKILL.md files.
 > When a CRE task comes in, match the user's request to a category below, then invoke the specific skill via `/skill-slug`.
 > Only read the full SKILL.md + references when you need the detailed process.
 
@@ -48,6 +48,7 @@
 | "land residual", "HBU", "highest and best use" | `/land-residual-hbu-analyzer` |
 | "development proforma", "construction budget", "draw schedule" | `/dev-proforma-engine` |
 | "zoning", "entitlement", "rezoning", "variance" | `/entitlement-feasibility` |
+| "estimate construction costs", "how much to build", "TDC estimate", "price this floor plan" | `/construction-cost-estimator` |
 | "GC budget", "CSI benchmarks", "construction costs" | `/construction-budget-gc-analyzer` |
 | "sell vs hold", "disposition strategy", "exit analysis" | `/disposition-strategy-engine` |
 | "prepare for sale", "broker selection", "disposition prep" | `/disposition-prep-kit` |
@@ -101,6 +102,8 @@
 | "generate LP data request", "LP questionnaire", "DDQ", "LP information request" | `/lp-data-request-generator` |
 | "Reg D", "506(b)", "506(c)", "accredited investor verification", "blue sky filing" | `/sec-reg-d-compliance` |
 | "Monte Carlo", "return simulation", "probability distribution", "stochastic model" | `/monte-carlo-return-simulator` |
+| "property management command center", "PM dashboard", "full PM operations" | `/property-management-orchestrator` |
+| "space planning", "redesign", "amenity addition", "reposition this space" | `/space-planning-redesign-orchestrator` |
 | "property management", "PM operations", "daily operations checklist", "site team" | `/property-management-operations` |
 | "distribution notice", "capital distribution", "distribution waterfall letter" | `/distribution-notice-generator` |
 | "1031 pipeline", "replacement property pipeline", "exchange timeline", "1031 ID deadline" | `/1031-pipeline-manager` |
