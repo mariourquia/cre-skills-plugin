@@ -47,7 +47,25 @@ sudo dnf install nodejs python3.11
 sudo pacman -S nodejs python
 ```
 
-### Windows WSL2
+### Windows (Native)
+
+| Requirement | Minimum | Check |
+|-------------|---------|-------|
+| Claude Code CLI or Claude Desktop | any | `claude --version` or check Start Menu |
+| Node.js | 18+ | `node --version` |
+| Python | 3.10+ (optional, for calculators) | `python --version` |
+
+Install Claude Code CLI if not present:
+
+```powershell
+npm install -g @anthropic-ai/claude-code
+```
+
+Download the `.exe` installer from the [releases page](https://github.com/mariourquia/cre-skills-plugin/releases/latest). No other setup required.
+
+### Windows WSL2 (Alternative)
+
+If you prefer running inside WSL2 instead of native Windows:
 
 1. Install WSL2: `wsl --install` from PowerShell (Admin)
 2. Open an Ubuntu terminal
@@ -67,7 +85,7 @@ npm install -g @anthropic-ai/claude-code
 
 4. Then run the quick install command from inside the WSL terminal.
 
-Note: The plugin works in WSL2. Running Claude Code natively on Windows (outside WSL) is not currently supported.
+Note: For most Windows users, the native `.exe` installer is the recommended path. WSL2 is an alternative for users who prefer a Linux environment.
 
 ---
 
@@ -133,6 +151,24 @@ For Claude Desktop users, the DMG is the simplest path.
 3. Double-click "CRE Skills Installer".
 4. Follow the Terminal prompts. The installer detects Claude Code and Claude Desktop and configures each automatically.
 5. Restart Claude Desktop.
+
+### Windows .exe Installer
+
+For Windows users with Claude Code CLI or Claude Desktop.
+
+1. Download `cre-skills-v2.0.0-setup.exe` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
+2. Run the installer. Windows SmartScreen may show a warning -- click "More info" then "Run anyway" (the installer is not yet code-signed).
+3. Follow the wizard. Default install location: `%APPDATA%\cre-skills-plugin`.
+4. The installer automatically detects Claude Code and Claude Desktop and configures each.
+5. Restart Claude Code or Claude Desktop.
+
+**Note**: The installer does not require administrator privileges.
+
+The plugin directory for Claude Desktop on Windows is:
+
+```
+%APPDATA%\Claude\skills\cre-skills-plugin\
+```
 
 ### Manual Claude Desktop Configuration
 
@@ -333,6 +369,10 @@ Delete the file to reset it. It will be recreated with defaults on next session 
 ```bash
 rm ~/.cre-skills/config.json
 ```
+
+### Windows SmartScreen warning
+
+The `.exe` installer is not code-signed. Windows SmartScreen will warn "Windows protected your PC." Click "More info" then "Run anyway." This is safe -- the installer is built reproducibly from source via GitHub Actions. You can verify the SHA256 checksum from the release page. Code signing will be added in a future release.
 
 ### Hooks not firing on Windows WSL
 

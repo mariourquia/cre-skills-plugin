@@ -1,0 +1,126 @@
+name: Build Windows Installer
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version string (e.g. 2.0.0)'
+        required: false
+        default: '2.0.0'
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-exe:
+    name: Build .exe installer
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Determine version
+        id: version
+        shell: pwsh
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+        run: |
+          if ($env:EVENT_NAME -eq "push") {
+            $ver = $env:REF_NAME -replace '^v', ''
+          } else {
+            $ver = $env:INPUT_VERSION
+            if (-not $ver) { $ver = "2.0.0" }
+          }
+          # Validate version format (digits and dots only)
+          if ($ver -notmatch '^\d+\.\d+\.\d+$') {
+            Write-Error "Invalid version format: $ver (expected X.Y.Z)"
+            exit 1
+          }
+          echo "VERSION=$ver" >> $env:GITHUB_OUTPUT
+          Write-Host "Building installer for version: $ver"
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          choco install innosetup -y --no-progress
+          Write-Host "Inno Setup installed"
+
+      - name: Create dist directory
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path dist -Force | Out-Null
+
+      - name: Compile installer
+        shell: pwsh
+        env:
+          APP_VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) {
+            Write-Error "Inno Setup compiler not found at: $iscc"
+            exit 1
+          }
+          $src = $env:GITHUB_WORKSPACE
+          $ver = $env:APP_VERSION
+          Write-Host "Compiling: ISCC /DSourceDir=$src /DAppVersion=$ver scripts\create-exe.iss"
+          & $iscc "/DSourceDir=$src" "/DAppVersion=$ver" "scripts\create-exe.iss"
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "Inno Setup compilation failed with exit code: $LASTEXITCODE"
+            exit 1
+          }
+
+      - name: Verify output
+        shell: pwsh
+        env:
+          APP_VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          $exe = "dist\cre-skills-v$($env:APP_VERSION)-setup.exe"
+          if (-not (Test-Path $exe)) {
+            Write-Error "Expected output not found: $exe"
+            Get-ChildItem dist\ -ErrorAction SilentlyContinue
+            exit 1
+          }
+          $size = (Get-Item $exe).Length
+          $sizeMB = [math]::Round($size / 1MB, 2)
+          Write-Host "Installer built: $exe ($sizeMB MB)"
+
+      - name: Generate SHA256 checksum
+        shell: pwsh
+        env:
+          APP_VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          $exe = "dist\cre-skills-v$($env:APP_VERSION)-setup.exe"
+          $hash = (Get-FileHash $exe -Algorithm SHA256).Hash.ToLower()
+          $filename = Split-Path $exe -Leaf
+          "$hash  $filename" | Out-File "dist\cre-skills-v$($env:APP_VERSION)-setup.exe.sha256" -Encoding ascii -NoNewline
+          Write-Host "SHA256: $hash"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        env:
+          APP_VERSION: ${{ steps.version.outputs.VERSION }}
+        with:
+          name: cre-skills-windows-installer
+          path: |
+            dist/cre-skills-v${{ steps.version.outputs.VERSION }}-setup.exe
+            dist/cre-skills-v${{ steps.version.outputs.VERSION }}-setup.exe.sha256
+          retention-days: 30
+
+      - name: Attach to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APP_VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          $ver = $env:APP_VERSION
+          $exe = "dist\cre-skills-v$ver-setup.exe"
+          $sha = "dist\cre-skills-v$ver-setup.exe.sha256"
+          Write-Host "Attaching to release v$ver..."
+          gh release upload "v$ver" $exe $sha --clobber
+          Write-Host "Attached to release v$ver"
