@@ -85,7 +85,6 @@ Source: "{#SourceDir}\CHANGELOG.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourceDir}\PRIVACY.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourceDir}\SECURITY.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourceDir}\CONTRIBUTING.md"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SourceDir}\plugin.json"; DestDir: "{app}"; Flags: ignoreversion
 
 ; ──────────────────────────────────────────────────────────────────────
 ; Post-install: run Install.ps1 to register with Claude Code / Desktop
