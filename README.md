@@ -73,6 +73,16 @@ Download `cre-skills-v2.0.0.dmg` from the [latest release](https://github.com/ma
 
 The installer automatically detects whether you have Claude Code, Claude Desktop, or both, and configures accordingly.
 
+### Windows .exe Installer
+
+Download `cre-skills-v2.0.0-setup.exe` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
+
+1. Run the installer (SmartScreen warning: click "More info" > "Run anyway")
+2. Follow the wizard
+3. Restart Claude Code or Claude Desktop
+
+The installer detects Claude Code CLI and Claude Desktop and configures both automatically. No admin privileges required.
+
 ### Manual (Local Development)
 
 ```bash
