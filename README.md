@@ -147,7 +147,7 @@ Raleigh NC, $42M asking, 2018 vintage, 93% occupied, $2.6M NOI, rents 12% below 
 
 ## Skill Categories
 
-### By Category (16 subcategories, 99 skills)
+### By Category (16 subcategories, 102 skills)
 
 | # | Category | Count | Key Skills |
 |---|----------|-------|------------|
@@ -214,7 +214,7 @@ See `orchestrators/README.md` for full documentation.
 
 ## Expert Agents
 
-54 expert agents across 13 categories, each with a distinct analytical perspective.
+55 expert agents across 13 categories, each with a distinct analytical perspective.
 
 | Category | Count | Agents |
 |----------|-------|--------|

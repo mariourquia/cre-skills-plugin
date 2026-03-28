@@ -70,7 +70,7 @@ HEADER
 printf "${RESET}"
 
 printf "${BLUE}  Plugin Installer v2.0.0${RESET}\n"
-printf "${DIM}  91 skills | 40 agents | 6 workflow chains${RESET}\n"
+printf "${DIM}  102 skills | 55 agents | 6 workflow chains${RESET}\n"
 echo ""
 
 # ── Step 1: Check prerequisites ──────────────────────────────────────
@@ -190,7 +190,7 @@ echo ""
 
 printf "  ${BOLD}What's Included${RESET}\n"
 echo ""
-printf "  ${GREEN}91${RESET} skills across 16 categories\n"
+printf "  ${GREEN}102${RESET} skills across 16 categories\n"
 printf "  ${GREEN}40${RESET} expert agents (Pension Fund, PE, REIT, Risk Mgr, ...)\n"
 printf "  ${GREEN} 6${RESET} workflow chains (Acquisition, Capital Stack, Hold, ...)\n"
 echo ""
