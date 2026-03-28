@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Determine version
         id: version
@@ -101,7 +101,7 @@ jobs:
           Write-Host "SHA256: $hash"
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         env:
           APP_VERSION: ${{ steps.version.outputs.VERSION }}
         with:

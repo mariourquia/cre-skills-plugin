@@ -221,11 +221,12 @@ SPACE PLANNING ORCHESTRATOR (this skill)
 
 ## Reference Files
 
-> **TODO (v3.0)**: Reference files will be created when the full orchestration is implemented:
-> - `amenity-cost-benchmarks.yaml` -- cost ranges for common amenity buildouts by type
-> - `tenant-survey-templates.md` -- ready-to-deploy survey instruments for different asset types
-> - `competitive-amenity-audit-template.md` -- structured audit framework for submarket analysis
-> - `roi-model-template.md` -- standardized ROI calculation methodology for space investments
+| File | Purpose |
+|---|---|
+| `references/amenity-cost-benchmarks.yaml` | Cost ranges (low/mid/high $/SF) for 16 amenity types plus common add-ons, with FF&E ratios, technology costs, operating costs, and revenue potential |
+| `references/tenant-survey-templates.md` | Three ready-to-deploy survey instruments: general amenity demand (12 questions), specific amenity validation (8 questions), post-renovation satisfaction (8 questions), plus distribution and sample size guidance |
+| `references/competitive-amenity-audit-template.md` | Structured audit form, comparison matrix, gap analysis methodology, rent premium correlation analysis, and competitive positioning recommendation framework |
+| `references/roi-model-template.md` | Investment cost build-up, 4-channel revenue model, 3-scenario template, NPV/IRR/payback calculations, property valuation impact formula, worked example, and decision framework |
 
 ## Implementation Status
 
@@ -235,7 +236,6 @@ This skill is a **stub framework** defining the full scope, workflows, and integ
 
 **What needs building for v3.0**:
 - Multi-agent dispatch (spawning subagents 1-5 as parallel Agent tool calls)
-- Reference files (4 files listed above)
 - Amenity cost calculator (Python script for FF&E + technology + specialty equipment pricing)
 - Tenant survey generator (templated survey instrument with customizable questions)
 - ROI calculator integration (extend existing NPV/IRR calculators for amenity-specific inputs)

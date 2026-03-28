@@ -1,5 +1,31 @@
 # Changelog
 
+## [2.5.0] - 2026-03-28
+
+### Added
+- construction-cost-estimator: full CSI MasterFormat cost estimation with 11 workflows including
+  visual input (floor plans/drawings), generative output (ASCII mockups), and co-creation design
+  loops. Includes construction_estimator.py calculator (zero dependencies), 925-line CSI cost
+  database, 60+ city regional cost factors, and soft cost benchmarks reference.
+- property-management-orchestrator: deep PM command center with 10 workflows across all asset
+  types. Routes to downstream skills (building-systems, work-order-triage, PM operations, etc.).
+  Includes 8 asset-type module stubs (multifamily through hospitality) for v3.0 deep-dive,
+  IREM/BOMA KPI benchmarks, monthly report template, and vendor management framework.
+- space-planning-redesign-orchestrator: multi-agent orchestrator for space redesign ideation
+  with 5 specialist subagents (space programmer, design visualizer, cost estimator, market
+  validator, ROI analyst). Includes amenity cost benchmarks, tenant survey templates,
+  competitive audit framework, and ROI model template. Status: stub (full orchestration in v3.0).
+- Windows .exe installer via Inno Setup (no admin privileges, auto-detects Claude Code + Desktop)
+- GitHub Actions workflow for building Windows installer on windows-latest runner
+- 12th Python calculator: construction_estimator.py
+
+### Changed
+- Total skills: 99 -> 102 (3 new)
+- Total reference files: 225 -> 236 (11 new)
+- routing/CRE-ROUTING.md updated with 3 new skill routing triggers
+- hooks/hooks.json SessionStart prompt updated to 102 skills, 55 agents
+- Install.ps1 added for Windows post-install configuration
+
 ## [2.0.0] - 2026-03-25
 
 ### Added
