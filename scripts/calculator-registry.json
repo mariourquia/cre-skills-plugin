@@ -1,0 +1,315 @@
+{
+  "version": "1.0",
+  "generated": "2026-03-27",
+  "calculators": {
+    "quick_screen": {
+      "script": "scripts/calculators/quick_screen.py",
+      "description": "Deal quick screen with cap rate, DSCR, CoC, replacement ratio, and KEEP/KILL/MAYBE verdict",
+      "inputs": {
+        "purchase_price": { "type": "number", "required": true, "description": "Total acquisition price" },
+        "noi": { "type": "number", "required": true, "description": "Net operating income (annual)" },
+        "units_or_sf": { "type": "number", "required": true, "description": "Number of units or total SF" },
+        "unit_type": { "type": "string", "required": true, "description": "Either 'units' or 'sf'" },
+        "market_rent_per_unit": { "type": "number", "required": true, "description": "Market rent per unit or per SF" },
+        "in_place_rent_per_unit": { "type": "number", "required": true, "description": "Current in-place rent per unit or per SF" },
+        "loan_amount": { "type": "number", "required": true, "description": "Loan principal amount" },
+        "rate": { "type": "number", "required": true, "description": "Annual interest rate (decimal, e.g. 0.065)" },
+        "amort_years": { "type": "number", "required": true, "description": "Amortization period in years" },
+        "replacement_cost_estimate": { "type": "number", "required": false, "description": "Estimated replacement cost" },
+        "property_type": { "type": "string", "required": false, "description": "Property type (multifamily, office, retail, industrial)" },
+        "submarket_vacancy": { "type": "number", "required": false, "description": "Submarket vacancy rate (decimal)" }
+      },
+      "outputs": {
+        "cap_rate": { "type": "number", "description": "Going-in cap rate" },
+        "price_per_unit": { "type": "number", "description": "Price per unit or per SF" },
+        "rent_vs_market": { "type": "number", "description": "In-place rent as pct of market" },
+        "dscr": { "type": "number", "description": "Debt service coverage ratio" },
+        "cash_on_cash": { "type": "number", "description": "Cash-on-cash return" },
+        "replacement_ratio": { "type": "number", "description": "Purchase price / replacement cost" },
+        "verdict": { "type": "string", "description": "KEEP, KILL, or MAYBE" },
+        "scenario_irrs": { "type": "object", "description": "IRR estimates under base/upside/downside scenarios" }
+      },
+      "used_by": ["deal-quick-screen"]
+    },
+    "covenant_tester": {
+      "script": "scripts/calculators/covenant_tester.py",
+      "description": "Tests loan covenants (DSCR, LTV, debt yield) against multi-year projections; detects breach year and cash sweep triggers",
+      "inputs": {
+        "noi_by_year": { "type": "array", "required": true, "description": "Array of annual NOI values" },
+        "loan_amount": { "type": "number", "required": true, "description": "Original loan amount" },
+        "rate": { "type": "number", "required": true, "description": "Annual interest rate (decimal)" },
+        "amortization_years": { "type": "number", "required": true, "description": "Amortization period in years" },
+        "io_years": { "type": "number", "required": false, "description": "Interest-only period in years (default 0)" },
+        "property_value_by_year": { "type": "array", "required": true, "description": "Array of property values by year" },
+        "dscr_covenant": { "type": "number", "required": true, "description": "Minimum DSCR covenant" },
+        "ltv_covenant": { "type": "number", "required": true, "description": "Maximum LTV covenant" },
+        "debt_yield_covenant": { "type": "number", "required": false, "description": "Minimum debt yield covenant" },
+        "cash_sweep_dscr": { "type": "number", "required": false, "description": "DSCR threshold that triggers cash sweep" }
+      },
+      "outputs": {
+        "dscr_by_year": { "type": "array", "description": "DSCR for each projection year" },
+        "ltv_by_year": { "type": "array", "description": "LTV for each projection year" },
+        "debt_yield_by_year": { "type": "array", "description": "Debt yield for each projection year" },
+        "breach_year": { "type": "number", "description": "First year a covenant is breached (null if none)" },
+        "cash_sweep_years": { "type": "array", "description": "Years where cash sweep is triggered" },
+        "annual_detail": { "type": "array", "description": "Detailed annual covenant test results" }
+      },
+      "used_by": ["loan-document-reviewer", "debt-covenant-monitor"]
+    },
+    "debt_sizing": {
+      "script": "scripts/calculators/debt_sizing.py",
+      "description": "Sizes CRE loans against simultaneous DSCR, LTV, and debt yield constraints; identifies binding constraint",
+      "inputs": {
+        "noi": { "type": "number", "required": true, "description": "Annual net operating income" },
+        "property_value": { "type": "number", "required": true, "description": "Appraised or estimated property value" },
+        "target_dscr": { "type": "number", "required": true, "description": "Target minimum DSCR" },
+        "target_ltv": { "type": "number", "required": true, "description": "Target maximum LTV (decimal)" },
+        "target_debt_yield": { "type": "number", "required": true, "description": "Target minimum debt yield (decimal)" },
+        "rate": { "type": "number", "required": true, "description": "Annual interest rate (decimal)" },
+        "amortization_years": { "type": "number", "required": true, "description": "Amortization period in years" },
+        "io_years": { "type": "number", "required": false, "description": "Interest-only period in years (default 0)" }
+      },
+      "outputs": {
+        "max_loan_dscr": { "type": "number", "description": "Max loan sized by DSCR constraint" },
+        "max_loan_ltv": { "type": "number", "description": "Max loan sized by LTV constraint" },
+        "max_loan_dy": { "type": "number", "description": "Max loan sized by debt yield constraint" },
+        "binding_constraint": { "type": "string", "description": "Which constraint binds (DSCR, LTV, or debt_yield)" },
+        "recommended_loan": { "type": "number", "description": "Recommended loan amount (min of all constraints)" },
+        "annual_debt_service": { "type": "number", "description": "Annual debt service at recommended loan" },
+        "rate_sensitivity": { "type": "object", "description": "Loan proceeds at +/- 50bps, 100bps rate changes" }
+      },
+      "used_by": ["loan-sizing-engine"]
+    },
+    "fund_fee_modeler": {
+      "script": "scripts/calculators/fund_fee_modeler.py",
+      "description": "Models blended management fee economics for fund raises with MFN cascade, GP promote sensitivity, and breakeven analysis",
+      "inputs": {
+        "_note": "Accepts a full fund state JSON file. Key top-level fields below.",
+        "standardTerms": { "type": "object", "required": true, "description": "Fund standard terms (managementFee, fundTerm, etc.)" },
+        "lps": { "type": "array", "required": true, "description": "Array of LP objects with commitments, negotiated fees, side letters" },
+        "gpCommitment": { "type": "number", "required": false, "description": "GP co-investment amount" },
+        "targetRaise": { "type": "number", "required": false, "description": "Target fund size" }
+      },
+      "outputs": {
+        "blended_fee_rate": { "type": "number", "description": "Weighted-average management fee rate" },
+        "mfn_cascade": { "type": "object", "description": "MFN impact analysis across LP cohorts" },
+        "breakeven_fund_size": { "type": "number", "description": "Minimum fund size to cover GP overhead" },
+        "gp_promote_sensitivity": { "type": "object", "description": "Promote dollars at various return scenarios" },
+        "lp_ledger": { "type": "array", "description": "Per-LP commitment, fee, and side letter detail" }
+      },
+      "cli_commands": ["dashboard", "scenario", "mfn-audit", "export-csv", "import-csv"],
+      "used_by": ["fund-raise-negotiation-engine"]
+    },
+    "monte_carlo_simulator": {
+      "script": "scripts/calculators/monte_carlo_simulator.py",
+      "description": "Stochastic simulation engine for CRE returns with correlated variables, percentile analysis, VaR, CVaR, and sensitivity ranking",
+      "inputs": {
+        "purchase_price": { "type": "number", "required": true, "description": "Total acquisition price" },
+        "equity_invested": { "type": "number", "required": true, "description": "Equity invested" },
+        "hold_period": { "type": "number", "required": true, "description": "Hold period in years" },
+        "base_noi": { "type": "number", "required": true, "description": "Year-1 NOI" },
+        "financing": { "type": "object", "required": true, "description": "Object with ltv, rate, term, amort_years, io_years" },
+        "variables": { "type": "array", "required": true, "description": "Array of variable objects with name, best_case, base_case, worst_case, distribution" },
+        "correlation_matrix": { "type": "object", "required": false, "description": "Variable-to-variable correlation matrix" },
+        "num_trials": { "type": "number", "required": false, "description": "Number of simulation trials (default 5000)" },
+        "random_seed": { "type": "number", "required": false, "description": "Random seed for reproducibility" },
+        "target_irr": { "type": "number", "required": false, "description": "Target IRR threshold for probability calc" }
+      },
+      "outputs": {
+        "percentile_returns": { "type": "object", "description": "IRR/equity multiple at p5, p25, p50, p75, p95" },
+        "probability_metrics": { "type": "object", "description": "Probability of loss, probability of hitting target IRR" },
+        "sensitivity_ranking": { "type": "array", "description": "Variables ranked by impact on returns" },
+        "distribution_histogram": { "type": "object", "description": "Binned IRR distribution" },
+        "summary_statistics": { "type": "object", "description": "Mean, median, std dev, skew, kurtosis of IRR distribution" }
+      },
+      "used_by": ["monte-carlo-return-simulator"]
+    },
+    "npv_trade_out": {
+      "script": "scripts/calculators/npv_trade_out.py",
+      "description": "Compares renewal NPV vs trade-out NPV for lease expiration decisions with breakeven analysis and sensitivity grid",
+      "inputs": {
+        "current_rent_psf": { "type": "number", "required": true, "description": "Current in-place rent per SF" },
+        "market_rent_psf": { "type": "number", "required": true, "description": "Current market rent per SF" },
+        "renewal_rent_psf": { "type": "number", "required": true, "description": "Proposed renewal rent per SF" },
+        "renewal_ti_psf": { "type": "number", "required": true, "description": "Renewal TI allowance per SF" },
+        "new_ti_psf": { "type": "number", "required": true, "description": "New tenant TI allowance per SF" },
+        "lc_pct_renewal": { "type": "number", "required": true, "description": "Leasing commission pct for renewal" },
+        "lc_pct_new": { "type": "number", "required": true, "description": "Leasing commission pct for new lease" },
+        "vacancy_months": { "type": "number", "required": true, "description": "Expected downtime months for trade-out" },
+        "make_ready_psf": { "type": "number", "required": true, "description": "Make-ready cost per SF" },
+        "sf": { "type": "number", "required": true, "description": "Suite square footage" },
+        "lease_term_years": { "type": "number", "required": true, "description": "Lease term in years" },
+        "discount_rate": { "type": "number", "required": true, "description": "Discount rate (decimal)" },
+        "annual_escalation": { "type": "number", "required": true, "description": "Annual rent escalation rate (decimal)" },
+        "carrying_cost_psf_monthly": { "type": "number", "required": false, "description": "Monthly carrying cost per SF during vacancy" }
+      },
+      "outputs": {
+        "renewal_npv": { "type": "number", "description": "NPV of renewal scenario" },
+        "tradeout_npv": { "type": "number", "description": "NPV of trade-out scenario" },
+        "delta": { "type": "number", "description": "NPV difference (trade-out - renewal)" },
+        "breakeven_vacancy_months": { "type": "number", "description": "Max vacancy months before renewal wins" },
+        "breakeven_rent_premium": { "type": "number", "description": "Min rent premium to justify trade-out" },
+        "sensitivity_grid": { "type": "object", "description": "2D grid of vacancy months vs rent premium" }
+      },
+      "used_by": ["lease-trade-out-analyzer"]
+    },
+    "option_valuation": {
+      "script": "scripts/calculators/option_valuation.py",
+      "description": "Calculates termination fees, renewal option cap rate impact, and compares conservative/moderate/aggressive option packages by NPV",
+      "inputs": {
+        "ti_total": { "type": "number", "required": true, "description": "Total TI investment" },
+        "ti_amortization_months": { "type": "number", "required": false, "description": "TI amortization period in months (default 120)" },
+        "lc_total": { "type": "number", "required": true, "description": "Total leasing commission cost" },
+        "lc_amortization_months": { "type": "number", "required": false, "description": "LC amortization period in months (default 120)" },
+        "months_remaining": { "type": "number", "required": true, "description": "Months remaining on current lease" },
+        "market_rent_psf": { "type": "number", "required": true, "description": "Current market rent per SF" },
+        "sf": { "type": "number", "required": true, "description": "Suite square footage" },
+        "expected_vacancy_months": { "type": "number", "required": true, "description": "Expected vacancy months if tenant leaves" },
+        "releasing_cost_psf": { "type": "number", "required": false, "description": "Re-leasing cost per SF" },
+        "discount_rate": { "type": "number", "required": true, "description": "Discount rate (decimal)" },
+        "noi": { "type": "number", "required": true, "description": "Property total NOI" },
+        "cap_rate": { "type": "number", "required": true, "description": "Property cap rate (decimal)" },
+        "tenant_pct_of_nra": { "type": "number", "required": true, "description": "Tenant SF as pct of total NRA" },
+        "lease_term_years": { "type": "number", "required": false, "description": "Original lease term in years" },
+        "remaining_term_years": { "type": "number", "required": false, "description": "Remaining years on lease" }
+      },
+      "outputs": {
+        "termination_fee": { "type": "number", "description": "Minimum acceptable termination fee" },
+        "fee_components": { "type": "object", "description": "Breakdown: unamortized TI, LC, re-leasing, opportunity cost" },
+        "cap_rate_impact_bps": { "type": "number", "description": "Cap rate impact of option risk in basis points" },
+        "package_comparison": { "type": "object", "description": "NPV comparison of conservative/moderate/aggressive packages" }
+      },
+      "used_by": ["lease-option-structurer"]
+    },
+    "proration_calculator": {
+      "script": "scripts/calculators/proration_calculator.py",
+      "description": "Calculates per diem prorations for tax, rent, insurance, and CAM/OpEx at CRE closings with actual/365, actual/360, and 30/360 conventions",
+      "inputs": {
+        "closing_date": { "type": "string", "required": true, "description": "Closing date (YYYY-MM-DD)" },
+        "annual_tax": { "type": "number", "required": true, "description": "Annual property tax amount" },
+        "tax_year_start": { "type": "string", "required": false, "description": "Tax year start date (YYYY-MM-DD)" },
+        "tax_paid_through": { "type": "string", "required": false, "description": "Date tax is paid through (YYYY-MM-DD)" },
+        "monthly_rent": { "type": "number", "required": false, "description": "Monthly rent collected" },
+        "rent_collected_through": { "type": "string", "required": false, "description": "Date rent is collected through (YYYY-MM-DD)" },
+        "insurance_annual": { "type": "number", "required": false, "description": "Annual insurance premium" },
+        "insurance_paid_through": { "type": "string", "required": false, "description": "Date insurance is paid through (YYYY-MM-DD)" },
+        "proration_method": { "type": "string", "required": false, "description": "Convention: actual_365, actual_360, or 30_360 (default actual_365)" }
+      },
+      "outputs": {
+        "buyer_credit": { "type": "number", "description": "Net credit to buyer" },
+        "seller_credit": { "type": "number", "description": "Net credit to seller" },
+        "per_diem_amounts": { "type": "object", "description": "Per diem rate for each proration item" },
+        "line_items": { "type": "array", "description": "Detailed proration line items" }
+      },
+      "used_by": ["funds-flow-calculator"]
+    },
+    "tenant_credit_scorer": {
+      "script": "scripts/calculators/tenant_credit_scorer.py",
+      "description": "Calculates HHI concentration, WALT-weighted credit score, expected annual loss, and occupancy cost ratios for a rent roll",
+      "inputs": {
+        "tenants": {
+          "type": "array",
+          "required": true,
+          "description": "Array of tenant objects",
+          "items": {
+            "name": { "type": "string", "required": true, "description": "Tenant name" },
+            "annual_rent": { "type": "number", "required": true, "description": "Annual rent" },
+            "sf": { "type": "number", "required": true, "description": "Leased square footage" },
+            "lease_remaining_years": { "type": "number", "required": true, "description": "Remaining lease term in years" },
+            "credit_rating": { "type": "string", "required": false, "description": "Credit rating (S&P or Moody's, null if unrated)" },
+            "revenue": { "type": "number", "required": false, "description": "Tenant annual revenue (for OCR calc)" },
+            "property_type": { "type": "string", "required": false, "description": "Property type for default probability lookup" }
+          }
+        }
+      },
+      "outputs": {
+        "hhi": { "type": "number", "description": "Herfindahl-Hirschman Index (tenant concentration)" },
+        "walt": { "type": "number", "description": "Weighted average lease term" },
+        "walt_weighted_score": { "type": "number", "description": "WALT-weighted composite credit score" },
+        "expected_loss_by_tenant": { "type": "array", "description": "Expected annual loss per tenant" },
+        "ocr_by_tenant": { "type": "array", "description": "Occupancy cost ratio per tenant" },
+        "concentration_flags": { "type": "array", "description": "Tenants exceeding concentration thresholds" }
+      },
+      "used_by": ["tenant-credit-analyzer"]
+    },
+    "transfer_tax": {
+      "script": "scripts/calculators/transfer_tax.py",
+      "description": "Calculates state and local transfer taxes for CRE transactions across all 50 states + DC with tiered rate handling",
+      "inputs": {
+        "state": { "type": "string", "required": true, "description": "Two-letter state abbreviation" },
+        "purchase_price": { "type": "number", "required": true, "description": "Transaction purchase price" },
+        "county": { "type": "string", "required": false, "description": "County name (needed for NYC, Chicago, etc.)" },
+        "property_type": { "type": "string", "required": false, "description": "commercial or residential (affects rates in some states)" }
+      },
+      "outputs": {
+        "state_tax": { "type": "number", "description": "State-level transfer tax" },
+        "county_tax": { "type": "number", "description": "County or local transfer tax" },
+        "total_tax": { "type": "number", "description": "Combined total transfer tax" },
+        "buyer_portion": { "type": "number", "description": "Buyer's conventional share" },
+        "seller_portion": { "type": "number", "description": "Seller's conventional share" },
+        "notes": { "type": "string", "description": "State-specific notes and caveats" }
+      },
+      "used_by": ["transfer-document-preparer", "funds-flow-calculator", "title-commitment-reviewer"]
+    },
+    "waterfall_calculator": {
+      "script": "scripts/calculators/waterfall_calculator.py",
+      "description": "Calculates GP/LP distributions through multi-tier promote waterfall with preferred return accrual, catch-up, and IRR-based lookback",
+      "inputs": {
+        "lp_equity": { "type": "number", "required": true, "description": "Total LP equity contribution" },
+        "gp_equity": { "type": "number", "required": true, "description": "Total GP equity contribution" },
+        "preferred_return": { "type": "number", "required": true, "description": "Preferred return rate (decimal)" },
+        "tiers": {
+          "type": "array",
+          "required": true,
+          "description": "Array of waterfall tiers",
+          "items": {
+            "hurdle_irr": { "type": "number", "description": "IRR hurdle for this tier" },
+            "gp_split": { "type": "number", "description": "GP share above this hurdle" },
+            "lp_split": { "type": "number", "description": "LP share above this hurdle" }
+          }
+        },
+        "cashflows_by_period": { "type": "array", "required": true, "description": "Array of periodic cash flows (index 0 = initial investment, negative)" },
+        "catch_up_pct": { "type": "number", "required": false, "description": "GP catch-up percentage (0-1)" },
+        "compounding": { "type": "boolean", "required": false, "description": "Whether preferred return compounds (default true)" }
+      },
+      "outputs": {
+        "lp_distributions": { "type": "array", "description": "LP distributions by period" },
+        "gp_distributions": { "type": "array", "description": "GP distributions by period" },
+        "gp_promote": { "type": "number", "description": "Total GP promote earned" },
+        "lp_irr": { "type": "number", "description": "LP internal rate of return" },
+        "gp_irr": { "type": "number", "description": "GP internal rate of return" },
+        "total_profit": { "type": "number", "description": "Total profit distributed" },
+        "tier_detail": { "type": "array", "description": "Distributions allocated per tier" }
+      },
+      "used_by": ["jv-waterfall-architect"]
+    },
+    "construction_estimator": {
+      "script": "scripts/calculators/construction_estimator.py",
+      "description": "Produces TDC estimate by CSI division with regional adjustment, soft cost layering, contingency, and sensitivity analysis",
+      "inputs": {
+        "asset_type": { "type": "string", "required": true, "description": "Property type (multifamily, office, retail, industrial, hotel)" },
+        "gross_sf": { "type": "number", "required": true, "description": "Gross building square footage" },
+        "unit_count": { "type": "number", "required": false, "description": "Number of units (multifamily/hotel)" },
+        "stories": { "type": "number", "required": false, "description": "Number of stories" },
+        "location": { "type": "string", "required": true, "description": "City, State for regional cost adjustment" },
+        "construction_type": { "type": "string", "required": true, "description": "Construction type (wood_frame, steel, concrete, hybrid)" },
+        "finish_level": { "type": "string", "required": true, "description": "Finish level (value, standard, premium, luxury)" },
+        "parking_type": { "type": "string", "required": false, "description": "Parking type (surface, structured, underground)" },
+        "parking_spaces": { "type": "number", "required": false, "description": "Number of parking spaces" },
+        "union_labor": { "type": "boolean", "required": false, "description": "Whether union labor is required" },
+        "prevailing_wage": { "type": "boolean", "required": false, "description": "Whether prevailing wage applies" },
+        "site_conditions": { "type": "string", "required": false, "description": "Site conditions (greenfield, infill, brownfield)" }
+      },
+      "outputs": {
+        "hard_costs_by_division": { "type": "object", "description": "Cost per CSI division with $/SF" },
+        "regional_adjustment": { "type": "number", "description": "Regional cost multiplier applied" },
+        "soft_costs": { "type": "object", "description": "Soft cost line items (A&E, permits, legal, financing, etc.)" },
+        "contingency": { "type": "number", "description": "Contingency amount" },
+        "tdc_summary": { "type": "object", "description": "Total development cost summary" },
+        "key_metrics": { "type": "object", "description": "TDC per unit, TDC per SF, hard cost per SF" },
+        "sensitivity_3scenario": { "type": "object", "description": "Low/base/high TDC scenarios" }
+      },
+      "used_by": ["construction-cost-estimator"]
+    }
+  }
+}
