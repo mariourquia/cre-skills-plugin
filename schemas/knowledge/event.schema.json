@@ -1,0 +1,192 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "knowledge/event.schema.json",
+  "title": "Knowledge Event",
+  "description": "Event stream schema for the knowledge graph. Events flow from pipeline orchestrators through the event-publisher into the knowledge graph, where the knowledge-manager routes them to subscribers and entity records.",
+  "type": "object",
+  "required": [
+    "eventId",
+    "timestamp",
+    "eventType",
+    "severity",
+    "source",
+    "title",
+    "summary"
+  ],
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "pattern": "^EVT-[0-9]{4}-[0-9]{2}-[0-9]{2}-[A-Za-z0-9]{6,}$",
+      "description": "Unique event identifier. Format: EVT-{YYYY}-{MM}-{DD}-{HASH} where HASH is a 6+ character alphanumeric string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp when the event occurred"
+    },
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "MARKET_ALERT",
+        "DECISION",
+        "FINDING",
+        "ACTION",
+        "POLICY_CHANGE",
+        "PERFORMANCE_UPDATE",
+        "RISK_FLAG",
+        "MILESTONE"
+      ],
+      "description": "Classification of the event. Determines routing to subscribers and broadcast channels."
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "INFO",
+        "WARNING",
+        "ALERT",
+        "CRITICAL"
+      ],
+      "description": "Event severity level. Events at ALERT or CRITICAL are written to broadcast channels in addition to the event stream."
+    },
+    "source": {
+      "type": "object",
+      "required": ["pipeline"],
+      "properties": {
+        "pipeline": {
+          "type": "string",
+          "description": "Pipeline that generated the event (e.g., 'hold-period', 'acquisition', 'fund-management', 'research-intelligence', 'property-management', 'disposition', 'portfolio-management', 'investment-strategy', 'capital-stack', 'development', 'lp-intelligence')"
+        },
+        "agent": {
+          "type": ["string", "null"],
+          "description": "Specific agent within the pipeline that generated the event"
+        },
+        "entityId": {
+          "type": ["string", "null"],
+          "description": "Entity ID associated with the source context (property, fund, etc.)"
+        },
+        "phase": {
+          "type": ["string", "null"],
+          "description": "Pipeline phase that generated the event"
+        },
+        "orchestrator": {
+          "type": ["string", "null"],
+          "description": "Orchestrator that routed the event to the event-publisher"
+        }
+      },
+      "additionalProperties": false
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Short, descriptive event title. Must be specific enough to be actionable without reading the summary."
+    },
+    "summary": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "Detailed event summary. Should contain: what happened, why it matters, what changed, and any immediate implications."
+    },
+    "affectedEntities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["entityId", "impact"],
+        "properties": {
+          "entityId": {
+            "type": "string",
+            "description": "Entity ID affected by this event"
+          },
+          "entityType": {
+            "type": "string",
+            "enum": ["PROPERTY", "FUND", "MARKET", "TENANT", "VENDOR", "LENDER", "BROKER"]
+          },
+          "impact": {
+            "type": "string",
+            "enum": ["DIRECT", "INDIRECT", "INFORMATIONAL"],
+            "description": "How the entity is affected: DIRECT (entity data changes), INDIRECT (related entity impacted), INFORMATIONAL (awareness only)"
+          },
+          "fieldsAffected": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Dot-notation paths to entity record fields that should be updated (e.g., 'currentPerformance.occupancy.physical')"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Entities affected by this event. The knowledge-manager uses this to update entity records."
+    },
+    "data": {
+      "type": "object",
+      "description": "Event-specific structured data. Schema varies by eventType. The knowledge-manager extracts field updates from this object.",
+      "additionalProperties": true
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Freeform tags for subscription matching and rollup classification. Tags should include: market name, property type, risk category, theme."
+    },
+    "ttl": {
+      "type": "object",
+      "properties": {
+        "expiresAt": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "ISO-8601 timestamp when this event expires. Null = never expires. Default TTL is 1 year for most events. DECISION events never expire."
+        },
+        "retentionPolicy": {
+          "type": "string",
+          "enum": [
+            "STANDARD",
+            "EXTENDED",
+            "PERMANENT"
+          ],
+          "description": "STANDARD = 1 year, EXTENDED = 3 years, PERMANENT = never expires. DECISION and POLICY_CHANGE events default to PERMANENT."
+        }
+      },
+      "additionalProperties": false
+    },
+    "parentEventId": {
+      "type": ["string", "null"],
+      "description": "If this event is a follow-up or correction to a prior event, reference the parent event ID"
+    },
+    "correlationId": {
+      "type": ["string", "null"],
+      "description": "Shared identifier for related events across pipelines (e.g., all events from a single quarterly review cycle)"
+    },
+    "broadcastChannels": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "market-alerts",
+          "policy-changes",
+          "portfolio-updates",
+          "operational-alerts"
+        ]
+      },
+      "description": "Broadcast channels this event was published to. Populated by event-publisher for events with severity >= ALERT."
+    },
+    "acknowledgements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["subscriberId", "acknowledgedAt"],
+        "properties": {
+          "subscriberId": {
+            "type": "string"
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "action": {
+            "type": ["string", "null"],
+            "description": "Action taken in response to the event"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Subscribers that have acknowledged this event. Populated by knowledge-manager."
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/portfolio-rebalance-data.schema.json",
+  "title": "Portfolio Management Phase 4 -- Rebalancing Strategy Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the rebalancing strategy phase. Covers sell/acquire recommendations, tax-efficient execution, pro forma portfolio, and liquidity assessment.",
+  "type": "object",
+  "required": [
+    "rebalancingPlan",
+    "liquidityAssessment"
+  ],
+  "properties": {
+    "rebalancingPlan": {
+      "type": "object",
+      "description": "Complete rebalancing strategy with sell/acquire recommendations.",
+      "required": ["sellCandidates", "overallRecommendation"],
+      "properties": {
+        "sellCandidates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["propertyId", "sellScore", "category"],
+            "properties": {
+              "rank": { "type": "integer" },
+              "propertyId": { "type": "string" },
+              "propertyName": { "type": "string" },
+              "sellScore": { "type": "number", "minimum": 0, "maximum": 100 },
+              "category": { "type": "string", "enum": ["STRONG_SELL", "CONSIDER_SELL", "HOLD"] },
+              "primaryReason": { "type": "string" },
+              "secondaryReasons": { "type": "array", "items": { "type": "string" } },
+              "estimatedValue": { "type": "number" },
+              "estimatedProceeds": { "type": "number" },
+              "taxStrategy": { "type": "string", "enum": ["1031", "INSTALLMENT", "TAXABLE"] },
+              "executionPhase": { "type": "integer", "minimum": 1, "maximum": 4 }
+            }
+          }
+        },
+        "acquisitionTargets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "profileId": { "type": "string" },
+              "targetPropertyType": { "type": "string" },
+              "targetGeography": { "type": "string" },
+              "targetSizeRange": { "type": "object" },
+              "targetCapRate": { "type": "object" },
+              "budget": { "type": "number" },
+              "allocationGapFilled": { "type": "string" },
+              "marketRationale": { "type": "string" }
+            }
+          }
+        },
+        "taxStrategy": {
+          "type": "object",
+          "properties": {
+            "total1031Eligible": { "type": "integer" },
+            "estimatedTaxLiability": { "type": "number" },
+            "taxSavingsFromOptimization": { "type": "number" }
+          }
+        },
+        "proFormaPortfolio": {
+          "type": "object",
+          "properties": {
+            "proFormaAUM": { "type": "number" },
+            "compositeDriftReduction": { "type": "number" },
+            "riskScoreImprovement": { "type": "number" },
+            "rebalancingEffective": { "type": "boolean" }
+          }
+        },
+        "executionTimeline": {
+          "type": "object",
+          "properties": {
+            "phase1": { "$ref": "#/$defs/executionPhase" },
+            "phase2": { "$ref": "#/$defs/executionPhase" },
+            "phase3": { "$ref": "#/$defs/executionPhase" },
+            "phase4": { "$ref": "#/$defs/executionPhase" },
+            "totalTransactionCost": { "type": "number" },
+            "transactionCostPctOfAUM": { "type": "number" }
+          }
+        },
+        "overallRecommendation": {
+          "type": "string",
+          "enum": ["EXECUTE", "MODIFY", "DEFER"]
+        }
+      }
+    },
+    "liquidityAssessment": {
+      "type": "object",
+      "description": "Portfolio liquidity and distribution capacity assessment.",
+      "required": ["overallAssessment", "rebalancingFeasibility"],
+      "properties": {
+        "cashFlowProjection": {
+          "type": "object",
+          "properties": {
+            "totalOperatingCF": { "type": "number" },
+            "totalTransactionCF": { "type": "number" },
+            "cashGapMonths": { "type": "array", "items": { "type": "integer" } }
+          }
+        },
+        "reserveAdequacy": {
+          "type": "object",
+          "properties": {
+            "reserveRatio": { "type": "number" },
+            "reserveStatus": { "type": "string", "enum": ["WELL_RESERVED", "ADEQUATE", "THIN", "INADEQUATE"] }
+          }
+        },
+        "distributionCapacity": {
+          "type": "object",
+          "properties": {
+            "annualDistributable": { "type": "number" },
+            "distributionYield": { "type": "number" },
+            "dpi": { "type": "number" },
+            "tvpi": { "type": "number" },
+            "preferredReturnStatus": { "type": "string", "enum": ["CURRENT", "IN_ARREARS", "ACCRUING"] }
+          }
+        },
+        "capitalCallPacing": {
+          "type": "object",
+          "properties": {
+            "unfundedCommitments": { "type": "number" },
+            "percentCalled": { "type": "number" },
+            "recycledCapital": { "type": "number" }
+          }
+        },
+        "overallAssessment": {
+          "type": "string",
+          "enum": ["STRONG", "ADEQUATE", "CONSTRAINED", "DISTRESSED"]
+        },
+        "rebalancingFeasibility": {
+          "type": "string",
+          "enum": ["FEASIBLE", "FEASIBLE_WITH_MODIFICATIONS", "NOT_FEASIBLE"]
+        }
+      }
+    }
+  },
+  "$defs": {
+    "executionPhase": {
+      "type": "object",
+      "properties": {
+        "period": { "type": "string" },
+        "actions": { "type": "array", "items": { "type": "object" } },
+        "assetCount": { "type": "integer" },
+        "proceeds": { "type": "number" },
+        "cost": { "type": "number" }
+      }
+    }
+  }
+}

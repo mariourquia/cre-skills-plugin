@@ -1,0 +1,67 @@
+{
+  "pipelineId": "capital-stack-optimizer",
+  "perspectives": [
+    {
+      "perspectiveId": "interest-rate-bear",
+      "name": "Interest Rate Bear",
+      "question": "What if rates rise 200bps before lock?",
+      "tier": 1,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "rate-lock-timing-risk",
+        "floating-rate-exposure",
+        "hedging-cost-sensitivity",
+        "dscr-under-rate-shock",
+        "spread-widening-scenarios"
+      ],
+      "challengeThreshold": "Floating rate selected OR rate lock window exceeds 30 days OR DSCR cushion below 15% above covenant"
+    },
+    {
+      "perspectiveId": "covenant-stress-analyst",
+      "name": "Covenant Stress Analyst",
+      "question": "Which covenant breaks first under NOI stress?",
+      "tier": 1,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "dscr-breakeven-noi",
+        "debt-yield-sensitivity",
+        "ltv-retest-risk",
+        "cash-trap-trigger-proximity",
+        "reserve-requirement-escalation"
+      ],
+      "challengeThreshold": "DSCR breakeven within 10% of projected NOI OR debt yield breakeven within 15% of projected NOI"
+    },
+    {
+      "perspectiveId": "refinance-risk-hawk",
+      "name": "Refinance Risk Hawk",
+      "question": "What happens at maturity if cap rates expand?",
+      "tier": 2,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "maturity-default-risk",
+        "cap-rate-expansion-scenarios",
+        "ltv-at-maturity-under-stress",
+        "refinance-gap-analysis",
+        "extension-option-value"
+      ],
+      "challengeThreshold": "Loan maturity within 5 years AND no extension option OR cap rate expansion of 50bps causes LTV breach"
+    },
+    {
+      "perspectiveId": "lp-dilution-watch",
+      "name": "LP Dilution Watch",
+      "question": "Does the mezz/pref layer destroy equity returns?",
+      "tier": 2,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "subordinate-capital-cost-vs-equity-return",
+        "promote-erosion-from-mezz-pref",
+        "lp-irr-sensitivity-to-subordinate-cost",
+        "waterfall-breakpoint-analysis",
+        "equity-dilution-quantification"
+      ],
+      "challengeThreshold": "Subordinate capital cost exceeds 12% OR LP IRR reduction from subordinate layer exceeds 200bps"
+    }
+  ],
+  "synthesisModel": "claude-opus-4-6[1m]",
+  "verdictReconciliation": "Challenge verdict overrides pipeline verdict if it differs"
+}

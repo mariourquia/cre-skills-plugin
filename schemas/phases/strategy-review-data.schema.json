@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/strategy-review-data.schema.json",
+  "title": "Investment Strategy Phase 5 -- Strategy Review Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the strategy review phase. Covers thesis validation, cycle reassessment, allocation drift, scenario re-run, and ACTIVE/PIVOT/PAUSE verdict. This phase is recurring semi-annually.",
+  "type": "object",
+  "required": ["thesisValidation", "cycleReassessment", "allocationDrift", "verdict"],
+  "properties": {
+    "thesisValidation": {
+      "type": "object",
+      "description": "Assessment of original thesis assumptions against current reality.",
+      "required": ["totalAssumptions", "validCount", "validityScorePct", "thesisStatus"],
+      "properties": {
+        "totalAssumptions": { "type": "integer" },
+        "validCount": { "type": "integer" },
+        "partialCount": { "type": "integer" },
+        "invalidCount": { "type": "integer" },
+        "validityScorePct": { "type": "number" },
+        "thesisStatus": { "type": "string", "enum": ["intact", "under_pressure", "compromised"] },
+        "assumptionDetails": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "assumptionId": { "type": "integer" },
+              "category": { "type": "string", "enum": ["macro", "market", "financial"] },
+              "originalAssumption": { "type": "string" },
+              "originalBasis": { "type": "string" },
+              "currentReality": { "type": "string" },
+              "validity": { "type": "string", "enum": ["valid", "partial", "invalid"] },
+              "impactIfInvalid": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "cycleReassessment": {
+      "type": "object",
+      "description": "Updated Mueller cycle positioning.",
+      "required": ["originalPhase", "currentPhase", "cycleStability"],
+      "properties": {
+        "originalPhase": { "type": "string", "enum": ["recovery", "expansion", "hyper_supply", "recession"] },
+        "originalSubPhase": { "type": "string", "enum": ["early", "mid", "late"] },
+        "currentPhase": { "type": "string", "enum": ["recovery", "expansion", "hyper_supply", "recession"] },
+        "currentSubPhase": { "type": "string", "enum": ["early", "mid", "late"] },
+        "phaseChanged": { "type": "boolean" },
+        "directionChanged": { "type": "boolean" },
+        "cycleStability": { "type": "string", "enum": ["stable", "progressing", "changed", "critical"] },
+        "strategyCycleCompatibility": { "type": "string", "enum": ["strong", "adequate", "weakened", "incompatible"] },
+        "indicators": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+    "allocationDrift": {
+      "type": "object",
+      "description": "Target vs actual allocation drift measurements.",
+      "required": ["compositeDriftPct", "classification", "rebalancingStatus"],
+      "properties": {
+        "propertyTypeDrift": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "targetPct": { "type": "number" },
+              "actualPct": { "type": "number" },
+              "driftPct": { "type": "number" },
+              "status": { "type": "string", "enum": ["green", "yellow", "red"] }
+            }
+          }
+        },
+        "geographicDrift": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "msa": { "type": "string" },
+              "targetPct": { "type": "number" },
+              "actualPct": { "type": "number" },
+              "driftPct": { "type": "number" },
+              "status": { "type": "string", "enum": ["green", "yellow", "red"] }
+            }
+          }
+        },
+        "riskTierDrift": { "type": "array", "items": { "type": "object" } },
+        "leverageDrift": {
+          "type": "object",
+          "properties": {
+            "targetLtv": { "type": "number" },
+            "actualLtv": { "type": "number" },
+            "driftPct": { "type": "number" }
+          }
+        },
+        "vintageConcentration": {
+          "type": "object",
+          "properties": {
+            "maxWindowPct": { "type": "number" },
+            "peakPricingExposurePct": { "type": "number" }
+          }
+        },
+        "compositeDriftPct": { "type": "number" },
+        "classification": { "type": "string", "enum": ["aligned", "minor_drift", "moderate_drift", "significant_drift", "severe_drift"] },
+        "rebalancingStatus": { "type": "string", "enum": ["clear", "watch", "action"] },
+        "triggersActivated": { "type": "integer" },
+        "rebalancingRecommendations": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+    "scenarioRerun": {
+      "type": "object",
+      "description": "Updated scenario analysis with current market assumptions.",
+      "properties": {
+        "updatedScenarios": {
+          "type": "object",
+          "properties": {
+            "bull": { "type": "object" },
+            "base": { "type": "object" },
+            "bear": { "type": "object" },
+            "stress": { "type": "object" }
+          }
+        },
+        "baseCaseMeetsTarget": { "type": "boolean" },
+        "bearCaseMeetsPreferred": { "type": "boolean" },
+        "stressCasePreservesCapital": { "type": "boolean" },
+        "returnFrameworkStatus": { "type": "string", "enum": ["intact", "adjusted", "at_risk"] }
+      }
+    },
+    "pivotAnalysis": {
+      "type": "object",
+      "description": "Strategy pivot triggers and recommendation.",
+      "properties": {
+        "triggersActivated": { "type": "array", "items": { "type": "string" } },
+        "triggersCount": { "type": "integer" },
+        "criticalTriggers": { "type": "array", "items": { "type": "string" } },
+        "recommendedPivot": { "type": "string", "enum": ["none", "parameter_adjustment", "strategy_shift", "pause", "redesign"] },
+        "specificChanges": { "type": "array", "items": { "type": "object" } },
+        "implementationTimeline": { "type": "string" }
+      }
+    },
+    "verdict": {
+      "type": "object",
+      "description": "Semi-annual strategy review verdict.",
+      "required": ["decision", "confidence"],
+      "properties": {
+        "decision": { "type": "string", "enum": ["ACTIVE", "PIVOT", "PAUSE"] },
+        "confidence": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "summary": { "type": "string" },
+        "nextReviewDate": { "type": "string", "format": "date" },
+        "actionItems": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

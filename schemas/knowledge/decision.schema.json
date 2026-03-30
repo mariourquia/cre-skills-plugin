@@ -1,0 +1,198 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "knowledge/decision.schema.json",
+  "title": "Knowledge Decision Log",
+  "description": "Decision log schema for the knowledge graph. Captures investment, exit, strategy, policy, and operational decisions with full audit trail. Decisions never expire and form the institutional memory of the platform.",
+  "type": "object",
+  "required": [
+    "decisionId",
+    "date",
+    "type",
+    "title",
+    "decidedBy",
+    "rationale",
+    "status"
+  ],
+  "properties": {
+    "decisionId": {
+      "type": "string",
+      "pattern": "^DEC-[0-9]{4}-[0-9]{3,}$",
+      "description": "Unique decision identifier. Format: DEC-{YYYY}-{SEQ} (e.g., DEC-2026-001)"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the decision was made"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "INVESTMENT",
+        "EXIT",
+        "STRATEGY",
+        "POLICY",
+        "OPERATIONAL"
+      ],
+      "description": "Decision classification. INVESTMENT: buy/pass on a deal. EXIT: sell/hold/refi. STRATEGY: fund-level strategy change. POLICY: policy or threshold change. OPERATIONAL: property-level operational decision."
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Concise decision title. Must be specific and actionable."
+    },
+    "decidedBy": {
+      "type": "string",
+      "description": "Decision maker: agent name, IC committee, or human operator"
+    },
+    "reviewedBy": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Agents or humans who reviewed the decision before finalization"
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 50,
+      "description": "Detailed rationale for the decision. Must include: what data was considered, what alternatives were evaluated, why this option was chosen. Minimum 50 characters."
+    },
+    "alternatives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["option", "reason_rejected"],
+        "properties": {
+          "option": {
+            "type": "string",
+            "description": "Alternative that was considered"
+          },
+          "reason_rejected": {
+            "type": "string",
+            "description": "Why this alternative was not chosen"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Alternatives considered and reasons for rejection"
+    },
+    "dataSupport": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "reference"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["EVENT", "ENTITY_RECORD", "INSIGHT", "REPORT", "EXTERNAL"],
+            "description": "Type of supporting data"
+          },
+          "reference": {
+            "type": "string",
+            "description": "Event ID, entity ID, insight ID, file path, or URL"
+          },
+          "summary": {
+            "type": ["string", "null"],
+            "description": "Brief summary of what this data point contributed to the decision"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Data points that supported the decision. Creates an audit trail from decision back to evidence."
+    },
+    "affectedEntities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "Entity IDs affected by this decision"
+      },
+      "description": "Entities whose records should be updated as a result of this decision"
+    },
+    "affectedPipelines": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "Pipeline names affected by this decision (e.g., 'acquisition', 'disposition', 'hold-period')"
+      },
+      "description": "Pipelines whose behavior or parameters change as a result of this decision"
+    },
+    "effectiveDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when the decision takes effect. May differ from the decision date."
+    },
+    "expirationDate": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "Date when the decision expires and must be reviewed. Null = no expiration (permanent)."
+    },
+    "reviewDate": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "Scheduled date for reviewing this decision. All STRATEGY and POLICY decisions must have a review date."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "EXPIRED",
+        "SUPERSEDED",
+        "REVERSED"
+      ],
+      "description": "Current status. ACTIVE: in effect. EXPIRED: past expiration date. SUPERSEDED: replaced by a newer decision. REVERSED: explicitly undone."
+    },
+    "supersededBy": {
+      "type": ["string", "null"],
+      "description": "Decision ID that superseded this decision, if status is SUPERSEDED"
+    },
+    "reversedBy": {
+      "type": ["string", "null"],
+      "description": "Decision ID that reversed this decision, if status is REVERSED"
+    },
+    "outcome": {
+      "type": "object",
+      "description": "Post-decision outcome tracking. Populated over time as results materialize.",
+      "properties": {
+        "assessedAt": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "When the outcome was last assessed"
+        },
+        "result": {
+          "type": ["string", "null"],
+          "enum": ["POSITIVE", "NEUTRAL", "NEGATIVE", "TOO_EARLY", null],
+          "description": "Assessment of whether the decision produced the intended result"
+        },
+        "notes": {
+          "type": ["string", "null"],
+          "description": "Narrative assessment of the outcome"
+        },
+        "metricsImpact": {
+          "type": "object",
+          "description": "Quantified impact of the decision on key metrics",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "confidenceAtDecision": {
+      "type": "string",
+      "enum": ["HIGH", "MEDIUM", "LOW"],
+      "description": "Confidence level at the time the decision was made"
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Tags for categorization and subscription matching"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "createdBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "lastUpdatedBy": { "type": "string" },
+        "lastUpdatedAt": { "type": "string", "format": "date-time" },
+        "version": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/research-policy-data.schema.json",
+  "title": "Research Intelligence Phase 4 -- Policy & Regulatory Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the policy and regulatory monitoring phase. Covers regulatory scorecards, alerts, and tax policy risk register.",
+  "type": "object",
+  "required": [
+    "regulatoryScoreCards"
+  ],
+  "properties": {
+    "regulatoryScoreCards": {
+      "type": "array",
+      "description": "Per-MSA regulatory scorecards with rent control, building standards, zoning, tax, and housing policy dimensions.",
+      "items": {
+        "type": "object",
+        "required": ["msa", "state", "rentControlScore", "buildingStandardsScore", "zoningScore", "taxScore", "housingPolicyScore", "compositeScore", "classification"],
+        "properties": {
+          "msa": { "type": "string" },
+          "state": { "type": "string" },
+          "rentControlScore": { "type": "number", "minimum": 0, "maximum": 100, "description": "Inverse score: 100 = no rent control risk, 0 = extreme rent control." },
+          "buildingStandardsScore": { "type": "number", "minimum": 0, "maximum": 100 },
+          "zoningScore": { "type": "number", "minimum": 0, "maximum": 100 },
+          "taxScore": { "type": "number", "minimum": 0, "maximum": 100 },
+          "housingPolicyScore": { "type": "number", "minimum": 0, "maximum": 100 },
+          "compositeScore": { "type": "number", "minimum": 0, "maximum": 100 },
+          "classification": { "type": "string", "enum": ["FAVORABLE", "MANAGEABLE", "HOSTILE"] },
+          "dataQuality": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW"] },
+          "rentControlRisk": { "type": "string", "enum": ["NONE", "LOW", "MODERATE", "HIGH", "EXTREME"] },
+          "buildingPerformanceRisk": { "type": "string", "enum": ["NONE", "LOW", "MODERATE", "HIGH"] }
+        }
+      }
+    },
+    "regulatoryAlerts": {
+      "type": "array",
+      "description": "Active regulatory alerts with severity, timeline, and financial impact.",
+      "items": {
+        "type": "object",
+        "required": ["msa", "category", "severity", "description"],
+        "properties": {
+          "msa": { "type": "string" },
+          "category": { "type": "string", "enum": ["rent-control", "building-performance", "zoning", "tax-policy", "housing-policy"] },
+          "severity": { "type": "string", "enum": ["INFO", "WARNING", "CRITICAL"] },
+          "description": { "type": "string" },
+          "timeline": { "type": "string" },
+          "estimatedFinancialImpact": { "type": "string" }
+        }
+      }
+    },
+    "taxPolicyRiskRegister": {
+      "type": "array",
+      "description": "Federal and state tax policy risks with probability-weighted impact.",
+      "items": {
+        "type": "object",
+        "required": ["risk", "probability", "severity"],
+        "properties": {
+          "risk": { "type": "string" },
+          "probability": { "type": "number", "minimum": 0, "maximum": 1 },
+          "timeline": { "type": "string" },
+          "impactOnAfterTaxIRR_bps": { "type": "number" },
+          "mitigationStrategy": { "type": "string" },
+          "severity": { "type": "string", "enum": ["LOW", "MODERATE", "HIGH", "CRITICAL"] }
+        }
+      }
+    },
+    "stateTaxComparison": {
+      "type": "array",
+      "description": "State-level tax environment comparison for target states.",
+      "items": {
+        "type": "object",
+        "required": ["state", "taxFavorabilityScore"],
+        "properties": {
+          "state": { "type": "string" },
+          "incomeTaxRate": { "type": "number" },
+          "effectivePropertyTaxRate": { "type": "number" },
+          "transferTaxRate": { "type": "number" },
+          "pteElectionAvailable": { "type": "boolean" },
+          "taxFavorabilityScore": { "type": "number", "minimum": 0, "maximum": 100 },
+          "taxFavorability": { "type": "string", "enum": ["FAVORABLE", "NEUTRAL", "UNFAVORABLE"] }
+        }
+      }
+    }
+  }
+}

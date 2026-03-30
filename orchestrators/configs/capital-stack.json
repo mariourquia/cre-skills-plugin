@@ -1,138 +1,93 @@
 {
-  "orchestratorId": "capital-stack",
-  "version": "1.0.0",
+  "orchestratorId": "capital-stack-optimizer",
+  "version": "2.0.0",
   "entityType": "deal",
-  "description": "Five-phase capital stack structuring pipeline: qualifies the deal, sizes senior debt, structures equity and mezz/pref layers, optimizes the blended cost of capital, and gates at IC. Coordinates loan-sizing-engine, capital-stack-optimizer, mezz-pref-structurer, and jv-waterfall-architect. Terminal verdict: PROCEED (stack approved), RESTRUCTURE (viable with revised terms), or KILL (no executable structure).",
+  "description": "Six-phase capital stack pipeline for CRE debt sizing, lender sourcing, quote analysis, subordinate capital structuring, WACC optimization, and term sheet execution. Cross-cutting pipeline invoked by acquisition (new financing), hold-period (refinance), disposition (refi-alternative), and development (construction-to-perm) pipelines. Coordinates 12 specialist agents across sequential phases to produce a FUNDED / RESTRUCTURE / ABORT verdict. Terminal deliverable is either an executed term sheet with final capital structure, a restructuring plan with revised assumptions, or a halt recommendation with documented constraints.",
   "model": "claude-opus-4-6[1m]",
   "phases": [
     {
-      "phaseId": "deal-qualification",
-      "name": "Deal Qualification",
-      "weight": 0.15,
-      "agents": [
-        {
-          "agentId": "deal-screener",
-          "file": "agents/capital-stack/deal-screener.md",
-          "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "underwriting outputs", "asset class profile"],
-          "outputs": ["deal qualification memo", "stack complexity rating", "eligible structure types"],
-          "critical": true,
-          "dependencies": [],
-          "skillRefs": [],
-          "maxTimeoutMinutes": 20
-        },
-        {
-          "agentId": "sponsor-profile",
-          "file": "agents/capital-stack/sponsor-profile.md",
-          "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "sponsor track record", "net worth statement"],
-          "outputs": ["sponsor qualification", "recourse capacity", "prior performance summary"],
-          "critical": true,
-          "dependencies": [],
-          "skillRefs": [],
-          "maxTimeoutMinutes": 20
-        }
-      ],
-      "verdictLogic": {
-        "thresholdsRef": "capitalStack",
-        "passConditions": [
-          {
-            "conditionId": "deal-meets-stack-criteria",
-            "description": "Deal NOI and property type are eligible for institutional capital stack structures.",
-            "propagateIfFailed": true
-          },
-          {
-            "conditionId": "sponsor-qualified",
-            "description": "Sponsor net worth, liquidity, and track record meet lender and equity partner minimums.",
-            "propagateIfFailed": true
-          }
-        ],
-        "conditionalConditions": [
-          {
-            "conditionId": "sponsor-marginal",
-            "description": "Sponsor qualifies with a co-GP or guarantor; additional structuring required.",
-            "propagateIfFailed": true
-          }
-        ],
-        "failConditions": [
-          {
-            "conditionId": "sponsor-disqualified",
-            "description": "Sponsor cannot meet recourse requirements or has material defaults in track record.",
-            "propagateIfFailed": true
-          }
-        ],
-        "dealbreakers": [
-          "sponsorBankruptcy",
-          "activeLenderLitigation"
-        ]
-      },
-      "dataForDownstreamContract": {
-        "eligibleStructures": {
-          "type": "array",
-          "required": true,
-          "description": "List of eligible capital stack structure types (senior-only, senior+mezz, senior+pref, JV) for downstream sizing."
-        },
-        "sponsorQualification": {
-          "type": "object",
-          "required": true,
-          "description": "Sponsor qualification summary including recourse capacity and co-GP requirement flag."
-        }
-      }
-    },
-    {
       "phaseId": "debt-sizing",
       "name": "Debt Sizing",
-      "weight": 0.25,
+      "weight": 0.20,
+      "orchestratorFile": "orchestrators/capital-stack/debt-sizing-orchestrator.md",
       "agents": [
         {
-          "agentId": "loan-sizing-agent",
-          "file": "agents/capital-stack/loan-sizing-agent.md",
-          "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "base case NOI", "deal qualification outputs", "eligible structure types"],
-          "outputs": ["maximum loan amount by lender type", "DSCR at each leverage point", "LTV summary", "lender type comparison matrix"],
+          "agentId": "debt-sizer",
+          "file": "agents/capital-stack/debt-sizer.md",
+          "model": "claude-opus-4-6[1m]",
+          "inputs": [
+            "config/deal.json",
+            "base case NOI",
+            "target LTV",
+            "DSCR constraints",
+            "debt yield floor",
+            "property valuation",
+            "inbound handoff data"
+          ],
+          "outputs": [
+            "max loan amount by constraint (DSCR, LTV, debt yield)",
+            "binding constraint identification",
+            "loan sizing matrix by lender type (agency, CMBS, bridge, life company, bank)",
+            "proceeds waterfall"
+          ],
           "critical": true,
           "dependencies": [],
-          "skillRefs": [],
-          "maxTimeoutMinutes": 30,
+          "skillRefs": [
+            "skills/loan-sizing-engine.md"
+          ],
+          "maxTimeoutMinutes": 40,
           "validationRules": [
             {
-              "ruleId": "dscr-at-max-leverage",
-              "description": "DSCR at maximum loan amount must be calculated and non-null.",
+              "ruleId": "binding-constraint-identified",
+              "description": "Exactly one binding constraint (DSCR, LTV, or debt yield) must be identified for each lender type.",
               "actionOnFailure": "retry_agent"
             },
             {
-              "ruleId": "ltv-coverage",
-              "description": "LTV must be calculated for agency, bridge, CMBS, and life co lender types.",
-              "actionOnFailure": "flag_data_gap"
+              "ruleId": "loan-amount-non-negative",
+              "description": "Max loan amount must be a positive number for at least one lender type.",
+              "actionOnFailure": "halt_phase"
+            },
+            {
+              "ruleId": "dscr-calculated-per-type",
+              "description": "DSCR must be calculated at max loan amount for every lender type evaluated.",
+              "actionOnFailure": "retry_agent"
             }
           ]
         },
         {
-          "agentId": "debt-market-scan",
-          "file": "agents/capital-stack/debt-market-scan.md",
-          "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "loan sizing outputs", "asset class profile"],
-          "outputs": ["current market rates by lender type", "spread environment", "execution risk flags"],
-          "critical": false,
-          "dependencies": ["loan-sizing-agent"],
-          "skillRefs": [],
-          "maxTimeoutMinutes": 20
-        }
-      ],
-      "upstreamDependencies": [
-        {
-          "phaseId": "deal-qualification",
-          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
-          "requiredDataKeys": [
+          "agentId": "structure-advisor",
+          "file": "agents/capital-stack/structure-advisor.md",
+          "model": "claude-opus-4-6[1m]",
+          "inputs": [
+            "config/deal.json",
+            "debt sizing outputs",
+            "asset class profile",
+            "sponsor profile",
+            "caller pipeline context"
+          ],
+          "outputs": [
+            "recommended structure type (fixed, floating, IO, hybrid)",
+            "term and amortization recommendation",
+            "prepayment structure analysis",
+            "structure comparison matrix"
+          ],
+          "critical": true,
+          "dependencies": ["debt-sizer"],
+          "skillRefs": [
+            "skills/loan-sizing-engine.md",
+            "skills/capital-stack-optimizer.md"
+          ],
+          "maxTimeoutMinutes": 35,
+          "validationRules": [
             {
-              "key": "eligibleStructures",
-              "critical": true,
-              "description": "Required to constrain loan sizing to eligible structure types."
+              "ruleId": "structure-recommendation-present",
+              "description": "At least one recommended structure must be provided with rate type, term, amortization, and IO period.",
+              "actionOnFailure": "retry_agent"
             },
             {
-              "key": "sponsorQualification",
-              "critical": true,
-              "description": "Recourse capacity affects maximum agency loan size."
+              "ruleId": "prepayment-analysis-complete",
+              "description": "Prepayment structure must be analyzed for each recommended structure including defeasance, yield maintenance, and step-down scenarios.",
+              "actionOnFailure": "flag_data_gap"
             }
           ]
         }
@@ -141,74 +96,183 @@
         "thresholdsRef": "capitalStack",
         "passConditions": [
           {
-            "conditionId": "viable-loan-amount",
-            "description": "At least one lender type can provide a loan that meets minimum LTV and maintains DSCR above threshold.",
+            "conditionId": "viable-loan-sizing",
+            "description": "At least one lender type can provide a loan meeting minimum LTV while maintaining DSCR above threshold.",
+            "metricPath": "debtSizing.maxLoanAmount",
+            "operator": "gt",
+            "thresholdRef": "capitalStack.minLoanAmount",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "structure-recommendation-viable",
+            "description": "Structure advisor produced a recommendation compatible with deal hold period and exit strategy.",
             "propagateIfFailed": true
           }
         ],
         "conditionalConditions": [
           {
             "conditionId": "sub-optimal-leverage",
-            "description": "Max loan amount is below targeted LTV; equity requirement exceeds base case assumption.",
+            "description": "Max achievable LTV is below target but deal remains viable with higher equity contribution.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "single-lender-type-only",
+            "description": "Only one lender type can finance this deal; no competitive tension possible.",
             "propagateIfFailed": true
           }
         ],
         "failConditions": [
           {
             "conditionId": "no-viable-debt",
-            "description": "No lender type can provide debt meeting minimum deal requirements; equity gap is unresolvable.",
+            "description": "No lender type can provide debt meeting minimum DSCR, LTV, or debt yield requirements.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "critical-agent-failure",
+            "description": "Debt sizer or structure advisor failed after all retry attempts.",
             "propagateIfFailed": true
           }
         ],
         "dealbreakers": [
           "noViableDebtSource",
-          "dscrBelowMinimumAtAnyLeverage"
+          "dscrBelowAbsoluteFloor",
+          "negativeDebtYield"
         ]
       },
       "dataForDownstreamContract": {
-        "seniorDebtSizing": {
+        "loanSizingMatrix": {
           "type": "object",
           "required": true,
-          "description": "Maximum senior loan amounts, DSCRs, and LTVs by lender type."
+          "description": "Max loan amounts by lender type with binding constraints, DSCR, LTV, and debt yield at each leverage point. Primary input for lender sourcing."
         },
-        "equityRequirement": {
+        "bindingConstraint": {
+          "type": "string",
+          "required": true,
+          "description": "The constraint (DSCR, LTV, or debt yield) that limits the max loan amount for the recommended structure."
+        },
+        "structureRecommendation": {
+          "type": "object",
+          "required": true,
+          "description": "Recommended loan structure including rate type, term, amortization, IO period, and prepayment provisions."
+        },
+        "equityGap": {
           "type": "number",
           "required": true,
-          "description": "Total equity required at each leverage scenario (purchase price minus max debt)."
-        },
-        "marketRates": {
-          "type": "object",
-          "required": false,
-          "description": "Current market rates by lender type for use in equity return modeling."
+          "description": "Total capitalization minus max senior debt. Defines the equity and subordinate capital requirement for downstream phases."
+        }
+      },
+      "selfReviewProtocol": {
+        "crossAgentValidations": [
+          {
+            "checkId": "sizing-structure-consistency",
+            "agentsInvolved": ["debt-sizer", "structure-advisor"],
+            "description": "Structure advisor recommendation must reference one of the lender types sized by debt-sizer. Loan amount in structure recommendation must match debt-sizer output for that lender type.",
+            "tolerance": "0%",
+            "actionOnMismatch": "block_verdict"
+          },
+          {
+            "checkId": "equity-gap-math",
+            "agentsInvolved": ["debt-sizer", "structure-advisor"],
+            "description": "Equity gap must equal total capitalization minus recommended senior debt amount within 0.1% tolerance.",
+            "tolerance": "0.1%",
+            "actionOnMismatch": "block_verdict"
+          }
+        ],
+        "confidenceScoringRules": {
+          "baseScore": 100,
+          "deductions": {
+            "perNullKeyMetric": 8,
+            "perCrossPhasesMismatch": 12,
+            "perDataGap": 3,
+            "perFailedNonCriticalAgent": 5,
+            "perConditionalUpstream": 10,
+            "perMissingReport": 15
+          },
+          "categories": {
+            "HIGH": 90,
+            "MEDIUM": 70,
+            "LOW": 50,
+            "VERY_LOW": 0
+          }
         }
       }
     },
     {
-      "phaseId": "equity-structuring",
-      "name": "Equity Structuring",
-      "weight": 0.25,
+      "phaseId": "lender-sourcing",
+      "name": "Lender Sourcing",
+      "weight": 0.20,
+      "orchestratorFile": "orchestrators/capital-stack/lender-sourcing-orchestrator.md",
       "agents": [
         {
-          "agentId": "mezz-pref-structurer-agent",
-          "file": "agents/capital-stack/mezz-pref-structurer-agent.md",
-          "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "debt sizing outputs", "equity requirement", "eligible structure types"],
-          "outputs": ["mezz/pref term sheet scenarios", "effective cost comparison", "subordinate debt vs preferred equity analysis"],
+          "agentId": "lender-sourcer",
+          "file": "agents/capital-stack/lender-sourcer.md",
+          "model": "claude-opus-4-6[1m]",
+          "inputs": [
+            "config/deal.json",
+            "loan sizing matrix",
+            "structure recommendation",
+            "asset class",
+            "geography",
+            "sponsor profile"
+          ],
+          "outputs": [
+            "target lender list with fit scores",
+            "lender appetite assessment by type",
+            "relationship mapping",
+            "outreach priority ranking"
+          ],
           "critical": true,
           "dependencies": [],
-          "skillRefs": [],
-          "maxTimeoutMinutes": 35
+          "skillRefs": [
+            "skills/loan-sizing-engine.md"
+          ],
+          "maxTimeoutMinutes": 40,
+          "validationRules": [
+            {
+              "ruleId": "min-lender-count",
+              "description": "At least the minimum number of lenders (per thresholds.capitalStack.minLenderQuotes) must be identified.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "fit-score-calculated",
+              "description": "Each lender must have a fit score based on asset type, geography, loan size, and sponsor match.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
         },
         {
-          "agentId": "jv-waterfall-architect-agent",
-          "file": "agents/capital-stack/jv-waterfall-architect-agent.md",
-          "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "debt sizing outputs", "equity requirement", "sponsor qualification"],
-          "outputs": ["JV waterfall structure", "LP/GP split scenarios", "promote hurdles", "co-invest terms"],
+          "agentId": "quote-collector",
+          "file": "agents/capital-stack/quote-collector.md",
+          "model": "claude-opus-4-6[1m]",
+          "inputs": [
+            "config/deal.json",
+            "target lender list",
+            "loan sizing matrix",
+            "structure recommendation",
+            "deal package summary"
+          ],
+          "outputs": [
+            "quote request packages sent",
+            "initial indicative quotes received",
+            "market conditions snapshot",
+            "rate lock window assessment"
+          ],
           "critical": true,
-          "dependencies": [],
+          "dependencies": ["lender-sourcer"],
           "skillRefs": [],
-          "maxTimeoutMinutes": 35
+          "maxTimeoutMinutes": 45,
+          "validationRules": [
+            {
+              "ruleId": "quotes-solicited",
+              "description": "Quote requests must be prepared for all lenders on the target list with complete deal package.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "market-conditions-documented",
+              "description": "Current market conditions (benchmark rates, spreads, liquidity) must be documented as of the request date.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
         }
       ],
       "upstreamDependencies": [
@@ -217,14 +281,19 @@
           "requiredStatus": ["COMPLETED", "CONDITIONAL"],
           "requiredDataKeys": [
             {
-              "key": "seniorDebtSizing",
+              "key": "loanSizingMatrix",
               "critical": true,
-              "description": "Senior debt parameters needed to size the equity gap and structure subordinate layers."
+              "description": "Loan sizing matrix required to target appropriate lenders by loan size, type, and structure."
             },
             {
-              "key": "equityRequirement",
+              "key": "structureRecommendation",
               "critical": true,
-              "description": "Total equity requirement to allocate across GP, LP, and any mezz/pref layers."
+              "description": "Structure recommendation required to match lenders with compatible loan products."
+            },
+            {
+              "key": "equityGap",
+              "critical": false,
+              "description": "Equity gap provides context for lender discussions about subordinate capital tolerance."
             }
           ]
         }
@@ -233,102 +302,196 @@
         "thresholdsRef": "capitalStack",
         "passConditions": [
           {
-            "conditionId": "equity-structure-executable",
-            "description": "At least one equity structure (JV or mezz/pref layered) is executable with market-rate terms.",
+            "conditionId": "sufficient-lender-pipeline",
+            "description": "At least the minimum number of lenders identified and engaged per threshold.",
+            "metricPath": "lenderSourcing.lenderCount",
+            "operator": "gte",
+            "thresholdRef": "capitalStack.minLenderQuotes",
             "propagateIfFailed": true
           },
           {
-            "conditionId": "sponsor-promote-viable",
-            "description": "GP promote in JV structure is achievable at base case return scenario.",
-            "propagateIfFailed": false
+            "conditionId": "quote-requests-submitted",
+            "description": "Quote request packages sent to all targeted lenders with complete deal information.",
+            "propagateIfFailed": true
           }
         ],
         "conditionalConditions": [
           {
-            "conditionId": "thin-promote",
-            "description": "Sponsor promote is achievable only in upside scenarios; base case is insufficient for promote.",
+            "conditionId": "limited-lender-appetite",
+            "description": "Fewer lenders than target but still above minimum; reduced competitive tension.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "market-volatility-flag",
+            "description": "Market conditions snapshot shows elevated volatility; rate lock timing is critical.",
             "propagateIfFailed": true
           }
         ],
         "failConditions": [
           {
-            "conditionId": "equity-gap-unresolvable",
-            "description": "Equity gap cannot be filled by any combination of LP, mezz, or pref at market-acceptable terms.",
+            "conditionId": "insufficient-lender-response",
+            "description": "Fewer lenders than absolute minimum willing to quote; deal may be unbankable.",
             "propagateIfFailed": true
           }
         ],
         "dealbreakers": [
-          "equityGapUnfillable",
-          "mezzCostKillsReturns"
+          "noLenderWillingToQuote",
+          "regulatoryBarrierToLending"
         ]
       },
       "dataForDownstreamContract": {
-        "preferredEquityStructure": {
-          "type": "object",
+        "targetLenderList": {
+          "type": "array",
           "required": true,
-          "description": "Selected equity structure with layer breakdown, cost of each layer, and total blended cost of capital."
+          "description": "Ranked list of lenders with fit scores, contact info, appetite assessment, and quote request status."
         },
-        "waterfallTerms": {
+        "quoteRequestsSent": {
+          "type": "array",
+          "required": true,
+          "description": "Record of all quote request packages sent with timestamps, recipients, and deal package contents."
+        },
+        "marketConditionsSnapshot": {
           "type": "object",
           "required": true,
-          "description": "JV waterfall economics including LP preferred return, GP promote, and hurdle thresholds."
+          "description": "Current benchmark rates (SOFR, Treasury), spreads by lender type, and market liquidity assessment."
+        },
+        "indicativeQuotes": {
+          "type": "array",
+          "required": false,
+          "description": "Any early indicative quotes received during the sourcing phase. Full quotes collected in Phase 3."
+        }
+      },
+      "selfReviewProtocol": {
+        "crossAgentValidations": [
+          {
+            "checkId": "lender-list-quote-alignment",
+            "agentsInvolved": ["lender-sourcer", "quote-collector"],
+            "description": "Quote collector must have sent requests to all lenders on the priority list. Any omissions must be documented with reason.",
+            "tolerance": "exact",
+            "actionOnMismatch": "log_warning"
+          }
+        ],
+        "confidenceScoringRules": {
+          "baseScore": 100,
+          "deductions": {
+            "perNullKeyMetric": 8,
+            "perCrossPhasesMismatch": 10,
+            "perDataGap": 3,
+            "perFailedNonCriticalAgent": 5,
+            "perConditionalUpstream": 10,
+            "perMissingReport": 15
+          },
+          "categories": {
+            "HIGH": 90,
+            "MEDIUM": 70,
+            "LOW": 50,
+            "VERY_LOW": 0
+          }
         }
       }
     },
     {
-      "phaseId": "optimization",
-      "name": "Stack Optimization",
-      "weight": 0.20,
+      "phaseId": "quote-analysis",
+      "name": "Quote Analysis",
+      "weight": 0.15,
+      "orchestratorFile": "orchestrators/capital-stack/quote-analysis-orchestrator.md",
       "agents": [
         {
-          "agentId": "capital-stack-optimizer-agent",
-          "file": "agents/capital-stack/capital-stack-optimizer-agent.md",
-          "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "all prior phase outputs", "return thresholds"],
-          "outputs": ["optimized stack configuration", "blended cost of capital", "return impact by tranche", "recommended structure"],
+          "agentId": "quote-analyst",
+          "file": "agents/capital-stack/quote-analyst.md",
+          "model": "claude-opus-4-6[1m]",
+          "inputs": [
+            "config/deal.json",
+            "received lender quotes",
+            "market conditions snapshot",
+            "loan sizing matrix",
+            "structure recommendation"
+          ],
+          "outputs": [
+            "quote comparison matrix",
+            "all-in cost analysis per quote",
+            "selected quote with rationale",
+            "negotiation leverage points"
+          ],
           "critical": true,
           "dependencies": [],
-          "skillRefs": [],
+          "skillRefs": [
+            "skills/loan-sizing-engine.md",
+            "skills/capital-stack-optimizer.md"
+          ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
             {
-              "ruleId": "blended-coc-calculated",
-              "description": "Blended cost of capital must be calculated for the recommended structure.",
+              "ruleId": "all-quotes-analyzed",
+              "description": "Every received quote must appear in the comparison matrix with all-in cost calculated.",
               "actionOnFailure": "retry_agent"
             },
             {
-              "ruleId": "return-attribution-present",
-              "description": "IRR impact must be quantified per capital layer.",
+              "ruleId": "selection-rationale-documented",
+              "description": "Selected quote must include documented rationale covering rate, terms, flexibility, execution certainty, and relationship value.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "all-in-cost-complete",
+              "description": "All-in cost must include rate, spread, origination fee, exit fee, legal costs, and reserves.",
               "actionOnFailure": "flag_data_gap"
             }
           ]
         },
         {
-          "agentId": "tax-efficiency-reviewer",
-          "file": "agents/capital-stack/tax-efficiency-reviewer.md",
+          "agentId": "hedging-advisor",
+          "file": "agents/capital-stack/hedging-advisor.md",
           "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "preferred equity structure", "waterfall terms"],
-          "outputs": ["tax efficiency assessment", "depreciation strategy", "entity structure recommendation"],
+          "inputs": [
+            "config/deal.json",
+            "selected quote",
+            "rate environment",
+            "hold period / expected refi timeline",
+            "deal exit strategy"
+          ],
+          "outputs": [
+            "hedging recommendation (rate cap, swap, collar)",
+            "hedging cost analysis",
+            "unhedged vs hedged scenario comparison",
+            "rate lock strategy"
+          ],
           "critical": false,
-          "dependencies": [],
+          "dependencies": ["quote-analyst"],
           "skillRefs": [],
-          "maxTimeoutMinutes": 25
+          "maxTimeoutMinutes": 30,
+          "validationRules": [
+            {
+              "ruleId": "hedging-scenarios-modeled",
+              "description": "At least 3 hedging scenarios must be modeled: no hedge, rate cap, and swap or collar.",
+              "actionOnFailure": "flag_data_gap"
+            },
+            {
+              "ruleId": "cost-impact-quantified",
+              "description": "Hedging cost must be quantified as both upfront and effective annual cost impact on all-in rate.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
         }
       ],
       "upstreamDependencies": [
         {
-          "phaseId": "equity-structuring",
+          "phaseId": "lender-sourcing",
           "requiredStatus": ["COMPLETED", "CONDITIONAL"],
           "requiredDataKeys": [
             {
-              "key": "preferredEquityStructure",
+              "key": "targetLenderList",
               "critical": true,
-              "description": "Equity structure options for the optimizer to evaluate."
+              "description": "Lender list required to match received quotes to sourced lenders."
             },
             {
-              "key": "waterfallTerms",
+              "key": "quoteRequestsSent",
               "critical": true,
-              "description": "Waterfall economics for return modeling across capital layers."
+              "description": "Record of requests sent required to track response rate and completeness."
+            },
+            {
+              "key": "marketConditionsSnapshot",
+              "critical": true,
+              "description": "Market conditions required to benchmark received quotes against current market."
             }
           ]
         }
@@ -337,79 +500,621 @@
         "thresholdsRef": "capitalStack",
         "passConditions": [
           {
-            "conditionId": "optimized-stack-meets-returns",
-            "description": "Optimized capital stack delivers LP preferred return and GP promote at base case.",
+            "conditionId": "quote-selected",
+            "description": "A preferred quote has been selected with documented rationale and all-in cost within threshold.",
+            "metricPath": "quoteAnalysis.selectedQuote.allInRate",
+            "operator": "lte",
+            "thresholdRef": "capitalStack.maxAllInRate",
             "propagateIfFailed": true
           },
           {
-            "conditionId": "blended-coc-within-budget",
-            "description": "Blended cost of capital is below the deal's unlevered yield.",
+            "conditionId": "competitive-quotes-received",
+            "description": "Multiple quotes received enabling competitive analysis.",
+            "propagateIfFailed": false
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "single-quote-only",
+            "description": "Only one quote received; no competitive tension. Proceed but flag in negotiation phase.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "hedging-analysis-incomplete",
+            "description": "Hedging advisor failed or produced incomplete analysis; floating rate risk is unquantified.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "all-quotes-exceed-threshold",
+            "description": "All received quotes have all-in rates exceeding the maximum threshold.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "no-quotes-received",
+            "description": "Zero quotes received from any lender. Deal is unbankable at current terms.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "zeroQuotesReceived",
+          "allQuotesExceedMaxRate"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "selectedQuote": {
+          "type": "object",
+          "required": true,
+          "description": "Selected lender quote with rate, spread, terms, fees, covenants, and all-in cost breakdown."
+        },
+        "quoteComparisonMatrix": {
+          "type": "array",
+          "required": true,
+          "description": "All received quotes with standardized comparison metrics: rate, spread, origination fee, exit fee, IO period, prepayment."
+        },
+        "hedgingAnalysis": {
+          "type": "object",
+          "required": false,
+          "description": "Hedging recommendation with cost analysis. Null if hedging-advisor was skipped or failed."
+        },
+        "negotiationLeveragePoints": {
+          "type": "array",
+          "required": false,
+          "description": "Identified areas where selected quote terms can be improved in negotiation based on competitive quotes."
+        }
+      },
+      "selfReviewProtocol": {
+        "crossAgentValidations": [
+          {
+            "checkId": "quote-selection-market-alignment",
+            "agentsInvolved": ["quote-analyst", "hedging-advisor"],
+            "description": "If floating rate quote selected, hedging advisor must have analyzed the rate exposure. If hedging advisor failed, log WARNING.",
+            "tolerance": "N/A",
+            "actionOnMismatch": "log_warning"
+          }
+        ],
+        "confidenceScoringRules": {
+          "baseScore": 100,
+          "deductions": {
+            "perNullKeyMetric": 10,
+            "perCrossPhasesMismatch": 12,
+            "perDataGap": 4,
+            "perFailedNonCriticalAgent": 5,
+            "perConditionalUpstream": 10,
+            "perMissingReport": 15
+          },
+          "categories": {
+            "HIGH": 90,
+            "MEDIUM": 70,
+            "LOW": 50,
+            "VERY_LOW": 0
+          }
+        }
+      }
+    },
+    {
+      "phaseId": "subordinate-capital",
+      "name": "Subordinate Capital",
+      "weight": 0.15,
+      "orchestratorFile": "orchestrators/capital-stack/subordinate-capital-orchestrator.md",
+      "agents": [
+        {
+          "agentId": "mezz-pref-analyst",
+          "file": "agents/capital-stack/mezz-pref-analyst.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": [
+            "config/deal.json",
+            "equity gap from debt sizing",
+            "selected senior quote",
+            "sponsor profile",
+            "target return hurdles"
+          ],
+          "outputs": [
+            "mezz debt sizing and terms",
+            "preferred equity sizing and terms",
+            "intercreditor considerations",
+            "subordinate capital cost comparison"
+          ],
+          "critical": false,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/mezz-pref-structurer.md"
+          ],
+          "maxTimeoutMinutes": 35,
+          "validationRules": [
+            {
+              "ruleId": "subordinate-sizing-complete",
+              "description": "If equity gap requires subordinate capital, at least one mezz or pref equity scenario must be sized.",
+              "actionOnFailure": "flag_data_gap"
+            },
+            {
+              "ruleId": "intercreditor-flagged",
+              "description": "Intercreditor agreement requirements must be documented for each subordinate capital scenario.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
+        },
+        {
+          "agentId": "jv-structurer",
+          "file": "agents/capital-stack/jv-structurer.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": [
+            "config/deal.json",
+            "equity gap from debt sizing",
+            "sponsor profile",
+            "target return hurdles",
+            "waterfall preferences"
+          ],
+          "outputs": [
+            "JV structure recommendation",
+            "LP/GP split scenarios",
+            "promote hurdle analysis",
+            "co-invest requirements"
+          ],
+          "critical": false,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/jv-waterfall-architect.md"
+          ],
+          "maxTimeoutMinutes": 35,
+          "validationRules": [
+            {
+              "ruleId": "waterfall-modeled",
+              "description": "At least 2 JV waterfall scenarios must be modeled with different promote hurdle structures.",
+              "actionOnFailure": "flag_data_gap"
+            },
+            {
+              "ruleId": "gp-co-invest-specified",
+              "description": "GP co-investment requirement must be specified as both dollar amount and percentage of total equity.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "quote-analysis",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "selectedQuote",
+              "critical": true,
+              "description": "Selected senior debt quote required to calculate remaining equity gap and subordinate capital needs."
+            },
+            {
+              "key": "quoteComparisonMatrix",
+              "critical": false,
+              "description": "Quote comparison provides context for subordinate capital providers on senior debt terms."
+            }
+          ]
+        },
+        {
+          "phaseId": "debt-sizing",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "equityGap",
+              "critical": true,
+              "description": "Equity gap defines the total subordinate capital and equity requirement."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "capitalStack",
+        "passConditions": [
+          {
+            "conditionId": "subordinate-structure-viable",
+            "description": "At least one subordinate capital or JV structure is viable with market-rate terms that preserve equity returns.",
+            "propagateIfFailed": false
+          }
+        ],
+        "conditionalConditions": [
+          {
+            "conditionId": "no-subordinate-needed",
+            "description": "Equity gap is small enough to be filled entirely by sponsor/LP equity; no mezz or pref needed.",
+            "propagateIfFailed": false
+          },
+          {
+            "conditionId": "expensive-subordinate-capital",
+            "description": "Subordinate capital available but priced aggressively; WACC impact is material.",
+            "propagateIfFailed": true
+          }
+        ],
+        "failConditions": [
+          {
+            "conditionId": "equity-gap-unfillable",
+            "description": "Equity gap too large for available subordinate capital sources and sponsor cannot fill the gap.",
+            "propagateIfFailed": true
+          }
+        ],
+        "dealbreakers": [
+          "equityGapUnfillableWithNoSponsorCapacity",
+          "mezzCostKillsAllReturns"
+        ]
+      },
+      "dataForDownstreamContract": {
+        "mezzTerms": {
+          "type": "object",
+          "required": false,
+          "description": "Mezzanine debt sizing, rate, term, and intercreditor requirements. Null if no mezz needed or sourced."
+        },
+        "prefEquityTerms": {
+          "type": "object",
+          "required": false,
+          "description": "Preferred equity terms including accrual rate, redemption rights, and seniority. Null if not applicable."
+        },
+        "jvStructure": {
+          "type": "object",
+          "required": false,
+          "description": "JV structure with LP/GP split, promote hurdles, co-invest amounts, and governance terms."
+        },
+        "intercreditorRequirements": {
+          "type": "object",
+          "required": false,
+          "description": "Intercreditor agreement requirements documenting senior lender consent and standstill provisions."
+        },
+        "totalSubordinateCapital": {
+          "type": "number",
+          "required": true,
+          "description": "Total subordinate capital layer amount (mezz + pref equity). Zero if all-equity fill."
+        }
+      },
+      "selfReviewProtocol": {
+        "crossAgentValidations": [
+          {
+            "checkId": "subordinate-equity-balance",
+            "agentsInvolved": ["mezz-pref-analyst", "jv-structurer"],
+            "description": "Combined subordinate capital (mezz + pref) plus JV equity must fill the equity gap from debt sizing within 1% tolerance.",
+            "tolerance": "1%",
+            "actionOnMismatch": "block_verdict"
+          }
+        ],
+        "confidenceScoringRules": {
+          "baseScore": 100,
+          "deductions": {
+            "perNullKeyMetric": 5,
+            "perCrossPhasesMismatch": 10,
+            "perDataGap": 2,
+            "perFailedNonCriticalAgent": 5,
+            "perConditionalUpstream": 10,
+            "perMissingReport": 15
+          },
+          "categories": {
+            "HIGH": 90,
+            "MEDIUM": 70,
+            "LOW": 50,
+            "VERY_LOW": 0
+          }
+        }
+      }
+    },
+    {
+      "phaseId": "optimization",
+      "name": "Optimization",
+      "weight": 0.15,
+      "orchestratorFile": "orchestrators/capital-stack/optimization-orchestrator.md",
+      "agents": [
+        {
+          "agentId": "wacc-optimizer",
+          "file": "agents/capital-stack/wacc-optimizer.md",
+          "model": "claude-opus-4-6[1m]",
+          "inputs": [
+            "config/deal.json",
+            "selected senior quote",
+            "subordinate capital terms",
+            "JV structure",
+            "all prior phase outputs"
+          ],
+          "outputs": [
+            "3-5 capital structure alternatives with WACC",
+            "recommended optimal structure",
+            "return attribution by tranche",
+            "sensitivity analysis (rate, NOI, cap rate)"
+          ],
+          "critical": true,
+          "dependencies": [],
+          "skillRefs": [
+            "skills/capital-stack-optimizer.md"
+          ],
+          "maxTimeoutMinutes": 45,
+          "validationRules": [
+            {
+              "ruleId": "min-alternatives-generated",
+              "description": "At least 3 capital structure alternatives must be generated with distinct tranche configurations.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "wacc-calculated",
+              "description": "Weighted average cost of capital must be calculated for each alternative.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "return-attribution-complete",
+              "description": "LP IRR, equity multiple, and cash-on-cash must be calculated for each alternative.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
+        },
+        {
+          "agentId": "leverage-stress-tester",
+          "file": "agents/capital-stack/leverage-stress-tester.md",
+          "model": "claude-opus-4-6[1m]",
+          "inputs": [
+            "config/deal.json",
+            "recommended optimal structure",
+            "loan covenants",
+            "NOI sensitivity ranges",
+            "rate scenarios"
+          ],
+          "outputs": [
+            "stress test results across NOI, rate, and cap rate scenarios",
+            "covenant sensitivity analysis",
+            "breakeven NOI for each covenant",
+            "max adverse rate move before covenant breach"
+          ],
+          "critical": true,
+          "dependencies": ["wacc-optimizer"],
+          "skillRefs": [
+            "skills/debt-covenant-monitor.md"
+          ],
+          "maxTimeoutMinutes": 40,
+          "validationRules": [
+            {
+              "ruleId": "stress-scenarios-complete",
+              "description": "Stress test must cover all scenarios defined in thresholds.capitalStack.stressTestScenarios.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "covenant-breakeven-calculated",
+              "description": "Breakeven NOI for DSCR covenant and breakeven rate for debt yield covenant must be calculated.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "no-immediate-covenant-breach",
+              "description": "Base case structure must not breach any covenant. If it does, verdict must be FAIL.",
+              "actionOnFailure": "halt_phase"
+            }
+          ]
+        }
+      ],
+      "upstreamDependencies": [
+        {
+          "phaseId": "quote-analysis",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "selectedQuote",
+              "critical": true,
+              "description": "Selected senior debt quote with rate, terms, and covenants for WACC calculation."
+            }
+          ]
+        },
+        {
+          "phaseId": "subordinate-capital",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "totalSubordinateCapital",
+              "critical": true,
+              "description": "Total subordinate capital amount for WACC calculation."
+            },
+            {
+              "key": "mezzTerms",
+              "critical": false,
+              "description": "Mezz terms for cost-of-capital calculation. Null if no mezz layer."
+            },
+            {
+              "key": "prefEquityTerms",
+              "critical": false,
+              "description": "Pref equity terms for cost-of-capital calculation. Null if no pref layer."
+            },
+            {
+              "key": "jvStructure",
+              "critical": false,
+              "description": "JV structure for equity return attribution. Null if no JV."
+            }
+          ]
+        }
+      ],
+      "verdictLogic": {
+        "thresholdsRef": "capitalStack",
+        "passConditions": [
+          {
+            "conditionId": "optimal-structure-identified",
+            "description": "At least one structure alternative meets all return thresholds (LP IRR, equity multiple, cash-on-cash).",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "stress-test-passed",
+            "description": "Recommended structure survives all stress scenarios without covenant breach.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "positive-leverage-confirmed",
+            "description": "WACC is below the property unlevered yield, confirming positive leverage.",
             "propagateIfFailed": true
           }
         ],
         "conditionalConditions": [
           {
-            "conditionId": "tight-spread",
-            "description": "Spread between blended COC and unlevered yield is less than 100bps; deal is executable but thin.",
+            "conditionId": "tight-spread-to-unlevered-yield",
+            "description": "Spread between WACC and unlevered yield is less than 100bps. Positive leverage exists but is thin.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "covenant-stress-marginal",
+            "description": "Base case passes covenants but breakeven NOI is within 10% of projected NOI. Limited margin of error.",
             "propagateIfFailed": true
           }
         ],
         "failConditions": [
           {
             "conditionId": "negative-leverage",
-            "description": "Blended cost of capital exceeds the property's unlevered yield at any feasible structure.",
+            "description": "WACC exceeds unlevered yield in all structure alternatives. Leverage destroys returns.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "base-case-covenant-breach",
+            "description": "Recommended structure breaches one or more covenants at base case projections.",
             "propagateIfFailed": true
           }
         ],
         "dealbreakers": [
-          "negativeLeverage",
-          "blendedCoCExceedsCapRate"
+          "negativeLeverageAllAlternatives",
+          "baseCaseCovenantBreach",
+          "waccExceedsCapRate"
         ]
       },
       "dataForDownstreamContract": {
-        "recommendedStack": {
+        "capitalStructureAlternatives": {
+          "type": "array",
+          "required": true,
+          "description": "3-5 capital structure alternatives each with tranche breakdown, WACC, and return metrics."
+        },
+        "recommendedStructure": {
           "type": "object",
           "required": true,
-          "description": "Final recommended capital stack with all tranche details, amounts, rates, and terms."
+          "description": "Optimal structure selected from alternatives with full tranche detail, WACC, and return profile."
         },
-        "blendedCostOfCapital": {
-          "type": "number",
+        "stressTestResults": {
+          "type": "object",
           "required": true,
-          "description": "Blended cost of capital for the recommended structure as a decimal (e.g., 0.065 = 6.5%)."
+          "description": "Stress test results across NOI, rate, and cap rate scenarios with covenant sensitivity."
         },
         "returnProfile": {
           "type": "object",
           "required": true,
-          "description": "LP IRR, LP EM, GP promote, and cash-on-cash at base case with the recommended stack."
+          "description": "Return metrics at recommended structure: LP IRR, equity multiple, cash-on-cash, GP promote, WACC."
+        },
+        "covenantSensitivity": {
+          "type": "object",
+          "required": true,
+          "description": "Breakeven NOI and rate for each covenant at the recommended structure."
+        }
+      },
+      "selfReviewProtocol": {
+        "crossAgentValidations": [
+          {
+            "checkId": "wacc-stress-consistency",
+            "agentsInvolved": ["wacc-optimizer", "leverage-stress-tester"],
+            "description": "Base case WACC and returns from optimizer must match the base case scenario in stress tester within 0.1% tolerance.",
+            "tolerance": "0.1%",
+            "actionOnMismatch": "block_verdict"
+          },
+          {
+            "checkId": "covenant-alignment",
+            "agentsInvolved": ["wacc-optimizer", "leverage-stress-tester"],
+            "description": "Covenant metrics (DSCR, debt yield) at recommended structure must match between optimizer and stress tester.",
+            "tolerance": "0%",
+            "actionOnMismatch": "block_verdict"
+          }
+        ],
+        "confidenceScoringRules": {
+          "baseScore": 100,
+          "deductions": {
+            "perNullKeyMetric": 10,
+            "perCrossPhasesMismatch": 15,
+            "perDataGap": 4,
+            "perFailedNonCriticalAgent": 5,
+            "perConditionalUpstream": 10,
+            "perMissingReport": 15
+          },
+          "categories": {
+            "HIGH": 90,
+            "MEDIUM": 70,
+            "LOW": 50,
+            "VERY_LOW": 0
+          }
         }
       }
     },
     {
-      "phaseId": "ic-gate",
-      "name": "IC Gate",
+      "phaseId": "term-sheet-execution",
+      "name": "Term Sheet Execution",
       "weight": 0.15,
+      "orchestratorFile": "orchestrators/capital-stack/term-sheet-execution-orchestrator.md",
       "agents": [
         {
-          "agentId": "ic-stack-memo-writer",
-          "file": "agents/capital-stack/ic-stack-memo-writer.md",
-          "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "all prior phase outputs", "recommended stack", "return profile"],
-          "outputs": ["capital stack IC memo", "structural alternatives summary", "risk factors by tranche"],
+          "agentId": "term-sheet-negotiator",
+          "file": "agents/capital-stack/term-sheet-negotiator.md",
+          "model": "claude-opus-4-6[1m]",
+          "inputs": [
+            "config/deal.json",
+            "selected quote",
+            "recommended structure",
+            "negotiation leverage points",
+            "stress test results"
+          ],
+          "outputs": [
+            "negotiated term sheet with tracked changes",
+            "negotiation outcomes vs initial quote",
+            "final rate and terms",
+            "outstanding conditions"
+          ],
           "critical": true,
           "dependencies": [],
           "skillRefs": [],
-          "maxTimeoutMinutes": 40
+          "maxTimeoutMinutes": 45,
+          "validationRules": [
+            {
+              "ruleId": "term-sheet-complete",
+              "description": "Negotiated term sheet must include: loan amount, rate, spread, term, amortization, IO period, prepayment, covenants, fees, and conditions.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "rate-within-threshold",
+              "description": "Negotiated all-in rate must not exceed the maximum all-in rate threshold.",
+              "actionOnFailure": "halt_phase"
+            },
+            {
+              "ruleId": "origination-fee-within-limit",
+              "description": "Negotiated origination fee must not exceed maxOriginationFee threshold.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
         },
         {
-          "agentId": "ic-challenge-agent",
-          "file": "agents/capital-stack/ic-challenge-agent.md",
-          "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["capital stack IC memo", "recommended stack", "return profile"],
-          "outputs": ["adversarial questions", "bear case analysis", "sensitivity to structure changes"],
+          "agentId": "loan-doc-coordinator",
+          "file": "agents/capital-stack/loan-doc-coordinator.md",
+          "model": "claude-opus-4-6[1m]",
+          "inputs": [
+            "config/deal.json",
+            "negotiated term sheet",
+            "entity structure",
+            "title and survey status",
+            "insurance requirements"
+          ],
+          "outputs": [
+            "loan document checklist",
+            "closing conditions tracker",
+            "final capital structure summary",
+            "lender name and contact"
+          ],
           "critical": true,
-          "dependencies": ["ic-stack-memo-writer"],
-          "skillRefs": [],
-          "maxTimeoutMinutes": 30
+          "dependencies": ["term-sheet-negotiator"],
+          "skillRefs": [
+            "skills/closing-checklist-tracker.md"
+          ],
+          "maxTimeoutMinutes": 40,
+          "validationRules": [
+            {
+              "ruleId": "doc-checklist-complete",
+              "description": "All standard loan document categories must be listed: loan agreement, note, mortgage/deed of trust, guaranty, environmental indemnity, UCC filings.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "closing-conditions-tracked",
+              "description": "All term sheet conditions must be tracked with responsible party and deadline.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "final-stack-balances",
+              "description": "Final capital structure sum (senior + mezz + pref + equity) must equal total capitalization within 0.1%.",
+              "actionOnFailure": "halt_phase"
+            }
+          ]
         }
       ],
       "upstreamDependencies": [
@@ -418,14 +1123,40 @@
           "requiredStatus": ["COMPLETED", "CONDITIONAL"],
           "requiredDataKeys": [
             {
-              "key": "recommendedStack",
+              "key": "recommendedStructure",
               "critical": true,
-              "description": "Recommended capital stack required for IC memo preparation."
+              "description": "Recommended capital structure with tranche detail for term sheet negotiation."
             },
             {
               "key": "returnProfile",
               "critical": true,
-              "description": "Return profile for IC presentation."
+              "description": "Return profile at recommended structure for validating negotiated terms still meet targets."
+            },
+            {
+              "key": "stressTestResults",
+              "critical": true,
+              "description": "Stress test results for covenant negotiation and risk discussion with lender."
+            },
+            {
+              "key": "covenantSensitivity",
+              "critical": false,
+              "description": "Covenant sensitivity provides negotiation context for covenant threshold discussions."
+            }
+          ]
+        },
+        {
+          "phaseId": "quote-analysis",
+          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredDataKeys": [
+            {
+              "key": "selectedQuote",
+              "critical": true,
+              "description": "Selected quote is the starting point for term sheet negotiation."
+            },
+            {
+              "key": "negotiationLeveragePoints",
+              "critical": false,
+              "description": "Leverage points from competitive quotes to strengthen negotiating position."
             }
           ]
         }
@@ -434,88 +1165,343 @@
         "thresholdsRef": "capitalStack",
         "passConditions": [
           {
-            "conditionId": "ic-memo-complete",
-            "description": "IC memo produced with all required sections including structure, returns, and risk factors.",
+            "conditionId": "term-sheet-executed",
+            "description": "Term sheet signed by both borrower and lender with all material terms agreed.",
             "propagateIfFailed": true
           },
           {
-            "conditionId": "challenge-answered",
-            "description": "IC challenge questions addressed with quantified responses.",
-            "propagateIfFailed": false
+            "conditionId": "final-stack-validated",
+            "description": "Final capital structure sums to total capitalization and all tranche costs confirmed.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "doc-process-initiated",
+            "description": "Loan document checklist prepared and closing conditions tracker initiated.",
+            "propagateIfFailed": true
           }
         ],
         "conditionalConditions": [
           {
-            "conditionId": "open-ic-questions",
-            "description": "IC challenge agent flagged questions that require external data not available in pipeline.",
+            "conditionId": "outstanding-conditions-remain",
+            "description": "Term sheet executed but conditions precedent remain open (appraisal, environmental, title). Typical and expected.",
+            "propagateIfFailed": false
+          },
+          {
+            "conditionId": "rate-at-threshold",
+            "description": "Negotiated rate is at the maximum threshold. Deal is executable but any further rate movement triggers RESTRUCTURE.",
             "propagateIfFailed": true
           }
         ],
         "failConditions": [
           {
-            "conditionId": "ic-memo-incomplete",
-            "description": "IC memo missing required sections; structure cannot be presented to IC.",
+            "conditionId": "term-sheet-rejected",
+            "description": "Lender withdrew or borrower rejected term sheet. Return to lender sourcing or abort.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "stack-imbalance",
+            "description": "Final capital structure does not balance to total capitalization.",
             "propagateIfFailed": true
           }
         ],
-        "dealbreakers": []
+        "dealbreakers": [
+          "termSheetRejectedByAllParties",
+          "stackImbalanceUnresolvable",
+          "lenderWithdrawsPostTermSheet"
+        ]
       },
       "dataForDownstreamContract": {
-        "icStackMemo": {
+        "termSheet": {
           "type": "object",
           "required": true,
-          "description": "Finalized IC memo for capital stack approval."
+          "description": "Executed term sheet with all negotiated terms: rate, spread, amount, term, amortization, IO, covenants, fees, conditions."
         },
-        "approvedStack": {
+        "lenderName": {
+          "type": "string",
+          "required": true,
+          "description": "Name of the selected lender for the senior debt tranche."
+        },
+        "finalCapitalStructure": {
           "type": "object",
           "required": true,
-          "description": "IC-approved capital stack configuration for execution."
+          "description": "Complete capital structure with all tranches, amounts, rates, terms, and total capitalization."
+        },
+        "loanDocChecklist": {
+          "type": "object",
+          "required": true,
+          "description": "Complete loan document checklist with categories, responsible parties, and deadlines."
+        },
+        "closingConditionsTracker": {
+          "type": "object",
+          "required": true,
+          "description": "All conditions precedent to closing with status, responsible party, and target date."
+        },
+        "actualLoanAssumptions": {
+          "type": "object",
+          "required": true,
+          "description": "Final loan assumptions to replace underwriting assumptions: actual rate, actual LTV, actual DSCR, actual IO period."
+        }
+      },
+      "selfReviewProtocol": {
+        "crossAgentValidations": [
+          {
+            "checkId": "term-sheet-doc-alignment",
+            "agentsInvolved": ["term-sheet-negotiator", "loan-doc-coordinator"],
+            "description": "All terms in the negotiated term sheet must be reflected in the loan document checklist conditions. No term sheet provision may be omitted from doc review.",
+            "tolerance": "exact",
+            "actionOnMismatch": "block_verdict"
+          },
+          {
+            "checkId": "final-stack-balance-check",
+            "agentsInvolved": ["term-sheet-negotiator", "loan-doc-coordinator"],
+            "description": "Senior debt from term sheet plus all equity/subordinate layers must equal total capitalization.",
+            "tolerance": "0.1%",
+            "actionOnMismatch": "block_verdict"
+          }
+        ],
+        "confidenceScoringRules": {
+          "baseScore": 100,
+          "deductions": {
+            "perNullKeyMetric": 10,
+            "perCrossPhasesMismatch": 15,
+            "perDataGap": 5,
+            "perFailedNonCriticalAgent": 5,
+            "perConditionalUpstream": 10,
+            "perMissingReport": 20
+          },
+          "categories": {
+            "HIGH": 90,
+            "MEDIUM": 70,
+            "LOW": 50,
+            "VERY_LOW": 0
+          }
         }
       }
     }
   ],
+  "terminalVerdicts": {
+    "FUNDED": "Capital stack fully assembled. Term sheet executed, final structure validated, loan documents initiated. Trigger outbound handoff to calling pipeline.",
+    "RESTRUCTURE": "Capital stack viable but requires revised deal economics, changed terms, or additional structuring. Specific changes enumerated. Return to calling pipeline with restructuring requirements.",
+    "ABORT": "No executable capital structure exists at current deal parameters and market conditions. Calling pipeline should re-evaluate deal feasibility."
+  },
+  "thresholdReferences": [
+    "capitalStack.maxLTV",
+    "capitalStack.minDSCR",
+    "capitalStack.maxAllInRate",
+    "capitalStack.minLenderQuotes",
+    "capitalStack.maxOriginationFee",
+    "capitalStack.stressTestScenarios"
+  ],
   "checkpointConfig": {
-    "basePath": "data/checkpoints/capital-stack",
+    "basePath": "data/status",
     "agentLevelTracking": true,
     "verdictValues": {
-      "PROCEED": "Capital stack approved; structure is executable and meets return thresholds.",
-      "RESTRUCTURE": "Stack viable with revised terms; specific changes required before execution.",
-      "KILL": "No executable capital structure exists at current deal economics."
+      "FUNDED": "Capital stack fully assembled with executed term sheet.",
+      "RESTRUCTURE": "Stack requires revised terms or deal economics.",
+      "ABORT": "No executable structure at current parameters."
     }
   },
   "crossChainHandoffs": [
     {
       "direction": "inbound",
       "counterpartOrchestrator": "multifamily-acquisition",
-      "triggerCondition": "Counterpart 'multifamily-acquisition' phase 'underwriting' status == COMPLETED",
+      "triggerCondition": "Counterpart 'multifamily-acquisition' underwriting phase completed and requests capital stack assembly",
       "dataContract": {
-        "baseCase": {
-          "type": "object",
+        "baseCaseNOI": {
+          "type": "number",
           "required": true,
-          "description": "Base case financial model with NOI and return assumptions for loan sizing.",
+          "description": "Base case Year 1 NOI from the underwriting model. Primary input for debt sizing (DSCR and debt yield constraints).",
           "sourcePhase": "underwriting",
-          "sourcePath": "baseCase"
+          "sourcePath": "baseCase.year1NOI"
         },
-        "loanAssumptions": {
+        "targetLTV": {
+          "type": "number",
+          "required": true,
+          "description": "Target loan-to-value ratio from acquisition underwriting assumptions.",
+          "sourcePhase": "underwriting",
+          "sourcePath": "loanAssumptions.targetLTV"
+        },
+        "debtSizingRequest": {
           "type": "object",
           "required": true,
-          "description": "Initial debt assumptions to validate and optimize.",
+          "description": "Full debt sizing request including purchase price, asset class, sponsor profile, and preliminary loan assumptions.",
           "sourcePhase": "underwriting",
-          "sourcePath": "loanAssumptions"
+          "sourcePath": "debtSizingRequest"
+        }
+      }
+    },
+    {
+      "direction": "inbound",
+      "counterpartOrchestrator": "hold-period-monitor",
+      "triggerCondition": "Counterpart 'hold-period-monitor' reposition-trigger phase recommends refinance",
+      "dataContract": {
+        "propertyId": {
+          "type": "string",
+          "required": true,
+          "description": "Property identifier for the refinance target.",
+          "sourcePhase": "reposition-trigger-evaluation",
+          "sourcePath": "propertyId"
+        },
+        "currentDebtTerms": {
+          "type": "object",
+          "required": true,
+          "description": "Current loan terms including rate, maturity date, prepayment provisions, and outstanding balance.",
+          "sourcePhase": "annual-budget-setup",
+          "sourcePath": "debtServiceSchedule.loanTerms"
+        },
+        "currentNOI": {
+          "type": "number",
+          "required": true,
+          "description": "Current annualized NOI for refinance underwriting and new loan sizing.",
+          "sourcePhase": "performance-monitoring",
+          "sourcePath": "currentNOI"
+        },
+        "refinanceReason": {
+          "type": "string",
+          "required": true,
+          "description": "Reason for refinance: debt maturity, rate improvement, cash-out, covenant relief.",
+          "sourcePhase": "reposition-trigger-evaluation",
+          "sourcePath": "exitTriggerReason"
+        }
+      }
+    },
+    {
+      "direction": "inbound",
+      "counterpartOrchestrator": "disposition-pipeline",
+      "triggerCondition": "Counterpart 'disposition-pipeline' recommends refi as alternative to sale",
+      "dataContract": {
+        "propertyId": {
+          "type": "string",
+          "required": true,
+          "description": "Property identifier for the refi-alternative analysis.",
+          "sourcePhase": "disposition-analysis",
+          "sourcePath": "propertyId"
+        },
+        "currentDebtTerms": {
+          "type": "object",
+          "required": true,
+          "description": "Current loan terms for refinance comparison.",
+          "sourcePhase": "disposition-analysis",
+          "sourcePath": "currentDebtTerms"
+        },
+        "refiAnalysis": {
+          "type": "object",
+          "required": true,
+          "description": "Preliminary refinance analysis from the disposition hold-sell evaluator showing refi as potentially superior to sale.",
+          "sourcePhase": "disposition-analysis",
+          "sourcePath": "holdSellRefiAnalysis.refiScenario"
+        }
+      }
+    },
+    {
+      "direction": "inbound",
+      "counterpartOrchestrator": "development-pipeline",
+      "triggerCondition": "Counterpart 'development-pipeline' requires construction financing and permanent conversion",
+      "dataContract": {
+        "totalDevelopmentCost": {
+          "type": "number",
+          "required": true,
+          "description": "Total development cost including land, hard costs, soft costs, and contingency.",
+          "sourcePhase": "development-budgeting",
+          "sourcePath": "totalDevelopmentCost"
+        },
+        "constructionDrawSchedule": {
+          "type": "object",
+          "required": true,
+          "description": "Monthly draw schedule for construction loan sizing and interest reserve calculation.",
+          "sourcePhase": "development-budgeting",
+          "sourcePath": "constructionDrawSchedule"
+        },
+        "stabilizedNOI": {
+          "type": "number",
+          "required": true,
+          "description": "Projected stabilized NOI for permanent loan conversion sizing.",
+          "sourcePhase": "development-budgeting",
+          "sourcePath": "stabilizedNOI"
         }
       }
     },
     {
       "direction": "outbound",
       "counterpartOrchestrator": "multifamily-acquisition",
-      "triggerCondition": "This orchestrator status == COMPLETED and verdict == PROCEED",
+      "triggerCondition": "Phase 'term-sheet-execution' verdict == FUNDED",
       "dataContract": {
-        "approvedStack": {
+        "termSheet": {
           "type": "object",
           "required": true,
-          "description": "IC-approved capital stack for use in financing and legal phases.",
-          "sourcePhase": "ic-gate",
-          "sourcePath": "approvedStack"
+          "description": "Executed term sheet with all negotiated terms for the acquisition financing.",
+          "sourcePhase": "term-sheet-execution",
+          "sourcePath": "termSheet"
+        },
+        "lenderName": {
+          "type": "string",
+          "required": true,
+          "description": "Selected lender name for the senior debt tranche.",
+          "sourcePhase": "term-sheet-execution",
+          "sourcePath": "lenderName"
+        },
+        "actualLoanAssumptions": {
+          "type": "object",
+          "required": true,
+          "description": "Actual loan assumptions to replace underwriting estimates: rate, LTV, DSCR, IO period, amortization.",
+          "sourcePhase": "term-sheet-execution",
+          "sourcePath": "actualLoanAssumptions"
+        }
+      }
+    },
+    {
+      "direction": "outbound",
+      "counterpartOrchestrator": "hold-period-monitor",
+      "triggerCondition": "Refinance capital stack completed with verdict FUNDED",
+      "dataContract": {
+        "refinancedTerms": {
+          "type": "object",
+          "required": true,
+          "description": "New loan terms from the refinance including rate, maturity, covenants, and prepayment provisions.",
+          "sourcePhase": "term-sheet-execution",
+          "sourcePath": "termSheet"
+        },
+        "newCovenants": {
+          "type": "object",
+          "required": true,
+          "description": "New covenant package for hold-period covenant monitoring.",
+          "sourcePhase": "term-sheet-execution",
+          "sourcePath": "termSheet.covenants"
+        },
+        "proceedsAvailable": {
+          "type": "number",
+          "required": false,
+          "description": "Net cash-out proceeds available from refinance (if cash-out refi). Null for rate-and-term.",
+          "sourcePhase": "term-sheet-execution",
+          "sourcePath": "finalCapitalStructure.cashOutProceeds"
+        }
+      }
+    },
+    {
+      "direction": "outbound",
+      "counterpartOrchestrator": "fund-management",
+      "triggerCondition": "Capital stack completed with any terminal verdict",
+      "dataContract": {
+        "capitalStructureSummary": {
+          "type": "object",
+          "required": true,
+          "description": "Complete capital structure summary with all tranches, amounts, rates, and terms for fund-level reporting.",
+          "sourcePhase": "term-sheet-execution",
+          "sourcePath": "finalCapitalStructure"
+        },
+        "leverageMetrics": {
+          "type": "object",
+          "required": true,
+          "description": "Key leverage metrics: LTV, DSCR, debt yield, WACC for fund-level portfolio analytics.",
+          "sourcePhase": "optimization",
+          "sourcePath": "returnProfile"
+        },
+        "debtMaturitySchedule": {
+          "type": "object",
+          "required": true,
+          "description": "Debt maturity date and amortization schedule for fund-level maturity ladder tracking.",
+          "sourcePhase": "term-sheet-execution",
+          "sourcePath": "termSheet.maturitySchedule"
         }
       }
     }
@@ -523,12 +1509,12 @@
   "executionConfig": {
     "concurrency": {
       "maxConcurrentPhases": 1,
-      "maxAgentsPerPhase": 4
+      "maxAgentsPerPhase": 2
     },
     "timeouts": {
-      "defaultAgentMinutes": 30,
+      "defaultAgentMinutes": 40,
       "defaultPhaseMinutes": 90,
-      "pipelineMinutes": 300
+      "pipelineMinutes": 480
     },
     "retryPolicy": {
       "maxAttempts": 3,
@@ -550,7 +1536,10 @@
         "RETRY",
         "TIMEOUT",
         "VERDICT",
-        "HANDOFF"
+        "HANDOFF",
+        "ESCALATE",
+        "RESUME",
+        "CROSS_CHECK"
       ]
     }
   }

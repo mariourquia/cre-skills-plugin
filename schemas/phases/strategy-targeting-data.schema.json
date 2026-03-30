@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/strategy-targeting-data.schema.json",
+  "title": "Investment Strategy Phase 3 -- Target Identification Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the target identification phase. Covers target acquisition profile, sourcing strategy, lead pipeline, broker network, and CRM schema.",
+  "type": "object",
+  "required": ["targetAcquisitionProfile", "sourcingStrategy", "leadPipeline"],
+  "properties": {
+    "targetAcquisitionProfile": {
+      "type": "object",
+      "description": "Specific property search criteria derived from strategy.",
+      "required": ["propertyCriteria", "financialCriteria", "geographicFilters"],
+      "properties": {
+        "propertyCriteria": {
+          "type": "object",
+          "properties": {
+            "propertyType": { "type": "string" },
+            "unitCountMin": { "type": "integer" },
+            "unitCountMax": { "type": "integer" },
+            "yearBuiltMin": { "type": "integer" },
+            "yearBuiltMax": { "type": "integer" },
+            "classTarget": { "type": "string" },
+            "occupancyMin": { "type": "number" },
+            "occupancyMax": { "type": "number" },
+            "condition": { "type": "string" }
+          }
+        },
+        "financialCriteria": {
+          "type": "object",
+          "properties": {
+            "totalDealSizeMin": { "type": "number" },
+            "totalDealSizeMax": { "type": "number" },
+            "equityCheckMin": { "type": "number" },
+            "equityCheckMax": { "type": "number" },
+            "goingInCapRateMin": { "type": "number" },
+            "goingInCapRateMax": { "type": "number" },
+            "pricePerUnitMax": { "type": "number" }
+          }
+        },
+        "geographicFilters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "msa": { "type": "string" },
+              "tier": { "type": "integer" },
+              "submarkets": { "type": "array", "items": { "type": "string" } },
+              "allocationPct": { "type": "number" }
+            }
+          }
+        },
+        "valueAddCriteria": {
+          "type": "object",
+          "properties": {
+            "renovationBudgetPerUnit": { "type": "number" },
+            "targetRentPremiumPct": { "type": "number" },
+            "stabilizationMonths": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "sourcingStrategy": {
+      "type": "object",
+      "description": "Multi-channel sourcing approach.",
+      "properties": {
+        "channels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "channel": { "type": "string" },
+              "targetPct": { "type": "number" },
+              "activities": { "type": "array", "items": { "type": "string" } },
+              "coverageStatus": { "type": "string" }
+            }
+          }
+        },
+        "brokerNetwork": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "brokerName": { "type": "string" },
+              "brokerage": { "type": "string" },
+              "msa": { "type": "string" },
+              "specialty": { "type": "string" },
+              "relationshipScore": { "type": "number" },
+              "category": { "type": "string" }
+            }
+          }
+        },
+        "coverageMatrix": {
+          "type": "object",
+          "properties": {
+            "overallCoveragePct": { "type": "number" },
+            "gapsByMsa": { "type": "array", "items": { "type": "object" } }
+          }
+        }
+      }
+    },
+    "leadPipeline": {
+      "type": "array",
+      "description": "Initial lead pipeline with scores.",
+      "items": {
+        "type": "object",
+        "required": ["dealId", "propertyName", "leadScore", "leadTier"],
+        "properties": {
+          "dealId": { "type": "string" },
+          "propertyName": { "type": "string" },
+          "msa": { "type": "string" },
+          "submarket": { "type": "string" },
+          "propertyType": { "type": "string" },
+          "units": { "type": "integer" },
+          "estimatedPrice": { "type": "number" },
+          "leadScore": { "type": "number", "minimum": 0, "maximum": 100 },
+          "leadTier": { "type": "string", "enum": ["priority", "strong", "moderate", "watch", "pass"] },
+          "sourcingChannel": { "type": "string" },
+          "currentStage": { "type": "string" },
+          "nextAction": { "type": "string" }
+        }
+      }
+    },
+    "pipelineAnalytics": {
+      "type": "object",
+      "description": "Summary pipeline metrics.",
+      "properties": {
+        "totalLeads": { "type": "integer" },
+        "avgLeadScore": { "type": "number" },
+        "priorityLeads": { "type": "integer" },
+        "pipelineValue": { "type": "number" },
+        "pipelineToDeploymentRatio": { "type": "number" },
+        "submarketCoveragePct": { "type": "number" },
+        "strategyAlignmentPct": { "type": "number" }
+      }
+    }
+  }
+}

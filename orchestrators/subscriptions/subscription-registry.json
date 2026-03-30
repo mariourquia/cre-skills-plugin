@@ -1,0 +1,528 @@
+{
+  "subscriptions": [
+    {
+      "subscriberId": "hold-period/market-pulse-analyst",
+      "displayName": "Market Pulse Analyst (Hold Period)",
+      "pipeline": "hold-period",
+      "eventTypes": ["MARKET_ALERT"],
+      "tags": ["market-conditions", "demographics", "rates"],
+      "entityFilter": {
+        "entityTypes": ["PROPERTY", "MARKET"]
+      },
+      "severityFilter": {
+        "minimum": "INFO"
+      },
+      "deliveryMethod": "NOTIFICATION_PACKAGE",
+      "deliveryConfig": {
+        "maxTokens": 2000,
+        "maxEvents": 20,
+        "summarize": true,
+        "groupBy": "entity"
+      },
+      "enabled": true,
+      "lastDeliveredAt": null,
+      "lastDeliveredEventId": null,
+      "createdAt": "2026-03-26T00:00:00Z",
+      "updatedAt": null,
+      "notes": "Market pulse analyst needs submarket-level market alerts to update quarterly market reports. Filtered to owned property submarkets via entity filter."
+    },
+    {
+      "subscriberId": "hold-period/exit-trigger-evaluator",
+      "displayName": "Exit Trigger Evaluator (Hold Period)",
+      "pipeline": "hold-period",
+      "eventTypes": ["DECISION", "POLICY_CHANGE", "MARKET_ALERT"],
+      "tags": ["exit", "strategy", "cap-rate", "market-conditions"],
+      "entityFilter": {
+        "entityTypes": ["PROPERTY", "FUND", "MARKET"]
+      },
+      "severityFilter": {
+        "minimum": "WARNING"
+      },
+      "deliveryMethod": "NOTIFICATION_PACKAGE",
+      "deliveryConfig": {
+        "maxTokens": 2000,
+        "maxEvents": 15,
+        "summarize": true,
+        "groupBy": "eventType"
+      },
+      "enabled": true,
+      "lastDeliveredAt": null,
+      "lastDeliveredEventId": null,
+      "createdAt": "2026-03-26T00:00:00Z",
+      "updatedAt": null,
+      "notes": "Exit trigger evaluator needs strategy/policy changes and market signals that could trigger a hold/sell/refi decision. Filtered to WARNING+ severity to avoid noise."
+    },
+    {
+      "subscriberId": "hold-period/performance-analyst",
+      "displayName": "Performance Analyst (Hold Period)",
+      "pipeline": "hold-period",
+      "eventTypes": ["PERFORMANCE_UPDATE", "RISK_FLAG"],
+      "tags": ["financial", "performance", "operations"],
+      "entityFilter": {
+        "entityTypes": ["PROPERTY"]
+      },
+      "severityFilter": {
+        "minimum": "INFO"
+      },
+      "deliveryMethod": "NOTIFICATION_PACKAGE",
+      "deliveryConfig": {
+        "maxTokens": 2000,
+        "maxEvents": 20,
+        "summarize": true,
+        "groupBy": "entity"
+      },
+      "enabled": true,
+      "lastDeliveredAt": null,
+      "lastDeliveredEventId": null,
+      "createdAt": "2026-03-26T00:00:00Z",
+      "updatedAt": null,
+      "notes": "Performance analyst needs cross-property performance updates and risk flags for benchmarking and variance analysis."
+    },
+    {
+      "subscriberId": "hold-period/covenant-watchdog",
+      "displayName": "Covenant Watchdog (Hold Period)",
+      "pipeline": "hold-period",
+      "eventTypes": ["RISK_FLAG", "PERFORMANCE_UPDATE"],
+      "tags": ["debt", "covenant", "credit-risk", "refinancing"],
+      "entityFilter": {
+        "entityTypes": ["PROPERTY", "LENDER"]
+      },
+      "severityFilter": {
+        "minimum": "WARNING"
+      },
+      "deliveryMethod": "NOTIFICATION_PACKAGE",
+      "deliveryConfig": {
+        "maxTokens": 1500,
+        "maxEvents": 10,
+        "summarize": true,
+        "groupBy": "severity"
+      },
+      "enabled": true,
+      "lastDeliveredAt": null,
+      "lastDeliveredEventId": null,
+      "createdAt": "2026-03-26T00:00:00Z",
+      "updatedAt": null,
+      "notes": "Covenant watchdog monitors debt-related risk flags and performance updates that could affect covenant compliance."
+    },
+    {
+      "subscriberId": "acquisition/master-orchestrator",
+      "displayName": "Acquisition Master Orchestrator",
+      "pipeline": "acquisition",
+      "eventTypes": ["POLICY_CHANGE", "DECISION", "MARKET_ALERT"],
+      "tags": ["strategy", "policy", "deployment", "market-conditions"],
+      "entityFilter": {
+        "entityTypes": ["FUND", "MARKET"]
+      },
+      "severityFilter": {
+        "minimum": "WARNING"
+      },
+      "deliveryMethod": "DIRECT_INJECTION",
+      "deliveryConfig": {
+        "maxTokens": 2000,
+        "maxEvents": 10,
+        "summarize": true,
+        "groupBy": "eventType"
+      },
+      "enabled": true,
+      "lastDeliveredAt": null,
+      "lastDeliveredEventId": null,
+      "createdAt": "2026-03-26T00:00:00Z",
+      "updatedAt": null,
+      "notes": "Master orchestrator needs policy changes affecting deployment strategy and market alerts that could impact acquisition pipeline. Delivered via direct injection to ensure context at launch."
+    },
+    {
+      "subscriberId": "property-management/work-order-orchestrator",
+      "displayName": "Work Order Orchestrator (PM)",
+      "pipeline": "property-management",
+      "eventTypes": ["RISK_FLAG", "ACTION"],
+      "tags": ["operations", "vendor", "compliance", "insurance-risk"],
+      "entityFilter": {
+        "entityTypes": ["PROPERTY", "VENDOR"]
+      },
+      "severityFilter": {
+        "minimum": "WARNING"
+      },
+      "deliveryMethod": "NOTIFICATION_PACKAGE",
+      "deliveryConfig": {
+        "maxTokens": 1500,
+        "maxEvents": 15,
+        "summarize": true,
+        "groupBy": "entity"
+      },
+      "enabled": true,
+      "lastDeliveredAt": null,
+      "lastDeliveredEventId": null,
+      "createdAt": "2026-03-26T00:00:00Z",
+      "updatedAt": null,
+      "notes": "Work order orchestrator needs vendor and safety risk flags, plus operational actions from other properties that may apply."
+    },
+    {
+      "subscriberId": "property-management/regulatory-compliance-tracker",
+      "displayName": "Regulatory Compliance Tracker (PM)",
+      "pipeline": "property-management",
+      "eventTypes": ["POLICY_CHANGE", "RISK_FLAG"],
+      "tags": ["compliance", "regulatory", "policy", "legal-risk"],
+      "entityFilter": {
+        "entityTypes": ["PROPERTY", "MARKET"]
+      },
+      "severityFilter": {
+        "minimum": "INFO"
+      },
+      "deliveryMethod": "NOTIFICATION_PACKAGE",
+      "deliveryConfig": {
+        "maxTokens": 2000,
+        "maxEvents": 20,
+        "summarize": false,
+        "groupBy": "eventType"
+      },
+      "enabled": true,
+      "lastDeliveredAt": null,
+      "lastDeliveredEventId": null,
+      "createdAt": "2026-03-26T00:00:00Z",
+      "updatedAt": null,
+      "notes": "Regulatory compliance tracker needs full event details (not summarized) for policy changes and regulatory risk flags. All severity levels to catch early regulatory signals."
+    },
+    {
+      "subscriberId": "property-management/pm-orchestrator-lead",
+      "displayName": "PM Orchestrator Lead",
+      "pipeline": "property-management",
+      "eventTypes": ["RISK_FLAG", "PERFORMANCE_UPDATE", "ACTION"],
+      "tags": ["operations", "performance", "risk"],
+      "entityFilter": {
+        "entityTypes": ["PROPERTY", "VENDOR"]
+      },
+      "severityFilter": {
+        "minimum": "WARNING"
+      },
+      "deliveryMethod": "NOTIFICATION_PACKAGE",
+      "deliveryConfig": {
+        "maxTokens": 2000,
+        "maxEvents": 20,
+        "summarize": true,
+        "groupBy": "severity"
+      },
+      "enabled": true,
+      "lastDeliveredAt": null,
+      "lastDeliveredEventId": null,
+      "createdAt": "2026-03-26T00:00:00Z",
+      "updatedAt": null,
+      "notes": "PM orchestrator lead needs cross-property operational risk flags and performance updates to coordinate portfolio-wide PM activities."
+    },
+    {
+      "subscriberId": "fund-management/deployment-strategist",
+      "displayName": "Deployment Strategist (Fund Management)",
+      "pipeline": "fund-management",
+      "eventTypes": ["MARKET_ALERT", "DECISION", "PERFORMANCE_UPDATE"],
+      "tags": ["deployment", "strategy", "market-conditions", "financial"],
+      "entityFilter": {
+        "entityTypes": ["FUND", "MARKET", "PROPERTY"]
+      },
+      "severityFilter": {
+        "minimum": "INFO"
+      },
+      "deliveryMethod": "NOTIFICATION_PACKAGE",
+      "deliveryConfig": {
+        "maxTokens": 2000,
+        "maxEvents": 20,
+        "summarize": true,
+        "groupBy": "eventType"
+      },
+      "enabled": true,
+      "lastDeliveredAt": null,
+      "lastDeliveredEventId": null,
+      "createdAt": "2026-03-26T00:00:00Z",
+      "updatedAt": null,
+      "notes": "Deployment strategist needs market signals for deployment pacing, investment decisions for pipeline adjustment, and portfolio performance updates for capital recycling decisions."
+    },
+    {
+      "subscriberId": "fund-management/compliance-officer",
+      "displayName": "Compliance Officer (Fund Management)",
+      "pipeline": "fund-management",
+      "eventTypes": ["POLICY_CHANGE", "RISK_FLAG", "DECISION"],
+      "tags": ["compliance", "policy", "regulatory", "governance"],
+      "entityFilter": {
+        "entityTypes": ["FUND", "PROPERTY"]
+      },
+      "severityFilter": {
+        "minimum": "INFO"
+      },
+      "deliveryMethod": "NOTIFICATION_PACKAGE",
+      "deliveryConfig": {
+        "maxTokens": 2000,
+        "maxEvents": 25,
+        "summarize": false,
+        "groupBy": "eventType"
+      },
+      "enabled": true,
+      "lastDeliveredAt": null,
+      "lastDeliveredEventId": null,
+      "createdAt": "2026-03-26T00:00:00Z",
+      "updatedAt": null,
+      "notes": "Compliance officer needs full (unsummarized) policy changes and regulatory risk flags for IPS compliance monitoring. All severity levels."
+    },
+    {
+      "subscriberId": "fund-management/fund-controller",
+      "displayName": "Fund Controller (Fund Management)",
+      "pipeline": "fund-management",
+      "eventTypes": ["PERFORMANCE_UPDATE", "MILESTONE", "DECISION"],
+      "tags": ["financial", "performance", "debt", "exit"],
+      "entityFilter": {
+        "entityTypes": ["FUND", "PROPERTY"]
+      },
+      "severityFilter": {
+        "minimum": "INFO"
+      },
+      "deliveryMethod": "NOTIFICATION_PACKAGE",
+      "deliveryConfig": {
+        "maxTokens": 2000,
+        "maxEvents": 25,
+        "summarize": true,
+        "groupBy": "entity"
+      },
+      "enabled": true,
+      "lastDeliveredAt": null,
+      "lastDeliveredEventId": null,
+      "createdAt": "2026-03-26T00:00:00Z",
+      "updatedAt": null,
+      "notes": "Fund controller needs property-level performance updates, milestones, and investment/exit decisions for NAV calculation and capital account management."
+    },
+    {
+      "subscriberId": "investment-strategy/strategy-reviewer",
+      "displayName": "Strategy Reviewer (Investment Strategy)",
+      "pipeline": "investment-strategy",
+      "eventTypes": ["MARKET_ALERT", "PERFORMANCE_UPDATE", "FINDING"],
+      "tags": ["market-conditions", "strategy", "performance", "demographics"],
+      "entityFilter": {
+        "entityTypes": ["MARKET", "PROPERTY", "FUND"]
+      },
+      "severityFilter": {
+        "minimum": "INFO"
+      },
+      "deliveryMethod": "NOTIFICATION_PACKAGE",
+      "deliveryConfig": {
+        "maxTokens": 2000,
+        "maxEvents": 20,
+        "summarize": true,
+        "groupBy": "eventType"
+      },
+      "enabled": true,
+      "lastDeliveredAt": null,
+      "lastDeliveredEventId": null,
+      "createdAt": "2026-03-26T00:00:00Z",
+      "updatedAt": null,
+      "notes": "Strategy reviewer needs market alerts and portfolio performance data to validate investment thesis assumptions. Findings from research pipeline inform thesis updates."
+    },
+    {
+      "subscriberId": "investment-strategy/strategy-architect",
+      "displayName": "Strategy Architect (Investment Strategy)",
+      "pipeline": "investment-strategy",
+      "eventTypes": ["MARKET_ALERT", "POLICY_CHANGE", "DECISION"],
+      "tags": ["strategy", "market-conditions", "policy", "rates"],
+      "entityFilter": {
+        "entityTypes": ["MARKET", "FUND"]
+      },
+      "severityFilter": {
+        "minimum": "WARNING"
+      },
+      "deliveryMethod": "NOTIFICATION_PACKAGE",
+      "deliveryConfig": {
+        "maxTokens": 2000,
+        "maxEvents": 15,
+        "summarize": true,
+        "groupBy": "eventType"
+      },
+      "enabled": true,
+      "lastDeliveredAt": null,
+      "lastDeliveredEventId": null,
+      "createdAt": "2026-03-26T00:00:00Z",
+      "updatedAt": null,
+      "notes": "Strategy architect needs significant market signals and policy decisions that could warrant strategy revision."
+    },
+    {
+      "subscriberId": "research-intelligence/research-synthesizer",
+      "displayName": "Research Synthesizer (Research Intelligence)",
+      "pipeline": "research-intelligence",
+      "eventTypes": ["FINDING", "MARKET_ALERT", "PERFORMANCE_UPDATE", "RISK_FLAG", "POLICY_CHANGE"],
+      "tags": [],
+      "entityFilter": {},
+      "severityFilter": {
+        "minimum": "INFO"
+      },
+      "deliveryMethod": "NOTIFICATION_PACKAGE",
+      "deliveryConfig": {
+        "maxTokens": 2000,
+        "maxEvents": 30,
+        "summarize": true,
+        "groupBy": "eventType"
+      },
+      "enabled": true,
+      "lastDeliveredAt": null,
+      "lastDeliveredEventId": null,
+      "createdAt": "2026-03-26T00:00:00Z",
+      "updatedAt": null,
+      "notes": "Research synthesizer consumes ALL finding events for cross-pipeline synthesis. Broad subscription with no tag or entity filters. High max events to ensure comprehensive coverage."
+    },
+    {
+      "subscriberId": "portfolio-management/risk-officer",
+      "displayName": "Risk Officer (Portfolio Management)",
+      "pipeline": "portfolio-management",
+      "eventTypes": ["RISK_FLAG", "PERFORMANCE_UPDATE", "MARKET_ALERT"],
+      "tags": ["risk", "credit-risk", "environmental-risk", "legal-risk", "insurance-risk", "compliance"],
+      "entityFilter": {
+        "entityTypes": ["PROPERTY", "FUND", "TENANT", "LENDER"]
+      },
+      "severityFilter": {
+        "minimum": "WARNING"
+      },
+      "deliveryMethod": "NOTIFICATION_PACKAGE",
+      "deliveryConfig": {
+        "maxTokens": 2000,
+        "maxEvents": 25,
+        "summarize": false,
+        "groupBy": "severity"
+      },
+      "enabled": true,
+      "lastDeliveredAt": null,
+      "lastDeliveredEventId": null,
+      "createdAt": "2026-03-26T00:00:00Z",
+      "updatedAt": null,
+      "notes": "Risk officer needs full (unsummarized) risk flag details and performance/market events that signal risk. Grouped by severity for triage."
+    },
+    {
+      "subscriberId": "portfolio-management/portfolio-manager",
+      "displayName": "Portfolio Manager (Portfolio Management)",
+      "pipeline": "portfolio-management",
+      "eventTypes": ["PERFORMANCE_UPDATE", "DECISION", "MILESTONE", "MARKET_ALERT"],
+      "tags": ["financial", "performance", "strategy", "exit"],
+      "entityFilter": {
+        "entityTypes": ["PROPERTY", "FUND"]
+      },
+      "severityFilter": {
+        "minimum": "INFO"
+      },
+      "deliveryMethod": "NOTIFICATION_PACKAGE",
+      "deliveryConfig": {
+        "maxTokens": 2000,
+        "maxEvents": 25,
+        "summarize": true,
+        "groupBy": "entity"
+      },
+      "enabled": true,
+      "lastDeliveredAt": null,
+      "lastDeliveredEventId": null,
+      "createdAt": "2026-03-26T00:00:00Z",
+      "updatedAt": null,
+      "notes": "Portfolio manager needs comprehensive property and fund performance data, strategic decisions, and market context for portfolio-level oversight."
+    },
+    {
+      "subscriberId": "portfolio-management/debt-portfolio-monitor",
+      "displayName": "Debt Portfolio Monitor (Portfolio Management)",
+      "pipeline": "portfolio-management",
+      "eventTypes": ["RISK_FLAG", "PERFORMANCE_UPDATE", "MARKET_ALERT"],
+      "tags": ["debt", "covenant", "rates", "refinancing", "credit-risk"],
+      "entityFilter": {
+        "entityTypes": ["PROPERTY", "LENDER"]
+      },
+      "severityFilter": {
+        "minimum": "INFO"
+      },
+      "deliveryMethod": "NOTIFICATION_PACKAGE",
+      "deliveryConfig": {
+        "maxTokens": 2000,
+        "maxEvents": 20,
+        "summarize": true,
+        "groupBy": "entity"
+      },
+      "enabled": true,
+      "lastDeliveredAt": null,
+      "lastDeliveredEventId": null,
+      "createdAt": "2026-03-26T00:00:00Z",
+      "updatedAt": null,
+      "notes": "Debt portfolio monitor needs debt-related risk flags, rate environment changes, and property performance updates that affect debt coverage metrics."
+    },
+    {
+      "subscriberId": "disposition/disposition-manager",
+      "displayName": "Disposition Manager",
+      "pipeline": "disposition",
+      "eventTypes": ["DECISION", "MARKET_ALERT", "PERFORMANCE_UPDATE"],
+      "tags": ["exit", "disposition", "market-conditions", "cap-rate"],
+      "entityFilter": {
+        "entityTypes": ["PROPERTY", "MARKET", "BROKER"]
+      },
+      "severityFilter": {
+        "minimum": "WARNING"
+      },
+      "deliveryMethod": "NOTIFICATION_PACKAGE",
+      "deliveryConfig": {
+        "maxTokens": 2000,
+        "maxEvents": 15,
+        "summarize": true,
+        "groupBy": "eventType"
+      },
+      "enabled": true,
+      "lastDeliveredAt": null,
+      "lastDeliveredEventId": null,
+      "createdAt": "2026-03-26T00:00:00Z",
+      "updatedAt": null,
+      "notes": "Disposition manager needs exit decisions, market timing signals, and property performance data for active and potential dispositions."
+    },
+    {
+      "subscriberId": "asset-management/asset-manager-lead",
+      "displayName": "Asset Manager Lead (Asset Management)",
+      "pipeline": "asset-management",
+      "eventTypes": ["PERFORMANCE_UPDATE", "RISK_FLAG", "MARKET_ALERT", "DECISION"],
+      "tags": ["performance", "risk", "market-conditions", "strategy"],
+      "entityFilter": {
+        "entityTypes": ["PROPERTY", "MARKET"]
+      },
+      "severityFilter": {
+        "minimum": "INFO"
+      },
+      "deliveryMethod": "NOTIFICATION_PACKAGE",
+      "deliveryConfig": {
+        "maxTokens": 2000,
+        "maxEvents": 25,
+        "summarize": true,
+        "groupBy": "entity"
+      },
+      "enabled": true,
+      "lastDeliveredAt": null,
+      "lastDeliveredEventId": null,
+      "createdAt": "2026-03-26T00:00:00Z",
+      "updatedAt": null,
+      "notes": "Asset manager lead needs comprehensive cross-property intelligence for hold period oversight including performance, risk, market, and strategic decision events."
+    },
+    {
+      "subscriberId": "capital-stack/structure-advisor",
+      "displayName": "Structure Advisor (Capital Stack)",
+      "pipeline": "capital-stack",
+      "eventTypes": ["MARKET_ALERT", "POLICY_CHANGE"],
+      "tags": ["rates", "debt", "refinancing", "policy"],
+      "entityFilter": {
+        "entityTypes": ["LENDER", "MARKET"]
+      },
+      "severityFilter": {
+        "minimum": "INFO"
+      },
+      "deliveryMethod": "NOTIFICATION_PACKAGE",
+      "deliveryConfig": {
+        "maxTokens": 1500,
+        "maxEvents": 15,
+        "summarize": true,
+        "groupBy": "eventType"
+      },
+      "enabled": true,
+      "lastDeliveredAt": null,
+      "lastDeliveredEventId": null,
+      "createdAt": "2026-03-26T00:00:00Z",
+      "updatedAt": null,
+      "notes": "Structure advisor needs rate environment alerts and lending policy changes to inform capital structure recommendations."
+    }
+  ],
+  "metadata": {
+    "version": 1,
+    "lastUpdatedAt": "2026-03-26T00:00:00Z",
+    "totalSubscriptions": 20,
+    "activeSubscriptions": 20
+  }
+}

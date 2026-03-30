@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/lp-reup-data.schema.json",
+  "title": "LP Intelligence Phase 5 -- Re-Up Decision Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the re-up decision phase. Covers scoring matrix, peer comparison, opportunity cost, commitment sizing, and terminal verdict.",
+  "type": "object",
+  "required": [
+    "scoringMatrix",
+    "peerComparison",
+    "verdict"
+  ],
+  "properties": {
+    "scoringMatrix": {
+      "type": "object",
+      "description": "Multi-dimensional scoring synthesis from all prior phases.",
+      "required": ["dimensions", "compositeScore"],
+      "properties": {
+        "dimensions": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "object",
+            "required": ["dimensionName", "score", "weight"],
+            "properties": {
+              "dimensionName": { "type": "string" },
+              "score": { "type": "number", "minimum": 1, "maximum": 5 },
+              "weight": { "type": "number" },
+              "evidence": { "type": "string" },
+              "sourcePhase": { "type": "string" },
+              "keyMetrics": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "metric": { "type": "string" },
+                    "value": { "type": ["string", "number"] },
+                    "assessment": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "compositeScore": { "type": "number", "minimum": 1, "maximum": 5 },
+        "overrideConditions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "condition": { "type": "string" },
+              "triggered": { "type": "boolean" },
+              "impact": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "peerComparison": {
+      "type": "object",
+      "description": "GP benchmarking against vintage-adjusted, risk-adjusted peer group.",
+      "required": ["peerGroup", "skillRating"],
+      "properties": {
+        "peerGroup": {
+          "type": "object",
+          "properties": {
+            "strategy": { "type": "string" },
+            "vintageRange": { "type": "string" },
+            "sizeBand": { "type": "string" },
+            "geography": { "type": "string" },
+            "fundCount": { "type": "integer" },
+            "dataSource": { "type": "string" }
+          }
+        },
+        "vintageAdjustedReturns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "fundName": { "type": "string" },
+              "vintage": { "type": "integer" },
+              "netIRR": { "type": "number" },
+              "peerMedian": { "type": "number" },
+              "excessReturnBps": { "type": "number" },
+              "percentile": { "type": "number" },
+              "quartile": { "type": "integer" }
+            }
+          }
+        },
+        "averageExcessReturnBps": { "type": "number" },
+        "riskAdjustedMetrics": {
+          "type": "object",
+          "properties": {
+            "sharpeLikeRatio": { "type": "number" },
+            "leverageAdjustedReturn": { "type": "number" },
+            "maxDrawdown": { "type": "number" },
+            "recoveryPeriodQuarters": { "type": ["integer", "null"] },
+            "lossRatioVsPeerMedian": { "type": "number" }
+          }
+        },
+        "skillVsBeta": {
+          "type": "object",
+          "properties": {
+            "estimatedMarketBeta": { "type": "number" },
+            "estimatedManagerAlpha": { "type": "number" },
+            "leverageContributionPct": { "type": "number" },
+            "alphaPersistent": { "type": "boolean" },
+            "alphaSources": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "skillRating": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "skillClassification": { "type": "string", "enum": ["SKILLED", "ABOVE_AVERAGE", "MARKET_PERFORMER", "BELOW_AVERAGE", "UNSKILLED"] },
+        "redFlags": { "type": "array", "items": { "type": "string" } },
+        "confidenceScore": { "type": "number", "minimum": 0, "maximum": 100 }
+      },
+      "additionalProperties": true
+    },
+    "opportunityCost": {
+      "type": ["object", "null"],
+      "description": "Opportunity cost analysis comparing current GP to alternatives.",
+      "properties": {
+        "alternativeManagers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "gpName": { "type": "string" },
+              "strategy": { "type": "string" },
+              "projectedNetIRR": { "type": "number" },
+              "feeLoadBps": { "type": "number" },
+              "trackRecordScore": { "type": "number" },
+              "currentlyFundraising": { "type": "boolean" }
+            }
+          }
+        },
+        "expectedIRRDeltaBps": { "type": "number", "description": "Best alternative IRR - current GP projected IRR" },
+        "expectedValueDifference": { "type": "number", "description": "Dollar value difference over fund life" },
+        "switchingCostAssessment": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "commitmentSizing": {
+      "type": "object",
+      "description": "Recommended commitment size with adjustment rationale.",
+      "properties": {
+        "currentCommitment": { "type": "number" },
+        "recommendedCommitment": { "type": "number" },
+        "commitmentRatio": { "type": "number", "description": "Recommended / Current" },
+        "performanceAdjustment": { "type": "number" },
+        "portfolioFitAdjustment": { "type": "number" },
+        "liquidityAdjustment": { "type": "number" },
+        "rationale": { "type": "string" }
+      }
+    },
+    "negotiationPoints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "rank": { "type": "integer" },
+          "provision": { "type": "string" },
+          "currentTerm": { "type": "string" },
+          "targetTerm": { "type": "string" },
+          "expectedImpactBps": { "type": "number" },
+          "priority": { "type": "string", "enum": ["must-have", "important", "nice-to-have"] }
+        }
+      }
+    },
+    "verdict": {
+      "type": "object",
+      "description": "Terminal re-up decision.",
+      "required": ["decision", "conviction"],
+      "properties": {
+        "decision": { "type": "string", "enum": ["RE-UP", "REDUCE", "EXIT"] },
+        "conviction": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "compositeScore": { "type": "number" },
+        "primaryRationale": { "type": "string" },
+        "conditionsForChange": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Conditions under which the verdict would change"
+        },
+        "icMemoSummary": { "type": "string", "description": "Executive summary for IC memo" },
+        "consolidatedRedFlags": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "flag": { "type": "string" },
+              "severity": { "type": "string", "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"] },
+              "sourcePhase": { "type": "string" }
+            }
+          }
+        },
+        "confidenceScore": { "type": "number", "minimum": 0, "maximum": 100 }
+      }
+    }
+  },
+  "additionalProperties": true
+}

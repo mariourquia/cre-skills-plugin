@@ -1,0 +1,191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/fund-monitoring-data.schema.json",
+  "title": "Fund Management Phase 4 -- Monitoring & Reporting Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the monitoring phase. Covers fund-level performance, GP economics, per-asset performance, compliance status, watch list, and quarterly verdict.",
+  "type": "object",
+  "required": [
+    "fundPerformance",
+    "gpEconomicsUpdate",
+    "assetPerformance",
+    "complianceStatus",
+    "quarterlyVerdict"
+  ],
+  "properties": {
+    "fundPerformance": {
+      "type": "object",
+      "description": "Fund-level performance metrics.",
+      "required": ["reportingPeriod", "nav", "tvpi", "dpi", "rvpi", "netIRR"],
+      "properties": {
+        "reportingPeriod": { "type": "string", "description": "Reporting period label (e.g., Q1-2026)." },
+        "reportingDate": { "type": "string", "format": "date" },
+        "nav": { "type": "number", "description": "Fund net asset value." },
+        "totalContributions": { "type": "number", "description": "Cumulative LP contributions." },
+        "totalDistributions": { "type": "number", "description": "Cumulative LP distributions." },
+        "tvpi": { "type": "number", "description": "Total value to paid-in multiple: (NAV + distributions) / contributions." },
+        "dpi": { "type": "number", "description": "Distributions to paid-in: distributions / contributions." },
+        "rvpi": { "type": "number", "description": "Residual value to paid-in: NAV / contributions." },
+        "grossIRR": { "type": "number", "description": "Gross internal rate of return." },
+        "netIRR": { "type": "number", "description": "Net internal rate of return (after fees and carry)." },
+        "grossMOIC": { "type": "number", "description": "Gross multiple on invested capital." },
+        "pmeAlpha": { "type": "number", "description": "Public market equivalent alpha vs benchmark." },
+        "benchmarkComparison": {
+          "type": "object",
+          "properties": {
+            "ncreifODCE": { "type": "object", "properties": { "benchmarkReturn": { "type": "number" }, "fundExcessReturn": { "type": "number" } } },
+            "cambridgePeerMedian": { "type": "object", "properties": { "benchmarkReturn": { "type": "number" }, "fundQuartile": { "type": "integer" } } }
+          }
+        },
+        "vintageYearAnalysis": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "year": { "type": "integer" },
+              "deployedCapital": { "type": "number" },
+              "currentValue": { "type": "number" },
+              "returnContribution": { "type": "number" }
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "gpEconomicsUpdate": {
+      "type": "object",
+      "description": "Updated GP economics for the reporting period.",
+      "required": ["managementFeesEarnedYTD", "carryAccrued", "clawbackExposure"],
+      "properties": {
+        "managementFeesEarnedYTD": { "type": "number", "description": "Year-to-date management fees earned." },
+        "managementFeesEarnedCumulative": { "type": "number", "description": "Cumulative management fees earned since inception." },
+        "managementFeeBasis": { "type": "string", "description": "Current fee basis (committed or invested capital)." },
+        "managementFeeBasisAmount": { "type": "number", "description": "Dollar amount of the fee basis." },
+        "quarterlyManagementFee": { "type": "number", "description": "Management fee for this quarter." },
+        "organizationalExpensesActual": { "type": "number", "description": "Cumulative organizational expenses." },
+        "organizationalExpenseCap": { "type": "number" },
+        "organizationalExpenseRemaining": { "type": "number" },
+        "transactionFeesEarned": { "type": "number", "description": "Transaction fees earned during the period." },
+        "feeOffsetCredit": { "type": "number", "description": "Fee offset credit applied against management fees." },
+        "cumulativeFeeOffsets": { "type": "number" },
+        "carryAccrued": { "type": "number", "description": "Carried interest accrued (unrealized) based on mark-to-market NAV." },
+        "carryDistributed": { "type": "number", "description": "Cumulative carried interest distributed (realized)." },
+        "carryEntitled": { "type": "number", "description": "Total carry entitled based on current whole-fund returns." },
+        "clawbackExposure": { "type": "number", "description": "Current clawback exposure (carry distributed minus entitled)." },
+        "clawbackGuaranteeAmount": { "type": "number" },
+        "clawbackReserveBalance": { "type": "number" },
+        "gpCoInvestDeployed": { "type": "number" },
+        "gpCoInvestReturn": { "type": "number" }
+      },
+      "additionalProperties": true
+    },
+    "assetPerformance": {
+      "type": "array",
+      "description": "Per-asset performance data.",
+      "items": {
+        "type": "object",
+        "required": ["dealId", "dealName", "currentNOI", "currentOccupancy", "currentValue", "returnContribution"],
+        "properties": {
+          "dealId": { "type": "string" },
+          "dealName": { "type": "string" },
+          "propertyType": { "type": "string" },
+          "geography": { "type": "string" },
+          "equityInvested": { "type": "number" },
+          "currentValue": { "type": "number" },
+          "currentNOI": { "type": "number", "description": "Current annualized NOI." },
+          "currentOccupancy": { "type": "number", "description": "Current physical occupancy (0-1)." },
+          "debtBalance": { "type": "number" },
+          "debtMaturityDate": { "type": "string", "format": "date" },
+          "dscr": { "type": "number" },
+          "covenantCompliant": { "type": "boolean" },
+          "dealIRR": { "type": "number", "description": "Deal-level IRR to date." },
+          "dealMOIC": { "type": "number" },
+          "returnContribution": { "type": "number", "description": "Contribution to fund-level return in bps." },
+          "watchListStatus": {
+            "type": "string",
+            "enum": ["PERFORMING", "WATCH", "UNDERPERFORMING", "IMPAIRED"]
+          },
+          "watchListReason": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "watchList": {
+      "type": "array",
+      "description": "Assets flagged for underperformance.",
+      "items": {
+        "type": "object",
+        "required": ["dealId", "reason", "severity"],
+        "properties": {
+          "dealId": { "type": "string" },
+          "dealName": { "type": "string" },
+          "reason": { "type": "string" },
+          "severity": { "type": "string", "enum": ["WATCH", "UNDERPERFORMING", "IMPAIRED"] },
+          "addedDate": { "type": "string", "format": "date" },
+          "quartersOnWatchList": { "type": "integer" },
+          "interventionPlan": { "type": "string" },
+          "exitTriggerMet": { "type": "boolean" }
+        }
+      }
+    },
+    "complianceStatus": {
+      "type": "object",
+      "description": "Compliance status for the reporting period.",
+      "required": ["ipsCompliant", "regulatoryFilingsCurrent"],
+      "properties": {
+        "ipsCompliant": { "type": "boolean", "description": "True if all IPS constraints are met." },
+        "ipsBreaches": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "constraint": { "type": "string" },
+              "limit": { "type": "number" },
+              "actual": { "type": "number" },
+              "cureStatus": { "type": "string" }
+            }
+          }
+        },
+        "regulatoryFilingsCurrent": { "type": "boolean" },
+        "erisaTestResult": {
+          "type": "object",
+          "properties": {
+            "benefitPlanInvestorPercentage": { "type": "number" },
+            "threshold": { "type": "number" },
+            "compliant": { "type": "boolean" }
+          }
+        },
+        "sideLetterComplianceCertified": { "type": "boolean" },
+        "conflictsOfInterest": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "description": { "type": "string" },
+              "resolution": { "type": "string" },
+              "status": { "type": "string", "enum": ["RESOLVED", "PENDING", "ESCALATED"] }
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "quarterlyVerdict": {
+      "type": "string",
+      "enum": ["ON_TRACK", "WATCH", "IMPAIRED"],
+      "description": "Quarterly monitoring verdict."
+    },
+    "quarterlyVerdictDetail": {
+      "type": "object",
+      "properties": {
+        "verdict": { "type": "string" },
+        "cycleNumber": { "type": "integer" },
+        "summaryNarrative": { "type": "string" },
+        "keyFindings": { "type": "array", "items": { "type": "string" } },
+        "recommendedActions": { "type": "array", "items": { "type": "string" } },
+        "nextReviewDate": { "type": "string", "format": "date" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

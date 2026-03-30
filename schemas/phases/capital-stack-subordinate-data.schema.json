@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/capital-stack-subordinate-data.schema.json",
+  "title": "Capital Stack Phase 4 -- Subordinate Capital Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the subordinate capital phase. Covers mezzanine debt, preferred equity, JV structure, and intercreditor requirements.",
+  "type": "object",
+  "required": [
+    "totalSubordinateCapital"
+  ],
+  "properties": {
+    "mezzTerms": {
+      "type": ["object", "null"],
+      "description": "Mezzanine debt sizing and terms. Null if no mezz layer needed or sourced.",
+      "properties": {
+        "mezzAmount": {
+          "type": "number",
+          "description": "Mezzanine loan amount."
+        },
+        "mezzRate": {
+          "type": "number",
+          "description": "Mezzanine interest rate."
+        },
+        "mezzRateType": {
+          "type": "string",
+          "enum": ["fixed", "floating", "payInKind"],
+          "description": "Rate structure for mezz debt."
+        },
+        "term": {
+          "type": "number",
+          "description": "Mezzanine loan term in years."
+        },
+        "combinedLTV": {
+          "type": "number",
+          "description": "Combined LTV including senior + mezz (0-1).",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "lastDollarLTV": {
+          "type": "number",
+          "description": "Last-dollar LTV for the mezz tranche (0-1)."
+        },
+        "paymentPriority": {
+          "type": "string",
+          "enum": ["currentPay", "accruing", "payInKind"],
+          "description": "How mezz interest is paid."
+        },
+        "prepaymentTerms": {
+          "type": "string",
+          "description": "Prepayment provisions for the mezz tranche."
+        },
+        "mezzProvider": {
+          "type": "string",
+          "description": "Type or name of mezz capital provider."
+        }
+      }
+    },
+    "prefEquityTerms": {
+      "type": ["object", "null"],
+      "description": "Preferred equity terms. Null if no pref equity layer.",
+      "properties": {
+        "prefAmount": {
+          "type": "number",
+          "description": "Preferred equity investment amount."
+        },
+        "accrualRate": {
+          "type": "number",
+          "description": "Preferred return accrual rate."
+        },
+        "compoundingMethod": {
+          "type": "string",
+          "enum": ["simple", "compound"],
+          "description": "Whether preferred return compounds."
+        },
+        "redemptionRights": {
+          "type": "object",
+          "description": "Redemption provisions.",
+          "properties": {
+            "mandatory": { "type": "boolean" },
+            "optionalAfterMonths": { "type": "integer" },
+            "redemptionPremium": { "type": "number" }
+          }
+        },
+        "participatingUpside": {
+          "type": "boolean",
+          "description": "Whether pref equity participates in upside above accrual."
+        },
+        "upsideSharePct": {
+          "type": "number",
+          "description": "Percentage of upside above pref return shared with pref investor (if participating)."
+        },
+        "seniorityPosition": {
+          "type": "string",
+          "enum": ["aboveCommonEquity", "aboveMezz", "pariPassuWithMezz"],
+          "description": "Seniority position in the capital stack."
+        }
+      }
+    },
+    "jvStructure": {
+      "type": ["object", "null"],
+      "description": "JV equity structure. Null if no JV arrangement.",
+      "properties": {
+        "totalEquity": {
+          "type": "number",
+          "description": "Total JV equity commitment."
+        },
+        "lpEquity": {
+          "type": "number",
+          "description": "LP equity commitment."
+        },
+        "gpEquity": {
+          "type": "number",
+          "description": "GP co-investment amount."
+        },
+        "gpCoInvestPct": {
+          "type": "number",
+          "description": "GP co-invest as percentage of total equity (0-1)."
+        },
+        "waterfallTiers": {
+          "type": "array",
+          "description": "JV waterfall tiers from first dollar to last.",
+          "items": {
+            "type": "object",
+            "required": ["tierName", "returnHurdle", "lpShare", "gpShare"],
+            "properties": {
+              "tierName": { "type": "string" },
+              "returnHurdle": { "type": "number", "description": "IRR hurdle for this tier." },
+              "lpShare": { "type": "number", "description": "LP share of distributions in this tier (0-1)." },
+              "gpShare": { "type": "number", "description": "GP share (promote) in this tier (0-1)." },
+              "catchUp": { "type": "boolean", "description": "Whether GP catch-up applies at this tier." },
+              "catchUpPct": { "type": "number", "description": "Percentage of catch-up if applicable." }
+            }
+          }
+        },
+        "prefReturn": {
+          "type": "number",
+          "description": "LP preferred return rate."
+        },
+        "prefReturnType": {
+          "type": "string",
+          "enum": ["simple", "compound", "nonCompound"],
+          "description": "How preferred return accrues."
+        },
+        "governanceRights": {
+          "type": "object",
+          "description": "Key governance provisions.",
+          "properties": {
+            "majorDecisions": { "type": "array", "items": { "type": "string" } },
+            "lpRemovalRights": { "type": "boolean" },
+            "budgetApprovalThreshold": { "type": "number" }
+          }
+        }
+      }
+    },
+    "intercreditorRequirements": {
+      "type": ["object", "null"],
+      "description": "Intercreditor agreement requirements when subordinate debt coexists with senior debt.",
+      "properties": {
+        "required": {
+          "type": "boolean",
+          "description": "Whether an intercreditor agreement is required."
+        },
+        "seniorLenderConsent": {
+          "type": "string",
+          "enum": ["obtained", "pending", "notRequired"],
+          "description": "Status of senior lender consent for subordinate capital."
+        },
+        "standstillPeriodMonths": {
+          "type": "integer",
+          "description": "Standstill period during which mezz lender cannot exercise remedies."
+        },
+        "curePeriodDays": {
+          "type": "integer",
+          "description": "Days allowed for mezz lender to cure senior loan default."
+        },
+        "purchaseOptionAtPar": {
+          "type": "boolean",
+          "description": "Whether mezz lender has option to purchase senior loan at par upon default."
+        },
+        "keyTerms": {
+          "type": "array",
+          "description": "Key intercreditor terms to negotiate.",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "totalSubordinateCapital": {
+      "type": "number",
+      "description": "Total subordinate capital layer (mezz + pref equity). Zero if all equity fill with no subordinate layers.",
+      "minimum": 0
+    },
+    "capitalStackBreakdown": {
+      "type": "object",
+      "description": "Running capital stack breakdown after subordinate capital phase.",
+      "properties": {
+        "seniorDebt": { "type": "number" },
+        "mezzDebt": { "type": "number" },
+        "prefEquity": { "type": "number" },
+        "commonEquity": { "type": "number" },
+        "totalCapitalization": { "type": "number" }
+      }
+    }
+  }
+}

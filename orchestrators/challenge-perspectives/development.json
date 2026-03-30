@@ -1,0 +1,75 @@
+{
+  "pipelineId": "development",
+  "perspectives": [
+    {
+      "perspectiveId": "cost-overrun-hawk",
+      "name": "Cost Overrun Hawk",
+      "question": "Are construction costs spiraling beyond contingency?",
+      "tier": 1,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "gmp-budget-to-actual-variance-by-trade",
+        "contingency-burn-rate-vs-completion-percentage",
+        "change-order-velocity-and-magnitude-trend",
+        "hard-cost-per-sf-vs-market-benchmarks",
+        "interest-reserve-adequacy-vs-remaining-construction",
+        "front-loading-detection-in-draw-requests",
+        "unforeseen-condition-frequency-vs-geotechnical-report"
+      ],
+      "challengeThreshold": "Budget-to-actual variance exceeds 5% of GMP OR contingency utilization exceeds 60% with more than 40% of construction remaining OR change order velocity exceeds 3 COs per month for 3 consecutive months"
+    },
+    {
+      "perspectiveId": "absorption-skeptic",
+      "name": "Absorption Skeptic",
+      "question": "Will this project actually lease up on the pro forma timeline?",
+      "tier": 1,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "absorption-velocity-vs-proforma-and-historical-submarket",
+        "competitive-supply-pipeline-within-radius",
+        "concession-burn-rate-vs-budget-and-burn-down-schedule",
+        "rent-achievability-vs-market-comps-and-competing-new-supply",
+        "seasonal-absorption-risk-for-delivery-timing",
+        "construction-loan-maturity-cushion-vs-stabilization-date",
+        "funnel-conversion-rates-vs-industry-benchmarks"
+      ],
+      "challengeThreshold": "Absorption velocity below 80% of pro forma rate for 8+ consecutive weeks OR competitive supply delivering within 12 months exceeds 2x submarket annual absorption OR concession budget projected to be exhausted before 80% occupancy"
+    },
+    {
+      "perspectiveId": "construction-risk",
+      "name": "Construction Risk",
+      "question": "Is the GC/schedule/quality on track or heading for a claim?",
+      "tier": 2,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "schedule-performance-index-and-critical-path-float",
+        "gc-financial-health-and-bonding-capacity",
+        "subcontractor-lien-risk-and-waiver-compliance",
+        "rfi-aging-and-design-coordination-gaps",
+        "safety-incident-rate-vs-osha-benchmarks",
+        "weather-delay-impact-on-completion-date",
+        "long-lead-item-delivery-risk"
+      ],
+      "challengeThreshold": "Schedule Performance Index (SPI) below 0.90 for 2 consecutive months OR open RFIs exceed 50 with average age above 21 days OR safety TRIR exceeds 4.0 OR GC requesting time extension exceeding 60 days"
+    },
+    {
+      "perspectiveId": "entitlement-bear",
+      "name": "Entitlement Bear",
+      "question": "Will this project actually get approved?",
+      "tier": 2,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "zoning-variance-count-and-severity",
+        "political-environment-and-election-cycle-timing",
+        "organized-opposition-strength-and-petition-activity",
+        "comparable-approval-precedent-in-jurisdiction",
+        "environmental-review-requirements-and-timeline-risk",
+        "impact-fee-magnitude-vs-proforma-feasibility",
+        "entitlement-cost-overrun-risk-vs-budget"
+      ],
+      "challengeThreshold": "NIMBY composite score exceeds 65 OR entitlement pathway requires rezoning in jurisdiction with less than 50% rezoning approval rate OR entitlement timeline exceeds 18 months OR impact fees exceed 5% of total development cost"
+    }
+  ],
+  "synthesisModel": "claude-opus-4-6[1m]",
+  "verdictReconciliation": "Challenge verdict overrides pipeline verdict if it differs. Cost Overrun Hawk and Absorption Skeptic perspectives carry veto weight on STABILIZED verdicts. Entitlement Bear carries veto weight on phase 1 PASS verdicts."
+}

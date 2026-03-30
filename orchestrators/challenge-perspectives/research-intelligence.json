@@ -1,0 +1,58 @@
+{
+  "pipelineId": "research-intelligence",
+  "perspectives": [
+    {
+      "perspectiveId": "data-quality-skeptic",
+      "name": "Data Quality Skeptic",
+      "question": "Is the research built on stale data and broker narratives instead of fundamentals?",
+      "tier": 1,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "data-freshness-vs-staleness",
+        "government-source-vs-broker-source-ratio",
+        "unsupported-narrative-claims",
+        "rounded-numbers-without-attribution",
+        "single-source-dependency",
+        "assumption-count-vs-data-count",
+        "conflicting-data-resolution-quality"
+      ],
+      "challengeThreshold": "Data freshness score below 70% OR source quality score below 60% OR more than 5 unsupported narrative claims identified"
+    },
+    {
+      "perspectiveId": "contrarian-research",
+      "name": "Contrarian Research",
+      "question": "What if the consensus view is wrong and the market moves in the opposite direction?",
+      "tier": 1,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "consensus-crowding-risk",
+        "base-case-vs-tail-risk-scenarios",
+        "mean-reversion-probability",
+        "historical-analog-comparison",
+        "what-market-is-pricing-in-vs-reality",
+        "contrarian-opportunity-identification",
+        "regime-change-probability"
+      ],
+      "challengeThreshold": "All target sectors are consensus overweight OR macro thesis aligns with >80% of broker research OR no downside scenarios modeled"
+    },
+    {
+      "perspectiveId": "timeliness",
+      "name": "Timeliness",
+      "question": "Is this research actionable now, or is the window already closed or not yet open?",
+      "tier": 1,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "cycle-timing-precision",
+        "capital-markets-window-assessment",
+        "debt-market-timing-risk",
+        "supply-delivery-timing-vs-entry",
+        "regulatory-implementation-timeline",
+        "election-cycle-policy-risk-calendar",
+        "seasonal-transaction-patterns"
+      ],
+      "challengeThreshold": "Timing assessment is DEPLOY but capital markets are TRANSITIONAL OR cycle position is PEAK OR major regulatory change expected within 12 months"
+    }
+  ],
+  "synthesisModel": "claude-opus-4-6[1m]",
+  "verdictReconciliation": "Challenge verdict adjusts pipeline verdict confidence but does not override. If all 3 challenges trigger, reduce verdict confidence by 15-25 points. If contrarian challenge identifies a material missed risk, add to watchlist triggers."
+}

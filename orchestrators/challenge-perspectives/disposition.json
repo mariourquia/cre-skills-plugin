@@ -1,0 +1,43 @@
+{
+  "pipelineId": "disposition-strategy",
+  "perspectives": [
+    {
+      "perspectiveId": "timing-skeptic",
+      "name": "Timing Skeptic",
+      "question": "Are we selling into a trough? Would 12 more months yield better pricing?",
+      "tier": 1,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": ["market-cycle-timing", "cap-rate-trajectory", "supply-pipeline-absorption", "rate-environment"],
+      "challengeThreshold": "Market cycle in early recovery or late recession"
+    },
+    {
+      "perspectiveId": "tax-efficiency-hawk",
+      "name": "Tax Efficiency Hawk",
+      "question": "Is a 1031 or installment sale structurally superior?",
+      "tier": 1,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": ["tax-liability-comparison", "1031-feasibility", "installment-sale-npv", "recapture-exposure"],
+      "challengeThreshold": "Tax liability exceeds 15% of gross proceeds"
+    },
+    {
+      "perspectiveId": "buyer-risk-analyst",
+      "name": "Buyer Risk Analyst",
+      "question": "Does the selected buyer actually close?",
+      "tier": 2,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": ["buyer-track-record", "financing-contingency-risk", "retrade-history", "earnest-money-adequacy"],
+      "challengeThreshold": "Buyer has financing contingency OR earnest money <2% of price"
+    },
+    {
+      "perspectiveId": "lp-return-maximizer",
+      "name": "LP Return Maximizer",
+      "question": "Does this exit deliver the fund-level return target?",
+      "tier": 2,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": ["fund-irr-impact", "promote-threshold-proximity", "distribution-timing", "reinvestment-opportunity"],
+      "challengeThreshold": "Exit IRR below fund target by >200bps"
+    }
+  ],
+  "synthesisModel": "claude-opus-4-6[1m]",
+  "verdictReconciliation": "Challenge verdict overrides pipeline verdict if it differs"
+}

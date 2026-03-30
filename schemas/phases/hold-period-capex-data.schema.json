@@ -1,0 +1,440 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/hold-period-capex-data.schema.json",
+  "title": "Hold Period Phase 5 — CapEx & Asset Management Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the hold-period capex phase. Covers active project execution status, updated systems condition from inspections, building performance standard compliance (LL97/BEPS), and deferred maintenance backlog.",
+  "type": "object",
+  "required": [
+    "capexExecutionStatus",
+    "systemsCondition",
+    "bpsComplianceStatus",
+    "deferredMaintenanceBacklog"
+  ],
+  "properties": {
+    "capexExecutionStatus": {
+      "type": "object",
+      "description": "Status of all active and recently completed capital projects.",
+      "required": ["reportingDate", "totalBudgetAuthorized", "totalSpentToDate", "totalCommitted", "activeProjects"],
+      "properties": {
+        "reportingDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "totalBudgetAuthorized": {
+          "type": "number",
+          "description": "Total capital budget approved for the current program.",
+          "minimum": 0
+        },
+        "totalSpentToDate": {
+          "type": "number",
+          "description": "Total capital expenditures spent to date.",
+          "minimum": 0
+        },
+        "totalCommitted": {
+          "type": "number",
+          "description": "Total committed but not yet spent (open purchase orders and contracts).",
+          "minimum": 0
+        },
+        "totalRemainingBudget": {
+          "type": "number",
+          "description": "Authorized budget minus spent minus committed.",
+          "minimum": 0
+        },
+        "overallBudgetVariance": {
+          "type": "number",
+          "description": "Aggregate budget variance (positive = under budget, negative = over budget)."
+        },
+        "overallBudgetVariancePercent": {
+          "type": "number",
+          "description": "Budget variance as percent of authorized budget."
+        },
+        "activeProjects": {
+          "type": "array",
+          "description": "Detail for each active or recently completed capital project.",
+          "items": {
+            "type": "object",
+            "required": ["projectId", "projectName", "category", "budgetAuthorized", "spentToDate", "status", "percentComplete"],
+            "properties": {
+              "projectId": {
+                "type": "string",
+                "description": "Unique project identifier."
+              },
+              "projectName": { "type": "string" },
+              "category": {
+                "type": "string",
+                "description": "e.g., Roof, HVAC, Interior Renovation, Amenity, Life-Safety, Exterior."
+              },
+              "budgetAuthorized": {
+                "type": "number",
+                "description": "Approved project budget."
+              },
+              "spentToDate": {
+                "type": "number",
+                "description": "Actual spend to date on this project."
+              },
+              "committed": {
+                "type": "number",
+                "description": "Committed but unspent on this project."
+              },
+              "revisedCostEstimate": {
+                "type": "number",
+                "description": "Current estimated cost at completion."
+              },
+              "budgetVariance": {
+                "type": "number",
+                "description": "Authorized budget minus revised cost estimate."
+              },
+              "status": {
+                "type": "string",
+                "enum": ["PLANNED", "IN_PROGRESS", "ON_HOLD", "COMPLETE", "CANCELLED"]
+              },
+              "percentComplete": {
+                "type": "number",
+                "description": "Physical percent complete (0–100).",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "scheduledStartDate": {
+                "type": "string",
+                "format": "date"
+              },
+              "scheduledEndDate": {
+                "type": "string",
+                "format": "date"
+              },
+              "revisedEndDate": {
+                "type": "string",
+                "format": "date",
+                "description": "Updated completion estimate if schedule has changed."
+              },
+              "isScheduleDelayed": {
+                "type": "boolean",
+                "description": "True if project is behind original schedule."
+              },
+              "delayReasons": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "valueAddROI": {
+                "type": "object",
+                "description": "Estimated return metrics for value-add projects.",
+                "properties": {
+                  "projectedNOIUplift": { "type": "number" },
+                  "estimatedValueCreated": { "type": "number" },
+                  "returnOnCost": { "type": "number", "description": "NOI uplift divided by project cost." }
+                },
+                "additionalProperties": true
+              },
+              "contractor": {
+                "type": "string",
+                "description": "Primary contractor name."
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "completedProjectsSummary": {
+          "type": "object",
+          "description": "Aggregate summary of projects completed in the current program year.",
+          "properties": {
+            "count": { "type": "integer", "minimum": 0 },
+            "totalBudget": { "type": "number" },
+            "totalActualCost": { "type": "number" },
+            "budgetVariance": { "type": "number" }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "systemsCondition": {
+      "type": "object",
+      "description": "Updated building systems condition assessment from current-period inspections.",
+      "required": ["inspectionDate", "overallConditionScore", "systems"],
+      "properties": {
+        "inspectionDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Date of most recent property inspection."
+        },
+        "inspectorName": {
+          "type": "string",
+          "description": "Name or firm of inspector."
+        },
+        "overallConditionScore": {
+          "type": "number",
+          "description": "Updated composite systems condition score (1–5, where 5 is excellent).",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "conditionChangeFromBaseline": {
+          "type": "number",
+          "description": "Score change from onboarding baseline. Positive = improvement."
+        },
+        "systems": {
+          "type": "array",
+          "description": "System-by-system updated condition records.",
+          "items": {
+            "type": "object",
+            "required": ["systemName", "category", "currentCondition", "estimatedRUL"],
+            "properties": {
+              "systemName": { "type": "string" },
+              "category": {
+                "type": "string",
+                "description": "HVAC, Plumbing, Electrical, Roof, Elevator, Life-Safety, Structural."
+              },
+              "currentCondition": {
+                "type": "string",
+                "enum": ["EXCELLENT", "GOOD", "FAIR", "POOR", "CRITICAL"]
+              },
+              "priorCondition": {
+                "type": "string",
+                "enum": ["EXCELLENT", "GOOD", "FAIR", "POOR", "CRITICAL"],
+                "description": "Condition at prior inspection or onboarding."
+              },
+              "conditionChanged": {
+                "type": "boolean",
+                "description": "True if condition has changed since prior assessment."
+              },
+              "estimatedRUL": {
+                "type": "number",
+                "description": "Updated estimated remaining useful life in years."
+              },
+              "replacementCostEstimate": {
+                "type": "number",
+                "description": "Updated replacement cost estimate."
+              },
+              "maintenanceActionsRequired": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "lastServiceDate": {
+                "type": "string",
+                "format": "date"
+              },
+              "notes": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        },
+        "immediateIssues": {
+          "type": "array",
+          "description": "Safety, regulatory, or urgent maintenance issues requiring immediate action.",
+          "items": {
+            "type": "object",
+            "required": ["issue", "severity", "estimatedCost"],
+            "properties": {
+              "issue": { "type": "string" },
+              "affectedSystem": { "type": "string" },
+              "severity": {
+                "type": "string",
+                "enum": ["LIFE_SAFETY", "REGULATORY", "URGENT", "MODERATE"]
+              },
+              "estimatedCost": { "type": "number" },
+              "requiredActionDate": { "type": "string", "format": "date" }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "bpsComplianceStatus": {
+      "type": "object",
+      "description": "Building performance standard compliance status (LL97/BEPS or applicable jurisdiction equivalent).",
+      "required": ["applicableStandard", "complianceStatus", "currentAnnualEmissions", "emissionsLimit", "pathway"],
+      "properties": {
+        "applicableStandard": {
+          "type": "string",
+          "description": "Name of applicable standard (e.g., NYC LL97, DC BEPS, Chicago BPS)."
+        },
+        "jurisdiction": {
+          "type": "string",
+          "description": "Jurisdiction where the standard applies."
+        },
+        "complianceStatus": {
+          "type": "string",
+          "enum": ["COMPLIANT", "AT_RISK", "NON_COMPLIANT", "NOT_APPLICABLE", "PENDING_ASSESSMENT"],
+          "description": "Current compliance standing."
+        },
+        "currentAnnualEmissions": {
+          "type": "number",
+          "description": "Current annual GHG emissions in metric tons CO2e."
+        },
+        "emissionsLimit": {
+          "type": "number",
+          "description": "Applicable annual emissions limit in metric tons CO2e."
+        },
+        "emissionsHeadroom": {
+          "type": "number",
+          "description": "Emissions limit minus current emissions. Negative = over limit."
+        },
+        "currentEnergyUseIntensity": {
+          "type": "number",
+          "description": "Current EUI in kBtu per SF per year."
+        },
+        "targetEUI": {
+          "type": "number",
+          "description": "Target EUI required for compliance."
+        },
+        "estimatedFineIfNonCompliant": {
+          "type": "number",
+          "description": "Estimated annual fine if current emissions exceed the limit."
+        },
+        "pathway": {
+          "type": "object",
+          "description": "Compliance pathway and planned actions.",
+          "required": ["pathwayType", "plannedActions"],
+          "properties": {
+            "pathwayType": {
+              "type": "string",
+              "enum": ["OPERATIONAL_IMPROVEMENTS", "CAPITAL_UPGRADES", "RENEWABLE_ENERGY", "CARBON_OFFSETS", "COMBINATION", "NOT_APPLICABLE"]
+            },
+            "plannedActions": {
+              "type": "array",
+              "description": "Specific actions on the compliance pathway.",
+              "items": {
+                "type": "object",
+                "required": ["action", "estimatedCost", "projectedEmissionsReduction", "targetCompletionDate"],
+                "properties": {
+                  "action": { "type": "string" },
+                  "estimatedCost": { "type": "number" },
+                  "projectedEmissionsReduction": { "type": "number", "description": "Tons CO2e reduction." },
+                  "targetCompletionDate": { "type": "string", "format": "date" }
+                },
+                "additionalProperties": true
+              }
+            },
+            "estimatedTotalPathwayCost": {
+              "type": "number",
+              "description": "Aggregate cost to achieve compliance.",
+              "minimum": 0
+            },
+            "projectedComplianceDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Projected date of full compliance."
+            }
+          },
+          "additionalProperties": true
+        },
+        "compliancePeriods": {
+          "type": "array",
+          "description": "Schedule of compliance thresholds by regulatory period.",
+          "items": {
+            "type": "object",
+            "required": ["period", "limit", "projectedStatus"],
+            "properties": {
+              "period": { "type": "string", "description": "Compliance period label (e.g., 2024-2029)." },
+              "limit": { "type": "number" },
+              "projectedEmissions": { "type": "number" },
+              "projectedStatus": {
+                "type": "string",
+                "enum": ["COMPLIANT", "AT_RISK", "NON_COMPLIANT"]
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "deferredMaintenanceBacklog": {
+      "type": "object",
+      "description": "Updated inventory and cost estimate for deferred maintenance items.",
+      "required": ["totalEstimatedCost", "itemCount", "items"],
+      "properties": {
+        "asOfDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "totalEstimatedCost": {
+          "type": "number",
+          "description": "Aggregate cost to resolve all deferred maintenance items.",
+          "minimum": 0
+        },
+        "changeFromPriorPeriod": {
+          "type": "number",
+          "description": "Change in total deferred maintenance cost from prior period assessment."
+        },
+        "itemCount": {
+          "type": "integer",
+          "description": "Total number of deferred maintenance items.",
+          "minimum": 0
+        },
+        "criticalItemCount": {
+          "type": "integer",
+          "description": "Number of items classified as critical.",
+          "minimum": 0
+        },
+        "criticalItemCost": {
+          "type": "number",
+          "description": "Aggregate cost of critical deferred maintenance items.",
+          "minimum": 0
+        },
+        "items": {
+          "type": "array",
+          "description": "Deferred maintenance item detail.",
+          "items": {
+            "type": "object",
+            "required": ["itemDescription", "system", "priority", "estimatedCost"],
+            "properties": {
+              "itemDescription": { "type": "string" },
+              "system": { "type": "string" },
+              "location": { "type": "string", "description": "Unit, floor, or area affected." },
+              "priority": {
+                "type": "string",
+                "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"]
+              },
+              "estimatedCost": { "type": "number" },
+              "dateIdentified": { "type": "string", "format": "date" },
+              "recommendedActionDate": { "type": "string", "format": "date" },
+              "isInCapexBudget": {
+                "type": "boolean",
+                "description": "True if this item is already included in the approved capex budget."
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "byPriority": {
+          "type": "object",
+          "description": "Cost and count aggregated by priority tier.",
+          "properties": {
+            "critical": {
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "totalCost": { "type": "number" }
+              }
+            },
+            "high": {
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "totalCost": { "type": "number" }
+              }
+            },
+            "medium": {
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "totalCost": { "type": "number" }
+              }
+            },
+            "low": {
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "totalCost": { "type": "number" }
+              }
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

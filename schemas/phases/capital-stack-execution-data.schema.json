@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/capital-stack-execution-data.schema.json",
+  "title": "Capital Stack Phase 6 -- Term Sheet Execution Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the term sheet execution phase. Covers negotiated terms, executed term sheet, loan document checklist, and final capital structure.",
+  "type": "object",
+  "required": [
+    "termSheet",
+    "lenderName",
+    "finalCapitalStructure",
+    "loanDocChecklist",
+    "closingConditionsTracker",
+    "actualLoanAssumptions"
+  ],
+  "properties": {
+    "termSheet": {
+      "type": "object",
+      "description": "Executed term sheet with all negotiated terms.",
+      "required": ["lenderName", "loanAmount", "rate", "allInRate", "term", "amortization", "covenants", "executionDate"],
+      "properties": {
+        "lenderName": { "type": "string" },
+        "loanAmount": { "type": "number" },
+        "rate": { "type": "number" },
+        "rateType": { "type": "string", "enum": ["fixed", "floating"] },
+        "spread": { "type": "number", "description": "Spread in bps if floating." },
+        "benchmark": { "type": "string" },
+        "allInRate": { "type": "number" },
+        "term": { "type": "number", "description": "Loan term in years." },
+        "amortization": { "type": "number", "description": "Amortization in years." },
+        "ioPeriod": { "type": "number", "description": "Interest-only period in years." },
+        "prepayment": {
+          "type": "object",
+          "properties": {
+            "structure": { "type": "string" },
+            "lockoutPeriodMonths": { "type": "integer" },
+            "stepDownSchedule": { "type": "array", "items": { "type": "object", "properties": { "year": { "type": "integer" }, "penalty": { "type": "number" } } } }
+          }
+        },
+        "originationFee": { "type": "number" },
+        "exitFee": { "type": "number" },
+        "covenants": {
+          "type": "object",
+          "required": ["minDSCR"],
+          "properties": {
+            "minDSCR": { "type": "number" },
+            "maxLTV": { "type": "number" },
+            "minDebtYield": { "type": "number" },
+            "cashTrapDSCR": { "type": "number" },
+            "reportingRequirements": { "type": "array", "items": { "type": "string" } },
+            "other": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "reserves": {
+          "type": "object",
+          "properties": {
+            "taxAndInsurance": { "type": "number" },
+            "replacementReserve": { "type": "number" },
+            "interestReserve": { "type": "number" },
+            "leaseUpReserve": { "type": "number" },
+            "other": { "type": "array", "items": { "type": "object", "properties": { "name": { "type": "string" }, "amount": { "type": "number" } } } }
+          }
+        },
+        "conditionsPrecedent": {
+          "type": "array",
+          "description": "Outstanding conditions before closing.",
+          "items": {
+            "type": "object",
+            "required": ["condition", "status"],
+            "properties": {
+              "condition": { "type": "string" },
+              "status": { "type": "string", "enum": ["open", "inProgress", "satisfied", "waived"] },
+              "responsibleParty": { "type": "string" },
+              "deadline": { "type": "string", "format": "date" }
+            }
+          }
+        },
+        "executionDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Date the term sheet was executed."
+        },
+        "expirationDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Date the term sheet expires if conditions not met."
+        },
+        "maturityDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Loan maturity date."
+        },
+        "maturitySchedule": {
+          "type": "object",
+          "description": "Amortization and maturity schedule for fund-level tracking.",
+          "properties": {
+            "maturityDate": { "type": "string", "format": "date" },
+            "extensionOptions": { "type": "array", "items": { "type": "object", "properties": { "extensionYears": { "type": "number" }, "extensionFee": { "type": "number" }, "extensionConditions": { "type": "array", "items": { "type": "string" } } } } },
+            "balloonPayment": { "type": "number" }
+          }
+        }
+      }
+    },
+    "negotiationOutcomes": {
+      "type": "object",
+      "description": "Summary of negotiation results vs initial quote.",
+      "properties": {
+        "initialRate": { "type": "number" },
+        "negotiatedRate": { "type": "number" },
+        "rateSavingsBps": { "type": "number" },
+        "initialOriginationFee": { "type": "number" },
+        "negotiatedOriginationFee": { "type": "number" },
+        "additionalConcessions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "term": { "type": "string" },
+              "initialValue": { "type": "string" },
+              "negotiatedValue": { "type": "string" },
+              "estimatedSavings": { "type": "number" }
+            }
+          }
+        },
+        "totalEstimatedSavings": { "type": "number", "description": "Total estimated savings from negotiation in dollars." }
+      }
+    },
+    "lenderName": {
+      "type": "string",
+      "description": "Name of the selected senior debt lender."
+    },
+    "finalCapitalStructure": {
+      "type": "object",
+      "description": "Complete final capital structure with all tranches.",
+      "required": ["tranches", "totalCapitalization", "wacc"],
+      "properties": {
+        "tranches": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["trancheName", "amount", "pctOfStack", "cost", "provider"],
+            "properties": {
+              "trancheName": { "type": "string" },
+              "amount": { "type": "number" },
+              "pctOfStack": { "type": "number" },
+              "cost": { "type": "number" },
+              "costType": { "type": "string" },
+              "term": { "type": "string" },
+              "provider": { "type": "string" }
+            }
+          }
+        },
+        "totalCapitalization": { "type": "number" },
+        "wacc": { "type": "number" },
+        "seniorLTV": { "type": "number" },
+        "combinedLTV": { "type": "number" },
+        "dscr": { "type": "number" },
+        "debtYield": { "type": "number" },
+        "cashOutProceeds": {
+          "type": ["number", "null"],
+          "description": "Net cash-out proceeds if this is a cash-out refinance. Null otherwise."
+        }
+      }
+    },
+    "loanDocChecklist": {
+      "type": "object",
+      "description": "Loan document categories and status.",
+      "required": ["documents"],
+      "properties": {
+        "documents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["documentName", "category", "status"],
+            "properties": {
+              "documentName": { "type": "string" },
+              "category": {
+                "type": "string",
+                "enum": ["loanAgreement", "note", "mortgageDeedOfTrust", "guaranty", "environmentalIndemnity", "uccFilings", "titleInsurance", "survey", "appraisal", "environmentalReport", "insuranceCertificate", "entityDocuments", "other"]
+              },
+              "status": {
+                "type": "string",
+                "enum": ["notStarted", "drafting", "underReview", "approved", "executed"]
+              },
+              "responsibleParty": { "type": "string" },
+              "deadline": { "type": "string", "format": "date" },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "completionPct": {
+          "type": "number",
+          "description": "Percentage of documents in approved or executed status."
+        }
+      }
+    },
+    "closingConditionsTracker": {
+      "type": "object",
+      "description": "All conditions precedent to closing.",
+      "required": ["conditions", "overallStatus"],
+      "properties": {
+        "conditions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["conditionId", "description", "status", "responsibleParty"],
+            "properties": {
+              "conditionId": { "type": "string" },
+              "description": { "type": "string" },
+              "status": { "type": "string", "enum": ["open", "inProgress", "satisfied", "waived", "failed"] },
+              "responsibleParty": { "type": "string" },
+              "targetDate": { "type": "string", "format": "date" },
+              "actualDate": { "type": ["string", "null"], "format": "date" },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "overallStatus": {
+          "type": "string",
+          "enum": ["allSatisfied", "inProgress", "conditionsFailing"],
+          "description": "Aggregate status of all closing conditions."
+        },
+        "estimatedClosingDate": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "actualLoanAssumptions": {
+      "type": "object",
+      "description": "Final loan assumptions to replace underwriting estimates. Sent to calling pipeline.",
+      "required": ["actualRate", "actualLTV", "actualDSCR", "actualIOPeriod", "actualTerm"],
+      "properties": {
+        "actualRate": { "type": "number" },
+        "actualLTV": { "type": "number" },
+        "actualDSCR": { "type": "number" },
+        "actualDebtYield": { "type": "number" },
+        "actualIOPeriod": { "type": "number" },
+        "actualTerm": { "type": "number" },
+        "actualAmortization": { "type": "number" },
+        "actualOriginationFee": { "type": "number" },
+        "actualPrepaymentStructure": { "type": "string" },
+        "deviationFromUnderwriting": {
+          "type": "object",
+          "description": "Comparison of actual vs underwriting assumptions.",
+          "properties": {
+            "rateDeviation": { "type": "number", "description": "Actual minus assumed in bps." },
+            "ltvDeviation": { "type": "number", "description": "Actual minus assumed as decimal." },
+            "dscrDeviation": { "type": "number" },
+            "irrImpact": { "type": "number", "description": "IRR impact of actual vs assumed in bps." }
+          }
+        }
+      }
+    }
+  }
+}

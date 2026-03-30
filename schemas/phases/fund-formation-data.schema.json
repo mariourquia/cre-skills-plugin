@@ -1,0 +1,321 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/fund-formation-data.schema.json",
+  "title": "Fund Management Phase 1 -- Fund Formation Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the fund formation phase. Covers fund structure, GP economics framework, LPA key terms, investment policy, regulatory compliance, and tax structure.",
+  "type": "object",
+  "required": [
+    "fundStructure",
+    "gpEconomics",
+    "lpaTerms",
+    "investmentPolicy",
+    "regulatoryCompliance"
+  ],
+  "properties": {
+    "fundStructure": {
+      "type": "object",
+      "description": "Complete fund structure recommendation.",
+      "required": ["entityType", "domicile", "fundName", "targetSize", "vintageYear"],
+      "properties": {
+        "entityType": {
+          "type": "string",
+          "description": "Legal entity type (e.g., Delaware LP, Cayman LP, LLC)."
+        },
+        "domicile": {
+          "type": "string",
+          "description": "Jurisdiction of formation."
+        },
+        "fundName": {
+          "type": "string",
+          "description": "Fund name as it will appear in legal documents."
+        },
+        "targetSize": {
+          "type": "number",
+          "description": "Target fund size in dollars."
+        },
+        "hardCap": {
+          "type": "number",
+          "description": "Maximum fund size (hard cap) in dollars."
+        },
+        "vintageYear": {
+          "type": "integer",
+          "description": "Fund vintage year."
+        },
+        "strategy": {
+          "type": "string",
+          "enum": ["core", "core-plus", "value-add", "opportunistic"],
+          "description": "Investment strategy classification."
+        },
+        "assetClass": {
+          "type": "string",
+          "description": "Target asset class (e.g., multifamily, office, industrial, diversified)."
+        },
+        "parallelVehicles": {
+          "type": "array",
+          "description": "Parallel investment vehicles (offshore, blocker, etc.).",
+          "items": {
+            "type": "object",
+            "properties": {
+              "vehicleName": { "type": "string" },
+              "entityType": { "type": "string" },
+              "domicile": { "type": "string" },
+              "purpose": { "type": "string" }
+            }
+          }
+        },
+        "feederFunds": {
+          "type": "array",
+          "description": "Feeder fund structures.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "feederName": { "type": "string" },
+              "targetInvestorType": { "type": "string" },
+              "domicile": { "type": "string" }
+            }
+          }
+        },
+        "governanceStructure": {
+          "type": "object",
+          "description": "Fund governance provisions.",
+          "properties": {
+            "lpacComposition": { "type": "string" },
+            "keyManProvisions": { "type": "string" },
+            "noFaultRemovalThreshold": { "type": "number", "description": "LP vote threshold for no-fault GP removal (0-1)." },
+            "excuseExclusionRights": { "type": "string" }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "gpEconomics": {
+      "type": "object",
+      "description": "GP economics framework tracked across all fund lifecycle phases.",
+      "required": ["managementFee", "carriedInterest", "gpCoInvest", "clawback", "organizationalExpenses"],
+      "properties": {
+        "managementFee": {
+          "type": "object",
+          "description": "Management fee structure.",
+          "required": ["rate", "basis", "frequency"],
+          "properties": {
+            "rate": { "type": "number", "description": "Management fee rate as decimal (e.g., 0.015 = 1.5%)." },
+            "basis": { "type": "string", "enum": ["committedCapital", "investedCapital", "NAV"], "description": "Fee basis during investment period." },
+            "postInvestmentPeriodBasis": { "type": "string", "enum": ["investedCapital", "NAV", "lesserOfCommittedOrInvested"] },
+            "stepDown": { "type": "object", "properties": { "postInvestmentRate": { "type": "number" }, "triggerEvent": { "type": "string" } } },
+            "frequency": { "type": "string", "enum": ["quarterly", "semi-annual", "annual"] },
+            "calculationMethod": { "type": "string", "enum": ["advance", "arrears"] }
+          }
+        },
+        "carriedInterest": {
+          "type": "object",
+          "description": "Carried interest structure.",
+          "required": ["rate", "hurdleRate", "waterfallType"],
+          "properties": {
+            "rate": { "type": "number", "description": "Carry rate as decimal (e.g., 0.20 = 20%)." },
+            "hurdleRate": { "type": "number", "description": "Preferred return hurdle as decimal (e.g., 0.08 = 8%)." },
+            "compoundingMethod": { "type": "string", "enum": ["annual", "quarterly", "simple"] },
+            "catchUp": { "type": "object", "properties": { "enabled": { "type": "boolean" }, "split": { "type": "string", "description": "e.g., 80/20 GP/LP" } } },
+            "waterfallType": { "type": "string", "enum": ["european", "american"], "description": "European = whole-fund; American = deal-by-deal." },
+            "calculationBasis": { "type": "string", "enum": ["wholeFund", "dealByDeal"] },
+            "holdingPeriodRequirement": { "type": "integer", "description": "Minimum holding period in years for LTCG treatment." }
+          }
+        },
+        "gpCoInvest": {
+          "type": "object",
+          "description": "GP co-investment commitment.",
+          "properties": {
+            "amount": { "type": "number", "description": "GP co-invest commitment in dollars." },
+            "percentOfFund": { "type": "number", "description": "GP co-invest as percentage of fund size (0-1)." },
+            "timing": { "type": "string", "description": "e.g., pari passu with LP capital calls." },
+            "treatment": { "type": "string", "description": "e.g., pro rata with LP for waterfall purposes." }
+          }
+        },
+        "clawback": {
+          "type": "object",
+          "description": "GP clawback provisions.",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "guarantee": { "type": "boolean", "description": "Whether GP has posted a clawback guarantee." },
+            "guaranteeAmount": { "type": "number" },
+            "escrowPercentage": { "type": "number", "description": "Percentage of carry held in escrow for clawback." },
+            "measurementBasis": { "type": "string", "description": "Cumulative distributions vs cumulative preferred return." }
+          }
+        },
+        "organizationalExpenses": {
+          "type": "object",
+          "description": "Organizational expense provisions.",
+          "properties": {
+            "cap": { "type": "number", "description": "Organizational expense cap in dollars." },
+            "treatmentOfExcess": { "type": "string", "description": "How expenses exceeding the cap are handled (e.g., borne by GP)." },
+            "coveredItems": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Items included in organizational expenses."
+            }
+          }
+        },
+        "feeOffsets": {
+          "type": "object",
+          "description": "Transaction fee offset provisions.",
+          "properties": {
+            "offsetRate": { "type": "number", "description": "Percentage of transaction fees offsetting management fees (0-1)." },
+            "coveredFees": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Types of fees subject to offset (acquisition, disposition, financing)."
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "lpaTerms": {
+      "type": "object",
+      "description": "LPA key terms sheet.",
+      "required": ["fundTerm", "investmentPeriod", "distributionWaterfall"],
+      "properties": {
+        "fundTerm": {
+          "type": "object",
+          "properties": {
+            "initialTermYears": { "type": "integer" },
+            "extensions": { "type": "array", "items": { "type": "object", "properties": { "years": { "type": "integer" }, "approvalRequired": { "type": "string" } } } }
+          }
+        },
+        "investmentPeriod": {
+          "type": "object",
+          "properties": {
+            "years": { "type": "integer" },
+            "extensions": { "type": "array", "items": { "type": "object", "properties": { "years": { "type": "integer" }, "approvalRequired": { "type": "string" } } } },
+            "suspensionTriggers": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "distributionWaterfall": {
+          "type": "object",
+          "description": "Four-tier distribution waterfall specification.",
+          "properties": {
+            "tier1_returnOfCapital": { "type": "string" },
+            "tier2_preferredReturn": { "type": "string" },
+            "tier3_gpCatchUp": { "type": "string" },
+            "tier4_residualSplit": { "type": "string" }
+          }
+        },
+        "transferRestrictions": { "type": "string" },
+        "defaultProvisions": { "type": "string" },
+        "confidentialityProvisions": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "investmentPolicy": {
+      "type": "object",
+      "description": "Investment policy statement with quantified constraints.",
+      "required": ["concentrationLimits", "leveragePolicy", "returnTargets"],
+      "properties": {
+        "concentrationLimits": {
+          "type": "object",
+          "properties": {
+            "maxSingleAsset": { "type": "number", "description": "Maximum allocation to a single asset as percentage of fund NAV." },
+            "maxGeography": { "type": "number", "description": "Maximum allocation to a single geography." },
+            "maxAssetType": { "type": "number", "description": "Maximum allocation to a single asset type." },
+            "maxVintageYear": { "type": "number", "description": "Maximum concentration in a single vintage year." }
+          }
+        },
+        "leveragePolicy": {
+          "type": "object",
+          "properties": {
+            "fundLevelMaxLTV": { "type": "number" },
+            "assetLevelMaxLTV": { "type": "number" },
+            "recoursePolicy": { "type": "string" },
+            "floatingRateLimit": { "type": "number", "description": "Maximum percentage of debt that can be floating rate." }
+          }
+        },
+        "returnTargets": {
+          "type": "object",
+          "properties": {
+            "grossIRR": { "type": "number" },
+            "netIRR": { "type": "number" },
+            "equityMultiple": { "type": "number" },
+            "cashYield": { "type": "number" }
+          }
+        },
+        "riskParameters": {
+          "type": "object",
+          "properties": {
+            "maxLossTolerance": { "type": "number" },
+            "liquidityReserve": { "type": "number" },
+            "hedgeRatio": { "type": "number" }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "regulatoryCompliance": {
+      "type": "object",
+      "description": "Regulatory filing status and compliance framework.",
+      "required": ["securitiesExemption", "erisaStatus"],
+      "properties": {
+        "securitiesExemption": {
+          "type": "object",
+          "properties": {
+            "exemptionBasis": { "type": "string", "description": "e.g., 506(b), 506(c), Section 3(c)(7)." },
+            "investorThreshold": { "type": "string", "description": "e.g., Qualified Purchaser, Accredited Investor." },
+            "formDFiled": { "type": "boolean" },
+            "formDFilingDate": { "type": "string", "format": "date" }
+          }
+        },
+        "erisaStatus": {
+          "type": "object",
+          "properties": {
+            "exemption": { "type": "string", "enum": ["VCOC", "REOC", "significantlyParticipated", "none"] },
+            "benefitPlanInvestorPercentage": { "type": "number", "description": "Current benefit plan investor percentage (0-1)." },
+            "planAssetFund": { "type": "boolean" }
+          }
+        },
+        "formPFRequired": { "type": "boolean" },
+        "blueSkyFilings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "state": { "type": "string" },
+              "status": { "type": "string", "enum": ["filed", "pending", "not-required"] }
+            }
+          }
+        },
+        "amlKycFramework": { "type": "string", "description": "Description of AML/KYC compliance framework." }
+      },
+      "additionalProperties": true
+    },
+    "taxStructure": {
+      "type": "object",
+      "description": "Tax-efficient structure recommendations.",
+      "properties": {
+        "blockerEntities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "entityName": { "type": "string" },
+              "purpose": { "type": "string" },
+              "targetInvestorType": { "type": "string" }
+            }
+          }
+        },
+        "stateNexus": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "state": { "type": "string" },
+              "nexusType": { "type": "string" },
+              "withholdingRate": { "type": "number" }
+            }
+          }
+        },
+        "depreciationStrategy": { "type": "string" },
+        "carriedInterestTaxTreatment": { "type": "string" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
