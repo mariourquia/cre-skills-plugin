@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/research-output-data.schema.json",
+  "title": "Research Intelligence Phase 5 -- Research Output Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the research output and distribution phase. Covers terminal verdict, opportunity map, data quality verdict, and market outlook report location.",
+  "type": "object",
+  "required": [
+    "terminalVerdict",
+    "opportunityMap",
+    "dataQualityVerdict",
+    "marketOutlookReport"
+  ],
+  "properties": {
+    "terminalVerdict": {
+      "type": "object",
+      "description": "Final research intelligence verdict with confidence and supporting analysis.",
+      "required": ["verdict", "confidence", "confidenceCategory", "summary"],
+      "properties": {
+        "verdict": { "type": "string", "enum": ["SIGNAL", "MONITOR", "ALERT"] },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 100 },
+        "confidenceCategory": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW", "VERY_LOW"] },
+        "summary": { "type": "string", "description": "2-3 sentence verdict rationale." },
+        "supportingFactors": { "type": "array", "items": { "type": "string" } },
+        "contraryFactors": { "type": "array", "items": { "type": "string" } },
+        "watchlistTriggers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "trigger": { "type": "string" },
+              "threshold": { "type": "string" },
+              "action": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "opportunityMap": {
+      "type": "array",
+      "description": "Ranked investment opportunities with target profiles and evidence.",
+      "items": {
+        "type": "object",
+        "required": ["opportunityId", "targetMarket", "propertyType", "investmentThesis", "confidenceLevel"],
+        "properties": {
+          "opportunityId": { "type": "string" },
+          "targetMarket": {
+            "type": "object",
+            "properties": {
+              "msa": { "type": "string" },
+              "submarket": { "type": "string" }
+            }
+          },
+          "propertyType": { "type": "string" },
+          "investmentThesis": { "type": "string" },
+          "targetProfile": {
+            "type": "object",
+            "properties": {
+              "propertyClass": { "type": "string" },
+              "vintageRange": { "type": "string" },
+              "unitCountRange": { "type": "string" },
+              "basisRange": {
+                "type": "object",
+                "properties": {
+                  "low": { "type": "number" },
+                  "high": { "type": "number" },
+                  "unit": { "type": "string" }
+                }
+              },
+              "targetCapRate": {
+                "type": "object",
+                "properties": {
+                  "low": { "type": "number" },
+                  "high": { "type": "number" }
+                }
+              },
+              "targetIRR": { "type": "number" }
+            }
+          },
+          "supportingEvidence": {
+            "type": "array",
+            "minItems": 5,
+            "items": {
+              "type": "object",
+              "properties": {
+                "source": { "type": "string" },
+                "dataPoint": { "type": "string" },
+                "agentId": { "type": "string" }
+              }
+            }
+          },
+          "riskFactors": {
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "type": "object",
+              "properties": {
+                "risk": { "type": "string" },
+                "probability": { "type": "string" },
+                "mitigant": { "type": "string" }
+              }
+            }
+          },
+          "timingAssessment": { "type": "string", "enum": ["URGENT", "FAVORABLE", "NEUTRAL", "WAIT"] },
+          "confidenceLevel": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW"] }
+        }
+      }
+    },
+    "dataQualityVerdict": {
+      "type": "object",
+      "description": "Data quality assessment from the data-quality-auditor.",
+      "required": ["verdict", "overallConfidence", "overallCategory"],
+      "properties": {
+        "verdict": { "type": "string", "enum": ["RELIABLE", "ADEQUATE", "UNRELIABLE"] },
+        "overallConfidence": { "type": "number", "minimum": 0, "maximum": 100 },
+        "overallCategory": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW", "VERY_LOW"] },
+        "criticalFindings": { "type": "array", "items": { "type": "string" } },
+        "streamConfidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "stream": { "type": "string" },
+              "confidence": { "type": "number" },
+              "category": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "marketOutlookReport": {
+      "type": "string",
+      "description": "File path to the complete market outlook report in markdown format."
+    },
+    "handoffPackages": {
+      "type": "object",
+      "description": "Pre-packaged data for downstream pipeline consumption.",
+      "properties": {
+        "investmentStrategy": {
+          "type": "object",
+          "description": "Data package for investment-strategy-orchestrator."
+        },
+        "holdPeriodMarketPulse": {
+          "type": "object",
+          "description": "Data package for hold-period market pulse monitoring."
+        },
+        "dispositionMarketTiming": {
+          "type": "object",
+          "description": "Data package for disposition market timing signals."
+        }
+      }
+    }
+  }
+}

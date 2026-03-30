@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/lp-dd-data.schema.json",
+  "title": "LP Intelligence Phase 4 -- Manager Due Diligence Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the manager due diligence phase. Covers operational DD assessment and ESG compliance review.",
+  "type": "object",
+  "required": [
+    "operationalDD",
+    "managerDDScore"
+  ],
+  "properties": {
+    "operationalDD": {
+      "type": "object",
+      "description": "Operational due diligence assessment across all dimensions.",
+      "required": ["aggregateScore", "classification"],
+      "properties": {
+        "backOffice": {
+          "type": "object",
+          "properties": {
+            "fundAdminType": { "type": "string", "enum": ["external-tier1", "external-tier2", "external-tier3", "internal"] },
+            "fundAdminName": { "type": "string" },
+            "fundAdminScore": { "type": "number", "minimum": 1, "maximum": 5 },
+            "auditorName": { "type": "string" },
+            "auditorTier": { "type": "string", "enum": ["big4", "equivalent", "mid-tier", "small"] },
+            "priorAuditFindings": { "type": "boolean" },
+            "socReport": { "type": "boolean" },
+            "score": { "type": "number", "minimum": 1, "maximum": 5 }
+          }
+        },
+        "valuationMethodology": {
+          "type": "object",
+          "properties": {
+            "documentedPolicy": { "type": "boolean" },
+            "valuationCommittee": { "type": "boolean" },
+            "externalAppraisalFrequency": { "type": "string" },
+            "appraiserRotation": { "type": "boolean" },
+            "markToExitRatio": { "type": ["number", "null"], "description": "Average exit price / last-reported NAV for realized investments" },
+            "markToExitAssessment": { "type": "string", "enum": ["conservative", "accurate", "aggressive"] },
+            "score": { "type": "number", "minimum": 1, "maximum": 5 }
+          }
+        },
+        "conflictOfInterest": {
+          "type": "object",
+          "properties": {
+            "relatedPartyTransactions": {
+              "type": "object",
+              "properties": {
+                "present": { "type": "boolean" },
+                "serviceCategories": { "type": "integer" },
+                "marketRateVerified": { "type": "boolean" },
+                "lpacApproval": { "type": "boolean" }
+              }
+            },
+            "coInvestAllocation": { "type": "string", "enum": ["pro-rata", "formula-based", "discretionary", "not-applicable"] },
+            "competingVehicles": { "type": "boolean" },
+            "allocationPolicyDocumented": { "type": "boolean" },
+            "score": { "type": "number", "minimum": 1, "maximum": 5 }
+          }
+        },
+        "cybersecurity": {
+          "type": "object",
+          "properties": {
+            "soc2Completed": { "type": "boolean" },
+            "penetrationTesting": { "type": "boolean" },
+            "cyberInsurance": { "type": "boolean" },
+            "incidentHistory": { "type": "boolean" },
+            "score": { "type": "number", "minimum": 1, "maximum": 5 }
+          }
+        },
+        "businessContinuity": {
+          "type": "object",
+          "properties": {
+            "bcpDocumented": { "type": "boolean" },
+            "successionPlan": { "type": "boolean" },
+            "score": { "type": "number", "minimum": 1, "maximum": 5 }
+          }
+        },
+        "insurance": {
+          "type": "object",
+          "properties": {
+            "eoInsurance": { "type": "boolean" },
+            "doInsurance": { "type": "boolean" },
+            "fidelityBond": { "type": "boolean" },
+            "cyberInsurance": { "type": "boolean" },
+            "score": { "type": "number", "minimum": 1, "maximum": 5 }
+          }
+        },
+        "regulatoryHistory": {
+          "type": "object",
+          "properties": {
+            "secActions": { "type": "boolean" },
+            "stateActions": { "type": "boolean" },
+            "pendingLitigation": { "type": "boolean" },
+            "deficiencyLetters": { "type": "boolean" },
+            "score": { "type": "number", "minimum": 1, "maximum": 5 }
+          }
+        },
+        "aggregateScore": { "type": "number", "minimum": 1, "maximum": 5, "description": "Weighted aggregate across all ODD dimensions" },
+        "classification": { "type": "string", "enum": ["INSTITUTIONAL_GRADE", "ADEQUATE", "BELOW_STANDARD", "UNACCEPTABLE"] },
+        "topRisks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "risk": { "type": "string" },
+              "severity": { "type": "string", "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"] },
+              "remediation": { "type": "string" }
+            }
+          }
+        },
+        "redFlags": { "type": "array", "items": { "type": "string" } },
+        "confidenceScore": { "type": "number", "minimum": 0, "maximum": 100 }
+      },
+      "additionalProperties": true
+    },
+    "esgCompliance": {
+      "type": ["object", "null"],
+      "description": "ESG compliance review. Null if non-critical agent did not complete.",
+      "properties": {
+        "gresbScore": {
+          "type": ["object", "null"],
+          "properties": {
+            "currentScore": { "type": "integer" },
+            "starRating": { "type": "integer", "minimum": 1, "maximum": 5 },
+            "trajectory": { "type": "string", "enum": ["improving", "stable", "declining"] },
+            "peerGroupRanking": { "type": "string" },
+            "managementScore": { "type": "integer" },
+            "performanceScore": { "type": "integer" }
+          }
+        },
+        "tcfdQuality": {
+          "type": "object",
+          "properties": {
+            "governanceScore": { "type": "number", "minimum": 1, "maximum": 5 },
+            "strategyScore": { "type": "number", "minimum": 1, "maximum": 5 },
+            "riskManagementScore": { "type": "number", "minimum": 1, "maximum": 5 },
+            "metricsAndTargetsScore": { "type": "number", "minimum": 1, "maximum": 5 },
+            "averageScore": { "type": "number", "minimum": 1, "maximum": 5 },
+            "classification": { "type": "string" }
+          }
+        },
+        "deiScore": { "type": "number", "minimum": 1, "maximum": 5 },
+        "deiTrajectory": { "type": "string", "enum": ["improving", "stable", "declining"] },
+        "policyImplementationGaps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "policy": { "type": "string" },
+              "commitment": { "type": "string" },
+              "evidence": { "type": "string" },
+              "gapSeverity": { "type": "string", "enum": ["cosmetic", "partial", "minor", "none"] }
+            }
+          }
+        },
+        "greenwashingIndicators": { "type": "array", "items": { "type": "string" } },
+        "compositeScore": { "type": "number", "minimum": 1, "maximum": 5 },
+        "classification": { "type": "string", "enum": ["INDUSTRY_LEADING", "INSTITUTIONAL_GRADE", "ADEQUATE", "LAGGING", "NON_COMPLIANT"] },
+        "redFlags": { "type": "array", "items": { "type": "string" } },
+        "confidenceScore": { "type": "number", "minimum": 0, "maximum": 100 }
+      },
+      "additionalProperties": true
+    },
+    "managerDDScore": {
+      "type": "object",
+      "description": "Consolidated manager due diligence assessment.",
+      "required": ["operationalScore", "overallClassification"],
+      "properties": {
+        "operationalScore": { "type": "number", "minimum": 1, "maximum": 5 },
+        "esgScore": { "type": ["number", "null"], "minimum": 1, "maximum": 5 },
+        "overallClassification": { "type": "string" },
+        "totalRedFlags": { "type": "integer" },
+        "criticalRedFlags": { "type": "integer" }
+      }
+    }
+  },
+  "additionalProperties": true
+}

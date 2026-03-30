@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/disposition-marketing-data.schema.json",
+  "title": "Disposition Phase 3 -- Marketing Preparation Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the disposition marketing preparation phase. Covers offering memorandum, data room, broker selection, and marketing timeline.",
+  "type": "object",
+  "required": [
+    "omPackage",
+    "dataRoomIndex",
+    "brokerSelection",
+    "marketingTimeline"
+  ],
+  "properties": {
+    "omPackage": {
+      "type": "object",
+      "description": "Complete offering memorandum with narrative, financial summary, and investment highlights.",
+      "required": ["executiveSummary", "investmentHighlights", "financialSummary", "propertyDescription", "marketOverview"],
+      "properties": {
+        "executiveSummary": {
+          "type": "string",
+          "description": "2-3 paragraph executive summary of the investment opportunity."
+        },
+        "investmentHighlights": {
+          "type": "array",
+          "description": "Top 5 investment highlights.",
+          "minItems": 3,
+          "maxItems": 7,
+          "items": {
+            "type": "object",
+            "required": ["highlight", "supportingData"],
+            "properties": {
+              "highlight": { "type": "string" },
+              "supportingData": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        },
+        "financialSummary": {
+          "type": "object",
+          "description": "Financial summary from OM.",
+          "required": ["askingPrice", "currentNOI", "impliedCapRate"],
+          "properties": {
+            "askingPrice": { "type": "number" },
+            "currentNOI": { "type": "number" },
+            "impliedCapRate": { "type": "number" },
+            "proFormaNOI": { "type": "number" },
+            "proFormaCapRate": { "type": "number" },
+            "pricePerUnit": { "type": "number" },
+            "t12Revenue": { "type": "number" },
+            "t12Expenses": { "type": "number" },
+            "occupancyRate": { "type": "number" }
+          },
+          "additionalProperties": true
+        },
+        "propertyDescription": { "type": "string", "description": "Property physical description and amenities." },
+        "marketOverview": { "type": "string", "description": "Submarket and MSA overview narrative." },
+        "riskFactors": {
+          "type": "array",
+          "description": "Disclosed risk factors.",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "dataRoomIndex": {
+      "type": "object",
+      "description": "Data room document index with population status.",
+      "required": ["totalDocuments", "populatedDocuments", "percentPopulated", "categories"],
+      "properties": {
+        "totalDocuments": { "type": "integer", "minimum": 0 },
+        "populatedDocuments": { "type": "integer", "minimum": 0 },
+        "percentPopulated": { "type": "number", "minimum": 0, "maximum": 100 },
+        "categories": {
+          "type": "array",
+          "description": "Document categories with population status.",
+          "items": {
+            "type": "object",
+            "required": ["category", "totalItems", "populated"],
+            "properties": {
+              "category": { "type": "string", "description": "Document category (financial, legal, environmental, physical, leasing, etc.)." },
+              "totalItems": { "type": "integer" },
+              "populated": { "type": "integer" },
+              "missingItems": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "accessControls": {
+          "type": "object",
+          "description": "Data room access control settings.",
+          "properties": {
+            "requireCA": { "type": "boolean", "description": "Whether CA/NDA is required for access." },
+            "tieredAccess": { "type": "boolean", "description": "Whether document access is tiered by buyer qualification." }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "brokerSelection": {
+      "type": "object",
+      "description": "Selected broker with commission terms and listing agreement parameters.",
+      "required": ["selectedBroker", "commissionRate", "listingType"],
+      "properties": {
+        "selectedBroker": {
+          "type": "object",
+          "description": "Selected broker details.",
+          "required": ["firmName", "brokerName"],
+          "properties": {
+            "firmName": { "type": "string" },
+            "brokerName": { "type": "string" },
+            "trackRecord": { "type": "string", "description": "Relevant transaction history in the submarket." },
+            "selectionScore": { "type": "number", "description": "Composite score from broker evaluation." }
+          },
+          "additionalProperties": true
+        },
+        "commissionRate": { "type": "number", "description": "Commission rate as decimal (e.g., 0.015 = 1.5%)." },
+        "estimatedCommission": { "type": "number", "description": "Estimated commission in dollars." },
+        "listingType": { "type": "string", "enum": ["exclusive", "co-exclusive", "open", "off-market"], "description": "Type of listing agreement." },
+        "listingTermMonths": { "type": "integer", "description": "Listing agreement term in months." }
+      },
+      "additionalProperties": true
+    },
+    "marketingTimeline": {
+      "type": "object",
+      "description": "Marketing timeline with key milestone dates.",
+      "required": ["marketingLaunchDate", "callForOffersDeadline"],
+      "properties": {
+        "marketingLaunchDate": { "type": "string", "format": "date", "description": "ISO 8601 date for marketing launch." },
+        "tourPeriodStart": { "type": "string", "format": "date" },
+        "tourPeriodEnd": { "type": "string", "format": "date" },
+        "callForOffersDeadline": { "type": "string", "format": "date", "description": "ISO 8601 deadline for initial offers." },
+        "bestAndFinalDate": { "type": "string", "format": "date", "description": "ISO 8601 date for best-and-final round (if competitive)." },
+        "targetClosingDate": { "type": "string", "format": "date", "description": "Target closing date." },
+        "totalMarketingDays": { "type": "integer", "description": "Total marketing period in days." }
+      },
+      "additionalProperties": true
+    },
+    "materialDefects": {
+      "type": "array",
+      "description": "Material property defects disclosed or discovered during OM preparation (empty if none).",
+      "items": {
+        "type": "object",
+        "required": ["defect", "severity", "disclosed"],
+        "properties": {
+          "defect": { "type": "string" },
+          "severity": { "type": "string", "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"] },
+          "disclosed": { "type": "boolean" },
+          "estimatedRemediationCost": { "type": "number" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

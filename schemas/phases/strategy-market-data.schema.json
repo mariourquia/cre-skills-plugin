@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/strategy-market-data.schema.json",
+  "title": "Investment Strategy Phase 1 -- Market Selection Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the market selection phase. Covers MSA rankings, submarket scorecards, cycle positioning, and supply pipeline assessments.",
+  "type": "object",
+  "required": ["msaRankings", "submarketScorecards", "cyclePositioning"],
+  "properties": {
+    "msaRankings": {
+      "type": "array",
+      "description": "Ranked MSAs with composite scores and tier assignments.",
+      "items": {
+        "type": "object",
+        "required": ["msaName", "compositeScore", "tier"],
+        "properties": {
+          "msaName": { "type": "string" },
+          "cbsaCode": { "type": "string" },
+          "compositeScore": { "type": "number", "minimum": 0, "maximum": 100 },
+          "tier": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "population": { "type": "integer" },
+          "employment": { "type": "integer" },
+          "employmentGrowth1yr": { "type": "number" },
+          "populationGrowth5yr": { "type": "number" },
+          "netMigration": { "type": "integer" },
+          "gdpPerCapita": { "type": "number" },
+          "priceToIncomeRatio": { "type": "number" },
+          "rentToIncomeRatio": { "type": "number" },
+          "industryHHI": { "type": "number" },
+          "keyStrengths": { "type": "array", "items": { "type": "string" } },
+          "keyRisks": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "submarketScorecards": {
+      "type": "array",
+      "description": "Ranked submarkets within target MSAs with fundamentals and competitive analysis.",
+      "items": {
+        "type": "object",
+        "required": ["submarketName", "msaName", "compositeScore", "recommendation"],
+        "properties": {
+          "submarketName": { "type": "string" },
+          "msaName": { "type": "string" },
+          "category": { "type": "string", "enum": ["urban_core", "urban_infill", "suburban", "emerging", "tertiary"] },
+          "compositeScore": { "type": "number", "minimum": 0, "maximum": 100 },
+          "recommendation": { "type": "string", "enum": ["primary_target", "secondary_target", "monitor", "avoid"] },
+          "occupancyPct": { "type": "number" },
+          "effectiveRent": { "type": "number" },
+          "rentGrowthYoY": { "type": "number" },
+          "netAbsorption12mo": { "type": "integer" },
+          "supplyAsPercentOfStock": { "type": "number" },
+          "yearsToAbsorb": { "type": "number" },
+          "supplyRiskLevel": { "type": "string", "enum": ["minimal", "low", "moderate", "elevated", "high"] },
+          "muellerPhase": { "type": "string", "enum": ["recovery", "expansion", "hyper_supply", "recession"] },
+          "muellerSubPhase": { "type": "string", "enum": ["early", "mid", "late"] },
+          "strategyFit": { "type": "string" },
+          "keyStrengths": { "type": "array", "items": { "type": "string" } },
+          "keyRisks": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "cyclePositioning": {
+      "type": "object",
+      "description": "Aggregate market cycle assessment across target markets.",
+      "required": ["dominantPhase", "confidence"],
+      "properties": {
+        "dominantPhase": { "type": "string", "enum": ["recovery", "expansion", "hyper_supply", "recession"] },
+        "dominantSubPhase": { "type": "string", "enum": ["early", "mid", "late"] },
+        "confidence": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW"] },
+        "phaseDistribution": {
+          "type": "object",
+          "properties": {
+            "recovery": { "type": "number" },
+            "expansion": { "type": "number" },
+            "hyper_supply": { "type": "number" },
+            "recession": { "type": "number" }
+          }
+        },
+        "monthsToTransition": { "type": "integer" }
+      }
+    },
+    "marketMemo": {
+      "type": "string",
+      "description": "Market selection memo text from macro-analyst."
+    },
+    "dataGaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "metric": { "type": "string" },
+          "affectedEntities": { "type": "array", "items": { "type": "string" } },
+          "impact": { "type": "string" }
+        }
+      }
+    }
+  }
+}

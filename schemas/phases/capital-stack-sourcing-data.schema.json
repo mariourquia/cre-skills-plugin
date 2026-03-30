@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/capital-stack-sourcing-data.schema.json",
+  "title": "Capital Stack Phase 2 -- Lender Sourcing Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the lender sourcing phase. Covers target lender list, quote requests sent, market conditions, and any early indicative quotes.",
+  "type": "object",
+  "required": [
+    "targetLenderList",
+    "quoteRequestsSent",
+    "marketConditionsSnapshot"
+  ],
+  "properties": {
+    "targetLenderList": {
+      "type": "array",
+      "description": "Ranked list of target lenders with fit assessment.",
+      "items": {
+        "type": "object",
+        "required": ["lenderName", "lenderType", "fitScore", "appetiteAssessment", "priority"],
+        "properties": {
+          "lenderName": {
+            "type": "string",
+            "description": "Lender institution name."
+          },
+          "lenderType": {
+            "type": "string",
+            "enum": ["agency", "cmbs", "bridge", "lifeCompany", "bank", "debtFund"],
+            "description": "Lender category."
+          },
+          "fitScore": {
+            "type": "number",
+            "description": "Composite fit score (0-100) based on asset type, geography, loan size, and sponsor match.",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "appetiteAssessment": {
+            "type": "string",
+            "enum": ["strong", "moderate", "limited", "unknown"],
+            "description": "Assessment of lender appetite for this specific deal."
+          },
+          "priority": {
+            "type": "integer",
+            "description": "Outreach priority ranking (1 = highest).",
+            "minimum": 1
+          },
+          "contactInfo": {
+            "type": "object",
+            "description": "Primary contact for quote request.",
+            "properties": {
+              "name": { "type": "string" },
+              "title": { "type": "string" },
+              "email": { "type": "string" },
+              "phone": { "type": "string" }
+            }
+          },
+          "recentActivity": {
+            "type": "string",
+            "description": "Recent lending activity in this asset class and geography."
+          },
+          "relationshipStatus": {
+            "type": "string",
+            "enum": ["existing", "new", "referred"],
+            "description": "Relationship status between sponsor and lender."
+          },
+          "targetLoanProduct": {
+            "type": "string",
+            "description": "Specific loan product this lender is being targeted for."
+          }
+        }
+      }
+    },
+    "quoteRequestsSent": {
+      "type": "array",
+      "description": "Record of quote request packages sent to lenders.",
+      "items": {
+        "type": "object",
+        "required": ["lenderName", "sentDate", "packageContents"],
+        "properties": {
+          "lenderName": { "type": "string" },
+          "sentDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp of when the quote request was sent."
+          },
+          "packageContents": {
+            "type": "array",
+            "description": "List of documents and data included in the quote request package.",
+            "items": { "type": "string" }
+          },
+          "responseDeadline": {
+            "type": "string",
+            "format": "date",
+            "description": "Requested response deadline."
+          },
+          "status": {
+            "type": "string",
+            "enum": ["sent", "acknowledged", "quoteReceived", "declined", "noResponse"],
+            "description": "Current status of this quote request."
+          }
+        }
+      }
+    },
+    "marketConditionsSnapshot": {
+      "type": "object",
+      "description": "Market conditions as of the sourcing date.",
+      "required": ["snapshotDate", "benchmarkRates", "spreadsByLenderType"],
+      "properties": {
+        "snapshotDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Date of the market conditions snapshot."
+        },
+        "benchmarkRates": {
+          "type": "object",
+          "description": "Key benchmark rates.",
+          "properties": {
+            "sofr30Day": { "type": "number", "description": "30-day SOFR rate." },
+            "sofr90Day": { "type": "number", "description": "90-day SOFR rate." },
+            "treasury5yr": { "type": "number", "description": "5-year Treasury rate." },
+            "treasury10yr": { "type": "number", "description": "10-year Treasury rate." },
+            "swapRate5yr": { "type": "number", "description": "5-year interest rate swap." },
+            "swapRate10yr": { "type": "number", "description": "10-year interest rate swap." }
+          }
+        },
+        "spreadsByLenderType": {
+          "type": "object",
+          "description": "Typical spreads by lender type for this asset class.",
+          "properties": {
+            "agency": { "type": "number", "description": "Agency spread in bps." },
+            "cmbs": { "type": "number", "description": "CMBS spread in bps." },
+            "bridge": { "type": "number", "description": "Bridge spread in bps over SOFR." },
+            "lifeCompany": { "type": "number", "description": "Life company spread in bps." },
+            "bank": { "type": "number", "description": "Bank spread in bps." },
+            "debtFund": { "type": "number", "description": "Debt fund spread in bps." }
+          }
+        },
+        "liquidityAssessment": {
+          "type": "string",
+          "enum": ["abundant", "normal", "tightening", "constrained"],
+          "description": "Overall market liquidity assessment."
+        },
+        "volatilityFlag": {
+          "type": "boolean",
+          "description": "True if market volatility is elevated, affecting rate lock timing."
+        },
+        "rateTrend": {
+          "type": "string",
+          "enum": ["declining", "stable", "rising", "volatile"],
+          "description": "Direction of rate movement over the past 30 days."
+        }
+      }
+    },
+    "indicativeQuotes": {
+      "type": "array",
+      "description": "Early indicative quotes received during sourcing. Full quotes analyzed in Phase 3.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "lenderName": { "type": "string" },
+          "indicativeRate": { "type": "number" },
+          "indicativeSpread": { "type": "number" },
+          "maxLoanAmount": { "type": "number" },
+          "conditions": { "type": "string" },
+          "receivedDate": { "type": "string", "format": "date" }
+        }
+      }
+    },
+    "sourcingMetrics": {
+      "type": "object",
+      "description": "Summary metrics for the sourcing phase.",
+      "properties": {
+        "totalLendersTargeted": { "type": "integer" },
+        "totalRequestsSent": { "type": "integer" },
+        "responsesReceived": { "type": "integer" },
+        "declinations": { "type": "integer" },
+        "responseRate": { "type": "number", "description": "Responses / requests sent (0-1)." }
+      }
+    }
+  }
+}

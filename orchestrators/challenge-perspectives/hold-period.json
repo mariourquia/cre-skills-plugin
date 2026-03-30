@@ -1,0 +1,43 @@
+{
+  "pipelineId": "hold-period-monitor",
+  "perspectives": [
+    {
+      "perspectiveId": "operations-skeptic",
+      "name": "Operations Skeptic",
+      "question": "Is the PM masking deterioration?",
+      "tier": 1,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": ["variance-analysis", "tenant-complaints", "work-order-backlog", "turnover-rate", "vendor-cost-trends"],
+      "challengeThreshold": "Any variance >5% from budget explained away as timing"
+    },
+    {
+      "perspectiveId": "market-cycle-bear",
+      "name": "Market Cycle Bear",
+      "question": "Is the submarket turning against this hold thesis?",
+      "tier": 1,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": ["supply-pipeline", "rent-growth-deceleration", "cap-rate-expansion", "employment-trends"],
+      "challengeThreshold": "Rent growth below proforma for 2+ consecutive quarters"
+    },
+    {
+      "perspectiveId": "capital-structure-stress",
+      "name": "Capital Structure Stress",
+      "question": "Can the debt terms survive a rate reset or covenant breach?",
+      "tier": 2,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": ["dscr-trajectory", "maturity-wall", "floating-rate-exposure", "covenant-cushion"],
+      "challengeThreshold": "DSCR cushion below 15% or maturity within 18 months"
+    },
+    {
+      "perspectiveId": "tenant-concentration-risk",
+      "name": "Tenant Concentration Risk",
+      "question": "What happens if the top 3 tenants leave?",
+      "tier": 2,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": ["revenue-concentration", "lease-expiration-clustering", "renewal-probability"],
+      "challengeThreshold": "Top 3 tenants >30% revenue AND any lease expiring within 12 months"
+    }
+  ],
+  "synthesisModel": "claude-opus-4-6[1m]",
+  "verdictReconciliation": "Challenge verdict overrides pipeline verdict if it differs"
+}

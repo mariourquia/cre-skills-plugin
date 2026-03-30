@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/fund-raise-data.schema.json",
+  "title": "Fund Management Phase 2 -- Capital Raise Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the capital raise phase. Covers capital commitments, LP roster, management fee schedule, deployable capital, and fundraise status.",
+  "type": "object",
+  "required": [
+    "capitalCommitmentRegister",
+    "deployableCapital",
+    "lpRoster",
+    "managementFeeSchedule",
+    "fundraiseStatus"
+  ],
+  "properties": {
+    "capitalCommitmentRegister": {
+      "type": "object",
+      "description": "Official capital commitment register.",
+      "required": ["totalCommitments", "closeHistory", "lpCommitments"],
+      "properties": {
+        "totalCommitments": {
+          "type": "number",
+          "description": "Total committed capital across all LPs and GP."
+        },
+        "gpCommitment": {
+          "type": "number",
+          "description": "GP co-investment commitment amount."
+        },
+        "lpCommitmentsTotal": {
+          "type": "number",
+          "description": "Total LP committed capital."
+        },
+        "closeHistory": {
+          "type": "array",
+          "description": "History of fund closes.",
+          "items": {
+            "type": "object",
+            "required": ["closeNumber", "closeDate", "capitalAdded"],
+            "properties": {
+              "closeNumber": { "type": "integer" },
+              "closeDate": { "type": "string", "format": "date" },
+              "capitalAdded": { "type": "number" },
+              "cumulativeCapital": { "type": "number" },
+              "lpsAdded": { "type": "integer" }
+            }
+          }
+        },
+        "lpCommitments": {
+          "type": "array",
+          "description": "Per-LP commitment details.",
+          "items": {
+            "type": "object",
+            "required": ["lpId", "lpName", "commitmentAmount", "closeDate", "kycStatus"],
+            "properties": {
+              "lpId": { "type": "string" },
+              "lpName": { "type": "string" },
+              "commitmentAmount": { "type": "number" },
+              "closeDate": { "type": "string", "format": "date" },
+              "closeNumber": { "type": "integer" },
+              "investorType": {
+                "type": "string",
+                "enum": ["institutional", "pension", "endowment", "foundation", "sovereign-wealth", "family-office", "fund-of-funds", "insurance", "high-net-worth", "other"]
+              },
+              "kycStatus": {
+                "type": "string",
+                "enum": ["CLEARED", "PENDING", "ISSUES"]
+              },
+              "qualificationStatus": {
+                "type": "string",
+                "enum": ["qualified-purchaser", "accredited-investor", "pending-verification"]
+              },
+              "erisaPlanAsset": { "type": "boolean", "description": "Whether this LP is a benefit plan investor for ERISA purposes." },
+              "foreignInvestor": { "type": "boolean" },
+              "sideLetter": { "type": "boolean", "description": "Whether LP has a negotiated side letter." },
+              "lpacMember": { "type": "boolean" },
+              "coInvestRights": { "type": "boolean" }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "deployableCapital": {
+      "type": "number",
+      "description": "Total deployable capital after deducting management fees, organizational expenses, and fund expense reserves."
+    },
+    "deployableCapitalBreakdown": {
+      "type": "object",
+      "description": "Breakdown of capital deductions from total commitments to deployable capital.",
+      "properties": {
+        "totalCommitments": { "type": "number" },
+        "managementFeeReserve": { "type": "number", "description": "Estimated management fees over the investment period." },
+        "organizationalExpenseReserve": { "type": "number" },
+        "fundExpenseReserve": { "type": "number" },
+        "deployableCapital": { "type": "number" }
+      }
+    },
+    "lpRoster": {
+      "type": "array",
+      "description": "LP roster with contact and preferences.",
+      "items": {
+        "type": "object",
+        "required": ["lpId", "lpName", "commitmentAmount"],
+        "properties": {
+          "lpId": { "type": "string" },
+          "lpName": { "type": "string" },
+          "commitmentAmount": { "type": "number" },
+          "primaryContact": { "type": "string" },
+          "reportingPreferences": {
+            "type": "object",
+            "properties": {
+              "format": { "type": "string", "enum": ["standard", "custom"] },
+              "frequency": { "type": "string" },
+              "additionalReports": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "sideLetterProvisions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "provision": { "type": "string" },
+                "detail": { "type": "string" },
+                "mfnEligible": { "type": "boolean" }
+              }
+            }
+          },
+          "lpacMember": { "type": "boolean" },
+          "coInvestRights": { "type": "boolean" },
+          "excuseRights": { "type": "array", "items": { "type": "string" }, "description": "Asset types or strategies the LP may be excused from." }
+        },
+        "additionalProperties": true
+      }
+    },
+    "managementFeeSchedule": {
+      "type": "object",
+      "description": "Management fee accrual schedule.",
+      "required": ["firstAccrualDate", "rate", "basis", "frequency"],
+      "properties": {
+        "firstAccrualDate": { "type": "string", "format": "date" },
+        "rate": { "type": "number" },
+        "basis": { "type": "string" },
+        "frequency": { "type": "string" },
+        "estimatedAnnualFee": { "type": "number" },
+        "stepDownDate": { "type": "string", "format": "date" },
+        "stepDownRate": { "type": "number" }
+      },
+      "additionalProperties": true
+    },
+    "fundraiseStatus": {
+      "type": "string",
+      "enum": ["FIRST_CLOSE", "SUBSEQUENT_CLOSE", "FINAL_CLOSE", "HARD_CAP"],
+      "description": "Current fundraise status."
+    },
+    "fundraiseMetrics": {
+      "type": "object",
+      "description": "Fundraise progress metrics.",
+      "properties": {
+        "targetFundSize": { "type": "number" },
+        "hardCap": { "type": "number" },
+        "firstCloseThreshold": { "type": "number" },
+        "firstCloseAchievedDate": { "type": "string", "format": "date" },
+        "percentOfTarget": { "type": "number", "description": "Total commitments as percentage of target (0-1)." },
+        "numberOfLPs": { "type": "integer" },
+        "averageCommitmentSize": { "type": "number" },
+        "pendingPipeline": { "type": "number", "description": "Soft circles and prospects not yet committed." }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

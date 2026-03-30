@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/portfolio-reporting-data.schema.json",
+  "title": "Portfolio Management Phase 5 -- Reporting & Visualization Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the reporting and visualization phase. Covers master dashboard, visualization data, LP report, and terminal verdict.",
+  "type": "object",
+  "required": [
+    "masterDashboard",
+    "terminalVerdict"
+  ],
+  "properties": {
+    "masterDashboard": {
+      "type": "object",
+      "description": "Traffic-light dashboard with overall portfolio health score.",
+      "required": ["healthScore", "overallVerdict", "dimensions"],
+      "properties": {
+        "healthScore": { "type": "number", "minimum": 0, "maximum": 100 },
+        "overallVerdict": { "type": "string", "enum": ["BALANCED", "REBALANCE", "DISTRESSED"] },
+        "greenCount": { "type": "integer" },
+        "yellowCount": { "type": "integer" },
+        "redCount": { "type": "integer" },
+        "dimensions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["dimension", "status"],
+            "properties": {
+              "dimension": { "type": "string" },
+              "status": { "type": "string", "enum": ["GREEN", "YELLOW", "RED"] },
+              "keyMetric": { "type": "string" },
+              "value": {},
+              "trend": { "type": "string", "enum": ["IMPROVING", "STABLE", "DETERIORATING"] },
+              "sourceAgent": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "allocationVisualizations": {
+      "type": "object",
+      "description": "Chart-ready allocation data structures.",
+      "properties": {
+        "pieCharts": { "type": "object" },
+        "driftBarChart": { "type": "array" },
+        "heatMap": { "type": "object" },
+        "historicalTrend": { "type": "object" },
+        "benchmarkOverlay": { "type": "object" }
+      }
+    },
+    "performanceVisualizations": {
+      "type": "object",
+      "description": "Chart-ready performance data structures.",
+      "properties": {
+        "attributionWaterfall": { "type": "array" },
+        "benchmarkLineChart": { "type": "array" },
+        "peerQuartileRanking": { "type": "object" },
+        "feeBridgeWaterfall": { "type": "array" },
+        "sameStoreTrend": { "type": "array" }
+      }
+    },
+    "riskVisualizations": {
+      "type": "object",
+      "description": "Chart-ready risk data structures.",
+      "properties": {
+        "concentrationHeatMap": { "type": "object" },
+        "debtMaturityWall": { "type": "array" },
+        "rateExposurePie": { "type": "array" },
+        "cyclePositioningMap": { "type": "array" },
+        "climateDashboard": { "type": "object" }
+      }
+    },
+    "lpReportPackage": {
+      "type": "object",
+      "description": "Complete LP quarterly report structure.",
+      "properties": {
+        "executiveSummary": { "type": "string" },
+        "portfolioOverview": { "type": "object" },
+        "performanceSection": { "type": "object" },
+        "riskSection": { "type": "object" },
+        "rebalancingSection": { "type": "object" },
+        "liquiditySection": { "type": "object" },
+        "esgSection": { "type": "object" },
+        "ilpaCompliant": { "type": "boolean" }
+      }
+    },
+    "stackingPlans": {
+      "type": "object",
+      "description": "Floor-by-floor stacking plan data for eligible assets.",
+      "properties": {
+        "eligibleAssets": { "type": "integer" },
+        "plans": { "type": "array", "items": { "type": "object" } },
+        "portfolioSummary": { "type": "object" }
+      }
+    },
+    "terminalVerdict": {
+      "type": "object",
+      "description": "Final portfolio management verdict.",
+      "required": ["verdict"],
+      "properties": {
+        "verdict": { "type": "string", "enum": ["BALANCED", "REBALANCE", "DISTRESSED"] },
+        "healthScore": { "type": "number" },
+        "keyDrivers": { "type": "array", "items": { "type": "string" } },
+        "immediateActions": { "type": "array", "items": { "type": "string" } },
+        "nextReviewDate": { "type": "string", "format": "date" }
+      }
+    }
+  }
+}

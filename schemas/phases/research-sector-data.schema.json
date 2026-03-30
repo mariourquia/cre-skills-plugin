@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/research-sector-data.schema.json",
+  "title": "Research Intelligence Phase 2 -- Sector Research Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the sector research phase. Covers sector scorecards, rankings, and REIT-derived signals.",
+  "type": "object",
+  "required": [
+    "sectorScoreCards",
+    "sectorRankings"
+  ],
+  "properties": {
+    "sectorScoreCards": {
+      "type": "array",
+      "description": "Per-sector scorecards with demand, supply, rent growth, risk, and capital markets dimensions.",
+      "items": {
+        "type": "object",
+        "required": ["sector", "demandScore", "supplyScore", "rentGrowthScore", "riskScore", "capitalMarketsScore", "compositeScore", "classification"],
+        "properties": {
+          "sector": { "type": "string", "enum": ["multifamily", "office", "industrial", "retail"] },
+          "demandScore": { "type": "number", "minimum": 0, "maximum": 100 },
+          "supplyScore": { "type": "number", "minimum": 0, "maximum": 100 },
+          "rentGrowthScore": { "type": "number", "minimum": 0, "maximum": 100 },
+          "riskScore": { "type": "number", "minimum": 0, "maximum": 100 },
+          "capitalMarketsScore": { "type": "number", "minimum": 0, "maximum": 100 },
+          "compositeScore": { "type": "number", "minimum": 0, "maximum": 100 },
+          "classification": { "type": "string", "enum": ["OVERWEIGHT", "MARKET_WEIGHT", "UNDERWEIGHT"] },
+          "rentGrowthT12": { "type": "number" },
+          "vacancyRate": { "type": "number", "minimum": 0, "maximum": 1 },
+          "absorptionRatio": { "type": "number", "minimum": 0 },
+          "pipelinePctOfStock": { "type": "number", "minimum": 0 }
+        }
+      }
+    },
+    "sectorRankings": {
+      "type": "object",
+      "description": "Ranked sectors with allocation recommendation.",
+      "required": ["rankedSectors"],
+      "properties": {
+        "rankedSectors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["sector", "rank", "compositeScore"],
+            "properties": {
+              "sector": { "type": "string" },
+              "rank": { "type": "integer", "minimum": 1 },
+              "compositeScore": { "type": "number" },
+              "allocationWeight": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          }
+        },
+        "sectorRotationSignals": { "type": "array", "items": { "type": "string" } },
+        "crossSectorThemes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "reitSignals": {
+      "type": "object",
+      "description": "REIT-derived valuation and capital flow signals by sector.",
+      "properties": {
+        "sectorSignals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sector": { "type": "string" },
+              "impliedCapRate": { "type": "number" },
+              "navDiscountPremium": { "type": "number" },
+              "publicPrivateGap_bps": { "type": "number" },
+              "compositeSignal": { "type": "string", "enum": ["BULLISH", "NEUTRAL", "BEARISH"] }
+            }
+          }
+        },
+        "leadLagAssessment": { "type": "string", "enum": ["PUBLIC_LEADING", "SYNCHRONIZED", "PRIVATE_LEADING"] }
+      }
+    }
+  }
+}

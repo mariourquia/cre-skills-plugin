@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "scope-selector.schema.json",
+  "title": "Financial Planning Scope Selector",
+  "description": "User-selectable scope for all financial planning operations: portfolio, region, property type, custom selection, or individual property",
+  "type": "object",
+  "required": ["level"],
+  "properties": {
+    "level": {
+      "type": "string",
+      "enum": ["portfolio", "region", "property_type", "custom", "property"],
+      "description": "Scope level. 'portfolio' = all properties. 'region' = filter by region. 'property_type' = filter by asset class. 'custom' = user-defined property list. 'property' = single property."
+    },
+    "filters": {
+      "type": "object",
+      "properties": {
+        "regionId": {
+          "type": ["string", "null"],
+          "description": "Region identifier when level=region (e.g. 'southeast', 'northeast', 'west')"
+        },
+        "propertyType": {
+          "type": ["string", "null"],
+          "enum": ["multifamily", "office", "retail", "industrial", "mixed-use", null],
+          "description": "Property type filter when level=property_type"
+        },
+        "propertyIds": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "string",
+            "pattern": "^PROP-[A-Z0-9-]+$"
+          },
+          "description": "Explicit property IDs when level=custom or level=property"
+        },
+        "strategy": {
+          "type": ["string", "null"],
+          "enum": ["core", "core-plus", "value-add", "opportunistic", null],
+          "description": "Filter by investment strategy"
+        },
+        "vintage": {
+          "type": ["integer", "null"],
+          "description": "Filter by acquisition year"
+        },
+        "fundId": {
+          "type": ["string", "null"],
+          "description": "Filter by fund identifier"
+        }
+      }
+    },
+    "comparison": {
+      "type": "object",
+      "properties": {
+        "sameStore": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, only include properties owned for the full comparison period (per sameStore.minimumOwnershipMonths in thresholds)"
+        },
+        "sameStoreCutoffDate": {
+          "type": ["string", "null"],
+          "format": "date",
+          "description": "Properties acquired before this date are same-store; null uses default (12 months prior)"
+        },
+        "includeDispositions": {
+          "type": "boolean",
+          "default": false,
+          "description": "Include properties that have been disposed during the period"
+        },
+        "includeAcquisitions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include properties acquired during the period (non-same-store)"
+        }
+      }
+    },
+    "timeframe": {
+      "type": "object",
+      "properties": {
+        "current": {
+          "type": "string",
+          "description": "Current reporting year (e.g. '2026')"
+        },
+        "priorYear": {
+          "type": "string",
+          "description": "Prior year for YoY comparison (e.g. '2025')"
+        },
+        "projectionYears": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 15,
+          "default": 5,
+          "description": "Number of years for forward projections in business plans"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/disposition-targeting-data.schema.json",
+  "title": "Disposition Phase 4 -- Buyer Targeting Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the disposition buyer targeting phase. Covers outreach pipeline, confidentiality agreements, property tours, and indications of interest.",
+  "type": "object",
+  "required": [
+    "outreachPipeline",
+    "casSigned",
+    "toursCompleted"
+  ],
+  "properties": {
+    "outreachPipeline": {
+      "type": "object",
+      "description": "Complete outreach pipeline with buyer contacts, segment classification, and outreach status.",
+      "required": ["totalTargets", "contactedCount", "respondedCount", "segments"],
+      "properties": {
+        "totalTargets": {
+          "type": "integer",
+          "description": "Total number of prospective buyers in the pipeline.",
+          "minimum": 0
+        },
+        "contactedCount": {
+          "type": "integer",
+          "description": "Number of buyers contacted.",
+          "minimum": 0
+        },
+        "respondedCount": {
+          "type": "integer",
+          "description": "Number of buyers who responded to outreach.",
+          "minimum": 0
+        },
+        "segments": {
+          "type": "array",
+          "description": "Pipeline breakdown by buyer segment.",
+          "items": {
+            "type": "object",
+            "required": ["segmentName", "targetCount", "contactedCount"],
+            "properties": {
+              "segmentName": { "type": "string", "description": "Buyer segment name." },
+              "targetCount": { "type": "integer" },
+              "contactedCount": { "type": "integer" },
+              "respondedCount": { "type": "integer" },
+              "caSignedCount": { "type": "integer" },
+              "touredCount": { "type": "integer" }
+            },
+            "additionalProperties": true
+          }
+        },
+        "buyers": {
+          "type": "array",
+          "description": "Individual buyer entries in the pipeline.",
+          "items": {
+            "type": "object",
+            "required": ["buyerName", "segment", "status"],
+            "properties": {
+              "buyerName": { "type": "string" },
+              "firmName": { "type": "string" },
+              "segment": { "type": "string" },
+              "status": { "type": "string", "enum": ["TARGETED", "CONTACTED", "CA_SIGNED", "OM_SENT", "TOURED", "IOI_RECEIVED", "DECLINED", "NO_RESPONSE"] },
+              "contactDate": { "type": "string", "format": "date" },
+              "caSignedDate": { "type": "string", "format": "date" },
+              "tourDate": { "type": "string", "format": "date" },
+              "notes": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "casSigned": {
+      "type": "integer",
+      "description": "Number of confidentiality agreements signed by prospective buyers.",
+      "minimum": 0
+    },
+    "toursCompleted": {
+      "type": "integer",
+      "description": "Number of property tours completed by qualified buyers.",
+      "minimum": 0
+    },
+    "indicationsOfInterest": {
+      "type": "array",
+      "description": "Preliminary indications of interest received before formal call-for-offers.",
+      "items": {
+        "type": "object",
+        "required": ["buyerName", "indicatedPrice", "receivedDate"],
+        "properties": {
+          "buyerName": { "type": "string" },
+          "firmName": { "type": "string" },
+          "segment": { "type": "string" },
+          "indicatedPrice": { "type": "number", "description": "Indicated price or price range low." },
+          "indicatedPriceHigh": { "type": "number", "description": "Price range high (if range provided)." },
+          "receivedDate": { "type": "string", "format": "date" },
+          "financingType": { "type": "string", "description": "All-cash, financed, or not specified." },
+          "ddPeriodRequested_days": { "type": "integer" },
+          "closingTimelineRequested_days": { "type": "integer" },
+          "notes": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "callForOffersProcess": {
+      "type": "object",
+      "description": "Call-for-offers process design and timeline.",
+      "properties": {
+        "processType": { "type": "string", "enum": ["broad-auction", "targeted-call", "negotiated-sale"], "description": "Type of sale process." },
+        "omDistributionDate": { "type": "string", "format": "date" },
+        "initialOfferDeadline": { "type": "string", "format": "date" },
+        "bestAndFinalDate": { "type": "string", "format": "date" },
+        "selectionTargetDate": { "type": "string", "format": "date" }
+      },
+      "additionalProperties": true
+    },
+    "outreachEffectiveness": {
+      "type": "object",
+      "description": "Outreach effectiveness metrics.",
+      "properties": {
+        "responseRate": { "type": "number", "description": "Percentage of contacted buyers who responded.", "minimum": 0, "maximum": 1 },
+        "caConversionRate": { "type": "number", "description": "Percentage of respondents who signed CA.", "minimum": 0, "maximum": 1 },
+        "tourConversionRate": { "type": "number", "description": "Percentage of CA-signed buyers who toured.", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

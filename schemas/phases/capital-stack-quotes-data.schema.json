@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/capital-stack-quotes-data.schema.json",
+  "title": "Capital Stack Phase 3 -- Quote Analysis Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the quote analysis phase. Covers received quotes, comparison matrix, selected quote with rationale, and hedging analysis.",
+  "type": "object",
+  "required": [
+    "selectedQuote",
+    "quoteComparisonMatrix"
+  ],
+  "properties": {
+    "selectedQuote": {
+      "type": "object",
+      "description": "The selected lender quote with full terms detail.",
+      "required": ["lenderName", "lenderType", "loanAmount", "rate", "allInRate", "term", "selectionRationale"],
+      "properties": {
+        "lenderName": { "type": "string", "description": "Name of the selected lender." },
+        "lenderType": {
+          "type": "string",
+          "enum": ["agency", "cmbs", "bridge", "lifeCompany", "bank", "debtFund"]
+        },
+        "loanAmount": { "type": "number", "description": "Quoted loan amount." },
+        "rate": { "type": "number", "description": "Quoted interest rate (nominal)." },
+        "rateType": { "type": "string", "enum": ["fixed", "floating"] },
+        "spread": { "type": "number", "description": "Spread over benchmark in bps (if floating)." },
+        "benchmark": { "type": "string", "description": "Reference benchmark (e.g., SOFR, Treasury)." },
+        "allInRate": { "type": "number", "description": "All-in rate including rate, spread, and fee amortization." },
+        "term": { "type": "number", "description": "Loan term in years." },
+        "amortization": { "type": "number", "description": "Amortization period in years. 0 for IO-only." },
+        "ioPeriod": { "type": "number", "description": "Interest-only period in years." },
+        "prepaymentStructure": { "type": "string" },
+        "originationFee": { "type": "number", "description": "Origination fee as decimal (e.g., 0.01 = 1%)." },
+        "exitFee": { "type": "number", "description": "Exit fee as decimal." },
+        "covenants": {
+          "type": "object",
+          "description": "Key loan covenants.",
+          "properties": {
+            "minDSCR": { "type": "number" },
+            "maxLTV": { "type": "number" },
+            "minDebtYield": { "type": "number" },
+            "cashTrapDSCR": { "type": "number", "description": "DSCR level triggering cash trap." },
+            "other": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "reserveRequirements": {
+          "type": "object",
+          "description": "Required reserves.",
+          "properties": {
+            "taxAndInsurance": { "type": "number" },
+            "replacementReserve": { "type": "number" },
+            "interestReserve": { "type": "number" },
+            "leaseUpReserve": { "type": "number" }
+          }
+        },
+        "selectionRationale": {
+          "type": "string",
+          "description": "Documented rationale for selecting this quote over alternatives."
+        },
+        "conditionsPrecedent": {
+          "type": "array",
+          "description": "Conditions that must be satisfied before closing.",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "quoteComparisonMatrix": {
+      "type": "array",
+      "description": "All received quotes with standardized comparison metrics.",
+      "items": {
+        "type": "object",
+        "required": ["lenderName", "lenderType", "loanAmount", "rate", "allInRate"],
+        "properties": {
+          "lenderName": { "type": "string" },
+          "lenderType": { "type": "string" },
+          "loanAmount": { "type": "number" },
+          "rate": { "type": "number" },
+          "rateType": { "type": "string" },
+          "spread": { "type": "number" },
+          "allInRate": { "type": "number" },
+          "term": { "type": "number" },
+          "ioPeriod": { "type": "number" },
+          "originationFee": { "type": "number" },
+          "exitFee": { "type": "number" },
+          "prepayment": { "type": "string" },
+          "dscr": { "type": "number" },
+          "ltv": { "type": "number" },
+          "executionCertainty": {
+            "type": "string",
+            "enum": ["high", "medium", "low"],
+            "description": "Assessment of likelihood this lender closes."
+          },
+          "rank": {
+            "type": "integer",
+            "description": "Rank among all quotes (1 = best)."
+          },
+          "selected": {
+            "type": "boolean",
+            "description": "Whether this quote was selected."
+          }
+        }
+      }
+    },
+    "hedgingAnalysis": {
+      "type": ["object", "null"],
+      "description": "Hedging recommendation and cost analysis. Null if hedging-advisor was skipped.",
+      "properties": {
+        "recommendation": {
+          "type": "string",
+          "enum": ["noHedge", "rateCap", "interestRateSwap", "collar"],
+          "description": "Recommended hedging strategy."
+        },
+        "hedgingScenarios": {
+          "type": "array",
+          "description": "Modeled hedging scenarios with cost comparison.",
+          "items": {
+            "type": "object",
+            "required": ["scenarioName", "instrument", "upfrontCost", "effectiveAnnualCost"],
+            "properties": {
+              "scenarioName": { "type": "string" },
+              "instrument": { "type": "string" },
+              "strikeRate": { "type": "number", "description": "Strike rate for cap or collar." },
+              "notional": { "type": "number" },
+              "termMonths": { "type": "integer" },
+              "upfrontCost": { "type": "number" },
+              "effectiveAnnualCost": { "type": "number", "description": "Annualized hedging cost as impact on all-in rate." },
+              "maxRateExposure": { "type": "number", "description": "Maximum effective rate under this scenario." },
+              "breakEvenRateMove": { "type": "number", "description": "Rate increase at which hedging cost equals savings." }
+            }
+          }
+        },
+        "rateLockStrategy": {
+          "type": "object",
+          "description": "Rate lock timing and strategy recommendation.",
+          "properties": {
+            "recommendedLockTiming": { "type": "string" },
+            "lockPeriodDays": { "type": "integer" },
+            "lockCost": { "type": "number" },
+            "floatRisk": { "type": "string", "description": "Description of rate risk if not locked." }
+          }
+        }
+      }
+    },
+    "negotiationLeveragePoints": {
+      "type": "array",
+      "description": "Identified areas where the selected quote can be improved in negotiation.",
+      "items": {
+        "type": "object",
+        "required": ["term", "currentValue", "targetValue", "leverage"],
+        "properties": {
+          "term": { "type": "string", "description": "The term to negotiate (e.g., spread, origination fee, IO period)." },
+          "currentValue": { "type": "string", "description": "Current value in the selected quote." },
+          "targetValue": { "type": "string", "description": "Target negotiated value." },
+          "leverage": { "type": "string", "description": "Source of negotiation leverage (e.g., competing quote, relationship, market movement)." },
+          "impactOnAllInRate": { "type": "number", "description": "Estimated bps impact on all-in rate if successfully negotiated." }
+        }
+      }
+    }
+  }
+}

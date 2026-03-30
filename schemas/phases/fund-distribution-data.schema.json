@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/fund-distribution-data.schema.json",
+  "title": "Fund Management Phase 5 -- Distribution Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the distributions phase. Covers waterfall calculation, post-distribution capital accounts, clawback status, and tax allocations.",
+  "type": "object",
+  "required": [
+    "distributionRecord",
+    "postDistributionCapitalAccounts",
+    "clawbackStatus",
+    "taxAllocations"
+  ],
+  "properties": {
+    "distributionRecord": {
+      "type": "object",
+      "description": "Complete distribution record for the event.",
+      "required": ["distributionId", "distributionDate", "totalProceeds", "source", "waterfallBreakdown", "perLPDistributions"],
+      "properties": {
+        "distributionId": { "type": "string" },
+        "distributionDate": { "type": "string", "format": "date" },
+        "totalProceeds": { "type": "number", "description": "Total distributable proceeds for the event." },
+        "source": {
+          "type": "string",
+          "enum": ["assetSale", "refinancing", "incomeDistribution", "windDown"],
+          "description": "Source of distributable proceeds."
+        },
+        "dealId": { "type": "string", "description": "Deal ID if distribution is from a specific asset event." },
+        "waterfallBreakdown": {
+          "type": "object",
+          "description": "Four-tier waterfall allocation.",
+          "required": ["tier1_returnOfCapital", "tier2_preferredReturn", "tier3_gpCatchUp", "tier4_residualSplit"],
+          "properties": {
+            "tier1_returnOfCapital": {
+              "type": "object",
+              "properties": {
+                "lpAmount": { "type": "number" },
+                "gpCoInvestAmount": { "type": "number" },
+                "cumulativeReturnedCapital": { "type": "number" },
+                "remainingUnreturnedCapital": { "type": "number" },
+                "tier1Satisfied": { "type": "boolean" }
+              }
+            },
+            "tier2_preferredReturn": {
+              "type": "object",
+              "properties": {
+                "lpAmount": { "type": "number" },
+                "accrualRate": { "type": "number" },
+                "compoundingMethod": { "type": "string" },
+                "cumulativePrefReturnPaid": { "type": "number" },
+                "cumulativePrefReturnOwed": { "type": "number" },
+                "tier2Satisfied": { "type": "boolean" }
+              }
+            },
+            "tier3_gpCatchUp": {
+              "type": "object",
+              "properties": {
+                "gpAmount": { "type": "number" },
+                "catchUpSplit": { "type": "string", "description": "e.g., 80/20 GP/LP." },
+                "cumulativeCatchUpPaid": { "type": "number" },
+                "cumulativeCatchUpEntitled": { "type": "number" },
+                "tier3Satisfied": { "type": "boolean" }
+              }
+            },
+            "tier4_residualSplit": {
+              "type": "object",
+              "properties": {
+                "lpAmount": { "type": "number" },
+                "gpCarryAmount": { "type": "number" },
+                "split": { "type": "string", "description": "e.g., 80/20 LP/GP." },
+                "cumulativeResidualDistributed": { "type": "number" }
+              }
+            },
+            "totalDistributed": { "type": "number" },
+            "waterfallBalanced": { "type": "boolean", "description": "True if total distributed equals total proceeds." }
+          }
+        },
+        "perLPDistributions": {
+          "type": "array",
+          "description": "Distribution amounts per LP.",
+          "items": {
+            "type": "object",
+            "required": ["lpId", "lpName", "totalDistribution"],
+            "properties": {
+              "lpId": { "type": "string" },
+              "lpName": { "type": "string" },
+              "totalDistribution": { "type": "number" },
+              "returnOfCapitalPortion": { "type": "number" },
+              "preferredReturnPortion": { "type": "number" },
+              "residualPortion": { "type": "number" },
+              "wireInstructions": { "type": "string", "description": "Reference to verified wire instructions." }
+            },
+            "additionalProperties": true
+          }
+        },
+        "gpDistribution": {
+          "type": "object",
+          "properties": {
+            "totalGPDistribution": { "type": "number" },
+            "coInvestReturn": { "type": "number" },
+            "catchUpAmount": { "type": "number" },
+            "carryAmount": { "type": "number" }
+          }
+        },
+        "cumulativeDPI": { "type": "number", "description": "Cumulative DPI after this distribution." }
+      },
+      "additionalProperties": true
+    },
+    "postDistributionCapitalAccounts": {
+      "type": "object",
+      "description": "Updated capital accounts after distribution.",
+      "required": ["totalFundNAV", "lpCapitalAccounts"],
+      "properties": {
+        "totalFundNAV": { "type": "number", "description": "Fund NAV after distribution." },
+        "gpCapitalAccount": {
+          "type": "object",
+          "properties": {
+            "contributions": { "type": "number" },
+            "distributions": { "type": "number" },
+            "unreturnedCapital": { "type": "number" },
+            "currentValue": { "type": "number" }
+          }
+        },
+        "lpCapitalAccounts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["lpId", "lpName", "contributions", "distributions", "unreturnedCapital"],
+            "properties": {
+              "lpId": { "type": "string" },
+              "lpName": { "type": "string" },
+              "commitmentAmount": { "type": "number" },
+              "calledCapital": { "type": "number" },
+              "contributions": { "type": "number" },
+              "distributions": { "type": "number" },
+              "unreturnedCapital": { "type": "number" },
+              "preferredReturnAccrued": { "type": "number" },
+              "preferredReturnPaid": { "type": "number" },
+              "preferredReturnOwed": { "type": "number" },
+              "currentNAV": { "type": "number" },
+              "lpTVPI": { "type": "number" },
+              "lpDPI": { "type": "number" },
+              "lpNetIRR": { "type": "number" }
+            },
+            "additionalProperties": true
+          }
+        },
+        "capitalAccountsBalanced": {
+          "type": "boolean",
+          "description": "True if sum of LP capital accounts + GP capital account = fund NAV."
+        }
+      },
+      "additionalProperties": true
+    },
+    "clawbackStatus": {
+      "type": "object",
+      "description": "Current GP clawback exposure.",
+      "required": ["cumulativeGPCarryDistributed", "cumulativeGPCarryEntitled", "clawbackExposure"],
+      "properties": {
+        "cumulativeGPCarryDistributed": { "type": "number" },
+        "cumulativeGPCarryEntitled": { "type": "number", "description": "Carry GP would be entitled to based on current whole-fund returns." },
+        "clawbackExposure": { "type": "number", "description": "Positive = GP has been over-distributed (owes clawback)." },
+        "clawbackGuaranteePosted": { "type": "boolean" },
+        "clawbackGuaranteeAmount": { "type": "number" },
+        "clawbackReserveBalance": { "type": "number" },
+        "clawbackRisk": {
+          "type": "string",
+          "enum": ["NONE", "LOW", "MODERATE", "HIGH"],
+          "description": "Qualitative clawback risk assessment."
+        }
+      },
+      "additionalProperties": true
+    },
+    "taxAllocations": {
+      "type": "object",
+      "description": "Tax allocation data for K-1 preparation.",
+      "required": ["distributionId", "totalGainAllocated", "perLPAllocations"],
+      "properties": {
+        "distributionId": { "type": "string" },
+        "distributionDate": { "type": "string", "format": "date" },
+        "totalGainAllocated": { "type": "number" },
+        "gainCharacter": {
+          "type": "object",
+          "properties": {
+            "ordinaryIncome": { "type": "number" },
+            "shortTermCapitalGain": { "type": "number" },
+            "longTermCapitalGain": { "type": "number" },
+            "section1231Gain": { "type": "number" },
+            "depreciationRecapture": { "type": "number" },
+            "qualifiedDividendIncome": { "type": "number" }
+          }
+        },
+        "perLPAllocations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["lpId", "totalAllocableIncome"],
+            "properties": {
+              "lpId": { "type": "string" },
+              "lpName": { "type": "string" },
+              "totalAllocableIncome": { "type": "number" },
+              "ordinaryIncome": { "type": "number" },
+              "capitalGain": { "type": "number" },
+              "depreciationRecapture": { "type": "number" },
+              "section704bCapitalAccount": {
+                "type": "object",
+                "properties": {
+                  "beginningBalance": { "type": "number" },
+                  "contributions": { "type": "number" },
+                  "allocableItems": { "type": "number" },
+                  "distributions": { "type": "number" },
+                  "endingBalance": { "type": "number" }
+                }
+              },
+              "firptaWithholding": { "type": "number", "description": "FIRPTA withholding amount for foreign LPs." },
+              "eciAllocation": { "type": "number", "description": "ECI allocation for foreign LPs." },
+              "ubtiEstimate": { "type": "number", "description": "UBTI estimate for tax-exempt LPs." }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

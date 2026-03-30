@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/capital-stack-sizing-data.schema.json",
+  "title": "Capital Stack Phase 1 -- Debt Sizing Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the debt sizing phase. Covers max loan by constraint, binding constraint identification, structure recommendation, and equity gap calculation.",
+  "type": "object",
+  "required": [
+    "loanSizingMatrix",
+    "bindingConstraint",
+    "structureRecommendation",
+    "equityGap"
+  ],
+  "properties": {
+    "loanSizingMatrix": {
+      "type": "object",
+      "description": "Max loan amounts by lender type with binding constraints at each leverage point.",
+      "required": ["lenderTypes", "bestExecution"],
+      "properties": {
+        "lenderTypes": {
+          "type": "array",
+          "description": "Loan sizing for each evaluated lender type.",
+          "items": {
+            "type": "object",
+            "required": ["lenderType", "maxLoanAmount", "ltv", "dscr", "debtYield", "bindingConstraint"],
+            "properties": {
+              "lenderType": {
+                "type": "string",
+                "enum": ["agency", "cmbs", "bridge", "lifeCompany", "bank", "debtFund"],
+                "description": "Lender category."
+              },
+              "maxLoanAmount": {
+                "type": "number",
+                "description": "Maximum loan amount achievable under all constraints."
+              },
+              "ltv": {
+                "type": "number",
+                "description": "Loan-to-value ratio at max loan amount (0-1).",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "dscr": {
+                "type": "number",
+                "description": "Debt service coverage ratio at max loan amount.",
+                "minimum": 0
+              },
+              "debtYield": {
+                "type": "number",
+                "description": "Debt yield (NOI / loan amount) at max loan amount (0-1).",
+                "minimum": 0
+              },
+              "bindingConstraint": {
+                "type": "string",
+                "enum": ["DSCR", "LTV", "debtYield"],
+                "description": "The constraint that limits the max loan amount for this lender type."
+              },
+              "rate": {
+                "type": "number",
+                "description": "Estimated interest rate for this lender type."
+              },
+              "rateType": {
+                "type": "string",
+                "enum": ["fixed", "floating"],
+                "description": "Whether the estimated rate is fixed or floating."
+              },
+              "spread": {
+                "type": "number",
+                "description": "Spread over benchmark (bps) for floating rate estimates."
+              },
+              "eligible": {
+                "type": "boolean",
+                "description": "Whether this lender type is eligible for this deal based on asset type, size, and location."
+              },
+              "notes": {
+                "type": "string",
+                "description": "Additional context on sizing constraints or eligibility."
+              }
+            }
+          }
+        },
+        "bestExecution": {
+          "type": "object",
+          "description": "The lender type and amount that provides the best overall execution.",
+          "required": ["lenderType", "maxLoanAmount", "rationale"],
+          "properties": {
+            "lenderType": { "type": "string" },
+            "maxLoanAmount": { "type": "number" },
+            "rationale": { "type": "string" }
+          }
+        },
+        "totalCapitalization": {
+          "type": "number",
+          "description": "Total capitalization (purchase price or development cost) that the stack must equal."
+        }
+      }
+    },
+    "bindingConstraint": {
+      "type": "string",
+      "enum": ["DSCR", "LTV", "debtYield"],
+      "description": "The binding constraint for the recommended (best execution) lender type."
+    },
+    "structureRecommendation": {
+      "type": "object",
+      "description": "Recommended loan structure from the structure advisor.",
+      "required": ["rateType", "term", "amortization", "ioperiod"],
+      "properties": {
+        "rateType": {
+          "type": "string",
+          "enum": ["fixed", "floating", "hybrid"],
+          "description": "Recommended rate type."
+        },
+        "term": {
+          "type": "number",
+          "description": "Recommended loan term in years."
+        },
+        "amortization": {
+          "type": "number",
+          "description": "Recommended amortization period in years. 0 for interest-only."
+        },
+        "ioperiod": {
+          "type": "number",
+          "description": "Interest-only period in years."
+        },
+        "prepaymentStructure": {
+          "type": "string",
+          "enum": ["defeasance", "yieldMaintenance", "stepDown", "openPrepayment", "lockout"],
+          "description": "Recommended prepayment structure."
+        },
+        "structureComparisonMatrix": {
+          "type": "array",
+          "description": "Comparison of alternative structures considered.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "structureName": { "type": "string" },
+              "pros": { "type": "array", "items": { "type": "string" } },
+              "cons": { "type": "array", "items": { "type": "string" } },
+              "effectiveCost": { "type": "number" },
+              "recommended": { "type": "boolean" }
+            }
+          }
+        },
+        "rationale": {
+          "type": "string",
+          "description": "Rationale for the structure recommendation."
+        }
+      }
+    },
+    "equityGap": {
+      "type": "number",
+      "description": "Total capitalization minus max senior debt at recommended structure. Defines subordinate capital + equity requirement.",
+      "minimum": 0
+    },
+    "proceedsWaterfall": {
+      "type": "object",
+      "description": "How the total capitalization is sourced across the stack.",
+      "properties": {
+        "seniorDebt": { "type": "number" },
+        "subordinateCapitalPlaceholder": { "type": "number", "description": "Placeholder amount for mezz/pref sizing in Phase 4." },
+        "equityRequired": { "type": "number" },
+        "totalCapitalization": { "type": "number" }
+      }
+    }
+  }
+}

@@ -2,7 +2,7 @@
   "orchestratorId": "disposition-strategy",
   "version": "2.0.0",
   "entityType": "property",
-  "description": "Seven-phase disposition pipeline: hold-sell-refi analysis, pricing strategy, marketing preparation, buyer targeting, offer management, due diligence management, and closing execution. Coordinates disposition-strategy-engine, disposition-prep-kit, comp-snapshot, 1031-exchange-executor, closing-checklist-tracker, funds-flow-calculator, market-cycle-positioner, om-reverse-pricing, psa-redline-strategy, and estoppel-certificate-generator. Includes buyer universe segmentation, offer comparison matrix, retrade defense, and 1031 coordination. Terminal verdict: SELL (execute disposition), HOLD (continue hold period), or REFI (refinance and hold).",
+  "description": "Seven-phase disposition pipeline for CRE property exits. Covers hold-sell-refi analysis, pricing strategy, marketing preparation, buyer targeting, offer management, due diligence management, and closing execution. Coordinates 14 specialist agents across sequential phases to produce a terminal verdict of SELL, HOLD, or REFI. May be triggered by hold-period-monitor (EXIT verdict), fund-management orchestrator (wind-down), or direct user request.",
   "model": "claude-opus-4-6[1m]",
   "phases": [
     {
@@ -14,26 +14,47 @@
         {
           "agentId": "hold-sell-evaluator",
           "file": "agents/disposition/hold-sell-evaluator.md",
-          "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "hold period performance data", "acquisition basis", "current market conditions", "remaining business plan"],
-          "outputs": ["hold-sell NPV comparison", "IRR-to-date vs projected IRR at exit", "remaining upside quantification", "tax impact summary", "scenario matrix (base/bull/bear)"],
+          "model": "claude-opus-4-6[1m]",
+          "inputs": [
+            "config/deal.json",
+            "hold period performance data",
+            "current NOI and occupancy",
+            "debt maturity schedule",
+            "market cycle position",
+            "exit trigger assessment",
+            "acquisition basis and return targets"
+          ],
+          "outputs": [
+            "hold NPV analysis",
+            "sell NPV analysis",
+            "refi NPV analysis",
+            "scenario comparison matrix (base/bull/bear)",
+            "IRR-to-date vs projected exit IRR",
+            "remaining upside quantification",
+            "terminal recommendation (SELL/HOLD/REFI)"
+          ],
           "critical": true,
           "dependencies": [],
           "skillRefs": [
             "skills/disposition-strategy-engine.md",
             "skills/market-cycle-positioner.md"
           ],
-          "maxTimeoutMinutes": 40,
+          "maxTimeoutMinutes": 45,
           "validationRules": [
             {
-              "ruleId": "npv-comparison-complete",
-              "description": "Hold NPV and sell NPV must both be calculated with matching discount rate across base, bull, and bear scenarios.",
+              "ruleId": "all-three-npvs-calculated",
+              "description": "Hold NPV, sell NPV, and refi NPV must all be non-null with base, bull, and bear scenarios for each.",
               "actionOnFailure": "retry_agent"
             },
             {
-              "ruleId": "irr-to-date-present",
-              "description": "IRR-to-date based on actual cash flows must be non-null.",
+              "ruleId": "recommendation-supported-by-npv",
+              "description": "Terminal recommendation must align with the NPV comparison: SELL requires sell NPV > hold NPV by at least the sellPremiumOverHold threshold.",
               "actionOnFailure": "halt_phase"
+            },
+            {
+              "ruleId": "irr-calculated",
+              "description": "IRR-to-date and projected exit IRR must both be calculated and non-null.",
+              "actionOnFailure": "retry_agent"
             }
           ]
         },
@@ -41,97 +62,200 @@
           "agentId": "tax-impact-analyzer",
           "file": "agents/disposition/tax-impact-analyzer.md",
           "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "acquisition basis", "depreciation schedule", "capital improvements history", "current hold period"],
-          "outputs": ["estimated tax liability at sale", "depreciation recapture calculation", "1031 exchange eligibility and benefit", "installment sale analysis", "after-tax proceeds estimate", "cost segregation recapture impact"],
+          "inputs": [
+            "config/deal.json",
+            "acquisition cost basis",
+            "depreciation schedule",
+            "cost segregation study (if available)",
+            "estimated sale price",
+            "holding period",
+            "entity structure"
+          ],
+          "outputs": [
+            "capital gains tax estimate",
+            "depreciation recapture exposure",
+            "1031 exchange eligibility assessment",
+            "1031 exchange NPV benefit",
+            "installment sale NPV analysis",
+            "after-tax proceeds comparison by exit strategy"
+          ],
           "critical": false,
           "dependencies": [],
           "skillRefs": [
-            "skills/1031-exchange-executor.md"
+            "skills/1031-exchange-executor.md",
+            "skills/cost-segregation-analyzer.md"
           ],
-          "maxTimeoutMinutes": 30
+          "maxTimeoutMinutes": 35,
+          "validationRules": [
+            {
+              "ruleId": "tax-liability-quantified",
+              "description": "Capital gains tax and depreciation recapture must be quantified in dollar terms.",
+              "actionOnFailure": "flag_data_gap"
+            },
+            {
+              "ruleId": "1031-eligibility-assessed",
+              "description": "1031 exchange eligibility must be evaluated with clear yes/no/conditional determination.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
         },
         {
           "agentId": "refi-alternative-analyzer",
           "file": "agents/disposition/refi-alternative-analyzer.md",
           "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "current debt terms", "current NOI", "market cap rates", "current lender environment"],
-          "outputs": ["cash-out refi proceeds estimate", "new debt terms at refi", "refi vs sell NPV comparison", "LP yield impact analysis", "refi DSCR and LTV analysis"],
+          "inputs": [
+            "config/deal.json",
+            "current debt terms",
+            "current NOI",
+            "current property value estimate",
+            "rate environment",
+            "hold period business plan (remaining years)"
+          ],
+          "outputs": [
+            "refi feasibility assessment",
+            "refi loan sizing (agency, CMBS, bank, life co)",
+            "cash-out potential",
+            "LP yield impact under refi scenario",
+            "refi NPV vs sell NPV comparison",
+            "prepayment penalty calculation"
+          ],
           "critical": false,
           "dependencies": [],
-          "skillRefs": [],
-          "maxTimeoutMinutes": 30
+          "skillRefs": [
+            "skills/refi-decision-analyzer.md",
+            "skills/loan-sizing-engine.md"
+          ],
+          "maxTimeoutMinutes": 35,
+          "validationRules": [
+            {
+              "ruleId": "refi-sizing-complete",
+              "description": "At least two lender types must be sized with rate, LTV, DSCR, and proceeds.",
+              "actionOnFailure": "flag_data_gap"
+            },
+            {
+              "ruleId": "prepayment-penalty-calculated",
+              "description": "Prepayment penalty on existing debt must be calculated (yield maintenance, defeasance, or step-down).",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
         }
       ],
       "verdictLogic": {
-        "thresholdsRef": "disposition",
+        "thresholdsRef": "disposition.holdSellRefi",
         "passConditions": [
           {
-            "conditionId": "sell-outperforms-hold",
-            "description": "Sell NPV exceeds hold NPV at the base case exit cap rate.",
-            "propagateIfFailed": false
+            "conditionId": "hold-sell-evaluator-complete",
+            "description": "Hold-sell evaluator completed successfully with a clear SELL, HOLD, or REFI recommendation supported by NPV analysis.",
+            "propagateIfFailed": true
           },
           {
-            "conditionId": "irr-target-met-at-exit",
-            "description": "Projected IRR at current pricing meets or exceeds the fund IRR target.",
-            "propagateIfFailed": false
+            "conditionId": "sell-premium-met",
+            "description": "If recommendation is SELL, sell NPV exceeds hold NPV by at least the sellPremiumOverHold threshold (default 5%).",
+            "metricPath": "holdSellRefi.sellPremiumOverHold",
+            "operator": "gte",
+            "thresholdRef": "disposition.holdSellRefi.sellPremiumOverHold",
+            "propagateIfFailed": true
           }
         ],
         "conditionalConditions": [
           {
-            "conditionId": "refi-competitive",
-            "description": "Cash-out refi delivers LP yield above preferred return; refi alternative viable.",
-            "propagateIfFailed": true
+            "conditionId": "tax-analysis-incomplete",
+            "description": "Tax impact analyzer failed or produced incomplete results; after-tax proceeds comparison is partial.",
+            "propagateIfFailed": false
           },
           {
-            "conditionId": "1031-required",
-            "description": "Tax impact analysis recommends 1031 exchange to preserve proceeds; adds timing constraint.",
-            "propagateIfFailed": true
-          },
-          {
-            "conditionId": "hold-marginal",
-            "description": "Hold NPV marginally exceeds sell NPV but within 5% sensitivity range; market timing may favor sell.",
+            "conditionId": "refi-marginal",
+            "description": "Refi NPV is within 2% of sell NPV; decision is sensitive to rate assumptions.",
             "propagateIfFailed": true
           }
         ],
         "failConditions": [
           {
-            "conditionId": "sell-below-basis",
-            "description": "Current market pricing would result in a sale below acquisition cost.",
+            "conditionId": "no-npv-analysis",
+            "description": "Hold-sell evaluator failed to produce any NPV comparison across scenarios.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "hold-sell-evaluator-failed",
+            "description": "Critical hold-sell evaluator agent failed after all retry attempts.",
             "propagateIfFailed": true
           }
         ],
-        "dealbreakers": []
+        "dealbreakers": [
+          "noNpvAnalysis",
+          "holdSellEvaluatorFailed"
+        ]
       },
       "dataForDownstreamContract": {
-        "holdSellDecision": {
+        "recommendation": {
           "type": "string",
           "required": true,
-          "description": "SELL, HOLD, or REFI based on NPV and IRR analysis."
+          "description": "Terminal recommendation: SELL, HOLD, or REFI. Determines whether pipeline continues (SELL), terminates back to hold-period (HOLD), or hands off to capital-stack (REFI)."
+        },
+        "npvComparison": {
+          "type": "object",
+          "required": true,
+          "description": "Hold, sell, and refi NPV across base, bull, and bear scenarios. Seeds pricing strategy and marketing preparation."
         },
         "targetExitPrice": {
           "type": "number",
           "required": true,
-          "description": "Target gross sale price based on hold-sell NPV analysis."
+          "description": "Recommended exit price based on sell NPV analysis. Starting point for pricing strategy."
         },
-        "exchange1031Eligible": {
-          "type": "boolean",
+        "irrToDate": {
+          "type": "number",
           "required": true,
-          "description": "True if 1031 exchange is recommended; triggers 1031-exchange-executor agent in closing phase."
+          "description": "IRR achieved from acquisition through current period. Context for LP reporting and exit decision."
         },
         "afterTaxProceeds": {
-          "type": "number",
-          "required": false,
-          "description": "Estimated after-tax net proceeds to LP at target exit price."
-        },
-        "exitCapRate": {
-          "type": "number",
-          "required": true,
-          "description": "Exit cap rate assumed in the hold-sell analysis for pricing strategy validation."
-        },
-        "scenarioMatrix": {
           "type": "object",
-          "required": true,
-          "description": "Base/bull/bear scenario NPV and IRR for pricing strategy stress testing."
+          "required": false,
+          "description": "After-tax proceeds by strategy (outright sale, 1031 exchange, installment sale). Seeds tax-optimal execution."
+        },
+        "refiAnalysis": {
+          "type": "object",
+          "required": false,
+          "description": "Refinance feasibility and sizing. Required if recommendation is REFI; passed to capital-stack orchestrator."
+        },
+        "holdDecisionRationale": {
+          "type": "string",
+          "required": false,
+          "description": "Narrative rationale for HOLD decision. Required if recommendation is HOLD; passed back to hold-period-monitor."
+        }
+      },
+      "selfReviewProtocol": {
+        "crossAgentValidations": [
+          {
+            "checkId": "npv-consistency-across-agents",
+            "agentsInvolved": ["hold-sell-evaluator", "refi-alternative-analyzer"],
+            "description": "Refi NPV produced by refi-alternative-analyzer must match the refi scenario in hold-sell-evaluator within 2%.",
+            "tolerance": "2%",
+            "actionOnMismatch": "log_warning"
+          },
+          {
+            "checkId": "tax-proceeds-consistency",
+            "agentsInvolved": ["hold-sell-evaluator", "tax-impact-analyzer"],
+            "description": "Gross proceeds used in tax impact analysis must match the sell NPV basis from hold-sell-evaluator.",
+            "tolerance": "0%",
+            "actionOnMismatch": "block_verdict"
+          }
+        ],
+        "confidenceScoringRules": {
+          "baseScore": 100,
+          "deductions": {
+            "perNullKeyMetric": 8,
+            "perCrossPhasesMismatch": 12,
+            "perDataGap": 3,
+            "perFailedNonCriticalAgent": 5,
+            "perConditionalUpstream": 10,
+            "perMissingReport": 15
+          },
+          "categories": {
+            "HIGH": 90,
+            "MEDIUM": 70,
+            "LOW": 50,
+            "VERY_LOW": 0
+          }
         }
       }
     },
@@ -139,141 +263,213 @@
       "phaseId": "pricing-strategy",
       "name": "Pricing Strategy",
       "weight": 0.15,
+      "orchestratorFile": "orchestrators/disposition-orchestrator.md",
       "agents": [
         {
-          "agentId": "market-cycle-positioner-agent",
-          "file": "agents/disposition/market-cycle-positioner-agent.md",
+          "agentId": "pricing-analyst",
+          "file": "agents/disposition/pricing-analyst.md",
           "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "target exit price", "current market conditions", "cap rate trends", "transaction volume data"],
-          "outputs": ["market cycle position assessment", "optimal listing timing", "cap rate sensitivity to target price", "buyer pool depth estimate", "market liquidity score"],
+          "inputs": [
+            "config/deal.json",
+            "target exit price from Phase 1",
+            "current NOI",
+            "rent roll",
+            "comparable sales data",
+            "market cycle position",
+            "cap rate environment"
+          ],
+          "outputs": [
+            "asking price recommendation",
+            "comp adjustment grid (minimum 3 comps)",
+            "cap rate range analysis",
+            "price per unit/SF benchmarking",
+            "pricing sensitivity (price vs days-on-market)",
+            "listing vs off-market recommendation"
+          ],
           "critical": true,
           "dependencies": [],
           "skillRefs": [
+            "skills/comp-snapshot.md",
+            "skills/om-reverse-pricing.md",
             "skills/market-cycle-positioner.md"
           ],
-          "maxTimeoutMinutes": 35
+          "maxTimeoutMinutes": 40,
+          "validationRules": [
+            {
+              "ruleId": "min-comp-count",
+              "description": "At least 3 comparable sales must be identified and adjusted, with no comp older than 12 months.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "price-within-comp-range",
+              "description": "Asking price must fall within 10% of the adjusted comp set range.",
+              "actionOnFailure": "halt_phase"
+            },
+            {
+              "ruleId": "cap-rate-validated",
+              "description": "Implied cap rate at asking price must be within the submarket cap rate range.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
         },
         {
-          "agentId": "comp-snapshot-agent",
-          "file": "agents/disposition/comp-snapshot-agent.md",
+          "agentId": "buyer-universe-segmenter",
+          "file": "agents/disposition/buyer-universe-segmenter.md",
           "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "property details", "submarket data", "trailing 12-month sales comps"],
-          "outputs": ["comparable sales analysis", "price per unit range", "cap rate range by quality tier", "positioning vs comp set", "days on market benchmarking"],
+          "inputs": [
+            "config/deal.json",
+            "asking price",
+            "property profile",
+            "asset class and submarket",
+            "comparable buyer data",
+            "cap rate at asking price"
+          ],
+          "outputs": [
+            "buyer universe segmentation (5 segments)",
+            "target return analysis per buyer type",
+            "buyer-specific pricing ceiling",
+            "recommended marketing approach per segment",
+            "buyer probability-weighted pricing matrix"
+          ],
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/comp-snapshot.md"
+            "skills/sourcing-outreach-system.md"
           ],
-          "maxTimeoutMinutes": 30
-        },
-        {
-          "agentId": "reverse-pricing-analyst",
-          "file": "agents/disposition/reverse-pricing-analyst.md",
-          "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "target exit price", "buyer type profiles", "current financing environment", "comp set cap rates"],
-          "outputs": ["reverse-engineered buyer pricing by buyer type", "buyer return analysis at target price", "maximum achievable price by buyer segment", "price ceiling recommendation"],
-          "critical": true,
-          "dependencies": ["comp-snapshot-agent"],
-          "skillRefs": [
-            "skills/om-reverse-pricing.md"
-          ],
-          "maxTimeoutMinutes": 30
-        },
-        {
-          "agentId": "broker-selection-advisor",
-          "file": "agents/disposition/broker-selection-advisor.md",
-          "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "asset class", "submarket", "deal size", "target buyer pool"],
-          "outputs": ["broker shortlist", "listing vs off-market recommendation", "marketing fee benchmark", "expected marketing timeline"],
-          "critical": false,
-          "dependencies": ["market-cycle-positioner-agent"],
-          "skillRefs": [],
-          "maxTimeoutMinutes": 20
+          "maxTimeoutMinutes": 35,
+          "validationRules": [
+            {
+              "ruleId": "all-segments-analyzed",
+              "description": "All five buyer segments (institutional, PE, family office, 1031/tax-motivated, local operator) must be analyzed with return metrics.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "at-least-one-viable-segment",
+              "description": "At least one buyer segment must achieve target returns at or near the asking price.",
+              "actionOnFailure": "halt_phase"
+            }
+          ]
         }
       ],
       "upstreamDependencies": [
         {
           "phaseId": "hold-sell-refi-analysis",
-          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredStatus": ["COMPLETED"],
           "requiredDataKeys": [
             {
-              "key": "holdSellDecision",
+              "key": "recommendation",
               "critical": true,
-              "description": "Decision must be SELL to proceed with pricing strategy; HOLD or REFI short-circuits the pipeline."
+              "description": "Must be SELL to proceed to pricing. HOLD and REFI terminate or redirect the pipeline."
             },
             {
               "key": "targetExitPrice",
               "critical": true,
-              "description": "Target price required for cap rate and market positioning analysis."
+              "description": "Target exit price from NPV analysis seeds the pricing strategy."
             },
             {
-              "key": "exitCapRate",
+              "key": "npvComparison",
               "critical": true,
-              "description": "Exit cap rate required for comp set validation and reverse pricing."
+              "description": "NPV comparison provides context for pricing sensitivity analysis."
             }
           ]
         }
       ],
       "verdictLogic": {
-        "thresholdsRef": "disposition",
+        "thresholdsRef": "disposition.pricing",
         "passConditions": [
           {
-            "conditionId": "target-price-within-comp-range",
-            "description": "Target exit price is within the comp set cap rate range given current market conditions.",
+            "conditionId": "price-supportable",
+            "description": "Asking price is within comp range and at least one buyer segment can achieve target returns.",
             "propagateIfFailed": true
           },
           {
-            "conditionId": "market-window-open",
-            "description": "Market cycle positioner confirms current or near-term window is favorable for disposition.",
-            "propagateIfFailed": true
-          },
-          {
-            "conditionId": "buyer-can-achieve-returns",
-            "description": "Reverse pricing confirms at least one buyer segment can achieve target returns at asking price.",
+            "conditionId": "both-agents-complete",
+            "description": "Both pricing-analyst and buyer-universe-segmenter completed successfully.",
             "propagateIfFailed": true
           }
         ],
         "conditionalConditions": [
           {
             "conditionId": "price-at-top-of-range",
-            "description": "Target price requires top-of-market buyer; execution risk is elevated.",
+            "description": "Asking price is within comp range but at the upper end; limited buyer universe.",
             "propagateIfFailed": true
           },
           {
-            "conditionId": "listing-timing-suboptimal",
-            "description": "Market cycle analysis suggests a 1-2 quarter delay would improve pricing; recommend proceeding with prep work.",
+            "conditionId": "timing-suboptimal",
+            "description": "Market cycle analysis suggests waiting 3-6 months could improve pricing by >3%.",
             "propagateIfFailed": true
           }
         ],
         "failConditions": [
           {
-            "conditionId": "price-above-market",
-            "description": "Target exit price exceeds top of comp set range by more than 10%; no buyer segment achieves target returns.",
+            "conditionId": "no-viable-buyer-segment",
+            "description": "No buyer segment can achieve target returns at asking price. Repricing required.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "price-unsupportable",
+            "description": "Asking price exceeds comp range by more than maxDiscountFromBOV threshold.",
             "propagateIfFailed": true
           }
         ],
-        "dealbreakers": []
+        "dealbreakers": [
+          "noViableBuyerSegment",
+          "priceUnsupportable"
+        ]
       },
       "dataForDownstreamContract": {
-        "marketPositioning": {
+        "askingPrice": {
+          "type": "number",
+          "required": true,
+          "description": "Final recommended asking price supported by comp analysis and buyer viability."
+        },
+        "compAdjustmentGrid": {
           "type": "object",
           "required": true,
-          "description": "Market positioning strategy including listing timing, price guidance, comp support, and buyer pool depth."
+          "description": "Comparable sales with adjustments. Minimum 3 comps with line-item adjustments."
         },
-        "brokerRecommendation": {
-          "type": "object",
-          "required": false,
-          "description": "Broker shortlist and listing vs off-market recommendation."
-        },
-        "capRateRange": {
+        "buyerUniverse": {
           "type": "object",
           "required": true,
-          "description": "Market cap rate range by quality tier for buyer targeting."
+          "description": "Five-segment buyer universe with return analysis and probability-weighted pricing per segment."
         },
-        "reversePricing": {
-          "type": "object",
+        "pricingStrategy": {
+          "type": "string",
           "required": true,
-          "description": "Reverse-engineered pricing by buyer type showing maximum achievable price per segment."
+          "description": "Recommended approach: broad marketing, targeted outreach, or off-market."
+        },
+        "impliedCapRate": {
+          "type": "number",
+          "required": true,
+          "description": "Cap rate implied by asking price and current NOI."
+        }
+      },
+      "selfReviewProtocol": {
+        "crossAgentValidations": [
+          {
+            "checkId": "price-buyer-consistency",
+            "agentsInvolved": ["pricing-analyst", "buyer-universe-segmenter"],
+            "description": "Asking price from pricing-analyst must be the same price used in buyer-universe-segmenter return analysis.",
+            "tolerance": "0%",
+            "actionOnMismatch": "block_verdict"
+          }
+        ],
+        "confidenceScoringRules": {
+          "baseScore": 100,
+          "deductions": {
+            "perNullKeyMetric": 8,
+            "perCrossPhasesMismatch": 12,
+            "perDataGap": 3,
+            "perFailedNonCriticalAgent": 5,
+            "perConditionalUpstream": 10,
+            "perMissingReport": 15
+          },
+          "categories": {
+            "HIGH": 90,
+            "MEDIUM": 70,
+            "LOW": 50,
+            "VERY_LOW": 0
+          }
         }
       }
     },
@@ -281,56 +477,93 @@
       "phaseId": "marketing-preparation",
       "name": "Marketing Preparation",
       "weight": 0.15,
+      "orchestratorFile": "orchestrators/disposition-orchestrator.md",
       "agents": [
         {
-          "agentId": "disposition-prep-agent",
-          "file": "agents/disposition/disposition-prep-agent.md",
+          "agentId": "om-preparer",
+          "file": "agents/disposition/om-preparer.md",
           "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "hold period performance data", "rent roll", "T-12 operating statement", "capex history"],
-          "outputs": ["offering memorandum data room checklist", "rent roll standardization", "T-12 normalization for buyer", "capital improvements summary", "deferred maintenance disclosure"],
+          "inputs": [
+            "config/deal.json",
+            "asking price and pricing strategy",
+            "rent roll",
+            "T-12 operating statement",
+            "property photos and site plan",
+            "market analysis",
+            "buyer universe segmentation"
+          ],
+          "outputs": [
+            "offering memorandum narrative",
+            "financial summary package",
+            "data room index and population checklist",
+            "investment highlights (top 5)",
+            "risk factors disclosure",
+            "marketing timeline"
+          ],
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/disposition-prep-kit.md"
+            "skills/disposition-prep-kit.md",
+            "skills/t12-normalizer.md",
+            "skills/rent-roll-formatter.md"
           ],
-          "maxTimeoutMinutes": 40
+          "maxTimeoutMinutes": 45,
+          "validationRules": [
+            {
+              "ruleId": "om-sections-complete",
+              "description": "OM must include executive summary, investment highlights, financial analysis, market overview, and property description.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "data-room-min-population",
+              "description": "Data room checklist must be at least 80% populated before marketing launch.",
+              "actionOnFailure": "flag_data_gap"
+            },
+            {
+              "ruleId": "financials-reconcile",
+              "description": "T-12 financials in OM must reconcile to source T-12 operating statement within 0.1%.",
+              "actionOnFailure": "halt_phase"
+            }
+          ]
         },
         {
-          "agentId": "om-narrative-builder",
-          "file": "agents/disposition/om-narrative-builder.md",
+          "agentId": "broker-selection-manager",
+          "file": "agents/disposition/broker-selection-manager.md",
           "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "market positioning", "comp snapshot", "property highlights", "business plan summary", "reverse pricing"],
-          "outputs": ["OM executive summary", "investment highlights narrative", "market narrative", "value-add opportunity description", "financial summary presentation"],
+          "inputs": [
+            "config/deal.json",
+            "property profile",
+            "asset class and submarket",
+            "pricing strategy (listing vs off-market)",
+            "target buyer segments",
+            "estimated sale price"
+          ],
+          "outputs": [
+            "broker shortlist with track record",
+            "commission structure recommendations",
+            "broker interview scorecard",
+            "listing agreement key terms",
+            "broker selection recommendation"
+          ],
           "critical": true,
-          "dependencies": ["disposition-prep-agent"],
-          "skillRefs": [
-            "skills/disposition-prep-kit.md"
-          ],
-          "maxTimeoutMinutes": 35
-        },
-        {
-          "agentId": "marketing-coordinator",
-          "file": "agents/disposition/marketing-coordinator.md",
-          "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "OM data room checklist", "broker recommendation", "marketing timeline"],
-          "outputs": ["data room population status", "marketing launch timeline", "tour coordination plan", "confidentiality agreement template", "qualified buyer criteria"],
-          "critical": false,
-          "dependencies": ["om-narrative-builder"],
-          "skillRefs": [
-            "skills/disposition-prep-kit.md"
-          ],
-          "maxTimeoutMinutes": 25
-        },
-        {
-          "agentId": "legal-readiness-checker",
-          "file": "agents/disposition/legal-readiness-checker.md",
-          "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "title status", "lease abstracts", "outstanding liens", "environmental status"],
-          "outputs": ["legal readiness checklist", "title curative items", "estoppel requirements", "disclosure obligations", "seller representation inventory"],
-          "critical": false,
           "dependencies": [],
-          "skillRefs": [],
-          "maxTimeoutMinutes": 25
+          "skillRefs": [
+            "skills/disposition-prep-kit.md",
+            "skills/leasing-strategy-marketing-planner.md"
+          ],
+          "maxTimeoutMinutes": 35,
+          "validationRules": [
+            {
+              "ruleId": "min-broker-candidates",
+              "description": "At least 3 broker candidates must be evaluated with market-specific transaction history.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "commission-benchmarked",
+              "description": "Recommended commission rate must be benchmarked against market norms for asset class and price point.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
         }
       ],
       "upstreamDependencies": [
@@ -339,102 +572,161 @@
           "requiredStatus": ["COMPLETED", "CONDITIONAL"],
           "requiredDataKeys": [
             {
-              "key": "marketPositioning",
+              "key": "askingPrice",
               "critical": true,
-              "description": "Market positioning strategy informs OM narrative and pricing guidance."
+              "description": "Asking price required for OM preparation and broker selection."
             },
             {
-              "key": "reversePricing",
-              "critical": false,
-              "description": "Reverse pricing analysis informs value-add opportunity framing in OM."
+              "key": "pricingStrategy",
+              "critical": true,
+              "description": "Listing vs off-market approach drives broker selection and OM format."
+            },
+            {
+              "key": "buyerUniverse",
+              "critical": true,
+              "description": "Target buyer segments inform OM narrative and broker selection criteria."
             }
           ]
         }
       ],
       "verdictLogic": {
-        "thresholdsRef": "disposition",
+        "thresholdsRef": "disposition.marketing",
         "passConditions": [
           {
-            "conditionId": "om-ready",
-            "description": "OM narrative and data room checklist are complete; ready for buyer outreach.",
+            "conditionId": "om-complete",
+            "description": "Offering memorandum is complete with all required sections and reconciled financials.",
             "propagateIfFailed": true
           },
           {
-            "conditionId": "no-material-disclosure-issues",
-            "description": "Legal readiness checker found no undisclosed material defects requiring remediation.",
+            "conditionId": "broker-selected",
+            "description": "Broker selected (if listing approach) or buyer target list ready (if off-market).",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "no-undisclosed-defects",
+            "description": "No material undisclosed defects identified during OM preparation.",
             "propagateIfFailed": true
           }
         ],
         "conditionalConditions": [
           {
-            "conditionId": "legal-items-outstanding",
-            "description": "Minor legal readiness items outstanding but not material to buyer decision.",
-            "propagateIfFailed": true
-          },
-          {
-            "conditionId": "data-room-partially-populated",
-            "description": "Data room is 80%+ populated; remaining items in progress and non-blocking for initial outreach.",
+            "conditionId": "data-room-incomplete",
+            "description": "Data room is between 80% and 100% populated; remaining items identified for follow-up.",
             "propagateIfFailed": false
           }
         ],
         "failConditions": [
           {
-            "conditionId": "undisclosed-material-defect",
-            "description": "Legal review found a material defect requiring remediation before marketing.",
+            "conditionId": "material-defect-undisclosed",
+            "description": "Material property defect discovered during OM preparation that was not previously disclosed. Pipeline halted for remediation.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "om-financials-mismatch",
+            "description": "OM financials do not reconcile to source documents.",
             "propagateIfFailed": true
           }
         ],
         "dealbreakers": [
-          "undisclosedEnvironmentalLiability",
-          "activeLitigation"
+          "materialDefectUndisclosed",
+          "omFinancialsMismatch"
         ]
       },
       "dataForDownstreamContract": {
-        "offeringMemorandum": {
+        "omPackage": {
           "type": "object",
           "required": true,
-          "description": "OM data package including executive summary, financials, market narrative, and value-add thesis."
+          "description": "Complete offering memorandum with narrative, financial summary, and investment highlights."
         },
-        "dataRoomChecklist": {
+        "dataRoomIndex": {
           "type": "object",
           "required": true,
-          "description": "Data room document checklist with completion status per item."
+          "description": "Data room document index with population status and access controls."
         },
-        "sellerDisclosures": {
+        "brokerSelection": {
           "type": "object",
           "required": true,
-          "description": "Known disclosure items from legal readiness check for PSA negotiation."
+          "description": "Selected broker with commission terms and listing agreement parameters."
+        },
+        "marketingTimeline": {
+          "type": "object",
+          "required": true,
+          "description": "Marketing timeline with launch date, call-for-offers deadline, and best-and-final date."
+        }
+      },
+      "selfReviewProtocol": {
+        "crossAgentValidations": [
+          {
+            "checkId": "om-price-consistency",
+            "agentsInvolved": ["om-preparer", "broker-selection-manager"],
+            "description": "Asking price in OM must match the price used for broker commission calculations.",
+            "tolerance": "0%",
+            "actionOnMismatch": "block_verdict"
+          }
+        ],
+        "confidenceScoringRules": {
+          "baseScore": 100,
+          "deductions": {
+            "perNullKeyMetric": 8,
+            "perCrossPhasesMismatch": 12,
+            "perDataGap": 3,
+            "perFailedNonCriticalAgent": 5,
+            "perConditionalUpstream": 10,
+            "perMissingReport": 15
+          },
+          "categories": {
+            "HIGH": 90,
+            "MEDIUM": 70,
+            "LOW": 50,
+            "VERY_LOW": 0
+          }
         }
       }
     },
     {
       "phaseId": "buyer-targeting",
       "name": "Buyer Targeting",
-      "weight": 0.15,
+      "weight": 0.10,
+      "orchestratorFile": "orchestrators/disposition-orchestrator.md",
       "agents": [
         {
-          "agentId": "buyer-profiler",
-          "file": "agents/disposition/buyer-profiler.md",
+          "agentId": "outreach-coordinator",
+          "file": "agents/disposition/outreach-coordinator.md",
           "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "cap rate range", "deal size", "asset class", "market positioning", "reverse pricing"],
-          "outputs": ["buyer type ranking", "institutional vs private buyer analysis", "geographic buyer pool", "return requirement by buyer type", "buyer universe segmentation matrix"],
+          "inputs": [
+            "config/deal.json",
+            "buyer universe segmentation",
+            "OM package",
+            "pricing strategy",
+            "marketing timeline",
+            "broker recommendation"
+          ],
+          "outputs": [
+            "outreach pipeline with contact list per segment",
+            "CA/NDA tracking log",
+            "OM distribution log",
+            "property tour schedule",
+            "indications of interest tracker",
+            "call-for-offers process design"
+          ],
           "critical": true,
           "dependencies": [],
-          "skillRefs": [],
-          "maxTimeoutMinutes": 25
-        },
-        {
-          "agentId": "disposition-manager",
-          "file": "agents/disposition/disposition-manager.md",
-          "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "buyer universe segmentation", "OM package", "marketing timeline", "broker recommendation"],
-          "outputs": ["outreach strategy by buyer segment", "call-for-offers timeline", "best-and-final process design", "confidentiality tracking", "buyer qualification criteria"],
-          "critical": true,
-          "dependencies": ["buyer-profiler"],
           "skillRefs": [
-            "skills/disposition-strategy-engine.md"
+            "skills/sourcing-outreach-system.md"
           ],
-          "maxTimeoutMinutes": 30
+          "maxTimeoutMinutes": 35,
+          "validationRules": [
+            {
+              "ruleId": "outreach-pipeline-populated",
+              "description": "Outreach pipeline must include contacts from at least 3 buyer segments with minimum 10 total targets.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "process-timeline-set",
+              "description": "Call-for-offers timeline must be defined with specific dates for OM distribution, tours, initial offers, and best-and-final.",
+              "actionOnFailure": "retry_agent"
+            }
+          ]
         }
       ],
       "upstreamDependencies": [
@@ -443,58 +735,95 @@
           "requiredStatus": ["COMPLETED", "CONDITIONAL"],
           "requiredDataKeys": [
             {
-              "key": "offeringMemorandum",
+              "key": "omPackage",
               "critical": true,
-              "description": "OM required before launching buyer outreach."
+              "description": "OM required for distribution to prospective buyers."
             },
             {
-              "key": "dataRoomChecklist",
-              "critical": false,
-              "description": "Data room status checked; incomplete items noted in buyer outreach."
+              "key": "marketingTimeline",
+              "critical": true,
+              "description": "Marketing timeline drives outreach scheduling."
+            },
+            {
+              "key": "brokerSelection",
+              "critical": true,
+              "description": "Selected broker leads or supports the outreach effort."
             }
           ]
         }
       ],
       "verdictLogic": {
-        "thresholdsRef": "disposition",
+        "thresholdsRef": "disposition.targeting",
         "passConditions": [
           {
-            "conditionId": "qualified-buyers-identified",
-            "description": "Buyer universe segmentation identifies sufficient qualified buyers across at least two buyer segments.",
+            "conditionId": "outreach-launched",
+            "description": "OM distributed to target buyer list with CA/NDA tracking active.",
             "propagateIfFailed": true
           },
           {
-            "conditionId": "outreach-strategy-complete",
-            "description": "Outreach strategy with call-for-offers timeline is approved and ready for execution.",
+            "conditionId": "tour-schedule-set",
+            "description": "Property tours scheduled or available for qualified buyers.",
             "propagateIfFailed": true
           }
         ],
         "conditionalConditions": [
           {
-            "conditionId": "thin-buyer-pool",
-            "description": "Qualified buyer pool is smaller than optimal; may need to expand geographic scope or adjust pricing.",
+            "conditionId": "limited-interest",
+            "description": "Fewer than 5 CAs signed; outreach may need to be expanded.",
             "propagateIfFailed": true
           }
         ],
         "failConditions": [
           {
-            "conditionId": "no-qualified-buyers",
-            "description": "No buyer segment can achieve target returns at asking price; pricing strategy must be revisited.",
+            "conditionId": "no-outreach-launched",
+            "description": "Outreach pipeline empty or OM not distributed. Cannot proceed to offer management.",
             "propagateIfFailed": true
           }
         ],
-        "dealbreakers": []
+        "dealbreakers": [
+          "noOutreachLaunched"
+        ]
       },
       "dataForDownstreamContract": {
-        "buyerUniverse": {
+        "outreachPipeline": {
           "type": "object",
           "required": true,
-          "description": "Segmented buyer universe with qualification criteria and outreach priority."
+          "description": "Complete outreach pipeline with buyer contacts, segment classification, and outreach status."
         },
-        "outreachStrategy": {
-          "type": "object",
+        "casSigned": {
+          "type": "integer",
           "required": true,
-          "description": "Outreach timeline, call-for-offers process, and best-and-final structure."
+          "description": "Number of confidentiality agreements signed by prospective buyers."
+        },
+        "toursCompleted": {
+          "type": "integer",
+          "required": true,
+          "description": "Number of property tours completed by qualified buyers."
+        },
+        "indicationsOfInterest": {
+          "type": "array",
+          "required": false,
+          "description": "Preliminary indications of interest received before formal call-for-offers."
+        }
+      },
+      "selfReviewProtocol": {
+        "crossAgentValidations": [],
+        "confidenceScoringRules": {
+          "baseScore": 100,
+          "deductions": {
+            "perNullKeyMetric": 5,
+            "perCrossPhasesMismatch": 10,
+            "perDataGap": 2,
+            "perFailedNonCriticalAgent": 5,
+            "perConditionalUpstream": 10,
+            "perMissingReport": 15
+          },
+          "categories": {
+            "HIGH": 90,
+            "MEDIUM": 70,
+            "LOW": 50,
+            "VERY_LOW": 0
+          }
         }
       }
     },
@@ -502,42 +831,89 @@
       "phaseId": "offer-management",
       "name": "Offer Management",
       "weight": 0.15,
+      "orchestratorFile": "orchestrators/disposition-orchestrator.md",
       "agents": [
         {
-          "agentId": "offer-evaluator",
-          "file": "agents/disposition/offer-evaluator.md",
+          "agentId": "offer-comparator",
+          "file": "agents/disposition/offer-comparator.md",
           "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "target exit price", "offers received", "buyer qualifications", "after-tax proceeds analysis", "scenario matrix"],
-          "outputs": ["offer comparison matrix", "net proceeds by offer", "buyer strength assessment", "recommended offer selection", "retrade risk assessment by buyer"],
+          "inputs": [
+            "config/deal.json",
+            "all received offers (LOIs)",
+            "asking price",
+            "buyer universe segmentation",
+            "comp data",
+            "target return metrics"
+          ],
+          "outputs": [
+            "offer comparison matrix",
+            "risk-adjusted net proceeds ranking",
+            "buyer retrade risk assessment per offer",
+            "financing contingency risk analysis",
+            "selected buyer recommendation",
+            "best-and-final strategy (if competitive)"
+          ],
           "critical": true,
           "dependencies": [],
-          "skillRefs": [],
-          "maxTimeoutMinutes": 30,
+          "skillRefs": [
+            "skills/loi-offer-builder.md",
+            "skills/om-reverse-pricing.md"
+          ],
+          "maxTimeoutMinutes": 40,
           "validationRules": [
             {
-              "ruleId": "offer-comparison-complete",
-              "description": "Offer comparison must include price, earnest money, contingency periods, financing certainty, closing timeline, and retrade risk for each offer.",
+              "ruleId": "all-offers-scored",
+              "description": "Every received offer must be scored on price, earnest money, DD period, financing contingency, closing timeline, and retrade risk.",
               "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "net-proceeds-calculated",
+              "description": "Risk-adjusted net proceeds must be calculated for every offer, accounting for retrade probability and closing risk.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "earnest-money-threshold",
+              "description": "Selected offer must meet minimum earnest money threshold (default 2% of price).",
+              "actionOnFailure": "halt_phase"
             }
           ]
         },
         {
-          "agentId": "loa-psa-negotiator",
-          "file": "agents/disposition/loa-psa-negotiator.md",
+          "agentId": "psa-negotiator",
+          "file": "agents/disposition/psa-negotiator.md",
           "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "selected offer", "seller preferred terms", "legal readiness checklist", "seller disclosures"],
-          "outputs": ["PSA negotiation points", "key terms summary", "risk flags", "recommended seller concessions", "retrade defense provisions"],
+          "inputs": [
+            "config/deal.json",
+            "selected offer terms",
+            "buyer profile",
+            "seller PSA template",
+            "retrade risk assessment",
+            "1031 exchange requirements (if applicable)"
+          ],
+          "outputs": [
+            "PSA markup strategy",
+            "retrade defense provisions",
+            "seller-favorable terms checklist",
+            "earnest money hardening schedule",
+            "DD scope limitation recommendations",
+            "PSA negotiation redline summary"
+          ],
           "critical": true,
-          "dependencies": ["offer-evaluator"],
+          "dependencies": ["offer-comparator"],
           "skillRefs": [
             "skills/psa-redline-strategy.md"
           ],
-          "maxTimeoutMinutes": 30,
+          "maxTimeoutMinutes": 40,
           "validationRules": [
             {
-              "ruleId": "retrade-defense-included",
-              "description": "PSA negotiation must include retrade defense provisions: non-refundable earnest money schedule, buyer DD limitation, and rep survival scope.",
+              "ruleId": "retrade-protections-included",
+              "description": "PSA must include retrade defense provisions: non-refundable EMD schedule, limited DD scope, as-is language, and liquidated damages.",
               "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "dd-period-within-limits",
+              "description": "Negotiated DD period must not exceed maximum DD period threshold (default 45 days).",
+              "actionOnFailure": "flag_data_gap"
             }
           ]
         }
@@ -548,104 +924,199 @@
           "requiredStatus": ["COMPLETED", "CONDITIONAL"],
           "requiredDataKeys": [
             {
-              "key": "buyerUniverse",
+              "key": "outreachPipeline",
               "critical": true,
-              "description": "Buyer universe required to evaluate offer quality and buyer qualification."
+              "description": "Outreach pipeline required to identify which buyers submitted offers."
             },
             {
-              "key": "outreachStrategy",
-              "critical": false,
-              "description": "Outreach strategy timeline for offer receipt context."
+              "key": "casSigned",
+              "critical": true,
+              "description": "At least one CA must be signed for offers to be considered."
             }
           ]
         }
       ],
       "verdictLogic": {
-        "thresholdsRef": "disposition",
+        "thresholdsRef": "disposition.offers",
         "passConditions": [
           {
-            "conditionId": "qualified-offer-at-target",
-            "description": "At least one qualified buyer has submitted an offer at or above target exit price.",
+            "conditionId": "qualified-offer-received",
+            "description": "At least one qualified offer at or above target price with acceptable PSA terms.",
             "propagateIfFailed": true
           },
           {
-            "conditionId": "psa-terms-acceptable",
-            "description": "PSA negotiation agent confirms key terms are within seller-acceptable range with adequate retrade protection.",
+            "conditionId": "psa-executed",
+            "description": "PSA negotiated and agreed with retrade defense provisions in place.",
             "propagateIfFailed": true
           }
         ],
         "conditionalConditions": [
           {
             "conditionId": "offer-below-target",
-            "description": "Best offer is 5-10% below target price; within seller consideration range.",
+            "description": "Best offer is below target but within consideration range (within maxDiscountFromBOV).",
             "propagateIfFailed": true
           },
           {
-            "conditionId": "psa-negotiations-ongoing",
-            "description": "PSA key terms largely agreed; minor points still under negotiation.",
-            "propagateIfFailed": false
+            "conditionId": "financing-contingency",
+            "description": "Selected buyer has financing contingency; not an all-cash or balance-sheet buyer.",
+            "propagateIfFailed": true
           }
         ],
         "failConditions": [
           {
             "conditionId": "no-qualified-offers",
-            "description": "No qualified offers received after full buyer outreach; market does not support target pricing.",
+            "description": "No qualified offers received. Pipeline may loop back to Phase 2 for repricing or terminate.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "psa-negotiation-failed",
+            "description": "Unable to reach agreement on PSA terms with any qualified buyer.",
             "propagateIfFailed": true
           }
         ],
-        "dealbreakers": []
+        "dealbreakers": [
+          "noQualifiedOffers"
+        ]
       },
       "dataForDownstreamContract": {
-        "selectedOffer": {
+        "offers": {
+          "type": "array",
+          "required": true,
+          "description": "Array of all received offers with comparison matrix scores and ranking."
+        },
+        "selectedBuyer": {
           "type": "object",
           "required": true,
-          "description": "Selected buyer offer with purchase price, earnest money, contingency schedule, closing timeline, and financing details."
+          "description": "Selected buyer profile with offer terms, financing structure, and retrade risk assessment."
         },
-        "psaSummary": {
+        "psaStatus": {
           "type": "object",
           "required": true,
-          "description": "PSA key terms summary including retrade defense provisions for closing phase execution."
+          "description": "PSA execution status with key terms, DD period dates, earnest money schedule, and closing date."
         },
-        "netProceedsProjection": {
-          "type": "number",
-          "required": true,
-          "description": "Projected net proceeds after debt payoff, closing costs, and selling fees."
-        },
-        "retradeRiskAssessment": {
+        "retradeRiskProfile": {
           "type": "object",
           "required": true,
-          "description": "Retrade risk assessment for selected buyer based on financing contingency, DD scope, and buyer track record."
+          "description": "Retrade risk assessment for selected buyer including financing contingency analysis and historical retrade behavior."
+        }
+      },
+      "selfReviewProtocol": {
+        "crossAgentValidations": [
+          {
+            "checkId": "offer-psa-price-match",
+            "agentsInvolved": ["offer-comparator", "psa-negotiator"],
+            "description": "Price in PSA markup must match the selected offer price from offer-comparator.",
+            "tolerance": "0%",
+            "actionOnMismatch": "block_verdict"
+          }
+        ],
+        "confidenceScoringRules": {
+          "baseScore": 100,
+          "deductions": {
+            "perNullKeyMetric": 8,
+            "perCrossPhasesMismatch": 12,
+            "perDataGap": 3,
+            "perFailedNonCriticalAgent": 5,
+            "perConditionalUpstream": 10,
+            "perMissingReport": 15
+          },
+          "categories": {
+            "HIGH": 90,
+            "MEDIUM": 70,
+            "LOW": 50,
+            "VERY_LOW": 0
+          }
         }
       }
     },
     {
-      "phaseId": "due-diligence-management",
+      "phaseId": "dd-management",
       "name": "Due Diligence Management",
-      "weight": 0.10,
+      "weight": 0.15,
+      "orchestratorFile": "orchestrators/disposition-orchestrator.md",
       "agents": [
         {
-          "agentId": "disposition-manager-dd",
-          "file": "agents/disposition/disposition-manager.md",
+          "agentId": "seller-dd-coordinator",
+          "file": "agents/disposition/seller-dd-coordinator.md",
           "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "PSA summary", "buyer DD request list", "data room checklist", "seller disclosures", "estoppel requirements"],
-          "outputs": ["buyer DD response tracker", "estoppel collection status", "lender consent status", "seller deliverable tracker", "retrade defense log", "DD objection response strategy"],
+          "inputs": [
+            "config/deal.json",
+            "PSA terms (DD period, scope)",
+            "data room index",
+            "rent roll and lease files",
+            "tenant information",
+            "buyer DD request list"
+          ],
+          "outputs": [
+            "DD response log",
+            "estoppel certificate status tracker",
+            "lender payoff/consent status",
+            "seller closing deliverables checklist",
+            "DD objection log with classification",
+            "DD timeline compliance status"
+          ],
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/estoppel-certificate-generator.md",
-            "skills/closing-checklist-tracker.md"
+            "skills/dd-command-center.md",
+            "skills/estoppel-certificate-generator.md"
+          ],
+          "maxTimeoutMinutes": 40,
+          "validationRules": [
+            {
+              "ruleId": "estoppel-threshold-tracked",
+              "description": "Estoppel collection progress must be tracked against PSA threshold (typically 75-80% of GLA or units).",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "dd-objections-classified",
+              "description": "Every buyer DD objection must be classified as legitimate finding, price fishing, or strategic retrade.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "lender-payoff-requested",
+              "description": "Lender payoff statement must be requested within 5 days of PSA execution.",
+              "actionOnFailure": "flag_data_gap"
+            }
+          ]
+        },
+        {
+          "agentId": "retrade-defense-analyst",
+          "file": "agents/disposition/retrade-defense-analyst.md",
+          "model": "claude-sonnet-4-6[1m]",
+          "inputs": [
+            "config/deal.json",
+            "DD objection log",
+            "PSA terms and protections",
+            "earnest money status",
+            "backup buyer list",
+            "cost to re-market estimate"
+          ],
+          "outputs": [
+            "retrade attempt classification",
+            "seller BATNA analysis",
+            "concession recommendation (if any)",
+            "PSA protection invocation strategy",
+            "backup buyer activation readiness",
+            "retrade defense verdict"
+          ],
+          "critical": true,
+          "dependencies": ["seller-dd-coordinator"],
+          "skillRefs": [
+            "skills/sensitivity-stress-test.md",
+            "skills/comp-snapshot.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
             {
-              "ruleId": "estoppel-threshold-tracked",
-              "description": "Estoppel collection status must be tracked against PSA-required threshold with per-tenant status.",
+              "ruleId": "batna-calculated",
+              "description": "Seller BATNA must be calculated: cost of concession vs cost of re-marketing and carrying the asset.",
               "actionOnFailure": "retry_agent"
             },
             {
-              "ruleId": "retrade-defense-active",
-              "description": "Any buyer DD objection that could result in a price retrade must be logged with defense strategy.",
-              "actionOnFailure": "flag_data_gap"
+              "ruleId": "concession-within-limits",
+              "description": "Any recommended concession must not exceed the cost of re-marketing and carrying the asset for 6 months.",
+              "actionOnFailure": "halt_phase"
             }
           ]
         }
@@ -653,89 +1124,121 @@
       "upstreamDependencies": [
         {
           "phaseId": "offer-management",
-          "requiredStatus": ["COMPLETED", "CONDITIONAL"],
+          "requiredStatus": ["COMPLETED"],
           "requiredDataKeys": [
             {
-              "key": "selectedOffer",
+              "key": "psaStatus",
               "critical": true,
-              "description": "Executed PSA or LOI required to initiate seller-side DD management."
+              "description": "Executed PSA required to define DD period, scope, and earnest money schedule."
             },
             {
-              "key": "psaSummary",
+              "key": "selectedBuyer",
               "critical": true,
-              "description": "PSA terms required for DD timeline, estoppel threshold, and retrade defense."
+              "description": "Selected buyer profile required for DD management and retrade risk assessment."
             },
             {
-              "key": "retradeRiskAssessment",
-              "critical": false,
-              "description": "Retrade risk assessment informs DD objection response strategy."
+              "key": "retradeRiskProfile",
+              "critical": true,
+              "description": "Retrade risk profile informs DD management strategy and defense posture."
             }
           ]
         }
       ],
       "verdictLogic": {
-        "thresholdsRef": "disposition",
+        "thresholdsRef": "disposition.dd",
         "passConditions": [
           {
-            "conditionId": "buyer-dd-complete",
-            "description": "Buyer has completed DD and waived contingency; no price retrade attempted.",
+            "conditionId": "dd-contingency-waived",
+            "description": "Buyer waived DD contingency with no retrade. Proceeding to closing.",
             "propagateIfFailed": true
           },
           {
-            "conditionId": "estoppel-threshold-met",
-            "description": "Estoppel collection meets PSA-required threshold.",
+            "conditionId": "estoppels-collected",
+            "description": "Estoppel certificates collected at or above PSA threshold.",
             "propagateIfFailed": true
           }
         ],
         "conditionalConditions": [
           {
-            "conditionId": "minor-retrade-negotiated",
-            "description": "Buyer attempted minor retrade; seller concession within acceptable range.",
+            "conditionId": "minor-retrade-agreed",
+            "description": "Minor retrade agreed within tolerance (e.g., repair credit, proration adjustment). Moving to close.",
             "propagateIfFailed": true
           },
           {
-            "conditionId": "estoppel-threshold-approaching",
-            "description": "Estoppel collection approaching threshold; additional tenant outreach underway.",
-            "propagateIfFailed": true
+            "conditionId": "estoppels-below-threshold",
+            "description": "Estoppels below PSA threshold but buyer agreed to waive or reduce threshold.",
+            "propagateIfFailed": false
           }
         ],
         "failConditions": [
           {
             "conditionId": "material-retrade",
-            "description": "Buyer attempting material price retrade exceeding seller concession tolerance.",
+            "description": "Buyer attempted material retrade exceeding acceptable concession limits. Evaluate backup buyers.",
             "propagateIfFailed": true
           },
           {
-            "conditionId": "buyer-dd-termination",
-            "description": "Buyer has exercised DD termination right.",
+            "conditionId": "buyer-termination",
+            "description": "Buyer terminated PSA during DD period.",
             "propagateIfFailed": true
           }
         ],
         "dealbreakers": [
-          "buyerDDTermination",
-          "materialPSABreach"
+          "buyerTermination"
         ]
       },
       "dataForDownstreamContract": {
-        "ddClearanceStatus": {
-          "type": "string",
-          "required": true,
-          "description": "CLEARED (buyer waived DD), CONDITIONAL (minor retrade agreed), or TERMINATED (buyer walked)."
-        },
-        "estoppelPackage": {
+        "estoppelStatus": {
           "type": "object",
           "required": true,
-          "description": "Complete estoppel package with per-tenant status and any discrepancy notes."
+          "description": "Estoppel collection status with return rate, discrepancies, and PSA threshold compliance."
         },
-        "lenderConsentStatus": {
+        "ddResponseStatus": {
+          "type": "object",
+          "required": true,
+          "description": "DD response log with all buyer requests, seller responses, and timeline compliance."
+        },
+        "retradeAttempts": {
+          "type": "array",
+          "required": true,
+          "description": "Array of retrade attempts (may be empty) with classification, response, and resolution."
+        },
+        "ddVerdict": {
           "type": "string",
           "required": true,
-          "description": "OBTAINED, PENDING, or NOT_REQUIRED for existing debt assumption or payoff."
+          "description": "DD management verdict: PASS (buyer waived), CONDITIONAL (minor retrade agreed), FAIL (buyer terminated or material retrade)."
         },
-        "priceAdjustments": {
+        "lenderPayoffStatus": {
           "type": "object",
-          "required": false,
-          "description": "Any price adjustments agreed during DD (repair credits, concessions, retrade resolution)."
+          "required": true,
+          "description": "Lender payoff statement status including payoff amount, good-through date, and wire instructions."
+        }
+      },
+      "selfReviewProtocol": {
+        "crossAgentValidations": [
+          {
+            "checkId": "dd-objection-classification-consistency",
+            "agentsInvolved": ["seller-dd-coordinator", "retrade-defense-analyst"],
+            "description": "DD objection classifications from seller-dd-coordinator must be consistent with retrade attempt classifications from retrade-defense-analyst.",
+            "tolerance": "exact",
+            "actionOnMismatch": "log_warning"
+          }
+        ],
+        "confidenceScoringRules": {
+          "baseScore": 100,
+          "deductions": {
+            "perNullKeyMetric": 8,
+            "perCrossPhasesMismatch": 12,
+            "perDataGap": 3,
+            "perFailedNonCriticalAgent": 5,
+            "perConditionalUpstream": 10,
+            "perMissingReport": 15
+          },
+          "categories": {
+            "HIGH": 90,
+            "MEDIUM": 70,
+            "LOW": 50,
+            "VERY_LOW": 0
+          }
         }
       }
     },
@@ -743,56 +1246,100 @@
       "phaseId": "closing-execution",
       "name": "Closing Execution",
       "weight": 0.15,
+      "orchestratorFile": "orchestrators/disposition-orchestrator.md",
       "agents": [
         {
           "agentId": "disposition-closing-coordinator",
           "file": "agents/disposition/disposition-closing-coordinator.md",
           "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "selected offer", "PSA summary", "data room checklist", "legal readiness checklist", "dd clearance status", "estoppel package"],
-          "outputs": ["disposition closing checklist", "condition cure status", "closing timeline", "lender payoff coordination status", "seller closing deliverables tracker"],
+          "inputs": [
+            "config/deal.json",
+            "PSA terms and amendments",
+            "lender payoff statement",
+            "estoppel certificates",
+            "title commitment",
+            "buyer financing status",
+            "closing conditions checklist"
+          ],
+          "outputs": [
+            "seller-side closing checklist",
+            "closing document preparation status",
+            "prorations calculation",
+            "funds flow memo (seller side)",
+            "closing condition clearance tracker",
+            "post-closing obligation schedule"
+          ],
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/closing-checklist-tracker.md",
-            "skills/funds-flow-calculator.md"
+            "skills/closing-checklist-tracker.md"
           ],
-          "maxTimeoutMinutes": 40
+          "maxTimeoutMinutes": 40,
+          "validationRules": [
+            {
+              "ruleId": "closing-checklist-complete",
+              "description": "All seller-side closing conditions must be tracked with status (cleared, pending, blocked).",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "prorations-calculated",
+              "description": "Prorations must be calculated for rent, taxes, insurance, and utilities with variance within 2% of preliminary estimates.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "required-deliverables-prepared",
+              "description": "All required closing deliverables (deed, bill of sale, assignment of leases, FIRPTA, owner's affidavit) must be prepared or in progress.",
+              "actionOnFailure": "halt_phase"
+            }
+          ]
         },
         {
-          "agentId": "exchange-1031-executor-agent",
-          "file": "agents/disposition/exchange-1031-executor-agent.md",
-          "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "1031 exchange eligibility", "net proceeds projection", "target replacement properties", "QI coordination"],
-          "outputs": ["1031 exchange timeline", "45-day identification list", "180-day closing requirement", "boot calculation", "reverse exchange feasibility"],
-          "critical": false,
-          "dependencies": [],
-          "skillRefs": [
-            "skills/1031-exchange-executor.md"
+          "agentId": "distribution-calculator",
+          "file": "agents/disposition/distribution-calculator.md",
+          "model": "claude-opus-4-6[1m]",
+          "inputs": [
+            "config/deal.json",
+            "net sale proceeds",
+            "JV/fund agreement waterfall terms",
+            "capital account balances",
+            "preferred return accruals",
+            "1031 exchange requirements (if applicable)",
+            "tax impact analysis"
           ],
-          "maxTimeoutMinutes": 30
-        },
-        {
-          "agentId": "lp-distribution-calculator",
-          "file": "agents/disposition/lp-distribution-calculator.md",
-          "model": "claude-sonnet-4-6[1m]",
-          "inputs": ["config/deal.json", "net proceeds projection", "price adjustments", "waterfall terms", "LP capital accounts", "preferred return schedule"],
-          "outputs": ["waterfall distribution calculation", "LP distribution amounts", "GP promote calculation", "final return summary per LP", "K-1 impact summary"],
+          "outputs": [
+            "distribution waterfall calculation",
+            "GP promote earned",
+            "per-LP distribution amounts",
+            "realized IRR and equity multiple",
+            "K-1 impact summary",
+            "1031 exchange proceeds allocation (if applicable)"
+          ],
           "critical": true,
           "dependencies": ["disposition-closing-coordinator"],
           "skillRefs": [
             "skills/jv-waterfall-architect.md",
-            "skills/partnership-allocation-engine.md"
+            "skills/1031-exchange-executor.md"
           ],
-          "maxTimeoutMinutes": 30,
+          "maxTimeoutMinutes": 40,
           "validationRules": [
             {
-              "ruleId": "waterfall-balanced",
-              "description": "Sum of all waterfall tier distributions must equal total distributable proceeds.",
+              "ruleId": "waterfall-balances",
+              "description": "Sum of all distributions (LP + GP) must equal net sale proceeds within $1 tolerance.",
               "actionOnFailure": "halt_phase"
             },
             {
-              "ruleId": "preferred-return-fully-addressed",
-              "description": "Preferred return must be fully paid before GP promote is allocated.",
+              "ruleId": "pref-return-calculated",
+              "description": "Preferred return must be calculated from capital contribution date through distribution date for each LP.",
+              "actionOnFailure": "retry_agent"
+            },
+            {
+              "ruleId": "promote-tiers-correct",
+              "description": "GP promote must be calculated at correct tier thresholds per JV/fund agreement.",
+              "actionOnFailure": "halt_phase"
+            },
+            {
+              "ruleId": "irr-calculated",
+              "description": "Realized IRR and equity multiple must be calculated for each LP and the overall fund position.",
               "actionOnFailure": "retry_agent"
             }
           ]
@@ -800,199 +1347,293 @@
       ],
       "upstreamDependencies": [
         {
-          "phaseId": "due-diligence-management",
+          "phaseId": "dd-management",
           "requiredStatus": ["COMPLETED", "CONDITIONAL"],
           "requiredDataKeys": [
             {
-              "key": "ddClearanceStatus",
+              "key": "ddVerdict",
               "critical": true,
-              "description": "DD clearance must be CLEARED or CONDITIONAL to initiate closing execution."
+              "description": "DD verdict must be PASS or CONDITIONAL to proceed to closing."
             },
             {
-              "key": "estoppelPackage",
+              "key": "estoppelStatus",
               "critical": true,
-              "description": "Estoppel package required for closing conditions."
+              "description": "Estoppel collection status required for closing condition verification."
             },
             {
-              "key": "lenderConsentStatus",
+              "key": "lenderPayoffStatus",
               "critical": true,
-              "description": "Lender consent status required for debt payoff or assumption coordination."
-            },
-            {
-              "key": "priceAdjustments",
-              "critical": false,
-              "description": "Price adjustments from DD inform final net proceeds and waterfall calculation."
+              "description": "Lender payoff amount and wire instructions required for funds flow."
             }
           ]
         }
       ],
       "verdictLogic": {
-        "thresholdsRef": "disposition",
+        "thresholdsRef": "disposition.closing",
         "passConditions": [
           {
-            "conditionId": "all-closing-conditions-cleared",
-            "description": "Closing checklist confirms all PSA conditions cleared and lender payoff coordinated.",
+            "conditionId": "closing-conditions-cleared",
+            "description": "All seller-side closing conditions cleared. Ready to close.",
             "propagateIfFailed": true
           },
           {
-            "conditionId": "lp-distribution-calculated",
-            "description": "Waterfall distribution memo is complete and LP amounts are confirmed.",
+            "conditionId": "waterfall-balanced",
+            "description": "Distribution waterfall balances: sum of all distributions equals net proceeds.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "deliverables-prepared",
+            "description": "All required closing deliverables prepared and ready for execution.",
             "propagateIfFailed": true
           }
         ],
         "conditionalConditions": [
           {
-            "conditionId": "1031-timing-tight",
-            "description": "1031 exchange executor flagged tight 45-day identification deadline; replacement property sourcing required immediately.",
-            "propagateIfFailed": true
-          },
-          {
-            "conditionId": "lender-payoff-pending",
-            "description": "Lender payoff amount confirmed but wire instructions pending final verification.",
+            "conditionId": "prorations-pending-final",
+            "description": "Prorations calculated based on estimates; final true-up pending post-closing reconciliation.",
             "propagateIfFailed": false
           }
         ],
         "failConditions": [
           {
-            "conditionId": "closing-conditions-uncleared",
-            "description": "Material PSA closing condition cannot be cured; closing is at risk.",
+            "conditionId": "waterfall-unbalanced",
+            "description": "Distribution waterfall does not balance. Do not distribute until resolved.",
+            "propagateIfFailed": true
+          },
+          {
+            "conditionId": "closing-condition-blocked",
+            "description": "Critical closing condition cannot be cleared (e.g., title issue, lender consent withheld).",
             "propagateIfFailed": true
           }
         ],
         "dealbreakers": [
-          "buyerFinancingFailure",
-          "psaTerminationByBuyer",
-          "lenderPayoffRefusal"
+          "waterfallUnbalanced",
+          "closingConditionBlocked"
         ]
       },
       "dataForDownstreamContract": {
-        "closingDate": {
-          "type": "string",
-          "required": true,
-          "description": "Actual closing date in ISO 8601 format."
-        },
-        "grossSalePrice": {
-          "type": "number",
-          "required": true,
-          "description": "Gross sale price as recorded in the settlement statement."
-        },
-        "lpDistributions": {
+        "closingChecklist": {
           "type": "object",
           "required": true,
-          "description": "Final LP distribution amounts by investor for fund accounting."
+          "description": "Complete closing checklist with all conditions and clearance status."
         },
-        "realizedIRR": {
-          "type": "number",
-          "required": true,
-          "description": "Realized levered IRR for the investment from acquisition to disposition."
-        },
-        "gpPromote": {
-          "type": "number",
-          "required": true,
-          "description": "GP promote earned on the disposition for fund GP economics tracking."
-        },
-        "exchange1031Status": {
+        "prorations": {
           "type": "object",
-          "required": false,
-          "description": "1031 exchange status if applicable: identification deadline, replacement property candidates, QI escrow amount."
+          "required": true,
+          "description": "Prorations for rent, taxes, insurance, and utilities as of closing date."
+        },
+        "distributionWaterfall": {
+          "type": "object",
+          "required": true,
+          "description": "Full waterfall calculation with tier-by-tier breakdown, GP promote, and per-LP distributions."
+        },
+        "finalProceeds": {
+          "type": "object",
+          "required": true,
+          "description": "Final net proceeds after debt payoff, closing costs, broker commission, and prorations."
+        },
+        "realizedReturns": {
+          "type": "object",
+          "required": true,
+          "description": "Realized IRR and equity multiple for the investment, per-LP and overall."
+        }
+      },
+      "selfReviewProtocol": {
+        "crossAgentValidations": [
+          {
+            "checkId": "proceeds-waterfall-consistency",
+            "agentsInvolved": ["disposition-closing-coordinator", "distribution-calculator"],
+            "description": "Net proceeds calculated by closing coordinator must match the total distributable amount used in waterfall calculation.",
+            "tolerance": "0%",
+            "actionOnMismatch": "block_verdict"
+          }
+        ],
+        "confidenceScoringRules": {
+          "baseScore": 100,
+          "deductions": {
+            "perNullKeyMetric": 10,
+            "perCrossPhasesMismatch": 15,
+            "perDataGap": 5,
+            "perFailedNonCriticalAgent": 5,
+            "perConditionalUpstream": 10,
+            "perMissingReport": 15
+          },
+          "categories": {
+            "HIGH": 90,
+            "MEDIUM": 70,
+            "LOW": 50,
+            "VERY_LOW": 0
+          }
         }
       }
     }
   ],
-  "checkpointConfig": {
-    "basePath": "data/checkpoints/disposition",
-    "agentLevelTracking": true,
-    "statusValues": {
-      "ANALYSIS": "Hold-sell-refi analysis in progress.",
-      "PRICING": "Pricing strategy and market positioning underway.",
-      "MARKETING": "Property in active marketing; OM and data room being prepared.",
-      "BUYER_OUTREACH": "Buyer targeting and outreach underway.",
-      "OFFERS_RECEIVED": "Offers received; evaluation and negotiation in progress.",
-      "UNDER_CONTRACT": "PSA executed; buyer DD and closing conditions being managed.",
-      "CLOSING": "Closing execution in progress; conditions being cleared.",
-      "CLOSED": "Transaction closed; distributions calculated and wired."
-    },
-    "verdictValues": {
-      "SELL": "Disposition approved; pipeline proceeding through closing execution.",
-      "HOLD": "Hold-sell analysis favors continued hold; pipeline terminates and control returns to hold-period-monitor.",
-      "REFI": "Refinance alternative superior to sale; handoff to capital-stack orchestrator for refi structuring."
-    }
-  },
   "crossChainHandoffs": [
     {
       "direction": "inbound",
       "counterpartOrchestrator": "hold-period-monitor",
-      "triggerCondition": "Counterpart 'hold-period-monitor' phase 'action-dispatch' overallVerdict == EXIT",
+      "triggerCondition": "Phase 'reposition-trigger-evaluation' exitRecommendation == EXIT with confidence >= 80%",
       "dataContract": {
         "propertyId": {
           "type": "string",
           "required": true,
-          "description": "Property identifier from hold-period-monitor.",
-          "sourcePhase": "action-dispatch",
-          "sourcePath": "quarterlyActionPlan.propertyId"
+          "description": "Property identifier for disposition pipeline. Primary key for all checkpoint and log paths.",
+          "sourcePhase": "reposition-trigger-evaluation",
+          "sourcePath": "propertyId"
         },
-        "exitTriggerAssessment": {
+        "holdPeriodPerformance": {
           "type": "object",
           "required": true,
-          "description": "Exit trigger analysis with IRR-to-date for disposition pricing.",
-          "sourcePhase": "trigger-evaluation",
-          "sourcePath": "exitTriggerAssessment"
+          "description": "Summary of hold period financial performance including cumulative cash flows, NOI trajectory, and return metrics.",
+          "sourcePhase": "reposition-trigger-evaluation",
+          "sourcePath": "holdPeriodPerformance"
         },
-        "acquisitionCost": {
+        "currentNOI": {
           "type": "number",
           "required": true,
-          "description": "Acquisition basis for return attribution.",
-          "sourcePhase": "budget-setup",
-          "sourcePath": "annualBudget.acquisitionCost"
+          "description": "Current quarter annualized NOI for disposition pricing and buyer underwriting.",
+          "sourcePhase": "performance-monitoring",
+          "sourcePath": "currentNOI"
+        },
+        "currentOccupancy": {
+          "type": "number",
+          "required": true,
+          "description": "Current physical occupancy rate as a decimal for disposition marketing materials.",
+          "sourcePhase": "performance-monitoring",
+          "sourcePath": "currentOccupancy"
+        },
+        "debtMaturityDate": {
+          "type": "string",
+          "required": true,
+          "description": "Loan maturity date in ISO 8601 format. Drives disposition timeline urgency.",
+          "sourcePhase": "annual-budget-setup",
+          "sourcePath": "debtServiceSchedule.maturityDate"
+        },
+        "exitTriggerReason": {
+          "type": "string",
+          "required": true,
+          "description": "Reason for exit recommendation (debt maturity, target return achieved, NOI decline, market timing).",
+          "sourcePhase": "reposition-trigger-evaluation",
+          "sourcePath": "exitTriggerReason"
+        },
+        "marketConditions": {
+          "type": "object",
+          "required": false,
+          "description": "Latest market position and competitive analysis for disposition pricing context.",
+          "sourcePhase": "performance-monitoring",
+          "sourcePath": "marketPosition"
+        }
+      }
+    },
+    {
+      "direction": "inbound",
+      "counterpartOrchestrator": "fund-management",
+      "triggerCondition": "Fund wind-down initiated or exit sequence prioritized for this property",
+      "dataContract": {
+        "fundId": {
+          "type": "string",
+          "required": true,
+          "description": "Fund identifier for portfolio-level exit sequencing.",
+          "sourcePhase": "fund-wind-down",
+          "sourcePath": "fundId"
+        },
+        "exitSequencePriority": {
+          "type": "integer",
+          "required": true,
+          "description": "Priority order in which this property should be disposed within the fund exit sequence.",
+          "sourcePhase": "fund-wind-down",
+          "sourcePath": "exitSequencePriority"
+        },
+        "targetExitDate": {
+          "type": "string",
+          "required": true,
+          "description": "Target date by which disposition must be completed for fund-level reporting.",
+          "sourcePhase": "fund-wind-down",
+          "sourcePath": "targetExitDate"
+        },
+        "minimumProceeds": {
+          "type": "number",
+          "required": false,
+          "description": "Minimum acceptable proceeds for fund-level return targets. May constrain pricing flexibility.",
+          "sourcePhase": "fund-wind-down",
+          "sourcePath": "minimumProceeds"
         }
       }
     },
     {
       "direction": "outbound",
-      "counterpartOrchestrator": "hold-period-monitor",
-      "triggerCondition": "Phase 'hold-sell-refi-analysis' verdict == HOLD",
+      "counterpartOrchestrator": "capital-stack-pipeline",
+      "triggerCondition": "Phase 'hold-sell-refi-analysis' recommendation == REFI",
       "dataContract": {
-        "holdDecisionRationale": {
+        "propertyId": {
+          "type": "string",
+          "required": true,
+          "description": "Property identifier for capital stack pipeline.",
+          "sourcePhase": "hold-sell-refi-analysis",
+          "sourcePath": "propertyId"
+        },
+        "currentDebtTerms": {
           "type": "object",
           "required": true,
-          "description": "NPV analysis supporting continued hold; returned to hold-period-monitor as context.",
+          "description": "Current loan terms for refinance comparison and sizing.",
           "sourcePhase": "hold-sell-refi-analysis",
-          "sourcePath": "holdSellDecision"
+          "sourcePath": "currentDebtTerms"
+        },
+        "refiAnalysis": {
+          "type": "object",
+          "required": true,
+          "description": "Refinance feasibility assessment, loan sizing by lender type, and cash-out potential from Phase 1.",
+          "sourcePhase": "hold-sell-refi-analysis",
+          "sourcePath": "refiAnalysis"
+        },
+        "currentNOI": {
+          "type": "number",
+          "required": true,
+          "description": "Current quarter annualized NOI for refinance underwriting and loan sizing.",
+          "sourcePhase": "hold-sell-refi-analysis",
+          "sourcePath": "currentNOI"
         }
       }
     },
     {
       "direction": "outbound",
       "counterpartOrchestrator": "fund-management",
-      "triggerCondition": "Phase 'closing-execution' status == COMPLETED",
+      "triggerCondition": "Phase 'closing-execution' completed with SELL verdict",
       "dataContract": {
-        "grossSalePrice": {
+        "propertyId": {
+          "type": "string",
+          "required": true,
+          "description": "Property identifier for fund-level capital account updates.",
+          "sourcePhase": "closing-execution",
+          "sourcePath": "propertyId"
+        },
+        "saleProceeds": {
           "type": "number",
           "required": true,
-          "description": "Gross sale proceeds for fund NAV update.",
+          "description": "Net sale proceeds after debt payoff, closing costs, and broker commission.",
           "sourcePhase": "closing-execution",
-          "sourcePath": "grossSalePrice"
+          "sourcePath": "finalProceeds.netToSeller"
         },
-        "lpDistributions": {
+        "distributionWaterfall": {
           "type": "object",
           "required": true,
-          "description": "LP distribution amounts for fund-level distribution tracking.",
+          "description": "Complete waterfall calculation with per-LP distributions for capital account updates.",
           "sourcePhase": "closing-execution",
-          "sourcePath": "lpDistributions"
+          "sourcePath": "distributionWaterfall"
         },
-        "realizedIRR": {
-          "type": "number",
+        "taxImpact": {
+          "type": "object",
           "required": true,
-          "description": "Realized asset-level IRR for fund performance attribution.",
-          "sourcePhase": "closing-execution",
-          "sourcePath": "realizedIRR"
+          "description": "Tax impact summary including capital gains, depreciation recapture, and 1031 exchange status.",
+          "sourcePhase": "hold-sell-refi-analysis",
+          "sourcePath": "afterTaxProceeds"
         },
-        "gpPromote": {
-          "type": "number",
+        "closingDate": {
+          "type": "string",
           "required": true,
-          "description": "GP promote earned for fund GP economics tracking.",
+          "description": "Actual closing date in ISO 8601 format for fund reporting.",
           "sourcePhase": "closing-execution",
-          "sourcePath": "gpPromote"
+          "sourcePath": "closingDate"
         }
       }
     }
@@ -1000,12 +1641,12 @@
   "executionConfig": {
     "concurrency": {
       "maxConcurrentPhases": 1,
-      "maxAgentsPerPhase": 5
+      "maxAgentsPerPhase": 3
     },
     "timeouts": {
       "defaultAgentMinutes": 35,
       "defaultPhaseMinutes": 120,
-      "pipelineMinutes": 600
+      "pipelineMinutes": 480
     },
     "retryPolicy": {
       "maxAttempts": 3,
@@ -1014,6 +1655,20 @@
     },
     "pollingIntervalMs": 30000,
     "stalledPollThreshold": 10,
+    "shortCircuitPaths": {
+      "phase1Hold": {
+        "condition": "Phase 'hold-sell-refi-analysis' recommendation == HOLD",
+        "action": "Terminate pipeline. Return holdDecisionRationale to hold-period-monitor."
+      },
+      "phase1Refi": {
+        "condition": "Phase 'hold-sell-refi-analysis' recommendation == REFI",
+        "action": "Terminate pipeline. Handoff refiAnalysis to capital-stack orchestrator."
+      },
+      "phase5NoOffers": {
+        "condition": "Phase 'offer-management' verdict == FAIL (no qualified offers)",
+        "action": "Loop back to Phase 2 for repricing. Maximum 2 repricing iterations before termination."
+      }
+    },
     "logging": {
       "categories": [
         "ACTION",
@@ -1029,7 +1684,9 @@
         "VERDICT",
         "HANDOFF",
         "RETRADE",
-        "OFFER"
+        "OFFER",
+        "RESUME",
+        "CROSS_CHECK"
       ]
     }
   }

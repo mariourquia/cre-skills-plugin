@@ -1,0 +1,62 @@
+{
+  "pipelineId": "investment-strategy",
+  "perspectives": [
+    {
+      "perspectiveId": "contrarian",
+      "name": "Contrarian",
+      "question": "Is this a crowded trade?",
+      "tier": 1,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "consensus-market-views-driving-allocation",
+        "crowded-trade-dynamics-in-target-msas",
+        "mean-reversion-risk-in-rent-growth-assumptions",
+        "cap-rate-compression-vs-historical-mean",
+        "herd-behavior-in-target-market-selection",
+        "contrarian-opportunity-in-excluded-markets",
+        "supply-pipeline-response-to-consensus-demand-thesis"
+      ],
+      "challengeThreshold": "Target MSA allocations concentrated in top-5 consensus markets (Dallas, Phoenix, Atlanta, Charlotte, Tampa) with >60% allocation AND rent growth assumptions exceed 5-year CAGR by >100bps"
+    },
+    {
+      "perspectiveId": "cycle-timer",
+      "name": "Cycle Timer",
+      "question": "Are we deploying at the wrong point in the cycle?",
+      "tier": 1,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "mueller-cycle-phase-consistency-with-strategy-type",
+        "late-cycle-deployment-risk",
+        "cap-rate-entry-point-vs-historical-distribution",
+        "vintage-year-return-sensitivity-to-entry-timing",
+        "rate-environment-transition-risk",
+        "construction-pipeline-peak-coincidence",
+        "exit-cap-rate-assumption-realism",
+        "deployment-pacing-vs-cycle-position"
+      ],
+      "challengeThreshold": "Strategy type is value-add or opportunistic AND dominant cycle position is hyper-supply or late-expansion AND entry cap rates are below 25th percentile of 10-year distribution"
+    },
+    {
+      "perspectiveId": "execution-risk",
+      "name": "Execution Risk",
+      "question": "Can this strategy actually be executed?",
+      "tier": 1,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "pipeline-coverage-ratio-vs-deployment-target",
+        "win-rate-realism-in-competitive-markets",
+        "sourcing-channel-dependency",
+        "broker-network-coverage-gaps",
+        "renovation-execution-capacity",
+        "financing-availability-at-target-leverage",
+        "deployment-pacing-achievability",
+        "key-personnel-concentration-risk",
+        "submarket-depth-for-target-deal-count",
+        "operational-scalability-across-target-msas"
+      ],
+      "challengeThreshold": "Pipeline coverage ratio below 3x AND broker coverage below 80% of target MSAs AND deployment target requires more than 5 closings per quarter"
+    }
+  ],
+  "synthesisModel": "claude-opus-4-6[1m]",
+  "verdictReconciliation": "Challenge verdict overrides pipeline verdict if it differs. Cycle Timer perspective carries veto weight on ACTIVE verdicts when cycle position is hyper-supply or recession. Contrarian perspective escalates to mandatory review when crowded-trade dynamics are identified in >50% of target allocation."
+}

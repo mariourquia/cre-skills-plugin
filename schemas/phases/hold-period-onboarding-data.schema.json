@@ -1,0 +1,491 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/hold-period-onboarding-data.schema.json",
+  "title": "Hold Period Phase 1 — Onboarding Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the hold-period onboarding phase. Covers property transition, vendor setup, insurance, and the baseline operating profile required by all downstream hold-period phases.",
+  "type": "object",
+  "required": [
+    "onboardingChecklist",
+    "pmTransitionPlan",
+    "vendorInventory",
+    "insuranceStatus",
+    "baselinePropertyProfile",
+    "systemsInventory"
+  ],
+  "properties": {
+    "onboardingChecklist": {
+      "type": "object",
+      "description": "Completion status of all property onboarding tasks.",
+      "required": ["totalItems", "completedItems", "percentComplete", "openItems"],
+      "properties": {
+        "totalItems": {
+          "type": "integer",
+          "description": "Total number of onboarding tasks.",
+          "minimum": 0
+        },
+        "completedItems": {
+          "type": "integer",
+          "description": "Number of tasks completed at checkpoint.",
+          "minimum": 0
+        },
+        "percentComplete": {
+          "type": "number",
+          "description": "Completion percentage (0–100).",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "openItems": {
+          "type": "array",
+          "description": "Unresolved onboarding tasks.",
+          "items": {
+            "type": "object",
+            "required": ["task", "owner", "dueDate", "priority"],
+            "properties": {
+              "task": { "type": "string", "description": "Task description." },
+              "owner": { "type": "string", "description": "Responsible party." },
+              "dueDate": { "type": "string", "format": "date", "description": "ISO 8601 due date." },
+              "priority": {
+                "type": "string",
+                "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"],
+                "description": "Task priority level."
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "criticalOpenCount": {
+          "type": "integer",
+          "description": "Number of open items with CRITICAL priority.",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": true
+    },
+    "pmTransitionPlan": {
+      "type": "object",
+      "description": "Property management transition details and timeline.",
+      "required": ["priorPM", "incomingPM", "transitionDate", "transitionStatus"],
+      "properties": {
+        "priorPM": {
+          "type": "string",
+          "description": "Name of prior property management company."
+        },
+        "incomingPM": {
+          "type": "string",
+          "description": "Name of incoming property management company."
+        },
+        "transitionDate": {
+          "type": "string",
+          "format": "date",
+          "description": "ISO 8601 date of PM handover."
+        },
+        "transitionStatus": {
+          "type": "string",
+          "enum": ["PLANNED", "IN_PROGRESS", "COMPLETE"],
+          "description": "Current state of PM transition."
+        },
+        "keyHandoffItems": {
+          "type": "array",
+          "description": "Critical items transferred from prior PM.",
+          "items": {
+            "type": "object",
+            "required": ["item", "status"],
+            "properties": {
+              "item": { "type": "string" },
+              "status": {
+                "type": "string",
+                "enum": ["RECEIVED", "PENDING", "MISSING"]
+              },
+              "notes": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        },
+        "managementFeePercent": {
+          "type": "number",
+          "description": "Contracted management fee as percent of EGI.",
+          "minimum": 0
+        },
+        "pmContractTermYears": {
+          "type": "number",
+          "description": "Initial PM contract term in years."
+        }
+      },
+      "additionalProperties": true
+    },
+    "vendorInventory": {
+      "type": "object",
+      "description": "Inventory and status of all property-level service contracts.",
+      "required": ["totalVendors", "contractsExecuted", "vendors"],
+      "properties": {
+        "totalVendors": {
+          "type": "integer",
+          "description": "Total number of vendors engaged.",
+          "minimum": 0
+        },
+        "contractsExecuted": {
+          "type": "integer",
+          "description": "Number of vendor contracts fully executed.",
+          "minimum": 0
+        },
+        "vendors": {
+          "type": "array",
+          "description": "Vendor-level detail.",
+          "items": {
+            "type": "object",
+            "required": ["vendorName", "serviceCategory", "annualCost", "contractStatus"],
+            "properties": {
+              "vendorName": { "type": "string" },
+              "serviceCategory": {
+                "type": "string",
+                "description": "e.g., Landscaping, HVAC, Janitorial, Elevator, Security."
+              },
+              "annualCost": {
+                "type": "number",
+                "description": "Annual contract value in dollars."
+              },
+              "contractStatus": {
+                "type": "string",
+                "enum": ["EXECUTED", "PENDING", "UNDER_REVIEW", "INHERITED", "TERMINATED"]
+              },
+              "contractExpiration": {
+                "type": "string",
+                "format": "date",
+                "description": "ISO 8601 contract expiration date."
+              },
+              "isInherited": {
+                "type": "boolean",
+                "description": "True if vendor contract was inherited from prior ownership."
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "totalAnnualVendorCost": {
+          "type": "number",
+          "description": "Sum of all annual vendor contract costs.",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": true
+    },
+    "insuranceStatus": {
+      "type": "object",
+      "description": "Property insurance coverage status at onboarding.",
+      "required": ["coverageInPlace", "primaryCarrier", "totalAnnualPremium", "policies"],
+      "properties": {
+        "coverageInPlace": {
+          "type": "boolean",
+          "description": "True if all required insurance coverage is active."
+        },
+        "primaryCarrier": {
+          "type": "string",
+          "description": "Name of primary insurance carrier."
+        },
+        "totalAnnualPremium": {
+          "type": "number",
+          "description": "Total annual insurance premium across all policies.",
+          "minimum": 0
+        },
+        "policies": {
+          "type": "array",
+          "description": "Individual policy details.",
+          "items": {
+            "type": "object",
+            "required": ["policyType", "carrier", "coverageLimit", "annualPremium", "expirationDate"],
+            "properties": {
+              "policyType": {
+                "type": "string",
+                "description": "e.g., Property, General Liability, Umbrella, Flood, Workers Comp."
+              },
+              "carrier": { "type": "string" },
+              "coverageLimit": {
+                "type": "number",
+                "description": "Policy coverage limit in dollars."
+              },
+              "annualPremium": {
+                "type": "number",
+                "description": "Annual premium in dollars."
+              },
+              "expirationDate": {
+                "type": "string",
+                "format": "date"
+              },
+              "deductible": {
+                "type": "number",
+                "description": "Policy deductible in dollars."
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "gaps": {
+          "type": "array",
+          "description": "Identified coverage gaps or deficiencies.",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "baselinePropertyProfile": {
+      "type": "object",
+      "description": "As-acquired baseline operating data — the foundation for all hold-period performance measurement.",
+      "required": ["unitMix", "rentRoll", "leaseExpirations", "operatingHistory"],
+      "properties": {
+        "unitMix": {
+          "type": "object",
+          "description": "Property unit configuration summary.",
+          "required": ["totalUnits", "totalRentableSF", "unitTypes"],
+          "properties": {
+            "totalUnits": {
+              "type": "integer",
+              "description": "Total number of units or suites.",
+              "minimum": 0
+            },
+            "totalRentableSF": {
+              "type": "number",
+              "description": "Total rentable square footage.",
+              "minimum": 0
+            },
+            "propertyType": {
+              "type": "string",
+              "description": "e.g., Multifamily, Office, Industrial, Retail, Mixed-Use."
+            },
+            "unitTypes": {
+              "type": "array",
+              "description": "Breakdown by unit or suite type.",
+              "items": {
+                "type": "object",
+                "required": ["type", "count", "avgSF", "avgInPlaceRent"],
+                "properties": {
+                  "type": { "type": "string", "description": "e.g., Studio, 1BR/1BA, 2BR/2BA, Suite A." },
+                  "count": { "type": "integer", "minimum": 0 },
+                  "avgSF": { "type": "number", "minimum": 0 },
+                  "avgInPlaceRent": { "type": "number", "description": "Average in-place monthly rent." },
+                  "avgMarketRent": { "type": "number", "description": "Average market rent at baseline." }
+                },
+                "additionalProperties": true
+              }
+            }
+          },
+          "additionalProperties": true
+        },
+        "rentRoll": {
+          "type": "object",
+          "description": "Aggregate rent roll statistics at onboarding.",
+          "required": ["occupancyRate", "effectiveGrossIncome", "avgInPlaceRent", "lossToLease"],
+          "properties": {
+            "occupancyRate": {
+              "type": "number",
+              "description": "Physical occupancy at baseline (0–1).",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "economicOccupancyRate": {
+              "type": "number",
+              "description": "Economic occupancy after concessions (0–1).",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "potentialGrossIncome": {
+              "type": "number",
+              "description": "100% occupancy gross rent potential (annual)."
+            },
+            "effectiveGrossIncome": {
+              "type": "number",
+              "description": "EGI after vacancy and concessions (annual)."
+            },
+            "avgInPlaceRent": {
+              "type": "number",
+              "description": "Average in-place monthly rent per unit/SF."
+            },
+            "avgMarketRent": {
+              "type": "number",
+              "description": "Average market rent per unit/SF at baseline."
+            },
+            "lossToLease": {
+              "type": "number",
+              "description": "Aggregate loss-to-lease in dollars (annual)."
+            },
+            "lossToLeasePercent": {
+              "type": "number",
+              "description": "Loss-to-lease as percent of potential gross income."
+            },
+            "concessions": {
+              "type": "number",
+              "description": "Annualized concession value in dollars."
+            }
+          },
+          "additionalProperties": true
+        },
+        "leaseExpirations": {
+          "type": "object",
+          "description": "Lease expiration schedule by period.",
+          "required": ["expirationSchedule", "weightedAverageLeaseTerm"],
+          "properties": {
+            "weightedAverageLeaseTerm": {
+              "type": "number",
+              "description": "WALT in years at baseline."
+            },
+            "expirationSchedule": {
+              "type": "array",
+              "description": "Annual or quarterly expiration buckets.",
+              "items": {
+                "type": "object",
+                "required": ["period", "unitsExpiring", "sfExpiring", "percentOfTotal"],
+                "properties": {
+                  "period": { "type": "string", "description": "e.g., 2025, Q1-2026." },
+                  "unitsExpiring": { "type": "integer", "minimum": 0 },
+                  "sfExpiring": { "type": "number", "minimum": 0 },
+                  "percentOfTotal": { "type": "number", "minimum": 0, "maximum": 100 },
+                  "annualizedRentExpiring": { "type": "number" }
+                },
+                "additionalProperties": true
+              }
+            },
+            "nearTermExpirationPercent": {
+              "type": "number",
+              "description": "Percent of leases expiring within 12 months.",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "additionalProperties": true
+        },
+        "operatingHistory": {
+          "type": "object",
+          "description": "Trailing 12-month operating statement at acquisition.",
+          "required": ["t12Revenue", "t12OperatingExpenses", "t12NOI", "t12CapRate"],
+          "properties": {
+            "t12Revenue": {
+              "type": "number",
+              "description": "Trailing 12-month gross revenue."
+            },
+            "t12OperatingExpenses": {
+              "type": "number",
+              "description": "Trailing 12-month total operating expenses."
+            },
+            "t12NOI": {
+              "type": "number",
+              "description": "Trailing 12-month net operating income."
+            },
+            "t12CapRate": {
+              "type": "number",
+              "description": "Going-in cap rate based on T-12 NOI and purchase price."
+            },
+            "t12ExpenseRatio": {
+              "type": "number",
+              "description": "OpEx as percent of EGI.",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "revenueLineItems": {
+              "type": "object",
+              "description": "T-12 revenue by line item.",
+              "properties": {
+                "baseRent": { "type": "number" },
+                "parkingIncome": { "type": "number" },
+                "otherIncome": { "type": "number" },
+                "vacancyCredit": { "type": "number" }
+              },
+              "additionalProperties": true
+            },
+            "expenseLineItems": {
+              "type": "object",
+              "description": "T-12 operating expenses by line item.",
+              "properties": {
+                "taxes": { "type": "number" },
+                "insurance": { "type": "number" },
+                "management": { "type": "number" },
+                "maintenance": { "type": "number" },
+                "utilities": { "type": "number" },
+                "payroll": { "type": "number" },
+                "adminGeneral": { "type": "number" }
+              },
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "systemsInventory": {
+      "type": "object",
+      "description": "Inventory and condition assessment of major building systems at onboarding.",
+      "required": ["systems", "overallConditionScore", "immediateActionItems"],
+      "properties": {
+        "overallConditionScore": {
+          "type": "number",
+          "description": "Composite systems condition score (1–5, where 5 is excellent).",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "systems": {
+          "type": "array",
+          "description": "Individual system records.",
+          "items": {
+            "type": "object",
+            "required": ["systemName", "category", "age", "condition", "estimatedRUL"],
+            "properties": {
+              "systemName": { "type": "string", "description": "e.g., HVAC Unit 1, Elevator A, Roof." },
+              "category": {
+                "type": "string",
+                "description": "System category: HVAC, Plumbing, Electrical, Roof, Elevator, Life-Safety, Structural."
+              },
+              "age": {
+                "type": "number",
+                "description": "System age in years."
+              },
+              "condition": {
+                "type": "string",
+                "enum": ["EXCELLENT", "GOOD", "FAIR", "POOR", "CRITICAL"],
+                "description": "Assessed condition at onboarding."
+              },
+              "estimatedRUL": {
+                "type": "number",
+                "description": "Estimated remaining useful life in years."
+              },
+              "replacementCostEstimate": {
+                "type": "number",
+                "description": "Estimated replacement cost in dollars."
+              },
+              "lastServiceDate": {
+                "type": "string",
+                "format": "date"
+              },
+              "notes": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        },
+        "immediateActionItems": {
+          "type": "array",
+          "description": "Systems requiring immediate attention (safety or regulatory).",
+          "items": {
+            "type": "object",
+            "required": ["system", "issue", "estimatedCost", "requiredBy"],
+            "properties": {
+              "system": { "type": "string" },
+              "issue": { "type": "string" },
+              "estimatedCost": { "type": "number" },
+              "requiredBy": {
+                "type": "string",
+                "format": "date",
+                "description": "Compliance or safety deadline."
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "totalDeferredMaintenanceEstimate": {
+          "type": "number",
+          "description": "Aggregate deferred maintenance cost estimate at onboarding.",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

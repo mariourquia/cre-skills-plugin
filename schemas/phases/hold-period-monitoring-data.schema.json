@@ -1,0 +1,462 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/hold-period-monitoring-data.schema.json",
+  "title": "Hold Period Phase 3 — Performance Monitoring Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the hold-period monitoring phase. Covers quarterly performance vs. budget, tenant health scoring, loan covenant status, submarket pulse, and the cycle-level hold verdict.",
+  "type": "object",
+  "required": [
+    "quarterlyPerformanceReport",
+    "tenantHealthScore",
+    "covenantStatus",
+    "marketPulse",
+    "cycleVerdict"
+  ],
+  "properties": {
+    "quarterlyPerformanceReport": {
+      "type": "object",
+      "description": "Trailing 12-month operating results and variance versus approved budget.",
+      "required": ["reportingPeriod", "t12Revenue", "t12OperatingExpenses", "t12NOI", "varianceAnalysis"],
+      "properties": {
+        "reportingPeriod": {
+          "type": "string",
+          "description": "Reporting period label (e.g., Q1-2026, Q3-2025)."
+        },
+        "reportingDate": {
+          "type": "string",
+          "format": "date",
+          "description": "ISO 8601 date this report was generated."
+        },
+        "t12Revenue": {
+          "type": "number",
+          "description": "Trailing 12-month gross effective revenue."
+        },
+        "t12OperatingExpenses": {
+          "type": "number",
+          "description": "Trailing 12-month total operating expenses."
+        },
+        "t12NOI": {
+          "type": "number",
+          "description": "Trailing 12-month net operating income."
+        },
+        "t12OccupancyRate": {
+          "type": "number",
+          "description": "Average physical occupancy over T-12 (0–1).",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "currentOccupancyRate": {
+          "type": "number",
+          "description": "Point-in-time occupancy at reporting date (0–1).",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "varianceAnalysis": {
+          "type": "object",
+          "description": "Budget vs. actual variance for key line items.",
+          "required": ["noiBudget", "noiActual", "noiVariance", "noiVariancePercent"],
+          "properties": {
+            "revenueBudget": { "type": "number" },
+            "revenueActual": { "type": "number" },
+            "revenueVariance": { "type": "number", "description": "Actual minus budget (positive = favorable)." },
+            "revenueVariancePercent": { "type": "number" },
+            "opExBudget": { "type": "number" },
+            "opExActual": { "type": "number" },
+            "opExVariance": { "type": "number" },
+            "opExVariancePercent": { "type": "number" },
+            "noiBudget": { "type": "number" },
+            "noiActual": { "type": "number" },
+            "noiVariance": { "type": "number" },
+            "noiVariancePercent": { "type": "number" },
+            "materialVarianceDrivers": {
+              "type": "array",
+              "description": "Key drivers of significant variances.",
+              "items": {
+                "type": "object",
+                "required": ["lineItem", "variance", "explanation"],
+                "properties": {
+                  "lineItem": { "type": "string" },
+                  "variance": { "type": "number" },
+                  "variancePercent": { "type": "number" },
+                  "explanation": { "type": "string" }
+                },
+                "additionalProperties": true
+              }
+            }
+          },
+          "additionalProperties": true
+        },
+        "capexYtdActual": {
+          "type": "number",
+          "description": "Year-to-date actual capex spend."
+        },
+        "capexYtdBudget": {
+          "type": "number",
+          "description": "Year-to-date budgeted capex spend."
+        }
+      },
+      "additionalProperties": true
+    },
+    "tenantHealthScore": {
+      "type": "object",
+      "description": "Tenant credit quality, delinquency, and renewal probability metrics.",
+      "required": ["portfolioDelinquencyRate", "renewalProbabilityWeighted", "tenantHealthTier", "tenantDetails"],
+      "properties": {
+        "portfolioDelinquencyRate": {
+          "type": "number",
+          "description": "Percent of tenants or units with outstanding receivables > 30 days.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "collectionsRate": {
+          "type": "number",
+          "description": "Collections as percent of scheduled rent (0–1).",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "renewalProbabilityWeighted": {
+          "type": "number",
+          "description": "Rent-weighted average renewal probability across all expiring leases (0–1).",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "tenantHealthTier": {
+          "type": "string",
+          "enum": ["STRONG", "STABLE", "WATCH", "STRESSED"],
+          "description": "Aggregate tenant health classification."
+        },
+        "concentrationRisk": {
+          "type": "object",
+          "description": "Top tenant concentration metrics.",
+          "properties": {
+            "topTenantPercentOfRent": {
+              "type": "number",
+              "description": "Largest single tenant as percent of total rent.",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "top5TenantsPercentOfRent": {
+              "type": "number",
+              "description": "Top 5 tenants combined as percent of total rent.",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": true
+        },
+        "tenantDetails": {
+          "type": "array",
+          "description": "Per-tenant health metrics for material tenants.",
+          "items": {
+            "type": "object",
+            "required": ["tenantId", "tenantName", "monthlyRent", "leaseExpiration", "delinquencyStatus", "renewalProbability"],
+            "properties": {
+              "tenantId": { "type": "string" },
+              "tenantName": { "type": "string" },
+              "unit": { "type": "string" },
+              "monthlyRent": { "type": "number" },
+              "leaseExpiration": { "type": "string", "format": "date" },
+              "delinquencyStatus": {
+                "type": "string",
+                "enum": ["CURRENT", "30_DAYS", "60_DAYS", "90_PLUS", "LEGAL"]
+              },
+              "arBalance": {
+                "type": "number",
+                "description": "Outstanding accounts receivable balance."
+              },
+              "renewalProbability": {
+                "type": "number",
+                "description": "Estimated probability of lease renewal (0–1).",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "creditRating": {
+                "type": "string",
+                "description": "Credit quality classification: STRONG, AVERAGE, WEAK, UNKNOWN."
+              },
+              "renewalStatus": {
+                "type": "string",
+                "enum": ["TOO_EARLY", "IN_NEGOTIATION", "RENEWED", "NOT_RENEWING", "UNKNOWN"]
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "covenantStatus": {
+      "type": "object",
+      "description": "Current loan covenant compliance and forward headroom.",
+      "required": ["overallCompliance", "dscr", "ltv", "covenants"],
+      "properties": {
+        "overallCompliance": {
+          "type": "boolean",
+          "description": "True if all loan covenants are currently in compliance."
+        },
+        "reportingDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "dscr": {
+          "type": "object",
+          "description": "Debt service coverage ratio status.",
+          "required": ["current", "threshold", "inCompliance", "headroom"],
+          "properties": {
+            "current": {
+              "type": "number",
+              "description": "Current trailing 12-month DSCR."
+            },
+            "threshold": {
+              "type": "number",
+              "description": "Minimum DSCR covenant."
+            },
+            "inCompliance": { "type": "boolean" },
+            "headroom": {
+              "type": "number",
+              "description": "Current DSCR minus covenant threshold."
+            },
+            "noiRequiredForCompliance": {
+              "type": "number",
+              "description": "Minimum NOI required to remain in compliance."
+            }
+          },
+          "additionalProperties": true
+        },
+        "ltv": {
+          "type": "object",
+          "description": "Loan-to-value ratio status.",
+          "required": ["current", "threshold", "inCompliance"],
+          "properties": {
+            "current": {
+              "type": "number",
+              "description": "Current LTV based on latest appraisal or estimated value."
+            },
+            "threshold": {
+              "type": "number",
+              "description": "Maximum LTV covenant."
+            },
+            "inCompliance": { "type": "boolean" },
+            "currentLoanBalance": { "type": "number" },
+            "estimatedPropertyValue": { "type": "number" },
+            "lastAppraisalDate": { "type": "string", "format": "date" }
+          },
+          "additionalProperties": true
+        },
+        "debtYield": {
+          "type": "object",
+          "description": "Debt yield covenant status.",
+          "properties": {
+            "current": {
+              "type": "number",
+              "description": "Current debt yield (NOI / loan balance)."
+            },
+            "threshold": {
+              "type": "number",
+              "description": "Minimum debt yield covenant."
+            },
+            "inCompliance": { "type": "boolean" },
+            "headroom": { "type": "number" }
+          },
+          "additionalProperties": true
+        },
+        "covenants": {
+          "type": "array",
+          "description": "All loan covenant tests.",
+          "items": {
+            "type": "object",
+            "required": ["covenantName", "currentValue", "threshold", "inCompliance"],
+            "properties": {
+              "covenantName": { "type": "string" },
+              "covenantType": { "type": "string", "description": "e.g., DSCR, LTV, DebtYield, NetWorth, Liquidity." },
+              "currentValue": { "type": "number" },
+              "threshold": { "type": "number" },
+              "inCompliance": { "type": "boolean" },
+              "testFrequency": { "type": "string", "description": "e.g., Quarterly, Annual." },
+              "nextTestDate": { "type": "string", "format": "date" }
+            },
+            "additionalProperties": true
+          }
+        },
+        "cureActions": {
+          "type": "array",
+          "description": "Required actions if any covenant is breached or near breach.",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "marketPulse": {
+      "type": "object",
+      "description": "Current submarket conditions and rent trend data for the property's competitive set.",
+      "required": ["submarket", "submarketOccupancy", "submarketRentGrowthYoY", "competitiveSetSummary", "supplyPipeline"],
+      "properties": {
+        "submarket": {
+          "type": "string",
+          "description": "Submarket name or identifier."
+        },
+        "asOfDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Date of market data."
+        },
+        "submarketOccupancy": {
+          "type": "number",
+          "description": "Current submarket occupancy rate (0–1).",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "submarketAvgRent": {
+          "type": "number",
+          "description": "Current submarket average asking rent per unit or SF."
+        },
+        "submarketRentGrowthYoY": {
+          "type": "number",
+          "description": "Year-over-year rent growth in the submarket (decimal, e.g., 0.03 = 3%)."
+        },
+        "propertyVsMarketRentPremium": {
+          "type": "number",
+          "description": "Property average rent minus submarket average (positive = premium to market)."
+        },
+        "capRateTrend": {
+          "type": "object",
+          "description": "Submarket cap rate movement.",
+          "properties": {
+            "currentCapRate": { "type": "number" },
+            "priorYearCapRate": { "type": "number" },
+            "basisPointChange": {
+              "type": "number",
+              "description": "Change in cap rate in basis points (positive = expansion)."
+            }
+          },
+          "additionalProperties": true
+        },
+        "competitiveSetSummary": {
+          "type": "object",
+          "description": "Summary of directly competitive properties.",
+          "required": ["compSetSize", "compSetAvgOccupancy", "compSetAvgRent"],
+          "properties": {
+            "compSetSize": {
+              "type": "integer",
+              "description": "Number of properties in competitive set."
+            },
+            "compSetAvgOccupancy": {
+              "type": "number",
+              "description": "Average occupancy across competitive set (0–1).",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "compSetAvgRent": {
+              "type": "number",
+              "description": "Average asking rent across competitive set."
+            },
+            "propertyRankByRent": {
+              "type": "integer",
+              "description": "Property's rank by rent within competitive set (1 = highest)."
+            }
+          },
+          "additionalProperties": true
+        },
+        "supplyPipeline": {
+          "type": "object",
+          "description": "New supply under construction or permitted in submarket.",
+          "required": ["unitsOrSFUnderConstruction", "deliveriesNext12Months", "netAbsorption"],
+          "properties": {
+            "unitsOrSFUnderConstruction": {
+              "type": "number",
+              "description": "Total units or SF currently under construction in submarket."
+            },
+            "deliveriesNext12Months": {
+              "type": "number",
+              "description": "Expected new supply deliveries in next 12 months."
+            },
+            "netAbsorption": {
+              "type": "number",
+              "description": "Trailing 12-month net absorption in submarket."
+            },
+            "supplyRisk": {
+              "type": "string",
+              "enum": ["LOW", "MODERATE", "HIGH", "SEVERE"],
+              "description": "Qualitative supply risk rating."
+            }
+          },
+          "additionalProperties": true
+        },
+        "macroFactors": {
+          "type": "object",
+          "description": "Broader economic factors affecting property performance.",
+          "properties": {
+            "employmentGrowthYoY": { "type": "number" },
+            "populationGrowthYoY": { "type": "number" },
+            "gdpGrowthRegional": { "type": "number" },
+            "interestRateEnvironment": {
+              "type": "string",
+              "enum": ["RISING", "STABLE", "FALLING"]
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "cycleVerdict": {
+      "type": "object",
+      "description": "Hold-cycle level verdict and narrative justification for downstream routing.",
+      "required": ["verdict", "cycleNumber", "summaryNarrative", "triggerConditions"],
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "enum": ["ON_TRACK", "WATCH", "INTERVENE", "EXIT_TRIGGER"],
+          "description": "Monitoring cycle outcome. ON_TRACK = continue hold as planned. WATCH = monitor closely. INTERVENE = activate operational improvement plan. EXIT_TRIGGER = route to exit or refi analysis."
+        },
+        "cycleNumber": {
+          "type": "integer",
+          "description": "Hold-period monitoring cycle number (1 = first quarterly review).",
+          "minimum": 1
+        },
+        "holdPeriodMonthsElapsed": {
+          "type": "integer",
+          "description": "Months elapsed since acquisition.",
+          "minimum": 0
+        },
+        "summaryNarrative": {
+          "type": "string",
+          "description": "Concise narrative supporting the cycle verdict."
+        },
+        "triggerConditions": {
+          "type": "array",
+          "description": "Specific conditions that influenced the verdict.",
+          "items": {
+            "type": "object",
+            "required": ["condition", "status"],
+            "properties": {
+              "condition": {
+                "type": "string",
+                "description": "e.g., NOI variance > 10%, DSCR breach, market cap rate expansion."
+              },
+              "status": {
+                "type": "string",
+                "enum": ["TRIGGERED", "AT_RISK", "CLEAR"]
+              },
+              "currentValue": { "type": "number" },
+              "threshold": { "type": "number" },
+              "notes": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        },
+        "recommendedNextSteps": {
+          "type": "array",
+          "description": "Prioritized action items for the next cycle.",
+          "items": { "type": "string" }
+        },
+        "nextReviewDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Scheduled date of next monitoring cycle."
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

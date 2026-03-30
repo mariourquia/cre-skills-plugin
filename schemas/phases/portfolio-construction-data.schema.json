@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/portfolio-construction-data.schema.json",
+  "title": "Portfolio Management Phase 1 -- Portfolio Construction Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the portfolio construction phase. Covers allocation matrix, drift analysis, concentration assessment, and breach flags.",
+  "type": "object",
+  "required": [
+    "portfolioInventory",
+    "allocationMatrix",
+    "concentrationAnalysis"
+  ],
+  "properties": {
+    "portfolioInventory": {
+      "type": "object",
+      "description": "Complete portfolio asset inventory with aggregate metrics.",
+      "required": ["portfolioId", "assetCount", "totalAUM", "totalEquity", "assets"],
+      "properties": {
+        "portfolioId": { "type": "string" },
+        "portfolioName": { "type": "string" },
+        "strategy": { "type": "string", "enum": ["core", "core-plus", "value-add", "opportunistic", "diversified"] },
+        "assetCount": { "type": "integer", "minimum": 1 },
+        "totalAUM": { "type": "number", "minimum": 0 },
+        "totalDebt": { "type": "number", "minimum": 0 },
+        "totalEquity": { "type": "number" },
+        "totalUnits": { "type": "integer", "minimum": 0 },
+        "weightedAvgOccupancy": { "type": "number", "minimum": 0, "maximum": 100 },
+        "weightedAvgCapRate": { "type": "number", "minimum": 0 },
+        "weightedAvgLTV": { "type": "number", "minimum": 0, "maximum": 100 },
+        "portfolioDSCR": { "type": "number", "minimum": 0 },
+        "assets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["propertyId", "estimatedValue"],
+            "properties": {
+              "propertyId": { "type": "string" },
+              "propertyName": { "type": "string" },
+              "msa": { "type": "string" },
+              "region": { "type": "string" },
+              "propertyType": { "type": "string" },
+              "yearAcquired": { "type": "integer" },
+              "vintageBand": { "type": "string" },
+              "unitCount": { "type": "integer" },
+              "occupancy": { "type": "number" },
+              "currentNOI": { "type": "number" },
+              "estimatedValue": { "type": "number" },
+              "debtBalance": { "type": "number" },
+              "ltv": { "type": "number" },
+              "dscr": { "type": "number" },
+              "strategyTier": { "type": "string" },
+              "riskProfile": { "type": "string" },
+              "holdPeriodVerdict": { "type": "string" },
+              "stale": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    "allocationMatrix": {
+      "type": "object",
+      "description": "Multi-dimensional allocation analysis with drift per dimension.",
+      "required": ["propertyType", "geography", "vintage", "riskProfile", "leverage"],
+      "properties": {
+        "propertyType": { "$ref": "#/$defs/allocationDimension" },
+        "geography": {
+          "type": "object",
+          "properties": {
+            "msaLevel": { "type": "array", "items": { "$ref": "#/$defs/allocationEntry" } },
+            "regionLevel": { "type": "array", "items": { "$ref": "#/$defs/allocationEntry" } },
+            "geoHHI_msa": { "type": "number" },
+            "geoHHI_region": { "type": "number" },
+            "dimensionStatus": { "type": "string" }
+          }
+        },
+        "vintage": { "$ref": "#/$defs/allocationDimension" },
+        "riskProfile": { "$ref": "#/$defs/allocationDimension" },
+        "leverage": { "$ref": "#/$defs/allocationDimension" }
+      }
+    },
+    "compositeDriftScore": {
+      "type": "number",
+      "description": "Composite drift score across all dimensions (lower = better aligned)."
+    },
+    "portfolioAlignment": {
+      "type": "string",
+      "enum": ["ALIGNED", "DRIFTING", "MISALIGNED", "SEVERELY_MISALIGNED"]
+    },
+    "gapAnalysis": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "dimension": { "type": "string" },
+          "subCategory": { "type": "string" },
+          "direction": { "type": "string", "enum": ["OVERWEIGHT", "UNDERWEIGHT"] },
+          "gapPct": { "type": "number" },
+          "gapDollars": { "type": "number" },
+          "priority": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW"] }
+        }
+      }
+    },
+    "concentrationAnalysis": {
+      "type": "object",
+      "description": "Multi-dimensional concentration risk assessment.",
+      "required": ["aggregateScore", "riskCategory"],
+      "properties": {
+        "tenantConcentration": { "$ref": "#/$defs/concentrationDimension" },
+        "leaseMaturityConcentration": { "$ref": "#/$defs/concentrationDimension" },
+        "geographicConcentration": { "$ref": "#/$defs/concentrationDimension" },
+        "debtConcentration": { "$ref": "#/$defs/concentrationDimension" },
+        "aggregateScore": { "type": "number", "minimum": 0, "maximum": 100 },
+        "riskCategory": { "type": "string", "enum": ["LOW", "MODERATE", "ELEVATED", "HIGH"] },
+        "breachFlags": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "dimension": { "type": "string" },
+              "metric": { "type": "string" },
+              "thresholdType": { "type": "string", "enum": ["WARNING", "ACTION", "HARD_LIMIT"] },
+              "actualValue": { "type": "number" },
+              "limitValue": { "type": "number" }
+            }
+          }
+        }
+      }
+    },
+    "benchmarkComparison": {
+      "type": "object",
+      "properties": {
+        "benchmarkName": { "type": "string" },
+        "trackingError": { "type": "number" },
+        "activeShare": { "type": "number" }
+      }
+    }
+  },
+  "$defs": {
+    "allocationEntry": {
+      "type": "object",
+      "properties": {
+        "category": { "type": "string" },
+        "targetPct": { "type": "number" },
+        "actualPct": { "type": "number" },
+        "driftPct": { "type": "number" },
+        "status": { "type": "string" },
+        "assetCount": { "type": "integer" },
+        "aum": { "type": "number" }
+      }
+    },
+    "allocationDimension": {
+      "type": "object",
+      "properties": {
+        "allocations": { "type": "array", "items": { "$ref": "#/$defs/allocationEntry" } },
+        "hhi": { "type": "number" },
+        "maxDrift": { "type": "number" },
+        "dimensionStatus": { "type": "string" }
+      }
+    },
+    "concentrationDimension": {
+      "type": "object",
+      "properties": {
+        "score": { "type": "number", "minimum": 0, "maximum": 100 },
+        "status": { "type": "string", "enum": ["GREEN", "YELLOW", "ORANGE", "RED"] },
+        "breachFlags": { "type": "array", "items": { "type": "object" } }
+      }
+    }
+  }
+}
