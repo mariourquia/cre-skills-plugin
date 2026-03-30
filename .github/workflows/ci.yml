@@ -32,3 +32,5 @@ jobs:
           for f in scripts/calculators/*.py; do python -c "compile(open('$f').read(), '$f', 'exec')"; done
       - name: Verify plugin structure
         run: bash scripts/verify-install.sh || true
+      - name: Validate registry references
+        run: python scripts/registry-validator.py
