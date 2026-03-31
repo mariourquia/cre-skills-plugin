@@ -1,0 +1,142 @@
+name: Build macOS DMG Installer
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version string (e.g. 2.0.0)'
+        required: false
+        default: '2.0.0'
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-dmg:
+    name: Build signed .dmg installer
+    runs-on: macos-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Determine version
+        id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+        run: |
+          if [ "$EVENT_NAME" = "push" ]; then
+            VERSION="${REF_NAME#v}"
+          else
+            VERSION="${INPUT_VERSION:-2.0.0}"
+          fi
+          if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Invalid version format: $VERSION (expected X.Y.Z)"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Building installer for version: $VERSION"
+
+      - name: Import Apple Developer ID certificate
+        env:
+          APPLE_CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        run: |
+          if [ -z "$APPLE_CERTIFICATE_BASE64" ]; then
+            echo "::warning::APPLE_CERTIFICATE_BASE64 not set -- building unsigned DMG"
+            echo "SKIP_SIGN=true" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          CERTIFICATE_PATH="$RUNNER_TEMP/certificate.p12"
+          KEYCHAIN_PATH="$RUNNER_TEMP/signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(openssl rand -base64 32)"
+
+          echo -n "$APPLE_CERTIFICATE_BASE64" | base64 --decode -o "$CERTIFICATE_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERTIFICATE_PATH" -P "$APPLE_CERTIFICATE_PASSWORD" \
+            -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: \
+            -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
+
+          IDENTITY=$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" \
+            | grep "Developer ID Application" \
+            | head -1 \
+            | sed 's/.*"\(.*\)"/\1/')
+          echo "SIGN_IDENTITY=$IDENTITY" >> "$GITHUB_ENV"
+          echo "SKIP_SIGN=false" >> "$GITHUB_ENV"
+
+      - name: Build .dmg installer
+        env:
+          APP_VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          if [ "$SKIP_SIGN" = "true" ]; then
+            bash scripts/create-dmg.sh "v${APP_VERSION}" --no-sign
+          else
+            bash scripts/create-dmg.sh "v${APP_VERSION}" --identity "$SIGN_IDENTITY"
+          fi
+
+      - name: Notarize and staple DMG
+        if: env.SKIP_SIGN != 'true'
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          APP_VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          DMG_PATH="dist/cre-skills-v${APP_VERSION}.dmg"
+
+          xcrun notarytool submit "$DMG_PATH" \
+            --apple-id "$APPLE_ID" \
+            --team-id "$APPLE_TEAM_ID" \
+            --password "$APPLE_APP_PASSWORD" \
+            --wait
+
+          xcrun stapler staple "$DMG_PATH"
+
+      - name: Verify signed DMG
+        if: env.SKIP_SIGN != 'true'
+        env:
+          APP_VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          DMG_PATH="dist/cre-skills-v${APP_VERSION}.dmg"
+          spctl --assess --type open --context context:primary-signature "$DMG_PATH"
+          codesign --verify --verbose "$DMG_PATH"
+          echo "DMG is signed, notarized, and stapled"
+
+      - name: Generate SHA256 checksum
+        env:
+          APP_VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          DMG_PATH="dist/cre-skills-v${APP_VERSION}.dmg"
+          shasum -a 256 "$DMG_PATH" > "${DMG_PATH}.sha256"
+          cat "${DMG_PATH}.sha256"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: cre-skills-macos-installer
+          path: |
+            dist/cre-skills-v${{ steps.version.outputs.VERSION }}.dmg
+            dist/cre-skills-v${{ steps.version.outputs.VERSION }}.dmg.sha256
+          retention-days: 30
+
+      - name: Attach to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APP_VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          gh release upload "v${APP_VERSION}" \
+            "dist/cre-skills-v${APP_VERSION}.dmg" \
+            "dist/cre-skills-v${APP_VERSION}.dmg.sha256" \
+            --clobber
+          echo "Attached to release v${APP_VERSION}"
