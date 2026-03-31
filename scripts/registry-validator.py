@@ -168,6 +168,100 @@ def validate_skill_md(skills: list[dict]) -> list[str]:
     return failures
 
 
+def validate_count_consistency(skills: list[dict]) -> list[str]:
+    """
+    Verify that skill/agent/calculator counts in key files match the actual
+    counts on disk. Catches stale numbers after adding/removing skills.
+    Returns list of failure messages.
+    """
+    failures: list[str] = []
+
+    # Actual counts from disk
+    actual_skills = len(list(SKILLS_DIR.glob("*/SKILL.md")))
+    actual_agents = len(list((PLUGIN_ROOT / "agents").glob("*.md"))) if (PLUGIN_ROOT / "agents").is_dir() else 0
+    actual_calcs = len(list((PLUGIN_ROOT / "scripts" / "calculators").glob("*.py"))) if (PLUGIN_ROOT / "scripts" / "calculators").is_dir() else 0
+
+    # Files that embed counts -- check each for the expected number
+    count_files = {
+        ".claude-plugin/plugin.json": None,
+        "hooks/hooks.json": None,
+        "routing/CRE-ROUTING.md": None,
+    }
+
+    import re
+
+    for relpath in count_files:
+        fpath = PLUGIN_ROOT / relpath
+        if not fpath.is_file():
+            continue
+        content = fpath.read_text(encoding="utf-8")
+
+        # Check for skill count mismatches
+        # Look for patterns like "105 CRE skills" or "105 skills"
+        for match in re.finditer(r"(\d+)\s+(?:CRE\s+)?skills", content):
+            found = int(match.group(1))
+            if found != actual_skills:
+                failures.append(
+                    f"FAIL  {relpath}: says {found} skills but disk has {actual_skills}"
+                )
+                break  # one failure per file is enough
+
+    # Check registry metadata
+    reg_content = REGISTRY_PATH.read_text(encoding="utf-8")
+    for match in re.finditer(r"total_skills:\s*(\d+)", reg_content):
+        found = int(match.group(1))
+        if found != actual_skills:
+            failures.append(
+                f"FAIL  registry.yaml: total_skills says {found} but disk has {actual_skills}"
+            )
+
+    return failures
+
+
+def validate_asset_type_neutrality() -> list[str]:
+    """
+    Scan orchestrator configs for hardcoded asset-type assumptions that should
+    be parameterized. Catches regressions like 'multifamily-acquisition'.
+    Returns list of failure messages.
+    """
+    failures: list[str] = []
+    configs_dir = PLUGIN_ROOT / "orchestrators" / "configs"
+
+    if not configs_dir.is_dir():
+        return failures
+
+    # Patterns that indicate hardcoded asset-type bias in orchestrator configs.
+    # The orchestratorId and cross-chain references should be asset-agnostic.
+    banned_patterns = [
+        "multifamily-acquisition",
+        "office-acquisition",
+        "retail-acquisition",
+        "industrial-acquisition",
+    ]
+
+    for config_file in sorted(configs_dir.glob("*.json")):
+        content = config_file.read_text(encoding="utf-8")
+        for pattern in banned_patterns:
+            if pattern in content:
+                failures.append(
+                    f"FAIL  orchestrators/configs/{config_file.name}: "
+                    f"contains hardcoded '{pattern}' -- should be asset-agnostic"
+                )
+
+    # Also check handoff registry
+    handoff_file = PLUGIN_ROOT / "orchestrators" / "engine" / "handoff-registry.json"
+    if handoff_file.is_file():
+        content = handoff_file.read_text(encoding="utf-8")
+        for pattern in banned_patterns:
+            if pattern in content:
+                failures.append(
+                    f"FAIL  orchestrators/engine/handoff-registry.json: "
+                    f"contains hardcoded '{pattern}'"
+                )
+
+    return failures
+
+
 def validate_orphan_dirs(skills: list[dict]) -> list[str]:
     """
     Check for skill directories that exist on disk but are not in the registry.
@@ -212,9 +306,11 @@ def main() -> None:
     # Run checks
     chain_failures = validate_chain_references(skills)
     skillmd_failures = validate_skill_md(skills)
+    count_failures = validate_count_consistency(skills)
+    neutrality_failures = validate_asset_type_neutrality()
     orphan_warnings = validate_orphan_dirs(skills)
 
-    all_failures = chain_failures + skillmd_failures
+    all_failures = chain_failures + skillmd_failures + count_failures + neutrality_failures
 
     # Print results
     if chain_failures:
@@ -226,6 +322,18 @@ def main() -> None:
     if skillmd_failures:
         print("--- SKILL.md Checks ---")
         for msg in skillmd_failures:
+            print(f"  {msg}")
+        print()
+
+    if count_failures:
+        print("--- Count Consistency Checks ---")
+        for msg in count_failures:
+            print(f"  {msg}")
+        print()
+
+    if neutrality_failures:
+        print("--- Asset-Type Neutrality Checks ---")
+        for msg in neutrality_failures:
             print(f"  {msg}")
         print()
 
