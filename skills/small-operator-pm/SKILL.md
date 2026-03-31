@@ -32,7 +32,7 @@ Do NOT trigger for: institutional asset management across a portfolio (use prope
 | Field | Type | Notes |
 |---|---|---|
 | `property_name` | string | property identifier or address |
-| `property_type` | enum | multifamily_small (2-4 units), multifamily_mid (5-50 units), small_commercial, mixed_use |
+| `property_type` | enum | multifamily, office, retail, industrial, mixed_use, self_storage, medical (any CRE asset type; workflows adapt based on type) |
 | `unit_count` | int | total units managed |
 | `unit_mix` | list | unit numbers with type (studio, 1BR, 2BR, etc.), SF, current rent, lease end date |
 | `occupancy_rate` | float | current occupied % |
