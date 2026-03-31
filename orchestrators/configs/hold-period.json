@@ -1800,8 +1800,8 @@
   "crossChainHandoffs": [
     {
       "direction": "inbound",
-      "counterpartOrchestrator": "multifamily-acquisition",
-      "triggerCondition": "Counterpart 'multifamily-acquisition' phase 'closing' verdict == PROCEED or CONDITIONAL",
+      "counterpartOrchestrator": "acquisition",
+      "triggerCondition": "Counterpart 'acquisition' phase 'closing' verdict == PROCEED or CONDITIONAL",
       "dataContract": {
         "propertyId": {
           "type": "string",
@@ -1841,7 +1841,7 @@
         "rentRoll": {
           "type": "object",
           "required": true,
-          "description": "Validated rent roll with unit mix, in-place rents, and lease expiration schedule. Seeds the initial onboarding and revenue modeling.",
+          "description": "Validated rent roll with unit mix (or tenant schedule for SF-based assets), in-place rents, and lease expiration schedule. Seeds the initial onboarding and revenue modeling.",
           "sourcePhase": "due-diligence",
           "sourcePath": "rentRoll"
         },

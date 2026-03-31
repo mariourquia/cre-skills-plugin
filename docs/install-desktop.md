@@ -122,9 +122,9 @@ List the 40 expert subagents organized by category:
 
 The plugin does not run any code. It is a structured knowledge base:
 
-- **80 SKILL.md files**: Each defines a specific CRE workflow step with trigger conditions, input schema, step-by-step process, output format, red flags, and chain notes pointing to the next skill.
-- **40 agent definitions**: Expert personas with analytical frameworks, key questions, and output styles.
-- **Routing index**: Maps natural language requests to the right skill without loading all 80 skill files.
+- **105 SKILL.md files**: Each defines a specific CRE workflow step with trigger conditions, input schema, step-by-step process, output format, red flags, and chain notes pointing to the next skill.
+- **55 agent definitions**: Expert personas with analytical frameworks, key questions, and output styles.
+- **Routing index**: Maps natural language requests to the right skill without loading all 105 skill files.
 - **SessionStart hook**: Injects a brief system prompt telling Claude the plugin is active and where to find the routing index.
 
 No API keys, no external services, no data leaves your conversation.
