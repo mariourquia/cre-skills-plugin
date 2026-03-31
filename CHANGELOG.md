@@ -20,8 +20,8 @@
 - 12th Python calculator: construction_estimator.py
 
 ### Changed
-- Total skills: 99 -> 102 (3 new)
-- Total reference files: 225 -> 236 (11 new)
+- Total skills: 99 -> 105 (6 new)
+- Total reference files: 225 -> 247 (22 new)
 - routing/CRE-ROUTING.md updated with 3 new skill routing triggers
 - hooks/hooks.json SessionStart prompt updated to 102 skills, 55 agents
 - Install.ps1 added for Windows post-install configuration

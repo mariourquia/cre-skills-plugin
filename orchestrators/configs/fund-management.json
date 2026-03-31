@@ -2057,7 +2057,7 @@
     },
     {
       "direction": "outbound",
-      "counterpartOrchestrator": "multifamily-acquisition",
+      "counterpartOrchestrator": "acquisition",
       "triggerCondition": "Phase 'deployment' approves a deal for fund allocation",
       "dataContract": {
         "fundDeploymentCapacity": {

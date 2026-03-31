@@ -350,7 +350,7 @@ cat > "$STAGING_DIR/$DMG_NAME/README.txt" << README
     ║     - Installs to ~/cre-skills-plugin            ║
     ║     - Detects Claude Code -> registers plugin    ║
     ║     - Detects Claude Desktop -> copies skills    ║
-    ║     - 88 institutional-grade CRE skills          ║
+    ║     - 105 institutional-grade CRE skills         ║
     ║                                                  ║
     ║   Requirements:                                  ║
     ║     - Claude Code CLI or Claude Desktop          ║
@@ -361,7 +361,7 @@ cat > "$STAGING_DIR/$DMG_NAME/README.txt" << README
     ║                                                  ║
     ╚══════════════════════════════════════════════════╝
 
-    88 skills | 40 agents | 6 workflow chains | 9 calculators
+    105 skills | 55 agents | 6 workflow chains | 12 calculators
     Deal sourcing, underwriting, capital markets, leasing,
     asset management, investor relations, and more.
 

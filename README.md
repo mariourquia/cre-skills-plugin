@@ -17,16 +17,16 @@
 
 # CRE Skills Plugin
 
-A Claude plugin delivering **99 institutional-grade commercial real estate skills** covering the full investment lifecycle -- deal sourcing, screening, underwriting, structuring, due diligence, capital markets, market research, asset management, leasing, investor relations, development, disposition, tax planning, ESG, portfolio strategy, and daily property operations. Each skill includes structured process logic, reference documents, chain connections to other skills, and Python calculators for precise quantitative output. Deploy as a plugin in Claude Code, Claude Desktop, or Claude.ai and get an entire CRE PE shop in your terminal.
+A Claude plugin delivering **105 institutional-grade commercial real estate skills** covering the full investment lifecycle -- deal sourcing, screening, underwriting, structuring, due diligence, capital markets, market research, asset management, leasing, investor relations, development, disposition, tax planning, ESG, portfolio strategy, and daily property operations. Each skill includes structured process logic, reference documents, chain connections to other skills, and Python calculators for precise quantitative output. Deploy as a plugin in Claude Code, Claude Desktop, or Claude.ai and get an entire CRE PE shop in your terminal.
 
 ## Key Stats
 
 | Metric | Count |
 |--------|-------|
-| Skills | **99** |
-| Expert Agents | **54** |
-| Reference Files | **225** |
-| Python Calculators | **11** |
+| Skills | **105** |
+| Expert Agents | **55** |
+| Reference Files | **247** |
+| Python Calculators | **12** |
 | Workflow Chains | **6** |
 | Orchestrator Pipelines | **10** |
 | Slash Commands | **7** |
@@ -38,7 +38,7 @@ A Claude plugin delivering **99 institutional-grade commercial real estate skill
 
 **19 new production-quality skills**: title-commitment-reviewer, tenant-credit-analyzer, term-sheet-builder, loan-document-reviewer, transfer-document-preparer, funds-flow-calculator, lease-option-structurer, lease-trade-out-analyzer, gp-performance-evaluator, fund-terms-comparator, lp-data-request-generator, sec-reg-d-compliance, monte-carlo-return-simulator, property-management-operations, distribution-notice-generator, 1031-pipeline-manager, deal-attribution-tracker, emerging-manager-evaluator, fund-raise-negotiation-engine.
 
-**11 Python calculators** (zero dependencies): debt sizing, covenant testing, NPV trade-out analysis, option valuation, proration calculation, tenant credit scoring, waterfall distribution, transfer tax (50 states + DC), quick screen IRR/CoC, Monte Carlo return simulation, fund fee modeling.
+**12 Python calculators** (zero dependencies): debt sizing, covenant testing, NPV trade-out analysis, option valuation, proration calculation, tenant credit scoring, waterfall distribution, transfer tax (50 states + DC), quick screen IRR/CoC, Monte Carlo return simulation, fund fee modeling.
 
 **Brand guidelines system**: Set up once with `/cre-skills:brand-config`. All investor-facing deliverables (IC memos, pitch decks, quarterly updates, offering packages) auto-load your colors, fonts, disclaimers, and contact info.
 
@@ -147,7 +147,7 @@ Raleigh NC, $42M asking, 2018 vintage, 93% occupied, $2.6M NOI, rents 12% below 
 
 ## Skill Categories
 
-### By Category (16 subcategories, 102 skills)
+### By Category (16 subcategories, 105 skills)
 
 | # | Category | Count | Key Skills |
 |---|----------|-------|------------|
@@ -238,7 +238,7 @@ The **Deal Team Lead** agent assembles multi-agent teams from 10 pre-built compo
 
 ## Python Calculators
 
-11 standalone Python scripts (zero external dependencies) that agents can execute for precise quantitative output.
+12 standalone Python scripts (zero external dependencies) that agents can execute for precise quantitative output.
 
 | Script | Skill | Calculations |
 |--------|-------|-------------|

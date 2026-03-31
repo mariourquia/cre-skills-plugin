@@ -1304,8 +1304,8 @@
   "crossChainHandoffs": [
     {
       "direction": "inbound",
-      "counterpartOrchestrator": "multifamily-acquisition",
-      "triggerCondition": "Counterpart 'multifamily-acquisition' underwriting phase completed and requests capital stack assembly",
+      "counterpartOrchestrator": "acquisition",
+      "triggerCondition": "Counterpart 'acquisition' underwriting phase completed and requests capital stack assembly",
       "dataContract": {
         "baseCaseNOI": {
           "type": "number",
@@ -1423,7 +1423,7 @@
     },
     {
       "direction": "outbound",
-      "counterpartOrchestrator": "multifamily-acquisition",
+      "counterpartOrchestrator": "acquisition",
       "triggerCondition": "Phase 'term-sheet-execution' verdict == FUNDED",
       "dataContract": {
         "termSheet": {
