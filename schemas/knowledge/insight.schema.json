@@ -1,0 +1,288 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "knowledge/insight.schema.json",
+  "title": "Knowledge Insight",
+  "description": "Insight schema for the knowledge graph. Insights are cross-pipeline pattern discoveries produced by the insight-synthesizer. They represent intelligence that no single agent or pipeline can see independently -- emergent patterns from portfolio-wide data.",
+  "type": "object",
+  "required": [
+    "insightId",
+    "date",
+    "source",
+    "title",
+    "summary",
+    "evidence",
+    "confidence"
+  ],
+  "properties": {
+    "insightId": {
+      "type": "string",
+      "pattern": "^INS-[0-9]{4}-[0-9]{3,}$",
+      "description": "Unique insight identifier. Format: INS-{YYYY}-{SEQ} (e.g., INS-2026-001)"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the insight was generated"
+    },
+    "source": {
+      "type": "object",
+      "required": ["agent"],
+      "properties": {
+        "agent": {
+          "type": "string",
+          "description": "Agent that produced the insight (typically 'insight-synthesizer')"
+        },
+        "trigger": {
+          "type": "string",
+          "enum": [
+            "SCHEDULED",
+            "EVENT_THRESHOLD",
+            "KNOWLEDGE_MANAGER_REFERRAL",
+            "PATTERN_DETECTION"
+          ],
+          "description": "What triggered the insight generation"
+        },
+        "analysisWindow": {
+          "type": "object",
+          "properties": {
+            "startDate": { "type": "string", "format": "date" },
+            "endDate": { "type": "string", "format": "date" },
+            "eventCount": { "type": "integer", "minimum": 0 },
+            "entityCount": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false,
+          "description": "Time window and data volume analyzed to produce this insight"
+        }
+      },
+      "additionalProperties": false
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Concise insight title. Must state the finding, not the methodology."
+    },
+    "summary": {
+      "type": "string",
+      "maxLength": 3000,
+      "description": "Detailed insight summary. Must include: the pattern discovered, the entities involved, the magnitude of the signal, and why this matters for portfolio decisions."
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "MARKET_TREND",
+        "OPERATIONAL_CORRELATION",
+        "FINANCIAL_PATTERN",
+        "RISK_CONVERGENCE",
+        "OPPORTUNITY_SIGNAL",
+        "PORTFOLIO_DRIFT",
+        "TENANT_PATTERN",
+        "VENDOR_PATTERN",
+        "DEBT_PATTERN",
+        "REGULATORY_SHIFT"
+      ],
+      "description": "Classification of the insight pattern type"
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["type", "reference", "description"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["EVENT", "ENTITY_METRIC", "TREND_DATA", "EXTERNAL_DATA", "AGENT_OUTPUT"],
+            "description": "Type of evidence"
+          },
+          "reference": {
+            "type": "string",
+            "description": "Event ID, entity ID, metric path, or file path"
+          },
+          "description": {
+            "type": "string",
+            "description": "What this evidence shows and how it supports the insight"
+          },
+          "value": {
+            "type": ["string", "number", "null"],
+            "description": "The specific data value if quantitative"
+          },
+          "sourceAgent": {
+            "type": ["string", "null"],
+            "description": "Agent that produced this evidence"
+          },
+          "sourcePipeline": {
+            "type": ["string", "null"],
+            "description": "Pipeline that produced this evidence"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Evidence supporting the insight. Minimum 2 items required. Cross-pipeline evidence (from 2+ pipelines) increases confidence."
+    },
+    "affectedEntities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["entityId"],
+        "properties": {
+          "entityId": {
+            "type": "string"
+          },
+          "entityType": {
+            "type": "string",
+            "enum": ["PROPERTY", "FUND", "MARKET", "TENANT", "VENDOR", "LENDER", "BROKER"]
+          },
+          "relevance": {
+            "type": "string",
+            "enum": ["PRIMARY", "SECONDARY", "CONTEXTUAL"],
+            "description": "How central this entity is to the insight"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Entities relevant to this insight"
+    },
+    "confidence": {
+      "type": "object",
+      "required": ["level", "score"],
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": ["HIGH", "MEDIUM", "LOW"],
+          "description": "Qualitative confidence level"
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Quantitative confidence score (0-100)"
+        },
+        "factors": {
+          "type": "object",
+          "properties": {
+            "evidenceDepth": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of evidence items"
+            },
+            "crossPipelineCorroboration": {
+              "type": "boolean",
+              "description": "Whether evidence comes from 2+ independent pipelines"
+            },
+            "temporalConsistency": {
+              "type": "boolean",
+              "description": "Whether the pattern holds across multiple time periods"
+            },
+            "sampleSize": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of entities exhibiting the pattern"
+            },
+            "dataFreshness": {
+              "type": "string",
+              "enum": ["CURRENT", "RECENT", "STALE"],
+              "description": "Freshness of the underlying data"
+            }
+          },
+          "additionalProperties": false,
+          "description": "Factors that contributed to the confidence score"
+        }
+      },
+      "additionalProperties": false
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Tags for categorization, subscription matching, and rollup grouping"
+    },
+    "actionRecommendation": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "MONITOR",
+            "INVESTIGATE",
+            "ACT_NOW",
+            "ESCALATE",
+            "INFORM_ONLY"
+          ],
+          "description": "Recommended action based on the insight"
+        },
+        "description": {
+          "type": "string",
+          "description": "Specific recommended action with enough detail to execute"
+        },
+        "urgency": {
+          "type": "string",
+          "enum": ["IMMEDIATE", "THIS_WEEK", "THIS_MONTH", "NEXT_QUARTER", "INFORMATIONAL"],
+          "description": "Time horizon for the recommended action"
+        },
+        "targetPipelines": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Pipelines that should act on this insight"
+        },
+        "targetAgents": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Specific agents that should receive this insight"
+        },
+        "estimatedImpact": {
+          "type": ["string", "null"],
+          "description": "Estimated financial or operational impact if the recommendation is followed (or not)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "relatedInsights": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "Insight IDs of related or predecessor insights"
+      },
+      "description": "Links to related insights for pattern tracking over time"
+    },
+    "lifecycle": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["NEW", "ACKNOWLEDGED", "ACTED_UPON", "EXPIRED", "SUPERSEDED"],
+          "description": "Current lifecycle status of the insight"
+        },
+        "acknowledgedAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "acknowledgedBy": {
+          "type": ["string", "null"]
+        },
+        "actedUponAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "actionTaken": {
+          "type": ["string", "null"],
+          "description": "Description of action taken in response"
+        },
+        "supersededBy": {
+          "type": ["string", "null"],
+          "description": "Insight ID that superseded this one"
+        }
+      },
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "createdAt": { "type": "string", "format": "date-time" },
+        "processingTimeMs": { "type": "number", "minimum": 0 },
+        "eventsAnalyzed": { "type": "integer", "minimum": 0 },
+        "entitiesAnalyzed": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}

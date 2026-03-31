@@ -1,0 +1,757 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "knowledge/entity-record.schema.json",
+  "title": "Knowledge Graph Entity Record",
+  "description": "Base schema for all entity records in the knowledge graph. Each entity represents a property, fund, market, tenant, vendor, lender, or broker tracked across the portfolio.",
+  "type": "object",
+  "required": [
+    "entityId",
+    "entityType",
+    "name",
+    "createdAt",
+    "lastUpdatedAt",
+    "status"
+  ],
+  "properties": {
+    "entityId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique identifier for the entity. Format: {TYPE}-{YEAR}-{SEQ} (e.g., PROP-2026-001, FUND-2025-001)"
+    },
+    "entityType": {
+      "type": "string",
+      "enum": [
+        "PROPERTY",
+        "FUND",
+        "MARKET",
+        "TENANT",
+        "VENDOR",
+        "LENDER",
+        "BROKER"
+      ],
+      "description": "Classification of the entity within the knowledge graph"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable name of the entity"
+    },
+    "aliases": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Alternative names or identifiers for cross-referencing (e.g., property address, fund ticker, DBA names)"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp when the entity was first created in the knowledge graph"
+    },
+    "lastUpdatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp of the most recent update to any field. Used for staleness detection (>30 days = stale)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "UNDER_REVIEW",
+        "WATCH_LIST",
+        "EXITED",
+        "ARCHIVED"
+      ],
+      "description": "Current lifecycle status of the entity"
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Freeform tags for filtering and subscription routing"
+    },
+    "relatedEntities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["entityId", "relationship"],
+        "properties": {
+          "entityId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "relationship": {
+            "type": "string",
+            "enum": [
+              "OWNS",
+              "MANAGES",
+              "LENDS_TO",
+              "TENANT_OF",
+              "VENDOR_FOR",
+              "BROKER_FOR",
+              "IN_MARKET",
+              "IN_FUND",
+              "CO_INVESTOR",
+              "GUARANTOR"
+            ]
+          },
+          "since": {
+            "type": "string",
+            "format": "date"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Graph edges linking this entity to other entities in the knowledge graph"
+    },
+    "acquisition": {
+      "type": "object",
+      "description": "Acquisition details (primarily for PROPERTY entities)",
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "Closing date of acquisition"
+        },
+        "cost": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Total acquisition cost including closing costs, in USD"
+        },
+        "costPerUnit": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Acquisition cost per unit (multifamily) or per SF (commercial)"
+        },
+        "capRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Going-in cap rate at acquisition (decimal, e.g., 0.055 = 5.5%)"
+        },
+        "strategy": {
+          "type": "string",
+          "enum": [
+            "CORE",
+            "CORE_PLUS",
+            "VALUE_ADD",
+            "OPPORTUNISTIC",
+            "DEVELOPMENT",
+            "DISTRESSED"
+          ],
+          "description": "Investment strategy classification at acquisition"
+        },
+        "uwIRR": {
+          "type": ["number", "null"],
+          "description": "Underwritten levered IRR at acquisition (decimal)"
+        },
+        "uwEquityMultiple": {
+          "type": ["number", "null"],
+          "description": "Underwritten equity multiple at acquisition"
+        },
+        "holdPeriod": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "description": "Planned hold period in years at acquisition"
+        },
+        "fundId": {
+          "type": ["string", "null"],
+          "description": "Fund entity that made the acquisition"
+        },
+        "lenderId": {
+          "type": ["string", "null"],
+          "description": "Primary lender entity at acquisition"
+        },
+        "brokerId": {
+          "type": ["string", "null"],
+          "description": "Acquisition broker entity"
+        }
+      },
+      "additionalProperties": false
+    },
+    "currentPerformance": {
+      "type": "object",
+      "description": "Latest operating performance metrics. Updated by knowledge-manager from pipeline outputs.",
+      "properties": {
+        "asOfDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Date these metrics are current as of"
+        },
+        "noi": {
+          "type": "object",
+          "properties": {
+            "trailingTwelveMonth": {
+              "type": "number",
+              "description": "T-12 NOI in USD"
+            },
+            "annualized": {
+              "type": "number",
+              "description": "Current-month annualized NOI in USD"
+            },
+            "budget": {
+              "type": "number",
+              "description": "Budgeted NOI for current year in USD"
+            },
+            "varianceToBudget": {
+              "type": "number",
+              "description": "Actual vs budget variance as decimal (e.g., -0.03 = 3% below budget)"
+            },
+            "varianceToUW": {
+              "type": "number",
+              "description": "Actual vs underwriting variance as decimal"
+            }
+          },
+          "additionalProperties": false
+        },
+        "occupancy": {
+          "type": "object",
+          "properties": {
+            "physical": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Physical occupancy rate (decimal)"
+            },
+            "economic": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Economic occupancy rate (decimal, accounts for concessions and delinquency)"
+            },
+            "trend": {
+              "type": "string",
+              "enum": ["IMPROVING", "STABLE", "DECLINING"],
+              "description": "3-month occupancy trend direction"
+            }
+          },
+          "additionalProperties": false
+        },
+        "collections": {
+          "type": "object",
+          "properties": {
+            "rate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Collection rate (decimal)"
+            },
+            "delinquencyRate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Delinquency rate 30+ days (decimal)"
+            },
+            "badDebtReserve": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Bad debt reserve in USD"
+            }
+          },
+          "additionalProperties": false
+        },
+        "revenue": {
+          "type": "object",
+          "properties": {
+            "effectiveRentPerUnit": {
+              "type": ["number", "null"],
+              "description": "Effective rent per unit (multifamily) or per SF (commercial)"
+            },
+            "rentGrowthYoY": {
+              "type": ["number", "null"],
+              "description": "Year-over-year rent growth (decimal)"
+            },
+            "concessionRate": {
+              "type": ["number", "null"],
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Concession rate as percentage of gross potential rent"
+            }
+          },
+          "additionalProperties": false
+        },
+        "capRate": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Implied cap rate based on current NOI and estimated value"
+        }
+      },
+      "additionalProperties": false
+    },
+    "debt": {
+      "type": "object",
+      "description": "Current debt position. Updated from financing pipeline outputs.",
+      "properties": {
+        "lender": {
+          "type": "string",
+          "description": "Lender name or entity ID"
+        },
+        "lenderId": {
+          "type": ["string", "null"],
+          "description": "Reference to LENDER entity in knowledge graph"
+        },
+        "loanType": {
+          "type": "string",
+          "enum": [
+            "FIXED",
+            "FLOATING",
+            "BRIDGE",
+            "CONSTRUCTION",
+            "AGENCY",
+            "CMBS",
+            "MEZZANINE",
+            "PREFERRED_EQUITY"
+          ],
+          "description": "Loan classification"
+        },
+        "originalBalance": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Original loan balance at closing in USD"
+        },
+        "currentBalance": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Current outstanding balance in USD"
+        },
+        "rate": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["FIXED", "FLOATING"]
+            },
+            "currentRate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Current all-in rate (decimal)"
+            },
+            "spread": {
+              "type": ["number", "null"],
+              "description": "Spread over index for floating rate (decimal)"
+            },
+            "index": {
+              "type": ["string", "null"],
+              "enum": ["SOFR", "PRIME", "TREASURY", "LIBOR", null],
+              "description": "Reference index for floating rate"
+            },
+            "cap": {
+              "type": ["number", "null"],
+              "description": "Interest rate cap (decimal), if any"
+            },
+            "floor": {
+              "type": ["number", "null"],
+              "description": "Interest rate floor (decimal), if any"
+            }
+          },
+          "additionalProperties": false
+        },
+        "maturity": {
+          "type": "object",
+          "properties": {
+            "maturityDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Loan maturity date"
+            },
+            "extensionOptions": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of extension options remaining"
+            },
+            "extensionTermMonths": {
+              "type": ["integer", "null"],
+              "description": "Duration of each extension option in months"
+            },
+            "extensionConditions": {
+              "type": ["string", "null"],
+              "description": "Conditions required to exercise extension (e.g., DSCR > 1.20x)"
+            }
+          },
+          "additionalProperties": false
+        },
+        "covenants": {
+          "type": "object",
+          "properties": {
+            "dscr": {
+              "type": "object",
+              "properties": {
+                "minimum": { "type": "number", "description": "Minimum DSCR covenant" },
+                "current": { "type": "number", "description": "Current DSCR" },
+                "status": { "type": "string", "enum": ["COMPLIANT", "WARNING", "BREACH"] }
+              },
+              "additionalProperties": false
+            },
+            "ltv": {
+              "type": "object",
+              "properties": {
+                "maximum": { "type": "number", "description": "Maximum LTV covenant (decimal)" },
+                "current": { "type": "number", "description": "Current LTV (decimal)" },
+                "status": { "type": "string", "enum": ["COMPLIANT", "WARNING", "BREACH"] }
+              },
+              "additionalProperties": false
+            },
+            "debtYield": {
+              "type": "object",
+              "properties": {
+                "minimum": { "type": "number", "description": "Minimum debt yield covenant (decimal)" },
+                "current": { "type": "number", "description": "Current debt yield (decimal)" },
+                "status": { "type": "string", "enum": ["COMPLIANT", "WARNING", "BREACH"] }
+              },
+              "additionalProperties": false
+            },
+            "otherCovenants": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "requirement": { "type": "string" },
+                  "current": { "type": "string" },
+                  "status": { "type": "string", "enum": ["COMPLIANT", "WARNING", "BREACH"] }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "prepayment": {
+          "type": ["string", "null"],
+          "description": "Prepayment penalty structure (e.g., 'yield maintenance', 'defeasance', '3-2-1 step-down')"
+        },
+        "ltv": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 2,
+          "description": "Current loan-to-value ratio (decimal)"
+        },
+        "dscr": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Current debt service coverage ratio"
+        }
+      },
+      "additionalProperties": false
+    },
+    "operations": {
+      "type": "object",
+      "description": "Operational metrics from property management pipeline. Updated by knowledge-manager from PM outputs.",
+      "properties": {
+        "managementCompany": {
+          "type": ["string", "null"],
+          "description": "Property management company name"
+        },
+        "pmsPlatform": {
+          "type": ["string", "null"],
+          "enum": ["YARDI", "REALPAGE", "APPFOLIO", "ENTRATA", "MRI", "OTHER", null],
+          "description": "Property management software platform"
+        },
+        "workOrders": {
+          "type": "object",
+          "properties": {
+            "openCount": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Current open work orders"
+            },
+            "avgCompletionDays": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Average work order completion time in days"
+            },
+            "emergencyBacklog": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Open emergency/urgent work orders"
+            },
+            "maintenanceCostPerUnit": {
+              "type": ["number", "null"],
+              "description": "Annualized maintenance cost per unit in USD"
+            }
+          },
+          "additionalProperties": false
+        },
+        "sla": {
+          "type": "object",
+          "properties": {
+            "emergencyResponseHours": {
+              "type": "number",
+              "minimum": 0,
+              "description": "SLA for emergency response in hours"
+            },
+            "routineCompletionDays": {
+              "type": "number",
+              "minimum": 0,
+              "description": "SLA for routine work order completion in days"
+            },
+            "complianceRate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Percentage of work orders completed within SLA (decimal)"
+            }
+          },
+          "additionalProperties": false
+        },
+        "turnDays": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Average unit turn time in days (vacancy between tenants)"
+        },
+        "nps": {
+          "type": ["number", "null"],
+          "minimum": -100,
+          "maximum": 100,
+          "description": "Net Promoter Score from resident surveys"
+        },
+        "inspectionScore": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Most recent property inspection score (0-100)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "market": {
+      "type": "object",
+      "description": "Market context for the entity. Updated from research and market pulse pipelines.",
+      "properties": {
+        "msa": {
+          "type": ["string", "null"],
+          "description": "Metropolitan Statistical Area"
+        },
+        "submarket": {
+          "type": ["string", "null"],
+          "description": "Submarket designation"
+        },
+        "propertyType": {
+          "type": ["string", "null"],
+          "enum": ["MULTIFAMILY", "OFFICE", "RETAIL", "INDUSTRIAL", "HOSPITALITY", "MIXED_USE", "SELF_STORAGE", "SENIOR_LIVING", "STUDENT_HOUSING", "MANUFACTURED_HOUSING", null],
+          "description": "Property type classification"
+        },
+        "propertyClass": {
+          "type": ["string", "null"],
+          "enum": ["A", "B", "C", "D", null],
+          "description": "Property class"
+        },
+        "cyclePosition": {
+          "type": ["string", "null"],
+          "enum": ["EXPANSION", "HYPERSUPPLY", "RECESSION", "RECOVERY", null],
+          "description": "Current position in real estate cycle for this submarket/type"
+        },
+        "rentGrowth": {
+          "type": "object",
+          "properties": {
+            "trailing12m": {
+              "type": ["number", "null"],
+              "description": "T-12 submarket rent growth (decimal)"
+            },
+            "forecast12m": {
+              "type": ["number", "null"],
+              "description": "Forward 12-month rent growth forecast (decimal)"
+            },
+            "forecastConfidence": {
+              "type": ["string", "null"],
+              "enum": ["HIGH", "MEDIUM", "LOW", null]
+            }
+          },
+          "additionalProperties": false
+        },
+        "supplyPipeline": {
+          "type": "object",
+          "properties": {
+            "underConstruction": {
+              "type": ["integer", "null"],
+              "description": "Units or SF under construction in submarket"
+            },
+            "entitled": {
+              "type": ["integer", "null"],
+              "description": "Units or SF entitled but not started"
+            },
+            "absorptionToDeliveryRatio": {
+              "type": ["number", "null"],
+              "description": "Trailing absorption divided by trailing deliveries. >1.0 = demand absorbing supply"
+            }
+          },
+          "additionalProperties": false
+        },
+        "submarketVacancy": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Current submarket vacancy rate (decimal)"
+        },
+        "submarketCapRate": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Prevailing submarket cap rate for comparable assets (decimal)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "riskFlags": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["flag", "severity", "source", "detectedAt"],
+        "properties": {
+          "flag": {
+            "type": "string",
+            "description": "Description of the risk"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+          },
+          "source": {
+            "type": "string",
+            "description": "Pipeline or agent that raised the flag"
+          },
+          "detectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolvedAt": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          },
+          "resolution": {
+            "type": ["string", "null"]
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Active and resolved risk flags from all pipelines"
+    },
+    "holdPeriodVerdict": {
+      "type": "object",
+      "description": "Current hold/sell/refi verdict from asset management pipeline",
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "enum": ["HOLD", "SELL", "REFINANCE", "RECAPITALIZE", "UNDER_REVIEW"],
+          "description": "Current hold period verdict"
+        },
+        "confidenceLevel": {
+          "type": "string",
+          "enum": ["HIGH", "MEDIUM", "LOW"]
+        },
+        "lastAssessedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "nextReviewDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "triggers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Active triggers that could change the verdict"
+        }
+      },
+      "additionalProperties": false
+    },
+    "timeline": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["date", "event", "source"],
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "event": {
+            "type": "string",
+            "description": "Description of the event"
+          },
+          "eventType": {
+            "type": "string",
+            "enum": [
+              "ACQUISITION",
+              "FINANCING",
+              "LEASE_SIGNED",
+              "LEASE_EXPIRED",
+              "CAPEX_COMPLETED",
+              "REFINANCE",
+              "MARKET_EVENT",
+              "POLICY_CHANGE",
+              "RISK_FLAG_RAISED",
+              "RISK_FLAG_RESOLVED",
+              "PERFORMANCE_MILESTONE",
+              "DISPOSITION_INITIATED",
+              "DISPOSITION_COMPLETED",
+              "MANAGEMENT_CHANGE",
+              "INSPECTION",
+              "INSURANCE_EVENT"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "description": "Pipeline or agent that generated the event"
+          },
+          "details": {
+            "type": "object",
+            "description": "Event-specific structured data"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Chronological timeline of significant events for this entity. Append-only."
+    },
+    "staleFields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["field", "lastUpdated", "staleSince"],
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "Dot-notation path to the stale field (e.g., 'currentPerformance.noi.trailingTwelveMonth')"
+          },
+          "lastUpdated": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "staleSince": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date when the field crossed the 30-day staleness threshold"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Fields that have not been updated in >30 days. Populated by knowledge-manager."
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "createdBy": {
+          "type": "string",
+          "description": "Agent or pipeline that created the record"
+        },
+        "lastUpdatedBy": {
+          "type": "string",
+          "description": "Agent or pipeline that last updated the record"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Record version number, incremented on each update"
+        },
+        "source": {
+          "type": "string",
+          "description": "Primary data source for the entity record"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}

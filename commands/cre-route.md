@@ -14,3 +14,13 @@ If the user provided arguments ("$ARGUMENTS"), match their request against the r
 If no arguments provided, show the category summary from the routing index.
 
 Do NOT load all SKILL.md files. Only load the specific skill identified by the routing index.
+
+## Programmatic Matching
+
+For automated or scripted routing, the skill dispatcher can be invoked directly:
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/routing/skill-dispatcher.mjs" "underwrite a deal"
+```
+
+This returns JSON with the top 3 matching skills, confidence scores, and the invoke command for each. Use `--list` to print all registered skill slugs.

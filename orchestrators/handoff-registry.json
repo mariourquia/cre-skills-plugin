@@ -1,0 +1,1086 @@
+{
+  "$schema": "Cross-Chain Handoff Registry",
+  "version": "1.0.0",
+  "description": "Data contracts for transitions between CRE workflow orchestrators. Each entry defines the trigger condition, required/optional field inventory, and per-field type specs for one directed handoff. The pipeline engine validates these contracts before launching the receiving orchestrator.",
+  "handoffs": [
+    {
+      "id": "acquisition-to-hold-period",
+      "from": {
+        "orchestratorId": "acquisition-orchestrator",
+        "phase": "closing"
+      },
+      "to": {
+        "orchestratorId": "hold-period-orchestrator",
+        "phase": "budget-setup"
+      },
+      "trigger": "acquisition.verdict == 'GO' AND closing.status == 'COMPLETED'",
+      "description": "Transfers stabilized operating fundamentals, financing terms, and capital reserve plan from the acquisition close to the hold-period monitor so it can establish Year 1 budgets, debt-service schedules, and capex governance.",
+      "dataContract": {
+        "required": {
+          "stabilized_noi": {
+            "type": "number",
+            "required": true,
+            "description": "Year 1 stabilized NOI from the final underwriting model, net of vacancy, credit loss, and operating expenses. Denominated in USD. Used as the hold-period budget baseline and DSCR calculation anchor.",
+            "sourcePhase": "underwriting",
+            "sourcePath": "financials.stabilizedNOI"
+          },
+          "rent_roll": {
+            "type": "object",
+            "required": true,
+            "description": "Unit- or tenant-level rent roll as of closing. Each entry contains unit_id, tenant_name, in_place_rent, lease_start, lease_expiration, and lease_type (gross/NNN/modified-gross). Drives Year 1 revenue budget and lease-expiration risk tracking.",
+            "sourcePhase": "closing",
+            "sourcePath": "documents.rentRoll"
+          },
+          "financing_terms": {
+            "type": "object",
+            "required": true,
+            "description": "Senior loan and any mezzanine/preferred equity terms as executed at close. Fields: lender_name, loan_amount, interest_rate, rate_type (fixed/floating), index (if floating), spread, io_period_months, amortization_years, maturity_date, prepayment_structure, key_covenants (DSCR_floor, LTV_ceiling, cash_management_trigger). Feeds the debt-service schedule and covenant monitoring module.",
+            "sourcePhase": "closing",
+            "sourcePath": "financing.executedTerms"
+          },
+          "capex_reserve": {
+            "type": "object",
+            "required": true,
+            "description": "Five-year capital expenditure plan approved at closing. Contains an array of line items each with category (roof, HVAC, plumbing, unit_renovation, common_area, other), year_scheduled (1-5), estimated_cost_usd, and priority (immediate, planned, deferred). Initializes the hold-period CapEx tracker and reserve-account model.",
+            "sourcePhase": "underwriting",
+            "sourcePath": "capex.fiveYearPlan"
+          },
+          "closing_date": {
+            "type": "string",
+            "required": true,
+            "description": "ISO 8601 date (YYYY-MM-DD) on which the acquisition closed. Used as the hold-period start date for IRR accrual, hold-length tracking, and reporting period anchoring.",
+            "sourcePhase": "closing",
+            "sourcePath": "closingDate"
+          },
+          "purchase_price": {
+            "type": "number",
+            "required": true,
+            "description": "Gross contract purchase price in USD at close, before closing costs and pro-rations. Used as the cost-basis anchor for IRR, equity-multiple, and going-in cap rate calculations throughout the hold period.",
+            "sourcePhase": "closing",
+            "sourcePath": "financials.purchasePrice"
+          }
+        },
+        "optional": {
+          "tenant_credit_profiles": {
+            "type": "array",
+            "required": false,
+            "description": "Array of credit assessments for anchor or material tenants. Each entry: tenant_name, credit_rating (if rated), annual_revenue_usd (if available), guaranty_type (corporate/personal/none), and qualitative_risk (low/medium/high). Feeds tenant-watch-list initialization in the hold-period monitor.",
+            "sourcePhase": "due-diligence",
+            "sourcePath": "tenancy.creditProfiles"
+          },
+          "environmental_status": {
+            "type": "object",
+            "required": false,
+            "description": "Phase I/II environmental report findings and remediation status. Fields: report_date, findings (clean/recognized_environmental_conditions/controlled_recognized_environmental_conditions), remediation_required (boolean), estimated_remediation_cost_usd, regulatory_agency. Surfaces environmental liability tracking obligations during hold.",
+            "sourcePhase": "due-diligence",
+            "sourcePath": "environmental.reportSummary"
+          },
+          "insurance_policies": {
+            "type": "array",
+            "required": false,
+            "description": "Active insurance policies transferred or originated at closing. Each entry: policy_type (property/casualty/umbrella/flood/earthquake), carrier, annual_premium_usd, coverage_limit_usd, policy_expiration, deductible_usd. Enables insurance renewal tracking and coverage-adequacy review during hold.",
+            "sourcePhase": "closing",
+            "sourcePath": "insurance.activePolicies"
+          },
+          "property_condition_report": {
+            "type": "object",
+            "required": false,
+            "description": "PCA/PCR summary from the due-diligence engineer. Fields: assessor_firm, assessment_date, immediate_needs_cost_usd, short_term_needs_cost_usd (1-5 yr), long_term_needs_cost_usd (6-10 yr), critical_findings (array of strings). Feeds the CapEx prioritization model in hold-period budget-setup.",
+            "sourcePhase": "due-diligence",
+            "sourcePath": "propertyCondition.reportSummary"
+          }
+        }
+      }
+    },
+    {
+      "id": "hold-period-to-disposition",
+      "from": {
+        "orchestratorId": "hold-period-orchestrator",
+        "phase": "trigger-evaluation"
+      },
+      "to": {
+        "orchestratorId": "disposition-orchestrator",
+        "phase": "hold-sell-analysis"
+      },
+      "trigger": "hold-period.verdict == 'EXIT'",
+      "description": "Transfers current operating performance, market conditions, and remaining lease risk from the hold-period monitor to the disposition orchestrator to seed the hold-sell analysis and pricing framework.",
+      "dataContract": {
+        "required": {
+          "current_noi": {
+            "type": "number",
+            "required": true,
+            "description": "Trailing twelve-month (T12) NOI at the time of the exit trigger, net of all operating expenses and vacancy. Denominated in USD. Primary input for cap-rate-based valuation and the hold-vs-sell IRR comparison.",
+            "sourcePhase": "monitoring",
+            "sourcePath": "financials.t12NOI"
+          },
+          "market_cap_rate": {
+            "type": "number",
+            "required": true,
+            "description": "Current market cap rate estimate for comparable assets in the submarket, expressed as a decimal (e.g., 0.055 for 5.5%). Sourced from broker surveys or recent comparable sales in the monitoring phase. Drives the broker opinion of value range in the disposition hold-sell analysis.",
+            "sourcePhase": "trigger-evaluation",
+            "sourcePath": "marketData.prevailingCapRate"
+          },
+          "remaining_lease_term": {
+            "type": "object",
+            "required": true,
+            "description": "Weighted average lease term (WALT) by rent and by square footage at the time of trigger. Fields: walt_by_rent_years (number), walt_by_sqft_years (number), near_term_expirations (array of {tenant, sqft, expiration_date, in_place_rent_usd} for leases expiring within 24 months). Critical for buyer underwriting and marketing positioning.",
+            "sourcePhase": "monitoring",
+            "sourcePath": "leasing.walt"
+          },
+          "capex_needs": {
+            "type": "object",
+            "required": true,
+            "description": "Outstanding CapEx obligations that will affect net proceeds and buyer diligence. Fields: deferred_maintenance_usd (number), planned_capex_next_24mo_usd (number), reserve_account_balance_usd (number). Feeds the net-proceeds waterfall and bid-ask adjustment model.",
+            "sourcePhase": "monitoring",
+            "sourcePath": "capex.outstanding"
+          },
+          "hold_period_performance": {
+            "type": "object",
+            "required": true,
+            "description": "Realized financial performance vs. underwriting over the full hold period. Fields: hold_start_date (ISO 8601), hold_months_elapsed (integer), cumulative_noi_actual_usd (number), cumulative_noi_underwritten_usd (number), noi_variance_pct (number), distributions_paid_usd (number), unrealized_irr_estimate (decimal), unrealized_equity_multiple (decimal). Provides context for the sell/hold decision and investor reporting.",
+            "sourcePhase": "trigger-evaluation",
+            "sourcePath": "performance.holdPeriodSummary"
+          }
+        },
+        "optional": {
+          "refinance_feasibility": {
+            "type": "object",
+            "required": false,
+            "description": "Preliminary assessment of refinance viability as an alternative to disposition. Fields: current_loan_balance_usd, maturity_date, estimated_new_loan_proceeds_usd, rate_environment_qualifier (favorable/neutral/unfavorable), equity_out_usd. Supports the hold-sell comparative in the disposition orchestrator.",
+            "sourcePhase": "trigger-evaluation",
+            "sourcePath": "alternatives.refinanceFeasibility"
+          },
+          "1031_candidate": {
+            "type": "boolean",
+            "required": false,
+            "description": "Flag indicating whether the selling entity has identified a potential 1031 exchange target. True triggers the disposition orchestrator to initiate parallel identification-period tracking and QI coordination.",
+            "sourcePhase": "trigger-evaluation",
+            "sourcePath": "taxPlanning.exchange1031Candidate"
+          },
+          "buyer_universe_preliminary": {
+            "type": "array",
+            "required": false,
+            "description": "Optional preliminary list of likely buyer profiles or named buyers already in dialogue. Each entry: buyer_type (institutional/private/REIT/family_office/1031_buyer), buyer_name (string, may be null), estimated_equity_check_usd (number), relationship_strength (warm/cold). Accelerates the marketing-strategy phase of the disposition orchestrator.",
+            "sourcePhase": "trigger-evaluation",
+            "sourcePath": "marketing.preliminaryBuyerUniverse"
+          }
+        }
+      }
+    },
+    {
+      "id": "hold-period-to-capital-stack",
+      "from": {
+        "orchestratorId": "hold-period-orchestrator",
+        "phase": "trigger-evaluation"
+      },
+      "to": {
+        "orchestratorId": "capital-stack-orchestrator",
+        "phase": "deal-qualification"
+      },
+      "trigger": "hold-period.verdict == 'INTERVENE' AND intervention_type == 'refinance'",
+      "description": "Initiates a mid-hold refinance or recapitalization workflow by handing current operating metrics and existing debt terms to the capital-stack orchestrator for sizing, lender outreach, and term negotiation.",
+      "dataContract": {
+        "required": {
+          "current_noi": {
+            "type": "number",
+            "required": true,
+            "description": "T12 NOI at the time of the refinance trigger, denominated in USD. Primary input for new loan sizing via DSCR and LTV constraints.",
+            "sourcePhase": "monitoring",
+            "sourcePath": "financials.t12NOI"
+          },
+          "current_debt_terms": {
+            "type": "object",
+            "required": true,
+            "description": "Existing loan terms being refinanced or supplemented. Fields: lender_name, outstanding_balance_usd (number), interest_rate (decimal), rate_type (fixed/floating), maturity_date (ISO 8601), prepayment_penalty_usd (number or null), defeasance_required (boolean), key_covenants (object). Enables the capital-stack orchestrator to evaluate payoff costs and structure new debt.",
+            "sourcePhase": "monitoring",
+            "sourcePath": "financing.currentDebtTerms"
+          },
+          "maturity_date": {
+            "type": "string",
+            "required": true,
+            "description": "ISO 8601 maturity date of the existing loan. Determines urgency and options (extension, refi, sale) in the capital-stack orchestrator's deal-qualification phase.",
+            "sourcePhase": "monitoring",
+            "sourcePath": "financing.currentDebtTerms.maturityDate"
+          },
+          "property_value_estimate": {
+            "type": "number",
+            "required": true,
+            "description": "Current estimated fair market value of the property in USD, derived from the hold-period monitor's periodic mark-to-market (cap-rate method or recent comparable sales). Used to compute as-is LTV for new lender underwriting.",
+            "sourcePhase": "trigger-evaluation",
+            "sourcePath": "marketData.estimatedValue"
+          }
+        },
+        "optional": {
+          "rate_environment": {
+            "type": "object",
+            "required": false,
+            "description": "Current interest rate environment snapshot. Fields: sofr_30d (decimal), treasury_10yr (decimal), credit_spreads_multifamily_bps (number), forward_curve_qualifier (rising/stable/falling). Helps the capital-stack orchestrator select optimal debt structure and timing.",
+            "sourcePhase": "trigger-evaluation",
+            "sourcePath": "marketData.rateEnvironment"
+          },
+          "lender_relationships": {
+            "type": "array",
+            "required": false,
+            "description": "Array of existing lender relationships to prioritize in outreach. Each entry: lender_name, relationship_strength (primary/secondary/new), asset_class_appetite (array of strings), recent_activity (boolean). Feeds the lender-outreach sequencing in the capital-stack orchestrator.",
+            "sourcePhase": "trigger-evaluation",
+            "sourcePath": "financing.lenderRelationships"
+          }
+        }
+      }
+    },
+    {
+      "id": "fund-to-acquisition",
+      "from": {
+        "orchestratorId": "fund-management-orchestrator",
+        "phase": "deployment"
+      },
+      "to": {
+        "orchestratorId": "acquisition-orchestrator",
+        "phase": "due-diligence"
+      },
+      "trigger": "fund.phase.deployment.dealSelected == true",
+      "description": "Passes fund-level mandate parameters, capital allocation constraints, and investor-type requirements from the fund management orchestrator to the acquisition orchestrator so that due diligence and underwriting are scoped to the fund's strategy and compliance guardrails.",
+      "dataContract": {
+        "required": {
+          "deal_config": {
+            "type": "object",
+            "required": true,
+            "description": "Property-level deal parameters selected by the fund deployment team. Fields: property_name (string), property_address (string), asset_class (multifamily/office/industrial/retail/hotel/mixed_use), submarket (string), asking_price_usd (number), deal_type (acquisition/joint_venture/preferred_equity), target_close_date (ISO 8601). Seeds the acquisition orchestrator's initial deal record.",
+            "sourcePhase": "deployment",
+            "sourcePath": "selectedDeal.dealConfig"
+          },
+          "fund_allocation_constraints": {
+            "type": "object",
+            "required": true,
+            "description": "Hard allocation limits the acquisition must stay within. Fields: max_equity_check_usd (number), min_equity_check_usd (number), max_fund_concentration_pct (decimal, e.g. 0.10 = 10% of NAV), max_geographic_concentration_pct (decimal), max_asset_class_concentration_pct (decimal). The acquisition underwriting phase validates compliance before issuing a GO verdict.",
+            "sourcePhase": "deployment",
+            "sourcePath": "allocationConstraints"
+          },
+          "investor_type": {
+            "type": "string",
+            "required": true,
+            "description": "Primary investor classification driving compliance and reporting requirements. Enum: institutional, HNWI, family_office, pension_fund, sovereign_wealth, REIT, syndication. Determines which disclosure, anti-fraud, and suitability checks the acquisition orchestrator must run.",
+            "sourcePhase": "deployment",
+            "sourcePath": "fund.investorProfile.primaryType"
+          },
+          "fund_strategy": {
+            "type": "object",
+            "required": true,
+            "description": "Fund-level return and risk mandate against which the acquisition will be benchmarked. Fields: strategy_type (core/core-plus/value-add/opportunistic), target_net_irr (decimal), target_equity_multiple (decimal), target_hold_years (integer), leverage_target_ltv (decimal), preferred_return_hurdle (decimal or null). The underwriting phase uses these targets to calibrate the verdict thresholds.",
+            "sourcePhase": "deployment",
+            "sourcePath": "fund.strategy"
+          }
+        },
+        "optional": {
+          "concentration_limits": {
+            "type": "object",
+            "required": false,
+            "description": "Supplemental concentration guardrails beyond the core allocation constraints. Fields: max_single_tenant_exposure_pct (decimal), max_same_submarket_assets (integer), prohibited_asset_classes (array of strings), prohibited_states (array of strings). Applied during the acquisition orchestrator's deal-qualification screen.",
+            "sourcePhase": "deployment",
+            "sourcePath": "allocationConstraints.supplemental"
+          },
+          "geographic_constraints": {
+            "type": "array",
+            "required": false,
+            "description": "Explicit list of approved or excluded geographies. Each entry: geography_type (MSA/state/zip_prefix), geography_value (string), constraint_type (approved_only/excluded). Used by the market-analysis agent to flag compliance risk early in due diligence.",
+            "sourcePhase": "deployment",
+            "sourcePath": "fund.geographicPolicy"
+          },
+          "leverage_policy": {
+            "type": "object",
+            "required": false,
+            "description": "Fund-level leverage parameters that override deal-level defaults. Fields: max_ltv (decimal), max_ltc (decimal), min_dscr (decimal), preferred_loan_type (agency/bank/cmbs/bridge/mezzanine), interest_only_allowed (boolean). Passed to the capital-stack orchestrator if it is launched in series with this acquisition.",
+            "sourcePhase": "deployment",
+            "sourcePath": "fund.leveragePolicy"
+          },
+          "fund_remaining_capital": {
+            "type": "number",
+            "required": false,
+            "description": "Uninvested committed capital available for deployment at the time of handoff, denominated in USD. Informs the acquisition orchestrator's equity-check feasibility check and the pacing model.",
+            "sourcePhase": "deployment",
+            "sourcePath": "fund.capitalAccounts.remainingCommitment"
+          }
+        }
+      }
+    },
+    {
+      "id": "acquisition-to-capital-stack",
+      "from": {
+        "orchestratorId": "acquisition-orchestrator",
+        "phase": "underwriting"
+      },
+      "to": {
+        "orchestratorId": "capital-stack-orchestrator",
+        "phase": "debt-sizing"
+      },
+      "trigger": "underwriting.status == 'COMPLETED' AND underwriting.verdict != 'FAIL'",
+      "description": "Transfers underwritten property economics and acquisition cost basis to the capital-stack orchestrator so it can size senior debt, evaluate mezzanine or preferred equity, and structure the final capital stack before LOI or purchase agreement execution.",
+      "dataContract": {
+        "required": {
+          "underwritten_noi": {
+            "type": "number",
+            "required": true,
+            "description": "Stabilized Year 1 NOI from the completed underwriting model, denominated in USD. Primary input for DSCR-based loan sizing and debt-yield calculations in the capital-stack orchestrator.",
+            "sourcePhase": "underwriting",
+            "sourcePath": "financials.stabilizedNOI"
+          },
+          "purchase_price": {
+            "type": "number",
+            "required": true,
+            "description": "Agreed or estimated purchase price in USD used in the underwriting model. Sets the as-is value anchor for LTV calculations and total capitalization modeling.",
+            "sourcePhase": "underwriting",
+            "sourcePath": "financials.purchasePrice"
+          },
+          "capex_budget": {
+            "type": "number",
+            "required": true,
+            "description": "Total near-term capital expenditure budget in USD included in the underwriting model (Year 1-2 capex for value-add business plan or immediate repair needs). Added to the purchase price to compute total capitalization for LTC-based loan sizing.",
+            "sourcePhase": "underwriting",
+            "sourcePath": "capex.totalBudgetUSD"
+          },
+          "investment_strategy": {
+            "type": "string",
+            "required": true,
+            "description": "Acquisition business plan that dictates appropriate debt structure. Enum: core, core_plus, value_add, opportunistic, development. Determines whether bridge, permanent, agency, or construction debt is appropriate in the capital-stack orchestrator.",
+            "sourcePhase": "underwriting",
+            "sourcePath": "investmentStrategy"
+          }
+        },
+        "optional": {
+          "preferred_lenders": {
+            "type": "array",
+            "required": false,
+            "description": "List of lenders to prioritize in the capital-stack outreach. Each entry: lender_name (string), lender_type (agency/bank/debt_fund/CMBS/life_co/mezzanine), relationship_strength (primary/secondary/new). Carried over from fund mandate or sponsor relationships.",
+            "sourcePhase": "underwriting",
+            "sourcePath": "financing.preferredLenders"
+          },
+          "rate_assumptions": {
+            "type": "object",
+            "required": false,
+            "description": "Interest rate assumptions used in the underwriting model that the capital-stack orchestrator should match or sensitize against. Fields: base_rate_index (SOFR/treasury/prime), base_rate_value (decimal), spread_assumption_bps (integer), io_period_assumed_months (integer). Enables scenario alignment between underwriting and debt terms.",
+            "sourcePhase": "underwriting",
+            "sourcePath": "financing.rateAssumptions"
+          },
+          "leverage_target": {
+            "type": "number",
+            "required": false,
+            "description": "Target LTV as a decimal (e.g., 0.65 for 65%) from the underwriting model or fund mandate. Serves as the base-case leverage assumption in the capital-stack debt-sizing phase before lender feedback.",
+            "sourcePhase": "underwriting",
+            "sourcePath": "financing.leverageTargetLTV"
+          }
+        }
+      }
+    },
+    {
+      "id": "development-to-hold-period",
+      "from": {
+        "orchestratorId": "development-orchestrator",
+        "phase": "stabilization"
+      },
+      "to": {
+        "orchestratorId": "hold-period-orchestrator",
+        "phase": "budget-setup"
+      },
+      "trigger": "development.verdict == 'BUILD' AND stabilization.status == 'COMPLETED'",
+      "description": "Transfers as-built cost basis, stabilized operating metrics, and construction completion documentation from the development orchestrator to the hold-period monitor at project stabilization, initiating the core hold-period governance cycle.",
+      "dataContract": {
+        "required": {
+          "stabilized_noi": {
+            "type": "number",
+            "required": true,
+            "description": "Achieved or projected Year 1 stabilized NOI at the completion of the lease-up period, denominated in USD. Replaces the development underwriting pro forma estimate with actual achieved rents and occupancy. Anchors the hold-period budget baseline.",
+            "sourcePhase": "stabilization",
+            "sourcePath": "financials.achievedStabilizedNOI"
+          },
+          "as_built_cost": {
+            "type": "number",
+            "required": true,
+            "description": "Total all-in development cost at project completion in USD, including land, hard costs, soft costs, financing costs, and lease-up carry. Replaces the pro forma TDC and serves as the cost-basis anchor for IRR, equity multiple, and going-in yield calculations throughout the hold period.",
+            "sourcePhase": "stabilization",
+            "sourcePath": "financials.totalAsBuiltCost"
+          },
+          "rent_roll": {
+            "type": "object",
+            "required": true,
+            "description": "Unit- or tenant-level rent roll at stabilization (90%+ occupancy or as defined in the development business plan). Each entry contains unit_id, tenant_name, in_place_rent, lease_start, lease_expiration, and lease_type. Initializes the hold-period revenue model and lease-expiration tracker.",
+            "sourcePhase": "stabilization",
+            "sourcePath": "leasing.stabilizedRentRoll"
+          },
+          "construction_completion_date": {
+            "type": "string",
+            "required": true,
+            "description": "ISO 8601 date on which the certificate of occupancy (CO) or substantial completion was issued. Sets the hold-period start date for reporting, IRR accrual, and hold-length tracking.",
+            "sourcePhase": "stabilization",
+            "sourcePath": "construction.coIssuanceDate"
+          }
+        },
+        "optional": {
+          "punch_list_items": {
+            "type": "array",
+            "required": false,
+            "description": "Outstanding contractor punch-list items at handoff. Each entry: description (string), responsible_party (string), estimated_cost_usd (number), target_completion_date (ISO 8601), priority (critical/high/low). Feeds the hold-period CapEx tracker as carry-over obligations from the construction phase.",
+            "sourcePhase": "stabilization",
+            "sourcePath": "construction.punchList"
+          },
+          "warranty_terms": {
+            "type": "array",
+            "required": false,
+            "description": "Active contractor or manufacturer warranties transferred to the hold-period manager. Each entry: warranty_type (roof/MEP/structural/appliances/windows/other), provider (string), expiration_date (ISO 8601), coverage_summary (string). Enables warranty-claim tracking and renewal scheduling during hold.",
+            "sourcePhase": "stabilization",
+            "sourcePath": "construction.warranties"
+          },
+          "as_built_drawings": {
+            "type": "object",
+            "required": false,
+            "description": "Reference to the as-built architectural and MEP drawing package. Fields: drawing_package_url (string, secure URL), version (string), architect_of_record (string), last_updated (ISO 8601). Provides the hold-period facilities manager with accurate building documentation for maintenance and future renovation planning.",
+            "sourcePhase": "stabilization",
+            "sourcePath": "construction.asBuiltDrawings"
+          }
+        }
+      }
+    },
+    {
+      "id": "disposition-to-fund",
+      "from": {
+        "orchestratorId": "disposition-orchestrator",
+        "phase": "close"
+      },
+      "to": {
+        "orchestratorId": "fund-management-orchestrator",
+        "phase": "monitoring"
+      },
+      "trigger": "disposition.verdict == 'SELL' AND disposition.close.status == 'COMPLETED'",
+      "description": "Returns realized performance metrics, net proceeds, and tax disposition data to the fund management orchestrator upon sale close so it can update the fund IRR model, record distributions, close the asset from the portfolio, and trigger reinvestment analysis.",
+      "dataContract": {
+        "required": {
+          "sale_price": {
+            "type": "number",
+            "required": true,
+            "description": "Gross contract sale price in USD as recorded at close, before selling costs, prorations, and loan payoff. Used as the terminal value in the fund-level IRR and equity-multiple calculations.",
+            "sourcePhase": "close",
+            "sourcePath": "financials.grossSalePrice"
+          },
+          "net_proceeds": {
+            "type": "number",
+            "required": true,
+            "description": "Net proceeds to the equity in USD after loan payoff, selling costs (broker commission, transfer taxes, legal), prorations, and closing adjustments. The actual cash returned to the fund for distribution and NAV recalculation.",
+            "sourcePhase": "close",
+            "sourcePath": "financials.netProceedsToEquity"
+          },
+          "realized_irr": {
+            "type": "number",
+            "required": true,
+            "description": "Realized project-level IRR as a decimal (e.g., 0.182 for 18.2%), computed from the full equity cash flow series including acquisition equity, annual distributions, and net proceeds. Used to update fund-level realized IRR and vintage-year performance reporting.",
+            "sourcePhase": "close",
+            "sourcePath": "performance.realizedIRR"
+          },
+          "realized_equity_multiple": {
+            "type": "number",
+            "required": true,
+            "description": "Realized equity multiple (MOIC) computed as total distributions plus net proceeds divided by total equity invested. Expressed as a decimal multiple (e.g., 1.85 for 1.85x). Updates the fund MOIC and is reported to LPs in the post-sale distribution notice.",
+            "sourcePhase": "close",
+            "sourcePath": "performance.realizedEquityMultiple"
+          },
+          "hold_period_months": {
+            "type": "number",
+            "required": true,
+            "description": "Actual hold duration in months from acquisition close date (or construction completion date for development assets) to disposition close date. Used for vintage-year attribution, IRR annualization, and fund-level hold-period analytics.",
+            "sourcePhase": "close",
+            "sourcePath": "performance.holdPeriodMonths"
+          }
+        },
+        "optional": {
+          "1031_exchange_status": {
+            "type": "object",
+            "required": false,
+            "description": "Status of any 1031 exchange initiated at disposition. Fields: exchange_initiated (boolean), qi_name (string), identification_deadline (ISO 8601), exchange_deadline (ISO 8601), identified_replacement_properties (array of strings). Triggers the fund management orchestrator to monitor exchange compliance timelines.",
+            "sourcePhase": "close",
+            "sourcePath": "taxPlanning.exchange1031Status"
+          },
+          "capital_gains": {
+            "type": "object",
+            "required": false,
+            "description": "Realized capital gains breakdown for tax reporting and fund K-1 preparation. Fields: total_gain_usd (number), depreciation_recapture_usd (number), long_term_capital_gain_usd (number), short_term_capital_gain_usd (number), tax_year (integer). Fed directly to the fund's tax administrator for Schedule K-1 generation.",
+            "sourcePhase": "close",
+            "sourcePath": "taxPlanning.realizedGains"
+          },
+          "distribution_waterfall": {
+            "type": "object",
+            "required": false,
+            "description": "Final distribution waterfall calculation allocating net proceeds across the capital structure. Fields: return_of_capital_usd (number), preferred_return_paid_usd (number), gp_catch_up_usd (number), carried_interest_usd (number), lp_residual_usd (number), gp_residual_usd (number). Used by the fund management orchestrator to process LP distributions and update capital accounts.",
+            "sourcePhase": "close",
+            "sourcePath": "financials.distributionWaterfall"
+          }
+        }
+      }
+    },
+    {
+      "id": "research-to-strategy",
+      "from": {
+        "orchestratorId": "market-research-intelligence",
+        "phase": "research-memo-production"
+      },
+      "to": {
+        "orchestratorId": "investment-strategy-formulator",
+        "phase": "market-cycle-positioning"
+      },
+      "trigger": "research.verdict == 'INVEST' OR research.verdict == 'MONITOR'",
+      "description": "Transfers market research findings, submarket scorecards, and target acquisition profiles from the research intelligence orchestrator to the investment strategy formulator so it can incorporate identified opportunities and submarket fundamentals into strategy formulation and allocation decisions.",
+      "dataContract": {
+        "required": {
+          "research_memo": {
+            "type": "object",
+            "required": true,
+            "description": "Complete market research memo with executive summary, macro analysis, submarket rankings, competitive landscape, and opportunity recommendations. Provides the empirical foundation for strategy formulation by supplying market-validated target geographies and property type opportunities.",
+            "sourcePhase": "research-memo-production",
+            "sourcePath": "researchMemo"
+          },
+          "target_acquisition_profiles": {
+            "type": "array",
+            "required": true,
+            "description": "Array of target acquisition profiles, each specifying property type, vintage range, unit count range, target cap rate range, target submarket(s), and basis targets. Directly informs the strategy formulation phase's property type and geographic allocation decisions.",
+            "sourcePhase": "opportunity-identification",
+            "sourcePath": "targetAcquisitionProfiles"
+          }
+        },
+        "optional": {
+          "submarket_scorecards": {
+            "type": "array",
+            "required": false,
+            "description": "Scored submarket profiles from the deep-dive phase with rent trends, vacancy, absorption, supply pipeline, and demographic indicators. Each scorecard contains composite_score, classification (INVEST/MONITOR/PASS), and data_quality rating. Provides granular market data for the strategy formulator's geographic allocation model.",
+            "sourcePhase": "submarket-deep-dive",
+            "sourcePath": "submarketScorecard"
+          },
+          "competitive_set": {
+            "type": "object",
+            "required": false,
+            "description": "Buyer universe map, recent trade analysis, and capital flow assessment from competitive set analysis. Fields: buyer_universe (array of buyer profiles), recent_trades (array of transaction records), capital_flow_assessment (string), competitive_positioning (string). Helps the strategy formulator assess deal flow availability and competitive dynamics for the selected strategy.",
+            "sourcePhase": "competitive-set-analysis",
+            "sourcePath": "competitiveSet"
+          },
+          "macro_filters": {
+            "type": "object",
+            "required": false,
+            "description": "Applied macro screening criteria and thresholds. Fields: min_population_growth, min_job_growth, min_wage_growth, max_supply_pipeline_pct, regulatory_filter. Provides context for why certain geographies were selected or excluded.",
+            "sourcePhase": "macro-screening",
+            "sourcePath": "macroFilters"
+          }
+        }
+      }
+    },
+    {
+      "id": "strategy-to-acquisition",
+      "from": {
+        "orchestratorId": "investment-strategy-formulator",
+        "phase": "strategy-memo-production"
+      },
+      "to": {
+        "orchestratorId": "acquisition-orchestrator",
+        "phase": "due-diligence"
+      },
+      "trigger": "strategy.verdict == 'DEPLOY'",
+      "description": "Transfers the approved investment strategy, concentration limits, and portfolio construction parameters from the strategy formulator to the acquisition orchestrator so that due diligence and underwriting are scoped to the fund's strategy, return targets, and compliance guardrails. This handoff replaces ad-hoc deal-level threshold setting with strategy-derived parameters.",
+      "dataContract": {
+        "required": {
+          "investment_strategy": {
+            "type": "object",
+            "required": true,
+            "description": "Approved investment strategy document including strategy_type (core/core-plus/value-add/opportunistic), property_type_allocation (object with percentages per asset class), geographic_allocation (object with percentages per MSA or region), leverage_policy (target_ltv, max_ltv, preferred_debt_type, io_period_target), hold_period_years (integer), and return_targets (net_irr, gross_irr, equity_multiple, preferred_return, cash_on_cash). The acquisition orchestrator uses these to calibrate underwriting thresholds and verdict logic.",
+            "sourcePhase": "strategy-formulation",
+            "sourcePath": "investmentStrategy"
+          },
+          "concentration_limits": {
+            "type": "object",
+            "required": true,
+            "description": "Explicit concentration limits from the portfolio construction phase. Fields: max_single_asset_pct (decimal), max_msa_pct (decimal), max_state_pct (decimal), max_property_type_pct (decimal), max_single_tenant_revenue_pct (decimal), min_number_of_assets (integer), max_number_of_assets (integer). The acquisition orchestrator validates each potential deal against these limits before issuing a GO verdict.",
+            "sourcePhase": "portfolio-construction-targets",
+            "sourcePath": "concentrationLimits"
+          }
+        },
+        "optional": {
+          "portfolio_construction_plan": {
+            "type": "object",
+            "required": false,
+            "description": "Full portfolio construction plan with pacing model (quarterly deployment targets), vintage targets, equity check ranges (min/max/target in USD), and rebalancing triggers. Provides the acquisition orchestrator with context on deployment urgency and deal size requirements.",
+            "sourcePhase": "portfolio-construction-targets",
+            "sourcePath": "portfolioConstructionPlan"
+          },
+          "cycle_assessment": {
+            "type": "object",
+            "required": false,
+            "description": "Current market cycle position diagnosis. Fields: phase (recovery/expansion/hyper-supply/recession), direction (early/mid/late), confidence (high/medium/low), supporting_indicators (array). Provides cycle context for the acquisition orchestrator's market study agent.",
+            "sourcePhase": "market-cycle-positioning",
+            "sourcePath": "cycleAssessment"
+          },
+          "stress_test_results": {
+            "type": "object",
+            "required": false,
+            "description": "Three-scenario stress test results (base, downside, severe downside) from the strategy validation. Fields per scenario: projected_irr, projected_em, key_assumptions. Provides the acquisition underwriting phase with pre-validated downside thresholds.",
+            "sourcePhase": "strategy-formulation",
+            "sourcePath": "stressTest"
+          }
+        }
+      }
+    },
+    {
+      "id": "research-to-acquisition",
+      "from": {
+        "orchestratorId": "market-research-intelligence",
+        "phase": "opportunity-identification"
+      },
+      "to": {
+        "orchestratorId": "acquisition-orchestrator",
+        "phase": "due-diligence"
+      },
+      "trigger": "research.verdict == 'INVEST'",
+      "description": "Direct opportunity feed from market research to the acquisition pipeline. Transfers target acquisition profiles and submarket context to seed deal screening and provide market study agents with pre-validated submarket data, bypassing the strategy formulator when research identifies immediate opportunities aligned with an existing approved strategy.",
+      "dataContract": {
+        "required": {
+          "target_acquisition_profiles": {
+            "type": "array",
+            "required": true,
+            "description": "Array of target acquisition profiles from opportunity identification. Each entry: opportunity_name (string), target_submarkets (array of strings), property_type (string), target_size_range (string), target_basis (string with $/unit or $/SF range), target_cap_rate (string with range), investment_thesis (string), supporting_data_points (array of strings), risk_factors (array of strings), timing_assessment (string). Used by the acquisition orchestrator to evaluate incoming deals against researched opportunity criteria.",
+            "sourcePhase": "opportunity-identification",
+            "sourcePath": "targetAcquisitionProfiles"
+          }
+        },
+        "optional": {
+          "submarket_scorecards": {
+            "type": "array",
+            "required": false,
+            "description": "Pre-validated submarket scorecards that the acquisition orchestrator's market-study agent can reference instead of rebuilding from scratch. Each scorecard contains rent_trends, supply_demand, demographics, catalysts, risk_factors, composite_score, and data_quality. Reduces duplicative research effort in the due diligence phase.",
+            "sourcePhase": "submarket-deep-dive",
+            "sourcePath": "submarketScorecard"
+          },
+          "competitive_set": {
+            "type": "object",
+            "required": false,
+            "description": "Competitive landscape data including buyer_universe, recent_trades, and capital_flow_assessment. Provides the acquisition orchestrator with pricing context and competitive dynamics for negotiation strategy.",
+            "sourcePhase": "competitive-set-analysis",
+            "sourcePath": "competitiveSet"
+          },
+          "cap_rate_context": {
+            "type": "object",
+            "required": false,
+            "description": "Market cap rate ranges by submarket, asset class, and vintage from the submarket deep-dive phase. Provides the acquisition underwriting agent with market-validated cap rate benchmarks for valuation.",
+            "sourcePhase": "submarket-deep-dive",
+            "sourcePath": "capRateContext"
+          }
+        }
+      }
+    },
+    {
+      "id": "hold-period-to-pm",
+      "from": {
+        "orchestratorId": "hold-period-orchestrator",
+        "phase": "monitoring"
+      },
+      "to": {
+        "orchestratorId": "pm-operations-orchestrator",
+        "phase": "request-intake"
+      },
+      "trigger": "Any hold-period agent issues a PM request",
+      "description": "Routes operational requests from hold-period monitoring agents to the property management sub-pipeline. Hold-period agents (e.g., noi-intervention-planner, tenant-health-monitor, capex-execution-manager) may identify operational actions that require PM execution. This handoff packages the request with property context so the PM orchestrator can dispatch the appropriate PM specialist agent.",
+      "dataContract": {
+        "required": {
+          "request_type": {
+            "type": "string",
+            "required": true,
+            "description": "Classification of the PM request. Enum: maintenance, leasing, collections, vendor-procurement, tenant-communication, compliance-check, unit-turn, emergency-response. Determines which PM specialist agent receives the request.",
+            "sourcePhase": "monitoring",
+            "sourcePath": "pmRequest.requestType"
+          },
+          "property_id": {
+            "type": "string",
+            "required": true,
+            "description": "Unique property identifier linking the request to the correct asset in the PM system. Used for routing, threshold lookup, and reporting rollup.",
+            "sourcePhase": "monitoring",
+            "sourcePath": "pmRequest.propertyId"
+          },
+          "payload": {
+            "type": "object",
+            "required": true,
+            "description": "Request-type-specific payload. For maintenance: unit_id, issue_description, priority (P1-P4), reported_by. For leasing: unit_id, vacancy_date, target_rent, concession_authority. For collections: tenant_name, amount_due_usd, days_delinquent, prior_notices. For vendor-procurement: scope_of_work, budget_usd, bid_requirement. Shape varies by request_type.",
+            "sourcePhase": "monitoring",
+            "sourcePath": "pmRequest.payload"
+          },
+          "requesting_agent": {
+            "type": "string",
+            "required": true,
+            "description": "Agent ID of the hold-period agent originating the PM request. Used for audit trail and response routing back to the correct hold-period agent.",
+            "sourcePhase": "monitoring",
+            "sourcePath": "pmRequest.requestingAgent"
+          }
+        },
+        "optional": {
+          "urgency": {
+            "type": "string",
+            "required": false,
+            "description": "Urgency classification for PM dispatch prioritization. Enum: critical (same-day), high (48h), standard (1 week), low (next scheduled cycle). Defaults to standard if omitted.",
+            "sourcePhase": "monitoring",
+            "sourcePath": "pmRequest.urgency"
+          },
+          "budget_authority": {
+            "type": "number",
+            "required": false,
+            "description": "Pre-approved budget in USD that the PM agent may spend without requiring hold-period escalation. Derived from the asset manager's delegation of authority matrix.",
+            "sourcePhase": "monitoring",
+            "sourcePath": "pmRequest.budgetAuthority"
+          }
+        }
+      }
+    },
+    {
+      "id": "pm-to-hold-period",
+      "from": {
+        "orchestratorId": "pm-operations-orchestrator",
+        "phase": "request-completion"
+      },
+      "to": {
+        "orchestratorId": "hold-period-orchestrator",
+        "phase": "monitoring"
+      },
+      "trigger": "PM module completes a request",
+      "description": "Returns PM execution results to the hold-period monitor so it can update property performance metrics, close open action items, and incorporate operational outcomes into the next monitoring cycle. Each PM response includes status, payload, and data quality indicators.",
+      "dataContract": {
+        "required": {
+          "request_id": {
+            "type": "string",
+            "required": true,
+            "description": "Unique identifier of the original PM request being fulfilled. Links the response to the originating hold-period action item for status tracking and audit trail.",
+            "sourcePhase": "request-completion",
+            "sourcePath": "pmResponse.requestId"
+          },
+          "status": {
+            "type": "string",
+            "required": true,
+            "description": "Completion status of the PM request. Enum: completed, in-progress, escalated, failed, deferred. Determines whether the hold-period monitor closes the action item or escalates.",
+            "sourcePhase": "request-completion",
+            "sourcePath": "pmResponse.status"
+          },
+          "payload": {
+            "type": "object",
+            "required": true,
+            "description": "Response payload specific to the request type. For maintenance: work_order_id, resolution_description, cost_actual_usd, completion_date. For leasing: lease_executed (boolean), tenant_name, effective_rent, lease_term_months. For collections: amount_collected_usd, payment_plan (object or null), legal_action_initiated (boolean). Shape varies by original request_type.",
+            "sourcePhase": "request-completion",
+            "sourcePath": "pmResponse.payload"
+          },
+          "data_quality": {
+            "type": "object",
+            "required": true,
+            "description": "Data quality indicators for the response. Fields: completeness (decimal 0-1), source_system (string, e.g. yardi/appfolio/manual), last_updated (ISO 8601), confidence (high/medium/low). Enables the hold-period monitor to weight PM data appropriately in performance calculations.",
+            "sourcePhase": "request-completion",
+            "sourcePath": "pmResponse.dataQuality"
+          }
+        },
+        "optional": {
+          "financial_impact": {
+            "type": "object",
+            "required": false,
+            "description": "Quantified financial impact of the PM action on property economics. Fields: noi_impact_monthly_usd (number, positive for improvement), capex_spent_usd (number), budget_line_item (string), variance_from_budget_pct (decimal). Feeds directly into the hold-period performance analyst's next variance calculation.",
+            "sourcePhase": "request-completion",
+            "sourcePath": "pmResponse.financialImpact"
+          },
+          "follow_up_required": {
+            "type": "object",
+            "required": false,
+            "description": "Any follow-up actions needed from the hold-period side. Fields: action_description (string), due_date (ISO 8601), responsible_agent (string), escalation_required (boolean). Creates a new action item in the hold-period monitor's queue.",
+            "sourcePhase": "request-completion",
+            "sourcePath": "pmResponse.followUp"
+          }
+        }
+      }
+    },
+    {
+      "id": "hold-period-quarterly-to-fund-mgmt",
+      "from": {
+        "orchestratorId": "hold-period-orchestrator",
+        "phase": "quarterly-reporting"
+      },
+      "to": {
+        "orchestratorId": "fund-management-orchestrator",
+        "phase": "monitoring"
+      },
+      "trigger": "Phase 3 monitoring cycle completes",
+      "description": "Recurring quarterly data feed from the hold-period monitor to the fund management orchestrator. Provides property-level performance metrics that the fund manager rolls up into portfolio NAV, fund-level IRR tracking, and LP quarterly reporting. Runs automatically at the end of each quarterly monitoring cycle.",
+      "dataContract": {
+        "required": {
+          "property_performance": {
+            "type": "object",
+            "required": true,
+            "description": "Quarterly property performance summary. Fields: property_id (string), property_name (string), reporting_period (string, YYYY-QN), gross_revenue_usd (number), operating_expenses_usd (number), noi_usd (number), noi_budget_usd (number), noi_variance_pct (decimal), capex_spent_usd (number), capex_budget_usd (number). Primary input for the fund's portfolio-level P&L rollup.",
+            "sourcePhase": "quarterly-reporting",
+            "sourcePath": "performance.quarterlyPropertySummary"
+          },
+          "current_noi": {
+            "type": "number",
+            "required": true,
+            "description": "Annualized trailing-twelve-month NOI at quarter end, denominated in USD. Used for mark-to-market valuation (NOI / cap rate) in the fund's NAV calculation.",
+            "sourcePhase": "quarterly-reporting",
+            "sourcePath": "financials.t12NOI"
+          },
+          "occupancy": {
+            "type": "object",
+            "required": true,
+            "description": "Occupancy metrics at quarter end. Fields: physical_occupancy_pct (decimal), economic_occupancy_pct (decimal), leased_pct (decimal), units_vacant (integer), average_days_vacant (number). Feeds the fund manager's portfolio occupancy dashboard and LP reporting.",
+            "sourcePhase": "quarterly-reporting",
+            "sourcePath": "leasing.occupancySnapshot"
+          },
+          "debt_status": {
+            "type": "object",
+            "required": true,
+            "description": "Current debt status and covenant compliance. Fields: outstanding_balance_usd (number), current_dscr (decimal), covenant_dscr_floor (decimal), dscr_cushion_pct (decimal), ltv_current (decimal), maturity_date (ISO 8601), months_to_maturity (integer), covenant_compliance (compliant/watch/breach), next_rate_reset_date (ISO 8601 or null). Critical for fund-level leverage monitoring and maturity-wall tracking.",
+            "sourcePhase": "quarterly-reporting",
+            "sourcePath": "financing.debtStatusSnapshot"
+          }
+        },
+        "optional": {
+          "leasing_activity": {
+            "type": "object",
+            "required": false,
+            "description": "Quarterly leasing activity summary. Fields: new_leases_executed (integer), renewals_executed (integer), move_outs (integer), net_absorption_units (integer), average_new_lease_rent_usd (number), average_renewal_rent_usd (number), retention_rate_pct (decimal). Provides operational context for the fund manager's asset-level commentary in LP reports.",
+            "sourcePhase": "quarterly-reporting",
+            "sourcePath": "leasing.quarterlyActivity"
+          },
+          "valuation_estimate": {
+            "type": "object",
+            "required": false,
+            "description": "Property-level mark-to-market estimate. Fields: estimated_value_usd (number), valuation_method (cap_rate/dcf/comp_sales), applied_cap_rate (decimal), confidence (high/medium/low), as_of_date (ISO 8601). Used in the fund NAV calculation and investor reporting.",
+            "sourcePhase": "quarterly-reporting",
+            "sourcePath": "valuation.estimate"
+          }
+        }
+      }
+    },
+    {
+      "id": "capital-stack-to-hold-period",
+      "from": {
+        "orchestratorId": "capital-stack-orchestrator",
+        "phase": "closing"
+      },
+      "to": {
+        "orchestratorId": "hold-period-orchestrator",
+        "phase": "debt-reset"
+      },
+      "trigger": "Capital stack pipeline completes with FUNDED verdict",
+      "description": "Transfers refinanced or recapitalized debt terms back to the hold-period monitor after a successful mid-hold refinance or supplemental financing. The hold-period monitor resets its debt-service schedule, covenant thresholds, and maturity tracking to reflect the new capital structure.",
+      "dataContract": {
+        "required": {
+          "refinanced_terms": {
+            "type": "object",
+            "required": true,
+            "description": "New loan terms from the completed refinance. Fields: lender_name (string), loan_amount_usd (number), interest_rate (decimal), rate_type (fixed/floating), index (string or null), spread_bps (integer or null), io_period_months (integer), amortization_years (integer), maturity_date (ISO 8601), prepayment_structure (string). Replaces the existing debt terms in the hold-period monitor's debt-service model.",
+            "sourcePhase": "closing",
+            "sourcePath": "financing.refinancedTerms"
+          },
+          "new_covenants": {
+            "type": "object",
+            "required": true,
+            "description": "Updated covenant package from the new loan. Fields: dscr_floor (decimal), ltv_ceiling (decimal), debt_yield_floor (decimal or null), cash_management_trigger_dscr (decimal or null), lockbox_required (boolean), reserve_requirements (object with replacement_reserve_monthly_usd, tax_escrow, insurance_escrow). Resets the covenant-watchdog agent's monitoring thresholds.",
+            "sourcePhase": "closing",
+            "sourcePath": "financing.newCovenants"
+          },
+          "proceeds_available": {
+            "type": "number",
+            "required": true,
+            "description": "Net cash proceeds available to the equity after loan payoff, closing costs, and required reserves, denominated in USD. May be zero (rate-and-term refi) or positive (cash-out refi). Feeds the hold-period monitor's distribution model and the fund management orchestrator's capital account updates.",
+            "sourcePhase": "closing",
+            "sourcePath": "financing.netProceeds"
+          }
+        },
+        "optional": {
+          "rate_lock_details": {
+            "type": "object",
+            "required": false,
+            "description": "Rate lock information if applicable. Fields: locked_rate (decimal), lock_date (ISO 8601), lock_expiration (ISO 8601), rate_buydown_cost_usd (number or null). Provides context for the realized cost of the refinance.",
+            "sourcePhase": "closing",
+            "sourcePath": "financing.rateLock"
+          },
+          "defeasance_or_prepay_cost": {
+            "type": "number",
+            "required": false,
+            "description": "Cost of defeasance or prepayment penalty paid to exit the prior loan, denominated in USD. Feeds the hold-period monitor's realized return calculation and the fund manager's distribution waterfall.",
+            "sourcePhase": "closing",
+            "sourcePath": "financing.prepaymentCost"
+          }
+        }
+      }
+    },
+    {
+      "id": "fund-to-disposition",
+      "from": {
+        "orchestratorId": "fund-management-orchestrator",
+        "phase": "exit-sequencing"
+      },
+      "to": {
+        "orchestratorId": "disposition-orchestrator",
+        "phase": "hold-sell-analysis"
+      },
+      "trigger": "Fund management exit-sequencer orders asset sale",
+      "description": "Initiates a fund-directed disposition when the fund management orchestrator's exit-sequencer determines that an asset should be sold as part of fund wind-down, portfolio rebalancing, or LP liquidity events. Transfers exit priority, timing constraints, and minimum proceeds requirements to the disposition orchestrator.",
+      "dataContract": {
+        "required": {
+          "exit_sequence_priority": {
+            "type": "integer",
+            "required": true,
+            "description": "Ordinal priority within the fund's exit sequence (1 = first to sell). Determined by the exit-sequencer based on market readiness, lease stability, and buyer demand. The disposition orchestrator uses this to calibrate marketing urgency and pricing flexibility.",
+            "sourcePhase": "exit-sequencing",
+            "sourcePath": "exitSequence.priority"
+          },
+          "target_exit_date": {
+            "type": "string",
+            "required": true,
+            "description": "ISO 8601 target date by which the sale should close, driven by fund term expiration, extension deadlines, or LP liquidity commitments. The disposition orchestrator uses this to set the marketing timeline, offer deadlines, and closing schedule.",
+            "sourcePhase": "exit-sequencing",
+            "sourcePath": "exitSequence.targetExitDate"
+          },
+          "minimum_proceeds": {
+            "type": "number",
+            "required": true,
+            "description": "Minimum net proceeds to the fund in USD required for the sale to satisfy LP return obligations and fund economics. Below this floor, the disposition orchestrator must escalate to the fund manager for a hold/extend decision rather than accepting a below-floor bid.",
+            "sourcePhase": "exit-sequencing",
+            "sourcePath": "exitSequence.minimumProceeds"
+          },
+          "property_id": {
+            "type": "string",
+            "required": true,
+            "description": "Unique property identifier linking the exit order to the correct asset. Used for routing to the disposition orchestrator and cross-referencing hold-period performance data.",
+            "sourcePhase": "exit-sequencing",
+            "sourcePath": "exitSequence.propertyId"
+          }
+        },
+        "optional": {
+          "exit_rationale": {
+            "type": "string",
+            "required": false,
+            "description": "Narrative explanation of the exit rationale for inclusion in the disposition marketing materials and IC memo. Enum-like categories: fund-term-expiration, portfolio-rebalancing, capital-recycling, lp-liquidity-event, market-cycle-timing, underperformance-exit.",
+            "sourcePhase": "exit-sequencing",
+            "sourcePath": "exitSequence.rationale"
+          },
+          "pricing_guidance": {
+            "type": "object",
+            "required": false,
+            "description": "Fund manager's pricing guidance for the disposition. Fields: estimated_value_usd (number), target_cap_rate (decimal), acceptable_cap_rate_range (object with min/max), price_per_unit_target (number or null). Provides the disposition orchestrator with a pricing framework for broker engagement.",
+            "sourcePhase": "exit-sequencing",
+            "sourcePath": "exitSequence.pricingGuidance"
+          }
+        }
+      }
+    },
+    {
+      "id": "portfolio-to-strategy",
+      "from": {
+        "orchestratorId": "portfolio-management-orchestrator",
+        "phase": "rebalancing"
+      },
+      "to": {
+        "orchestratorId": "investment-strategy-formulator",
+        "phase": "allocation-review"
+      },
+      "trigger": "Portfolio management produces rebalancing recommendations",
+      "description": "Feeds portfolio-level allocation analysis and rebalancing recommendations from the portfolio management orchestrator back to the investment strategy formulator. Enables the strategy layer to incorporate realized portfolio drift, concentration breaches, and performance attribution into updated allocation targets and strategy adjustments.",
+      "dataContract": {
+        "required": {
+          "allocation_gaps": {
+            "type": "object",
+            "required": true,
+            "description": "Current portfolio allocation versus target allocation by dimension. Fields: by_property_type (object with target_pct and current_pct per type), by_geography (object with target_pct and current_pct per MSA/region), by_strategy (object with target_pct and current_pct per strategy type), by_vintage (object with target_pct and current_pct per vintage year). Quantifies where the portfolio is over/under-allocated relative to the approved strategy.",
+            "sourcePhase": "rebalancing",
+            "sourcePath": "portfolio.allocationGaps"
+          },
+          "overweight_exposures": {
+            "type": "array",
+            "required": true,
+            "description": "Array of concentration breaches or near-breaches requiring strategy attention. Each entry: dimension (property_type/geography/tenant/strategy), name (string), current_pct (decimal), limit_pct (decimal), breach_severity (breach/warning/watch), recommended_action (reduce/hold/monitor). Triggers the strategy formulator to adjust allocation targets or initiate disposition recommendations.",
+            "sourcePhase": "rebalancing",
+            "sourcePath": "portfolio.overweightExposures"
+          }
+        },
+        "optional": {
+          "performance_attribution": {
+            "type": "object",
+            "required": false,
+            "description": "Decomposition of portfolio returns by allocation effect, selection effect, and interaction effect across property type and geography dimensions. Fields: total_return_pct (decimal), allocation_effect_pct (decimal), selection_effect_pct (decimal), interaction_effect_pct (decimal), benchmark_return_pct (decimal), active_return_pct (decimal). Provides the strategy formulator with empirical feedback on strategy effectiveness.",
+            "sourcePhase": "rebalancing",
+            "sourcePath": "portfolio.performanceAttribution"
+          },
+          "liquidity_assessment": {
+            "type": "object",
+            "required": false,
+            "description": "Portfolio liquidity profile for strategy planning. Fields: liquid_assets_pct (decimal), average_hold_period_months (number), near_term_maturities_count (integer), undrawn_commitments_usd (number). Informs the strategy formulator's deployment pacing and exit timing recommendations.",
+            "sourcePhase": "rebalancing",
+            "sourcePath": "portfolio.liquidityAssessment"
+          }
+        }
+      }
+    },
+    {
+      "id": "development-to-capital-stack",
+      "from": {
+        "orchestratorId": "development-orchestrator",
+        "phase": "pre-construction"
+      },
+      "to": {
+        "orchestratorId": "capital-stack-orchestrator",
+        "phase": "construction-financing"
+      },
+      "trigger": "Development Phase 3 ready for construction financing",
+      "description": "Transfers development cost basis, construction draw schedule, and stabilized pro forma from the development orchestrator to the capital-stack orchestrator when a project has completed entitlement and pre-construction and is ready for construction loan origination. The capital-stack orchestrator uses these inputs to size the construction loan, evaluate lender options, and structure the development capital stack.",
+      "dataContract": {
+        "required": {
+          "total_development_cost": {
+            "type": "number",
+            "required": true,
+            "description": "Total development cost (TDC) in USD including land, hard costs, soft costs, contingency, financing costs, and lease-up carry. Primary input for construction loan sizing via LTC constraint. Broken down by category in the optional cost_breakdown field.",
+            "sourcePhase": "pre-construction",
+            "sourcePath": "financials.totalDevelopmentCost"
+          },
+          "construction_draw_schedule": {
+            "type": "array",
+            "required": true,
+            "description": "Monthly or milestone-based construction draw schedule. Each entry: period (integer or milestone string), draw_amount_usd (number), cumulative_draw_usd (number), category (land/hard-cost/soft-cost/contingency), description (string). Used by the capital-stack orchestrator to model interest carry, size the construction loan facility, and establish draw conditions in the term sheet.",
+            "sourcePhase": "pre-construction",
+            "sourcePath": "construction.drawSchedule"
+          },
+          "stabilized_noi": {
+            "type": "number",
+            "required": true,
+            "description": "Projected stabilized NOI in USD upon project completion and lease-up, from the development pro forma. Used for permanent loan sizing (DSCR/debt-yield), construction loan exit analysis, and going-in yield calculation on the development cost basis.",
+            "sourcePhase": "pre-construction",
+            "sourcePath": "financials.projectedStabilizedNOI"
+          },
+          "construction_timeline": {
+            "type": "object",
+            "required": true,
+            "description": "Key construction milestones. Fields: construction_start_date (ISO 8601), substantial_completion_date (ISO 8601), construction_duration_months (integer), lease_up_start_date (ISO 8601), stabilization_date (ISO 8601). Sets the construction loan maturity, extension options, and interest reserve sizing.",
+            "sourcePhase": "pre-construction",
+            "sourcePath": "construction.timeline"
+          }
+        },
+        "optional": {
+          "cost_breakdown": {
+            "type": "object",
+            "required": false,
+            "description": "Detailed cost breakdown by CSI division or category. Fields: land_cost_usd, hard_costs_usd, soft_costs_usd, contingency_usd, financing_costs_usd, developer_fee_usd. Enables the capital-stack orchestrator to validate cost reasonableness and structure draw conditions at the category level.",
+            "sourcePhase": "pre-construction",
+            "sourcePath": "financials.costBreakdown"
+          },
+          "entitlement_status": {
+            "type": "object",
+            "required": false,
+            "description": "Current entitlement and permitting status. Fields: zoning_approved (boolean), building_permit_issued (boolean), environmental_clearance (boolean), utility_commitments (boolean), outstanding_conditions (array of strings). Construction lenders require entitlement completion before initial draw; this status feeds the capital-stack orchestrator's closing conditions checklist.",
+            "sourcePhase": "pre-construction",
+            "sourcePath": "entitlement.status"
+          },
+          "gc_contract": {
+            "type": "object",
+            "required": false,
+            "description": "General contractor contract summary. Fields: gc_name (string), contract_type (GMP/lump-sum/cost-plus), contract_amount_usd (number), retainage_pct (decimal), payment_bond (boolean), performance_bond (boolean). Required by most construction lenders as a closing condition and feeds the capital-stack orchestrator's lender package preparation.",
+            "sourcePhase": "pre-construction",
+            "sourcePath": "construction.gcContract"
+          }
+        }
+      }
+    }
+  ]
+}

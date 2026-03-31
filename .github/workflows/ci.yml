@@ -13,11 +13,11 @@ jobs:
         python-version: ['3.10', '3.11', '3.12', '3.13']
         node-version: ['18', '20', '22', '24']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node-version }}
       - name: Run integrity tests
@@ -32,3 +32,5 @@ jobs:
           for f in scripts/calculators/*.py; do python -c "compile(open('$f').read(), '$f', 'exec')"; done
       - name: Verify plugin structure
         run: bash scripts/verify-install.sh || true
+      - name: Validate registry references
+        run: python scripts/registry-validator.py

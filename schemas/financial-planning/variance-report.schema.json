@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "variance-report.schema.json",
+  "title": "Budget vs Actual Variance Report",
+  "description": "Variance analysis with classification (timing/permanent/one-time/trend), materiality screening, and narrative generation",
+  "type": "object",
+  "required": [
+    "propertyId",
+    "period",
+    "periodType",
+    "lineItems",
+    "summary",
+    "projectedFullYearImpact"
+  ],
+  "properties": {
+    "propertyId": {
+      "type": "string",
+      "pattern": "^PROP-[A-Z0-9-]+$",
+      "description": "Unique property identifier"
+    },
+    "period": {
+      "type": "string",
+      "description": "Reporting period: YYYY-MM for monthly, YYYY-Q# for quarterly, YYYY-YTD for year-to-date"
+    },
+    "periodType": {
+      "type": "string",
+      "enum": ["monthly", "quarterly", "ytd"],
+      "description": "Granularity of the variance report"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp when report was generated"
+    },
+    "lineItems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "lineItem",
+          "budget",
+          "actual",
+          "variance",
+          "variancePct",
+          "classification",
+          "materiality"
+        ],
+        "properties": {
+          "lineItem": {
+            "type": "string",
+            "description": "Canonical line item name matching budget/actuals schema (e.g. 'realEstateTaxes', 'insurance', 'effectiveGrossIncome')"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["revenue", "expense", "belowTheLine"],
+            "description": "Line item category"
+          },
+          "budget": {
+            "type": "number",
+            "description": "Budget amount for the period"
+          },
+          "actual": {
+            "type": "number",
+            "description": "Actual amount for the period"
+          },
+          "variance": {
+            "type": "number",
+            "description": "Actual minus budget; positive = favorable for revenue, unfavorable for expenses"
+          },
+          "variancePct": {
+            "type": ["number", "null"],
+            "description": "Variance as percentage of budget; null if budget is zero"
+          },
+          "classification": {
+            "type": "string",
+            "enum": ["TIMING", "PERMANENT", "ONE_TIME", "TREND"],
+            "description": "TIMING: expected to reverse. PERMANENT: structural shift. ONE_TIME: non-recurring. TREND: directional shift that may continue."
+          },
+          "materiality": {
+            "type": "string",
+            "enum": ["MATERIAL", "IMMATERIAL"],
+            "description": "Material if exceeds both pct threshold AND dollar threshold from thresholds.json"
+          },
+          "narrative": {
+            "type": "string",
+            "description": "Ownership-ready explanation of the variance: what happened, why, and projected impact"
+          },
+          "priorPeriodVariance": {
+            "type": ["number", "null"],
+            "description": "Same line item variance from the prior period for trend detection"
+          },
+          "trendDirection": {
+            "type": ["string", "null"],
+            "enum": ["IMPROVING", "STABLE", "DETERIORATING", null],
+            "description": "Trend vs prior period"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["totalRevenue", "totalExpenses", "noi"],
+      "properties": {
+        "totalRevenue": {
+          "type": "object",
+          "required": ["budget", "actual", "variance", "variancePct"],
+          "properties": {
+            "budget": { "type": "number" },
+            "actual": { "type": "number" },
+            "variance": { "type": "number" },
+            "variancePct": { "type": ["number", "null"] }
+          }
+        },
+        "totalExpenses": {
+          "type": "object",
+          "required": ["budget", "actual", "variance", "variancePct"],
+          "properties": {
+            "budget": { "type": "number" },
+            "actual": { "type": "number" },
+            "variance": { "type": "number" },
+            "variancePct": { "type": ["number", "null"] }
+          }
+        },
+        "noi": {
+          "type": "object",
+          "required": ["budget", "actual", "variance", "variancePct"],
+          "properties": {
+            "budget": { "type": "number" },
+            "actual": { "type": "number" },
+            "variance": { "type": "number" },
+            "variancePct": { "type": ["number", "null"] }
+          }
+        },
+        "materialVarianceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of line items classified as MATERIAL"
+        },
+        "classificationBreakdown": {
+          "type": "object",
+          "properties": {
+            "timing": { "type": "integer" },
+            "permanent": { "type": "integer" },
+            "oneTime": { "type": "integer" },
+            "trend": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "projectedFullYearImpact": {
+      "type": "object",
+      "required": ["projectedRevenue", "projectedExpenses", "projectedNOI", "projectedNCF"],
+      "properties": {
+        "projectedRevenue": {
+          "type": "number",
+          "description": "Full-year revenue projection based on YTD actuals and classified variances"
+        },
+        "projectedExpenses": {
+          "type": "number",
+          "description": "Full-year expense projection"
+        },
+        "projectedNOI": {
+          "type": "number",
+          "description": "Full-year NOI projection"
+        },
+        "projectedNCF": {
+          "type": "number",
+          "description": "Full-year NCF projection"
+        },
+        "noiDeltaVsBudget": {
+          "type": "number",
+          "description": "Projected full-year NOI minus budgeted NOI"
+        },
+        "noiDeltaPct": {
+          "type": ["number", "null"],
+          "description": "Projected NOI delta as percentage of budget"
+        },
+        "valueDelta": {
+          "type": "number",
+          "description": "Implied property value change = noiDeltaVsBudget / capRate"
+        },
+        "methodology": {
+          "type": "string",
+          "description": "How full-year projection was calculated (e.g. 'YTD actuals + remaining months at budget adjusted for permanent variances')"
+        }
+      }
+    }
+  }
+}

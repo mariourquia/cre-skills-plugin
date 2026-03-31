@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/disposition-analysis-data.schema.json",
+  "title": "Disposition Phase 1 -- Hold-Sell-Refi Analysis Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the disposition hold-sell-refi analysis phase. Covers NPV comparison across hold/sell/refi scenarios, IRR analysis, tax impact, and the terminal recommendation.",
+  "type": "object",
+  "required": [
+    "recommendation",
+    "npvComparison",
+    "targetExitPrice",
+    "irrToDate"
+  ],
+  "properties": {
+    "recommendation": {
+      "type": "string",
+      "enum": ["SELL", "HOLD", "REFI"],
+      "description": "Terminal recommendation from hold-sell-refi analysis."
+    },
+    "npvComparison": {
+      "type": "object",
+      "description": "NPV comparison across hold, sell, and refi scenarios under base, bull, and bear cases.",
+      "required": ["holdNPV", "sellNPV", "refiNPV"],
+      "properties": {
+        "holdNPV": {
+          "type": "object",
+          "description": "Net present value of continuing to hold the asset.",
+          "required": ["base", "bull", "bear"],
+          "properties": {
+            "base": { "type": "number", "description": "Base case hold NPV." },
+            "bull": { "type": "number", "description": "Bull case hold NPV." },
+            "bear": { "type": "number", "description": "Bear case hold NPV." },
+            "assumptions": { "type": "string", "description": "Key assumptions driving hold NPV scenarios." }
+          },
+          "additionalProperties": true
+        },
+        "sellNPV": {
+          "type": "object",
+          "description": "Net present value of selling the asset at current market pricing.",
+          "required": ["base", "bull", "bear"],
+          "properties": {
+            "base": { "type": "number", "description": "Base case sell NPV." },
+            "bull": { "type": "number", "description": "Bull case sell NPV." },
+            "bear": { "type": "number", "description": "Bear case sell NPV." },
+            "assumptions": { "type": "string", "description": "Key assumptions driving sell NPV scenarios." }
+          },
+          "additionalProperties": true
+        },
+        "refiNPV": {
+          "type": "object",
+          "description": "Net present value of refinancing and continuing to hold.",
+          "required": ["base", "bull", "bear"],
+          "properties": {
+            "base": { "type": "number", "description": "Base case refi NPV." },
+            "bull": { "type": "number", "description": "Bull case refi NPV." },
+            "bear": { "type": "number", "description": "Bear case refi NPV." },
+            "assumptions": { "type": "string", "description": "Key assumptions driving refi NPV scenarios." }
+          },
+          "additionalProperties": true
+        },
+        "sellPremiumOverHold": {
+          "type": "number",
+          "description": "Sell NPV premium over hold NPV in base case, expressed as decimal (e.g., 0.05 = 5%)."
+        },
+        "sensitivityNotes": {
+          "type": "string",
+          "description": "Narrative on which assumptions most materially affect the NPV comparison."
+        }
+      },
+      "additionalProperties": true
+    },
+    "targetExitPrice": {
+      "type": "number",
+      "description": "Recommended exit price based on sell NPV analysis. Minimum: 0.",
+      "minimum": 0
+    },
+    "irrToDate": {
+      "type": "number",
+      "description": "IRR achieved from acquisition through current period, expressed as decimal (e.g., 0.15 = 15%)."
+    },
+    "projectedExitIRR": {
+      "type": "number",
+      "description": "Projected IRR at exit under base case sell scenario."
+    },
+    "remainingUpside": {
+      "type": "object",
+      "description": "Quantification of remaining value-creation upside if held longer.",
+      "properties": {
+        "noiGrowthPotential": { "type": "number", "description": "Estimated incremental NOI achievable (annual)." },
+        "occupancyUpsideBps": { "type": "number", "description": "Basis points of occupancy improvement available." },
+        "markToMarketRentGap": { "type": "number", "description": "Percentage gap between in-place and market rents." },
+        "capexValueCreation": { "type": "number", "description": "Value creation from remaining capex projects." },
+        "timeToCapture_months": { "type": "integer", "description": "Estimated months to capture remaining upside." }
+      },
+      "additionalProperties": true
+    },
+    "taxImpact": {
+      "type": "object",
+      "description": "Tax impact analysis for each exit strategy.",
+      "properties": {
+        "capitalGainsTax": { "type": "number", "description": "Estimated capital gains tax liability." },
+        "depreciationRecapture": { "type": "number", "description": "Depreciation recapture exposure." },
+        "exchange1031Eligible": { "type": "boolean", "description": "Whether property qualifies for 1031 exchange." },
+        "exchange1031Benefit": { "type": "number", "description": "NPV benefit of 1031 exchange vs outright sale." },
+        "installmentSaleNPV": { "type": "number", "description": "NPV of installment sale structure." },
+        "afterTaxProceedsBySrategy": {
+          "type": "object",
+          "description": "After-tax proceeds comparison by exit strategy.",
+          "properties": {
+            "outrightSale": { "type": "number" },
+            "exchange1031": { "type": "number" },
+            "installmentSale": { "type": "number" }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "refiAnalysis": {
+      "type": "object",
+      "description": "Refinance feasibility and sizing (populated when REFI is a viable alternative).",
+      "properties": {
+        "refiIsFeasible": { "type": "boolean", "description": "Whether refinancing is feasible." },
+        "lenderSizing": {
+          "type": "array",
+          "description": "Loan sizing by lender type.",
+          "items": {
+            "type": "object",
+            "required": ["lenderType", "maxLoanAmount", "estimatedRate", "ltv", "dscr"],
+            "properties": {
+              "lenderType": { "type": "string", "description": "Agency, CMBS, bank, or life company." },
+              "maxLoanAmount": { "type": "number" },
+              "estimatedRate": { "type": "number" },
+              "ltv": { "type": "number" },
+              "dscr": { "type": "number" },
+              "cashOutProceeds": { "type": "number" }
+            },
+            "additionalProperties": true
+          }
+        },
+        "prepaymentPenalty": { "type": "number", "description": "Prepayment penalty on existing debt." },
+        "lpYieldUnderRefi": { "type": "number", "description": "LP cash-on-cash yield under refi scenario." }
+      },
+      "additionalProperties": true
+    },
+    "holdDecisionRationale": {
+      "type": "string",
+      "description": "Narrative rationale for HOLD decision (populated only when recommendation is HOLD)."
+    }
+  },
+  "additionalProperties": true
+}

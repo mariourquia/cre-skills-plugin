@@ -1,13 +1,13 @@
 # CRE Skills Registry
 # Generated: 2026-03-17
 # Updated: 2026-03-26
-# Total Skills: 99 (3 existing deployed + 77 planned + 19 new deployed)
+# Total Skills: 102 (3 existing deployed + 77 planned + 19 new deployed + 3 new)
 
 metadata:
   version: "1.4"
   generated: "2026-03-17"
   updated: "2026-03-26"
-  total_skills: 99
+  total_skills: 105
   categories: 16
   source_prompts_audited: 155
   gap_fill_prompts_added: 32
@@ -372,7 +372,7 @@ skills:
     daily_ops_support: []
 
   # ============================================================================
-  # 07-ASSET-MANAGEMENT (6 skills)
+  # 07-ASSET-MANAGEMENT (8 skills)
   # ============================================================================
 
   - slug: annual-budget-engine
@@ -413,6 +413,27 @@ skills:
     chains_to: [sensitivity-stress-test, quarterly-investor-update]
     chains_from: [annual-budget-engine, rent-roll-analyzer, market-memo-generator]
     daily_ops_support: [t12-normalizer, variance-narrative-generator, cam-reconciliation-calculator]
+
+  - slug: property-management-orchestrator
+    name: Property Management Orchestrator
+    category: 07-asset-management
+    priority: P0
+    phase: 3
+    status: deployed
+    effort_hours: 8
+    chains_to: [noi-sprint-plan, property-performance-dashboard, annual-budget-engine, disposition-strategy-engine, investor-lifecycle-manager]
+    chains_from: [post-close-onboarding-transition, construction-project-command-center]
+    daily_ops_support: [building-systems-maintenance-manager, work-order-triage, small-operator-pm, property-operations-admin-toolkit, cam-reconciliation-calculator, tenant-delinquency-workout, coi-compliance-checker, vendor-invoice-validator, compliance-regulatory-response-kit, capex-prioritizer]
+
+  - slug: space-planning-redesign-orchestrator
+    name: Space Planning & Redesign Orchestrator
+    category: 07-asset-management
+    priority: P2
+    phase: 3
+    status: stub
+    effort_hours: 12
+    chains_to: [construction-cost-estimator, construction-project-command-center, capex-prioritizer, annual-budget-engine, ic-memo-generator]
+    chains_from: [property-management-orchestrator, noi-sprint-plan, tenant-retention-engine, lease-up-war-room]
 
   - slug: capex-prioritizer
     name: CapEx Prioritizer
@@ -579,7 +600,7 @@ skills:
     daily_ops_support: []
 
   # ============================================================================
-  # 10-DEVELOPMENT (4 skills)
+  # 10-DEVELOPMENT (5 skills)
   # ============================================================================
 
   - slug: land-residual-hbu-analyzer
@@ -633,6 +654,16 @@ skills:
     chains_to: [dev-proforma-engine]
     chains_from: [land-residual-hbu-analyzer, entitlement-feasibility]
     daily_ops_support: []
+
+  - slug: construction-cost-estimator
+    name: Construction Cost Estimator
+    category: 10-development
+    priority: P1
+    phase: 3
+    status: deployed
+    effort_hours: 6
+    chains_to: [dev-proforma-engine, construction-budget-gc-analyzer, loan-sizing-engine, capital-stack-optimizer, construction-project-command-center, ic-memo-generator]
+    chains_from: [entitlement-feasibility, land-residual-hbu-analyzer, comp-snapshot]
 
   # ============================================================================
   # 11-DISPOSITION (2 skills)
@@ -1350,7 +1381,7 @@ skills:
     chains_from: [acquisition-underwriting-engine, portfolio-allocator]
     daily_ops_support: []
 
-  - slug: property-management-operations
+  - slug: small-operator-pm
     name: Property Management Operations
     category: 07-asset-management
     priority: P1

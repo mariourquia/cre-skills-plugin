@@ -1,0 +1,77 @@
+{
+  "pipelineId": "lp-intelligence",
+  "perspectives": [
+    {
+      "perspectiveId": "fee-drag-hawk",
+      "name": "Fee Drag Hawk",
+      "question": "Are total fees (management + carry + hidden) consuming more than 30% of gross alpha, making this GP economically inferior to a lower-cost alternative?",
+      "tier": 1,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "gross-to-net-spread-vs-strategy-median",
+        "management-fee-on-uninvested-capital-during-deployment",
+        "carry-accrual-rate-vs-realized-distributions",
+        "hidden-fees-in-related-party-transactions",
+        "operating-partner-promote-stacking-on-gp-carry",
+        "fee-escalation-across-fund-generations",
+        "total-gp-economics-as-pct-of-gross-at-base-case",
+        "fee-offset-compliance-actual-vs-lpa-provisions"
+      ],
+      "challengeThreshold": "Gross-to-net spread exceeds 300bps OR total GP economics (management fee + carry + all other fees) exceed 35% of gross fund profits at base-case returns OR fee load increasing across fund generations without performance improvement"
+    },
+    {
+      "perspectiveId": "alignment-skeptic",
+      "name": "Alignment Skeptic",
+      "question": "Is the GP's incentive structure actually aligned with LP interests, or does the GP profit regardless of LP outcomes?",
+      "tier": 1,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "gp-cash-commitment-vs-fee-waiver-commitment",
+        "management-fee-as-pct-of-total-gp-economics",
+        "american-waterfall-creating-carry-on-losing-fund",
+        "co-invest-allocation-discretion-favoring-gp-insiders",
+        "fund-size-growth-driven-by-fee-revenue-not-opportunity",
+        "key-person-departures-without-economic-consequence-to-gp",
+        "gp-launching-competing-vehicles-diluting-deal-flow",
+        "clawback-enforceability-and-guarantee-quality"
+      ],
+      "challengeThreshold": "GP cash commitment below 2% of fund AND management fee represents more than 60% of total GP economics AND American waterfall without escrowed clawback, indicating GP profits primarily from AUM fees rather than performance"
+    },
+    {
+      "perspectiveId": "vintage-bias",
+      "name": "Vintage Bias Detector",
+      "question": "Are this GP's returns attributable to skill or to favorable vintage timing, leverage, and market beta?",
+      "tier": 2,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "vintage-adjusted-alpha-persistence-across-funds",
+        "leverage-contribution-as-pct-of-total-equity-return",
+        "cap-rate-compression-tailwind-vs-operational-improvement",
+        "subscription-line-irr-inflation-magnitude",
+        "gp-returns-during-unfavorable-vintages-vs-favorable",
+        "unlevered-return-ranking-vs-levered-return-ranking",
+        "strategy-drift-invalidating-cross-vintage-comparison"
+      ],
+      "challengeThreshold": "Leverage effect exceeds 50% of total equity return OR sub-line adjusted IRR drops GP from top to second quartile OR vintage-adjusted alpha is negative in 2+ funds, indicating returns are market beta and leverage rather than skill"
+    },
+    {
+      "perspectiveId": "liquidity-risk",
+      "name": "Liquidity Risk Assessor",
+      "question": "Can the LP actually fund this commitment and all existing commitments under stress without forced selling?",
+      "tier": 2,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "over-commitment-ratio-under-denominator-stress",
+        "reserve-ratio-under-combined-call-acceleration-and-distribution-delay",
+        "multiple-funds-in-j-curve-simultaneously",
+        "secondary-market-discount-if-forced-to-sell",
+        "correlation-between-lp-public-portfolio-decline-and-re-call-timing",
+        "total-unfunded-commitments-as-pct-of-liquid-assets",
+        "capital-call-clustering-risk-across-gp-relationships"
+      ],
+      "challengeThreshold": "Reserve ratio falls below 1.0x under combined stress (distributions delayed 2 quarters + calls accelerated 50%) OR over-commitment ratio exceeds 1.5x after denominator effect from 20% public equity decline OR total unfunded commitments exceed 40% of LP's liquid assets"
+    }
+  ],
+  "synthesisModel": "claude-opus-4-6[1m]",
+  "verdictReconciliation": "Challenge verdict overrides pipeline verdict if it differs. Fee Drag Hawk and Alignment Skeptic perspectives carry veto weight on RE-UP verdicts -- if either flags CRITICAL issues, verdict must downgrade to at minimum REDUCE. Liquidity Risk perspective carries absolute veto on RE-UP verdicts if LP cannot fund the commitment under stress."
+}

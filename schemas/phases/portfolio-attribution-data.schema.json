@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/portfolio-attribution-data.schema.json",
+  "title": "Portfolio Management Phase 2 -- Performance Attribution Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the performance attribution phase. Covers return decomposition, alpha analysis, fee bridge, and benchmark comparison.",
+  "type": "object",
+  "required": [
+    "portfolioReturns",
+    "alphaAttribution",
+    "compositeScorecard"
+  ],
+  "properties": {
+    "portfolioReturns": {
+      "type": "object",
+      "description": "Aggregate portfolio return decomposition across time periods.",
+      "required": ["timeWeightedReturn", "incomeReturn", "appreciationReturn", "totalGrossReturn"],
+      "properties": {
+        "timeWeightedReturn": { "$ref": "#/$defs/periodMetric" },
+        "moneyWeightedReturn": { "$ref": "#/$defs/periodMetric" },
+        "incomeReturn": { "$ref": "#/$defs/periodMetric" },
+        "appreciationReturn": { "$ref": "#/$defs/periodMetric" },
+        "leverageEffect": { "$ref": "#/$defs/periodMetric" },
+        "totalGrossReturn": { "$ref": "#/$defs/periodMetric" },
+        "sameStoreNOIGrowth": { "type": "number" },
+        "sameStoreOccupancyChange": { "type": "number" }
+      }
+    },
+    "propertyLevelReturns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["propertyId", "leveredReturn"],
+        "properties": {
+          "propertyId": { "type": "string" },
+          "propertyName": { "type": "string" },
+          "incomeReturn": { "type": "number" },
+          "appreciationReturn": { "type": "number" },
+          "unleveredReturn": { "type": "number" },
+          "leverageEffect": { "type": "number" },
+          "leveredReturn": { "type": "number" },
+          "weight": { "type": "number" }
+        }
+      }
+    },
+    "vintageReturns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "vintageBand": { "type": "string" },
+          "return": { "type": "number" },
+          "alpha": { "type": "number" },
+          "assetCount": { "type": "integer" }
+        }
+      }
+    },
+    "alphaAttribution": {
+      "type": "object",
+      "required": ["grossAlpha", "persistenceClassification"],
+      "properties": {
+        "grossAlpha": { "type": "number", "description": "Total alpha in basis points." },
+        "assetSelectionAlpha": { "type": "number" },
+        "allocationAlpha": { "type": "number" },
+        "interactionAlpha": { "type": "number" },
+        "alphaConsistency": { "type": "number", "minimum": 0, "maximum": 1 },
+        "alphaVolatility": { "type": "number" },
+        "informationRatio": { "type": "number" },
+        "persistenceClassification": { "type": "string", "enum": ["CONSISTENT", "SPORADIC", "INCONSISTENT"] },
+        "alphaGenerators": { "type": "array", "items": { "type": "object" } },
+        "alphaDrags": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+    "feeBridge": {
+      "type": "object",
+      "properties": {
+        "grossPropertyReturn": { "type": "number" },
+        "afterPropertyFees": { "type": "number" },
+        "afterFundFees": { "type": "number" },
+        "netToLP": { "type": "number" },
+        "grossToNetSpread": { "type": "number" },
+        "spreadClassification": { "type": "string", "enum": ["ACCEPTABLE", "ELEVATED", "EXCESSIVE"] }
+      }
+    },
+    "ncreifComparison": {
+      "type": "object",
+      "properties": {
+        "periods": { "type": "object" },
+        "unleveredExcess": { "type": "number" },
+        "incomeSpread": { "type": "number" },
+        "appreciationSpread": { "type": "number" }
+      }
+    },
+    "peerComparison": {
+      "type": "object",
+      "properties": {
+        "peerCount": { "type": "integer" },
+        "netIRRQuartile": { "type": "integer", "minimum": 1, "maximum": 4 },
+        "tvpiQuartile": { "type": "integer", "minimum": 1, "maximum": 4 },
+        "vintageAdjustedExcess": { "type": "number" }
+      }
+    },
+    "compositeScorecard": {
+      "type": "object",
+      "required": ["compositeRating"],
+      "properties": {
+        "compositeRating": {
+          "type": "string",
+          "enum": ["OUTPERFORMING", "AT_MARKET", "UNDERPERFORMING", "SIGNIFICANTLY_UNDERPERFORMING"]
+        },
+        "trendDirection": { "type": "string", "enum": ["IMPROVING", "STABLE", "DETERIORATING"] },
+        "icSummary": { "type": "string" },
+        "lpReportingSummary": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "periodMetric": {
+      "type": "object",
+      "properties": {
+        "quarterly": { "type": "number" },
+        "ttm": { "type": "number" },
+        "sinceInception": { "type": "number" }
+      }
+    }
+  }
+}

@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/disposition-offers-data.schema.json",
+  "title": "Disposition Phase 5 -- Offer Management Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the disposition offer management phase. Covers offer comparison, buyer selection, PSA negotiation, and retrade risk profiling.",
+  "type": "object",
+  "required": [
+    "offers",
+    "selectedBuyer",
+    "psaStatus",
+    "retradeRiskProfile"
+  ],
+  "properties": {
+    "offers": {
+      "type": "array",
+      "description": "Array of all received offers with comparison matrix scores and ranking.",
+      "items": {
+        "type": "object",
+        "required": ["offerId", "buyerName", "offerPrice", "ranking"],
+        "properties": {
+          "offerId": { "type": "string", "description": "Unique identifier for the offer." },
+          "buyerName": { "type": "string" },
+          "firmName": { "type": "string" },
+          "buyerSegment": { "type": "string", "description": "Buyer segment classification." },
+          "offerPrice": { "type": "number", "description": "Gross offer price." },
+          "pricePerUnit": { "type": "number" },
+          "impliedCapRate": { "type": "number" },
+          "earnestMoney": { "type": "number", "description": "Earnest money deposit." },
+          "earnestMoneyPct": { "type": "number", "description": "EMD as percentage of price." },
+          "earnestMoneyStructure": { "type": "string", "enum": ["day-1-hard", "hard-after-dd", "refundable", "mixed"], "description": "EMD hardening structure." },
+          "ddPeriod_days": { "type": "integer", "description": "Due diligence period in days." },
+          "financingType": { "type": "string", "enum": ["all-cash", "hard-loan-commitment", "contingent-loan", "balance-sheet"], "description": "Financing structure." },
+          "financingContingency": { "type": "boolean", "description": "Whether offer has financing contingency." },
+          "closingTimeline_days": { "type": "integer", "description": "Target closing timeline in days from PSA execution." },
+          "retradeRisk": { "type": "string", "enum": ["LOW", "MEDIUM", "MEDIUM_HIGH", "HIGH"], "description": "Assessed retrade risk." },
+          "closingCertainty": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW"], "description": "Assessed certainty of close." },
+          "riskAdjustedNetProceeds": { "type": "number", "description": "Net proceeds adjusted for retrade probability and closing risk." },
+          "ranking": { "type": "integer", "description": "Overall ranking (1 = best).", "minimum": 1 },
+          "specialConditions": {
+            "type": "array",
+            "description": "Special conditions or contingencies in the offer.",
+            "items": { "type": "string" }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "selectedBuyer": {
+      "type": "object",
+      "description": "Selected buyer profile with offer terms and assessment.",
+      "required": ["buyerName", "offerPrice", "selectionRationale"],
+      "properties": {
+        "buyerName": { "type": "string" },
+        "firmName": { "type": "string" },
+        "buyerSegment": { "type": "string" },
+        "offerPrice": { "type": "number" },
+        "earnestMoney": { "type": "number" },
+        "financingType": { "type": "string" },
+        "financingContingency": { "type": "boolean" },
+        "ddPeriod_days": { "type": "integer" },
+        "closingTimeline_days": { "type": "integer" },
+        "selectionRationale": { "type": "string", "description": "Narrative rationale for selecting this buyer." },
+        "buyerTrackRecord": { "type": "string", "description": "Buyer's recent transaction history and reputation." },
+        "backupBuyer": {
+          "type": "object",
+          "description": "Backup buyer in case primary buyer fails to close.",
+          "properties": {
+            "buyerName": { "type": "string" },
+            "offerPrice": { "type": "number" },
+            "status": { "type": "string", "enum": ["WARM", "COLD", "NOT_IDENTIFIED"] }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "psaStatus": {
+      "type": "object",
+      "description": "PSA execution status with key terms and timeline.",
+      "required": ["status", "keyTerms"],
+      "properties": {
+        "status": { "type": "string", "enum": ["NEGOTIATING", "EXECUTED", "AMENDED", "TERMINATED"], "description": "Current PSA status." },
+        "executionDate": { "type": "string", "format": "date", "description": "ISO 8601 PSA execution date." },
+        "keyTerms": {
+          "type": "object",
+          "description": "Key PSA terms.",
+          "required": ["purchasePrice", "earnestMoney", "ddPeriodEnd", "closingDate"],
+          "properties": {
+            "purchasePrice": { "type": "number" },
+            "earnestMoney": { "type": "number" },
+            "emdHardeningSchedule": {
+              "type": "array",
+              "description": "EMD hardening milestones.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "date": { "type": "string", "format": "date" },
+                  "amount": { "type": "number" },
+                  "trigger": { "type": "string" }
+                },
+                "additionalProperties": true
+              }
+            },
+            "ddPeriodEnd": { "type": "string", "format": "date" },
+            "closingDate": { "type": "string", "format": "date" },
+            "asIsSale": { "type": "boolean", "description": "Whether sale is on an as-is basis." },
+            "sellerRepsScope": { "type": "string", "description": "Scope of seller representations (knowledge-qualified, etc.)." },
+            "survivalPeriod_months": { "type": "integer", "description": "Rep survival period in months." },
+            "sellerAssignmentRights": { "type": "boolean", "description": "Whether seller has assignment rights (for 1031)." },
+            "liquidatedDamages": { "type": "boolean", "description": "Whether buyer default triggers liquidated damages (EMD forfeiture)." }
+          },
+          "additionalProperties": true
+        },
+        "amendments": {
+          "type": "array",
+          "description": "PSA amendments (if any).",
+          "items": {
+            "type": "object",
+            "properties": {
+              "amendmentNumber": { "type": "integer" },
+              "date": { "type": "string", "format": "date" },
+              "description": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "retradeRiskProfile": {
+      "type": "object",
+      "description": "Retrade risk assessment for the selected buyer.",
+      "required": ["overallRisk", "riskFactors"],
+      "properties": {
+        "overallRisk": { "type": "string", "enum": ["LOW", "MEDIUM", "MEDIUM_HIGH", "HIGH"] },
+        "riskFactors": {
+          "type": "array",
+          "description": "Individual risk factors contributing to retrade risk.",
+          "items": {
+            "type": "object",
+            "required": ["factor", "severity", "mitigation"],
+            "properties": {
+              "factor": { "type": "string" },
+              "severity": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"] },
+              "mitigation": { "type": "string", "description": "PSA provision or strategy mitigating this risk." }
+            },
+            "additionalProperties": true
+          }
+        },
+        "financingContingencyRisk": { "type": "string", "description": "Assessment of financing contingency risk." },
+        "buyerRetradeHistory": { "type": "string", "description": "Known retrade history of the buyer." }
+      },
+      "additionalProperties": true
+    },
+    "offerProcess": {
+      "type": "object",
+      "description": "Summary of the offer process.",
+      "properties": {
+        "totalOffersReceived": { "type": "integer" },
+        "qualifiedOffers": { "type": "integer" },
+        "bestAndFinalRound": { "type": "boolean" },
+        "processTimeline_days": { "type": "integer", "description": "Total days from call-for-offers to buyer selection." }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

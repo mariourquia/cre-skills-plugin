@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/strategy-pipeline-data.schema.json",
+  "title": "Investment Strategy Phase 4 -- Pipeline Management Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the pipeline management phase. Covers funnel analysis, conversion rates, deal velocity, deployment forecasts, quick screen results, and dead deal patterns.",
+  "type": "object",
+  "required": ["funnelSnapshot", "deploymentForecast", "quickScreenResults"],
+  "properties": {
+    "funnelSnapshot": {
+      "type": "object",
+      "description": "Current pipeline funnel with counts, values, and conversion rates.",
+      "required": ["stages", "totalActivDeals", "weightedPipelineValue"],
+      "properties": {
+        "stages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["stage", "count", "grossValue"],
+            "properties": {
+              "stage": { "type": "string" },
+              "count": { "type": "integer" },
+              "grossValue": { "type": "number" },
+              "weightedValue": { "type": "number" },
+              "equityValue": { "type": "number" },
+              "avgDaysInStage": { "type": "number" },
+              "conversionToNextPct": { "type": "number" },
+              "benchmarkConversion": { "type": "number" },
+              "status": { "type": "string", "enum": ["green", "yellow", "red"] }
+            }
+          }
+        },
+        "totalActivDeals": { "type": "integer" },
+        "totalPipelineValue": { "type": "number" },
+        "weightedPipelineValue": { "type": "number" },
+        "overallWinRate": { "type": "number" }
+      }
+    },
+    "conversionAnalysis": {
+      "type": "object",
+      "description": "Conversion rate analysis by stage, property type, MSA, and channel.",
+      "properties": {
+        "byStage": { "type": "array", "items": { "type": "object" } },
+        "byPropertyType": { "type": "array", "items": { "type": "object" } },
+        "byMsa": { "type": "array", "items": { "type": "object" } },
+        "byChannel": { "type": "array", "items": { "type": "object" } },
+        "bottlenecks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "transition": { "type": "string" },
+              "conversionRate": { "type": "number" },
+              "benchmark": { "type": "number" },
+              "severity": { "type": "string", "enum": ["critical", "warning", "watch"] },
+              "possibleCauses": { "type": "array", "items": { "type": "string" } },
+              "interventions": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    "velocityAnalysis": {
+      "type": "object",
+      "description": "Deal velocity metrics and stale deal identification.",
+      "properties": {
+        "stageVelocity": { "type": "array", "items": { "type": "object" } },
+        "totalVelocityAvgDays": { "type": "number" },
+        "velocityTrend": { "type": "string", "enum": ["improving", "stable", "worsening"] },
+        "staleDeals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "dealId": { "type": "string" },
+              "stage": { "type": "string" },
+              "daysInStage": { "type": "integer" },
+              "medianForStage": { "type": "integer" }
+            }
+          }
+        }
+      }
+    },
+    "deploymentForecast": {
+      "type": "object",
+      "description": "Deployment forecast based on pipeline and velocity.",
+      "required": ["remainingTarget", "pipelineCoverageRatio", "pacingStatus"],
+      "properties": {
+        "remainingTarget": { "type": "number" },
+        "pipelineCoverageRatio": { "type": "number" },
+        "forecast30Day": { "type": "number" },
+        "forecast90Day": { "type": "number" },
+        "forecast180Day": { "type": "number" },
+        "pacingStatus": { "type": "string", "enum": ["on_track", "behind", "ahead", "critical"] },
+        "pacingByPeriod": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+    "quickScreenResults": {
+      "type": "array",
+      "description": "Quick screen KEEP/KILL/CONDITIONAL verdicts.",
+      "items": {
+        "type": "object",
+        "required": ["dealId", "verdict"],
+        "properties": {
+          "dealId": { "type": "string" },
+          "propertyName": { "type": "string" },
+          "verdict": { "type": "string", "enum": ["KEEP", "KILL", "CONDITIONAL"] },
+          "compositeScore": { "type": "number" },
+          "goingInCapRate": { "type": "number" },
+          "estimatedUnleveredIrr": { "type": "number" },
+          "estimatedLeveredIrr": { "type": "number" },
+          "redFlagCount": { "type": "integer" },
+          "criticalFlags": { "type": "array", "items": { "type": "string" } },
+          "keyAssumptions": { "type": "array", "items": { "type": "string" } },
+          "rationale": { "type": "string" }
+        }
+      }
+    },
+    "deadDealAnalysis": {
+      "type": "object",
+      "description": "Dead deal patterns and recommendations.",
+      "properties": {
+        "totalKilled": { "type": "integer" },
+        "byReason": { "type": "array", "items": { "type": "object" } },
+        "preventableKillsPct": { "type": "number" },
+        "lateStageKillPatterns": { "type": "array", "items": { "type": "string" } },
+        "recommendations": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "pipelineHealth": {
+      "type": "object",
+      "description": "Overall pipeline health assessment.",
+      "properties": {
+        "overallStatus": { "type": "string", "enum": ["healthy", "adequate", "strained", "critical"] },
+        "deploymentPace": { "type": "string", "enum": ["on_track", "behind", "ahead", "critical"] },
+        "alerts": { "type": "array", "items": { "type": "object" } }
+      }
+    }
+  }
+}

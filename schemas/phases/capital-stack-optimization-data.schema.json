@@ -1,0 +1,270 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/capital-stack-optimization-data.schema.json",
+  "title": "Capital Stack Phase 5 -- Optimization Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the optimization phase. Covers capital structure alternatives with WACC, stress test results, covenant sensitivity, and return profiles.",
+  "type": "object",
+  "required": [
+    "capitalStructureAlternatives",
+    "recommendedStructure",
+    "stressTestResults",
+    "returnProfile",
+    "covenantSensitivity"
+  ],
+  "properties": {
+    "capitalStructureAlternatives": {
+      "type": "array",
+      "description": "3-5 capital structure alternatives with distinct tranche configurations.",
+      "minItems": 3,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": ["alternativeId", "name", "tranches", "wacc", "returnMetrics"],
+        "properties": {
+          "alternativeId": {
+            "type": "string",
+            "description": "Unique identifier for this alternative (e.g., 'alt-1-conservative')."
+          },
+          "name": {
+            "type": "string",
+            "description": "Descriptive name (e.g., 'Conservative - Agency Fixed', 'Aggressive - Bridge + Mezz')."
+          },
+          "tranches": {
+            "type": "array",
+            "description": "All tranches in this alternative.",
+            "items": {
+              "type": "object",
+              "required": ["trancheName", "amount", "pctOfStack", "cost"],
+              "properties": {
+                "trancheName": { "type": "string" },
+                "amount": { "type": "number" },
+                "pctOfStack": { "type": "number", "description": "Percentage of total capitalization (0-1)." },
+                "cost": { "type": "number", "description": "Cost of this tranche (rate for debt, required return for equity)." },
+                "costType": { "type": "string", "enum": ["interestRate", "allInRate", "requiredReturn", "preferredReturn"] },
+                "provider": { "type": "string" }
+              }
+            }
+          },
+          "wacc": {
+            "type": "number",
+            "description": "Weighted average cost of capital for this alternative."
+          },
+          "spreadToUnleveredYield": {
+            "type": "number",
+            "description": "Spread between unlevered yield (cap rate) and WACC in bps. Positive = positive leverage."
+          },
+          "returnMetrics": {
+            "type": "object",
+            "required": ["lpIrr", "lpEquityMultiple", "cashOnCashYear1"],
+            "properties": {
+              "lpIrr": { "type": "number", "description": "LP internal rate of return." },
+              "lpEquityMultiple": { "type": "number", "description": "LP equity multiple." },
+              "cashOnCashYear1": { "type": "number", "description": "Year 1 cash-on-cash return." },
+              "gpPromotePct": { "type": "number", "description": "GP promote earned as percentage of profits." },
+              "totalReturnOnEquity": { "type": "number" }
+            }
+          },
+          "recommended": {
+            "type": "boolean",
+            "description": "Whether this is the recommended alternative."
+          },
+          "rationale": {
+            "type": "string",
+            "description": "Why this alternative was or was not recommended."
+          }
+        }
+      }
+    },
+    "recommendedStructure": {
+      "type": "object",
+      "description": "The recommended optimal capital structure with full detail.",
+      "required": ["alternativeId", "tranches", "wacc", "returnProfile", "totalCapitalization"],
+      "properties": {
+        "alternativeId": { "type": "string" },
+        "tranches": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["trancheName", "amount", "pctOfStack", "cost"],
+            "properties": {
+              "trancheName": { "type": "string" },
+              "amount": { "type": "number" },
+              "pctOfStack": { "type": "number" },
+              "cost": { "type": "number" },
+              "terms": { "type": "string", "description": "Key terms summary for this tranche." },
+              "provider": { "type": "string" }
+            }
+          }
+        },
+        "wacc": { "type": "number" },
+        "returnProfile": {
+          "type": "object",
+          "required": ["lpIrr", "lpEquityMultiple", "cashOnCashYear1"],
+          "properties": {
+            "lpIrr": { "type": "number" },
+            "lpEquityMultiple": { "type": "number" },
+            "cashOnCashYear1": { "type": "number" },
+            "gpPromotePct": { "type": "number" },
+            "blendedCostOfCapital": { "type": "number" }
+          }
+        },
+        "totalCapitalization": { "type": "number" },
+        "leverageMetrics": {
+          "type": "object",
+          "properties": {
+            "seniorLTV": { "type": "number" },
+            "combinedLTV": { "type": "number" },
+            "dscr": { "type": "number" },
+            "debtYield": { "type": "number" }
+          }
+        }
+      }
+    },
+    "stressTestResults": {
+      "type": "object",
+      "description": "Stress test results across NOI, rate, and cap rate scenarios.",
+      "required": ["noiStress", "rateStress", "capRateStress", "combinedStress"],
+      "properties": {
+        "noiStress": {
+          "type": "array",
+          "description": "NOI decline scenarios and impact on DSCR and returns.",
+          "items": {
+            "type": "object",
+            "required": ["noiDeclinePct", "dscr", "debtYield", "covenantStatus"],
+            "properties": {
+              "noiDeclinePct": { "type": "number", "description": "NOI decline as percentage (e.g., 0.10 = 10% decline)." },
+              "dscr": { "type": "number" },
+              "debtYield": { "type": "number" },
+              "covenantStatus": { "type": "string", "enum": ["PASS", "WATCH", "BREACH"] },
+              "lpIrrImpact": { "type": "number" },
+              "cashTrapTriggered": { "type": "boolean" }
+            }
+          }
+        },
+        "rateStress": {
+          "type": "array",
+          "description": "Interest rate increase scenarios (relevant for floating rate or refi risk).",
+          "items": {
+            "type": "object",
+            "required": ["rateIncreaseBps", "newAllInRate", "dscr", "covenantStatus"],
+            "properties": {
+              "rateIncreaseBps": { "type": "number" },
+              "newAllInRate": { "type": "number" },
+              "dscr": { "type": "number" },
+              "covenantStatus": { "type": "string", "enum": ["PASS", "WATCH", "BREACH"] },
+              "annualDebtServiceIncrease": { "type": "number" },
+              "lpIrrImpact": { "type": "number" }
+            }
+          }
+        },
+        "capRateStress": {
+          "type": "array",
+          "description": "Cap rate expansion scenarios and impact on LTV and exit returns.",
+          "items": {
+            "type": "object",
+            "required": ["capRateExpansionBps", "impliedValue", "ltvAtStress"],
+            "properties": {
+              "capRateExpansionBps": { "type": "number" },
+              "impliedValue": { "type": "number" },
+              "ltvAtStress": { "type": "number" },
+              "ltvCovenantStatus": { "type": "string", "enum": ["PASS", "WATCH", "BREACH"] },
+              "refinanceGap": { "type": "number", "description": "Gap between loan balance and value at maturity." },
+              "exitIrrImpact": { "type": "number" }
+            }
+          }
+        },
+        "combinedStress": {
+          "type": "object",
+          "description": "Combined stress scenario (NOI decline + rate increase + cap rate expansion).",
+          "required": ["scenarioName", "dscr", "ltv", "covenantStatus"],
+          "properties": {
+            "scenarioName": { "type": "string", "description": "e.g., '10% NOI decline + 200bps rate increase + 50bps cap rate expansion'" },
+            "noiDeclinePct": { "type": "number" },
+            "rateIncreaseBps": { "type": "number" },
+            "capRateExpansionBps": { "type": "number" },
+            "dscr": { "type": "number" },
+            "ltv": { "type": "number" },
+            "covenantStatus": { "type": "string", "enum": ["PASS", "WATCH", "BREACH"] },
+            "lpIrr": { "type": "number" },
+            "outcome": { "type": "string", "description": "Summary of the combined stress outcome." }
+          }
+        }
+      }
+    },
+    "returnProfile": {
+      "type": "object",
+      "description": "Return metrics at the recommended structure.",
+      "required": ["lpIrr", "lpEquityMultiple", "cashOnCashYear1", "wacc"],
+      "properties": {
+        "lpIrr": { "type": "number" },
+        "lpEquityMultiple": { "type": "number" },
+        "cashOnCashYear1": { "type": "number" },
+        "gpPromotePct": { "type": "number" },
+        "wacc": { "type": "number" },
+        "spreadToCapRate": { "type": "number", "description": "Cap rate minus WACC in bps." },
+        "positiveLeverage": { "type": "boolean" },
+        "returnAttribution": {
+          "type": "array",
+          "description": "Return contribution by each tranche.",
+          "items": {
+            "type": "object",
+            "required": ["trancheName", "irrContribution"],
+            "properties": {
+              "trancheName": { "type": "string" },
+              "irrContribution": { "type": "number", "description": "IRR contribution from this tranche in bps." },
+              "leverageEffect": { "type": "string", "enum": ["positive", "neutral", "negative"] }
+            }
+          }
+        }
+      }
+    },
+    "covenantSensitivity": {
+      "type": "object",
+      "description": "Breakeven analysis for each covenant at the recommended structure.",
+      "required": ["dscrBreakeven", "debtYieldBreakeven"],
+      "properties": {
+        "dscrBreakeven": {
+          "type": "object",
+          "description": "NOI level at which DSCR covenant is breached.",
+          "required": ["covenantMinimum", "currentDSCR", "breakevenNOI", "cushionPct"],
+          "properties": {
+            "covenantMinimum": { "type": "number" },
+            "currentDSCR": { "type": "number" },
+            "breakevenNOI": { "type": "number" },
+            "cushionPct": { "type": "number", "description": "Percentage NOI can decline before DSCR breach." }
+          }
+        },
+        "debtYieldBreakeven": {
+          "type": "object",
+          "description": "NOI level at which debt yield covenant is breached.",
+          "required": ["covenantMinimum", "currentDebtYield", "breakevenNOI", "cushionPct"],
+          "properties": {
+            "covenantMinimum": { "type": "number" },
+            "currentDebtYield": { "type": "number" },
+            "breakevenNOI": { "type": "number" },
+            "cushionPct": { "type": "number" }
+          }
+        },
+        "ltvBreakeven": {
+          "type": "object",
+          "description": "Value decline at which LTV covenant is breached.",
+          "properties": {
+            "covenantMaximum": { "type": "number" },
+            "currentLTV": { "type": "number" },
+            "breakevenValue": { "type": "number" },
+            "cushionPct": { "type": "number", "description": "Percentage value can decline before LTV breach." }
+          }
+        },
+        "cashTrapBreakeven": {
+          "type": "object",
+          "description": "NOI level at which cash trap is triggered.",
+          "properties": {
+            "trapTriggerDSCR": { "type": "number" },
+            "breakevenNOI": { "type": "number" },
+            "cushionPct": { "type": "number" }
+          }
+        }
+      }
+    }
+  }
+}

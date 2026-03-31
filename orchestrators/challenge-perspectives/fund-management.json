@@ -1,0 +1,78 @@
+{
+  "pipelineId": "fund-management",
+  "perspectives": [
+    {
+      "perspectiveId": "lp-fiduciary",
+      "name": "LP Fiduciary",
+      "question": "Are fees eating alpha?",
+      "tier": 1,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "management-fee-drag-on-net-returns",
+        "gross-to-net-spread-vs-peers",
+        "organizational-expense-overruns",
+        "transaction-fee-offset-compliance",
+        "carry-accrual-vs-realized-distributions",
+        "co-invest-fee-arbitrage",
+        "side-letter-fee-breaks-impact-on-non-mfn-lps"
+      ],
+      "challengeThreshold": "Gross-to-net IRR spread exceeds 300bps or management fee drag on uninvested capital exceeds 50bps annualized"
+    },
+    {
+      "perspectiveId": "pacing-risk-analyst",
+      "name": "Pacing Risk Analyst",
+      "question": "Over-deploying into late-cycle?",
+      "tier": 1,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "deployment-pace-vs-market-cycle-position",
+        "j-curve-depth-and-recovery-timeline",
+        "vintage-year-concentration",
+        "entry-cap-rate-vs-historical-spreads",
+        "recycling-aggression-during-late-cycle",
+        "management-fee-pressure-driving-premature-deployment",
+        "opportunity-cost-of-dry-powder"
+      ],
+      "challengeThreshold": "Deployment pace exceeds target by 20%+ AND market cycle indicators suggest late-cycle (cap rate compression, elevated construction, rising rates)"
+    },
+    {
+      "perspectiveId": "regulatory-compliance",
+      "name": "Regulatory Compliance",
+      "question": "ERISA plan asset rules? CFIUS?",
+      "tier": 2,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "erisa-25-percent-test-proximity",
+        "vcoc-reoc-exemption-maintenance",
+        "cfius-filing-requirements-for-foreign-lps",
+        "form-pf-reporting-obligations",
+        "form-d-amendment-timeliness",
+        "state-blue-sky-compliance",
+        "firpta-withholding-accuracy",
+        "anti-money-laundering-ongoing-monitoring",
+        "side-letter-mfn-cascade-compliance"
+      ],
+      "challengeThreshold": "ERISA benefit plan investors exceed 20% of fund (approaching 25% trigger) OR foreign investor concentration exceeds 30% without CFIUS analysis"
+    },
+    {
+      "perspectiveId": "concentration-risk",
+      "name": "Concentration Risk",
+      "question": "Diversified across vintage, geography, asset type?",
+      "tier": 2,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "single-asset-concentration-vs-ips-limit",
+        "geographic-concentration-hhi",
+        "asset-type-concentration",
+        "vintage-year-clustering",
+        "single-market-exposure",
+        "tenant-credit-concentration-across-portfolio",
+        "debt-maturity-clustering",
+        "lp-concentration-risk-single-lp-dominance"
+      ],
+      "challengeThreshold": "Any single asset exceeds 20% of fund NAV OR top 3 geographies exceed 60% of deployed capital OR single vintage year exceeds 40% of deployments"
+    }
+  ],
+  "synthesisModel": "claude-opus-4-6[1m]",
+  "verdictReconciliation": "Challenge verdict overrides pipeline verdict if it differs. LP Fiduciary and Pacing Risk perspectives carry veto weight on DEPLOY verdicts."
+}

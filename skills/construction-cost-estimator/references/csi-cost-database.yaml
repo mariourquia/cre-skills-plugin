@@ -1,0 +1,925 @@
+# CSI MasterFormat Construction Cost Database
+# Base $/SF ranges by division, asset type, construction type, and finish level
+# Source: National averages based on 2024-2025 RSMeans, ENR, and institutional project data
+# These are pre-regional-adjustment figures. Apply regional cost factors before use.
+#
+# Usage: Look up division -> asset_type -> construction_type -> finish_level
+# All values in USD per gross square foot unless noted otherwise
+
+metadata:
+  version: "2025.1"
+  baseline_year: 2024
+  baseline_quarter: Q4
+  cost_index_source: "RSMeans national average, ENR BCI"
+  notes: >
+    Ranges represent the 25th to 75th percentile of observed project costs.
+    Actual costs will vary based on project-specific conditions, subcontractor
+    availability, procurement strategy, and market timing. Use as order-of-magnitude
+    guidance for conceptual and schematic design phase estimates.
+
+divisions:
+  "01_general_requirements":
+    description: "General conditions, temporary facilities, bonds, permits, testing, cleanup"
+    typical_pct_of_hard: "8-12%"
+    notes: "Calculated as % of trade costs (divisions 02-33). Higher for constrained urban sites, prevailing wage projects, and long-duration projects."
+    by_asset_type:
+      multifamily:
+        wood_frame:
+          value: { low: 9.00, mid: 12.00, high: 15.00 }
+          standard: { low: 11.00, mid: 14.50, high: 18.00 }
+          premium: { low: 14.00, mid: 18.00, high: 22.00 }
+          luxury: { low: 18.00, mid: 23.00, high: 28.00 }
+        steel:
+          value: { low: 14.00, mid: 18.00, high: 22.00 }
+          standard: { low: 17.00, mid: 22.00, high: 27.00 }
+          premium: { low: 21.00, mid: 27.00, high: 33.00 }
+          luxury: { low: 26.00, mid: 33.00, high: 40.00 }
+        concrete:
+          value: { low: 16.00, mid: 21.00, high: 26.00 }
+          standard: { low: 20.00, mid: 26.00, high: 32.00 }
+          premium: { low: 25.00, mid: 32.00, high: 39.00 }
+          luxury: { low: 30.00, mid: 38.00, high: 46.00 }
+      office:
+        steel:
+          value: { low: 14.00, mid: 18.00, high: 22.00 }
+          standard: { low: 18.00, mid: 23.00, high: 28.00 }
+          premium: { low: 23.00, mid: 29.00, high: 35.00 }
+          luxury: { low: 28.00, mid: 36.00, high: 44.00 }
+        concrete:
+          value: { low: 17.00, mid: 22.00, high: 27.00 }
+          standard: { low: 22.00, mid: 28.00, high: 34.00 }
+          premium: { low: 28.00, mid: 35.00, high: 42.00 }
+          luxury: { low: 34.00, mid: 43.00, high: 52.00 }
+      industrial:
+        steel:
+          value: { low: 5.00, mid: 7.00, high: 9.00 }
+          standard: { low: 7.00, mid: 9.50, high: 12.00 }
+          premium: { low: 9.00, mid: 12.00, high: 15.00 }
+        concrete:
+          value: { low: 7.00, mid: 9.00, high: 11.00 }
+          standard: { low: 9.00, mid: 12.00, high: 15.00 }
+          premium: { low: 12.00, mid: 15.00, high: 18.00 }
+      retail:
+        steel:
+          value: { low: 8.00, mid: 11.00, high: 14.00 }
+          standard: { low: 11.00, mid: 14.50, high: 18.00 }
+          premium: { low: 15.00, mid: 19.00, high: 23.00 }
+        concrete:
+          value: { low: 10.00, mid: 13.00, high: 16.00 }
+          standard: { low: 14.00, mid: 18.00, high: 22.00 }
+          premium: { low: 18.00, mid: 23.00, high: 28.00 }
+      mixed_use:
+        steel:
+          value: { low: 13.00, mid: 17.00, high: 21.00 }
+          standard: { low: 17.00, mid: 22.00, high: 27.00 }
+          premium: { low: 22.00, mid: 28.00, high: 34.00 }
+          luxury: { low: 27.00, mid: 34.00, high: 41.00 }
+        concrete:
+          value: { low: 16.00, mid: 21.00, high: 26.00 }
+          standard: { low: 21.00, mid: 27.00, high: 33.00 }
+          premium: { low: 27.00, mid: 34.00, high: 41.00 }
+          luxury: { low: 33.00, mid: 42.00, high: 51.00 }
+
+  "02_existing_conditions":
+    description: "Demolition, hazmat abatement, site clearing, earthwork for existing structures"
+    notes: "Zero for greenfield ground-up. Significant for adaptive reuse and gut renovation."
+    by_asset_type:
+      multifamily:
+        wood_frame:
+          value: { low: 0.00, mid: 0.00, high: 0.50 }
+          standard: { low: 0.00, mid: 0.50, high: 1.50 }
+          premium: { low: 0.00, mid: 0.50, high: 2.00 }
+          luxury: { low: 0.00, mid: 0.50, high: 2.50 }
+        steel:
+          value: { low: 0.00, mid: 0.50, high: 2.00 }
+          standard: { low: 0.00, mid: 1.00, high: 3.00 }
+          premium: { low: 0.00, mid: 1.00, high: 3.50 }
+          luxury: { low: 0.00, mid: 1.50, high: 4.00 }
+        concrete:
+          value: { low: 0.00, mid: 0.50, high: 2.50 }
+          standard: { low: 0.00, mid: 1.00, high: 3.50 }
+          premium: { low: 0.00, mid: 1.50, high: 4.00 }
+          luxury: { low: 0.00, mid: 2.00, high: 5.00 }
+      office:
+        steel:
+          value: { low: 0.00, mid: 0.50, high: 2.00 }
+          standard: { low: 0.00, mid: 1.00, high: 3.00 }
+          premium: { low: 0.00, mid: 1.50, high: 4.00 }
+          luxury: { low: 0.00, mid: 2.00, high: 5.00 }
+        concrete:
+          value: { low: 0.00, mid: 1.00, high: 3.00 }
+          standard: { low: 0.00, mid: 1.50, high: 4.00 }
+          premium: { low: 0.00, mid: 2.00, high: 5.00 }
+          luxury: { low: 0.00, mid: 2.50, high: 6.00 }
+      industrial:
+        steel:
+          value: { low: 0.00, mid: 0.25, high: 1.00 }
+          standard: { low: 0.00, mid: 0.50, high: 1.50 }
+          premium: { low: 0.00, mid: 0.50, high: 2.00 }
+        concrete:
+          value: { low: 0.00, mid: 0.50, high: 1.50 }
+          standard: { low: 0.00, mid: 0.75, high: 2.00 }
+          premium: { low: 0.00, mid: 1.00, high: 2.50 }
+      retail:
+        steel:
+          value: { low: 0.00, mid: 0.25, high: 1.00 }
+          standard: { low: 0.00, mid: 0.50, high: 2.00 }
+          premium: { low: 0.00, mid: 1.00, high: 3.00 }
+        concrete:
+          value: { low: 0.00, mid: 0.50, high: 1.50 }
+          standard: { low: 0.00, mid: 1.00, high: 2.50 }
+          premium: { low: 0.00, mid: 1.50, high: 3.50 }
+      mixed_use:
+        steel:
+          value: { low: 0.00, mid: 0.50, high: 2.00 }
+          standard: { low: 0.00, mid: 1.00, high: 3.00 }
+          premium: { low: 0.00, mid: 1.50, high: 4.00 }
+          luxury: { low: 0.00, mid: 2.00, high: 5.00 }
+        concrete:
+          value: { low: 0.00, mid: 1.00, high: 3.00 }
+          standard: { low: 0.00, mid: 1.50, high: 4.00 }
+          premium: { low: 0.00, mid: 2.00, high: 5.00 }
+          luxury: { low: 0.00, mid: 2.50, high: 6.00 }
+
+  "03_concrete":
+    description: "Foundations, SOG, elevated slabs, structural concrete, rebar, formwork"
+    notes: "Dominant cost for concrete construction. Scales with stories and below-grade levels. Foundation cost varies significantly with soil conditions."
+    by_asset_type:
+      multifamily:
+        wood_frame:
+          value: { low: 8.00, mid: 12.00, high: 16.00 }
+          standard: { low: 10.00, mid: 14.00, high: 18.00 }
+          premium: { low: 12.00, mid: 16.00, high: 20.00 }
+          luxury: { low: 14.00, mid: 18.00, high: 22.00 }
+        steel:
+          value: { low: 18.00, mid: 24.00, high: 30.00 }
+          standard: { low: 22.00, mid: 28.00, high: 34.00 }
+          premium: { low: 26.00, mid: 33.00, high: 40.00 }
+          luxury: { low: 30.00, mid: 38.00, high: 46.00 }
+        concrete:
+          value: { low: 35.00, mid: 45.00, high: 55.00 }
+          standard: { low: 42.00, mid: 54.00, high: 66.00 }
+          premium: { low: 50.00, mid: 64.00, high: 78.00 }
+          luxury: { low: 58.00, mid: 74.00, high: 90.00 }
+      office:
+        steel:
+          value: { low: 20.00, mid: 26.00, high: 32.00 }
+          standard: { low: 24.00, mid: 31.00, high: 38.00 }
+          premium: { low: 30.00, mid: 38.00, high: 46.00 }
+          luxury: { low: 36.00, mid: 46.00, high: 56.00 }
+        concrete:
+          value: { low: 38.00, mid: 48.00, high: 58.00 }
+          standard: { low: 45.00, mid: 57.00, high: 69.00 }
+          premium: { low: 55.00, mid: 70.00, high: 85.00 }
+          luxury: { low: 65.00, mid: 82.00, high: 100.00 }
+      industrial:
+        steel:
+          value: { low: 6.00, mid: 9.00, high: 12.00 }
+          standard: { low: 8.00, mid: 11.00, high: 14.00 }
+          premium: { low: 10.00, mid: 14.00, high: 18.00 }
+        concrete:
+          value: { low: 10.00, mid: 14.00, high: 18.00 }
+          standard: { low: 14.00, mid: 18.00, high: 22.00 }
+          premium: { low: 18.00, mid: 23.00, high: 28.00 }
+      retail:
+        steel:
+          value: { low: 8.00, mid: 11.00, high: 14.00 }
+          standard: { low: 10.00, mid: 14.00, high: 18.00 }
+          premium: { low: 14.00, mid: 18.00, high: 22.00 }
+        concrete:
+          value: { low: 14.00, mid: 18.00, high: 22.00 }
+          standard: { low: 18.00, mid: 23.00, high: 28.00 }
+          premium: { low: 22.00, mid: 28.00, high: 34.00 }
+      mixed_use:
+        steel:
+          value: { low: 20.00, mid: 26.00, high: 32.00 }
+          standard: { low: 24.00, mid: 31.00, high: 38.00 }
+          premium: { low: 30.00, mid: 38.00, high: 46.00 }
+          luxury: { low: 36.00, mid: 46.00, high: 56.00 }
+        concrete:
+          value: { low: 36.00, mid: 46.00, high: 56.00 }
+          standard: { low: 44.00, mid: 56.00, high: 68.00 }
+          premium: { low: 52.00, mid: 66.00, high: 80.00 }
+          luxury: { low: 62.00, mid: 78.00, high: 95.00 }
+
+  "04_masonry":
+    description: "CMU, brick veneer, stone, masonry accessories"
+    notes: "Regional aesthetic norms drive material selection. Northeast/Midwest have higher masonry use. Premium finish adds natural stone."
+    by_asset_type:
+      multifamily:
+        wood_frame:
+          value: { low: 2.00, mid: 4.00, high: 6.00 }
+          standard: { low: 3.00, mid: 5.50, high: 8.00 }
+          premium: { low: 5.00, mid: 8.00, high: 11.00 }
+          luxury: { low: 8.00, mid: 12.00, high: 16.00 }
+        steel:
+          value: { low: 3.00, mid: 5.00, high: 7.00 }
+          standard: { low: 5.00, mid: 7.50, high: 10.00 }
+          premium: { low: 7.00, mid: 10.50, high: 14.00 }
+          luxury: { low: 10.00, mid: 15.00, high: 20.00 }
+        concrete:
+          value: { low: 2.00, mid: 4.00, high: 6.00 }
+          standard: { low: 4.00, mid: 6.50, high: 9.00 }
+          premium: { low: 6.00, mid: 9.50, high: 13.00 }
+          luxury: { low: 10.00, mid: 15.00, high: 20.00 }
+      office:
+        steel:
+          value: { low: 2.00, mid: 4.00, high: 6.00 }
+          standard: { low: 4.00, mid: 6.00, high: 8.00 }
+          premium: { low: 6.00, mid: 9.00, high: 12.00 }
+          luxury: { low: 10.00, mid: 14.00, high: 18.00 }
+        concrete:
+          value: { low: 1.50, mid: 3.00, high: 4.50 }
+          standard: { low: 3.00, mid: 5.00, high: 7.00 }
+          premium: { low: 5.00, mid: 8.00, high: 11.00 }
+          luxury: { low: 8.00, mid: 12.00, high: 16.00 }
+      industrial:
+        steel:
+          value: { low: 1.00, mid: 2.00, high: 3.00 }
+          standard: { low: 2.00, mid: 3.00, high: 4.00 }
+          premium: { low: 3.00, mid: 4.50, high: 6.00 }
+        concrete:
+          value: { low: 2.00, mid: 3.50, high: 5.00 }
+          standard: { low: 3.00, mid: 5.00, high: 7.00 }
+          premium: { low: 5.00, mid: 7.00, high: 9.00 }
+      retail:
+        steel:
+          value: { low: 2.00, mid: 3.50, high: 5.00 }
+          standard: { low: 3.50, mid: 5.50, high: 7.50 }
+          premium: { low: 6.00, mid: 9.00, high: 12.00 }
+        concrete:
+          value: { low: 2.50, mid: 4.00, high: 5.50 }
+          standard: { low: 4.00, mid: 6.00, high: 8.00 }
+          premium: { low: 6.50, mid: 9.50, high: 12.50 }
+      mixed_use:
+        steel:
+          value: { low: 2.50, mid: 4.50, high: 6.50 }
+          standard: { low: 4.50, mid: 7.00, high: 9.50 }
+          premium: { low: 7.00, mid: 10.50, high: 14.00 }
+          luxury: { low: 10.00, mid: 15.00, high: 20.00 }
+        concrete:
+          value: { low: 2.00, mid: 3.50, high: 5.00 }
+          standard: { low: 3.50, mid: 6.00, high: 8.50 }
+          premium: { low: 6.00, mid: 9.00, high: 12.00 }
+          luxury: { low: 9.00, mid: 13.50, high: 18.00 }
+
+  "05_metals":
+    description: "Structural steel, miscellaneous metals, stairs, railings, metal decking"
+    notes: "Dominant for steel construction type. Includes structural frame, joist, deck, and miscellaneous metals."
+    by_asset_type:
+      multifamily:
+        wood_frame:
+          value: { low: 2.00, mid: 3.50, high: 5.00 }
+          standard: { low: 3.00, mid: 5.00, high: 7.00 }
+          premium: { low: 4.00, mid: 6.50, high: 9.00 }
+          luxury: { low: 6.00, mid: 9.00, high: 12.00 }
+        steel:
+          value: { low: 22.00, mid: 28.00, high: 34.00 }
+          standard: { low: 26.00, mid: 33.00, high: 40.00 }
+          premium: { low: 32.00, mid: 40.00, high: 48.00 }
+          luxury: { low: 38.00, mid: 48.00, high: 58.00 }
+        concrete:
+          value: { low: 4.00, mid: 6.00, high: 8.00 }
+          standard: { low: 5.00, mid: 8.00, high: 11.00 }
+          premium: { low: 7.00, mid: 10.00, high: 13.00 }
+          luxury: { low: 9.00, mid: 13.00, high: 17.00 }
+      office:
+        steel:
+          value: { low: 25.00, mid: 32.00, high: 39.00 }
+          standard: { low: 30.00, mid: 38.00, high: 46.00 }
+          premium: { low: 38.00, mid: 48.00, high: 58.00 }
+          luxury: { low: 45.00, mid: 57.00, high: 69.00 }
+        concrete:
+          value: { low: 4.00, mid: 6.00, high: 8.00 }
+          standard: { low: 6.00, mid: 9.00, high: 12.00 }
+          premium: { low: 8.00, mid: 12.00, high: 16.00 }
+          luxury: { low: 10.00, mid: 15.00, high: 20.00 }
+      industrial:
+        steel:
+          value: { low: 14.00, mid: 18.00, high: 22.00 }
+          standard: { low: 18.00, mid: 23.00, high: 28.00 }
+          premium: { low: 22.00, mid: 28.00, high: 34.00 }
+        concrete:
+          value: { low: 2.00, mid: 4.00, high: 6.00 }
+          standard: { low: 4.00, mid: 6.00, high: 8.00 }
+          premium: { low: 6.00, mid: 8.00, high: 10.00 }
+      retail:
+        steel:
+          value: { low: 12.00, mid: 16.00, high: 20.00 }
+          standard: { low: 16.00, mid: 21.00, high: 26.00 }
+          premium: { low: 22.00, mid: 28.00, high: 34.00 }
+        concrete:
+          value: { low: 3.00, mid: 5.00, high: 7.00 }
+          standard: { low: 5.00, mid: 7.50, high: 10.00 }
+          premium: { low: 7.00, mid: 10.00, high: 13.00 }
+      mixed_use:
+        steel:
+          value: { low: 24.00, mid: 30.00, high: 36.00 }
+          standard: { low: 28.00, mid: 36.00, high: 44.00 }
+          premium: { low: 36.00, mid: 45.00, high: 54.00 }
+          luxury: { low: 42.00, mid: 53.00, high: 64.00 }
+        concrete:
+          value: { low: 4.00, mid: 6.00, high: 8.00 }
+          standard: { low: 6.00, mid: 9.00, high: 12.00 }
+          premium: { low: 8.00, mid: 12.00, high: 16.00 }
+          luxury: { low: 10.00, mid: 15.00, high: 20.00 }
+
+  "06_wood_plastics_composites":
+    description: "Rough carpentry, finish carpentry, millwork, casework, countertops, FRP"
+    notes: "Dominant for wood frame construction. Millwork and casework quality driven by finish level."
+    by_asset_type:
+      multifamily:
+        wood_frame:
+          value: { low: 18.00, mid: 24.00, high: 30.00 }
+          standard: { low: 22.00, mid: 29.00, high: 36.00 }
+          premium: { low: 28.00, mid: 36.00, high: 44.00 }
+          luxury: { low: 35.00, mid: 45.00, high: 55.00 }
+        steel:
+          value: { low: 4.00, mid: 6.00, high: 8.00 }
+          standard: { low: 6.00, mid: 9.00, high: 12.00 }
+          premium: { low: 8.00, mid: 12.00, high: 16.00 }
+          luxury: { low: 12.00, mid: 17.00, high: 22.00 }
+        concrete:
+          value: { low: 3.00, mid: 5.00, high: 7.00 }
+          standard: { low: 5.00, mid: 8.00, high: 11.00 }
+          premium: { low: 7.00, mid: 11.00, high: 15.00 }
+          luxury: { low: 11.00, mid: 16.00, high: 21.00 }
+      office:
+        steel:
+          value: { low: 3.00, mid: 5.00, high: 7.00 }
+          standard: { low: 5.00, mid: 8.00, high: 11.00 }
+          premium: { low: 8.00, mid: 12.00, high: 16.00 }
+          luxury: { low: 12.00, mid: 17.00, high: 22.00 }
+        concrete:
+          value: { low: 2.50, mid: 4.00, high: 5.50 }
+          standard: { low: 4.00, mid: 7.00, high: 10.00 }
+          premium: { low: 7.00, mid: 11.00, high: 15.00 }
+          luxury: { low: 11.00, mid: 16.00, high: 21.00 }
+      industrial:
+        steel:
+          value: { low: 1.00, mid: 2.00, high: 3.00 }
+          standard: { low: 2.00, mid: 3.00, high: 4.00 }
+          premium: { low: 3.00, mid: 4.50, high: 6.00 }
+        concrete:
+          value: { low: 1.00, mid: 2.00, high: 3.00 }
+          standard: { low: 2.00, mid: 3.00, high: 4.00 }
+          premium: { low: 3.00, mid: 4.50, high: 6.00 }
+      retail:
+        steel:
+          value: { low: 2.00, mid: 3.50, high: 5.00 }
+          standard: { low: 4.00, mid: 6.00, high: 8.00 }
+          premium: { low: 6.00, mid: 9.00, high: 12.00 }
+        concrete:
+          value: { low: 2.00, mid: 3.50, high: 5.00 }
+          standard: { low: 4.00, mid: 6.00, high: 8.00 }
+          premium: { low: 6.00, mid: 9.00, high: 12.00 }
+      mixed_use:
+        steel:
+          value: { low: 4.00, mid: 6.00, high: 8.00 }
+          standard: { low: 6.00, mid: 9.00, high: 12.00 }
+          premium: { low: 9.00, mid: 13.00, high: 17.00 }
+          luxury: { low: 13.00, mid: 18.00, high: 23.00 }
+        concrete:
+          value: { low: 3.00, mid: 5.00, high: 7.00 }
+          standard: { low: 5.00, mid: 8.00, high: 11.00 }
+          premium: { low: 8.00, mid: 12.00, high: 16.00 }
+          luxury: { low: 12.00, mid: 17.00, high: 22.00 }
+
+  "07_thermal_moisture_protection":
+    description: "Roofing, insulation, waterproofing, air barriers, sealants, fireproofing"
+    notes: "Climate zone and sustainability target drive insulation/envelope costs. Below-grade waterproofing adds $5-15/SF of below-grade wall area."
+    by_asset_type:
+      multifamily:
+        wood_frame:
+          value: { low: 5.00, mid: 7.50, high: 10.00 }
+          standard: { low: 7.00, mid: 10.00, high: 13.00 }
+          premium: { low: 9.00, mid: 13.00, high: 17.00 }
+          luxury: { low: 12.00, mid: 16.00, high: 20.00 }
+        steel:
+          value: { low: 6.00, mid: 9.00, high: 12.00 }
+          standard: { low: 8.00, mid: 12.00, high: 16.00 }
+          premium: { low: 11.00, mid: 15.00, high: 19.00 }
+          luxury: { low: 14.00, mid: 19.00, high: 24.00 }
+        concrete:
+          value: { low: 6.00, mid: 9.00, high: 12.00 }
+          standard: { low: 8.00, mid: 12.00, high: 16.00 }
+          premium: { low: 11.00, mid: 15.00, high: 19.00 }
+          luxury: { low: 14.00, mid: 19.00, high: 24.00 }
+      office:
+        steel:
+          value: { low: 6.00, mid: 9.00, high: 12.00 }
+          standard: { low: 8.00, mid: 12.00, high: 16.00 }
+          premium: { low: 11.00, mid: 15.00, high: 19.00 }
+          luxury: { low: 14.00, mid: 19.00, high: 24.00 }
+        concrete:
+          value: { low: 5.50, mid: 8.50, high: 11.50 }
+          standard: { low: 7.50, mid: 11.00, high: 14.50 }
+          premium: { low: 10.00, mid: 14.00, high: 18.00 }
+          luxury: { low: 13.00, mid: 18.00, high: 23.00 }
+      industrial:
+        steel:
+          value: { low: 4.00, mid: 6.00, high: 8.00 }
+          standard: { low: 5.50, mid: 8.00, high: 10.50 }
+          premium: { low: 7.00, mid: 10.00, high: 13.00 }
+        concrete:
+          value: { low: 4.00, mid: 6.00, high: 8.00 }
+          standard: { low: 5.50, mid: 8.00, high: 10.50 }
+          premium: { low: 7.00, mid: 10.00, high: 13.00 }
+      retail:
+        steel:
+          value: { low: 4.50, mid: 6.50, high: 8.50 }
+          standard: { low: 6.00, mid: 9.00, high: 12.00 }
+          premium: { low: 8.00, mid: 12.00, high: 16.00 }
+        concrete:
+          value: { low: 4.50, mid: 6.50, high: 8.50 }
+          standard: { low: 6.00, mid: 9.00, high: 12.00 }
+          premium: { low: 8.00, mid: 12.00, high: 16.00 }
+      mixed_use:
+        steel:
+          value: { low: 6.00, mid: 9.00, high: 12.00 }
+          standard: { low: 8.00, mid: 12.00, high: 16.00 }
+          premium: { low: 11.00, mid: 15.00, high: 19.00 }
+          luxury: { low: 14.00, mid: 19.00, high: 24.00 }
+        concrete:
+          value: { low: 5.50, mid: 8.50, high: 11.50 }
+          standard: { low: 7.50, mid: 11.00, high: 14.50 }
+          premium: { low: 10.00, mid: 14.00, high: 18.00 }
+          luxury: { low: 13.00, mid: 18.00, high: 23.00 }
+
+  "08_openings":
+    description: "Windows, doors, storefront, curtain wall, overhead doors, hardware"
+    notes: "Office and hospitality have higher window-to-wall ratios. Curtain wall systems cost 2-3x standard windows."
+    by_asset_type:
+      multifamily:
+        wood_frame:
+          value: { low: 5.00, mid: 8.00, high: 11.00 }
+          standard: { low: 7.00, mid: 11.00, high: 15.00 }
+          premium: { low: 10.00, mid: 15.00, high: 20.00 }
+          luxury: { low: 15.00, mid: 22.00, high: 29.00 }
+        steel:
+          value: { low: 7.00, mid: 11.00, high: 15.00 }
+          standard: { low: 10.00, mid: 15.00, high: 20.00 }
+          premium: { low: 14.00, mid: 21.00, high: 28.00 }
+          luxury: { low: 20.00, mid: 30.00, high: 40.00 }
+        concrete:
+          value: { low: 8.00, mid: 12.00, high: 16.00 }
+          standard: { low: 11.00, mid: 16.00, high: 21.00 }
+          premium: { low: 15.00, mid: 22.00, high: 29.00 }
+          luxury: { low: 22.00, mid: 33.00, high: 44.00 }
+      office:
+        steel:
+          value: { low: 10.00, mid: 15.00, high: 20.00 }
+          standard: { low: 14.00, mid: 20.00, high: 26.00 }
+          premium: { low: 20.00, mid: 30.00, high: 40.00 }
+          luxury: { low: 30.00, mid: 44.00, high: 58.00 }
+        concrete:
+          value: { low: 10.00, mid: 15.00, high: 20.00 }
+          standard: { low: 14.00, mid: 20.00, high: 26.00 }
+          premium: { low: 20.00, mid: 30.00, high: 40.00 }
+          luxury: { low: 30.00, mid: 44.00, high: 58.00 }
+      industrial:
+        steel:
+          value: { low: 2.00, mid: 3.50, high: 5.00 }
+          standard: { low: 3.00, mid: 5.00, high: 7.00 }
+          premium: { low: 5.00, mid: 7.50, high: 10.00 }
+        concrete:
+          value: { low: 2.00, mid: 3.50, high: 5.00 }
+          standard: { low: 3.00, mid: 5.00, high: 7.00 }
+          premium: { low: 5.00, mid: 7.50, high: 10.00 }
+      retail:
+        steel:
+          value: { low: 6.00, mid: 9.00, high: 12.00 }
+          standard: { low: 9.00, mid: 13.00, high: 17.00 }
+          premium: { low: 14.00, mid: 20.00, high: 26.00 }
+        concrete:
+          value: { low: 6.00, mid: 9.00, high: 12.00 }
+          standard: { low: 9.00, mid: 13.00, high: 17.00 }
+          premium: { low: 14.00, mid: 20.00, high: 26.00 }
+      mixed_use:
+        steel:
+          value: { low: 8.00, mid: 12.00, high: 16.00 }
+          standard: { low: 12.00, mid: 18.00, high: 24.00 }
+          premium: { low: 18.00, mid: 26.00, high: 34.00 }
+          luxury: { low: 26.00, mid: 38.00, high: 50.00 }
+        concrete:
+          value: { low: 8.00, mid: 12.00, high: 16.00 }
+          standard: { low: 12.00, mid: 18.00, high: 24.00 }
+          premium: { low: 18.00, mid: 26.00, high: 34.00 }
+          luxury: { low: 26.00, mid: 38.00, high: 50.00 }
+
+  "09_finishes":
+    description: "Drywall, painting, flooring, tile, acoustic ceilings, wall coverings"
+    notes: "Most variable division. Luxury can be 3-4x value. Hospitality and medical are finish-intensive."
+    by_asset_type:
+      multifamily:
+        wood_frame:
+          value: { low: 12.00, mid: 16.00, high: 20.00 }
+          standard: { low: 16.00, mid: 22.00, high: 28.00 }
+          premium: { low: 22.00, mid: 30.00, high: 38.00 }
+          luxury: { low: 32.00, mid: 44.00, high: 56.00 }
+        steel:
+          value: { low: 14.00, mid: 19.00, high: 24.00 }
+          standard: { low: 19.00, mid: 26.00, high: 33.00 }
+          premium: { low: 26.00, mid: 35.00, high: 44.00 }
+          luxury: { low: 38.00, mid: 52.00, high: 66.00 }
+        concrete:
+          value: { low: 14.00, mid: 19.00, high: 24.00 }
+          standard: { low: 19.00, mid: 26.00, high: 33.00 }
+          premium: { low: 26.00, mid: 35.00, high: 44.00 }
+          luxury: { low: 38.00, mid: 52.00, high: 66.00 }
+      office:
+        steel:
+          value: { low: 12.00, mid: 16.00, high: 20.00 }
+          standard: { low: 18.00, mid: 24.00, high: 30.00 }
+          premium: { low: 26.00, mid: 35.00, high: 44.00 }
+          luxury: { low: 38.00, mid: 50.00, high: 62.00 }
+        concrete:
+          value: { low: 12.00, mid: 16.00, high: 20.00 }
+          standard: { low: 18.00, mid: 24.00, high: 30.00 }
+          premium: { low: 26.00, mid: 35.00, high: 44.00 }
+          luxury: { low: 38.00, mid: 50.00, high: 62.00 }
+      industrial:
+        steel:
+          value: { low: 2.00, mid: 3.50, high: 5.00 }
+          standard: { low: 3.00, mid: 5.00, high: 7.00 }
+          premium: { low: 5.00, mid: 8.00, high: 11.00 }
+        concrete:
+          value: { low: 2.00, mid: 3.50, high: 5.00 }
+          standard: { low: 3.00, mid: 5.00, high: 7.00 }
+          premium: { low: 5.00, mid: 8.00, high: 11.00 }
+      retail:
+        steel:
+          value: { low: 6.00, mid: 9.00, high: 12.00 }
+          standard: { low: 10.00, mid: 14.00, high: 18.00 }
+          premium: { low: 16.00, mid: 22.00, high: 28.00 }
+        concrete:
+          value: { low: 6.00, mid: 9.00, high: 12.00 }
+          standard: { low: 10.00, mid: 14.00, high: 18.00 }
+          premium: { low: 16.00, mid: 22.00, high: 28.00 }
+      mixed_use:
+        steel:
+          value: { low: 12.00, mid: 17.00, high: 22.00 }
+          standard: { low: 18.00, mid: 24.00, high: 30.00 }
+          premium: { low: 24.00, mid: 33.00, high: 42.00 }
+          luxury: { low: 36.00, mid: 48.00, high: 60.00 }
+        concrete:
+          value: { low: 12.00, mid: 17.00, high: 22.00 }
+          standard: { low: 18.00, mid: 24.00, high: 30.00 }
+          premium: { low: 24.00, mid: 33.00, high: 42.00 }
+          luxury: { low: 36.00, mid: 48.00, high: 60.00 }
+
+  "10_specialties":
+    description: "Signage, toilet accessories, fire extinguishers, lockers, mailboxes, corner guards"
+    notes: "Relatively stable. Unit count drives cost in multifamily (mailboxes, unit signage)."
+    by_asset_type:
+      multifamily:
+        all_types:
+          value: { low: 1.00, mid: 1.50, high: 2.00 }
+          standard: { low: 1.50, mid: 2.50, high: 3.50 }
+          premium: { low: 2.50, mid: 3.50, high: 4.50 }
+          luxury: { low: 3.50, mid: 5.00, high: 6.50 }
+      office:
+        all_types:
+          value: { low: 1.00, mid: 1.50, high: 2.00 }
+          standard: { low: 1.50, mid: 2.50, high: 3.50 }
+          premium: { low: 2.50, mid: 3.50, high: 4.50 }
+          luxury: { low: 3.50, mid: 5.00, high: 6.50 }
+      industrial:
+        all_types:
+          value: { low: 0.25, mid: 0.50, high: 0.75 }
+          standard: { low: 0.50, mid: 0.75, high: 1.00 }
+          premium: { low: 0.75, mid: 1.00, high: 1.50 }
+      retail:
+        all_types:
+          value: { low: 0.50, mid: 1.00, high: 1.50 }
+          standard: { low: 1.00, mid: 1.50, high: 2.00 }
+          premium: { low: 1.50, mid: 2.50, high: 3.50 }
+      mixed_use:
+        all_types:
+          value: { low: 1.00, mid: 1.50, high: 2.00 }
+          standard: { low: 1.50, mid: 2.50, high: 3.50 }
+          premium: { low: 2.50, mid: 3.50, high: 4.50 }
+          luxury: { low: 3.50, mid: 5.00, high: 6.50 }
+
+  "11_equipment":
+    description: "Appliances, commercial kitchen, laundry, loading docks, waste handling"
+    notes: "Asset-type specific. High for multifamily (appliances) and hospitality (kitchen). Zero or minimal for industrial, office shell."
+    by_asset_type:
+      multifamily:
+        all_types:
+          value: { low: 2.00, mid: 3.50, high: 5.00 }
+          standard: { low: 3.50, mid: 5.50, high: 7.50 }
+          premium: { low: 5.00, mid: 8.00, high: 11.00 }
+          luxury: { low: 8.00, mid: 12.00, high: 16.00 }
+      office:
+        all_types:
+          value: { low: 0.25, mid: 0.50, high: 1.00 }
+          standard: { low: 0.50, mid: 1.00, high: 1.50 }
+          premium: { low: 1.00, mid: 1.50, high: 2.00 }
+          luxury: { low: 1.50, mid: 2.50, high: 3.50 }
+      industrial:
+        all_types:
+          value: { low: 0.50, mid: 1.00, high: 1.50 }
+          standard: { low: 1.00, mid: 1.50, high: 2.00 }
+          premium: { low: 1.50, mid: 2.50, high: 3.50 }
+      retail:
+        all_types:
+          value: { low: 0.25, mid: 0.50, high: 1.00 }
+          standard: { low: 0.50, mid: 1.00, high: 1.50 }
+          premium: { low: 1.00, mid: 2.00, high: 3.00 }
+      mixed_use:
+        all_types:
+          value: { low: 1.50, mid: 3.00, high: 4.50 }
+          standard: { low: 3.00, mid: 4.50, high: 6.00 }
+          premium: { low: 4.00, mid: 6.50, high: 9.00 }
+          luxury: { low: 6.00, mid: 9.50, high: 13.00 }
+
+  "12_furnishings":
+    description: "Window treatments, artwork, built-in furniture, casework, signage systems"
+    notes: "Zero for most commercial shells. Significant for hospitality and luxury multifamily amenity spaces."
+    by_asset_type:
+      multifamily:
+        all_types:
+          value: { low: 0.00, mid: 0.50, high: 1.00 }
+          standard: { low: 0.50, mid: 1.00, high: 2.00 }
+          premium: { low: 1.00, mid: 2.50, high: 4.00 }
+          luxury: { low: 3.00, mid: 5.00, high: 7.00 }
+      office:
+        all_types:
+          value: { low: 0.00, mid: 0.25, high: 0.50 }
+          standard: { low: 0.25, mid: 0.50, high: 1.00 }
+          premium: { low: 0.50, mid: 1.50, high: 2.50 }
+          luxury: { low: 2.00, mid: 4.00, high: 6.00 }
+      industrial:
+        all_types:
+          value: { low: 0.00, mid: 0.00, high: 0.25 }
+          standard: { low: 0.00, mid: 0.25, high: 0.50 }
+          premium: { low: 0.25, mid: 0.50, high: 1.00 }
+      retail:
+        all_types:
+          value: { low: 0.00, mid: 0.25, high: 0.50 }
+          standard: { low: 0.25, mid: 0.50, high: 1.00 }
+          premium: { low: 0.50, mid: 1.50, high: 2.50 }
+      mixed_use:
+        all_types:
+          value: { low: 0.00, mid: 0.50, high: 1.00 }
+          standard: { low: 0.50, mid: 1.00, high: 2.00 }
+          premium: { low: 1.00, mid: 2.50, high: 4.00 }
+          luxury: { low: 3.00, mid: 5.00, high: 7.00 }
+
+  "14_conveying_equipment":
+    description: "Elevators, escalators, dumbwaiters"
+    notes: "Binary cost. Required for buildings > 3 stories or per ADA. Cost per elevator $150K-$500K+ depending on speed, rise, cab finish."
+    lump_sum_per_elevator:
+      standard_hydraulic: { low: 75000, mid: 100000, high: 140000 }
+      standard_traction: { low: 150000, mid: 200000, high: 275000 }
+      high_speed_traction: { low: 275000, mid: 375000, high: 500000 }
+      premium_high_rise: { low: 400000, mid: 550000, high: 750000 }
+    escalator_per_unit: { low: 150000, mid: 200000, high: 300000 }
+    notes_per_sf: "Divide lump sum by gross SF to get $/SF. Typical: $1.50-$6.00/SF depending on building height and elevator count."
+
+  "21_fire_suppression":
+    description: "Wet sprinkler, dry sprinkler, standpipes, fire pumps, clean agent systems"
+    notes: "Required for most commercial occupancies per IBC. ESFR systems for high-pile storage in industrial cost more."
+    by_asset_type:
+      multifamily:
+        all_types:
+          value: { low: 3.00, mid: 4.00, high: 5.00 }
+          standard: { low: 3.50, mid: 4.50, high: 5.50 }
+          premium: { low: 4.00, mid: 5.00, high: 6.00 }
+          luxury: { low: 4.50, mid: 5.50, high: 7.00 }
+      office:
+        all_types:
+          value: { low: 3.00, mid: 4.00, high: 5.00 }
+          standard: { low: 3.50, mid: 4.50, high: 5.50 }
+          premium: { low: 4.00, mid: 5.50, high: 7.00 }
+          luxury: { low: 5.00, mid: 6.50, high: 8.00 }
+      industrial:
+        all_types:
+          value: { low: 2.00, mid: 3.00, high: 4.00 }
+          standard: { low: 3.00, mid: 4.00, high: 5.50 }
+          premium: { low: 4.00, mid: 5.50, high: 7.00 }
+      retail:
+        all_types:
+          value: { low: 2.50, mid: 3.50, high: 4.50 }
+          standard: { low: 3.00, mid: 4.00, high: 5.00 }
+          premium: { low: 3.50, mid: 5.00, high: 6.50 }
+      mixed_use:
+        all_types:
+          value: { low: 3.00, mid: 4.00, high: 5.00 }
+          standard: { low: 3.50, mid: 4.50, high: 5.50 }
+          premium: { low: 4.00, mid: 5.50, high: 7.00 }
+          luxury: { low: 5.00, mid: 6.50, high: 8.00 }
+
+  "22_plumbing":
+    description: "Domestic water, sanitary waste, storm drainage, fixtures, water heaters"
+    notes: "Fixture-count driven. Multifamily and hospitality have high fixture density. Medical has specialized waste requirements."
+    by_asset_type:
+      multifamily:
+        all_types:
+          value: { low: 8.00, mid: 11.00, high: 14.00 }
+          standard: { low: 10.00, mid: 14.00, high: 18.00 }
+          premium: { low: 13.00, mid: 18.00, high: 23.00 }
+          luxury: { low: 17.00, mid: 24.00, high: 31.00 }
+      office:
+        all_types:
+          value: { low: 4.00, mid: 6.00, high: 8.00 }
+          standard: { low: 6.00, mid: 8.00, high: 10.00 }
+          premium: { low: 7.00, mid: 10.00, high: 13.00 }
+          luxury: { low: 9.00, mid: 13.00, high: 17.00 }
+      industrial:
+        all_types:
+          value: { low: 2.00, mid: 3.00, high: 4.00 }
+          standard: { low: 3.00, mid: 4.00, high: 5.00 }
+          premium: { low: 4.00, mid: 5.50, high: 7.00 }
+      retail:
+        all_types:
+          value: { low: 3.00, mid: 4.50, high: 6.00 }
+          standard: { low: 4.50, mid: 6.50, high: 8.50 }
+          premium: { low: 6.00, mid: 8.50, high: 11.00 }
+      mixed_use:
+        all_types:
+          value: { low: 7.00, mid: 10.00, high: 13.00 }
+          standard: { low: 9.00, mid: 13.00, high: 17.00 }
+          premium: { low: 12.00, mid: 16.00, high: 20.00 }
+          luxury: { low: 15.00, mid: 21.00, high: 27.00 }
+
+  "23_hvac":
+    description: "Heating, ventilation, air conditioning, controls, building automation, ductwork"
+    notes: "Largest MEP division. System type by asset: packaged RTU (retail, industrial), split/VRF (multifamily), chilled water (large office, hospitality). Climate zone affects sizing."
+    by_asset_type:
+      multifamily:
+        all_types:
+          value: { low: 10.00, mid: 14.00, high: 18.00 }
+          standard: { low: 14.00, mid: 19.00, high: 24.00 }
+          premium: { low: 18.00, mid: 25.00, high: 32.00 }
+          luxury: { low: 24.00, mid: 33.00, high: 42.00 }
+      office:
+        all_types:
+          value: { low: 14.00, mid: 19.00, high: 24.00 }
+          standard: { low: 18.00, mid: 25.00, high: 32.00 }
+          premium: { low: 25.00, mid: 34.00, high: 43.00 }
+          luxury: { low: 34.00, mid: 45.00, high: 56.00 }
+      industrial:
+        all_types:
+          value: { low: 3.00, mid: 5.00, high: 7.00 }
+          standard: { low: 5.00, mid: 7.50, high: 10.00 }
+          premium: { low: 8.00, mid: 12.00, high: 16.00 }
+      retail:
+        all_types:
+          value: { low: 8.00, mid: 11.00, high: 14.00 }
+          standard: { low: 11.00, mid: 15.00, high: 19.00 }
+          premium: { low: 15.00, mid: 20.00, high: 25.00 }
+      mixed_use:
+        all_types:
+          value: { low: 12.00, mid: 17.00, high: 22.00 }
+          standard: { low: 16.00, mid: 22.00, high: 28.00 }
+          premium: { low: 22.00, mid: 30.00, high: 38.00 }
+          luxury: { low: 30.00, mid: 40.00, high: 50.00 }
+
+  "26_electrical":
+    description: "Power distribution, lighting, fire alarm, low voltage, telecom, generator"
+    notes: "Office and medical have higher power density. Data centers are 3-5x standard office."
+    by_asset_type:
+      multifamily:
+        all_types:
+          value: { low: 8.00, mid: 12.00, high: 16.00 }
+          standard: { low: 11.00, mid: 15.00, high: 19.00 }
+          premium: { low: 14.00, mid: 19.00, high: 24.00 }
+          luxury: { low: 18.00, mid: 25.00, high: 32.00 }
+      office:
+        all_types:
+          value: { low: 12.00, mid: 16.00, high: 20.00 }
+          standard: { low: 16.00, mid: 22.00, high: 28.00 }
+          premium: { low: 22.00, mid: 30.00, high: 38.00 }
+          luxury: { low: 30.00, mid: 40.00, high: 50.00 }
+      industrial:
+        all_types:
+          value: { low: 4.00, mid: 6.00, high: 8.00 }
+          standard: { low: 6.00, mid: 8.00, high: 10.00 }
+          premium: { low: 8.00, mid: 11.00, high: 14.00 }
+      retail:
+        all_types:
+          value: { low: 6.00, mid: 9.00, high: 12.00 }
+          standard: { low: 8.00, mid: 12.00, high: 16.00 }
+          premium: { low: 12.00, mid: 16.00, high: 20.00 }
+      mixed_use:
+        all_types:
+          value: { low: 10.00, mid: 14.00, high: 18.00 }
+          standard: { low: 14.00, mid: 19.00, high: 24.00 }
+          premium: { low: 18.00, mid: 25.00, high: 32.00 }
+          luxury: { low: 24.00, mid: 33.00, high: 42.00 }
+
+  "31_earthwork":
+    description: "Site excavation, grading, fill, compaction, shoring, dewatering"
+    notes: "Driven by site conditions and below-grade construction. Brownfield and constrained sites add 20-50%."
+    by_asset_type:
+      multifamily:
+        all_types:
+          value: { low: 2.00, mid: 3.50, high: 5.00 }
+          standard: { low: 3.00, mid: 5.00, high: 7.00 }
+          premium: { low: 4.00, mid: 6.00, high: 8.00 }
+          luxury: { low: 5.00, mid: 7.50, high: 10.00 }
+      office:
+        all_types:
+          value: { low: 2.00, mid: 3.50, high: 5.00 }
+          standard: { low: 3.00, mid: 5.00, high: 7.00 }
+          premium: { low: 4.00, mid: 6.00, high: 8.00 }
+          luxury: { low: 5.00, mid: 7.50, high: 10.00 }
+      industrial:
+        all_types:
+          value: { low: 1.50, mid: 2.50, high: 3.50 }
+          standard: { low: 2.50, mid: 3.50, high: 4.50 }
+          premium: { low: 3.50, mid: 5.00, high: 6.50 }
+      retail:
+        all_types:
+          value: { low: 1.50, mid: 2.50, high: 3.50 }
+          standard: { low: 2.50, mid: 4.00, high: 5.50 }
+          premium: { low: 3.50, mid: 5.00, high: 6.50 }
+      mixed_use:
+        all_types:
+          value: { low: 2.00, mid: 3.50, high: 5.00 }
+          standard: { low: 3.00, mid: 5.00, high: 7.00 }
+          premium: { low: 4.00, mid: 6.50, high: 9.00 }
+          luxury: { low: 5.00, mid: 8.00, high: 11.00 }
+
+  "32_exterior_improvements":
+    description: "Paving, curb/gutter, sidewalks, landscaping, site lighting, fencing, irrigation"
+    notes: "Surface parking is dominant cost here. Landscaping varies by jurisdiction requirements."
+    by_asset_type:
+      multifamily:
+        all_types:
+          value: { low: 3.00, mid: 5.00, high: 7.00 }
+          standard: { low: 4.00, mid: 6.50, high: 9.00 }
+          premium: { low: 6.00, mid: 9.00, high: 12.00 }
+          luxury: { low: 8.00, mid: 12.00, high: 16.00 }
+      office:
+        all_types:
+          value: { low: 3.00, mid: 5.00, high: 7.00 }
+          standard: { low: 4.50, mid: 7.00, high: 9.50 }
+          premium: { low: 6.00, mid: 9.00, high: 12.00 }
+          luxury: { low: 8.00, mid: 12.00, high: 16.00 }
+      industrial:
+        all_types:
+          value: { low: 3.00, mid: 5.00, high: 7.00 }
+          standard: { low: 4.00, mid: 6.00, high: 8.00 }
+          premium: { low: 5.00, mid: 7.50, high: 10.00 }
+      retail:
+        all_types:
+          value: { low: 4.00, mid: 6.00, high: 8.00 }
+          standard: { low: 5.00, mid: 7.50, high: 10.00 }
+          premium: { low: 7.00, mid: 10.00, high: 13.00 }
+      mixed_use:
+        all_types:
+          value: { low: 3.00, mid: 5.00, high: 7.00 }
+          standard: { low: 4.50, mid: 7.00, high: 9.50 }
+          premium: { low: 6.00, mid: 9.00, high: 12.00 }
+          luxury: { low: 8.00, mid: 12.00, high: 16.00 }
+
+  "33_utilities":
+    description: "Water mains, sanitary sewer, storm sewer, gas, electrical, telecom site connections"
+    notes: "Greenfield has highest connection costs. Infill may need capacity upgrades. Distance to mains is the key driver."
+    by_asset_type:
+      multifamily:
+        all_types:
+          value: { low: 2.00, mid: 3.50, high: 5.00 }
+          standard: { low: 3.00, mid: 4.50, high: 6.00 }
+          premium: { low: 3.50, mid: 5.00, high: 6.50 }
+          luxury: { low: 4.00, mid: 5.50, high: 7.00 }
+      office:
+        all_types:
+          value: { low: 2.00, mid: 3.50, high: 5.00 }
+          standard: { low: 3.00, mid: 4.50, high: 6.00 }
+          premium: { low: 3.50, mid: 5.00, high: 6.50 }
+          luxury: { low: 4.00, mid: 5.50, high: 7.00 }
+      industrial:
+        all_types:
+          value: { low: 1.50, mid: 3.00, high: 4.50 }
+          standard: { low: 2.50, mid: 4.00, high: 5.50 }
+          premium: { low: 3.50, mid: 5.00, high: 6.50 }
+      retail:
+        all_types:
+          value: { low: 1.50, mid: 3.00, high: 4.50 }
+          standard: { low: 2.50, mid: 4.00, high: 5.50 }
+          premium: { low: 3.00, mid: 4.50, high: 6.00 }
+      mixed_use:
+        all_types:
+          value: { low: 2.50, mid: 4.00, high: 5.50 }
+          standard: { low: 3.00, mid: 4.50, high: 6.00 }
+          premium: { low: 3.50, mid: 5.50, high: 7.50 }
+          luxury: { low: 4.00, mid: 6.00, high: 8.00 }
+
+# Parking Cost Overlay (separate from building divisions)
+parking:
+  surface:
+    per_space: { low: 3000, mid: 5000, high: 8000 }
+    notes: "Includes paving, striping, lighting, drainage, landscaping islands"
+  structured:
+    per_space: { low: 25000, mid: 35000, high: 50000 }
+    notes: "Above-grade precast or cast-in-place. Includes MEP, lighting, ventilation."
+  underground:
+    per_space: { low: 45000, mid: 60000, high: 85000 }
+    notes: "Below-grade. Includes waterproofing, ventilation, fire suppression, structural premium."
+  podium:
+    per_space: { low: 35000, mid: 45000, high: 60000 }
+    notes: "At-grade or partially below-grade with building above. Common for multifamily."

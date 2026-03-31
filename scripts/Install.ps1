@@ -46,8 +46,8 @@ Write-Cyan @"
 
 "@
 
-Write-Blue  "  Plugin Installer v2.0.0"
-Write-Dim   "  99 skills | 55 agents | 6 workflow chains"
+Write-Blue  "  Plugin Installer v2.5.0"
+Write-Dim   "  102 skills | 55 agents | 6 workflow chains"
 Write-Host  ""
 
 # ── Verify plugin files exist ───────────────────────────────────────

@@ -16,3 +16,22 @@ Available chains:
 4. **Disposition Pipeline**: dashboard -> strategy (sell/hold/refi) -> prep -> 1031 exchange
 5. **Development Pipeline**: land residual + entitlements -> proforma -> construction -> lease-up -> perm takeout
 6. **Fund Management**: formation -> pitch deck -> capital raise -> deploy -> quarterly update -> attribution
+
+## Programmatic Execution
+
+Workflow chains can also be executed programmatically via the engine modules in `orchestrators/engine/`:
+
+- **workflow-executor.mjs**: Parses workflow markdown files, builds a dependency graph, and executes steps in topological order with decision-gate evaluation and checkpoint persistence.
+  ```
+  node orchestrators/engine/workflow-executor.mjs --workflow deal-pipeline-acquisition --dry-run
+  node orchestrators/engine/workflow-executor.mjs --workflow capital-stack-assembly
+  node orchestrators/engine/workflow-executor.mjs --workflow deal-pipeline-acquisition --resume <workflowId>
+  ```
+
+- **handoff-router.mjs**: Routes data between orchestrator pipelines when a workflow completes, using the contracts defined in `orchestrators/engine/handoff-registry.json`.
+  ```
+  node orchestrators/engine/handoff-router.mjs --from acquisition --verdict PROCEED --dry-run
+  node orchestrators/engine/handoff-router.mjs --from hold-period --verdict EXIT
+  ```
+
+Both modules support `--test` for self-verification and can be imported as ESM for use in other engine components.

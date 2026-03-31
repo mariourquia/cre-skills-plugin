@@ -1,0 +1,470 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/hold-period-tenant-data.schema.json",
+  "title": "Hold Period Phase 6 — Tenant Relations & Operations Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the hold-period tenant relations phase. Covers the renewal retention pipeline with NPV analysis per tenant, WALT projection under renewal and non-renewal scenarios, work order and operations KPIs, and vendor performance scorecards.",
+  "type": "object",
+  "required": [
+    "retentionPipeline",
+    "waltProjection",
+    "operationsStatus",
+    "vendorPerformance"
+  ],
+  "properties": {
+    "retentionPipeline": {
+      "type": "object",
+      "description": "Active renewal and retention pipeline with NPV analysis.",
+      "required": ["reportingDate", "activeRenewalOpportunities", "retentionRateTarget", "retentionRateCurrent", "tenants"],
+      "properties": {
+        "reportingDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "activeRenewalOpportunities": {
+          "type": "integer",
+          "description": "Number of tenants currently in renewal negotiations or outreach.",
+          "minimum": 0
+        },
+        "retentionRateTarget": {
+          "type": "number",
+          "description": "Target retention rate for the hold period (0–1).",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "retentionRateCurrent": {
+          "type": "number",
+          "description": "Trailing 12-month actual retention rate (0–1).",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "retentionRateYtd": {
+          "type": "number",
+          "description": "Year-to-date retention rate (0–1).",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "averageRenewalNPV": {
+          "type": "number",
+          "description": "Average NPV of retaining a tenant vs. re-leasing (positive = renew is value-accretive)."
+        },
+        "totalRentAtRiskNext6Months": {
+          "type": "number",
+          "description": "Annualized rent from leases expiring in next 6 months.",
+          "minimum": 0
+        },
+        "tenants": {
+          "type": "array",
+          "description": "Per-tenant retention pipeline detail.",
+          "items": {
+            "type": "object",
+            "required": ["tenantId", "tenantName", "unit", "monthlyRent", "leaseExpiration", "retentionStatus", "renewalProbability", "retentionNPV"],
+            "properties": {
+              "tenantId": { "type": "string" },
+              "tenantName": { "type": "string" },
+              "unit": { "type": "string" },
+              "sf": {
+                "type": "number",
+                "description": "Occupied square footage."
+              },
+              "monthlyRent": { "type": "number" },
+              "leaseExpiration": { "type": "string", "format": "date" },
+              "monthsToExpiration": {
+                "type": "integer",
+                "description": "Months until lease expiration.",
+                "minimum": 0
+              },
+              "retentionStatus": {
+                "type": "string",
+                "enum": ["EARLY_OUTREACH", "PROPOSAL_SENT", "IN_NEGOTIATION", "RENEWED", "NOTICE_TO_VACATE", "MONTH_TO_MONTH", "NO_ACTION_NEEDED"]
+              },
+              "renewalProbability": {
+                "type": "number",
+                "description": "Estimated probability of renewal (0–1).",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "proposedRenewalRent": {
+                "type": "number",
+                "description": "Proposed renewal rent if offered."
+              },
+              "marketRent": {
+                "type": "number",
+                "description": "Current market rent for comparable unit or space."
+              },
+              "retentionNPV": {
+                "type": "object",
+                "description": "NPV comparison of renewing vs. re-leasing.",
+                "required": ["renewNPV", "reLeaseNPV", "netRetentionBenefit"],
+                "properties": {
+                  "renewNPV": {
+                    "type": "number",
+                    "description": "NPV of cash flows from renewing the existing tenant."
+                  },
+                  "reLeaseNPV": {
+                    "type": "number",
+                    "description": "NPV of cash flows from re-leasing after vacancy and downtime."
+                  },
+                  "netRetentionBenefit": {
+                    "type": "number",
+                    "description": "renewNPV minus reLeaseNPV. Positive = economically rational to retain."
+                  },
+                  "assumedVacancyMonths": {
+                    "type": "number",
+                    "description": "Assumed months of vacancy in the re-lease scenario."
+                  },
+                  "assumedTIAllowance": {
+                    "type": "number",
+                    "description": "Assumed tenant improvement allowance for new tenant in re-lease scenario."
+                  },
+                  "discountRate": {
+                    "type": "number",
+                    "description": "Discount rate used in NPV calculation (decimal)."
+                  }
+                },
+                "additionalProperties": true
+              },
+              "satisfactionScore": {
+                "type": "number",
+                "description": "Tenant satisfaction survey score (0–10 scale).",
+                "minimum": 0,
+                "maximum": 10
+              },
+              "openWorkOrders": {
+                "type": "integer",
+                "description": "Number of open work orders for this tenant/unit.",
+                "minimum": 0
+              },
+              "notes": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "waltProjection": {
+      "type": "object",
+      "description": "Weighted average lease term projections under base, renewal, and non-renewal scenarios.",
+      "required": ["current", "ifRenewScenario", "ifLeaveScenario", "projectionDate"],
+      "properties": {
+        "projectionDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "current": {
+          "type": "object",
+          "description": "Current WALT based on existing lease expirations.",
+          "required": ["walt", "methodology"],
+          "properties": {
+            "walt": {
+              "type": "number",
+              "description": "Current weighted average lease term in years."
+            },
+            "methodology": {
+              "type": "string",
+              "enum": ["RENT_WEIGHTED", "SF_WEIGHTED", "UNIT_COUNT_WEIGHTED"],
+              "description": "Weighting basis for WALT calculation."
+            },
+            "expirationScheduleByYear": {
+              "type": "array",
+              "description": "Percent of rent or SF expiring by year.",
+              "items": {
+                "type": "object",
+                "required": ["year", "percentExpiring"],
+                "properties": {
+                  "year": { "type": "integer" },
+                  "percentExpiring": { "type": "number", "minimum": 0, "maximum": 100 },
+                  "rentExpiring": { "type": "number" }
+                },
+                "additionalProperties": true
+              }
+            }
+          },
+          "additionalProperties": true
+        },
+        "ifRenewScenario": {
+          "type": "object",
+          "description": "WALT assuming all pending renewals execute at proposed terms.",
+          "required": ["walt", "assumedRenewalTerm", "retentionRateAssumed"],
+          "properties": {
+            "walt": {
+              "type": "number",
+              "description": "Projected WALT if all in-negotiation tenants renew."
+            },
+            "waltChangeFromCurrent": {
+              "type": "number",
+              "description": "WALT increase from successful renewals."
+            },
+            "assumedRenewalTerm": {
+              "type": "number",
+              "description": "Average assumed renewal lease term in years."
+            },
+            "retentionRateAssumed": {
+              "type": "number",
+              "description": "Renewal rate assumption for this scenario (0–1).",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "annualizedRentRetained": {
+              "type": "number",
+              "description": "Annualized rent retained under this scenario."
+            }
+          },
+          "additionalProperties": true
+        },
+        "ifLeaveScenario": {
+          "type": "object",
+          "description": "WALT assuming all pending renewals result in move-out.",
+          "required": ["walt", "occupancyImpact", "annualizedRentLost"],
+          "properties": {
+            "walt": {
+              "type": "number",
+              "description": "Projected WALT if all pending tenants vacate."
+            },
+            "waltChangeFromCurrent": {
+              "type": "number",
+              "description": "WALT impact from non-renewals."
+            },
+            "occupancyImpact": {
+              "type": "number",
+              "description": "Projected occupancy rate if all pending tenants leave (0–1).",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "annualizedRentLost": {
+              "type": "number",
+              "description": "Annualized rent lost under this scenario."
+            },
+            "requiredReLeasingTimelineMonths": {
+              "type": "number",
+              "description": "Estimated months to re-stabilize occupancy if all vacate.",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": true
+        },
+        "waltAtUnderwrittenExit": {
+          "type": "number",
+          "description": "Target WALT at underwritten exit date to achieve disposition cap rate."
+        },
+        "waltGapToTarget": {
+          "type": "number",
+          "description": "Current WALT minus target WALT. Negative = below target."
+        }
+      },
+      "additionalProperties": true
+    },
+    "operationsStatus": {
+      "type": "object",
+      "description": "Property operations KPIs including work order performance and tenant satisfaction.",
+      "required": ["reportingPeriod", "workOrderKPIs", "tenantSatisfaction", "maintenanceSpend"],
+      "properties": {
+        "reportingPeriod": {
+          "type": "string",
+          "description": "Reporting period label (e.g., Q1-2026)."
+        },
+        "workOrderKPIs": {
+          "type": "object",
+          "description": "Work order volume and response time metrics.",
+          "required": ["totalOpenWorkOrders", "totalCompletedThisPeriod", "avgResolutionDays", "overdueCount"],
+          "properties": {
+            "totalOpenWorkOrders": {
+              "type": "integer",
+              "description": "Total open work orders as of reporting date.",
+              "minimum": 0
+            },
+            "totalCompletedThisPeriod": {
+              "type": "integer",
+              "description": "Work orders completed during the reporting period.",
+              "minimum": 0
+            },
+            "totalSubmittedThisPeriod": {
+              "type": "integer",
+              "description": "New work orders submitted during the period.",
+              "minimum": 0
+            },
+            "avgResolutionDays": {
+              "type": "number",
+              "description": "Average calendar days from submission to completion.",
+              "minimum": 0
+            },
+            "avgEmergencyResponseHours": {
+              "type": "number",
+              "description": "Average hours to respond to emergency work orders.",
+              "minimum": 0
+            },
+            "overdueCount": {
+              "type": "integer",
+              "description": "Work orders open beyond target resolution time.",
+              "minimum": 0
+            },
+            "byCategory": {
+              "type": "array",
+              "description": "Work order volume and resolution time by category.",
+              "items": {
+                "type": "object",
+                "required": ["category", "count", "avgResolutionDays"],
+                "properties": {
+                  "category": { "type": "string", "description": "e.g., Plumbing, HVAC, Electrical, Appliance, Pest, Other." },
+                  "count": { "type": "integer", "minimum": 0 },
+                  "avgResolutionDays": { "type": "number" },
+                  "overdueCount": { "type": "integer", "minimum": 0 }
+                },
+                "additionalProperties": true
+              }
+            },
+            "preventiveMaintenanceCompletionRate": {
+              "type": "number",
+              "description": "Percent of scheduled preventive maintenance tasks completed on time (0–1).",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": true
+        },
+        "tenantSatisfaction": {
+          "type": "object",
+          "description": "Tenant satisfaction survey results.",
+          "properties": {
+            "surveyPeriod": { "type": "string" },
+            "responsesReceived": { "type": "integer", "minimum": 0 },
+            "responseRate": { "type": "number", "minimum": 0, "maximum": 1 },
+            "overallScore": {
+              "type": "number",
+              "description": "Overall satisfaction score (0–10).",
+              "minimum": 0,
+              "maximum": 10
+            },
+            "maintenanceScore": {
+              "type": "number",
+              "description": "Maintenance responsiveness score (0–10).",
+              "minimum": 0,
+              "maximum": 10
+            },
+            "managementScore": {
+              "type": "number",
+              "description": "Management communication score (0–10).",
+              "minimum": 0,
+              "maximum": 10
+            },
+            "amenitiesScore": {
+              "type": "number",
+              "description": "Amenity quality and availability score (0–10).",
+              "minimum": 0,
+              "maximum": 10
+            },
+            "netPromoterScore": {
+              "type": "number",
+              "description": "Net Promoter Score (-100 to 100).",
+              "minimum": -100,
+              "maximum": 100
+            },
+            "renewalIntentPercent": {
+              "type": "number",
+              "description": "Percent of respondents indicating intent to renew.",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "additionalProperties": true
+        },
+        "maintenanceSpend": {
+          "type": "object",
+          "description": "Maintenance and repair expenditure for the period.",
+          "required": ["totalSpend", "budgetedSpend", "spendVariance"],
+          "properties": {
+            "totalSpend": { "type": "number" },
+            "budgetedSpend": { "type": "number" },
+            "spendVariance": { "type": "number" },
+            "spendPerUnit": { "type": "number" },
+            "emergencyRepairPercent": {
+              "type": "number",
+              "description": "Emergency repairs as percent of total maintenance spend.",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "vendorPerformance": {
+      "type": "object",
+      "description": "Scorecard and contract status for key property-level vendors.",
+      "required": ["reportingPeriod", "overallVendorScore", "vendors"],
+      "properties": {
+        "reportingPeriod": {
+          "type": "string",
+          "description": "Reporting period label."
+        },
+        "overallVendorScore": {
+          "type": "number",
+          "description": "Composite weighted average vendor performance score (0–10).",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "vendorsOnWatch": {
+          "type": "integer",
+          "description": "Number of vendors on performance watch or at risk of contract termination.",
+          "minimum": 0
+        },
+        "vendors": {
+          "type": "array",
+          "description": "Per-vendor performance detail.",
+          "items": {
+            "type": "object",
+            "required": ["vendorId", "vendorName", "serviceCategory", "performanceScore", "contractStatus"],
+            "properties": {
+              "vendorId": { "type": "string" },
+              "vendorName": { "type": "string" },
+              "serviceCategory": { "type": "string" },
+              "contractExpiration": { "type": "string", "format": "date" },
+              "annualContractValue": { "type": "number" },
+              "contractStatus": {
+                "type": "string",
+                "enum": ["ACTIVE", "UP_FOR_RENEWAL", "IN_RENEGOTIATION", "TERMINATED", "EXPIRED"]
+              },
+              "performanceScore": {
+                "type": "number",
+                "description": "Vendor performance score (0–10).",
+                "minimum": 0,
+                "maximum": 10
+              },
+              "scorecardComponents": {
+                "type": "object",
+                "description": "Score breakdown by performance dimension.",
+                "properties": {
+                  "qualityOfWork": { "type": "number", "minimum": 0, "maximum": 10 },
+                  "responseTime": { "type": "number", "minimum": 0, "maximum": 10 },
+                  "costManagement": { "type": "number", "minimum": 0, "maximum": 10 },
+                  "contractCompliance": { "type": "number", "minimum": 0, "maximum": 10 },
+                  "tenantImpact": { "type": "number", "minimum": 0, "maximum": 10 }
+                },
+                "additionalProperties": true
+              },
+              "openComplaints": {
+                "type": "integer",
+                "description": "Number of unresolved service complaints.",
+                "minimum": 0
+              },
+              "isOnWatch": {
+                "type": "boolean",
+                "description": "True if vendor is flagged for performance remediation."
+              },
+              "renewalRecommendation": {
+                "type": "string",
+                "enum": ["RENEW", "RENEGOTIATE", "REBID", "TERMINATE"],
+                "description": "Recommended action at contract expiration."
+              },
+              "notes": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

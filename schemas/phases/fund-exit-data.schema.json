@@ -1,0 +1,221 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/fund-exit-data.schema.json",
+  "title": "Fund Management Phase 6 -- Exit & Wind-Down Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the exit and wind-down phase. Covers final verdict, track record, GP economics settlement, and dissolution status.",
+  "type": "object",
+  "required": [
+    "finalVerdict",
+    "trackRecordData",
+    "gpEconomicsFinal",
+    "dissolutionStatus"
+  ],
+  "properties": {
+    "finalVerdict": {
+      "type": "string",
+      "enum": ["WOUND_DOWN", "RESIDUAL"],
+      "description": "WOUND_DOWN = complete fund dissolution. RESIDUAL = assets remain, extension period active."
+    },
+    "trackRecordData": {
+      "type": "object",
+      "description": "Fund track record for GP fundraising and reporting.",
+      "required": ["fundName", "vintageYear", "strategy", "fundSize", "grossIRR", "netIRR", "tvpi", "dpi"],
+      "properties": {
+        "fundName": { "type": "string" },
+        "vintageYear": { "type": "integer" },
+        "strategy": { "type": "string" },
+        "assetClass": { "type": "string" },
+        "fundSize": { "type": "number", "description": "Total committed capital." },
+        "investmentPeriod": {
+          "type": "object",
+          "properties": {
+            "startDate": { "type": "string", "format": "date" },
+            "endDate": { "type": "string", "format": "date" },
+            "yearsActive": { "type": "number" }
+          }
+        },
+        "fundLife": {
+          "type": "object",
+          "properties": {
+            "inceptionDate": { "type": "string", "format": "date" },
+            "dissolutionDate": { "type": "string", "format": "date" },
+            "totalYears": { "type": "number" }
+          }
+        },
+        "numberOfInvestments": { "type": "integer" },
+        "numberOfExits": { "type": "integer" },
+        "numberOfWriteOffs": { "type": "integer" },
+        "grossIRR": { "type": "number" },
+        "netIRR": { "type": "number" },
+        "grossMOIC": { "type": "number" },
+        "tvpi": { "type": "number" },
+        "dpi": { "type": "number" },
+        "rvpi": { "type": "number", "description": "Should be 0 or near 0 at dissolution." },
+        "peakNAV": { "type": "number" },
+        "peakNAVDate": { "type": "string", "format": "date" },
+        "benchmarkComparison": {
+          "type": "object",
+          "properties": {
+            "ncreifODCESpread": { "type": "number", "description": "Fund net IRR minus ODCE return." },
+            "cambridgePeerQuartile": { "type": "integer" },
+            "cambridgePeerMedianSpread": { "type": "number" }
+          }
+        },
+        "portfolioSummary": {
+          "type": "array",
+          "description": "Per-deal summary for track record.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "dealName": { "type": "string" },
+              "propertyType": { "type": "string" },
+              "geography": { "type": "string" },
+              "equityInvested": { "type": "number" },
+              "totalProceeds": { "type": "number" },
+              "dealGrossIRR": { "type": "number" },
+              "dealGrossMOIC": { "type": "number" },
+              "holdPeriodYears": { "type": "number" },
+              "status": { "type": "string", "enum": ["REALIZED", "WRITTEN_OFF", "RESIDUAL"] }
+            }
+          }
+        },
+        "gipsCompliant": { "type": "boolean", "description": "Whether track record follows GIPS methodology." }
+      },
+      "additionalProperties": true
+    },
+    "gpEconomicsFinal": {
+      "type": "object",
+      "description": "Final GP economics settlement.",
+      "required": ["totalManagementFees", "totalCarryDistributed", "totalGPCoInvestReturn", "clawbackResolution"],
+      "properties": {
+        "totalManagementFees": { "type": "number", "description": "Total management fees earned over fund life." },
+        "totalOrganizationalExpenses": { "type": "number" },
+        "organizationalExpenseCap": { "type": "number" },
+        "totalTransactionFees": { "type": "number" },
+        "totalFeeOffsets": { "type": "number" },
+        "netManagementFees": { "type": "number", "description": "Management fees after fee offsets." },
+        "totalCarryAccrued": { "type": "number" },
+        "totalCarryDistributed": { "type": "number" },
+        "totalCarryEntitled": { "type": "number", "description": "Carry entitled based on final fund returns." },
+        "carryOverUnderDistributed": { "type": "number", "description": "Positive = over-distributed (clawback). Negative = underpaid." },
+        "totalGPCoInvestDeployed": { "type": "number" },
+        "totalGPCoInvestReturn": { "type": "number" },
+        "gpCoInvestMOIC": { "type": "number" },
+        "clawbackResolution": {
+          "type": "object",
+          "required": ["clawbackTriggered", "status"],
+          "properties": {
+            "clawbackTriggered": { "type": "boolean" },
+            "clawbackAmount": { "type": "number" },
+            "guaranteeUsed": { "type": "boolean" },
+            "guaranteeAmount": { "type": "number" },
+            "reserveUsed": { "type": "boolean" },
+            "reserveAmount": { "type": "number" },
+            "gpPaymentAmount": { "type": "number" },
+            "status": {
+              "type": "string",
+              "enum": ["NOT_TRIGGERED", "RESOLVED", "DISPUTED", "PENDING"],
+              "description": "Clawback resolution status."
+            },
+            "resolutionDate": { "type": "string", "format": "date" },
+            "disputeDetails": { "type": "string" }
+          }
+        },
+        "totalGPEconomics": {
+          "type": "number",
+          "description": "Total GP economics: management fees + carry + co-invest return - clawback."
+        }
+      },
+      "additionalProperties": true
+    },
+    "dissolutionStatus": {
+      "type": "object",
+      "description": "Fund dissolution status.",
+      "required": ["entityStatus", "regulatoryStatus"],
+      "properties": {
+        "entityStatus": {
+          "type": "string",
+          "enum": ["ACTIVE", "WINDING_DOWN", "DISSOLVED"],
+          "description": "Legal entity status."
+        },
+        "dissolutionDate": { "type": "string", "format": "date" },
+        "regulatoryStatus": {
+          "type": "object",
+          "properties": {
+            "formADVWithdrawn": { "type": "boolean" },
+            "formADVWithdrawalDate": { "type": "string", "format": "date" },
+            "stateFilingsCancelled": { "type": "boolean" },
+            "formPFFinalFiled": { "type": "boolean" }
+          }
+        },
+        "insuranceTail": {
+          "type": "object",
+          "properties": {
+            "tailCoverageInPlace": { "type": "boolean" },
+            "tailPeriodYears": { "type": "integer" },
+            "tailExpirationDate": { "type": "string", "format": "date" }
+          }
+        },
+        "indemnificationProvisions": { "type": "string" },
+        "finalAudit": {
+          "type": "object",
+          "properties": {
+            "auditorName": { "type": "string" },
+            "auditCompleted": { "type": "boolean" },
+            "auditOpinion": { "type": "string", "enum": ["unqualified", "qualified", "adverse", "disclaimer"] },
+            "auditCompletionDate": { "type": "string", "format": "date" }
+          }
+        },
+        "finalK1Status": {
+          "type": "object",
+          "properties": {
+            "draftK1sIssued": { "type": "boolean" },
+            "draftK1Date": { "type": "string", "format": "date" },
+            "finalK1sIssued": { "type": "boolean" },
+            "finalK1Date": { "type": "string", "format": "date" }
+          }
+        },
+        "remainingObligations": {
+          "type": "array",
+          "description": "Any remaining obligations post-dissolution.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "obligation": { "type": "string" },
+              "amount": { "type": "number" },
+              "deadline": { "type": "string", "format": "date" },
+              "status": { "type": "string" }
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "exitSequenceSummary": {
+      "type": "object",
+      "description": "Summary of the exit sequence execution.",
+      "properties": {
+        "totalAssetsExited": { "type": "integer" },
+        "totalGrossProceeds": { "type": "number" },
+        "totalNetProceeds": { "type": "number" },
+        "averageHoldPeriodYears": { "type": "number" },
+        "exitsByType": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "exitType": { "type": "string", "enum": ["sale", "1031Exchange", "installmentSale", "writeOff"] },
+              "count": { "type": "integer" },
+              "totalProceeds": { "type": "number" }
+            }
+          }
+        },
+        "assetsRemaining": { "type": "integer", "description": "Number of assets not yet exited (should be 0 at WOUND_DOWN)." },
+        "extensionRequired": { "type": "boolean" },
+        "extensionYears": { "type": "integer" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

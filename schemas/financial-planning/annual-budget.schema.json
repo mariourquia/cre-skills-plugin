@@ -1,0 +1,552 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "annual-budget.schema.json",
+  "title": "Annual Operating Budget",
+  "description": "Full annual operating budget for a property with IREM/BOMA benchmarks, sensitivity grid, and approval workflow",
+  "type": "object",
+  "required": [
+    "propertyId",
+    "year",
+    "status",
+    "version",
+    "revenue",
+    "expenses",
+    "noi",
+    "belowTheLine",
+    "netCashFlow",
+    "benchmarks",
+    "sensitivityGrid",
+    "assumptions"
+  ],
+  "properties": {
+    "propertyId": {
+      "type": "string",
+      "pattern": "^PROP-[A-Z0-9-]+$",
+      "description": "Unique property identifier"
+    },
+    "year": {
+      "type": "integer",
+      "minimum": 2020,
+      "maximum": 2040,
+      "description": "Budget year"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["DRAFT", "UNDER_REVIEW", "APPROVED", "SUPERSEDED"],
+      "description": "Budget approval status"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Budget version number; increments on each revision"
+    },
+    "approvedBy": {
+      "type": ["string", "null"],
+      "description": "Name or ID of approver; null until APPROVED"
+    },
+    "approvedDate": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "ISO-8601 approval timestamp; null until APPROVED"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 creation timestamp"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 last-updated timestamp"
+    },
+    "revenue": {
+      "type": "object",
+      "required": [
+        "grossPotentialRent",
+        "vacancyLoss",
+        "concessions",
+        "badDebt",
+        "otherIncome",
+        "effectiveGrossIncome"
+      ],
+      "properties": {
+        "grossPotentialRent": {
+          "type": "object",
+          "required": ["monthly", "annual"],
+          "properties": {
+            "monthly": {
+              "type": "array",
+              "items": { "type": "number" },
+              "minItems": 12,
+              "maxItems": 12,
+              "description": "Monthly GPR values, Jan-Dec"
+            },
+            "annual": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Annual GPR total; must equal sum of monthly"
+            }
+          }
+        },
+        "vacancyLoss": {
+          "type": "object",
+          "required": ["monthly", "annual", "rate"],
+          "properties": {
+            "monthly": {
+              "type": "array",
+              "items": { "type": "number" },
+              "minItems": 12,
+              "maxItems": 12
+            },
+            "annual": { "type": "number" },
+            "rate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Vacancy rate as decimal"
+            }
+          }
+        },
+        "concessions": {
+          "type": "object",
+          "required": ["monthly", "annual"],
+          "properties": {
+            "monthly": {
+              "type": "array",
+              "items": { "type": "number" },
+              "minItems": 12,
+              "maxItems": 12
+            },
+            "annual": { "type": "number" }
+          }
+        },
+        "badDebt": {
+          "type": "object",
+          "required": ["monthly", "annual", "rate"],
+          "properties": {
+            "monthly": {
+              "type": "array",
+              "items": { "type": "number" },
+              "minItems": 12,
+              "maxItems": 12
+            },
+            "annual": { "type": "number" },
+            "rate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Bad debt rate as decimal"
+            }
+          }
+        },
+        "otherIncome": {
+          "type": "object",
+          "required": ["laundry", "parking", "petRent", "rubs", "lateFees", "applicationFees", "totalOtherIncome"],
+          "properties": {
+            "laundry": {
+              "type": "object",
+              "required": ["monthly", "annual"],
+              "properties": {
+                "monthly": { "type": "array", "items": { "type": "number" }, "minItems": 12, "maxItems": 12 },
+                "annual": { "type": "number" }
+              }
+            },
+            "parking": {
+              "type": "object",
+              "required": ["monthly", "annual"],
+              "properties": {
+                "monthly": { "type": "array", "items": { "type": "number" }, "minItems": 12, "maxItems": 12 },
+                "annual": { "type": "number" }
+              }
+            },
+            "petRent": {
+              "type": "object",
+              "required": ["monthly", "annual"],
+              "properties": {
+                "monthly": { "type": "array", "items": { "type": "number" }, "minItems": 12, "maxItems": 12 },
+                "annual": { "type": "number" }
+              }
+            },
+            "rubs": {
+              "type": "object",
+              "required": ["monthly", "annual"],
+              "properties": {
+                "monthly": { "type": "array", "items": { "type": "number" }, "minItems": 12, "maxItems": 12 },
+                "annual": { "type": "number" }
+              },
+              "description": "Ratio Utility Billing System reimbursements"
+            },
+            "lateFees": {
+              "type": "object",
+              "required": ["monthly", "annual"],
+              "properties": {
+                "monthly": { "type": "array", "items": { "type": "number" }, "minItems": 12, "maxItems": 12 },
+                "annual": { "type": "number" }
+              }
+            },
+            "applicationFees": {
+              "type": "object",
+              "required": ["monthly", "annual"],
+              "properties": {
+                "monthly": { "type": "array", "items": { "type": "number" }, "minItems": 12, "maxItems": 12 },
+                "annual": { "type": "number" }
+              }
+            },
+            "totalOtherIncome": {
+              "type": "object",
+              "required": ["monthly", "annual"],
+              "properties": {
+                "monthly": { "type": "array", "items": { "type": "number" }, "minItems": 12, "maxItems": 12 },
+                "annual": { "type": "number" }
+              }
+            }
+          }
+        },
+        "effectiveGrossIncome": {
+          "type": "object",
+          "required": ["monthly", "annual"],
+          "properties": {
+            "monthly": {
+              "type": "array",
+              "items": { "type": "number" },
+              "minItems": 12,
+              "maxItems": 12,
+              "description": "Monthly EGI = GPR - vacancy - concessions - badDebt + otherIncome"
+            },
+            "annual": {
+              "type": "number",
+              "description": "Annual EGI; must equal sum of monthly"
+            }
+          }
+        }
+      }
+    },
+    "expenses": {
+      "type": "object",
+      "required": [
+        "realEstateTaxes",
+        "insurance",
+        "utilities",
+        "repairsAndMaintenance",
+        "contractServices",
+        "payroll",
+        "managementFee",
+        "generalAndAdmin",
+        "marketing",
+        "professionalFees",
+        "totalOperatingExpenses"
+      ],
+      "properties": {
+        "realEstateTaxes": {
+          "$ref": "#/$defs/expenseLineItem"
+        },
+        "insurance": {
+          "$ref": "#/$defs/expenseLineItem"
+        },
+        "utilities": {
+          "$ref": "#/$defs/expenseLineItem"
+        },
+        "repairsAndMaintenance": {
+          "$ref": "#/$defs/expenseLineItem"
+        },
+        "contractServices": {
+          "$ref": "#/$defs/expenseLineItem"
+        },
+        "payroll": {
+          "$ref": "#/$defs/expenseLineItem"
+        },
+        "managementFee": {
+          "type": "object",
+          "required": ["monthly", "annual", "escalator", "rate", "basis"],
+          "properties": {
+            "monthly": { "type": "array", "items": { "type": "number" }, "minItems": 12, "maxItems": 12 },
+            "annual": { "type": "number" },
+            "escalator": { "$ref": "#/$defs/escalator" },
+            "rate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.15,
+              "description": "Management fee rate as decimal (e.g. 0.04 = 4%)"
+            },
+            "basis": {
+              "type": "string",
+              "enum": ["EGI", "collected_revenue", "fixed"],
+              "description": "What the management fee is calculated against"
+            }
+          }
+        },
+        "generalAndAdmin": {
+          "$ref": "#/$defs/expenseLineItem"
+        },
+        "marketing": {
+          "$ref": "#/$defs/expenseLineItem"
+        },
+        "professionalFees": {
+          "$ref": "#/$defs/expenseLineItem"
+        },
+        "totalOperatingExpenses": {
+          "type": "object",
+          "required": ["monthly", "annual"],
+          "properties": {
+            "monthly": { "type": "array", "items": { "type": "number" }, "minItems": 12, "maxItems": 12 },
+            "annual": {
+              "type": "number",
+              "description": "Sum of all expense line items"
+            }
+          }
+        }
+      }
+    },
+    "noi": {
+      "type": "object",
+      "required": ["monthly", "annual"],
+      "properties": {
+        "monthly": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 12,
+          "maxItems": 12,
+          "description": "Monthly NOI = EGI - Total OpEx"
+        },
+        "annual": {
+          "type": "number",
+          "description": "Annual NOI; must equal EGI.annual - totalOperatingExpenses.annual"
+        }
+      }
+    },
+    "belowTheLine": {
+      "type": "object",
+      "required": ["debtService", "capitalReserves", "tenantImprovements", "leasingCommissions"],
+      "properties": {
+        "debtService": {
+          "type": "object",
+          "required": ["monthly", "annual"],
+          "properties": {
+            "monthly": { "type": "array", "items": { "type": "number" }, "minItems": 12, "maxItems": 12 },
+            "annual": { "type": "number" }
+          }
+        },
+        "capitalReserves": {
+          "type": "object",
+          "required": ["monthly", "annual"],
+          "properties": {
+            "monthly": { "type": "array", "items": { "type": "number" }, "minItems": 12, "maxItems": 12 },
+            "annual": { "type": "number" }
+          }
+        },
+        "tenantImprovements": {
+          "type": "object",
+          "required": ["monthly", "annual"],
+          "properties": {
+            "monthly": { "type": "array", "items": { "type": "number" }, "minItems": 12, "maxItems": 12 },
+            "annual": { "type": "number" }
+          }
+        },
+        "leasingCommissions": {
+          "type": "object",
+          "required": ["monthly", "annual"],
+          "properties": {
+            "monthly": { "type": "array", "items": { "type": "number" }, "minItems": 12, "maxItems": 12 },
+            "annual": { "type": "number" }
+          }
+        }
+      }
+    },
+    "netCashFlow": {
+      "type": "object",
+      "required": ["monthly", "annual"],
+      "properties": {
+        "monthly": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 12,
+          "maxItems": 12,
+          "description": "Monthly NCF = NOI - debtService - capitalReserves - TI - LC"
+        },
+        "annual": {
+          "type": "number",
+          "description": "Annual NCF"
+        }
+      }
+    },
+    "benchmarks": {
+      "type": "object",
+      "required": ["noiPerUnit", "expensePerUnit", "expenseRatio"],
+      "properties": {
+        "noiPerUnit": {
+          "type": "number",
+          "description": "Annual NOI divided by total units or per 1,000 SF"
+        },
+        "expensePerUnit": {
+          "type": "number",
+          "description": "Annual total OpEx divided by total units or per 1,000 SF"
+        },
+        "expenseRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Total OpEx / EGI as decimal"
+        },
+        "iremComparison": {
+          "type": "object",
+          "properties": {
+            "propertyType": { "type": "string" },
+            "region": { "type": "string" },
+            "medianExpensePerUnit": { "type": "number" },
+            "medianExpenseRatio": { "type": "number" },
+            "percentileRank": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Where this property ranks vs IREM peers"
+            },
+            "lineItemComparisons": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["category", "budgetPerUnit", "iremMedianPerUnit", "gapPct", "flag"],
+                "properties": {
+                  "category": { "type": "string" },
+                  "budgetPerUnit": { "type": "number" },
+                  "iremMedianPerUnit": { "type": "number" },
+                  "gapPct": { "type": "number" },
+                  "flag": {
+                    "type": "string",
+                    "enum": ["ABOVE_BENCHMARK", "WITHIN_NORM", "POTENTIAL_UNDER_SPENDING"]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "sensitivityGrid": {
+      "type": "object",
+      "required": ["revenueGrowthScenarios", "expenseGrowthScenarios", "noiMatrix"],
+      "properties": {
+        "revenueGrowthScenarios": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["label", "rate"],
+            "properties": {
+              "label": { "type": "string", "description": "e.g. 'Bear', 'Base', 'Bull'" },
+              "rate": { "type": "number", "description": "Revenue growth rate as decimal" }
+            }
+          },
+          "minItems": 3,
+          "description": "Revenue growth scenarios for sensitivity grid"
+        },
+        "expenseGrowthScenarios": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["label", "rate"],
+            "properties": {
+              "label": { "type": "string" },
+              "rate": { "type": "number" }
+            }
+          },
+          "minItems": 3,
+          "description": "Expense growth scenarios for sensitivity grid"
+        },
+        "noiMatrix": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["noi", "dscr", "valueDelta"],
+              "properties": {
+                "noi": { "type": "number", "description": "NOI under this scenario combination" },
+                "dscr": { "type": ["number", "null"], "description": "DSCR under this scenario; null if no debt" },
+                "valueDelta": { "type": "number", "description": "Change in implied value vs base case" }
+              }
+            }
+          },
+          "description": "2D array [revenue_scenario_idx][expense_scenario_idx]"
+        }
+      }
+    },
+    "assumptions": {
+      "type": "object",
+      "required": ["occupancyRate", "rentGrowthRate", "expenseGrowthRate", "capRate", "discountRate", "holdPeriodRemaining"],
+      "properties": {
+        "occupancyRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Assumed economic occupancy rate"
+        },
+        "rentGrowthRate": {
+          "type": "number",
+          "description": "Assumed rent growth rate for budget year"
+        },
+        "expenseGrowthRate": {
+          "type": "number",
+          "description": "Blended expense growth rate (component-specific rates override per line item)"
+        },
+        "capRate": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 0.20,
+          "description": "Cap rate used for budget-to-value linkage"
+        },
+        "discountRate": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 0.30,
+          "description": "Discount rate for NPV calculations"
+        },
+        "holdPeriodRemaining": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 30,
+          "description": "Years remaining in hold period"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "expenseLineItem": {
+      "type": "object",
+      "required": ["monthly", "annual", "escalator"],
+      "properties": {
+        "monthly": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 12,
+          "maxItems": 12,
+          "description": "Monthly values, Jan-Dec"
+        },
+        "annual": {
+          "type": "number",
+          "description": "Annual total; must equal sum of monthly"
+        },
+        "escalator": {
+          "$ref": "#/$defs/escalator"
+        }
+      }
+    },
+    "escalator": {
+      "type": "object",
+      "required": ["source", "rate"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Data source for escalation rate (e.g. 'CIAB Q3-2026', 'EIA retail electricity', 'BLS OES')"
+        },
+        "rate": {
+          "type": "number",
+          "description": "Annual escalation rate as decimal"
+        },
+        "isEstimated": {
+          "type": "boolean",
+          "default": false,
+          "description": "True if rate is estimated from training data rather than sourced"
+        }
+      }
+    }
+  }
+}

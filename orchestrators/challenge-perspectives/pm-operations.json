@@ -1,0 +1,30 @@
+{
+  "pipelineId": "pm-operations",
+  "perspectives": [
+    {
+      "perspectiveId": "cost-efficiency-hawk",
+      "name": "Cost Efficiency Hawk",
+      "question": "Are we overpaying vendors or over-staffing?",
+      "tier": 1,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": ["vendor-costs-vs-market", "staffing-ratios", "contract-rates-vs-bids", "admin-overhead"]
+    },
+    {
+      "perspectiveId": "resident-experience-advocate",
+      "name": "Resident Experience Advocate",
+      "question": "Are we cutting corners that will hurt retention?",
+      "tier": 1,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": ["satisfaction-scores", "work-order-quality", "amenity-condition", "communication-gaps"]
+    },
+    {
+      "perspectiveId": "compliance-auditor",
+      "name": "Compliance Auditor",
+      "question": "Are we exposed to regulatory or legal risk?",
+      "tier": 2,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": ["fair-housing-gaps", "expired-licenses", "insurance-lapses", "bps-penalties"]
+    }
+  ],
+  "synthesisModel": "claude-opus-4-6[1m]"
+}

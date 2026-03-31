@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/disposition-pricing-data.schema.json",
+  "title": "Disposition Phase 2 -- Pricing Strategy Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the disposition pricing strategy phase. Covers asking price derivation, comparable sales adjustments, buyer universe segmentation, and market positioning.",
+  "type": "object",
+  "required": [
+    "askingPrice",
+    "compAdjustmentGrid",
+    "buyerUniverse",
+    "pricingStrategy",
+    "impliedCapRate"
+  ],
+  "properties": {
+    "askingPrice": {
+      "type": "number",
+      "description": "Final recommended asking price supported by comp analysis and buyer viability.",
+      "minimum": 0
+    },
+    "compAdjustmentGrid": {
+      "type": "object",
+      "description": "Comparable sales with line-item adjustments. Minimum 3 comps required.",
+      "required": ["comps", "adjustedValueRange", "selectedCapRate"],
+      "properties": {
+        "comps": {
+          "type": "array",
+          "description": "Array of comparable sales with adjustments.",
+          "minItems": 3,
+          "items": {
+            "type": "object",
+            "required": ["compId", "address", "saleDate", "salePrice", "capRate", "adjustedValue"],
+            "properties": {
+              "compId": { "type": "string", "description": "Unique identifier for the comparable." },
+              "address": { "type": "string", "description": "Property address." },
+              "saleDate": { "type": "string", "format": "date", "description": "ISO 8601 sale date." },
+              "salePrice": { "type": "number", "description": "Gross sale price." },
+              "pricePerUnit": { "type": "number", "description": "Price per unit or per SF." },
+              "capRate": { "type": "number", "description": "Cap rate at sale." },
+              "noi": { "type": "number", "description": "NOI at time of sale." },
+              "adjustments": {
+                "type": "array",
+                "description": "Line-item adjustments applied to this comp.",
+                "items": {
+                  "type": "object",
+                  "required": ["category", "adjustmentPercent", "rationale"],
+                  "properties": {
+                    "category": { "type": "string", "description": "Adjustment category (location, condition, size, age, market timing, etc.)." },
+                    "adjustmentPercent": { "type": "number", "description": "Adjustment as decimal (positive = upward, negative = downward)." },
+                    "adjustmentDollars": { "type": "number", "description": "Adjustment in dollar terms." },
+                    "rationale": { "type": "string", "description": "Brief rationale for the adjustment." }
+                  },
+                  "additionalProperties": true
+                }
+              },
+              "adjustedValue": { "type": "number", "description": "Comp value after all adjustments applied." }
+            },
+            "additionalProperties": true
+          }
+        },
+        "adjustedValueRange": {
+          "type": "object",
+          "description": "Range of adjusted comp values.",
+          "required": ["low", "high", "mean", "median"],
+          "properties": {
+            "low": { "type": "number" },
+            "high": { "type": "number" },
+            "mean": { "type": "number" },
+            "median": { "type": "number" }
+          },
+          "additionalProperties": true
+        },
+        "selectedCapRate": {
+          "type": "number",
+          "description": "Selected cap rate for pricing based on comp analysis."
+        },
+        "capRateRange": {
+          "type": "object",
+          "description": "Cap rate range from comp set.",
+          "properties": {
+            "low": { "type": "number" },
+            "high": { "type": "number" },
+            "submarketAvg": { "type": "number" }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "buyerUniverse": {
+      "type": "object",
+      "description": "Five-segment buyer universe with return analysis and pricing ceiling per segment.",
+      "required": ["segments"],
+      "properties": {
+        "segments": {
+          "type": "array",
+          "description": "Array of buyer segments with return analysis.",
+          "minItems": 5,
+          "items": {
+            "type": "object",
+            "required": ["segmentName", "targetReturn", "maxPrice", "viability"],
+            "properties": {
+              "segmentName": { "type": "string", "description": "Buyer segment (institutional, PE, family office, 1031/tax-motivated, local operator)." },
+              "targetReturn": { "type": "number", "description": "Target return (IRR or cash-on-cash) for this buyer type." },
+              "maxPrice": { "type": "number", "description": "Maximum price this buyer type can pay while achieving target returns." },
+              "viability": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW", "NOT_VIABLE"], "description": "Viability of this segment at the asking price." },
+              "retradeRisk": { "type": "string", "enum": ["LOW", "MEDIUM", "MEDIUM_HIGH", "HIGH"], "description": "Expected retrade risk from this buyer type." },
+              "closingCertainty": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW"], "description": "Certainty of close from this buyer type." },
+              "estimatedBuyerCount": { "type": "integer", "description": "Estimated number of active buyers in this segment for this asset." }
+            },
+            "additionalProperties": true
+          }
+        },
+        "probabilityWeightedPrice": {
+          "type": "number",
+          "description": "Probability-weighted price across all viable buyer segments."
+        },
+        "recommendedTargetSegments": {
+          "type": "array",
+          "description": "Ordered list of recommended target segments.",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "pricingStrategy": {
+      "type": "string",
+      "enum": ["broad-marketing", "targeted-outreach", "off-market"],
+      "description": "Recommended marketing approach based on asset profile and buyer universe."
+    },
+    "impliedCapRate": {
+      "type": "number",
+      "description": "Cap rate implied by asking price and current NOI.",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "pricePerUnit": {
+      "type": "number",
+      "description": "Asking price per unit (multifamily) or per SF (commercial)."
+    },
+    "daysOnMarketEstimate": {
+      "type": "integer",
+      "description": "Estimated days on market based on pricing level and market conditions."
+    },
+    "listingVsOffMarketAnalysis": {
+      "type": "object",
+      "description": "Comparison of listing vs off-market approach.",
+      "properties": {
+        "listingEstimatedPrice": { "type": "number" },
+        "offMarketEstimatedPrice": { "type": "number" },
+        "listingTimeline_days": { "type": "integer" },
+        "offMarketTimeline_days": { "type": "integer" },
+        "recommendation": { "type": "string" },
+        "rationale": { "type": "string" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

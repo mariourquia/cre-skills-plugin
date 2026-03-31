@@ -1,0 +1,225 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/lp-monitoring-data.schema.json",
+  "title": "LP Intelligence Phase 3 -- Portfolio Monitoring (LP Lens) Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the portfolio monitoring phase. Covers performance verification, denominator effect analysis, and liquidity assessment.",
+  "type": "object",
+  "required": [
+    "performanceVerification",
+    "liquidityAssessment"
+  ],
+  "properties": {
+    "performanceVerification": {
+      "type": "object",
+      "description": "Independent verification of GP-reported fund performance metrics.",
+      "required": ["metricVerification", "reportingQuality"],
+      "properties": {
+        "reportingPeriod": { "type": "string" },
+        "metricVerification": {
+          "type": "object",
+          "properties": {
+            "dpi": {
+              "type": "object",
+              "properties": {
+                "gpReported": { "type": "number" },
+                "independentlyComputed": { "type": "number" },
+                "discrepancy": { "type": "number" },
+                "withinTolerance": { "type": "boolean" }
+              }
+            },
+            "tvpi": {
+              "type": "object",
+              "properties": {
+                "gpReported": { "type": "number" },
+                "independentlyComputed": { "type": "number" },
+                "discrepancy": { "type": "number" },
+                "withinTolerance": { "type": "boolean" }
+              }
+            },
+            "rvpi": {
+              "type": "object",
+              "properties": {
+                "gpReported": { "type": "number" },
+                "independentlyComputed": { "type": "number" },
+                "discrepancy": { "type": "number" },
+                "withinTolerance": { "type": "boolean" }
+              }
+            },
+            "netIRR": {
+              "type": "object",
+              "properties": {
+                "gpReported": { "type": "number" },
+                "independentlyComputed": { "type": "number" },
+                "discrepancyBps": { "type": "number" },
+                "withinTolerance": { "type": "boolean" },
+                "subLineAdjustedIRR": { "type": ["number", "null"] },
+                "subLineInflationBps": { "type": ["number", "null"] }
+              }
+            },
+            "nav": {
+              "type": "object",
+              "properties": {
+                "gpReported": { "type": "number" },
+                "navBridgeReconciled": { "type": "boolean" },
+                "reconciliationVariancePct": { "type": "number" }
+              }
+            }
+          }
+        },
+        "discrepancyReport": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "metric": { "type": "string" },
+              "gpValue": { "type": "number" },
+              "independentValue": { "type": "number" },
+              "divergence": { "type": "number" },
+              "rootCause": { "type": "string" },
+              "severity": { "type": "string", "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"] }
+            }
+          }
+        },
+        "navMarkAnalysis": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "assetId": { "type": "string" },
+              "gpReportedValue": { "type": "number" },
+              "impliedCapRate": { "type": "number" },
+              "marketCapRate": { "type": "number" },
+              "valuationAssessment": { "type": "string", "enum": ["conservative", "accurate", "aggressive"] }
+            }
+          }
+        },
+        "reportingQuality": {
+          "type": "object",
+          "required": ["overallScore", "overallGrade"],
+          "properties": {
+            "timeliness": { "type": "number", "minimum": 0, "maximum": 100 },
+            "completeness": { "type": "number", "minimum": 0, "maximum": 100 },
+            "transparency": { "type": "number", "minimum": 0, "maximum": 100 },
+            "accuracy": { "type": "number", "minimum": 0, "maximum": 100 },
+            "overallScore": { "type": "number", "minimum": 0, "maximum": 100 },
+            "overallGrade": { "type": "string", "enum": ["EXCELLENT", "GOOD", "ADEQUATE", "POOR", "UNACCEPTABLE"] }
+          }
+        },
+        "vintagePercentile": { "type": "number" },
+        "vintageQuartile": { "type": "integer", "enum": [1, 2, 3, 4] },
+        "redFlags": { "type": "array", "items": { "type": "string" } },
+        "confidenceScore": { "type": "number", "minimum": 0, "maximum": 100 }
+      },
+      "additionalProperties": true
+    },
+    "denominatorEffectAnalysis": {
+      "type": ["object", "null"],
+      "description": "Total portfolio allocation and denominator effect modeling. Null if LP does not provide cross-asset data.",
+      "properties": {
+        "currentREAllocationPct": { "type": "number" },
+        "targetREAllocationPct": { "type": "number" },
+        "allocationDriftPct": { "type": "number" },
+        "denominatorScenarios": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "publicEquityDecline": { "type": "number" },
+              "resultingREAllocationPct": { "type": "number" },
+              "driftFromTargetPct": { "type": "number" },
+              "policyBreached": { "type": "boolean" }
+            }
+          }
+        },
+        "overCommitmentRatio": {
+          "type": "object",
+          "properties": {
+            "current": { "type": "number" },
+            "stressed": { "type": "number" },
+            "classification": { "type": "string", "enum": ["under-committed", "at-target", "over-committed", "significantly-over-committed"] }
+          }
+        },
+        "unfundedCommitments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "fundName": { "type": "string" },
+              "committed": { "type": "number" },
+              "drawn": { "type": "number" },
+              "unfunded": { "type": "number" },
+              "expectedCallTimeline": { "type": "string" }
+            }
+          }
+        },
+        "rebalancingRecommendation": { "type": "string", "enum": ["none", "passive", "selective-secondary", "active-secondary"] },
+        "confidenceScore": { "type": "number", "minimum": 0, "maximum": 100 }
+      },
+      "additionalProperties": true
+    },
+    "liquidityAssessment": {
+      "type": "object",
+      "description": "Cash flow matching and liquidity stress testing.",
+      "required": ["reserveRatio", "reserveClassification"],
+      "properties": {
+        "cashFlowForecast": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "quarter": { "type": "string" },
+              "expectedDistributions": { "type": "number" },
+              "expectedCalls": { "type": "number" },
+              "netCashFlow": { "type": "number" },
+              "cumulativeNetCF": { "type": "number" },
+              "status": { "type": "string", "enum": ["GREEN", "YELLOW", "RED"] }
+            }
+          }
+        },
+        "distributionReliability": {
+          "type": "object",
+          "properties": {
+            "aggregateScore": { "type": "number", "minimum": 1, "maximum": 5 },
+            "perFundScores": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "fundName": { "type": "string" },
+                  "score": { "type": "number", "minimum": 1, "maximum": 5 }
+                }
+              }
+            }
+          }
+        },
+        "stressTestResults": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "scenarioName": { "type": "string" },
+              "description": { "type": "string" },
+              "reserveRatioUnderStress": { "type": "number" },
+              "shortfallAmount": { "type": ["number", "null"] },
+              "quartersBeforeShortfall": { "type": ["integer", "null"] }
+            }
+          }
+        },
+        "reserveRatio": { "type": "number", "description": "Current liquid reserves / required reserves" },
+        "reserveClassification": { "type": "string", "enum": ["WELL_RESERVED", "ADEQUATE", "THIN", "INADEQUATE"] },
+        "secondaryMarketValuation": {
+          "type": ["object", "null"],
+          "properties": {
+            "totalSecondaryValue": { "type": "number" },
+            "totalRemainingCalls": { "type": "number" },
+            "netSecondaryPosition": { "type": "number" }
+          }
+        },
+        "redFlags": { "type": "array", "items": { "type": "string" } },
+        "confidenceScore": { "type": "number", "minimum": 0, "maximum": 100 }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

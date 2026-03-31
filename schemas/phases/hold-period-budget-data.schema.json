@@ -1,0 +1,490 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/hold-period-budget-data.schema.json",
+  "title": "Hold Period Phase 2 — Budget & Financial Plan Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the hold-period budget phase. Contains the approved annual operating budget, 5-year capex reserve schedule, 3-scenario revenue projections, debt service schedule with covenant tracking, and sensitivity analysis.",
+  "type": "object",
+  "required": [
+    "annualBudget",
+    "capexReserveSchedule",
+    "revenueProjection",
+    "debtServiceSchedule",
+    "sensitivityGrid"
+  ],
+  "properties": {
+    "annualBudget": {
+      "type": "object",
+      "description": "Approved annual operating budget for the current hold-period year.",
+      "required": ["budgetYear", "revenue", "expenses", "noi"],
+      "properties": {
+        "budgetYear": {
+          "type": "integer",
+          "description": "Calendar year this budget covers."
+        },
+        "revenue": {
+          "type": "object",
+          "description": "Budgeted revenue by line item.",
+          "required": ["baseRent", "otherIncome", "totalPotentialGrossIncome", "vacancyAllowance", "effectiveGrossIncome"],
+          "properties": {
+            "baseRent": {
+              "type": "number",
+              "description": "Budgeted base rent revenue (annual)."
+            },
+            "parkingIncome": {
+              "type": "number",
+              "description": "Budgeted parking and garage income (annual)."
+            },
+            "ancillaryIncome": {
+              "type": "number",
+              "description": "Laundry, storage, pet fees, and other ancillary income (annual)."
+            },
+            "otherIncome": {
+              "type": "number",
+              "description": "All other revenue not captured in specific lines (annual)."
+            },
+            "totalPotentialGrossIncome": {
+              "type": "number",
+              "description": "PGI at 100% occupancy (annual)."
+            },
+            "vacancyAllowance": {
+              "type": "number",
+              "description": "Budgeted vacancy and credit loss (annual, expressed as positive number)."
+            },
+            "concessions": {
+              "type": "number",
+              "description": "Budgeted leasing concessions (annual)."
+            },
+            "effectiveGrossIncome": {
+              "type": "number",
+              "description": "EGI after vacancy and concessions (annual)."
+            },
+            "budgetedOccupancyRate": {
+              "type": "number",
+              "description": "Target occupancy rate for the budget year (0–1).",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": true
+        },
+        "expenses": {
+          "type": "object",
+          "description": "Budgeted operating expenses by line item.",
+          "required": ["taxes", "insurance", "management", "maintenance", "utilities", "totalOperatingExpenses", "opExRatio"],
+          "properties": {
+            "taxes": {
+              "type": "number",
+              "description": "Real estate taxes (annual)."
+            },
+            "insurance": {
+              "type": "number",
+              "description": "Property and liability insurance (annual)."
+            },
+            "management": {
+              "type": "number",
+              "description": "Property management fee (annual)."
+            },
+            "maintenance": {
+              "type": "number",
+              "description": "Repairs and maintenance (annual)."
+            },
+            "utilities": {
+              "type": "number",
+              "description": "Owner-paid utilities (annual)."
+            },
+            "payroll": {
+              "type": "number",
+              "description": "On-site payroll and benefits (annual)."
+            },
+            "marketing": {
+              "type": "number",
+              "description": "Leasing and marketing expenses (annual)."
+            },
+            "adminGeneral": {
+              "type": "number",
+              "description": "Administrative and general expenses (annual)."
+            },
+            "professionalFees": {
+              "type": "number",
+              "description": "Legal, accounting, and consulting fees (annual)."
+            },
+            "totalOperatingExpenses": {
+              "type": "number",
+              "description": "Total operating expenses before capex (annual)."
+            },
+            "opExRatio": {
+              "type": "number",
+              "description": "Total OpEx as percent of EGI.",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "opExPerUnit": {
+              "type": "number",
+              "description": "Total OpEx per unit or per SF (annual)."
+            }
+          },
+          "additionalProperties": true
+        },
+        "noi": {
+          "type": "object",
+          "description": "Net operating income summary.",
+          "required": ["budgetedNOI", "budgetedCapRate", "noiBridgeFromT12"],
+          "properties": {
+            "budgetedNOI": {
+              "type": "number",
+              "description": "EGI minus total operating expenses (annual)."
+            },
+            "budgetedCapRate": {
+              "type": "number",
+              "description": "Budgeted NOI divided by purchase price or current appraised value."
+            },
+            "noiBridgeFromT12": {
+              "type": "number",
+              "description": "Dollar change in NOI from T-12 baseline to budget year."
+            },
+            "noiBridgeDrivers": {
+              "type": "array",
+              "description": "Key drivers of NOI change from T-12 to budget.",
+              "items": {
+                "type": "object",
+                "required": ["driver", "impact"],
+                "properties": {
+                  "driver": { "type": "string" },
+                  "impact": { "type": "number", "description": "Dollar impact (positive = NOI increase)." }
+                },
+                "additionalProperties": true
+              }
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "capexReserveSchedule": {
+      "type": "object",
+      "description": "5-year capital expenditure reserve and project schedule by category.",
+      "required": ["totalFiveYearCapex", "annualSchedule", "reserveAccountBalance"],
+      "properties": {
+        "totalFiveYearCapex": {
+          "type": "number",
+          "description": "Total projected capex over 5-year hold period.",
+          "minimum": 0
+        },
+        "reserveAccountBalance": {
+          "type": "number",
+          "description": "Current capex reserve account balance.",
+          "minimum": 0
+        },
+        "annualReserveContribution": {
+          "type": "number",
+          "description": "Annual capex reserve contribution per the budget.",
+          "minimum": 0
+        },
+        "annualSchedule": {
+          "type": "array",
+          "description": "Year-by-year capex budget by category.",
+          "items": {
+            "type": "object",
+            "required": ["year", "categories", "totalCapex"],
+            "properties": {
+              "year": { "type": "integer", "description": "Calendar year." },
+              "totalCapex": { "type": "number", "description": "Total capex for the year.", "minimum": 0 },
+              "categories": {
+                "type": "object",
+                "description": "Capex by major category.",
+                "properties": {
+                  "roofing": { "type": "number" },
+                  "hvac": { "type": "number" },
+                  "plumbing": { "type": "number" },
+                  "electrical": { "type": "number" },
+                  "elevators": { "type": "number" },
+                  "interiorRenovations": { "type": "number" },
+                  "exteriorImprovements": { "type": "number" },
+                  "amenities": { "type": "number" },
+                  "technologyInfrastructure": { "type": "number" },
+                  "lifeSafety": { "type": "number" },
+                  "other": { "type": "number" }
+                },
+                "additionalProperties": true
+              },
+              "projectList": {
+                "type": "array",
+                "description": "Discrete capex projects planned for the year.",
+                "items": {
+                  "type": "object",
+                  "required": ["projectName", "budget"],
+                  "properties": {
+                    "projectName": { "type": "string" },
+                    "budget": { "type": "number" },
+                    "category": { "type": "string" },
+                    "valueAddImpact": { "type": "number", "description": "Estimated NOI uplift from project." }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "revenueProjection": {
+      "type": "object",
+      "description": "3-scenario revenue and NOI projection over the hold period.",
+      "required": ["holdPeriodYears", "baseCase", "bullCase", "bearCase"],
+      "properties": {
+        "holdPeriodYears": {
+          "type": "integer",
+          "description": "Underwritten hold period in years.",
+          "minimum": 1
+        },
+        "baseCase": {
+          "type": "object",
+          "description": "Base-case revenue projection.",
+          "required": ["rentGrowthAssumption", "occupancyAssumption", "year1NOI", "stabilizedNOI", "exitCapRate", "projectedSalePrice"],
+          "properties": {
+            "rentGrowthAssumption": {
+              "type": "number",
+              "description": "Annual rent growth rate (decimal)."
+            },
+            "occupancyAssumption": {
+              "type": "number",
+              "description": "Stabilized occupancy rate (0–1).",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "expenseGrowthAssumption": {
+              "type": "number",
+              "description": "Annual expense growth rate (decimal)."
+            },
+            "year1NOI": { "type": "number" },
+            "stabilizedNOI": { "type": "number" },
+            "exitCapRate": { "type": "number" },
+            "projectedSalePrice": { "type": "number" },
+            "leveragedIRR": { "type": "number" },
+            "equityMultiple": { "type": "number" },
+            "annualNOI": {
+              "type": "array",
+              "description": "NOI by year over hold period.",
+              "items": {
+                "type": "object",
+                "required": ["year", "noi"],
+                "properties": {
+                  "year": { "type": "integer" },
+                  "noi": { "type": "number" },
+                  "egi": { "type": "number" },
+                  "opEx": { "type": "number" }
+                },
+                "additionalProperties": true
+              }
+            }
+          },
+          "additionalProperties": true
+        },
+        "bullCase": {
+          "type": "object",
+          "description": "Upside scenario with favorable market conditions.",
+          "required": ["rentGrowthAssumption", "occupancyAssumption", "year1NOI", "exitCapRate", "leveragedIRR", "equityMultiple"],
+          "properties": {
+            "rentGrowthAssumption": { "type": "number" },
+            "occupancyAssumption": { "type": "number", "minimum": 0, "maximum": 1 },
+            "year1NOI": { "type": "number" },
+            "exitCapRate": { "type": "number" },
+            "projectedSalePrice": { "type": "number" },
+            "leveragedIRR": { "type": "number" },
+            "equityMultiple": { "type": "number" }
+          },
+          "additionalProperties": true
+        },
+        "bearCase": {
+          "type": "object",
+          "description": "Downside scenario with adverse market conditions.",
+          "required": ["rentGrowthAssumption", "occupancyAssumption", "year1NOI", "exitCapRate", "leveragedIRR", "equityMultiple"],
+          "properties": {
+            "rentGrowthAssumption": { "type": "number" },
+            "occupancyAssumption": { "type": "number", "minimum": 0, "maximum": 1 },
+            "year1NOI": { "type": "number" },
+            "exitCapRate": { "type": "number" },
+            "projectedSalePrice": { "type": "number" },
+            "leveragedIRR": { "type": "number" },
+            "equityMultiple": { "type": "number" }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "debtServiceSchedule": {
+      "type": "object",
+      "description": "Loan amortization schedule and covenant projection over the hold period.",
+      "required": ["loanBalance", "annualDebtService", "amortizationSchedule", "covenantProjections"],
+      "properties": {
+        "loanAmount": {
+          "type": "number",
+          "description": "Original loan amount.",
+          "minimum": 0
+        },
+        "loanBalance": {
+          "type": "number",
+          "description": "Current outstanding loan balance.",
+          "minimum": 0
+        },
+        "interestRate": {
+          "type": "number",
+          "description": "Current all-in interest rate (decimal)."
+        },
+        "rateType": {
+          "type": "string",
+          "enum": ["FIXED", "FLOATING", "HYBRID"],
+          "description": "Interest rate type."
+        },
+        "maturityDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Loan maturity date."
+        },
+        "annualDebtService": {
+          "type": "number",
+          "description": "Annual debt service payment (P+I).",
+          "minimum": 0
+        },
+        "currentDSCR": {
+          "type": "number",
+          "description": "Current debt service coverage ratio (NOI / ADS)."
+        },
+        "amortizationSchedule": {
+          "type": "array",
+          "description": "Annual principal and interest breakdown.",
+          "items": {
+            "type": "object",
+            "required": ["year", "beginningBalance", "principal", "interest", "endingBalance"],
+            "properties": {
+              "year": { "type": "integer" },
+              "beginningBalance": { "type": "number" },
+              "principal": { "type": "number" },
+              "interest": { "type": "number" },
+              "totalPayment": { "type": "number" },
+              "endingBalance": { "type": "number" }
+            },
+            "additionalProperties": true
+          }
+        },
+        "covenantProjections": {
+          "type": "object",
+          "description": "Forward-looking covenant compliance projections.",
+          "required": ["dscrThreshold", "ltvThreshold", "projectedDSCRByYear", "projectedLTVByYear"],
+          "properties": {
+            "dscrThreshold": {
+              "type": "number",
+              "description": "Minimum DSCR required under loan covenants."
+            },
+            "ltvThreshold": {
+              "type": "number",
+              "description": "Maximum LTV permitted under loan covenants (decimal)."
+            },
+            "debtYieldThreshold": {
+              "type": "number",
+              "description": "Minimum debt yield required under loan covenants."
+            },
+            "projectedDSCRByYear": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["year", "projectedDSCR", "inCompliance"],
+                "properties": {
+                  "year": { "type": "integer" },
+                  "projectedDSCR": { "type": "number" },
+                  "inCompliance": { "type": "boolean" },
+                  "headroom": { "type": "number", "description": "DSCR cushion above covenant minimum." }
+                },
+                "additionalProperties": true
+              }
+            },
+            "projectedLTVByYear": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["year", "projectedLTV", "inCompliance"],
+                "properties": {
+                  "year": { "type": "integer" },
+                  "projectedLTV": { "type": "number" },
+                  "inCompliance": { "type": "boolean" },
+                  "assumedValue": { "type": "number", "description": "Estimated property value used for LTV calculation." }
+                },
+                "additionalProperties": true
+              }
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "sensitivityGrid": {
+      "type": "object",
+      "description": "Two-dimensional sensitivity analysis of IRR and value across key assumption ranges.",
+      "required": ["metric", "rowVariable", "colVariable", "grid"],
+      "properties": {
+        "metric": {
+          "type": "string",
+          "description": "Output metric displayed in grid (e.g., leveragedIRR, equityMultiple, exitValue)."
+        },
+        "rowVariable": {
+          "type": "object",
+          "description": "Row axis variable definition.",
+          "required": ["name", "values"],
+          "properties": {
+            "name": { "type": "string", "description": "e.g., rentGrowth, exitCapRate." },
+            "label": { "type": "string" },
+            "values": {
+              "type": "array",
+              "description": "Ordered list of row axis assumption values.",
+              "items": { "type": "number" }
+            }
+          },
+          "additionalProperties": true
+        },
+        "colVariable": {
+          "type": "object",
+          "description": "Column axis variable definition.",
+          "required": ["name", "values"],
+          "properties": {
+            "name": { "type": "string", "description": "e.g., occupancyRate, opExGrowth." },
+            "label": { "type": "string" },
+            "values": {
+              "type": "array",
+              "description": "Ordered list of column axis assumption values.",
+              "items": { "type": "number" }
+            }
+          },
+          "additionalProperties": true
+        },
+        "grid": {
+          "type": "array",
+          "description": "Matrix of output values. Outer array indexed by row, inner array indexed by column.",
+          "items": {
+            "type": "array",
+            "items": { "type": "number" }
+          }
+        },
+        "baseCoordinates": {
+          "type": "object",
+          "description": "Row and column indices of the base-case cell.",
+          "properties": {
+            "row": { "type": "integer" },
+            "col": { "type": "integer" }
+          },
+          "additionalProperties": false
+        },
+        "hurdleRate": {
+          "type": "number",
+          "description": "Minimum acceptable IRR or return hurdle for color coding."
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

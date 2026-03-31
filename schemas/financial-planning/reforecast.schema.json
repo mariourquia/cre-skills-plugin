@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "reforecast.schema.json",
+  "title": "Quarterly Reforecast",
+  "description": "Quarterly reforecast combining YTD actuals with remaining months projection via trend-adjusted, rebudgeted, or hybrid methodology",
+  "type": "object",
+  "required": [
+    "propertyId",
+    "year",
+    "quarter",
+    "reforecastDate",
+    "status",
+    "methodology",
+    "ytdActuals",
+    "remainingMonths",
+    "fullYearReforecast",
+    "reforecastDrivers",
+    "revisionToAssumptions"
+  ],
+  "properties": {
+    "propertyId": {
+      "type": "string",
+      "pattern": "^PROP-[A-Z0-9-]+$",
+      "description": "Unique property identifier"
+    },
+    "year": {
+      "type": "integer",
+      "minimum": 2020,
+      "maximum": 2040,
+      "description": "Fiscal year being reforecast"
+    },
+    "quarter": {
+      "type": "string",
+      "pattern": "^Q[1-4]$",
+      "description": "Quarter through which actuals are available (Q1 = Jan-Mar actuals)"
+    },
+    "reforecastDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the reforecast was produced"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["DRAFT", "UNDER_REVIEW", "APPROVED", "SUPERSEDED"],
+      "description": "Reforecast approval status"
+    },
+    "methodology": {
+      "type": "string",
+      "enum": ["TREND_ADJUSTED", "REBUDGETED", "HYBRID"],
+      "description": "TREND_ADJUSTED: apply YTD run-rate to remaining months. REBUDGETED: bottom-up re-estimate. HYBRID: trend for stable items, rebudget for volatile."
+    },
+    "ytdActuals": {
+      "type": "object",
+      "required": ["months", "revenue", "expenses", "noi"],
+      "properties": {
+        "months": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12,
+          "description": "Number of months of actual data included"
+        },
+        "revenue": {
+          "type": "object",
+          "required": ["actual", "budget", "variance", "variancePct"],
+          "properties": {
+            "actual": { "type": "number" },
+            "budget": { "type": "number" },
+            "variance": { "type": "number" },
+            "variancePct": { "type": ["number", "null"] }
+          }
+        },
+        "expenses": {
+          "type": "object",
+          "required": ["actual", "budget", "variance", "variancePct"],
+          "properties": {
+            "actual": { "type": "number" },
+            "budget": { "type": "number" },
+            "variance": { "type": "number" },
+            "variancePct": { "type": ["number", "null"] }
+          }
+        },
+        "noi": {
+          "type": "object",
+          "required": ["actual", "budget", "variance", "variancePct"],
+          "properties": {
+            "actual": { "type": "number" },
+            "budget": { "type": "number" },
+            "variance": { "type": "number" },
+            "variancePct": { "type": ["number", "null"] }
+          }
+        }
+      }
+    },
+    "remainingMonths": {
+      "type": "object",
+      "required": ["revenue", "expenses", "noi"],
+      "properties": {
+        "monthCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 11,
+          "description": "Number of remaining months being projected"
+        },
+        "revenue": {
+          "type": "object",
+          "required": ["original", "reforecast", "change"],
+          "properties": {
+            "original": { "type": "number", "description": "Remaining months at original budget" },
+            "reforecast": { "type": "number", "description": "Remaining months at reforecast" },
+            "change": { "type": "number", "description": "Reforecast minus original" }
+          }
+        },
+        "expenses": {
+          "type": "object",
+          "required": ["original", "reforecast", "change"],
+          "properties": {
+            "original": { "type": "number" },
+            "reforecast": { "type": "number" },
+            "change": { "type": "number" }
+          }
+        },
+        "noi": {
+          "type": "object",
+          "required": ["original", "reforecast", "change"],
+          "properties": {
+            "original": { "type": "number" },
+            "reforecast": { "type": "number" },
+            "change": { "type": "number" }
+          }
+        }
+      }
+    },
+    "fullYearReforecast": {
+      "type": "object",
+      "required": ["revenue", "expenses", "noi"],
+      "properties": {
+        "revenue": {
+          "type": "object",
+          "required": ["original", "reforecast", "change", "changePct"],
+          "properties": {
+            "original": { "type": "number", "description": "Original full-year budget" },
+            "reforecast": { "type": "number", "description": "YTD actuals + remaining months reforecast" },
+            "change": { "type": "number" },
+            "changePct": { "type": ["number", "null"] }
+          }
+        },
+        "expenses": {
+          "type": "object",
+          "required": ["original", "reforecast", "change", "changePct"],
+          "properties": {
+            "original": { "type": "number" },
+            "reforecast": { "type": "number" },
+            "change": { "type": "number" },
+            "changePct": { "type": ["number", "null"] }
+          }
+        },
+        "noi": {
+          "type": "object",
+          "required": ["original", "reforecast", "change", "changePct"],
+          "properties": {
+            "original": { "type": "number" },
+            "reforecast": { "type": "number" },
+            "change": { "type": "number" },
+            "changePct": { "type": ["number", "null"] }
+          }
+        },
+        "netCashFlow": {
+          "type": "object",
+          "properties": {
+            "original": { "type": "number" },
+            "reforecast": { "type": "number" },
+            "change": { "type": "number" },
+            "changePct": { "type": ["number", "null"] }
+          }
+        },
+        "dscr": {
+          "type": "object",
+          "properties": {
+            "original": { "type": ["number", "null"] },
+            "reforecast": { "type": ["number", "null"] }
+          }
+        }
+      }
+    },
+    "reforecastDrivers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["driver", "impact", "category"],
+        "properties": {
+          "driver": {
+            "type": "string",
+            "description": "What changed and why (e.g. 'Real estate tax reassessment 12% above budget')"
+          },
+          "impact": {
+            "type": "number",
+            "description": "Dollar impact on full-year NOI (positive = favorable)"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["revenue", "expense", "occupancy", "market", "regulatory", "one-time"],
+            "description": "Driver category for grouping"
+          },
+          "permanence": {
+            "type": "string",
+            "enum": ["PERMANENT", "TEMPORARY", "UNCERTAIN"],
+            "description": "Whether this driver carries into next year"
+          }
+        }
+      },
+      "description": "Key drivers explaining the delta between original budget and reforecast"
+    },
+    "revisionToAssumptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["assumption", "original", "revised"],
+        "properties": {
+          "assumption": {
+            "type": "string",
+            "description": "Name of the assumption being revised (e.g. 'occupancyRate', 'rentGrowthRate')"
+          },
+          "original": {
+            "type": "number",
+            "description": "Original budget assumption value"
+          },
+          "revised": {
+            "type": "number",
+            "description": "Revised assumption value for reforecast"
+          },
+          "rationale": {
+            "type": "string",
+            "description": "Why the assumption changed"
+          }
+        }
+      },
+      "description": "Assumptions revised from original budget to reforecast"
+    }
+  }
+}
