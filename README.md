@@ -36,7 +36,7 @@ A Claude plugin delivering **105 institutional-grade commercial real estate skil
 
 ## What's New in v2.0.0
 
-**19 new production-quality skills**: title-commitment-reviewer, tenant-credit-analyzer, term-sheet-builder, loan-document-reviewer, transfer-document-preparer, funds-flow-calculator, lease-option-structurer, lease-trade-out-analyzer, gp-performance-evaluator, fund-terms-comparator, lp-data-request-generator, sec-reg-d-compliance, monte-carlo-return-simulator, property-management-operations, distribution-notice-generator, 1031-pipeline-manager, deal-attribution-tracker, emerging-manager-evaluator, fund-raise-negotiation-engine.
+**19 new production-quality skills**: title-commitment-reviewer, tenant-credit-analyzer, term-sheet-builder, loan-document-reviewer, transfer-document-preparer, funds-flow-calculator, lease-option-structurer, lease-trade-out-analyzer, gp-performance-evaluator, fund-terms-comparator, lp-data-request-generator, sec-reg-d-compliance, monte-carlo-return-simulator, small-operator-pm, distribution-notice-generator, 1031-pipeline-manager, deal-attribution-tracker, emerging-manager-evaluator, fund-raise-negotiation-engine.
 
 **12 Python calculators** (zero dependencies): debt sizing, covenant testing, NPV trade-out analysis, option valuation, proration calculation, tenant credit scoring, waterfall distribution, transfer tax (50 states + DC), quick screen IRR/CoC, Monte Carlo return simulation, fund fee modeling.
 
@@ -157,7 +157,7 @@ Raleigh NC, $42M asking, 2018 vintage, 93% occupied, $2.6M NOI, rents 12% below 
 | 04 | **Due Diligence** | 4 | `dd-command-center`, `distressed-acquisition-playbook`, `title-commitment-reviewer`, `tenant-credit-analyzer` |
 | 05 | **Capital Markets** | 7 | `loan-sizing-engine`, `capital-stack-optimizer`, `refi-decision-analyzer`, `mezz-pref-structurer`, `debt-portfolio-monitor`, `workout-playbook`, `term-sheet-builder` |
 | 06 | **Market Research** | 4 | `submarket-truth-serum`, `comp-snapshot`, `supply-demand-forecast`, `market-cycle-positioner` |
-| 07 | **Asset Management** | 7 | `annual-budget-engine`, `property-performance-dashboard`, `capex-prioritizer`, `noi-sprint-plan`, `lease-compliance-auditor`, `tenant-delinquency-workout`, `property-management-operations` |
+| 07 | **Asset Management** | 7 | `annual-budget-engine`, `property-performance-dashboard`, `capex-prioritizer`, `noi-sprint-plan`, `lease-compliance-auditor`, `tenant-delinquency-workout`, `small-operator-pm` |
 | 08 | **Leasing** | 9 | `tenant-retention-engine`, `lease-up-war-room`, `lease-negotiation-analyzer`, `rent-optimization-planner`, `leasing-operations-engine`, `leasing-strategy-marketing-planner`, `lease-document-factory`, `lease-option-structurer`, `lease-trade-out-analyzer` |
 | 09 | **Investor Relations** | 11 | `ic-memo-generator`, `quarterly-investor-update`, `lp-pitch-deck-builder`, `capital-raise-machine`, `fund-formation-toolkit`, `fund-operations-compliance-dashboard`, `investor-lifecycle-manager`, `sec-reg-d-compliance`, `distribution-notice-generator`, `emerging-manager-evaluator`, `fund-raise-negotiation-engine` |
 | 10 | **Development** | 7 | `dev-proforma-engine`, `land-residual-hbu-analyzer`, `entitlement-feasibility`, `construction-budget-gc-analyzer`, `construction-project-command-center`, `construction-procurement-contracts-engine`, `post-close-onboarding-transition` |

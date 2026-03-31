@@ -423,7 +423,7 @@ skills:
     effort_hours: 8
     chains_to: [noi-sprint-plan, property-performance-dashboard, annual-budget-engine, disposition-strategy-engine, investor-lifecycle-manager]
     chains_from: [post-close-onboarding-transition, construction-project-command-center]
-    daily_ops_support: [building-systems-maintenance-manager, work-order-triage, property-management-operations, property-operations-admin-toolkit, cam-reconciliation-calculator, tenant-delinquency-workout, coi-compliance-checker, vendor-invoice-validator, compliance-regulatory-response-kit, capex-prioritizer]
+    daily_ops_support: [building-systems-maintenance-manager, work-order-triage, small-operator-pm, property-operations-admin-toolkit, cam-reconciliation-calculator, tenant-delinquency-workout, coi-compliance-checker, vendor-invoice-validator, compliance-regulatory-response-kit, capex-prioritizer]
 
   - slug: space-planning-redesign-orchestrator
     name: Space Planning & Redesign Orchestrator
@@ -1381,7 +1381,7 @@ skills:
     chains_from: [acquisition-underwriting-engine, portfolio-allocator]
     daily_ops_support: []
 
-  - slug: property-management-operations
+  - slug: small-operator-pm
     name: Property Management Operations
     category: 07-asset-management
     priority: P1

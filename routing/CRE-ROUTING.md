@@ -104,7 +104,7 @@
 | "Monte Carlo", "return simulation", "probability distribution", "stochastic model" | `/monte-carlo-return-simulator` |
 | "property management command center", "PM dashboard", "full PM operations" | `/property-management-orchestrator` |
 | "space planning", "redesign", "amenity addition", "reposition this space" | `/space-planning-redesign-orchestrator` |
-| "property management", "PM operations", "daily operations checklist", "site team" | `/property-management-operations` |
+| "small operator PM", "self-manage", "landlord operations", "1-50 units" | `/small-operator-pm` |
 | "distribution notice", "capital distribution", "distribution waterfall letter" | `/distribution-notice-generator` |
 | "1031 pipeline", "replacement property pipeline", "exchange timeline", "1031 ID deadline" | `/1031-pipeline-manager` |
 | "deal attribution", "deal-level P&L", "track record attribution", "realized/unrealized" | `/deal-attribution-tracker` |
