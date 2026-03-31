@@ -1,8 +1,8 @@
 {
-  "orchestratorId": "multifamily-acquisition",
+  "orchestratorId": "acquisition",
   "version": "1.0.0",
   "entityType": "deal",
-  "description": "Five-phase multifamily acquisition pipeline: due diligence, underwriting, financing, legal, and closing. Coordinates 21 specialist agents across all phases to produce an IC memo, funded term sheet, and executed closing package. Terminal deliverable is a PROCEED / CONDITIONAL / KILL verdict handed off to the hold-period-monitor orchestrator on closing.",
+  "description": "Five-phase commercial real estate acquisition pipeline: due diligence, underwriting, financing, legal, and closing. Coordinates 21 specialist agents across all phases to produce an IC memo, funded term sheet, and executed closing package. Asset-class-agnostic; parameterized by deal.json assetClass field. Terminal deliverable is a PROCEED / CONDITIONAL / KILL verdict handed off to the hold-period-monitor orchestrator on closing.",
   "model": "claude-opus-4-6[1m]",
   "phases": [
     {
@@ -16,23 +16,23 @@
           "file": "agents/due-diligence/rent-roll-analyst.md",
           "model": "claude-sonnet-4-6[1m]",
           "inputs": ["config/deal.json", "rent roll document"],
-          "outputs": ["rent-roll analysis", "unit mix summary", "loss-to-lease calculation"],
+          "outputs": ["rent-roll analysis", "unit mix summary or tenant schedule", "loss-to-lease or in-place-vs-market calculation"],
           "critical": true,
           "dependencies": [],
           "skillRefs": [
             "skills/underwriting-calc.md",
-            "skills/multifamily-benchmarks.md"
+            "skills/asset-class-benchmarks.md"
           ],
           "maxTimeoutMinutes": 30,
           "validationRules": [
             {
               "ruleId": "unit-count-present",
-              "description": "Total unit count must be non-null and match deal.json unitCount within 0 variance.",
+              "description": "Total unit count must be non-null and match deal.json unitCount within 0 variance. Applies to unit-based assets (multifamily, self-storage, hospitality); SF-based assets (office, industrial, retail) use rentable-sf-present instead.",
               "actionOnFailure": "retry_agent"
             },
             {
               "ruleId": "loss-to-lease-calculated",
-              "description": "Loss-to-lease value in dollars and percentage must be present.",
+              "description": "Loss-to-lease (residential) or in-place-vs-market gap (non-residential) value in dollars and percentage must be present.",
               "actionOnFailure": "flag_data_gap"
             }
           ]
@@ -42,11 +42,11 @@
           "file": "agents/due-diligence/opex-analyst.md",
           "model": "claude-sonnet-4-6[1m]",
           "inputs": ["config/deal.json", "T-12 operating statement"],
-          "outputs": ["opex analysis", "per-unit expenses", "anomaly flags"],
+          "outputs": ["opex analysis", "per-unit or per-SF expenses depending on asset class", "anomaly flags"],
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/multifamily-benchmarks.md",
+            "skills/asset-class-benchmarks.md",
             "skills/underwriting-calc.md"
           ],
           "maxTimeoutMinutes": 30
@@ -165,12 +165,12 @@
         "rentRoll": {
           "type": "object",
           "required": true,
-          "description": "Validated rent roll with unit mix, in-place rents, loss-to-lease, and vacancy schedule. Required by financial-model-builder."
+          "description": "Validated rent roll with unit mix (or tenant schedule for non-residential), in-place rents, loss-to-lease (or in-place-vs-market for non-residential), and vacancy schedule. Required by financial-model-builder."
         },
         "opexAnalysis": {
           "type": "object",
           "required": true,
-          "description": "Normalized T-12 expenses with per-unit benchmarks and anomaly flags. Required by financial-model-builder."
+          "description": "Normalized T-12 expenses with per-unit or per-SF benchmarks (depending on asset class) and anomaly flags. Required by financial-model-builder."
         },
         "capexEstimates": {
           "type": "object",
@@ -203,14 +203,14 @@
           {
             "checkId": "unit-count-consistency",
             "agentsInvolved": ["rent-roll-analyst", "physical-inspection"],
-            "description": "Total unit count from rent roll must match physical inspection unit count.",
+            "description": "Total unit count from rent roll must match physical inspection unit count. Applies to unit-based assets (multifamily, self-storage, hospitality); SF-based assets (office, industrial, retail) use rentable-sf-consistency instead.",
             "tolerance": "0%",
             "actionOnMismatch": "block_verdict"
           },
           {
             "checkId": "opex-gross-revenue-ratio",
             "agentsInvolved": ["rent-roll-analyst", "opex-analyst"],
-            "description": "OpEx as % of gross revenue must be within market benchmarks (30-55% for multifamily).",
+            "description": "OpEx as % of gross revenue must be within market benchmarks (varies by asset class: 30-55% multifamily, 35-50% office, 15-30% industrial, 25-45% retail).",
             "tolerance": "5%",
             "actionOnMismatch": "log_warning"
           }
@@ -250,7 +250,7 @@
           "dependencies": [],
           "skillRefs": [
             "skills/underwriting-calc.md",
-            "skills/multifamily-benchmarks.md"
+            "skills/asset-class-benchmarks.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [

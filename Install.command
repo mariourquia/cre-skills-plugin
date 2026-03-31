@@ -69,8 +69,8 @@ cat << 'HEADER'
 HEADER
 printf "${RESET}"
 
-printf "${BLUE}  Plugin Installer v2.0.0${RESET}\n"
-printf "${DIM}  91 skills | 40 agents | 6 workflow chains${RESET}\n"
+printf "${BLUE}  Plugin Installer v2.5.0${RESET}\n"
+printf "${DIM}  105 skills | 55 agents | 6 workflow chains${RESET}\n"
 echo ""
 
 # ── Step 1: Check prerequisites ──────────────────────────────────────
@@ -177,7 +177,7 @@ echo ""
 printf "  ${CYAN}/cre-skills:cre-route${RESET}        Route any CRE task to the right skill\n"
 printf "  ${CYAN}/cre-skills:deal-quick-screen${RESET} Screen a deal in seconds\n"
 printf "  ${CYAN}/cre-skills:cre-workflows${RESET}    Browse 6 end-to-end workflow chains\n"
-printf "  ${CYAN}/cre-skills:cre-agents${RESET}       List 40 expert agents\n"
+printf "  ${CYAN}/cre-skills:cre-agents${RESET}       List 55 expert agents\n"
 echo ""
 
 printf "  ${BOLD}Example${RESET}\n"
@@ -190,8 +190,8 @@ echo ""
 
 printf "  ${BOLD}What's Included${RESET}\n"
 echo ""
-printf "  ${GREEN}91${RESET} skills across 16 categories\n"
-printf "  ${GREEN}40${RESET} expert agents (Pension Fund, PE, REIT, Risk Mgr, ...)\n"
+printf "  ${GREEN}105${RESET} skills across 16 categories\n"
+printf "  ${GREEN}55${RESET} expert agents (Pension Fund, PE, REIT, Risk Mgr, ...)\n"
 printf "  ${GREEN} 6${RESET} workflow chains (Acquisition, Capital Stack, Hold, ...)\n"
 echo ""
 printf "  Plugin location: ${DIM}%s${RESET}\n" "$INSTALL_DIR"

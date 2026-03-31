@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/strategy-definition-data.schema.json",
+  "title": "Investment Strategy Phase 2 -- Strategy Definition Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the strategy definition phase. Covers strategy type selection, allocation matrix, return targets, leverage policy, and investment thesis document.",
+  "type": "object",
+  "required": ["riskReturnProfile", "allocationMatrix", "returnTargets", "leveragePolicy", "investmentThesis"],
+  "properties": {
+    "riskReturnProfile": {
+      "type": "object",
+      "description": "Selected investment strategy with decision rationale.",
+      "required": ["primaryStrategy", "compositeScore", "selectionRationale"],
+      "properties": {
+        "primaryStrategy": { "type": "string", "enum": ["core", "core-plus", "value-add", "opportunistic"] },
+        "secondaryStrategy": { "type": ["string", "null"], "enum": ["core", "core-plus", "value-add", "opportunistic", null] },
+        "dualStrategyRecommended": { "type": "boolean" },
+        "compositeScore": { "type": "number" },
+        "selectionRationale": { "type": "string" },
+        "decisionMatrix": {
+          "type": "object",
+          "description": "Scoring matrix across return fit, cycle compatibility, mandate compliance, and market opportunity."
+        }
+      }
+    },
+    "allocationMatrix": {
+      "type": "object",
+      "description": "Multi-dimensional target allocation matrix.",
+      "required": ["propertyType", "geographic", "riskTier"],
+      "properties": {
+        "propertyType": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["type", "targetPct"],
+            "properties": {
+              "type": { "type": "string" },
+              "targetPct": { "type": "number", "minimum": 0, "maximum": 1 },
+              "minPct": { "type": "number", "minimum": 0, "maximum": 1 },
+              "maxPct": { "type": "number", "minimum": 0, "maximum": 1 },
+              "rationale": { "type": "string" }
+            }
+          }
+        },
+        "geographic": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["msa", "targetPct", "tier"],
+            "properties": {
+              "msa": { "type": "string" },
+              "targetPct": { "type": "number", "minimum": 0, "maximum": 1 },
+              "minPct": { "type": "number", "minimum": 0, "maximum": 1 },
+              "maxPct": { "type": "number", "minimum": 0, "maximum": 1 },
+              "tier": { "type": "integer", "minimum": 1, "maximum": 5 },
+              "rationale": { "type": "string" }
+            }
+          }
+        },
+        "riskTier": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["tier", "targetPct"],
+            "properties": {
+              "tier": { "type": "string" },
+              "targetPct": { "type": "number", "minimum": 0, "maximum": 1 },
+              "minPct": { "type": "number", "minimum": 0, "maximum": 1 },
+              "maxPct": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          }
+        },
+        "vintage": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "year": { "type": "string" },
+              "targetPct": { "type": "number" },
+              "maxPct": { "type": "number" }
+            }
+          }
+        }
+      }
+    },
+    "returnTargets": {
+      "type": "object",
+      "description": "Explicit return targets with floor and ceiling.",
+      "required": ["netIrrTarget", "equityMultipleTarget"],
+      "properties": {
+        "netIrrTarget": { "type": "number" },
+        "netIrrFloor": { "type": "number" },
+        "grossIrrTarget": { "type": "number" },
+        "equityMultipleTarget": { "type": "number" },
+        "equityMultipleFloor": { "type": "number" },
+        "preferredReturn": { "type": "number" },
+        "cashOnCashTarget": { "type": "number" },
+        "holdPeriodYears": { "type": "number" },
+        "benchmarkPercentile": { "type": "string" },
+        "returnAttribution": { "type": "object" },
+        "scenarios": {
+          "type": "object",
+          "properties": {
+            "bull": { "type": "object" },
+            "base": { "type": "object" },
+            "bear": { "type": "object" },
+            "stress": { "type": "object" }
+          }
+        }
+      }
+    },
+    "leveragePolicy": {
+      "type": "object",
+      "description": "Leverage framework for the strategy.",
+      "required": ["fundLevelLtvTarget", "dealLevelLtvTarget", "minDscr"],
+      "properties": {
+        "fundLevelLtvTarget": { "type": "number" },
+        "fundLevelLtvMax": { "type": "number" },
+        "dealLevelLtvTarget": { "type": "number" },
+        "dealLevelLtvMax": { "type": "number" },
+        "minDscr": { "type": "number" },
+        "minDebtYield": { "type": "number" },
+        "preferredDebtTypes": { "type": "array", "items": { "type": "string" } },
+        "rateStrategy": { "type": "string" },
+        "ioPeriodMonths": { "type": "integer" },
+        "recoursePolicy": { "type": "string" },
+        "positiveLeverageSpreadBps": { "type": "integer" }
+      }
+    },
+    "holdPeriod": {
+      "type": "object",
+      "description": "Hold period parameters and exit strategy.",
+      "properties": {
+        "targetYears": { "type": "number" },
+        "minimumYears": { "type": "number" },
+        "maximumYears": { "type": "number" },
+        "exitStrategy": { "type": "object" },
+        "forcedExitTriggers": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "investmentThesis": {
+      "type": "object",
+      "description": "Investment thesis document sections.",
+      "required": ["executiveSummary"],
+      "properties": {
+        "executiveSummary": { "type": "string" },
+        "marketRationale": { "type": "string" },
+        "strategyFramework": { "type": "string" },
+        "competitiveAdvantages": { "type": "string" },
+        "riskFactors": { "type": "string" },
+        "financialExhibits": { "type": "string" }
+      }
+    },
+    "differentiation": {
+      "type": "object",
+      "description": "Strategy differentiation narrative.",
+      "properties": {
+        "marketSelectionEdge": { "type": "string" },
+        "executionCapability": { "type": "string" },
+        "sourcingAdvantage": { "type": "string" },
+        "structuralAdvantage": { "type": "string" },
+        "riskManagement": { "type": "string" }
+      }
+    }
+  }
+}

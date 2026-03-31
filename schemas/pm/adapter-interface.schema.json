@@ -1,0 +1,366 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cre-acquisition-orchestrator/schemas/pm/adapter-interface.schema.json",
+  "title": "PM Platform Adapter Interface",
+  "description": "Standardized request/response format for all PM platform adapters (Yardi, AppFolio, RealPage). Module agents formulate requests in this format; adapters return responses in this format. The consuming agent never sees raw platform API responses.",
+
+  "definitions": {
+    "AdapterRequest": {
+      "type": "object",
+      "required": ["requestId", "adapterId", "operation", "entityScope", "timestamp"],
+      "properties": {
+        "requestId": {
+          "type": "string",
+          "description": "Unique request ID for tracking. Format: ADAPT-REQ-{timestamp}-{random}",
+          "pattern": "^ADAPT-REQ-"
+        },
+        "adapterId": {
+          "type": "string",
+          "enum": ["yardi-adapter", "appfolio-adapter", "realpage-adapter"],
+          "description": "Which platform adapter handles this request. Determined by pm-orchestrator-lead based on property config."
+        },
+        "operation": {
+          "type": "string",
+          "enum": [
+            "extract_rent_roll",
+            "extract_financial_statement",
+            "extract_trial_balance",
+            "extract_delinquency_report",
+            "extract_work_orders",
+            "extract_leasing_pipeline",
+            "extract_vendor_list",
+            "extract_coi_status",
+            "extract_tenant_roster",
+            "extract_lease_expirations",
+            "extract_payment_history",
+            "extract_utility_data",
+            "extract_inspection_results",
+            "extract_budget",
+            "extract_bank_reconciliation",
+            "push_work_order",
+            "push_late_notice",
+            "push_lease_renewal_offer",
+            "push_rent_charge",
+            "push_vendor_payment",
+            "push_tenant_communication",
+            "query_market_analytics",
+            "query_revenue_recommendation"
+          ],
+          "description": "The data operation to perform. Extract operations read data; push operations write data; query operations request computed results."
+        },
+        "entityScope": {
+          "type": "object",
+          "required": ["level"],
+          "properties": {
+            "level": {
+              "type": "string",
+              "enum": ["unit", "property", "region", "portfolio"],
+              "description": "The level of data being requested."
+            },
+            "propertyId": { "type": "string", "description": "Required for property/unit level" },
+            "regionId": { "type": "string", "description": "Required for region level" },
+            "portfolioId": { "type": "string", "description": "Required for portfolio level" },
+            "unitId": { "type": "string", "description": "Required for unit level" }
+          }
+        },
+        "dateRange": {
+          "type": "object",
+          "properties": {
+            "startDate": { "type": "string", "format": "date", "description": "ISO 8601 date" },
+            "endDate": { "type": "string", "format": "date" },
+            "period": {
+              "type": "string",
+              "enum": ["current_month", "prior_month", "current_quarter", "prior_quarter", "trailing_12", "ytd", "custom"],
+              "description": "Shorthand for common date ranges. If 'custom', use startDate/endDate."
+            }
+          }
+        },
+        "filters": {
+          "type": "object",
+          "description": "Operation-specific filters (e.g., status=delinquent, priority=P1)",
+          "additionalProperties": true
+        },
+        "pagination": {
+          "type": "object",
+          "properties": {
+            "pageSize": { "type": "integer", "default": 500, "maximum": 5000 },
+            "pageToken": { "type": "string", "description": "Continuation token from prior response" }
+          }
+        },
+        "pushPayload": {
+          "type": "object",
+          "description": "Data to write for push operations. Schema varies by operation type.",
+          "additionalProperties": true
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the request was created"
+        },
+        "callerAgent": {
+          "type": "string",
+          "description": "The module agent that originated this request"
+        },
+        "urgency": {
+          "type": "string",
+          "enum": ["immediate", "standard", "batch"],
+          "default": "standard",
+          "description": "immediate: real-time needed (emergencies); standard: within minutes; batch: can wait for scheduled run"
+        }
+      }
+    },
+
+    "AdapterResponse": {
+      "type": "object",
+      "required": ["responseId", "requestId", "status", "adapterId", "timestamp"],
+      "properties": {
+        "responseId": {
+          "type": "string",
+          "pattern": "^ADAPT-RES-"
+        },
+        "requestId": {
+          "type": "string",
+          "description": "Echoes the request ID for correlation"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["success", "partial", "error", "rate_limited", "auth_failed"],
+          "description": "success: all data returned. partial: some data returned with gaps noted. error: operation failed. rate_limited: retry after delay. auth_failed: credentials invalid."
+        },
+        "adapterId": {
+          "type": "string",
+          "enum": ["yardi-adapter", "appfolio-adapter", "realpage-adapter"]
+        },
+        "data": {
+          "type": "object",
+          "description": "The normalized response data. Schema depends on the operation type. All platform-specific field names are mapped to the canonical orchestrator field names.",
+          "additionalProperties": true
+        },
+        "recordCount": {
+          "type": "integer",
+          "description": "Number of records returned"
+        },
+        "pagination": {
+          "type": "object",
+          "properties": {
+            "hasMore": { "type": "boolean" },
+            "nextPageToken": { "type": "string" },
+            "totalRecords": { "type": "integer" }
+          }
+        },
+        "dataQuality": {
+          "type": "object",
+          "properties": {
+            "completeness": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Fraction of requested fields that were non-null"
+            },
+            "gaps": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "field": { "type": "string" },
+                  "reason": { "type": "string", "enum": ["not_available", "permission_denied", "api_error", "not_applicable"] }
+                }
+              }
+            },
+            "staleness": {
+              "type": "string",
+              "description": "How fresh the data is. 'real-time', 'daily', 'weekly', 'monthly'"
+            }
+          }
+        },
+        "platformMetadata": {
+          "type": "object",
+          "description": "Platform-specific metadata (API version, rate limit remaining, etc.). Consuming agents should NOT depend on this -- it's for debugging only.",
+          "properties": {
+            "platform": { "type": "string" },
+            "apiVersion": { "type": "string" },
+            "rateLimitRemaining": { "type": "integer" },
+            "responseTimeMs": { "type": "integer" }
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": { "type": "string" },
+              "message": { "type": "string" },
+              "retryable": { "type": "boolean" },
+              "retryAfterMs": { "type": "integer" }
+            }
+          }
+        },
+        "complianceFlags": {
+          "type": "array",
+          "description": "DOJ consent decree and regulatory compliance flags. Only populated by realpage-adapter when revenue management data is involved.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "flag": { "type": "string" },
+              "regulation": { "type": "string" },
+              "action": { "type": "string", "enum": ["data_filtered", "data_lagged", "data_blocked", "jurisdiction_prohibited"] },
+              "detail": { "type": "string" }
+            }
+          }
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+
+    "NormalizedRentRoll": {
+      "type": "object",
+      "description": "Canonical rent roll format. All platform adapters normalize to this structure regardless of source platform.",
+      "properties": {
+        "propertyId": { "type": "string" },
+        "asOfDate": { "type": "string", "format": "date" },
+        "totalUnits": { "type": "integer" },
+        "occupiedUnits": { "type": "integer" },
+        "vacantUnits": { "type": "integer" },
+        "physicalOccupancy": { "type": "number" },
+        "economicOccupancy": { "type": "number" },
+        "units": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["unitId", "unitType", "sqft", "status", "marketRent"],
+            "properties": {
+              "unitId": { "type": "string" },
+              "unitNumber": { "type": "string" },
+              "unitType": { "type": "string", "description": "Canonical: studio, 1br, 2br, 3br, 4br, commercial, retail, office" },
+              "sqft": { "type": "number" },
+              "floor": { "type": "integer" },
+              "building": { "type": "string" },
+              "status": { "type": "string", "enum": ["occupied", "vacant", "notice", "down", "model", "employee"] },
+              "marketRent": { "type": "number" },
+              "currentRent": { "type": "number", "description": "null if vacant" },
+              "lossToLease": { "type": "number", "description": "marketRent - currentRent, null if vacant" },
+              "leaseStart": { "type": "string", "format": "date" },
+              "leaseEnd": { "type": "string", "format": "date" },
+              "moveInDate": { "type": "string", "format": "date" },
+              "tenantName": { "type": "string" },
+              "monthToMonth": { "type": "boolean" },
+              "concessions": { "type": "number", "description": "Monthly concession amount" },
+              "otherCharges": { "type": "number", "description": "Pet rent, parking, storage, RUBS" },
+              "securityDeposit": { "type": "number" },
+              "balance": { "type": "number", "description": "Outstanding tenant balance" }
+            }
+          }
+        }
+      }
+    },
+
+    "NormalizedFinancialStatement": {
+      "type": "object",
+      "description": "Canonical P&L format. All platform adapters normalize to this structure.",
+      "properties": {
+        "propertyId": { "type": "string" },
+        "period": { "type": "string", "description": "e.g., '2026-01' for January 2026" },
+        "periodType": { "type": "string", "enum": ["monthly", "quarterly", "annual", "trailing_12"] },
+        "revenue": {
+          "type": "object",
+          "properties": {
+            "grossPotentialRent": { "type": "number" },
+            "vacancyLoss": { "type": "number" },
+            "concessions": { "type": "number" },
+            "badDebt": { "type": "number" },
+            "netRentalIncome": { "type": "number" },
+            "otherIncome": {
+              "type": "object",
+              "properties": {
+                "laundry": { "type": "number" },
+                "parking": { "type": "number" },
+                "petFees": { "type": "number" },
+                "rubs": { "type": "number" },
+                "lateFees": { "type": "number" },
+                "applicationFees": { "type": "number" },
+                "other": { "type": "number" },
+                "total": { "type": "number" }
+              }
+            },
+            "effectiveGrossIncome": { "type": "number" }
+          }
+        },
+        "expenses": {
+          "type": "object",
+          "properties": {
+            "realEstateTaxes": { "type": "number" },
+            "insurance": { "type": "number" },
+            "utilities": { "type": "number" },
+            "repairsAndMaintenance": { "type": "number" },
+            "contractServices": { "type": "number" },
+            "payroll": { "type": "number" },
+            "managementFee": { "type": "number" },
+            "generalAndAdmin": { "type": "number" },
+            "marketing": { "type": "number" },
+            "professionalFees": { "type": "number" },
+            "other": { "type": "number" },
+            "totalOperatingExpenses": { "type": "number" }
+          }
+        },
+        "netOperatingIncome": { "type": "number" },
+        "belowTheLine": {
+          "type": "object",
+          "properties": {
+            "debtService": { "type": "number" },
+            "capitalExpenditures": { "type": "number" },
+            "replacementReserves": { "type": "number" },
+            "tenantImprovements": { "type": "number" },
+            "leasingCommissions": { "type": "number" }
+          }
+        },
+        "netCashFlow": { "type": "number" }
+      }
+    },
+
+    "NormalizedWorkOrder": {
+      "type": "object",
+      "description": "Canonical work order format.",
+      "properties": {
+        "workOrderId": { "type": "string" },
+        "propertyId": { "type": "string" },
+        "unitId": { "type": "string" },
+        "category": { "type": "string", "enum": ["plumbing", "electrical", "hvac", "appliance", "flooring", "painting", "pest", "lock_key", "common_area", "exterior", "fire_safety", "elevator", "other"] },
+        "priority": { "type": "string", "enum": ["P1", "P2", "P3", "P4"] },
+        "status": { "type": "string", "enum": ["open", "assigned", "in_progress", "on_hold", "completed", "cancelled"] },
+        "description": { "type": "string" },
+        "createdDate": { "type": "string", "format": "date-time" },
+        "assignedVendor": { "type": "string" },
+        "slaDeadline": { "type": "string", "format": "date-time" },
+        "completedDate": { "type": "string", "format": "date-time" },
+        "cost": { "type": "number" },
+        "tenantSatisfactionScore": { "type": "number", "minimum": 1, "maximum": 5 },
+        "source": { "type": "string", "enum": ["tenant_portal", "phone", "email", "inspection", "preventive_maintenance", "emergency"] }
+      }
+    },
+
+    "NormalizedDelinquency": {
+      "type": "object",
+      "description": "Canonical delinquency record.",
+      "properties": {
+        "propertyId": { "type": "string" },
+        "unitId": { "type": "string" },
+        "tenantName": { "type": "string" },
+        "leaseEnd": { "type": "string", "format": "date" },
+        "monthlyRent": { "type": "number" },
+        "totalBalance": { "type": "number" },
+        "current": { "type": "number" },
+        "days30": { "type": "number" },
+        "days60": { "type": "number" },
+        "days90": { "type": "number" },
+        "days120plus": { "type": "number" },
+        "lastPaymentDate": { "type": "string", "format": "date" },
+        "lastPaymentAmount": { "type": "number" },
+        "paymentPlanActive": { "type": "boolean" },
+        "legalStatus": { "type": "string", "enum": ["none", "notice_sent", "filed", "hearing_scheduled", "judgment", "eviction_scheduled"] }
+      }
+    }
+  }
+}

@@ -1,0 +1,345 @@
+# Amenity Cost Benchmarks
+# Source: RS Means, JLL, CBRE, Cushman & Wakefield project data (2024-2025)
+# All costs in USD. Ranges reflect Class B/C (low), Class A (mid), Trophy/luxury (high).
+# FF&E % is of total construction cost. Technology costs are incremental to base construction.
+# Annual operating costs exclude property-level shared overhead (insurance, taxes).
+
+amenity_types:
+
+  fitness_center:
+    description: "Tenant/resident fitness facility with cardio, strength, and stretching zones"
+    cost_per_sf:
+      low: 75
+      mid: 125
+      high: 200
+    typical_sf_range: [800, 5000]
+    ffe_pct_of_construction: 0.35
+    technology_cost_per_sf: 8
+    technology_notes: "Access control, music/AV, equipment tracking sensors, digital signage"
+    annual_operating_cost_per_sf: 12
+    operating_notes: "Cleaning, equipment maintenance, insurance rider, consumables"
+    revenue_potential:
+      multifamily_premium_per_unit_month: [25, 75]
+      office_premium_per_sf_year: [0.50, 2.00]
+      direct_membership_monthly: null
+    notes: "Equipment lifecycle 5-7 years. Budget replacement reserve at 15% of equipment cost annually."
+
+  coworking_space:
+    description: "Shared workspace with hot desks, private offices, phone rooms, and meeting areas"
+    cost_per_sf:
+      low: 90
+      mid: 150
+      high: 250
+    typical_sf_range: [1500, 15000]
+    ffe_pct_of_construction: 0.40
+    technology_cost_per_sf: 18
+    technology_notes: "WiFi mesh, booking system, access control, AV in meeting rooms, printing"
+    annual_operating_cost_per_sf: 22
+    operating_notes: "Staffing (0.5-2 FTE), internet, cleaning, supplies, software licenses"
+    revenue_potential:
+      hot_desk_monthly: [150, 400]
+      dedicated_desk_monthly: [300, 700]
+      private_office_per_sf_monthly: [4.00, 8.00]
+      meeting_room_hourly: [25, 100]
+    notes: "Breakeven typically requires 60-70% utilization. Consider operator partnership vs self-managed."
+
+  lobby_renovation:
+    description: "Main building entry, reception, and waiting area upgrade"
+    cost_per_sf:
+      low: 60
+      mid: 120
+      high: 225
+    typical_sf_range: [500, 5000]
+    ffe_pct_of_construction: 0.25
+    technology_cost_per_sf: 10
+    technology_notes: "Digital directory, visitor management kiosk, security turnstiles, ambient displays"
+    annual_operating_cost_per_sf: 6
+    operating_notes: "Concierge staffing (if added), cleaning, plant maintenance, display content"
+    revenue_potential:
+      office_premium_per_sf_year: [1.00, 3.00]
+      multifamily_premium_per_unit_month: [15, 50]
+    notes: "Highest ROI amenity in office buildings. First impression drives tour-to-lease conversion."
+
+  conference_center:
+    description: "Bookable meeting and event space with AV, catering support, and flexible layout"
+    cost_per_sf:
+      low: 85
+      mid: 150
+      high: 275
+    typical_sf_range: [800, 6000]
+    ffe_pct_of_construction: 0.30
+    technology_cost_per_sf: 25
+    technology_notes: "Video conferencing, projection/display, wireless presentation, room scheduling, sound"
+    annual_operating_cost_per_sf: 15
+    operating_notes: "AV maintenance, booking admin, cleaning, catering coordination"
+    revenue_potential:
+      hourly_rental: [50, 250]
+      daily_rental: [500, 3000]
+      tenant_premium_per_sf_year: [0.50, 1.50]
+    notes: "Hybrid-work driver. Tenants value bookable space over dedicated large conf rooms in their suite."
+
+  tenant_lounge:
+    description: "Casual seating area with coffee bar, soft seating, and work-from-lobby zones"
+    cost_per_sf:
+      low: 55
+      mid: 100
+      high: 180
+    typical_sf_range: [500, 3000]
+    ffe_pct_of_construction: 0.35
+    technology_cost_per_sf: 6
+    technology_notes: "WiFi boost, power/USB at seating, background music, digital art displays"
+    annual_operating_cost_per_sf: 10
+    operating_notes: "Coffee service, cleaning, furniture refresh cycle"
+    revenue_potential:
+      office_premium_per_sf_year: [0.50, 1.50]
+      multifamily_premium_per_unit_month: [10, 30]
+    notes: "Low cost, high perceived value. Often combined with lobby renovation for compounding effect."
+
+  outdoor_terrace:
+    description: "Furnished outdoor space with seating, landscaping, and weather protection"
+    cost_per_sf:
+      low: 40
+      mid: 85
+      high: 175
+    typical_sf_range: [500, 5000]
+    ffe_pct_of_construction: 0.30
+    technology_cost_per_sf: 5
+    technology_notes: "Outdoor WiFi, landscape lighting, speakers, heaters/misters"
+    annual_operating_cost_per_sf: 8
+    operating_notes: "Landscaping, furniture storage/maintenance, seasonal setup/teardown"
+    revenue_potential:
+      office_premium_per_sf_year: [0.75, 2.00]
+      multifamily_premium_per_unit_month: [20, 60]
+      event_rental_per_hour: [100, 500]
+    notes: "Seasonal in northern climates. Heaters and enclosures extend usability but add $15-30/SF."
+
+  package_room:
+    description: "Secure package locker system with automated notification and retrieval"
+    cost_per_sf:
+      low: 50
+      mid: 90
+      high: 140
+    typical_sf_range: [100, 800]
+    ffe_pct_of_construction: 0.50
+    technology_cost_per_sf: 30
+    technology_notes: "Smart lockers, notification system, camera, access integration, refrigerated units"
+    annual_operating_cost_per_sf: 8
+    operating_notes: "Locker software license, maintenance, staff overflow handling"
+    revenue_potential:
+      multifamily_premium_per_unit_month: [10, 25]
+      vendor_revenue_share_annual: [2000, 10000]
+    notes: "Multifamily essential. 70%+ of residents rank package handling in top 3 amenity priorities."
+
+  dog_park:
+    description: "Enclosed pet area with turf, wash station, waste disposal, and seating"
+    cost_per_sf:
+      low: 25
+      mid: 50
+      high: 90
+    typical_sf_range: [500, 3000]
+    ffe_pct_of_construction: 0.15
+    technology_cost_per_sf: 3
+    technology_notes: "Pet camera, access control, waste station sensors"
+    annual_operating_cost_per_sf: 6
+    operating_notes: "Turf replacement (annual), waste disposal, cleaning, wash station maintenance"
+    revenue_potential:
+      multifamily_pet_rent_monthly: [25, 75]
+      multifamily_pet_deposit: [250, 500]
+    notes: "65%+ of renters own pets. Properties with dog parks report 8-12% higher retention."
+
+  bike_room:
+    description: "Secure bicycle storage with repair station and changing area"
+    cost_per_sf:
+      low: 30
+      mid: 55
+      high: 95
+    typical_sf_range: [200, 1500]
+    ffe_pct_of_construction: 0.20
+    technology_cost_per_sf: 5
+    technology_notes: "Access control, bike rack sensors, surveillance"
+    annual_operating_cost_per_sf: 3
+    operating_notes: "Cleaning, repair tool replacement, rack maintenance"
+    revenue_potential:
+      monthly_storage_fee: [15, 50]
+      office_premium_per_sf_year: [0.25, 0.75]
+    notes: "Required in some jurisdictions. LEED/WELL credit eligible. Low cost, strong ESG signal."
+
+  ev_charging:
+    description: "Electric vehicle charging stations in parking structure or surface lot"
+    cost_per_sf:
+      low: 15
+      mid: 35
+      high: 70
+    typical_sf_range: [200, 2000]
+    ffe_pct_of_construction: 0.05
+    technology_cost_per_sf: 40
+    technology_notes: "Level 2/DC fast chargers, payment system, load management, networked software"
+    annual_operating_cost_per_sf: 4
+    operating_notes: "Electricity, network fees, maintenance, insurance"
+    revenue_potential:
+      per_kwh_markup: [0.05, 0.20]
+      monthly_subscription: [30, 100]
+      premium_parking_monthly: [25, 75]
+    notes: "Check utility rebates and tax credits (up to 30% via 30C). Size electrical panel for future expansion."
+
+  rooftop_deck:
+    description: "Amenitized rooftop with seating, BBQ, fire features, and views"
+    cost_per_sf:
+      low: 60
+      mid: 130
+      high: 250
+    typical_sf_range: [1000, 8000]
+    ffe_pct_of_construction: 0.25
+    technology_cost_per_sf: 8
+    technology_notes: "Lighting, speakers, WiFi, weather sensors, access control"
+    annual_operating_cost_per_sf: 10
+    operating_notes: "Furniture maintenance, seasonal setup, cleaning, fire feature fuel, insurance rider"
+    revenue_potential:
+      multifamily_premium_per_unit_month: [30, 100]
+      event_rental_per_event: [500, 5000]
+    notes: "Structural engineer review required. Waterproofing warranty implications. Wind load for furniture."
+
+  childcare_center:
+    description: "Licensed on-site childcare facility for tenants or residents"
+    cost_per_sf:
+      low: 120
+      mid: 200
+      high: 325
+    typical_sf_range: [2000, 8000]
+    ffe_pct_of_construction: 0.30
+    technology_cost_per_sf: 12
+    technology_notes: "Access control, parent cameras, check-in system, classroom AV"
+    annual_operating_cost_per_sf: 45
+    operating_notes: "Staffing (ratio-dependent), licensing, insurance, supplies, food service"
+    revenue_potential:
+      monthly_tuition_per_child: [1200, 3500]
+      office_premium_per_sf_year: [1.00, 3.00]
+    notes: "Highest operating cost and regulatory burden. Usually requires third-party operator. Strong retention driver for office and multifamily."
+
+  food_hall:
+    description: "Multi-vendor food service area with shared seating and tenant variety"
+    cost_per_sf:
+      low: 100
+      mid: 175
+      high: 300
+    typical_sf_range: [2000, 15000]
+    ffe_pct_of_construction: 0.25
+    technology_cost_per_sf: 10
+    technology_notes: "POS integration, mobile ordering, digital menu boards, grease trap monitoring"
+    annual_operating_cost_per_sf: 18
+    operating_notes: "Common area maintenance, shared utility metering, waste management, pest control"
+    revenue_potential:
+      base_rent_per_sf_year: [35, 80]
+      percentage_rent_breakpoint: "6-8% of gross sales"
+      cam_recovery: "NNN or modified gross"
+    notes: "Activates ground floor. Requires kitchen exhaust infrastructure. 18-24 month lease-up for vendor mix."
+
+  game_room:
+    description: "Recreation space with billiards, shuffleboard, arcade, and social games"
+    cost_per_sf:
+      low: 45
+      mid: 80
+      high: 140
+    typical_sf_range: [400, 2000]
+    ffe_pct_of_construction: 0.45
+    technology_cost_per_sf: 5
+    technology_notes: "Speakers, smart TV, booking app for tournaments"
+    annual_operating_cost_per_sf: 7
+    operating_notes: "Equipment maintenance, cleaning, consumables (darts, cues)"
+    revenue_potential:
+      multifamily_premium_per_unit_month: [10, 25]
+    notes: "Low cost, high engagement for multifamily. Pair with lounge for social programming."
+
+  meditation_room:
+    description: "Quiet room for meditation, prayer, wellness, and focus work"
+    cost_per_sf:
+      low: 40
+      mid: 75
+      high: 130
+    typical_sf_range: [150, 600]
+    ffe_pct_of_construction: 0.30
+    technology_cost_per_sf: 5
+    technology_notes: "Sound masking, ambient lighting control, booking system"
+    annual_operating_cost_per_sf: 4
+    operating_notes: "Cleaning, air freshener, minimal maintenance"
+    revenue_potential:
+      office_premium_per_sf_year: [0.25, 0.75]
+      multifamily_premium_per_unit_month: [5, 15]
+    notes: "WELL certification component. Small footprint, high perceived value. Doubles as mother's room."
+
+  podcast_studio:
+    description: "Sound-treated recording space with professional AV equipment"
+    cost_per_sf:
+      low: 80
+      mid: 150
+      high: 275
+    typical_sf_range: [100, 500]
+    ffe_pct_of_construction: 0.35
+    technology_cost_per_sf: 40
+    technology_notes: "Acoustic treatment, microphones, mixer, camera, lighting, streaming software"
+    annual_operating_cost_per_sf: 10
+    operating_notes: "Equipment maintenance, software licenses, acoustic panel upkeep"
+    revenue_potential:
+      hourly_booking: [25, 75]
+      monthly_membership: [100, 300]
+      office_premium_per_sf_year: [0.25, 1.00]
+    notes: "Niche but differentiating for creative office and Class A multifamily. Small footprint."
+
+# ------------------------------------------------------------------
+# Common add-ons (priced independently, applied on top of base amenity costs)
+# ------------------------------------------------------------------
+
+common_addons:
+
+  digital_signage:
+    description: "LCD/LED displays for wayfinding, building communications, and advertising"
+    cost_per_unit:
+      low: 2500
+      mid: 6000
+      high: 15000
+    typical_quantity_per_building: [3, 15]
+    annual_operating_per_unit: 600
+    operating_notes: "Content management software, display replacement (5-7 year cycle), power"
+    revenue_potential:
+      advertising_revenue_per_screen_month: [100, 500]
+    notes: "Interactive touchscreens 2-3x cost of passive displays."
+
+  access_control:
+    description: "Electronic access (fob, mobile, biometric) for amenity spaces"
+    cost_per_door:
+      low: 1500
+      mid: 3500
+      high: 8000
+    typical_doors_per_amenity: [1, 4]
+    annual_operating_per_door: 300
+    operating_notes: "Software license, credential management, hardware maintenance"
+    notes: "Mobile-first systems trending. Biometric adds $2K-$5K per reader."
+
+  av_systems:
+    description: "Audio-visual systems for meeting rooms, event spaces, and common areas"
+    cost_per_room:
+      low: 5000
+      mid: 15000
+      high: 50000
+    annual_operating_per_room: 1200
+    operating_notes: "Calibration, firmware updates, bulb/panel replacement, support contract"
+    notes: "Video conferencing drives cost. Wireless presentation systems $2K-$5K each."
+
+  specialty_lighting:
+    description: "Architectural, accent, or programmable lighting beyond standard build-out"
+    cost_per_sf:
+      low: 5
+      mid: 15
+      high: 40
+    annual_operating_per_sf: 2
+    operating_notes: "Lamp replacement, control system programming, dimmer maintenance"
+    notes: "LED color-tunable systems at high end. Circadian lighting for WELL credit."
+
+# ------------------------------------------------------------------
+# Usage notes
+# ------------------------------------------------------------------
+# 1. All costs are national averages. Apply regional cost factors for local pricing.
+# 2. Contingency of 10-15% should be added to all estimates.
+# 3. Soft costs (A&E, permitting, project management) typically add 15-25% to hard costs.
+# 4. FF&E procurement lead times: 8-16 weeks for standard, 16-24 weeks for custom.
+# 5. Revenue projections should be discounted by local market conditions and property class.

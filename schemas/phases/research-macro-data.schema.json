@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/research-macro-data.schema.json",
+  "title": "Research Intelligence Phase 1 -- Macro Research Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the macro research phase. Covers macro scorecard, capital markets scorecard, MSA rankings, and rate environment summary.",
+  "type": "object",
+  "required": [
+    "macroScorecard",
+    "capitalMarketsScorecard",
+    "msaRankings",
+    "rateEnvironment"
+  ],
+  "properties": {
+    "macroScorecard": {
+      "type": "object",
+      "description": "5-dimension macro scorecard with composite score and CRE cycle position.",
+      "required": ["gdpScore", "laborScore", "rateScore", "inflationScore", "housingScore", "compositeScore", "classification", "cyclePosition"],
+      "properties": {
+        "gdpScore": { "type": "number", "minimum": 0, "maximum": 100 },
+        "laborScore": { "type": "number", "minimum": 0, "maximum": 100 },
+        "rateScore": { "type": "number", "minimum": 0, "maximum": 100 },
+        "inflationScore": { "type": "number", "minimum": 0, "maximum": 100 },
+        "housingScore": { "type": "number", "minimum": 0, "maximum": 100 },
+        "compositeScore": { "type": "number", "minimum": 0, "maximum": 100 },
+        "classification": { "type": "string", "enum": ["FAVORABLE", "NEUTRAL", "UNFAVORABLE"] },
+        "cyclePosition": { "type": "string", "enum": ["EXPANSION", "PEAK", "CONTRACTION", "TROUGH"] },
+        "timingAssessment": { "type": "string", "enum": ["DEPLOY", "SELECTIVE", "WAIT"] }
+      }
+    },
+    "capitalMarketsScorecard": {
+      "type": "object",
+      "description": "5-dimension capital markets scorecard with composite score and liquidity classification.",
+      "required": ["transactionLiquidityScore", "capRateAttractivenessScore", "debtAvailabilityScore", "institutionalFlowScore", "sentimentScore", "compositeScore", "classification"],
+      "properties": {
+        "transactionLiquidityScore": { "type": "number", "minimum": 0, "maximum": 100 },
+        "capRateAttractivenessScore": { "type": "number", "minimum": 0, "maximum": 100 },
+        "debtAvailabilityScore": { "type": "number", "minimum": 0, "maximum": 100 },
+        "institutionalFlowScore": { "type": "number", "minimum": 0, "maximum": 100 },
+        "sentimentScore": { "type": "number", "minimum": 0, "maximum": 100 },
+        "compositeScore": { "type": "number", "minimum": 0, "maximum": 100 },
+        "classification": { "type": "string", "enum": ["LIQUID", "TRANSITIONAL", "ILLIQUID"] },
+        "capitalCyclePosition": { "type": "string", "enum": ["RECOVERY", "EXPANSION", "PEAK", "CORRECTION", "TROUGH"] }
+      }
+    },
+    "msaRankings": {
+      "type": "array",
+      "description": "Target MSAs ranked by macro favorability.",
+      "items": {
+        "type": "object",
+        "required": ["msa", "macroScore", "keyDrivers"],
+        "properties": {
+          "msa": { "type": "string" },
+          "macroScore": { "type": "number", "minimum": 0, "maximum": 100 },
+          "keyDrivers": { "type": "array", "items": { "type": "string" } },
+          "risks": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "rateEnvironment": {
+      "type": "object",
+      "description": "Interest rate environment summary for downstream analysis.",
+      "required": ["fedFundsRate", "treasury10Y", "fedTrajectory"],
+      "properties": {
+        "fedFundsRate": { "type": "number", "minimum": 0 },
+        "treasury10Y": { "type": "number", "minimum": 0 },
+        "fedTrajectory": { "type": "string", "enum": ["HIKING", "PAUSING", "CUTTING", "NEUTRAL"] },
+        "yieldCurveShape": { "type": "string", "enum": ["NORMAL", "FLAT", "INVERTED"] },
+        "creDebtRateRange": {
+          "type": "object",
+          "properties": {
+            "low": { "type": "number" },
+            "high": { "type": "number" }
+          }
+        },
+        "debtAvailability": { "type": "string", "enum": ["ABUNDANT", "AVAILABLE", "CONSTRAINED", "SCARCE"] }
+      }
+    }
+  }
+}

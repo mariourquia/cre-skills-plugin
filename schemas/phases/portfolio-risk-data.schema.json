@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/portfolio-risk-data.schema.json",
+  "title": "Portfolio Management Phase 3 -- Risk Monitoring Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the recurring quarterly risk monitoring phase. Covers debt surveillance, climate risk, and market exposure.",
+  "type": "object",
+  "required": [
+    "debtDashboard",
+    "marketExposure"
+  ],
+  "properties": {
+    "debtDashboard": {
+      "type": "object",
+      "description": "Consolidated debt portfolio surveillance dashboard.",
+      "required": ["maturityWall", "rateExposure", "consolidatedDashboard"],
+      "properties": {
+        "maturityWall": {
+          "type": "object",
+          "properties": {
+            "maturing12Months": { "type": "object", "properties": { "balance": { "type": "number" }, "pct": { "type": "number" }, "count": { "type": "integer" } } },
+            "maturing24Months": { "type": "object", "properties": { "balance": { "type": "number" }, "pct": { "type": "number" }, "count": { "type": "integer" } } },
+            "trafficLight": { "$ref": "#/$defs/trafficLight" }
+          }
+        },
+        "rateExposure": {
+          "type": "object",
+          "properties": {
+            "fixedRate": { "type": "object", "properties": { "pct": { "type": "number" } } },
+            "floatingUnhedged": { "type": "object", "properties": { "pct": { "type": "number" } } },
+            "rateSensitivity": { "type": "object" },
+            "trafficLight": { "$ref": "#/$defs/trafficLight" }
+          }
+        },
+        "ceclReserves": {
+          "type": "object",
+          "properties": {
+            "reserveAdequacy": { "type": "number" },
+            "reserveStatus": { "type": "string", "enum": ["WELL_RESERVED", "ADEQUATE", "UNDERRESERVED"] },
+            "trafficLight": { "$ref": "#/$defs/trafficLight" }
+          }
+        },
+        "covenantCompliance": {
+          "type": "object",
+          "properties": {
+            "summary": { "type": "object" },
+            "nearBreachAssets": { "type": "array", "items": { "type": "object" } },
+            "trafficLight": { "$ref": "#/$defs/trafficLight" }
+          }
+        },
+        "watchlist": {
+          "type": "object",
+          "properties": {
+            "currentQuarter": { "type": "array", "items": { "type": "object" } },
+            "additions": { "type": "array" },
+            "removals": { "type": "array" },
+            "escalations": { "type": "array" },
+            "watchlistExposure": { "type": "object", "properties": { "aum": { "type": "number" }, "pct": { "type": "number" } } },
+            "trafficLight": { "$ref": "#/$defs/trafficLight" }
+          }
+        },
+        "consolidatedDashboard": {
+          "type": "object",
+          "properties": {
+            "overallScore": { "type": "number", "minimum": 0, "maximum": 100 },
+            "overallTrafficLight": { "$ref": "#/$defs/trafficLight" },
+            "quarterOverQuarterTrend": { "type": "string", "enum": ["IMPROVING", "STABLE", "DETERIORATING"] }
+          }
+        }
+      }
+    },
+    "climateRisk": {
+      "type": "object",
+      "description": "Portfolio-level climate risk assessment (non-critical, may be absent).",
+      "properties": {
+        "compositeClimateScore": { "type": "number", "minimum": 0, "maximum": 100 },
+        "climateRiskCategory": { "type": "string", "enum": ["LOW", "MODERATE", "ELEVATED", "HIGH"] },
+        "physicalRiskScore": { "type": "number" },
+        "transitionRiskScore": { "type": "number" },
+        "tcfdReport": { "type": "object" },
+        "quarterOverQuarterTrend": { "type": "string", "enum": ["IMPROVING", "STABLE", "DETERIORATING"] }
+      }
+    },
+    "marketExposure": {
+      "type": "object",
+      "description": "Supply-demand and market cycle exposure analysis.",
+      "required": ["marketExposureScore"],
+      "properties": {
+        "supplyDemandBalance": {
+          "type": "object",
+          "properties": {
+            "favorableExposure": { "type": "number" },
+            "neutralExposure": { "type": "number" },
+            "unfavorableExposure": { "type": "number" }
+          }
+        },
+        "cyclePositioning": {
+          "type": "object",
+          "properties": {
+            "portfolioWeightedCycleScore": { "type": "number" },
+            "cycleMismatches": { "type": "array", "items": { "type": "object" } }
+          }
+        },
+        "marketExposureScore": { "type": "number", "minimum": 0, "maximum": 100 },
+        "quarterOverQuarterTrend": { "type": "string", "enum": ["IMPROVING", "STABLE", "DETERIORATING"] },
+        "recommendations": { "type": "array", "items": { "type": "object" } }
+      }
+    }
+  },
+  "$defs": {
+    "trafficLight": {
+      "type": "string",
+      "enum": ["GREEN", "YELLOW", "RED"]
+    }
+  }
+}

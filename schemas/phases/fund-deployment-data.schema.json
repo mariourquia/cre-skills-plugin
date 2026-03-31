@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/fund-deployment-data.schema.json",
+  "title": "Fund Management Phase 3 -- Capital Deployment Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the capital deployment phase. Covers portfolio composition, deployment status, deal allocations, co-invest allocations, and capital call history.",
+  "type": "object",
+  "required": [
+    "portfolioComposition",
+    "deploymentStatus",
+    "dealAllocations",
+    "capitalCallHistory"
+  ],
+  "properties": {
+    "portfolioComposition": {
+      "type": "object",
+      "description": "Current portfolio composition by allocation dimension.",
+      "required": ["totalDeployed", "byGeography", "byAssetType"],
+      "properties": {
+        "totalDeployed": { "type": "number", "description": "Total deployed equity capital." },
+        "totalRemainingCapacity": { "type": "number", "description": "Remaining undeployed capital." },
+        "percentDeployed": { "type": "number", "description": "Deployed as percentage of deployable capital (0-1)." },
+        "numberOfDeals": { "type": "integer" },
+        "byGeography": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["geography", "allocatedAmount", "percentOfDeployed"],
+            "properties": {
+              "geography": { "type": "string" },
+              "allocatedAmount": { "type": "number" },
+              "percentOfDeployed": { "type": "number" },
+              "concentrationLimitUsed": { "type": "number", "description": "Percent of IPS concentration limit consumed." },
+              "numberOfDeals": { "type": "integer" }
+            }
+          }
+        },
+        "byAssetType": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["assetType", "allocatedAmount", "percentOfDeployed"],
+            "properties": {
+              "assetType": { "type": "string" },
+              "allocatedAmount": { "type": "number" },
+              "percentOfDeployed": { "type": "number" },
+              "concentrationLimitUsed": { "type": "number" },
+              "numberOfDeals": { "type": "integer" }
+            }
+          }
+        },
+        "byVintageYear": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "year": { "type": "integer" },
+              "allocatedAmount": { "type": "number" },
+              "percentOfDeployed": { "type": "number" },
+              "numberOfDeals": { "type": "integer" }
+            }
+          }
+        },
+        "byRiskProfile": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "riskProfile": { "type": "string", "enum": ["core", "core-plus", "value-add", "opportunistic"] },
+              "allocatedAmount": { "type": "number" },
+              "percentOfDeployed": { "type": "number" }
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "deploymentStatus": {
+      "type": "object",
+      "description": "Deployment pacing and status.",
+      "required": ["deployedCapital", "remainingCapacity", "pacingStatus"],
+      "properties": {
+        "deployedCapital": { "type": "number" },
+        "remainingCapacity": { "type": "number" },
+        "pacingStatus": {
+          "type": "string",
+          "enum": ["ON_PACE", "AHEAD", "LAGGING", "STALLED"],
+          "description": "Deployment pace relative to target."
+        },
+        "pacingVariance": { "type": "number", "description": "Actual vs target deployment as percentage variance." },
+        "investmentPeriodRemaining": { "type": "integer", "description": "Quarters remaining in investment period." },
+        "jCurvePosition": {
+          "type": "object",
+          "properties": {
+            "currentIRR": { "type": "number", "description": "Current fund IRR (may be negative during J-curve)." },
+            "estimatedTroughDepth": { "type": "number" },
+            "estimatedQuartersToBreakeven": { "type": "integer" }
+          }
+        },
+        "managementFeeDrag": {
+          "type": "object",
+          "properties": {
+            "uninvestedCapital": { "type": "number" },
+            "annualizedFeeDragBps": { "type": "number", "description": "Management fee drag on uninvested capital in basis points." }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "dealAllocations": {
+      "type": "array",
+      "description": "Per-deal allocation details.",
+      "items": {
+        "type": "object",
+        "required": ["dealId", "dealName", "equityAllocation", "allocationDate"],
+        "properties": {
+          "dealId": { "type": "string" },
+          "dealName": { "type": "string" },
+          "propertyType": { "type": "string" },
+          "geography": { "type": "string" },
+          "equityAllocation": { "type": "number" },
+          "totalDealSize": { "type": "number" },
+          "leverage": { "type": "number", "description": "Deal-level LTV." },
+          "allocationDate": { "type": "string", "format": "date" },
+          "targetIRR": { "type": "number" },
+          "targetEM": { "type": "number" },
+          "status": {
+            "type": "string",
+            "enum": ["APPROVED", "FUNDED", "ACTIVE", "WATCH", "EXIT_PENDING", "EXITED"]
+          },
+          "capitalCallId": { "type": "string", "description": "Reference to the capital call that funded this allocation." }
+        },
+        "additionalProperties": true
+      }
+    },
+    "coInvestAllocations": {
+      "type": "array",
+      "description": "Co-invest allocation details.",
+      "items": {
+        "type": "object",
+        "required": ["dealId", "lpId", "coInvestAmount"],
+        "properties": {
+          "dealId": { "type": "string" },
+          "lpId": { "type": "string" },
+          "lpName": { "type": "string" },
+          "coInvestAmount": { "type": "number" },
+          "coInvestTerms": { "type": "string", "description": "Fee and carry terms for co-invest (e.g., no fee, no carry)." },
+          "spvId": { "type": "string", "description": "Co-invest SPV identifier if applicable." }
+        },
+        "additionalProperties": true
+      }
+    },
+    "capitalCallHistory": {
+      "type": "array",
+      "description": "Capital call notices issued.",
+      "items": {
+        "type": "object",
+        "required": ["callId", "callDate", "totalAmount", "purpose"],
+        "properties": {
+          "callId": { "type": "string" },
+          "callDate": { "type": "string", "format": "date" },
+          "fundingDate": { "type": "string", "format": "date" },
+          "totalAmount": { "type": "number" },
+          "purpose": { "type": "string", "description": "e.g., deal funding, management fee, fund expense." },
+          "dealId": { "type": "string", "description": "Deal ID if capital call is for a specific deal." },
+          "lpContributions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "lpId": { "type": "string" },
+                "calledAmount": { "type": "number" },
+                "status": { "type": "string", "enum": ["FUNDED", "PENDING", "DEFAULT"] },
+                "excused": { "type": "boolean" }
+              }
+            }
+          },
+          "cumulativeCalledCapital": { "type": "number", "description": "Cumulative capital called to date." },
+          "cumulativeAsPercentOfCommitment": { "type": "number", "description": "Cumulative called as percentage of total commitments." }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

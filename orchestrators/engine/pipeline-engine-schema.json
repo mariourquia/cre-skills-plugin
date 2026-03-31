@@ -18,7 +18,7 @@
   "properties": {
     "orchestratorId": {
       "type": "string",
-      "description": "Globally unique identifier for this orchestrator. Use kebab-case. Serves as the key in agent-registry lookups and as the prefix for log entries, checkpoint paths, and cross-chain handoff references. Example: 'multifamily-acquisition', 'development-pipeline', 'hold-period-monitor'.",
+      "description": "Globally unique identifier for this orchestrator. Use kebab-case. Serves as the key in agent-registry lookups and as the prefix for log entries, checkpoint paths, and cross-chain handoff references. Example: 'acquisition', 'development-pipeline', 'hold-period-monitor'.",
       "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
       "minLength": 3,
       "maxLength": 64

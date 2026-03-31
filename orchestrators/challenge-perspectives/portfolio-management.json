@@ -1,0 +1,58 @@
+{
+  "pipelineId": "portfolio-management",
+  "perspectives": [
+    {
+      "perspectiveId": "diversification-purist",
+      "name": "Diversification Purist",
+      "question": "Is this portfolio actually diversified or does correlation erase paper diversification?",
+      "tier": 1,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "effective-diversification-ratio-vs-raw-asset-count",
+        "economic-correlation-between-msa-pairs",
+        "hidden-concentration-in-correlated-geographies",
+        "tenant-industry-correlation-across-assets",
+        "supply-cycle-synchronization-across-submarkets",
+        "single-employer-dependency-in-multifamily-clusters",
+        "lender-concentration-amplifying-geographic-concentration"
+      ],
+      "challengeThreshold": "Effective diversification ratio below 0.70 (meaning correlation erodes 30%+ of nominal diversification) OR any correlated MSA group exceeding 40% of AUM"
+    },
+    {
+      "perspectiveId": "tail-risk-analyst",
+      "name": "Tail Risk Analyst",
+      "question": "What breaks in the 1-in-20 scenario that the base case ignores?",
+      "tier": 1,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "simultaneous-maturity-wall-and-rate-shock",
+        "insurance-market-withdrawal-cascading-to-portfolio",
+        "covenant-breach-cascade-from-single-market-downturn",
+        "unhedged-floating-rate-exposure-under-extreme-rate-path",
+        "climate-event-impacting-multiple-portfolio-assets-simultaneously",
+        "liquidity-trap-from-simultaneous-disposition-need-and-frozen-transaction-market",
+        "preferred-return-shortfall-compounding-into-clawback-exposure"
+      ],
+      "challengeThreshold": "Portfolio does not survive severe combined stress (+300bps rate, -20% NOI, +100bps cap expansion) OR any single tail scenario produces negative equity in aggregate"
+    },
+    {
+      "perspectiveId": "vintage-decay-analyst",
+      "name": "Vintage Decay Analyst",
+      "question": "Are older assets dragging returns while consuming disproportionate management attention?",
+      "tier": 2,
+      "model": "claude-sonnet-4-6[1m]",
+      "focus": [
+        "vintage-year-alpha-decay-pattern",
+        "older-assets-with-persistent-negative-alpha",
+        "deferred-capex-accumulation-on-aged-assets",
+        "management-fee-drag-on-stale-positions",
+        "opportunity-cost-of-capital-trapped-in-underperforming-vintage",
+        "aged-assets-masking-portfolio-underperformance",
+        "vintage-cliff-risk-when-large-cohort-approaches-exit-simultaneously"
+      ],
+      "challengeThreshold": "Assets older than 7 years represent more than 40% of AUM AND their trailing 4-quarter alpha is negative by more than 100bps vs portfolio average"
+    }
+  ],
+  "synthesisModel": "claude-opus-4-6[1m]",
+  "verdictReconciliation": "Challenge verdict overrides pipeline verdict if it differs. Diversification Purist and Tail Risk Analyst perspectives carry veto weight on BALANCED verdicts -- if either flags CRITICAL issues, verdict must escalate to REBALANCE or DISTRESSED."
+}

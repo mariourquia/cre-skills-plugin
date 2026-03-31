@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/disposition-dd-data.schema.json",
+  "title": "Disposition Phase 6 -- Due Diligence Management Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the disposition due diligence management phase. Covers estoppel collection, DD response tracking, retrade defense, and lender payoff coordination.",
+  "type": "object",
+  "required": [
+    "estoppelStatus",
+    "ddResponseStatus",
+    "retradeAttempts",
+    "ddVerdict",
+    "lenderPayoffStatus"
+  ],
+  "properties": {
+    "estoppelStatus": {
+      "type": "object",
+      "description": "Estoppel certificate collection status with return rate and discrepancy tracking.",
+      "required": ["totalRequired", "collected", "returnRate", "psaThreshold"],
+      "properties": {
+        "totalRequired": {
+          "type": "integer",
+          "description": "Total estoppels required (number of tenants or units).",
+          "minimum": 0
+        },
+        "collected": {
+          "type": "integer",
+          "description": "Estoppels collected and reviewed.",
+          "minimum": 0
+        },
+        "outstanding": {
+          "type": "integer",
+          "description": "Estoppels still outstanding.",
+          "minimum": 0
+        },
+        "returnRate": {
+          "type": "number",
+          "description": "Collection rate as decimal (e.g., 0.80 = 80%).",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "psaThreshold": {
+          "type": "number",
+          "description": "PSA-required return rate threshold as decimal.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "thresholdMet": {
+          "type": "boolean",
+          "description": "Whether the PSA threshold has been met."
+        },
+        "discrepancies": {
+          "type": "array",
+          "description": "Estoppel discrepancies with rent roll.",
+          "items": {
+            "type": "object",
+            "required": ["tenantName", "discrepancyType", "severity"],
+            "properties": {
+              "tenantName": { "type": "string" },
+              "unitNumber": { "type": "string" },
+              "discrepancyType": { "type": "string", "description": "Rent amount, lease term, options, etc." },
+              "rentRollValue": { "type": "string" },
+              "estoppelValue": { "type": "string" },
+              "severity": { "type": "string", "enum": ["CRITICAL", "MATERIAL", "MINOR"] },
+              "resolution": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "ddResponseStatus": {
+      "type": "object",
+      "description": "DD response log with all buyer requests and seller responses.",
+      "required": ["totalRequests", "respondedCount", "timelineCompliance"],
+      "properties": {
+        "totalRequests": {
+          "type": "integer",
+          "description": "Total DD requests received from buyer.",
+          "minimum": 0
+        },
+        "respondedCount": {
+          "type": "integer",
+          "description": "DD requests responded to.",
+          "minimum": 0
+        },
+        "outstandingCount": {
+          "type": "integer",
+          "description": "DD requests still outstanding.",
+          "minimum": 0
+        },
+        "timelineCompliance": {
+          "type": "boolean",
+          "description": "Whether all DD responses have been provided within PSA timelines."
+        },
+        "requests": {
+          "type": "array",
+          "description": "Individual DD request log.",
+          "items": {
+            "type": "object",
+            "required": ["requestId", "category", "status"],
+            "properties": {
+              "requestId": { "type": "string" },
+              "category": { "type": "string", "description": "Financial, legal, environmental, physical, leasing, etc." },
+              "description": { "type": "string" },
+              "requestDate": { "type": "string", "format": "date" },
+              "responseDate": { "type": "string", "format": "date" },
+              "status": { "type": "string", "enum": ["RECEIVED", "IN_PROGRESS", "RESPONDED", "ESCALATED"] }
+            },
+            "additionalProperties": true
+          }
+        },
+        "ddObjections": {
+          "type": "array",
+          "description": "DD objection notices from buyer.",
+          "items": {
+            "type": "object",
+            "required": ["objectionId", "description", "classification"],
+            "properties": {
+              "objectionId": { "type": "string" },
+              "description": { "type": "string" },
+              "classification": { "type": "string", "enum": ["LEGITIMATE_FINDING", "PRICE_FISHING", "STRATEGIC_RETRADE"], "description": "Seller-side classification of the objection." },
+              "estimatedImpact": { "type": "number", "description": "Estimated dollar impact of the finding." },
+              "sellerResponse": { "type": "string" },
+              "resolution": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "retradeAttempts": {
+      "type": "array",
+      "description": "Array of retrade attempts (may be empty if no retrades).",
+      "items": {
+        "type": "object",
+        "required": ["attemptId", "requestedReduction", "classification", "resolution"],
+        "properties": {
+          "attemptId": { "type": "string" },
+          "date": { "type": "string", "format": "date" },
+          "requestedReduction": { "type": "number", "description": "Dollar reduction requested by buyer." },
+          "requestedReductionPct": { "type": "number", "description": "Reduction as percentage of purchase price." },
+          "statedReason": { "type": "string", "description": "Buyer's stated reason for retrade." },
+          "classification": { "type": "string", "enum": ["LEGITIMATE_FINDING", "PRICE_FISHING", "STRATEGIC_RETRADE"] },
+          "sellerResponse": { "type": "string", "enum": ["CONCEDED", "PARTIAL_CONCESSION", "REJECTED", "COUNTER_OFFERED"] },
+          "concessionAmount": { "type": "number", "description": "Dollar concession agreed (0 if rejected)." },
+          "concessionType": { "type": "string", "enum": ["PRICE_REDUCTION", "REPAIR_CREDIT", "REPAIR_ESCROW", "CLOSING_CREDIT", "NONE"] },
+          "resolution": { "type": "string", "description": "Narrative resolution." },
+          "psaProtectionsInvoked": {
+            "type": "array",
+            "description": "PSA provisions invoked in defense.",
+            "items": { "type": "string" }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "ddVerdict": {
+      "type": "string",
+      "enum": ["PASS", "CONDITIONAL", "FAIL"],
+      "description": "DD management verdict: PASS (buyer waived), CONDITIONAL (minor retrade agreed), FAIL (buyer terminated or material retrade)."
+    },
+    "lenderPayoffStatus": {
+      "type": "object",
+      "description": "Lender payoff statement status.",
+      "required": ["payoffRequested", "payoffReceived"],
+      "properties": {
+        "payoffRequested": { "type": "boolean" },
+        "payoffRequestDate": { "type": "string", "format": "date" },
+        "payoffReceived": { "type": "boolean" },
+        "payoffAmount": { "type": "number", "description": "Total loan payoff amount." },
+        "goodThroughDate": { "type": "string", "format": "date", "description": "Date through which payoff amount is valid." },
+        "prepaymentPenalty": { "type": "number", "description": "Prepayment penalty included in payoff." },
+        "perDiem": { "type": "number", "description": "Per diem interest for payoff after good-through date." },
+        "wireInstructions": { "type": "boolean", "description": "Whether wire instructions have been received." },
+        "lenderConsentRequired": { "type": "boolean" },
+        "lenderConsentReceived": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "sellerClosingDeliverables": {
+      "type": "object",
+      "description": "Status of seller-side closing deliverables preparation.",
+      "properties": {
+        "totalDeliverables": { "type": "integer" },
+        "preparedCount": { "type": "integer" },
+        "deliverables": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["document", "status"],
+            "properties": {
+              "document": { "type": "string" },
+              "status": { "type": "string", "enum": ["PREPARED", "IN_PROGRESS", "NOT_STARTED", "N/A"] },
+              "responsibleParty": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

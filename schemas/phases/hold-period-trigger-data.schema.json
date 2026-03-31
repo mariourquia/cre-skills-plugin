@@ -1,0 +1,622 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/hold-period-trigger-data.schema.json",
+  "title": "Hold Period Phase 7 — Exit Trigger & Verdict Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the hold-period trigger evaluation phase. This is the terminal hold-period phase. Its output routes the asset to CONTINUE (next hold cycle), INTERVENE (90-day operational sprint), or EXIT (disposition or refi pipeline handoff).",
+  "type": "object",
+  "required": [
+    "exitTriggerAssessment",
+    "repositionPlan",
+    "dispositionHandoff",
+    "refiHandoff",
+    "verdict",
+    "convictionScore"
+  ],
+  "properties": {
+    "exitTriggerAssessment": {
+      "type": "object",
+      "description": "Quantitative hold-vs-sell-vs-refi comparison and market cycle positioning.",
+      "required": ["holdNPV", "sellNPV", "refiNPV", "marketCyclePosition", "returnOnRemainingEquity"],
+      "properties": {
+        "holdNPV": {
+          "type": "object",
+          "description": "NPV analysis of continuing to hold the asset through the underwritten exit date.",
+          "required": ["value", "assumptions"],
+          "properties": {
+            "value": {
+              "type": "number",
+              "description": "NPV of remaining hold-period cash flows plus terminal value, discounted at the equity hurdle rate."
+            },
+            "terminalValue": {
+              "type": "number",
+              "description": "Projected sale price at underwritten exit date (NOI / exit cap rate)."
+            },
+            "remainingHoldMonths": {
+              "type": "integer",
+              "description": "Months remaining in the underwritten hold period.",
+              "minimum": 0
+            },
+            "assumptions": {
+              "type": "object",
+              "description": "Key assumptions used in hold NPV calculation.",
+              "required": ["exitCapRate", "noiGrowthRate", "discountRate"],
+              "properties": {
+                "exitCapRate": { "type": "number" },
+                "noiGrowthRate": { "type": "number" },
+                "discountRate": { "type": "number" },
+                "projectedYearlyNOI": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["year", "noi"],
+                    "properties": {
+                      "year": { "type": "integer" },
+                      "noi": { "type": "number" }
+                    },
+                    "additionalProperties": true
+                  }
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": true
+        },
+        "sellNPV": {
+          "type": "object",
+          "description": "NPV analysis of selling the asset at current market value.",
+          "required": ["value", "estimatedSalePrice", "netProceeds"],
+          "properties": {
+            "value": {
+              "type": "number",
+              "description": "Net equity proceeds from current sale, discounted to today."
+            },
+            "estimatedSalePrice": {
+              "type": "number",
+              "description": "Estimated gross sale price based on current market cap rate applied to T-12 NOI."
+            },
+            "impliedCapRate": {
+              "type": "number",
+              "description": "Implied cap rate from estimated sale price and T-12 NOI."
+            },
+            "transactionCosts": {
+              "type": "number",
+              "description": "Estimated total transaction costs (broker, legal, transfer taxes).",
+              "minimum": 0
+            },
+            "loanPayoff": {
+              "type": "number",
+              "description": "Outstanding loan balance to be repaid at closing.",
+              "minimum": 0
+            },
+            "prepaymentPenalty": {
+              "type": "number",
+              "description": "Estimated loan prepayment penalty.",
+              "minimum": 0
+            },
+            "estimatedTaxLiability": {
+              "type": "number",
+              "description": "Estimated capital gains and depreciation recapture tax liability.",
+              "minimum": 0
+            },
+            "netProceeds": {
+              "type": "number",
+              "description": "Estimated net equity proceeds after all costs, payoffs, and taxes."
+            },
+            "is1031Eligible": {
+              "type": "boolean",
+              "description": "True if asset qualifies for 1031 exchange deferral."
+            },
+            "netProceedsIf1031": {
+              "type": "number",
+              "description": "Net proceeds if taxes deferred via 1031 exchange."
+            }
+          },
+          "additionalProperties": true
+        },
+        "refiNPV": {
+          "type": "object",
+          "description": "NPV analysis of cash-out refinance plus continued hold.",
+          "required": ["isViable", "value"],
+          "properties": {
+            "isViable": {
+              "type": "boolean",
+              "description": "True if refinance terms are achievable given current market and covenant constraints."
+            },
+            "value": {
+              "type": "number",
+              "description": "NPV of cash-out proceeds plus projected hold period cash flows and terminal value under new debt structure. Null if not viable."
+            },
+            "estimatedNewLoanAmount": {
+              "type": "number",
+              "description": "Estimated new loan balance at refinance.",
+              "minimum": 0
+            },
+            "estimatedCashOut": {
+              "type": "number",
+              "description": "Estimated equity proceeds from refinance (new loan minus payoff)."
+            },
+            "projectedNewDSCR": {
+              "type": "number",
+              "description": "Projected DSCR under new debt terms."
+            },
+            "projectedNewRate": {
+              "type": "number",
+              "description": "Estimated interest rate on new loan."
+            },
+            "notViableReason": {
+              "type": "string",
+              "description": "Explanation if refinance is not viable (e.g., LTV too high, DSCR insufficient)."
+            }
+          },
+          "additionalProperties": true
+        },
+        "marketCyclePosition": {
+          "type": "object",
+          "description": "Mueller Real Estate Cycle positioning and implications.",
+          "required": ["phase", "quadrant", "submarketOccupancyTrend", "capRateTrend"],
+          "properties": {
+            "phase": {
+              "type": "string",
+              "enum": ["RECOVERY", "EXPANSION", "HYPERSUPPLY", "RECESSION"],
+              "description": "Current phase of the real estate cycle for this property's submarket."
+            },
+            "quadrant": {
+              "type": "integer",
+              "description": "Mueller cycle quadrant (1–4, where 1=Recovery, 2=Expansion, 3=Hypersupply, 4=Recession).",
+              "minimum": 1,
+              "maximum": 4
+            },
+            "cyclePositionWithinPhase": {
+              "type": "string",
+              "enum": ["EARLY", "MID", "LATE"],
+              "description": "Position within the current cycle phase."
+            },
+            "submarketOccupancyTrend": {
+              "type": "string",
+              "enum": ["RISING", "STABLE", "FALLING"],
+              "description": "Direction of submarket occupancy over trailing 4 quarters."
+            },
+            "capRateTrend": {
+              "type": "string",
+              "enum": ["COMPRESSING", "STABLE", "EXPANDING"],
+              "description": "Direction of submarket cap rates over trailing 4 quarters."
+            },
+            "supplyDemandBalance": {
+              "type": "string",
+              "enum": ["DEMAND_EXCEEDS_SUPPLY", "BALANCED", "SUPPLY_EXCEEDS_DEMAND"],
+              "description": "Current supply-demand dynamic in the submarket."
+            },
+            "cycleImplication": {
+              "type": "string",
+              "description": "Narrative interpretation of cycle position for hold-vs-sell decision."
+            }
+          },
+          "additionalProperties": true
+        },
+        "returnOnRemainingEquity": {
+          "type": "object",
+          "description": "Marginal return analysis on equity currently trapped in the asset.",
+          "required": ["currentEquityValue", "projectedNextYearReturn", "opportunityCostRate"],
+          "properties": {
+            "currentEquityValue": {
+              "type": "number",
+              "description": "Estimated current equity value (market value minus loan balance).",
+              "minimum": 0
+            },
+            "projectedNextYearReturn": {
+              "type": "number",
+              "description": "Projected next-12-month total return on equity (cash yield + appreciation)."
+            },
+            "opportunityCostRate": {
+              "type": "number",
+              "description": "Hurdle rate for alternative equity deployment (fund target return)."
+            },
+            "isReturnAboveHurdle": {
+              "type": "boolean",
+              "description": "True if projected next-year return exceeds opportunity cost rate."
+            }
+          },
+          "additionalProperties": true
+        },
+        "exitTriggersFired": {
+          "type": "array",
+          "description": "Specific threshold-based exit triggers that are active.",
+          "items": {
+            "type": "object",
+            "required": ["triggerName", "status", "currentValue", "threshold"],
+            "properties": {
+              "triggerName": {
+                "type": "string",
+                "description": "e.g., DSCR_BREACH, WALT_BELOW_TARGET, NOI_VARIANCE_CRITICAL, CAP_RATE_EXPANSION, LOAN_MATURITY_WITHIN_12M."
+              },
+              "status": {
+                "type": "string",
+                "enum": ["FIRED", "AT_RISK", "CLEAR"]
+              },
+              "currentValue": {
+                "type": "number",
+                "description": "Observed metric value."
+              },
+              "threshold": {
+                "type": "number",
+                "description": "Trigger threshold value."
+              },
+              "severity": {
+                "type": "string",
+                "enum": ["WARNING", "CRITICAL"]
+              },
+              "notes": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        },
+        "consecutiveInterveneQuarters": {
+          "type": "integer",
+          "description": "Number of consecutive monitoring cycles with INTERVENE or EXIT_TRIGGER verdict.",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": true
+    },
+    "repositionPlan": {
+      "type": "object",
+      "description": "90-day operational sprint plan. Required when verdict is INTERVENE; null otherwise.",
+      "required": ["isActive", "targetNOIImprovement", "sprintDurationDays", "revenueLevers", "expenseLevers", "weeklyKPIs"],
+      "properties": {
+        "isActive": {
+          "type": "boolean",
+          "description": "True if the reposition plan is activated (verdict = INTERVENE)."
+        },
+        "activationDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Date the sprint was activated."
+        },
+        "targetNOIImprovement": {
+          "type": "number",
+          "description": "Projected annualized NOI improvement if all sprint actions execute successfully.",
+          "minimum": 0
+        },
+        "sprintDurationDays": {
+          "type": "integer",
+          "description": "Duration of the operational sprint in calendar days.",
+          "minimum": 0
+        },
+        "successCriteria": {
+          "type": "string",
+          "description": "Definition of success — the conditions that would shift verdict to CONTINUE at the next review."
+        },
+        "revenueLevers": {
+          "type": "array",
+          "description": "Revenue enhancement actions in the sprint plan.",
+          "items": {
+            "type": "object",
+            "required": ["lever", "projectedImpact", "targetStartDate", "owner"],
+            "properties": {
+              "lever": { "type": "string", "description": "Action description (e.g., Increase asking rents 5%, Launch concession burn-off)." },
+              "projectedImpact": { "type": "number", "description": "Estimated annualized NOI impact in dollars." },
+              "targetStartDate": { "type": "string", "format": "date" },
+              "targetCompleteDate": { "type": "string", "format": "date" },
+              "owner": { "type": "string" },
+              "status": {
+                "type": "string",
+                "enum": ["PLANNED", "IN_PROGRESS", "COMPLETE", "BLOCKED"]
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "expenseLevers": {
+          "type": "array",
+          "description": "Expense reduction actions in the sprint plan.",
+          "items": {
+            "type": "object",
+            "required": ["lever", "projectedImpact", "targetStartDate", "owner"],
+            "properties": {
+              "lever": { "type": "string" },
+              "projectedImpact": { "type": "number", "description": "Estimated annualized cost savings in dollars." },
+              "targetStartDate": { "type": "string", "format": "date" },
+              "targetCompleteDate": { "type": "string", "format": "date" },
+              "owner": { "type": "string" },
+              "status": {
+                "type": "string",
+                "enum": ["PLANNED", "IN_PROGRESS", "COMPLETE", "BLOCKED"]
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "weeklyKPIs": {
+          "type": "array",
+          "description": "Week-by-week KPI targets for the sprint (typically 13 weeks).",
+          "items": {
+            "type": "object",
+            "required": ["week", "collectionsTarget", "occupancyTarget"],
+            "properties": {
+              "week": { "type": "integer", "minimum": 1 },
+              "collectionsTarget": {
+                "type": "number",
+                "description": "Target collection rate for the week (0–1).",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "occupancyTarget": {
+                "type": "number",
+                "description": "Target physical occupancy for the week (0–1).",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "leasingVelocityTarget": {
+                "type": "integer",
+                "description": "Target new leases or renewals executed.",
+                "minimum": 0
+              },
+              "weeklyNOITarget": {
+                "type": "number",
+                "description": "Target weekly NOI run rate."
+              },
+              "expenseRunRateTarget": {
+                "type": "number",
+                "description": "Target weekly operating expense run rate."
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "escalationThreshold": {
+          "type": "object",
+          "description": "Conditions that would automatically escalate to EXIT verdict mid-sprint.",
+          "properties": {
+            "minCollectionsRate": { "type": "number" },
+            "minOccupancyRate": { "type": "number" },
+            "autoEscalateWeek": {
+              "type": "integer",
+              "description": "Week number at which auto-escalation is evaluated if KPIs are missed.",
+              "minimum": 1
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "dispositionHandoff": {
+      "type": "object",
+      "description": "Handoff package for the disposition pipeline. Required when verdict is EXIT with sell recommendation; null otherwise.",
+      "required": ["isActive", "propertyId", "exitReason", "holdPeriodSummary", "currentOperatingMetrics", "estimatedSalePrice"],
+      "properties": {
+        "isActive": {
+          "type": "boolean",
+          "description": "True if disposition handoff is activated."
+        },
+        "propertyId": { "type": "string" },
+        "exitReason": {
+          "type": "string",
+          "enum": ["HOLD_PERIOD_COMPLETE", "MARKET_CYCLE_PEAK", "DSCR_BREACH", "LOAN_MATURITY", "FUND_LIFE_CONSTRAINT", "CONSECUTIVE_INTERVENE", "BETTER_REDEPLOYMENT_OPPORTUNITY", "OTHER"],
+          "description": "Primary reason for disposition."
+        },
+        "exitReasonNarrative": {
+          "type": "string",
+          "description": "Narrative explanation of exit rationale."
+        },
+        "holdPeriodSummary": {
+          "type": "object",
+          "description": "Cumulative hold period performance versus underwriting.",
+          "required": ["acquisitionDate", "acquisitionPrice", "holdPeriodMonths", "totalCashDistributed", "unrealizedGain"],
+          "properties": {
+            "acquisitionDate": { "type": "string", "format": "date" },
+            "acquisitionPrice": { "type": "number" },
+            "totalBasisIncludingCapex": { "type": "number" },
+            "holdPeriodMonths": { "type": "integer", "minimum": 0 },
+            "totalCashDistributed": { "type": "number", "description": "Total distributions to equity during hold." },
+            "underwrittenIRR": { "type": "number" },
+            "projectedRealizationIRR": { "type": "number" },
+            "unrealizedGain": { "type": "number", "description": "Estimated current equity value minus equity invested." }
+          },
+          "additionalProperties": true
+        },
+        "currentOperatingMetrics": {
+          "type": "object",
+          "description": "Current operating snapshot for disposition marketing package.",
+          "required": ["t12NOI", "currentOccupancyRate", "currentWALT"],
+          "properties": {
+            "t12NOI": { "type": "number" },
+            "currentOccupancyRate": { "type": "number", "minimum": 0, "maximum": 1 },
+            "currentWALT": { "type": "number" },
+            "avgInPlaceRent": { "type": "number" },
+            "lossToLeasePercent": { "type": "number" },
+            "delinquencyRate": { "type": "number" }
+          },
+          "additionalProperties": true
+        },
+        "estimatedSalePrice": {
+          "type": "number",
+          "description": "Estimated gross sale price.",
+          "minimum": 0
+        },
+        "capRateBasis": {
+          "type": "number",
+          "description": "Market cap rate applied to T-12 NOI to arrive at estimated sale price."
+        },
+        "estimatedNetProceeds": {
+          "type": "number",
+          "description": "Estimated equity proceeds net of loan payoff, costs, and taxes."
+        },
+        "targetMarketingLaunchDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Target date to launch disposition marketing."
+        },
+        "targetCloseDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "dataRoomStatus": {
+          "type": "string",
+          "enum": ["NOT_STARTED", "IN_PREPARATION", "READY"],
+          "description": "Status of disposition data room preparation."
+        },
+        "brokerRecommendation": {
+          "type": "string",
+          "description": "Recommended disposition broker or process type."
+        },
+        "marketConditionsSnapshot": {
+          "type": "object",
+          "description": "Submarket conditions supporting disposition pricing.",
+          "properties": {
+            "submarket": { "type": "string" },
+            "submarketCapRate": { "type": "number" },
+            "marketLiquidityRating": {
+              "type": "string",
+              "enum": ["HIGH", "MODERATE", "LOW"],
+              "description": "Estimated buyer pool depth and transaction volume."
+            },
+            "recentComps": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["address", "saleDate", "salePrice", "capRate"],
+                "properties": {
+                  "address": { "type": "string" },
+                  "saleDate": { "type": "string", "format": "date" },
+                  "salePrice": { "type": "number" },
+                  "capRate": { "type": "number" }
+                },
+                "additionalProperties": true
+              }
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "refiHandoff": {
+      "type": "object",
+      "description": "Handoff package for the capital stack pipeline. Required when verdict is EXIT with refi recommendation; null otherwise.",
+      "required": ["isActive", "propertyId", "refinanceReason", "currentDebtTerms", "refinanceObjective"],
+      "properties": {
+        "isActive": {
+          "type": "boolean",
+          "description": "True if capital stack handoff is activated."
+        },
+        "propertyId": { "type": "string" },
+        "refinanceReason": {
+          "type": "string",
+          "enum": ["LOAN_MATURITY", "CASH_OUT_REDEPLOYMENT", "RATE_REDUCTION", "COVENANT_BREACH_CURE", "BRIDGE_TO_DISPOSITION"],
+          "description": "Primary motivation for refinance."
+        },
+        "refinanceReasonNarrative": {
+          "type": "string",
+          "description": "Narrative explanation of refinance rationale."
+        },
+        "currentDebtTerms": {
+          "type": "object",
+          "description": "Existing loan terms being refinanced.",
+          "required": ["lender", "currentBalance", "currentRate", "maturityDate", "currentDSCR"],
+          "properties": {
+            "lender": { "type": "string" },
+            "currentBalance": { "type": "number", "minimum": 0 },
+            "currentRate": { "type": "number" },
+            "rateType": {
+              "type": "string",
+              "enum": ["FIXED", "FLOATING", "HYBRID"]
+            },
+            "maturityDate": { "type": "string", "format": "date" },
+            "currentDSCR": { "type": "number" },
+            "currentLTV": { "type": "number" },
+            "prepaymentPenalty": { "type": "number" },
+            "extensionOptionsRemaining": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": true
+        },
+        "refinanceObjective": {
+          "type": "object",
+          "description": "Target terms and objectives for the new financing.",
+          "required": ["targetLoanAmount", "targetProceeds"],
+          "properties": {
+            "targetLoanAmount": {
+              "type": "number",
+              "description": "Target new loan amount.",
+              "minimum": 0
+            },
+            "targetProceeds": {
+              "type": "number",
+              "description": "Target cash-out proceeds (new loan minus payoff).",
+              "minimum": 0
+            },
+            "targetRate": {
+              "type": "number",
+              "description": "Target interest rate."
+            },
+            "targetLoanType": {
+              "type": "string",
+              "description": "e.g., Permanent, Bridge, CMBS, Agency, Life Co."
+            },
+            "targetTermYears": {
+              "type": "number",
+              "description": "Target new loan term in years."
+            },
+            "lenderTargetList": {
+              "type": "array",
+              "description": "Lenders to approach for the refinance.",
+              "items": { "type": "string" }
+            }
+          },
+          "additionalProperties": true
+        },
+        "currentNOI": {
+          "type": "number",
+          "description": "Current T-12 NOI used for refinance underwriting."
+        },
+        "currentEstimatedValue": {
+          "type": "number",
+          "description": "Current estimated property value for refinance sizing.",
+          "minimum": 0
+        },
+        "targetMarketingDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Target date to begin lender outreach."
+        },
+        "targetCloseDate": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "additionalProperties": true
+    },
+    "verdict": {
+      "type": "string",
+      "enum": ["CONTINUE", "INTERVENE", "EXIT"],
+      "description": "Terminal hold-period verdict. CONTINUE: asset on track, proceed to next monitoring cycle. INTERVENE: activate 90-day operational sprint. EXIT: route to disposition or refi pipeline."
+    },
+    "convictionScore": {
+      "type": "integer",
+      "description": "Confidence level in the verdict (0–100). Scores below 60 trigger challenge-layer review before the verdict is finalized.",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "verdictRationale": {
+      "type": "string",
+      "description": "2–3 sentence explanation of the primary factors driving the verdict."
+    },
+    "keyRisks": {
+      "type": "array",
+      "description": "Top risks that could change the verdict at the next review cycle.",
+      "items": { "type": "string" }
+    },
+    "keyMerits": {
+      "type": "array",
+      "description": "Top supporting factors for the verdict.",
+      "items": { "type": "string" }
+    },
+    "nextReviewDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Scheduled date of next trigger evaluation cycle."
+    }
+  },
+  "additionalProperties": true
+}

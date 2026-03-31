@@ -1,0 +1,226 @@
+# PM KPI Benchmarks by Asset Type and Property Class
+# Source basis: IREM Income/Expense Analysis, BOMA Experience Exchange Report (2023-2024 editions)
+# These are representative institutional benchmarks. Actual market conditions vary.
+# Verify current local market conditions and regulatory requirements before use.
+
+benchmarks:
+
+  multifamily:
+    class_a:
+      operating_expense_ratio: 0.38
+      r_and_m_per_sf: 2.10
+      management_fee_pct: 0.03
+      staffing_ratio_units_per_fte: 55
+      vacancy_rate_target: 0.05
+      collections_rate_target: 0.985
+      tenant_retention_rate: 0.55
+      work_order_response_hours: 4
+      nps_benchmark: 35
+      capex_reserve_per_sf: 0.45
+      turnover_cost_per_unit: 3500
+      average_days_to_lease: 30
+      concession_rate_target: 0.02
+      economic_occupancy_gap_max: 0.02
+
+    class_b:
+      operating_expense_ratio: 0.42
+      r_and_m_per_sf: 2.50
+      management_fee_pct: 0.04
+      staffing_ratio_units_per_fte: 65
+      vacancy_rate_target: 0.06
+      collections_rate_target: 0.975
+      tenant_retention_rate: 0.50
+      work_order_response_hours: 6
+      nps_benchmark: 25
+      capex_reserve_per_sf: 0.55
+      turnover_cost_per_unit: 2800
+      average_days_to_lease: 35
+      concession_rate_target: 0.03
+      economic_occupancy_gap_max: 0.03
+
+    class_c:
+      operating_expense_ratio: 0.48
+      r_and_m_per_sf: 3.20
+      management_fee_pct: 0.05
+      staffing_ratio_units_per_fte: 75
+      vacancy_rate_target: 0.08
+      collections_rate_target: 0.960
+      tenant_retention_rate: 0.45
+      work_order_response_hours: 8
+      nps_benchmark: 15
+      capex_reserve_per_sf: 0.70
+      turnover_cost_per_unit: 2200
+      average_days_to_lease: 25
+      concession_rate_target: 0.04
+      economic_occupancy_gap_max: 0.04
+
+  office:
+    class_a:
+      operating_expense_ratio: 0.45
+      r_and_m_per_sf: 3.50
+      management_fee_pct: 0.03
+      staffing_ratio_sf_per_fte: 80000
+      vacancy_rate_target: 0.08
+      collections_rate_target: 0.990
+      tenant_retention_rate: 0.70
+      work_order_response_hours: 2
+      nps_benchmark: 40
+      capex_reserve_per_sf: 0.60
+      janitorial_per_sf: 2.20
+      security_per_sf: 1.50
+      average_days_to_lease: 90
+      ti_allowance_per_sf_new: 65
+      ti_allowance_per_sf_renewal: 25
+
+    class_b:
+      operating_expense_ratio: 0.50
+      r_and_m_per_sf: 3.00
+      management_fee_pct: 0.04
+      staffing_ratio_sf_per_fte: 100000
+      vacancy_rate_target: 0.10
+      collections_rate_target: 0.985
+      tenant_retention_rate: 0.65
+      work_order_response_hours: 4
+      nps_benchmark: 30
+      capex_reserve_per_sf: 0.50
+      janitorial_per_sf: 1.80
+      security_per_sf: 1.10
+      average_days_to_lease: 120
+      ti_allowance_per_sf_new: 45
+      ti_allowance_per_sf_renewal: 15
+
+    class_c:
+      operating_expense_ratio: 0.55
+      r_and_m_per_sf: 2.60
+      management_fee_pct: 0.05
+      staffing_ratio_sf_per_fte: 130000
+      vacancy_rate_target: 0.14
+      collections_rate_target: 0.975
+      tenant_retention_rate: 0.58
+      work_order_response_hours: 8
+      nps_benchmark: 20
+      capex_reserve_per_sf: 0.40
+      janitorial_per_sf: 1.40
+      security_per_sf: 0.80
+      average_days_to_lease: 150
+      ti_allowance_per_sf_new: 30
+      ti_allowance_per_sf_renewal: 10
+
+  retail:
+    class_a:
+      operating_expense_ratio: 0.30
+      r_and_m_per_sf: 2.80
+      management_fee_pct: 0.04
+      staffing_ratio_sf_per_fte: 120000
+      vacancy_rate_target: 0.05
+      collections_rate_target: 0.990
+      tenant_retention_rate: 0.75
+      work_order_response_hours: 4
+      nps_benchmark: 30
+      capex_reserve_per_sf: 0.50
+      cam_per_sf: 8.50
+      percentage_rent_breakpoint_multiple: 6.0
+      average_days_to_lease: 120
+      tenant_sales_psf_benchmark: 450
+
+    class_b:
+      operating_expense_ratio: 0.35
+      r_and_m_per_sf: 2.40
+      management_fee_pct: 0.05
+      staffing_ratio_sf_per_fte: 150000
+      vacancy_rate_target: 0.08
+      collections_rate_target: 0.980
+      tenant_retention_rate: 0.68
+      work_order_response_hours: 6
+      nps_benchmark: 22
+      capex_reserve_per_sf: 0.45
+      cam_per_sf: 7.00
+      percentage_rent_breakpoint_multiple: 5.5
+      average_days_to_lease: 150
+      tenant_sales_psf_benchmark: 350
+
+    class_c:
+      operating_expense_ratio: 0.40
+      r_and_m_per_sf: 2.00
+      management_fee_pct: 0.06
+      staffing_ratio_sf_per_fte: 200000
+      vacancy_rate_target: 0.12
+      collections_rate_target: 0.965
+      tenant_retention_rate: 0.60
+      work_order_response_hours: 8
+      nps_benchmark: 15
+      capex_reserve_per_sf: 0.35
+      cam_per_sf: 5.50
+      percentage_rent_breakpoint_multiple: 5.0
+      average_days_to_lease: 180
+      tenant_sales_psf_benchmark: 250
+
+  industrial:
+    class_a:
+      operating_expense_ratio: 0.22
+      r_and_m_per_sf: 0.80
+      management_fee_pct: 0.03
+      staffing_ratio_sf_per_fte: 300000
+      vacancy_rate_target: 0.04
+      collections_rate_target: 0.995
+      tenant_retention_rate: 0.80
+      work_order_response_hours: 8
+      nps_benchmark: 35
+      capex_reserve_per_sf: 0.25
+      dock_door_maintenance_per_door: 800
+      clear_height_ft: 36
+      average_days_to_lease: 60
+      triple_net_recovery_rate: 0.98
+
+    class_b:
+      operating_expense_ratio: 0.28
+      r_and_m_per_sf: 1.00
+      management_fee_pct: 0.04
+      staffing_ratio_sf_per_fte: 400000
+      vacancy_rate_target: 0.06
+      collections_rate_target: 0.990
+      tenant_retention_rate: 0.75
+      work_order_response_hours: 12
+      nps_benchmark: 28
+      capex_reserve_per_sf: 0.30
+      dock_door_maintenance_per_door: 650
+      clear_height_ft: 30
+      average_days_to_lease: 75
+      triple_net_recovery_rate: 0.96
+
+    class_c:
+      operating_expense_ratio: 0.34
+      r_and_m_per_sf: 1.30
+      management_fee_pct: 0.05
+      staffing_ratio_sf_per_fte: 500000
+      vacancy_rate_target: 0.10
+      collections_rate_target: 0.980
+      tenant_retention_rate: 0.68
+      work_order_response_hours: 24
+      nps_benchmark: 18
+      capex_reserve_per_sf: 0.35
+      dock_door_maintenance_per_door: 550
+      clear_height_ft: 24
+      average_days_to_lease: 90
+      triple_net_recovery_rate: 0.93
+
+# Alert thresholds (apply across all types unless overridden above)
+alert_thresholds:
+  noi_budget_variance_yellow: -0.03
+  noi_budget_variance_red: -0.05
+  occupancy_drop_yellow_bps: 200
+  occupancy_drop_red_bps: 500
+  collections_rate_yellow: 0.975
+  collections_rate_red: 0.950
+  work_order_sla_compliance_yellow: 0.92
+  work_order_sla_compliance_red: 0.90
+  pm_compliance_yellow: 0.88
+  pm_compliance_red: 0.80
+  delinquency_30_day_yellow_pct: 0.02
+  delinquency_30_day_red_pct: 0.04
+  vendor_scorecard_pip_threshold: 3.0
+  vendor_scorecard_replace_threshold: 2.5
+  capex_overbudget_yellow_pct: 0.10
+  capex_overbudget_red_pct: 0.15
+  insurance_compliance_yellow_pct: 0.97
+  insurance_compliance_red_pct: 0.95

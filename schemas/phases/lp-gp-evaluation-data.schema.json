@@ -1,0 +1,175 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/lp-gp-evaluation-data.schema.json",
+  "title": "LP Intelligence Phase 1 -- GP Evaluation Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the GP evaluation phase. Covers track record analysis, fee transparency audit, and consolidated GP scorecard.",
+  "type": "object",
+  "required": [
+    "trackRecordAnalysis",
+    "feeAudit",
+    "gpScorecard"
+  ],
+  "properties": {
+    "trackRecordAnalysis": {
+      "type": "object",
+      "description": "Historical returns forensic analysis across all prior GP funds.",
+      "required": ["funds", "persistenceScore", "trackRecordVerdict"],
+      "properties": {
+        "gpName": { "type": "string" },
+        "totalFundsAnalyzed": { "type": "integer", "minimum": 0 },
+        "funds": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["fundName", "vintage", "netIRR", "dpi", "tvpi"],
+            "properties": {
+              "fundName": { "type": "string" },
+              "vintage": { "type": "integer" },
+              "strategy": { "type": "string" },
+              "committedCapital": { "type": "number" },
+              "netIRR": { "type": "number", "description": "Net IRR as decimal (0.15 = 15%)" },
+              "grossIRR": { "type": "number" },
+              "grossToNetSpreadBps": { "type": "number" },
+              "subLineAdjustedIRR": { "type": ["number", "null"], "description": "IRR adjusted for subscription credit facility effect" },
+              "subLineInflationBps": { "type": ["number", "null"] },
+              "dpi": { "type": "number" },
+              "tvpi": { "type": "number" },
+              "rvpi": { "type": "number" },
+              "lossRate": { "type": "number", "description": "Capital invested in losing deals / total capital invested" },
+              "capitalDestructionRate": { "type": "number" },
+              "giniCoefficient": { "type": ["number", "null"], "description": "Deal-level return dispersion Gini coefficient" },
+              "topDealConcentration": { "type": ["number", "null"], "description": "Top deal as % of total fund value" },
+              "vintagePercentile": { "type": "number", "description": "Percentile ranking within vintage peer group" },
+              "vintageQuartile": { "type": "integer", "enum": [1, 2, 3, 4] },
+              "benchmarkSource": { "type": "string" },
+              "dpiTrajectory": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "year": { "type": "integer" },
+                    "dpi": { "type": "number" },
+                    "vintageMedianDpi": { "type": ["number", "null"] }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "persistenceScore": { "type": "integer", "minimum": 1, "maximum": 5, "description": "Cross-vintage persistence score" },
+        "persistenceTrajectory": { "type": "string", "enum": ["STRONG", "MODERATE", "INCONSISTENT", "IMPROVING", "DECLINING", "NONE"] },
+        "trackRecordVerdict": { "type": "string", "enum": ["EXCEPTIONAL", "STRONG", "ACCEPTABLE", "WEAK", "UNPROVEN"] },
+        "transitionMatrix": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "fromFund": { "type": "string" },
+              "toFund": { "type": "string" },
+              "fromQuartile": { "type": "integer" },
+              "toQuartile": { "type": "integer" }
+            }
+          }
+        },
+        "averageExcessReturnBps": { "type": "number", "description": "Average vintage-adjusted excess return in bps" },
+        "redFlags": { "type": "array", "items": { "type": "string" } },
+        "dataGaps": { "type": "array", "items": { "type": "string" } },
+        "confidenceScore": { "type": "number", "minimum": 0, "maximum": 100 }
+      },
+      "additionalProperties": true
+    },
+    "feeAudit": {
+      "type": "object",
+      "description": "Total fee drag analysis and benchmarking.",
+      "required": ["totalFeeLoadBps", "feeLoadRating", "grossToNetBridge"],
+      "properties": {
+        "managementFee": {
+          "type": "object",
+          "properties": {
+            "investmentPeriodRate": { "type": "number" },
+            "harvestPeriodRate": { "type": "number" },
+            "feeBasis": { "type": "string" },
+            "stepDown": { "type": "boolean" },
+            "totalDragBps": { "type": "number" },
+            "uninvestedCapitalDragBps": { "type": "number" }
+          }
+        },
+        "carriedInterest": {
+          "type": "object",
+          "properties": {
+            "carryRate": { "type": "number" },
+            "preferredReturn": { "type": "number" },
+            "catchUpStructure": { "type": "string" },
+            "waterfallType": { "type": "string", "enum": ["european", "american", "hybrid"] },
+            "clawbackPresent": { "type": "boolean" },
+            "bullCaseCarry": { "type": "number" },
+            "baseCaseCarry": { "type": "number" },
+            "bearCaseCarry": { "type": "number" }
+          }
+        },
+        "hiddenFees": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "feeType": { "type": "string" },
+              "amount": { "type": ["number", "null"] },
+              "bpsImpact": { "type": ["number", "null"] },
+              "classification": { "type": "string" },
+              "flagged": { "type": "boolean" }
+            }
+          }
+        },
+        "grossToNetBridge": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "layer": { "type": "string" },
+              "bpsDeduction": { "type": "number" },
+              "dollarAmount": { "type": ["number", "null"] }
+            }
+          }
+        },
+        "totalFeeLoadBps": { "type": "number" },
+        "feeLoadRating": { "type": "string", "enum": ["LP-Favorable", "At Market", "Above Market", "Excessive"] },
+        "peerBenchmark": {
+          "type": "object",
+          "properties": {
+            "peerMedianFeeLoadBps": { "type": "number" },
+            "peerQuartile": { "type": "integer" },
+            "peerGroupSize": { "type": "integer" }
+          }
+        },
+        "feeEvolution": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "fundName": { "type": "string" },
+              "managementFeeRate": { "type": "number" },
+              "grossToNetSpreadBps": { "type": "number" }
+            }
+          }
+        },
+        "redFlags": { "type": "array", "items": { "type": "string" } },
+        "confidenceScore": { "type": "number", "minimum": 0, "maximum": 100 }
+      },
+      "additionalProperties": true
+    },
+    "gpScorecard": {
+      "type": "object",
+      "description": "Consolidated GP quality assessment.",
+      "required": ["trackRecordScore", "feeScore", "overallScore"],
+      "properties": {
+        "trackRecordScore": { "type": "number", "minimum": 1, "maximum": 5 },
+        "feeScore": { "type": "number", "minimum": 1, "maximum": 5 },
+        "overallScore": { "type": "number", "minimum": 1, "maximum": 5 },
+        "verdict": { "type": "string", "enum": ["PASS", "CONDITIONAL", "FAIL"] },
+        "totalRedFlags": { "type": "integer" },
+        "criticalRedFlags": { "type": "integer" }
+      }
+    }
+  },
+  "additionalProperties": true
+}

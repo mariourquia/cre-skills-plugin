@@ -1,0 +1,601 @@
+# Regional Construction Cost Factors
+# Multipliers applied to national-average base costs to produce local market estimates
+# Source: RSMeans City Cost Index, ENR Construction Cost Index, 2024-2025 data
+# National baseline = 1.00
+#
+# Factor interpretation:
+#   < 1.00 = below national average (lower cost market)
+#   = 1.00 = at national average
+#   > 1.00 = above national average (higher cost market)
+#
+# Factors incorporate labor rates, material delivery costs, productivity norms,
+# and general regulatory environment. They do NOT separately account for:
+#   - Union vs. open-shop differentials (apply separately if needed)
+#   - Prevailing wage premiums (apply separately)
+#   - Seismic or extreme climate premiums (apply separately)
+
+metadata:
+  version: "2025.1"
+  baseline_year: 2024
+  baseline_quarter: Q4
+  source: "RSMeans City Cost Index, ENR BCI, institutional project data"
+  national_baseline: 1.00
+  notes: >
+    Factors represent the overall cost index relative to the national average.
+    For cities not listed, interpolate from the nearest metro area or use the
+    state-level average. Factors change over time as local labor markets,
+    material supply chains, and regulatory environments evolve. Re-validate
+    annually or when market conditions shift significantly.
+
+factors:
+  # --- NORTHEAST ---
+  - city: "New York, NY"
+    metro: "New York-Newark-Jersey City"
+    state: "NY"
+    factor: 1.45
+    union_market: true
+    notes: "Highest-cost US market. Mandatory union labor, extreme regulatory burden, constrained logistics. Manhattan can reach 1.55-1.65 for high-rise."
+
+  - city: "Brooklyn, NY"
+    metro: "New York-Newark-Jersey City"
+    state: "NY"
+    factor: 1.38
+    union_market: true
+    notes: "Slightly below Manhattan. Similar regulatory environment, marginally better site access."
+
+  - city: "Newark, NJ"
+    metro: "New York-Newark-Jersey City"
+    state: "NJ"
+    factor: 1.28
+    union_market: true
+    notes: "Northern NJ metro. Strong union market. Lower than NYC but well above national average."
+
+  - city: "Jersey City, NJ"
+    metro: "New York-Newark-Jersey City"
+    state: "NJ"
+    factor: 1.32
+    union_market: true
+    notes: "Waterfront high-rise market. Closer to NYC pricing than other NJ markets."
+
+  - city: "Boston, MA"
+    metro: "Boston-Cambridge-Newton"
+    state: "MA"
+    factor: 1.32
+    union_market: true
+    notes: "Strong union market. High labor costs. Tight subcontractor market. Life science premium in Cambridge/Kendall."
+
+  - city: "Hartford, CT"
+    metro: "Hartford-East Hartford-Middletown"
+    state: "CT"
+    factor: 1.15
+    union_market: true
+    notes: "Below Boston/NYC but still above national average due to New England labor rates."
+
+  - city: "Stamford, CT"
+    metro: "Bridgeport-Stamford-Norwalk"
+    state: "CT"
+    factor: 1.22
+    union_market: true
+    notes: "Fairfield County. NYC labor market influence. Premium over Hartford."
+
+  - city: "Providence, RI"
+    metro: "Providence-Warwick"
+    state: "RI"
+    factor: 1.12
+    union_market: true
+    notes: "New England market. Union labor. Below Boston."
+
+  - city: "Philadelphia, PA"
+    metro: "Philadelphia-Camden-Wilmington"
+    state: "PA"
+    factor: 1.22
+    union_market: true
+    notes: "Strong union market. Building trades well organized. Center City premium."
+
+  - city: "Pittsburgh, PA"
+    metro: "Pittsburgh"
+    state: "PA"
+    factor: 1.08
+    union_market: true
+    notes: "Below Philadelphia. Moderate labor costs. Union market with competitive bidding."
+
+  - city: "Washington, DC"
+    metro: "Washington-Arlington-Alexandria"
+    state: "DC"
+    factor: 1.18
+    union_market: false
+    notes: "Open-shop market but high labor demand. Federal projects drive prevailing wage. Security clearance adds cost for government-adjacent work."
+
+  - city: "Baltimore, MD"
+    metro: "Baltimore-Columbia-Towson"
+    state: "MD"
+    factor: 1.05
+    union_market: false
+    notes: "Below DC. Mixed union/open-shop. Proximity to DC labor pool."
+
+  - city: "Portland, ME"
+    metro: "Portland-South Portland"
+    state: "ME"
+    factor: 1.04
+    union_market: false
+    notes: "Small market. Limited subcontractor pool for large projects. Seasonal construction window."
+
+  - city: "Burlington, VT"
+    metro: "Burlington-South Burlington"
+    state: "VT"
+    factor: 1.06
+    union_market: false
+    notes: "Small market. Aggressive energy code. Skilled labor shortage."
+
+  # --- SOUTHEAST ---
+  - city: "Atlanta, GA"
+    metro: "Atlanta-Sandy Springs-Alpharetta"
+    state: "GA"
+    factor: 0.92
+    union_market: false
+    notes: "Major Southeast hub. Competitive open-shop market. Growing labor demand from in-migration."
+
+  - city: "Miami, FL"
+    metro: "Miami-Fort Lauderdale-Pompano Beach"
+    state: "FL"
+    factor: 1.05
+    union_market: false
+    notes: "High-rise concrete market. Hurricane code adds structural cost. International labor pool. High-rise premium."
+
+  - city: "Fort Lauderdale, FL"
+    metro: "Miami-Fort Lauderdale-Pompano Beach"
+    state: "FL"
+    factor: 0.98
+    union_market: false
+    notes: "Below Miami. Similar wind code requirements."
+
+  - city: "Orlando, FL"
+    metro: "Orlando-Kissimmee-Sanford"
+    state: "FL"
+    factor: 0.90
+    union_market: false
+    notes: "Below Miami. Hospitality construction expertise. Open-shop."
+
+  - city: "Tampa, FL"
+    metro: "Tampa-St. Petersburg-Clearwater"
+    state: "FL"
+    factor: 0.90
+    union_market: false
+    notes: "Growing market. Wind code costs. Competitive labor market."
+
+  - city: "Jacksonville, FL"
+    metro: "Jacksonville"
+    state: "FL"
+    factor: 0.87
+    union_market: false
+    notes: "Lower cost Florida market. Good labor availability."
+
+  - city: "Charlotte, NC"
+    metro: "Charlotte-Concord-Gastonia"
+    state: "NC"
+    factor: 0.88
+    union_market: false
+    notes: "Right-to-work state. Competitive bidding environment. Strong growth market."
+
+  - city: "Raleigh, NC"
+    metro: "Raleigh-Cary"
+    state: "NC"
+    factor: 0.88
+    union_market: false
+    notes: "Research Triangle. Growing market. Competitive labor costs."
+
+  - city: "Nashville, TN"
+    metro: "Nashville-Davidson-Murfreesboro-Franklin"
+    state: "TN"
+    factor: 0.90
+    union_market: false
+    notes: "Rapid growth market. Subcontractor demand increasing. Costs rising faster than national average."
+
+  - city: "Memphis, TN"
+    metro: "Memphis"
+    state: "TN"
+    factor: 0.84
+    union_market: false
+    notes: "Lower cost. Seismic zone 2-3 (New Madrid) adds structural cost."
+
+  - city: "Charleston, SC"
+    metro: "Charleston-North Charleston"
+    state: "SC"
+    factor: 0.86
+    union_market: false
+    notes: "Coastal. Wind code and flood zone requirements. Historic district has premium."
+
+  - city: "Richmond, VA"
+    metro: "Richmond"
+    state: "VA"
+    factor: 0.92
+    union_market: false
+    notes: "Moderate cost market. Open-shop. Proximity to DC labor pool for large projects."
+
+  - city: "New Orleans, LA"
+    metro: "New Orleans-Metairie"
+    state: "LA"
+    factor: 0.88
+    union_market: false
+    notes: "Hurricane code. Flood zone requirements. Specialized foundation requirements in many areas."
+
+  - city: "Birmingham, AL"
+    metro: "Birmingham-Hoover"
+    state: "AL"
+    factor: 0.82
+    union_market: false
+    notes: "Lower cost Southeast market. Right-to-work state."
+
+  # --- MIDWEST ---
+  - city: "Chicago, IL"
+    metro: "Chicago-Naperville-Elgin"
+    state: "IL"
+    factor: 1.22
+    union_market: true
+    notes: "Strong union market. High labor costs. Severe winter impacts on schedule. City of Chicago has additional regulatory costs."
+
+  - city: "Minneapolis, MN"
+    metro: "Minneapolis-St. Paul-Bloomington"
+    state: "MN"
+    factor: 1.08
+    union_market: true
+    notes: "Union market. Cold climate adds envelope and HVAC cost. Short construction season."
+
+  - city: "Milwaukee, WI"
+    metro: "Milwaukee-Waukesha"
+    state: "WI"
+    factor: 1.05
+    union_market: true
+    notes: "Union market. Below Chicago. Cold climate."
+
+  - city: "Detroit, MI"
+    metro: "Detroit-Warren-Dearborn"
+    state: "MI"
+    factor: 1.02
+    union_market: true
+    notes: "Union market but competitive pricing. Skilled trades available."
+
+  - city: "Columbus, OH"
+    metro: "Columbus"
+    state: "OH"
+    factor: 0.95
+    union_market: false
+    notes: "Moderate cost. Growing market. Mixed union/open-shop."
+
+  - city: "Cleveland, OH"
+    metro: "Cleveland-Elyria"
+    state: "OH"
+    factor: 1.00
+    union_market: true
+    notes: "At national average. Union market. Moderate regulatory environment."
+
+  - city: "Cincinnati, OH"
+    metro: "Cincinnati"
+    state: "OH"
+    factor: 0.95
+    union_market: false
+    notes: "Below Cleveland. Mixed union/open-shop market."
+
+  - city: "Indianapolis, IN"
+    metro: "Indianapolis-Carmel-Anderson"
+    state: "IN"
+    factor: 0.92
+    union_market: false
+    notes: "Right-to-work state. Competitive bidding. Moderate costs."
+
+  - city: "Kansas City, MO"
+    metro: "Kansas City"
+    state: "MO"
+    factor: 0.95
+    union_market: false
+    notes: "Moderate cost. Central location keeps material delivery costs low."
+
+  - city: "St. Louis, MO"
+    metro: "St. Louis"
+    state: "MO"
+    factor: 1.00
+    union_market: true
+    notes: "At national average. Union market on Missouri side. Open-shop on Illinois side."
+
+  - city: "Omaha, NE"
+    metro: "Omaha-Council Bluffs"
+    state: "NE"
+    factor: 0.88
+    union_market: false
+    notes: "Lower cost Midwest market. Open-shop. Good labor availability."
+
+  - city: "Des Moines, IA"
+    metro: "Des Moines-West Des Moines"
+    state: "IA"
+    factor: 0.88
+    union_market: false
+    notes: "Lower cost. Seasonal construction constraints."
+
+  # --- SOUTHWEST ---
+  - city: "Dallas, TX"
+    metro: "Dallas-Fort Worth-Arlington"
+    state: "TX"
+    factor: 0.88
+    union_market: false
+    notes: "Large open-shop market. Competitive bidding. Rapid growth driving labor demand."
+
+  - city: "Houston, TX"
+    metro: "Houston-The Woodlands-Sugar Land"
+    state: "TX"
+    factor: 0.85
+    union_market: false
+    notes: "Below-average costs. Deep industrial/energy construction labor pool. Hurricane code in coastal areas."
+
+  - city: "Austin, TX"
+    metro: "Austin-Round Rock-Georgetown"
+    state: "TX"
+    factor: 0.92
+    union_market: false
+    notes: "Above Dallas/Houston due to rapid growth and labor competition. Tech-driven demand."
+
+  - city: "San Antonio, TX"
+    metro: "San Antonio-New Braunfels"
+    state: "TX"
+    factor: 0.83
+    union_market: false
+    notes: "Lower cost Texas market. Military base construction drives some prevailing wage work."
+
+  - city: "Phoenix, AZ"
+    metro: "Phoenix-Mesa-Chandler"
+    state: "AZ"
+    factor: 0.90
+    union_market: false
+    notes: "Open-shop. Hot climate reduces HVAC heating costs but increases cooling. Rapid growth market."
+
+  - city: "Tucson, AZ"
+    metro: "Tucson"
+    state: "AZ"
+    factor: 0.85
+    union_market: false
+    notes: "Below Phoenix. Smaller subcontractor pool."
+
+  - city: "Denver, CO"
+    metro: "Denver-Aurora-Lakewood"
+    state: "CO"
+    factor: 0.98
+    union_market: false
+    notes: "Near national average. Growing market. Altitude affects concrete curing. Energy code increasingly stringent."
+
+  - city: "Salt Lake City, UT"
+    metro: "Salt Lake City"
+    state: "UT"
+    factor: 0.90
+    union_market: false
+    notes: "Open-shop. Seismic zone 3. Growing market."
+
+  - city: "Las Vegas, NV"
+    metro: "Las Vegas-Henderson-Paradise"
+    state: "NV"
+    factor: 0.98
+    union_market: true
+    notes: "Union market for hospitality/gaming. Open-shop for residential. Hospitality expertise."
+
+  - city: "Albuquerque, NM"
+    metro: "Albuquerque"
+    state: "NM"
+    factor: 0.85
+    union_market: false
+    notes: "Lower cost Southwest market. Limited large-project subcontractor pool."
+
+  # --- WEST COAST ---
+  - city: "Los Angeles, CA"
+    metro: "Los Angeles-Long Beach-Anaheim"
+    state: "CA"
+    factor: 1.25
+    union_market: true
+    notes: "Union market. High seismic zone. Stringent energy code (Title 24). High regulatory costs. Coastal premium."
+
+  - city: "San Francisco, CA"
+    metro: "San Francisco-Oakland-Berkeley"
+    state: "CA"
+    factor: 1.42
+    union_market: true
+    notes: "Second highest US market. Mandatory union. Extreme regulatory environment. Seismic zone 4. Constrained logistics."
+
+  - city: "San Jose, CA"
+    metro: "San Jose-Sunnyvale-Santa Clara"
+    state: "CA"
+    factor: 1.35
+    union_market: true
+    notes: "Silicon Valley. High labor demand from tech sector construction. Seismic zone 4."
+
+  - city: "Oakland, CA"
+    metro: "San Francisco-Oakland-Berkeley"
+    state: "CA"
+    factor: 1.32
+    union_market: true
+    notes: "Below SF but still premium. Same seismic and regulatory environment."
+
+  - city: "San Diego, CA"
+    metro: "San Diego-Chula Vista-Carlsbad"
+    state: "CA"
+    factor: 1.15
+    union_market: true
+    notes: "Below LA. Union market. Seismic zone. Coastal climate."
+
+  - city: "Sacramento, CA"
+    metro: "Sacramento-Roseville-Folsom"
+    state: "CA"
+    factor: 1.12
+    union_market: true
+    notes: "Below coastal California markets. State capital. Union market."
+
+  - city: "Riverside, CA"
+    metro: "Riverside-San Bernardino-Ontario"
+    state: "CA"
+    factor: 1.08
+    union_market: true
+    notes: "Inland Empire. Below coastal CA. Large industrial/warehouse market."
+
+  - city: "Portland, OR"
+    metro: "Portland-Vancouver-Hillsboro"
+    state: "OR"
+    factor: 1.08
+    union_market: true
+    notes: "Union market. Seismic zone 3. Stringent energy code. Rain impacts schedule."
+
+  - city: "Seattle, WA"
+    metro: "Seattle-Tacoma-Bellevue"
+    state: "WA"
+    factor: 1.15
+    union_market: true
+    notes: "Growing market. Union labor. Seismic zone 3. High-rise premium downtown."
+
+  - city: "Honolulu, HI"
+    metro: "Urban Honolulu"
+    state: "HI"
+    factor: 1.35
+    union_market: true
+    notes: "Island premium. All materials shipped in. Limited labor pool. High cost of living drives wages."
+
+  # --- MOUNTAIN / PLAINS ---
+  - city: "Boise, ID"
+    metro: "Boise City"
+    state: "ID"
+    factor: 0.88
+    union_market: false
+    notes: "Growing market. Open-shop. Seismic zone 2."
+
+  - city: "Billings, MT"
+    metro: "Billings"
+    state: "MT"
+    factor: 0.90
+    union_market: false
+    notes: "Small market. Material delivery costs higher. Cold climate."
+
+  - city: "Cheyenne, WY"
+    metro: "Cheyenne"
+    state: "WY"
+    factor: 0.85
+    union_market: false
+    notes: "Small market. Wind-resistant construction. Limited labor."
+
+  - city: "Sioux Falls, SD"
+    metro: "Sioux Falls"
+    state: "SD"
+    factor: 0.82
+    union_market: false
+    notes: "Low cost market. Cold climate. Open-shop."
+
+  - city: "Fargo, ND"
+    metro: "Fargo"
+    state: "ND"
+    factor: 0.85
+    union_market: false
+    notes: "Cold climate. Short construction season. Open-shop."
+
+  - city: "Oklahoma City, OK"
+    metro: "Oklahoma City"
+    state: "OK"
+    factor: 0.82
+    union_market: false
+    notes: "Low cost market. Open-shop. Tornado-resistant construction in some areas."
+
+  - city: "Tulsa, OK"
+    metro: "Tulsa"
+    state: "OK"
+    factor: 0.80
+    union_market: false
+    notes: "Among lowest cost markets. Open-shop."
+
+  - city: "Little Rock, AR"
+    metro: "Little Rock-North Little Rock-Conway"
+    state: "AR"
+    factor: 0.78
+    union_market: false
+    notes: "Low cost market. Right-to-work state."
+
+  - city: "Jackson, MS"
+    metro: "Jackson"
+    state: "MS"
+    factor: 0.76
+    union_market: false
+    notes: "Lowest cost tier. Right-to-work. Limited large-project experience."
+
+  # --- ADDITIONAL MARKETS ---
+  - city: "Anchorage, AK"
+    metro: "Anchorage"
+    state: "AK"
+    factor: 1.30
+    union_market: true
+    notes: "Extreme climate premium. Materials shipped in. Short construction season. Seismic zone 4."
+
+  - city: "Louisville, KY"
+    metro: "Louisville/Jefferson County"
+    state: "KY"
+    factor: 0.88
+    union_market: false
+    notes: "Moderate cost. Ohio River proximity. Mixed union/open-shop."
+
+  - city: "Norfolk, VA"
+    metro: "Virginia Beach-Norfolk-Newport News"
+    state: "VA"
+    factor: 0.90
+    union_market: false
+    notes: "Military-adjacent market. Coastal wind requirements. Open-shop."
+
+  - city: "Savannah, GA"
+    metro: "Savannah"
+    state: "GA"
+    factor: 0.84
+    union_market: false
+    notes: "Coastal. Historic district premium. Industrial port construction."
+
+# State-level fallback factors for cities not individually listed
+state_averages:
+  AL: 0.82
+  AK: 1.30
+  AZ: 0.88
+  AR: 0.78
+  CA: 1.20
+  CO: 0.98
+  CT: 1.18
+  DE: 1.05
+  DC: 1.18
+  FL: 0.92
+  GA: 0.88
+  HI: 1.35
+  ID: 0.88
+  IL: 1.10
+  IN: 0.92
+  IA: 0.88
+  KS: 0.85
+  KY: 0.88
+  LA: 0.85
+  ME: 1.00
+  MD: 1.02
+  MA: 1.28
+  MI: 1.00
+  MN: 1.05
+  MS: 0.76
+  MO: 0.95
+  MT: 0.88
+  NE: 0.85
+  NV: 0.95
+  NH: 1.02
+  NJ: 1.25
+  NM: 0.85
+  NY: 1.30
+  NC: 0.86
+  ND: 0.85
+  OH: 0.96
+  OK: 0.80
+  OR: 1.05
+  PA: 1.10
+  RI: 1.10
+  SC: 0.84
+  SD: 0.82
+  TN: 0.86
+  TX: 0.86
+  UT: 0.90
+  VT: 1.04
+  VA: 0.92
+  WA: 1.10
+  WV: 0.90
+  WI: 1.02
+  WY: 0.85

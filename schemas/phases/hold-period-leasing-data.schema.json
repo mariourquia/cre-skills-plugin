@@ -1,0 +1,394 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "phases/hold-period-leasing-data.schema.json",
+  "title": "Hold Period Phase 4 — Leasing & Revenue Management Downstream Data",
+  "description": "Shape of the dataForDownstream object written to the master checkpoint by the hold-period leasing phase. Covers the active leasing pipeline, renewal forecast with probability-weighted pricing, CAM reconciliation results, and effective rent trends.",
+  "type": "object",
+  "required": [
+    "leasingPipeline",
+    "renewalForecast",
+    "camReconciliation",
+    "effectiveRentTrends"
+  ],
+  "properties": {
+    "leasingPipeline": {
+      "type": "object",
+      "description": "Active new-lease leasing funnel with conversion metrics.",
+      "required": ["asOfDate", "totalProspects", "conversionRate", "projectedLeasesThisQuarter", "funnelStages"],
+      "properties": {
+        "asOfDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Snapshot date for pipeline data."
+        },
+        "totalProspects": {
+          "type": "integer",
+          "description": "Total active prospects in the leasing funnel.",
+          "minimum": 0
+        },
+        "newProspectsThisMonth": {
+          "type": "integer",
+          "description": "New prospects added in current month.",
+          "minimum": 0
+        },
+        "conversionRate": {
+          "type": "number",
+          "description": "Overall prospect-to-lease conversion rate (0–1), trailing 90 days.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "avgDaysToLease": {
+          "type": "number",
+          "description": "Average days from first contact to signed lease.",
+          "minimum": 0
+        },
+        "projectedLeasesThisQuarter": {
+          "type": "integer",
+          "description": "Probability-weighted projected new leases to execute this quarter.",
+          "minimum": 0
+        },
+        "projectedRevenueThisQuarter": {
+          "type": "number",
+          "description": "Probability-weighted projected new lease revenue for the quarter.",
+          "minimum": 0
+        },
+        "funnelStages": {
+          "type": "array",
+          "description": "Prospect count and conversion rate by funnel stage.",
+          "items": {
+            "type": "object",
+            "required": ["stage", "count", "stageConversionRate"],
+            "properties": {
+              "stage": {
+                "type": "string",
+                "description": "Funnel stage label: INQUIRY, TOUR_SCHEDULED, TOURED, APPLICATION, APPROVED, SIGNED."
+              },
+              "count": { "type": "integer", "minimum": 0 },
+              "stageConversionRate": {
+                "type": "number",
+                "description": "Conversion rate from this stage to the next (0–1).",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "avgDaysInStage": { "type": "number" }
+            },
+            "additionalProperties": true
+          }
+        },
+        "leasedUnits": {
+          "type": "array",
+          "description": "Recently executed new leases.",
+          "items": {
+            "type": "object",
+            "required": ["unit", "startDate", "term", "monthlyRent", "concessions"],
+            "properties": {
+              "unit": { "type": "string" },
+              "startDate": { "type": "string", "format": "date" },
+              "term": { "type": "integer", "description": "Lease term in months." },
+              "monthlyRent": { "type": "number" },
+              "priorRent": { "type": "number", "description": "Prior tenant's monthly rent for the same unit." },
+              "rentChange": { "type": "number", "description": "New rent minus prior rent." },
+              "concessions": {
+                "type": "object",
+                "properties": {
+                  "freeMonths": { "type": "number" },
+                  "tenantImprovementAllowance": { "type": "number" },
+                  "totalConcessionValue": { "type": "number" }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "vacantUnits": {
+          "type": "integer",
+          "description": "Current number of vacant units available for lease.",
+          "minimum": 0
+        },
+        "avgDaysVacant": {
+          "type": "number",
+          "description": "Average days on market for currently vacant units.",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": true
+    },
+    "renewalForecast": {
+      "type": "object",
+      "description": "Upcoming lease expiration analysis with renewal probability and pricing.",
+      "required": ["expiringNext12Months", "probabilityWeightedRenewals", "renewalPricingStrategy", "renewalDetails"],
+      "properties": {
+        "forecastDate": {
+          "type": "string",
+          "format": "date",
+          "description": "As-of date for this forecast."
+        },
+        "expiringNext12Months": {
+          "type": "object",
+          "description": "Summary of leases expiring in the next 12 months.",
+          "required": ["unitCount", "sfExpiring", "annualizedRentAtRisk"],
+          "properties": {
+            "unitCount": {
+              "type": "integer",
+              "description": "Number of leases expiring in next 12 months.",
+              "minimum": 0
+            },
+            "sfExpiring": {
+              "type": "number",
+              "description": "Total square footage of expiring leases.",
+              "minimum": 0
+            },
+            "percentOfPortfolio": {
+              "type": "number",
+              "description": "Expiring leases as percent of total rent roll.",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "annualizedRentAtRisk": {
+              "type": "number",
+              "description": "Annualized rent from expiring leases.",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": true
+        },
+        "probabilityWeightedRenewals": {
+          "type": "object",
+          "description": "Expected renewal outcomes probability-weighted.",
+          "required": ["expectedRenewalCount", "expectedRetentionRate", "expectedNonRenewalCount"],
+          "properties": {
+            "expectedRenewalCount": {
+              "type": "number",
+              "description": "Probability-weighted expected number of renewals."
+            },
+            "expectedRetentionRate": {
+              "type": "number",
+              "description": "Expected retention rate (0–1).",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "expectedNonRenewalCount": {
+              "type": "number",
+              "description": "Probability-weighted expected move-outs."
+            },
+            "expectedNonRenewalRentLoss": {
+              "type": "number",
+              "description": "Annualized rent loss from expected non-renewals."
+            }
+          },
+          "additionalProperties": true
+        },
+        "renewalPricingStrategy": {
+          "type": "object",
+          "description": "Renewal rent pricing approach and targets.",
+          "required": ["strategy", "avgProposedRentIncrease"],
+          "properties": {
+            "strategy": {
+              "type": "string",
+              "description": "e.g., Market rate, Retention-optimized, Blended."
+            },
+            "avgProposedRentIncrease": {
+              "type": "number",
+              "description": "Average proposed rent increase for renewing tenants (decimal, e.g., 0.05 = 5%)."
+            },
+            "blendedRentGrowthExpected": {
+              "type": "number",
+              "description": "Blended rent growth across new and renewal leases (decimal)."
+            },
+            "concessionBudgetPerRenewal": {
+              "type": "number",
+              "description": "Allocated concession budget per renewing tenant."
+            }
+          },
+          "additionalProperties": true
+        },
+        "renewalDetails": {
+          "type": "array",
+          "description": "Per-tenant renewal status for expiring leases.",
+          "items": {
+            "type": "object",
+            "required": ["tenantId", "unit", "expirationDate", "currentRent", "renewalStatus", "renewalProbability"],
+            "properties": {
+              "tenantId": { "type": "string" },
+              "unit": { "type": "string" },
+              "tenantName": { "type": "string" },
+              "expirationDate": { "type": "string", "format": "date" },
+              "currentRent": { "type": "number" },
+              "proposedRenewalRent": { "type": "number" },
+              "renewalStatus": {
+                "type": "string",
+                "enum": ["TOO_EARLY", "OFFER_SENT", "IN_NEGOTIATION", "RENEWED", "NOTICE_TO_VACATE", "UNKNOWN"]
+              },
+              "renewalProbability": {
+                "type": "number",
+                "description": "Probability of renewal (0–1).",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "renewalNPV": {
+                "type": "number",
+                "description": "NPV of retaining this tenant vs. re-leasing (positive = renew)."
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "camReconciliation": {
+      "type": "object",
+      "description": "Common area maintenance and operating expense reconciliation results (commercial leases).",
+      "required": ["reconciliationPeriod", "totalEstimatedRecoveries", "totalActualExpenses", "overUnderBilling", "recoveryRate"],
+      "properties": {
+        "reconciliationPeriod": {
+          "type": "string",
+          "description": "Period covered by this reconciliation (e.g., FY2025)."
+        },
+        "reconciliationDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "totalEstimatedRecoveries": {
+          "type": "number",
+          "description": "Total CAM/operating expenses billed to tenants during the period."
+        },
+        "totalActualExpenses": {
+          "type": "number",
+          "description": "Total actual recoverable operating expenses incurred."
+        },
+        "overUnderBilling": {
+          "type": "number",
+          "description": "Estimated recoveries minus actual expenses. Positive = overbilled (tenant credit); negative = underbilled (additional charge)."
+        },
+        "recoveryRate": {
+          "type": "number",
+          "description": "Percent of total operating expenses recovered from tenants (0–1).",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "tenantReconciliations": {
+          "type": "array",
+          "description": "Individual tenant CAM reconciliation settlements.",
+          "items": {
+            "type": "object",
+            "required": ["tenantId", "estimatedPayments", "actualShare", "settlementAmount"],
+            "properties": {
+              "tenantId": { "type": "string" },
+              "tenantName": { "type": "string" },
+              "unit": { "type": "string" },
+              "proRataShare": {
+                "type": "number",
+                "description": "Tenant's pro-rata share of recoverable expenses (0–1)."
+              },
+              "estimatedPayments": {
+                "type": "number",
+                "description": "Estimated CAM payments made during the period."
+              },
+              "actualShare": {
+                "type": "number",
+                "description": "Actual recoverable expense obligation."
+              },
+              "settlementAmount": {
+                "type": "number",
+                "description": "Net settlement. Positive = tenant owes landlord; negative = landlord credits tenant."
+              },
+              "settlementStatus": {
+                "type": "string",
+                "enum": ["PENDING", "INVOICED", "COLLECTED", "CREDITED", "DISPUTED"]
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "excludedExpenses": {
+          "type": "array",
+          "description": "Expense categories excluded from recovery per lease terms.",
+          "items": {
+            "type": "object",
+            "required": ["category", "amount"],
+            "properties": {
+              "category": { "type": "string" },
+              "amount": { "type": "number" },
+              "reason": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "effectiveRentTrends": {
+      "type": "object",
+      "description": "Effective rent trend analysis capturing net rent after concessions and free rent periods.",
+      "required": ["currentAvgAskingRent", "currentAvgEffectiveRent", "concessionRate", "trendData"],
+      "properties": {
+        "asOfDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "currentAvgAskingRent": {
+          "type": "number",
+          "description": "Current average asking rent per unit or SF."
+        },
+        "currentAvgEffectiveRent": {
+          "type": "number",
+          "description": "Current average effective rent after concessions."
+        },
+        "concessionRate": {
+          "type": "number",
+          "description": "Average concession as percent of asking rent (0–1).",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "newLeaseRentVsPrior": {
+          "type": "number",
+          "description": "Average rent change on new leases vs. prior rent for the same units (decimal)."
+        },
+        "renewalRentVsPrior": {
+          "type": "number",
+          "description": "Average rent change on renewal leases vs. expiring rent (decimal)."
+        },
+        "blendedRentGrowth": {
+          "type": "number",
+          "description": "Blended rent growth across new and renewal leases (decimal)."
+        },
+        "lossToLeaseCurrent": {
+          "type": "number",
+          "description": "Current loss-to-lease in dollars (market rent minus in-place rent, annualized)."
+        },
+        "lossToLeasePercent": {
+          "type": "number",
+          "description": "Current loss-to-lease as percent of potential gross income."
+        },
+        "trendData": {
+          "type": "array",
+          "description": "Historical monthly or quarterly effective rent trend.",
+          "items": {
+            "type": "object",
+            "required": ["period", "avgAskingRent", "avgEffectiveRent"],
+            "properties": {
+              "period": { "type": "string", "description": "Period label, e.g., 2025-Q1." },
+              "avgAskingRent": { "type": "number" },
+              "avgEffectiveRent": { "type": "number" },
+              "occupancyRate": { "type": "number", "minimum": 0, "maximum": 1 },
+              "concessionValue": { "type": "number" }
+            },
+            "additionalProperties": true
+          }
+        },
+        "submarketRentBenchmark": {
+          "type": "number",
+          "description": "Current submarket average effective rent for benchmarking."
+        },
+        "propertyRentPremiumToMarket": {
+          "type": "number",
+          "description": "Property effective rent minus submarket benchmark."
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
