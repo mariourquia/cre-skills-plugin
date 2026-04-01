@@ -6,7 +6,7 @@
  * No external dependencies. Node stdlib only.
  */
 
-import { readFileSync, appendFileSync, mkdirSync } from 'fs';
+import { readFileSync, writeFileSync, appendFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 
@@ -105,6 +105,59 @@ function main() {
         'To submit feedback, run /cre-skills:feedback-summary or edit ~/.cre-skills/feedback.jsonl directly.\n'
       );
     }
+  }
+
+  // Weekly feedback prompt: show once per 7 days after first week of use.
+  // Runs independently of the survey toggle -- this is about the feedback
+  // commands, not the session rating.
+  showWeeklyFeedbackPrompt(config);
+}
+
+/**
+ * Show a brief, non-intrusive feedback prompt at most once per 7 days,
+ * only after the plugin has been installed for at least 7 days,
+ * and only if CRE skills were used this session.
+ */
+function showWeeklyFeedbackPrompt(config) {
+  const today = isoDate();
+
+  // Need firstRunAt to know install age
+  if (!config.firstRunAt) return;
+
+  // Must be at least 7 days since install
+  const installDate = new Date(config.firstRunAt + 'T00:00:00Z');
+  const now = new Date(today + 'T00:00:00Z');
+  const daysSinceInstall = Math.floor((now - installDate) / 86_400_000);
+  if (daysSinceInstall < 7) return;
+
+  // Check if we already prompted within the last 7 days
+  const feedback = config.feedback || {};
+  if (feedback.last_prompt_shown_at) {
+    const lastPrompt = new Date(feedback.last_prompt_shown_at + 'T00:00:00Z');
+    const daysSincePrompt = Math.floor((now - lastPrompt) / 86_400_000);
+    if (daysSincePrompt < 7) return;
+  }
+
+  // Only prompt if skills were used this session
+  const skillsUsed = getTodaysSkills(config.anonymousId || 'unknown');
+  if (skillsUsed.length === 0) return;
+
+  // Show the prompt
+  process.stdout.write(
+    '\n[CRE Skills] How are the skills working for you? Share feedback anytime:\n' +
+    '  /cre-skills:send-feedback   -- suggestions, ratings, comments\n' +
+    '  /cre-skills:report-problem  -- bugs or issues\n'
+  );
+
+  // Update last_prompt_shown_at so we don't prompt again for 7 days
+  if (!config.feedback) config.feedback = {};
+  config.feedback.last_prompt_shown_at = today;
+
+  try {
+    mkdirSync(CONFIG_DIR, { recursive: true });
+    writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2) + '\n', 'utf8');
+  } catch {
+    // Never crash over a config write failure.
   }
 }
 

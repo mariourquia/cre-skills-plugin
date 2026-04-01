@@ -21,6 +21,11 @@
       "type": "string",
       "default": "https://cre-skills-feedback-api.vercel.app/api/feedback",
       "description": "HTTPS endpoint for remote feedback submission. Empty string disables remote submission."
+    },
+    "last_prompt_shown_at": {
+      "type": ["string", "null"],
+      "default": null,
+      "description": "ISO date (YYYY-MM-DD) of last weekly feedback prompt. Set automatically."
     }
   },
   "additionalProperties": false
