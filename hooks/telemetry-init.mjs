@@ -61,6 +61,12 @@ function main() {
     writeConfig(config);
   }
 
+  // Backfill firstRunAt for installs that predate this field
+  if (config.firstRunComplete && !config.firstRunAt) {
+    config.firstRunAt = new Date().toISOString().slice(0, 10);
+    writeConfig(config);
+  }
+
   if (!config.firstRunComplete) {
     process.stdout.write(
       '[CRE Skills] First run detected. Telemetry and feedback are disabled by default.\n' +
@@ -70,6 +76,7 @@ function main() {
       'See PRIVACY.md for what is and isn\'t collected.\n'
     );
     config.firstRunComplete = true;
+    config.firstRunAt = new Date().toISOString().slice(0, 10);
     writeConfig(config);
   }
 }
