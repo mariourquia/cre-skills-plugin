@@ -20,6 +20,8 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Install test dependencies
+        run: pip install pytest pyyaml
       - name: Run integrity tests
         run: python -m pytest tests/ -v
       - name: Validate hooks JSON
