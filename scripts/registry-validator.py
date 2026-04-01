@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 """
-Registry Validator
-==================
-Zero-dependency script that validates registry.yaml integrity:
-  - For each skill with chains_to/chains_from, verify referenced skill directory exists
-  - Verify all skill directories have a SKILL.md
-  - Print pass/fail report, exit 0 (all pass) or 1 (any failure)
+Registry Validator & Documentation Drift Checker
+=================================================
+Zero-dependency script that validates:
+  - registry.yaml integrity (chain refs, SKILL.md presence, orphan dirs)
+  - Count consistency: skills, agents, commands, calculators, references
+  - Version consistency: plugin.json version matches all docs and scripts
+  - Stale version detection: no references to prior versions in non-CHANGELOG files
+  - Legacy file detection: completed plan docs, duplicate files, empty dirs
+  - Asset-type neutrality in orchestrator configs
 
 Parses YAML manually (line-by-line) since PyYAML is not guaranteed.
+Runs in CI and blocks releases on any FAIL result.
 
 Usage:
     python3 scripts/registry-validator.py
@@ -262,6 +266,239 @@ def validate_asset_type_neutrality() -> list[str]:
     return failures
 
 
+def validate_version_consistency() -> list[str]:
+    """
+    The version in plugin.json is the source of truth.
+    Every file that embeds a version string must match it.
+    Returns list of failure messages.
+    """
+    import json, re
+    failures: list[str] = []
+
+    # Source of truth
+    pj_path = PLUGIN_ROOT / ".claude-plugin" / "plugin.json"
+    if not pj_path.is_file():
+        failures.append("FAIL  .claude-plugin/plugin.json not found")
+        return failures
+
+    pj = json.loads(pj_path.read_text(encoding="utf-8"))
+    sot_version = pj.get("version", "")
+    if not sot_version:
+        failures.append("FAIL  plugin.json has no version field")
+        return failures
+
+    # Files that must contain this version
+    version_files = [
+        ("hooks/telemetry-init.mjs", re.compile(r"version:\s*['\"](\d+\.\d+\.\d+)['\"]")),
+        ("docs/install-guide.md", re.compile(r"Version\s+(\d+\.\d+\.\d+)")),
+        ("PRIVACY.md", re.compile(r"Plugin\s+v(\d+\.\d+\.\d+)")),
+    ]
+
+    for relpath, pattern in version_files:
+        fpath = PLUGIN_ROOT / relpath
+        if not fpath.is_file():
+            continue
+        content = fpath.read_text(encoding="utf-8")
+        match = pattern.search(content)
+        if match:
+            found = match.group(1)
+            if found != sot_version:
+                failures.append(
+                    f"FAIL  {relpath}: version {found} != plugin.json {sot_version}"
+                )
+
+    return failures
+
+
+def validate_stale_versions() -> list[str]:
+    """
+    Detect references to prior major/minor versions in non-historical files.
+    CHANGELOG.md and docs/releases/ are exempt (they document history).
+    Returns list of failure messages.
+    """
+    import json, re
+    failures: list[str] = []
+
+    pj_path = PLUGIN_ROOT / ".claude-plugin" / "plugin.json"
+    if not pj_path.is_file():
+        return failures
+
+    pj = json.loads(pj_path.read_text(encoding="utf-8"))
+    current = pj.get("version", "")
+    if not current:
+        return failures
+
+    current_major_minor = ".".join(current.split(".")[:2])
+
+    # Build list of prior versions to detect
+    # Only flag versions that are clearly stale (prior major.minor)
+    prior_patterns = []
+    major, minor = int(current.split(".")[0]), int(current.split(".")[1])
+    for m in range(1, major + 1):
+        for n in range(0, 10):
+            vm = f"{m}.{n}"
+            if vm != current_major_minor:
+                prior_patterns.append(vm)
+
+    # Files to scan (exclude history files and files with legitimate prior-version context)
+    exempt = {"CHANGELOG.md", "NOTICE", "LICENSE"}
+    exempt_dirs = {"docs/releases", "docs/plans"}
+    # Files that legitimately reference prior versions (migration tables, examples)
+    exempt_contextual = {
+        "scripts/create-dmg.sh",   # example command in header comment
+        "scripts/install.sh",      # v1->v2 migration messaging
+        "docs/install-guide.md",   # migration comparison table
+    }
+
+    scan_extensions = {".md", ".json", ".mjs", ".sh", ".ps1", ".iss", ".yml"}
+
+    for fpath in sorted(PLUGIN_ROOT.rglob("*")):
+        if not fpath.is_file():
+            continue
+        if ".git" in fpath.parts:
+            continue
+        if fpath.suffix not in scan_extensions:
+            continue
+        relpath_str = str(fpath.relative_to(PLUGIN_ROOT))
+        if fpath.name in exempt:
+            continue
+        if any(relpath_str.startswith(d) for d in exempt_dirs):
+            continue
+        if relpath_str in exempt_contextual:
+            continue
+
+        try:
+            content = fpath.read_text(encoding="utf-8")
+        except (UnicodeDecodeError, PermissionError):
+            continue
+
+        relpath = str(fpath.relative_to(PLUGIN_ROOT))
+
+        # Look for version patterns like "v2.0.0" or "v2.5.0" (with 'v' prefix)
+        for match in re.finditer(r"v(\d+\.\d+\.\d+)", content):
+            found_ver = match.group(1)
+            found_mm = ".".join(found_ver.split(".")[:2])
+            if found_mm in prior_patterns:
+                # Get line number for context
+                line_start = content[:match.start()].count("\n") + 1
+                failures.append(
+                    f"FAIL  {relpath}:{line_start}: stale version reference v{found_ver} (current is v{current})"
+                )
+                break  # one per file is enough
+
+    return failures
+
+
+def validate_full_counts() -> list[str]:
+    """
+    Validate that all catalog counts (skills, agents, commands, calculators)
+    are consistent between the source of truth (disk) and documentation files.
+    Returns list of failure messages.
+    """
+    import json, re
+    failures: list[str] = []
+
+    # Actual counts from disk
+    counts = {
+        "skills": len(list(SKILLS_DIR.glob("*/SKILL.md"))) if SKILLS_DIR.is_dir() else 0,
+        "agents": len(list((PLUGIN_ROOT / "agents").glob("*.md"))) if (PLUGIN_ROOT / "agents").is_dir() else 0,
+        "commands": len(list((PLUGIN_ROOT / "commands").glob("*.md"))) if (PLUGIN_ROOT / "commands").is_dir() else 0,
+        "calculators": len(list((PLUGIN_ROOT / "scripts" / "calculators").glob("*.py"))) if (PLUGIN_ROOT / "scripts" / "calculators").is_dir() else 0,
+    }
+
+    # Subtract _index.md from agents count (it's an index, not an agent)
+    if (PLUGIN_ROOT / "agents" / "_index.md").is_file():
+        counts["agents"] -= 1
+
+    # Also count agents in subdirectories
+    for subdir in (PLUGIN_ROOT / "agents").iterdir() if (PLUGIN_ROOT / "agents").is_dir() else []:
+        if subdir.is_dir():
+            counts["agents"] += len(list(subdir.glob("*.md")))
+
+    # Files to check and what to look for
+    check_files = {
+        "README.md": {
+            "skills": re.compile(r"\*\*(\d+)\*\*.*Skills|Skills\s*\|\s*\*\*(\d+)\*\*"),
+            "agents": re.compile(r"Expert\s+Agents\s*\|\s*\*\*(\d+)\*\*|(\d+)\s+expert\s+agents", re.IGNORECASE),
+            "commands": re.compile(r"Slash\s+Commands\s*\|\s*\*\*(\d+)\*\*"),
+            "calculators": re.compile(r"Python\s+Calculators\s*\|\s*\*\*(\d+)\*\*"),
+        },
+        "hooks/hooks.json": {
+            "skills": re.compile(r"(\d+)\s+(?:CRE\s+)?skills"),
+            "agents": re.compile(r"(\d+)\s+expert\s+agents"),
+        },
+    }
+
+    for relpath, patterns in check_files.items():
+        fpath = PLUGIN_ROOT / relpath
+        if not fpath.is_file():
+            continue
+        content = fpath.read_text(encoding="utf-8")
+
+        for asset_type, pattern in patterns.items():
+            for match in pattern.finditer(content):
+                # Get the first non-None group
+                found = next((int(g) for g in match.groups() if g is not None), None)
+                if found is not None and found != counts[asset_type]:
+                    failures.append(
+                        f"FAIL  {relpath}: says {found} {asset_type} but disk has {counts[asset_type]}"
+                    )
+                    break
+
+    return failures
+
+
+def validate_legacy_files() -> list[str]:
+    """
+    Detect files that should not be present in a release:
+    - Completed plan docs in docs/plans/
+    - Duplicate files with ' 2' suffix (macOS conflict copies)
+    - Empty directories under skills/
+    - .env files or credentials
+    Returns list of failure messages.
+    """
+    failures: list[str] = []
+
+    # Plan docs should be removed after completion
+    plans_dir = PLUGIN_ROOT / "docs" / "plans"
+    if plans_dir.is_dir():
+        plan_files = list(plans_dir.glob("*.md"))
+        if plan_files:
+            for pf in plan_files:
+                failures.append(
+                    f"FAIL  docs/plans/{pf.name}: completed plan doc should be removed before release"
+                )
+
+    # Duplicate files with " 2" suffix (macOS conflict copies)
+    for fpath in PLUGIN_ROOT.rglob("* 2*"):
+        if ".git" in fpath.parts:
+            continue
+        relpath = str(fpath.relative_to(PLUGIN_ROOT))
+        failures.append(
+            f"FAIL  {relpath}: duplicate file (macOS conflict copy) -- delete before release"
+        )
+
+    # Empty skill directories
+    if SKILLS_DIR.is_dir():
+        for entry in sorted(SKILLS_DIR.iterdir()):
+            if entry.is_dir() and not any(entry.iterdir()):
+                failures.append(
+                    f"FAIL  skills/{entry.name}/: empty directory -- remove or populate"
+                )
+
+    # Sensitive files that should never be committed
+    sensitive_patterns = [".env", ".env.local", "credentials.json", "*.pem", "*.key"]
+    for pattern in sensitive_patterns:
+        for fpath in PLUGIN_ROOT.glob(pattern):
+            if ".git" in fpath.parts:
+                continue
+            failures.append(
+                f"FAIL  {fpath.name}: sensitive file detected -- must not be in release"
+            )
+
+    return failures
+
+
 def validate_orphan_dirs(skills: list[dict]) -> list[str]:
     """
     Check for skill directories that exist on disk but are not in the registry.
@@ -303,39 +540,27 @@ def main() -> None:
     print(f"Parsed {len(skills)} skill entries from registry.yaml")
     print()
 
-    # Run checks
-    chain_failures = validate_chain_references(skills)
-    skillmd_failures = validate_skill_md(skills)
-    count_failures = validate_count_consistency(skills)
-    neutrality_failures = validate_asset_type_neutrality()
+    # Run all checks
+    checks = [
+        ("Chain References", validate_chain_references(skills)),
+        ("SKILL.md Presence", validate_skill_md(skills)),
+        ("Skill Count Consistency", validate_count_consistency(skills)),
+        ("Full Catalog Counts", validate_full_counts()),
+        ("Version Consistency", validate_version_consistency()),
+        ("Stale Version References", validate_stale_versions()),
+        ("Asset-Type Neutrality", validate_asset_type_neutrality()),
+        ("Legacy & Sensitive Files", validate_legacy_files()),
+    ]
     orphan_warnings = validate_orphan_dirs(skills)
 
-    all_failures = chain_failures + skillmd_failures + count_failures + neutrality_failures
-
-    # Print results
-    if chain_failures:
-        print("--- Chain Reference Checks ---")
-        for msg in chain_failures:
-            print(f"  {msg}")
-        print()
-
-    if skillmd_failures:
-        print("--- SKILL.md Checks ---")
-        for msg in skillmd_failures:
-            print(f"  {msg}")
-        print()
-
-    if count_failures:
-        print("--- Count Consistency Checks ---")
-        for msg in count_failures:
-            print(f"  {msg}")
-        print()
-
-    if neutrality_failures:
-        print("--- Asset-Type Neutrality Checks ---")
-        for msg in neutrality_failures:
-            print(f"  {msg}")
-        print()
+    all_failures = []
+    for name, failures in checks:
+        if failures:
+            print(f"--- {name} ---")
+            for msg in failures:
+                print(f"  {msg}")
+            print()
+            all_failures.extend(failures)
 
     if orphan_warnings:
         print("--- Orphan Directory Warnings ---")
@@ -344,10 +569,9 @@ def main() -> None:
         print()
 
     # Summary
-    total_checks = len(skills) * 2  # chain refs + SKILL.md per entry
-    pass_count = total_checks - len(all_failures)
+    check_count = sum(len(f) == 0 for _, f in checks)
     print("=" * 60)
-    print(f"RESULT: {pass_count}/{total_checks} checks passed, "
+    print(f"CHECKS: {check_count}/{len(checks)} categories clean, "
           f"{len(all_failures)} failures, {len(orphan_warnings)} warnings")
 
     if all_failures:

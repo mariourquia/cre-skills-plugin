@@ -24,7 +24,7 @@ A Claude plugin delivering **105 institutional-grade commercial real estate skil
 | Metric | Count |
 |--------|-------|
 | Skills | **105** |
-| Expert Agents | **55** |
+| Expert Agents | **54** |
 | Reference Files | **247** |
 | Python Calculators | **12** |
 | Workflow Chains | **6** |
@@ -40,7 +40,7 @@ A Claude plugin delivering **105 institutional-grade commercial real estate skil
 
 **Weekly feedback prompt**: Brief, non-intrusive reminder at session end after 7+ days of use. Shown once per week, only when CRE skills were used. No opt-in required.
 
-**105 skills, 55 agents, 12 calculators, 9 commands**: Full counts after v2.5.0 additions (construction estimator, PM orchestrator, space planning) plus v3.0.0 feedback commands.
+**105 skills, 54 agents, 12 calculators, 9 commands**: Full counts after prior additions (construction estimator, PM orchestrator, space planning) plus v3.0.0 feedback commands.
 
 **Claude Desktop support**: macOS DMG and Windows .exe installers auto-detect Claude Code and Claude Desktop. Both platforms fully supported.
 
@@ -214,7 +214,7 @@ See `orchestrators/README.md` for full documentation.
 
 ## Expert Agents
 
-55 expert agents across 13 categories, each with a distinct analytical perspective.
+54 expert agents across 13 categories, each with a distinct analytical perspective.
 
 | Category | Count | Agents |
 |----------|-------|--------|
@@ -340,7 +340,7 @@ cre-skills-plugin/
       references/          # Supporting reference documents (.md and .yaml)
   agents/
     _index.md              # Agent roster and team compositions
-    <agent>.md             # Individual agent definitions (55 core agents)
+    <agent>.md             # Individual agent definitions (54 core agents)
     research/              # Market research lifecycle agents (2)
     strategy/              # Investment strategy lifecycle agents (2)
     asset-management/      # Asset management lifecycle agents (2)

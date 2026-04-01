@@ -220,7 +220,7 @@ There is no separate VS Code extension or JetBrains plugin.
 
 ### What Changed
 
-| Area | v1.0.0 | v2.0.0 |
+| Area | v3.0.0 | v2.0.0 |
 |------|--------|--------|
 | Skills | 80 | 91 (+11 orchestrator gap skills) |
 | License | MIT | Apache 2.0 |
