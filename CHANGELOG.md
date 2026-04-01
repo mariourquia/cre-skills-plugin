@@ -1,5 +1,30 @@
 # Changelog
 
+## [3.0.0] - 2026-04-01
+
+### Added
+- Feedback system: /cre-skills:send-feedback and /cre-skills:report-problem commands for
+  structured feedback intake without leaving the session
+- Remote feedback submission via Vercel Function + Supabase backend at
+  cre-skills-feedback-api.vercel.app (default mode: ask_each_time, user confirms each send)
+- Automatic redaction of file paths, emails, digit sequences, and env vars from feedback
+  text before storage (scripts/redact-feedback.mjs, 38 behavioral tests)
+- Weekly feedback prompt: non-intrusive reminder at session end after 7+ days of use,
+  shown once per 7 days, only when CRE skills were used in the session
+- Feedback schemas: feedback-submission.schema.json, feedback-config.schema.json
+- Architecture documentation: docs/feedback-system.md
+- 38 redaction tests (tests/test-redaction.mjs) + 4 new structural integrity tests
+- firstRunAt timestamp tracking for install age calculation
+
+### Changed
+- Total commands: 7 -> 9 (added send-feedback, report-problem)
+- Config model: added feedback block (mode, include_context, backend_url, last_prompt_shown_at)
+- hooks/hooks.json: SessionStart prompt updated with new commands
+- hooks/telemetry-init.mjs: feedback config initialization + backfill for existing installs
+- hooks/session-summary.mjs: weekly feedback prompt logic
+- PRIVACY.md: documented structured feedback data flow, redaction rules, remote submission
+- README.md: feedback section, updated stats (9 commands), project structure
+
 ## [2.5.0] - 2026-03-28
 
 ### Added

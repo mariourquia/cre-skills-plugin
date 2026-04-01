@@ -6,7 +6,7 @@ on:
       version:
         description: 'Version string (e.g. 2.0.0)'
         required: false
-        default: '2.0.0'
+        default: '3.0.0'
   push:
     tags:
       - 'v*'
@@ -34,7 +34,7 @@ jobs:
             $ver = $env:REF_NAME -replace '^v', ''
           } else {
             $ver = $env:INPUT_VERSION
-            if (-not $ver) { $ver = "2.0.0" }
+            if (-not $ver) { $ver = "3.0.0" }
           }
           # Validate version format (digits and dots only)
           if ($ver -notmatch '^\d+\.\d+\.\d+$') {

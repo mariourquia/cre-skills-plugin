@@ -71,7 +71,7 @@ To prevent unexpected changes from affecting active workflows, pin the plugin to
 
 ## Configuring Which Skills Are Enabled
 
-The plugin ships with all 80 skills active by default. For teams that only use a subset (e.g., an acquisitions team that does not need construction management skills), you can scope the active skills.
+The plugin ships with all 105 skills active by default. For teams that only use a subset (e.g., an acquisitions team that does not need construction management skills), you can scope the active skills.
 
 ### Option A: Registry-Based Filtering
 

@@ -28,7 +28,7 @@ python -m pytest tests/test_plugin_integrity.py::TestPluginStructure -v
 
 | Test | Description |
 |------|-------------|
-| `test_plugin_json_valid` | `plugin.json` parses as valid JSON, version is 2.0.0, license is Apache-2.0 |
+| `test_plugin_json_valid` | `plugin.json` parses as valid JSON, version is 3.0.0, license is Apache-2.0 |
 | `test_all_skills_have_skillmd` | Every directory under `skills/` contains a `SKILL.md` |
 | `test_hooks_json_valid` | `hooks/hooks.json` parses as valid JSON and has a `hooks` key |
 | `test_hook_scripts_syntax` | All `.mjs` files in `hooks/` pass `node --check` |

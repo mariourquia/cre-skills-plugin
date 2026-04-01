@@ -83,29 +83,17 @@ All files in `~/.cre-skills/`:
 
 `feedback-log.jsonl` is distinct from `feedback.jsonl`. The former stores structured command-driven submissions; the latter stores the existing session-end survey responses.
 
-## Remote Submission (Slice 3 -- commands already wired)
+## Remote Submission
 
-The commands already contain the full remote submission logic. It activates when:
-1. `feedback.mode` is not `local_only`
-2. `feedback.backend_url` is a non-empty HTTPS URL
+Remote submission is active by default (`ask_each_time` mode). The commands POST redacted submissions to `https://cre-skills-feedback-api.vercel.app/api/feedback` after local save, with user confirmation.
 
-When both conditions are met, after local save:
+**Modes:**
+- `ask_each_time` (default) -- prompt user before each remote send
+- `anonymous_remote` -- send without contact_email/organization
+- `remote_with_contact` -- send all fields
+- `local_only` -- disable remote submission entirely
 
-```
-6. Check mode:
-   - ask_each_time: prompt user for confirmation
-   - anonymous_remote: send without contact_email/organization
-   - remote_with_contact: send all fields
-7. POST redacted JSON to backend_url with Content-Type and X-Plugin-Version headers
-8. On success: confirm "sent to maintainer"
-9. On failure: save to ~/.cre-skills/outbox.jsonl for retry
-```
+**Backend:** Vercel Function + Supabase. Secrets are server-side only. The plugin only knows the public URL. See the [cre-skills-feedback-api](https://github.com/mariourquia/cre-skills-feedback-api) repo.
 
-### What's still needed for Slice 3
-
-- **Backend**: Vercel Function + Supabase (thin proxy, ~40 lines, secrets server-side only)
-- **`hooks/feedback-outbox.mjs`**: SessionStart hook to flush failed sends from outbox
-- **PRIVACY.md update**: Document the endpoint URL, retention policy, deletion process
-- **Set `backend_url`** in user configs (via `scripts/update.sh` or docs)
-
-See `docs/plans/feedback-system-plan.md` for the full architecture and procurement checklist.
+**Remaining work:**
+- `hooks/feedback-outbox.mjs` -- SessionStart hook to retry failed remote sends

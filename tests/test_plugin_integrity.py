@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Plugin integrity tests for CRE Skills Plugin v2.5.0"""
+"""Plugin integrity tests for CRE Skills Plugin v3.0.0"""
 import json, yaml, os, glob, subprocess, unittest
 
 PLUGIN_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -8,7 +8,7 @@ class TestPluginStructure(unittest.TestCase):
     def test_plugin_json_valid(self):
         with open(os.path.join(PLUGIN_ROOT, '.claude-plugin/plugin.json')) as f:
             data = json.load(f)
-        self.assertEqual(data['version'], '2.5.0')
+        self.assertEqual(data['version'], '3.0.0')
         self.assertEqual(data['license'], 'Apache-2.0')
 
     def test_all_skills_have_skillmd(self):
@@ -79,9 +79,9 @@ class TestPluginStructure(unittest.TestCase):
 
     def test_feedback_docs_exist(self):
         """Verify feedback system documentation exists"""
-        for path in ['docs/feedback-system.md', 'docs/plans/feedback-system-plan.md']:
-            full = os.path.join(PLUGIN_ROOT, path)
-            self.assertTrue(os.path.exists(full), f'Missing {path}')
+        path = 'docs/feedback-system.md'
+        full = os.path.join(PLUGIN_ROOT, path)
+        self.assertTrue(os.path.exists(full), f'Missing {path}')
 
 if __name__ == '__main__':
     unittest.main()

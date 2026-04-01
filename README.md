@@ -34,17 +34,17 @@ A Claude plugin delivering **105 institutional-grade commercial real estate skil
 
 ---
 
-## What's New in v2.0.0
+## What's New in v3.0.0
 
-**19 new production-quality skills**: title-commitment-reviewer, tenant-credit-analyzer, term-sheet-builder, loan-document-reviewer, transfer-document-preparer, funds-flow-calculator, lease-option-structurer, lease-trade-out-analyzer, gp-performance-evaluator, fund-terms-comparator, lp-data-request-generator, sec-reg-d-compliance, monte-carlo-return-simulator, small-operator-pm, distribution-notice-generator, 1031-pipeline-manager, deal-attribution-tracker, emerging-manager-evaluator, fund-raise-negotiation-engine.
+**Feedback system**: `/cre-skills:send-feedback` and `/cre-skills:report-problem` for structured feedback without leaving your session. Submissions are saved locally with automatic redaction (file paths, emails, digit sequences, env vars stripped). Optional remote submission to the maintainer (ask_each_time mode -- you confirm each send).
 
-**12 Python calculators** (zero dependencies): debt sizing, covenant testing, NPV trade-out analysis, option valuation, proration calculation, tenant credit scoring, waterfall distribution, transfer tax (50 states + DC), quick screen IRR/CoC, Monte Carlo return simulation, fund fee modeling.
+**Weekly feedback prompt**: Brief, non-intrusive reminder at session end after 7+ days of use. Shown once per week, only when CRE skills were used. No opt-in required.
 
-**Brand guidelines system**: Set up once with `/cre-skills:brand-config`. All investor-facing deliverables (IC memos, pitch decks, quarterly updates, offering packages) auto-load your colors, fonts, disclaimers, and contact info.
+**105 skills, 55 agents, 12 calculators, 9 commands**: Full counts after v2.5.0 additions (construction estimator, PM orchestrator, space planning) plus v3.0.0 feedback commands.
 
-**Opt-in telemetry**: Local-only usage tracking in `~/.cre-skills/`. Never leaves your machine. See [PRIVACY.md](PRIVACY.md).
+**Claude Desktop support**: macOS DMG and Windows .exe installers auto-detect Claude Code and Claude Desktop. Both platforms fully supported.
 
-**License: Apache 2.0** (migrated from MIT). Provides explicit patent grant and attribution protection. See [NOTICE](NOTICE).
+See [CHANGELOG.md](CHANGELOG.md) for full history.
 
 ---
 
@@ -64,7 +64,7 @@ curl -fsSL https://raw.githubusercontent.com/mariourquia/cre-skills-plugin/main/
 
 ### macOS DMG (Double-Click Installer)
 
-Download `cre-skills-v2.0.0.dmg` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
+Download `cre-skills-v3.0.0.dmg` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
 
 1. Open the DMG
 2. Double-click "CRE Skills Installer"
@@ -75,7 +75,7 @@ The installer automatically detects whether you have Claude Code, Claude Desktop
 
 ### Windows .exe Installer
 
-Download `cre-skills-v2.0.0-setup.exe` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
+Download `cre-skills-v3.0.0-setup.exe` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
 
 1. Run the installer (SmartScreen warning: click "More info" > "Run anyway")
 2. Follow the wizard
@@ -340,7 +340,7 @@ cre-skills-plugin/
       references/          # Supporting reference documents (.md and .yaml)
   agents/
     _index.md              # Agent roster and team compositions
-    <agent>.md             # Individual agent definitions (40 core agents)
+    <agent>.md             # Individual agent definitions (55 core agents)
     research/              # Market research lifecycle agents (2)
     strategy/              # Investment strategy lifecycle agents (2)
     asset-management/      # Asset management lifecycle agents (2)
