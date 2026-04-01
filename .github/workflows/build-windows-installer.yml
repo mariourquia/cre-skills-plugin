@@ -112,7 +112,6 @@ jobs:
           retention-days: 30
 
       - name: Attach to GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -121,6 +120,11 @@ jobs:
           $ver = $env:APP_VERSION
           $exe = "dist\cre-skills-v$ver-setup.exe"
           $sha = "dist\cre-skills-v$ver-setup.exe.sha256"
-          Write-Host "Attaching to release v$ver..."
-          gh release upload "v$ver" $exe $sha --clobber
-          Write-Host "Attached to release v$ver"
+          $releaseCheck = gh release view "v$ver" 2>&1
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "Attaching to release v$ver..."
+            gh release upload "v$ver" $exe $sha --clobber
+            Write-Host "Attached to release v$ver"
+          } else {
+            Write-Host "No release found for v$ver -- skipping attachment (artifacts available as build artifacts)"
+          }
