@@ -1,11 +1,11 @@
 # Privacy Policy
 
-**CRE Skills Plugin v2.5.0**
+**CRE Skills Plugin v3.0.0**
 **Last updated:** 2026-04-01
 
 ## Data Collection Scope
 
-The CRE Skills Plugin does NOT collect, transmit, or store any deal data, financial figures, property details, or personally identifiable information. All skill execution happens locally in the user's Claude Code session. No data leaves the user's machine unless they explicitly opt into remote telemetry (future, not available in v2).
+The CRE Skills Plugin does NOT collect, transmit, or store any deal data, financial figures, property details, or personally identifiable information. All skill execution happens locally in the user's Claude Code session. No data leaves the user's machine unless they explicitly choose to send feedback remotely (mode: ask_each_time, anonymous_remote, or remote_with_contact in config).
 
 ## Telemetry (Opt-In Only)
 

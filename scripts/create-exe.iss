@@ -19,7 +19,7 @@
 #endif
 
 #ifndef AppVersion
-  #define AppVersion "2.0.0"
+  #define AppVersion "3.0.0"
 #endif
 
 [Setup]
@@ -47,7 +47,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Messages]
 WelcomeLabel1=CRE Skills Plugin for Claude
-WelcomeLabel2=This will install the CRE Skills Plugin v{#AppVersion} on your computer.%n%n99 institutional-grade CRE skills covering deal sourcing, underwriting, capital markets, leasing, asset management, investor relations, development, and more.%n%nWorks with Claude Code CLI and Claude Desktop.%n%nApache License 2.0
+WelcomeLabel2=This will install the CRE Skills Plugin v{#AppVersion} on your computer.%n%n105 institutional-grade CRE skills covering deal sourcing, underwriting, capital markets, leasing, asset management, investor relations, development, and more.%n%nWorks with Claude Code CLI and Claude Desktop.%n%nApache License 2.0
 
 ; ──────────────────────────────────────────────────────────────────────
 ; Files -- explicit whitelist (no .git, dist, .local, tests, etc.)

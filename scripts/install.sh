@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install.sh -- Single-command installer for the CRE Skills Plugin v2.5.0
+# install.sh -- Single-command installer for the CRE Skills Plugin v3.0.0
 #
 # Usage (remote):
 #   curl -fsSL https://raw.githubusercontent.com/mariourquia/cre-skills-plugin/main/scripts/install.sh | bash
@@ -40,7 +40,7 @@ print_banner() {
  | |    |  _  /|  __|   ___) | . \| | | \__ \
  | |____|_| \_\|_|____ |____/|_|\_\_|_|_|___/
   \_____|      |______|
-   Plugin v2.5.0 -- 105 skills, 55 agents, 6 workflows
+   Plugin v3.0.0 -- 105 skills, 55 agents, 6 workflows
 
 BANNER
   printf "${RESET}"
@@ -318,7 +318,7 @@ print_success() {
   printf "${GREEN}${BOLD}"
   cat << 'SUCCESS'
   ============================================
-       CRE Skills Plugin v2.5.0 -- Installed
+       CRE Skills Plugin v3.0.0 -- Installed
   ============================================
 SUCCESS
   printf "${RESET}"

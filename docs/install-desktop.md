@@ -106,7 +106,7 @@ Browse the 6 end-to-end workflow chains that connect multiple skills into a pipe
 
 ### `/cre-skills:cre-agents`
 
-List the 40 expert subagents organized by category:
+List the 55 expert subagents organized by category:
 
 - **Investment Function** (8): Acquisitions analyst, asset manager, capital markets, etc.
 - **Adversarial / Challenge** (6): Conservative lender, IC challenger, skeptical LP, etc.
