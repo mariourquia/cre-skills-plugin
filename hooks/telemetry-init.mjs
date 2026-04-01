@@ -18,9 +18,14 @@ function defaultConfig() {
   return {
     telemetry: false,
     survey: false,
+    feedback: {
+      mode: 'local_only',
+      include_context: true,
+      backend_url: '',
+    },
     anonymousId: randomUUID(),
     firstRunComplete: false,
-    version: '2.0.0',
+    version: '2.5.0',
   };
 }
 
@@ -50,11 +55,18 @@ function main() {
     writeConfig(config);
   }
 
+  // Backfill feedback config for existing installs (added in v2.5.0)
+  if (!config.feedback) {
+    config.feedback = { mode: 'local_only', include_context: true, backend_url: '' };
+    writeConfig(config);
+  }
+
   if (!config.firstRunComplete) {
     process.stdout.write(
       '[CRE Skills] First run detected. Telemetry and feedback are disabled by default.\n' +
       'To enable anonymous usage tracking: set "telemetry": true in ~/.cre-skills/config.json\n' +
       'To enable post-session feedback prompts: set "survey": true in ~/.cre-skills/config.json\n' +
+      'To share feedback anytime: /cre-skills:send-feedback or /cre-skills:report-problem\n' +
       'See PRIVACY.md for what is and isn\'t collected.\n'
     );
     config.firstRunComplete = true;

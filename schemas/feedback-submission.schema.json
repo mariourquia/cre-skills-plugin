@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mariourquia/cre-skills-plugin/schemas/feedback-submission.schema.json",
+  "title": "CRE Skills Feedback Submission",
+  "description": "Schema for feedback records stored in ~/.cre-skills/feedback-log.jsonl",
+  "type": "object",
+  "required": ["submission_id", "submission_type", "timestamp", "plugin_version", "install_id_hash", "message"],
+  "properties": {
+    "submission_id": {
+      "type": "string",
+      "pattern": "^fb_[a-zA-Z0-9]{12,}$",
+      "description": "Unique ID: fb_ prefix + random alphanumeric"
+    },
+    "submission_type": {
+      "type": "string",
+      "enum": ["general", "bug", "feature", "contact"],
+      "description": "Category of submission"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp"
+    },
+    "plugin_version": {
+      "type": "string",
+      "description": "Plugin version from plugin.json at time of submission"
+    },
+    "install_id_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of the anonymousId from config.json"
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 5000,
+      "description": "User-authored feedback text"
+    },
+    "rating": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Optional 1-5 rating"
+    },
+    "severity": {
+      "type": ["string", "null"],
+      "enum": ["low", "medium", "high", "critical", null],
+      "description": "Bug severity (report-problem only)"
+    },
+    "category": {
+      "type": ["string", "null"],
+      "description": "User-selected feedback category (e.g., skill quality, missing feature, documentation)"
+    },
+    "skill_slug": {
+      "type": ["string", "null"],
+      "description": "Relevant skill slug if applicable"
+    },
+    "workflow_slug": {
+      "type": ["string", "null"],
+      "description": "Relevant workflow chain if applicable"
+    },
+    "orchestrator_slug": {
+      "type": ["string", "null"],
+      "description": "Relevant orchestrator pipeline if applicable"
+    },
+    "cre_domain": {
+      "type": ["string", "null"],
+      "description": "CRE domain area (e.g., leasing, capital-markets, underwriting)"
+    },
+    "contact_email": {
+      "type": ["string", "null"],
+      "format": "email",
+      "description": "Optional email for follow-up (only if user explicitly provides)"
+    },
+    "organization": {
+      "type": ["string", "null"],
+      "description": "Optional organization name"
+    },
+    "context": {
+      "type": ["object", "null"],
+      "description": "Sanitized session context (redacted before storage)",
+      "properties": {
+        "skills_used_this_session": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Skill slugs used in current session"
+        },
+        "error_category": {
+          "type": ["string", "null"],
+          "description": "High-level error category (no stack traces)"
+        },
+        "what_user_tried": {
+          "type": ["string", "null"],
+          "description": "User description of what they were attempting (bug reports)"
+        },
+        "what_happened": {
+          "type": ["string", "null"],
+          "description": "User description of unexpected behavior (bug reports)"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

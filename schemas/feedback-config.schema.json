@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mariourquia/cre-skills-plugin/schemas/feedback-config.schema.json",
+  "title": "CRE Skills Feedback Configuration",
+  "description": "Schema for the feedback block in ~/.cre-skills/config.json",
+  "type": "object",
+  "required": ["mode", "include_context"],
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": ["local_only", "ask_each_time", "anonymous_remote", "remote_with_contact"],
+      "default": "local_only",
+      "description": "How feedback is stored/sent. Slice 1 only supports local_only."
+    },
+    "include_context": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether to auto-attach sanitized session context (skill slugs, error category) to feedback submissions."
+    },
+    "backend_url": {
+      "type": "string",
+      "default": "",
+      "description": "HTTPS endpoint for remote feedback submission. Empty string means remote submission is disabled. Set by maintainer when Slice 3 backend is deployed."
+    }
+  },
+  "additionalProperties": false
+}
