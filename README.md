@@ -29,7 +29,7 @@ A Claude plugin delivering **105 institutional-grade commercial real estate skil
 | Python Calculators | **12** |
 | Workflow Chains | **6** |
 | Orchestrator Pipelines | **10** |
-| Slash Commands | **7** |
+| Slash Commands | **9** |
 | Skill Categories | **16** |
 
 ---
@@ -302,12 +302,27 @@ Professional defaults: navy `#1B365D`, white `#FFFFFF`, gold accent `#C9A84C`, H
 
 ---
 
+## Feedback
+
+Share feedback or report problems without leaving your session:
+
+- `/cre-skills:send-feedback` -- share feedback about skill quality, missing capabilities, or general suggestions
+- `/cre-skills:report-problem` -- report a bug with structured severity, reproduction context, and skill identification
+
+Feedback is saved locally to `~/.cre-skills/feedback-log.jsonl`. Free-text fields are automatically sanitized (file paths, emails, digit sequences stripped). No deal data, prompts, or financial figures are ever stored. Remote submission is not yet available.
+
+View your feedback history with `/cre-skills:feedback-summary`.
+
+---
+
 ## Privacy & Telemetry
 
 Usage telemetry is **opt-in only** and **local-only**. Data is stored in `~/.cre-skills/` and never leaves your machine.
 
 - `/cre-skills:usage-stats` -- view your aggregated skill usage patterns
 - `/cre-skills:feedback-summary` -- view your session ratings and comments
+- `/cre-skills:send-feedback` -- share structured feedback (saved locally)
+- `/cre-skills:report-problem` -- report bugs (saved locally)
 
 See [PRIVACY.md](PRIVACY.md) for what is and is not collected.
 
@@ -350,6 +365,8 @@ cre-skills-plugin/
     orchestrate.md         # Multi-agent pipeline orchestrator
     usage-stats.md         # Telemetry summary
     feedback-summary.md    # Session feedback log
+    send-feedback.md       # Share feedback
+    report-problem.md      # Report a bug
   routing/
     CRE-ROUTING.md         # Master routing index
     workflows/             # Detailed workflow chain documents
@@ -359,7 +376,8 @@ cre-skills-plugin/
     telemetry-capture.mjs  # Tracks skill invocations (opt-in)
     session-summary.mjs    # Session end record and feedback
   scripts/
-    calculators/           # 10 Python calculator scripts
+    calculators/           # 12 Python calculator scripts
+    redact-feedback.mjs    # Feedback sanitization utility
     install.sh             # Fresh install with v1->v2 migration
     update.sh              # Pull latest, detect breaking changes
     uninstall.sh           # Clean removal with data preservation
