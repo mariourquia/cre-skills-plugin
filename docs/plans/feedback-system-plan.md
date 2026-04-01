@@ -1,6 +1,6 @@
 # Feedback System Implementation Plan
 
-**Status:** In Progress (Slice 1)
+**Status:** Slice 1 complete, remote sending active (ask_each_time mode)
 **Branch:** `feature/feedback-system`
 **Created:** 2026-04-01
 

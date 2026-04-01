@@ -19,9 +19,9 @@ function defaultConfig() {
     telemetry: false,
     survey: false,
     feedback: {
-      mode: 'local_only',
+      mode: 'ask_each_time',
       include_context: true,
-      backend_url: '',
+      backend_url: 'https://cre-skills-feedback-api.vercel.app/api/feedback',
     },
     anonymousId: randomUUID(),
     firstRunComplete: false,
@@ -57,7 +57,7 @@ function main() {
 
   // Backfill feedback config for existing installs (added in v2.5.0)
   if (!config.feedback) {
-    config.feedback = { mode: 'local_only', include_context: true, backend_url: '' };
+    config.feedback = { mode: 'ask_each_time', include_context: true, backend_url: 'https://cre-skills-feedback-api.vercel.app/api/feedback' };
     writeConfig(config);
   }
 
