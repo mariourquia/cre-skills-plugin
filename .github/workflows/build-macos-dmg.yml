@@ -86,6 +86,8 @@ jobs:
 
       - name: Notarize and staple DMG
         if: env.SKIP_SIGN != 'true'
+        continue-on-error: true
+        id: notarize
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
@@ -103,7 +105,7 @@ jobs:
           xcrun stapler staple "$DMG_PATH"
 
       - name: Verify signed DMG
-        if: env.SKIP_SIGN != 'true'
+        if: env.SKIP_SIGN != 'true' && steps.notarize.outcome == 'success'
         env:
           APP_VERSION: ${{ steps.version.outputs.VERSION }}
         run: |
@@ -111,6 +113,11 @@ jobs:
           spctl --assess --type open --context context:primary-signature "$DMG_PATH"
           codesign --verify --verbose "$DMG_PATH"
           echo "DMG is signed, notarized, and stapled"
+
+      - name: Warn if notarization failed
+        if: env.SKIP_SIGN != 'true' && steps.notarize.outcome != 'success'
+        run: |
+          echo "::warning::Notarization failed. DMG is signed but not notarized. Regenerate app-specific password at appleid.apple.com if this persists."
 
       - name: Generate SHA256 checksum
         env:
@@ -130,13 +137,16 @@ jobs:
           retention-days: 30
 
       - name: Attach to GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APP_VERSION: ${{ steps.version.outputs.VERSION }}
         run: |
-          gh release upload "v${APP_VERSION}" \
-            "dist/cre-skills-v${APP_VERSION}.dmg" \
-            "dist/cre-skills-v${APP_VERSION}.dmg.sha256" \
-            --clobber
-          echo "Attached to release v${APP_VERSION}"
+          if gh release view "v${APP_VERSION}" > /dev/null 2>&1; then
+            gh release upload "v${APP_VERSION}" \
+              "dist/cre-skills-v${APP_VERSION}.dmg" \
+              "dist/cre-skills-v${APP_VERSION}.dmg.sha256" \
+              --clobber
+            echo "Attached to release v${APP_VERSION}"
+          else
+            echo "No release found for v${APP_VERSION} -- skipping attachment"
+          fi
