@@ -9,8 +9,8 @@
     "mode": {
       "type": "string",
       "enum": ["local_only", "ask_each_time", "anonymous_remote", "remote_with_contact"],
-      "default": "local_only",
-      "description": "How feedback is stored/sent. Slice 1 only supports local_only."
+      "default": "ask_each_time",
+      "description": "How feedback is stored/sent. ask_each_time prompts the user before sending remotely."
     },
     "include_context": {
       "type": "boolean",
@@ -19,8 +19,8 @@
     },
     "backend_url": {
       "type": "string",
-      "default": "",
-      "description": "HTTPS endpoint for remote feedback submission. Empty string means remote submission is disabled. Set by maintainer when Slice 3 backend is deployed."
+      "default": "https://cre-skills-feedback-api.vercel.app/api/feedback",
+      "description": "HTTPS endpoint for remote feedback submission. Empty string disables remote submission."
     }
   },
   "additionalProperties": false
