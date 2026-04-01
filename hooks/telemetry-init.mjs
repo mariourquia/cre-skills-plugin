@@ -55,7 +55,7 @@ function main() {
     writeConfig(config);
   }
 
-  // Backfill feedback config for existing installs (added in v2.5.0)
+  // Backfill feedback config for existing installs (added in v3.0.0)
   if (!config.feedback) {
     config.feedback = { mode: 'ask_each_time', include_context: true, backend_url: 'https://cre-skills-feedback-api.vercel.app/api/feedback' };
     writeConfig(config);
