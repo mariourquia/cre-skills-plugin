@@ -1,15 +1,19 @@
 # Privacy Policy
 
-**CRE Skills Plugin v3.0.0**
-**Last updated:** 2026-04-01
+**CRE Skills Plugin v4.0.0**
+**Last updated:** 2026-04-02
 
 ## Data Collection Scope
 
 The CRE Skills Plugin does NOT collect, transmit, or store any deal data, financial figures, property details, or personally identifiable information. All skill execution happens locally in the user's Claude Code session. No data leaves the user's machine unless they explicitly choose to send feedback remotely (mode: ask_each_time, anonymous_remote, or remote_with_contact in config).
 
-## Telemetry (Opt-In Only)
+## Telemetry (Enabled by Default, Opt-Out)
 
-Telemetry is **disabled by default**. The user must explicitly enable it by setting `telemetry: true` in `~/.cre-skills/config.json`.
+Telemetry is **enabled by default** and records only anonymous, non-invasive usage data. All telemetry data stays on your machine. Nothing is transmitted externally.
+
+To opt out: set `"telemetry": false` in `~/.cre-skills/config.json`.
+
+On first run, the plugin displays a clear notice explaining exactly what is and is not tracked.
 
 When enabled, telemetry records ONLY:
 

@@ -2,7 +2,7 @@
 /**
  * CRE Skills Plugin -- SessionStart hook
  * Initializes ~/.cre-skills/config.json on first run.
- * Shows a one-time consent notice when firstRunComplete is false.
+ * Shows a one-time privacy notice when firstRunComplete is false.
  * No external dependencies. Node stdlib only.
  */
 
@@ -16,7 +16,7 @@ const CONFIG_PATH = join(CONFIG_DIR, 'config.json');
 
 function defaultConfig() {
   return {
-    telemetry: false,
+    telemetry: true,
     survey: false,
     feedback: {
       mode: 'local_only',
@@ -25,7 +25,7 @@ function defaultConfig() {
     },
     anonymousId: randomUUID(),
     firstRunComplete: false,
-    version: '3.0.0',
+    version: '4.0.0',
   };
 }
 
@@ -55,6 +55,13 @@ function main() {
     writeConfig(config);
   }
 
+  // Backfill: enable telemetry for existing installs upgrading to v4
+  if (config.version && config.version < '4.0.0' && config.telemetry === false) {
+    config.telemetry = true;
+    config.version = '4.0.0';
+    writeConfig(config);
+  }
+
   // Backfill feedback config for existing installs (added in v3.0.0)
   if (!config.feedback) {
     config.feedback = { mode: 'local_only', include_context: true, backend_url: '' };
@@ -69,11 +76,21 @@ function main() {
 
   if (!config.firstRunComplete) {
     process.stdout.write(
-      '[CRE Skills] First run detected. Telemetry and feedback are disabled by default.\n' +
-      'To enable anonymous usage tracking: set "telemetry": true in ~/.cre-skills/config.json\n' +
-      'To enable post-session feedback prompts: set "survey": true in ~/.cre-skills/config.json\n' +
-      'To share feedback anytime: /cre-skills:send-feedback or /cre-skills:report-problem\n' +
-      'See PRIVACY.md for what is and isn\'t collected.\n'
+      '[CRE Skills] Welcome! Anonymous usage telemetry is enabled by default.\n' +
+      '\n' +
+      'What is tracked (anonymous, local-only):\n' +
+      '  - Which skill was used (slug only, e.g. "deal-quick-screen")\n' +
+      '  - Date of use (no time, no timezone)\n' +
+      '  - A random anonymous ID (no name, email, or identity)\n' +
+      '\n' +
+      'What is NEVER tracked:\n' +
+      '  - Deal data, financial figures, rent rolls, property details\n' +
+      '  - File paths, prompts, AI responses, or any text you type\n' +
+      '  - Your name, email, IP address, or organization\n' +
+      '\n' +
+      'All data stays on your machine at ~/.cre-skills/telemetry.jsonl\n' +
+      'To opt out: set "telemetry": false in ~/.cre-skills/config.json\n' +
+      'Full details: PRIVACY.md\n'
     );
     config.firstRunComplete = true;
     config.firstRunAt = new Date().toISOString().slice(0, 10);
