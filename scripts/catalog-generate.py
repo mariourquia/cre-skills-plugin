@@ -30,11 +30,12 @@ except ImportError:
     sys.exit(1)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+SRC_DIR = REPO_ROOT / "src"
 
 
 def load_catalog() -> dict:
     """Load catalog from YAML (primary) or JSON (fallback)."""
-    yaml_path = REPO_ROOT / "catalog" / "catalog.yaml"
+    yaml_path = SRC_DIR / "catalog" / "catalog.yaml"
     json_path = REPO_ROOT / "dist" / "catalog.json"
     if yaml_path.exists():
         return yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
@@ -61,7 +62,7 @@ def catalog_counts(catalog: dict) -> dict:
 
     # Count reference files
     ref_count = 0
-    skills_dir = REPO_ROOT / "skills"
+    skills_dir = SRC_DIR / "skills"
     for skill_dir in skills_dir.iterdir():
         if not skill_dir.is_dir():
             continue
@@ -190,7 +191,7 @@ def update_readme(catalog: dict, counts: dict, dry_run: bool = False) -> bool:
 
 def update_hooks(counts: dict, dry_run: bool = False) -> bool:
     """Update hooks.json SessionStart prompt with accurate counts."""
-    hooks_path = REPO_ROOT / "hooks" / "hooks.json"
+    hooks_path = SRC_DIR / "hooks" / "hooks.json"
     data = json.loads(hooks_path.read_text(encoding="utf-8"))
     original = json.dumps(data, indent=2)
 
@@ -231,7 +232,7 @@ def update_hooks(counts: dict, dry_run: bool = False) -> bool:
 
 def update_plugin_json(counts: dict, dry_run: bool = False) -> bool:
     """Update plugin.json description with accurate counts."""
-    pj_path = REPO_ROOT / ".claude-plugin" / "plugin.json"
+    pj_path = SRC_DIR / "plugin" / "plugin.json"
     data = json.loads(pj_path.read_text(encoding="utf-8"))
     original = json.dumps(data, indent=2)
 
@@ -262,7 +263,7 @@ def update_plugin_json(counts: dict, dry_run: bool = False) -> bool:
 
 def update_routing_index(catalog: dict, counts: dict, dry_run: bool = False) -> bool:
     """Regenerate the Quick Routing Table in CRE-ROUTING.md from catalog triggers."""
-    routing_path = REPO_ROOT / "routing" / "CRE-ROUTING.md"
+    routing_path = SRC_DIR / "routing" / "CRE-ROUTING.md"
     text = routing_path.read_text(encoding="utf-8")
     original = text
 

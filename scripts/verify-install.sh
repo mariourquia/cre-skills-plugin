@@ -46,8 +46,9 @@ done
 # ---------------------------------------------------------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+SRC_DIR="$REPO_ROOT/src"
 
-if [ ! -f "$REPO_ROOT/.claude-plugin/plugin.json" ]; then
+if [ ! -f "$SRC_DIR/plugin/plugin.json" ]; then
   printf "${RED}ERROR: Cannot locate plugin root at %s${RESET}\n" "$REPO_ROOT"
   exit 1
 fi
@@ -95,7 +96,7 @@ section "2. Skill SKILL.md files"
 SKILL_DIRS=()
 while IFS= read -r -d '' d; do
   SKILL_DIRS+=("$d")
-done < <(find "$REPO_ROOT/skills" -maxdepth 1 -mindepth 1 -type d -print0 | sort -z)
+done < <(find "$SRC_DIR/skills" -maxdepth 1 -mindepth 1 -type d -print0 | sort -z)
 
 SKILL_TOTAL=${#SKILL_DIRS[@]}
 SKILL_MISSING=0
@@ -128,7 +129,7 @@ while IFS= read -r -d '' f; do
     fail_check "Empty reference file: ${f#"$REPO_ROOT/"}"
     REF_EMPTY=$((REF_EMPTY + 1))
   fi
-done < <(find "$REPO_ROOT/skills" -path "*/references/*" -type f -print0)
+done < <(find "$SRC_DIR/skills" -path "*/references/*" -type f -print0)
 
 if [ "$REF_EMPTY" -eq 0 ]; then
   pass "$REF_TOTAL reference files all non-empty"
@@ -141,12 +142,12 @@ fi
 # ---------------------------------------------------------------------------
 section "4. Python calculators"
 
-CALC_DIR="$REPO_ROOT/scripts/calculators"
+CALC_DIR="$SRC_DIR/calculators"
 CALC_TOTAL=0
 CALC_ERRORS=0
 
 if [ ! -d "$CALC_DIR" ]; then
-  warn_check "Calculator directory not found: scripts/calculators/"
+  warn_check "Calculator directory not found: src/calculators/"
 elif ! command -v python3 &>/dev/null; then
   warn_check "python3 not found. Cannot verify calculator syntax."
 else
@@ -174,7 +175,7 @@ except SyntaxError as e:
   if [ "$CALC_ERRORS" -eq 0 ] && [ "$CALC_TOTAL" -gt 0 ]; then
     pass "$CALC_TOTAL Python calculators are syntactically valid"
   elif [ "$CALC_TOTAL" -eq 0 ]; then
-    warn_check "No Python calculator files found in scripts/calculators/"
+    warn_check "No Python calculator files found in src/calculators/"
   fi
 
   # Check executability
@@ -185,7 +186,7 @@ except SyntaxError as e:
     fi
   done < <(find "$CALC_DIR" -name '*.py' -print0)
   if [ "$NOT_EXEC" -gt 0 ]; then
-    warn_check "$NOT_EXEC calculators are not executable. Run: chmod +x scripts/calculators/*.py"
+    warn_check "$NOT_EXEC calculators are not executable. Run: chmod +x src/calculators/*.py"
   fi
 fi
 
@@ -194,7 +195,7 @@ fi
 # ---------------------------------------------------------------------------
 section "5. hooks.json"
 
-HOOKS_FILE="$REPO_ROOT/hooks/hooks.json"
+HOOKS_FILE="$SRC_DIR/hooks/hooks.json"
 
 if [ ! -f "$HOOKS_FILE" ]; then
   fail_check "hooks/hooks.json not found"
@@ -211,7 +212,7 @@ fi
 # ---------------------------------------------------------------------------
 section "6. Node.js hook scripts"
 
-HOOKS_DIR="$REPO_ROOT/hooks"
+HOOKS_DIR="$SRC_DIR/hooks"
 HOOK_ERRORS=0
 
 if ! command -v node &>/dev/null; then
@@ -308,7 +309,7 @@ if [ "$JSON_MODE" = true ]; then
   python3 -c "
 import json
 print(json.dumps({
-    'version': open('$REPO_ROOT/.claude-plugin/plugin.json').read(),
+    'version': open('$SRC_DIR/plugin/plugin.json').read(),
     'failures': $FAILURES,
     'warnings': $WARNINGS,
     'skill_dirs': $SKILL_TOTAL,
