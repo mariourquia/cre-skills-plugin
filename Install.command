@@ -17,16 +17,11 @@ cleanup_on_error() {
         printf '\033[1;31m  INSTALLATION ERROR (exit code %s)\033[0m\n' "$exit_code"
         printf '\033[1;31m  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m\n'
         echo ""
-        local diag_script="${SCRIPT_DIR:-$(cd "$(dirname "$0")" && pwd)}/scripts/diagnostic_report.py"
-        if python3 "$diag_script" --error "Install.command failed with exit $exit_code" --step "install" 2>/dev/null; then
-            :
-        elif python "$diag_script" --error "Install.command failed with exit $exit_code" --step "install" 2>/dev/null; then
-            :
-        else
-            echo "  Submit a bug report:"
-            echo "  https://github.com/mariourquia/cre-skills-plugin/issues/new?labels=bug,installer"
-            echo ""
-        fi
+        send_telemetry "unhandled_exit" "Install.command exited with code $exit_code"
+        dim "  An anonymous error report was sent to help improve the installer."
+        echo ""
+        echo "  Submit a bug report:"
+        echo "  https://github.com/mariourquia/cre-skills-plugin/issues/new?labels=bug,installer"
         echo ""
         printf '\033[1mPress Enter to close this window.\033[0m\n'
         read -r
@@ -59,6 +54,46 @@ press_to_exit() {
     bold "Press Enter to close this window."
     read -r
     exit "${1:-0}"
+}
+
+# ── Telemetry (curl-based, no Python/Node dependency) ──────────────
+
+TELEMETRY_URL="https://cre-skills-feedback-api.vercel.app/api/installer-telemetry"
+PLUGIN_NAME_CONST="cre-skills-plugin"
+INSTALLER_VERSION_CONST="4.1.0"
+
+send_telemetry() {
+    local step_failed="$1"
+    local error_msg="$2"
+    local prereqs_json="${3:-{}}"
+
+    {
+        local id_source
+        id_source="$(hostname)-$(whoami)"
+        local install_hash
+        install_hash=$(printf '%s' "$id_source" | shasum -a 256 | cut -d' ' -f1)
+        local event_seed
+        event_seed="$step_failed-$error_msg-$(date +%s)"
+        local event_id
+        event_id="it_$(printf '%s' "$event_seed" | shasum -a 256 | cut -d' ' -f1 | head -c 16)"
+
+        # Truncate error message
+        if [ ${#error_msg} -gt 2000 ]; then
+            error_msg="${error_msg:0:2000}"
+        fi
+
+        curl -s -X POST "$TELEMETRY_URL" \
+            -H "Content-Type: application/json" \
+            -d "$(printf '{"id":"%s","plugin_name":"%s","plugin_version":"%s","installer_type":"command","os":"macos","os_version":"%s","arch":"%s","step_failed":"%s","error_message":"%s","prereqs":%s,"install_id_hash":"%s"}' \
+                "$event_id" "$PLUGIN_NAME_CONST" "$INSTALLER_VERSION_CONST" \
+                "$(sw_vers -productVersion 2>/dev/null || uname -r)" \
+                "$(uname -m)" \
+                "$step_failed" \
+                "$error_msg" \
+                "$prereqs_json" \
+                "$install_hash")" \
+            --connect-timeout 5 --max-time 10 2>/dev/null
+    } &
 }
 
 # ── Navigate to repo root ────────────────────────────────────────────
@@ -100,7 +135,7 @@ cat << 'HEADER'
 HEADER
 printf "${RESET}"
 
-printf "${BLUE}  Plugin Installer v4.0.0${RESET}\n"
+printf "${BLUE}  Plugin Installer v4.1.0${RESET}\n"
 printf "${DIM}  112 skills | 54 agents | 8 MCP tools | 6 workflow chains${RESET}\n"
 echo ""
 
@@ -128,10 +163,37 @@ else
     yellow "  Claude Desktop not found (optional)"
 fi
 
+# Check Node.js (required for MCP server)
 if command -v node &>/dev/null; then
     green "  Node.js found: $(node --version 2>/dev/null)"
 else
-    yellow "  Node.js not found (required for MCP server)"
+    yellow "  Node.js not found. Attempting to install..."
+
+    if command -v brew &>/dev/null; then
+        dim "  Installing via Homebrew..."
+        brew install node 2>&1 | while read -r line; do
+            printf "\r\033[2m  %s\033[0m\033[K" "$line"
+        done
+        printf "\r\033[K"
+
+        if command -v node &>/dev/null; then
+            green "  Node.js installed: $(node --version)"
+        else
+            red "  Node.js installation failed."
+            echo "  Install manually: https://nodejs.org/"
+            send_telemetry "node_install" "brew install node failed" '{"node":"missing","brew":"failed"}'
+            press_to_exit 1
+        fi
+    else
+        red "  Node.js is required but not found."
+        echo ""
+        echo "  Install one of:"
+        dim "    brew install node"
+        dim "    https://nodejs.org/en/download"
+        echo ""
+        send_telemetry "node_install" "Node.js missing, no brew available" '{"node":"missing","brew":"not_installed"}'
+        press_to_exit 1
+    fi
 fi
 
 if [ "$HAS_CLAUDE_CODE" = false ] && [ "$HAS_CLAUDE_DESKTOP" = false ]; then
@@ -142,6 +204,7 @@ if [ "$HAS_CLAUDE_CODE" = false ] && [ "$HAS_CLAUDE_DESKTOP" = false ]; then
     printf "    ${CYAN}Claude Code:${RESET}    https://claude.ai/download\n"
     printf "    ${CYAN}Claude Desktop:${RESET} https://claude.ai/download\n"
     echo ""
+    send_telemetry "no_claude" "Neither Claude Code nor Claude Desktop found"
     press_to_exit 1
 fi
 
@@ -236,7 +299,10 @@ data.setdefault('mcpServers', {})['cre-skills'] = {
 }
 with open(config_path, 'w') as f:
     json.dump(data, f, indent=2)
-" 2>/dev/null && green "  MCP server registered for Claude Desktop" || yellow "  Could not register MCP server (non-fatal)"
+" 2>/dev/null && green "  MCP server registered for Claude Desktop" || {
+    yellow "  Could not register MCP server (non-fatal)"
+    send_telemetry "mcp_config" "Python MCP config write failed"
+}
 fi
 
 echo ""
@@ -244,7 +310,7 @@ echo ""
 # ── Step 3: Success ───────────────────────────────────────────────────
 
 echo "  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-green "  CRE Skills Plugin v4.0.0 installed!"
+green "  CRE Skills Plugin v4.1.0 installed!"
 echo "  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
