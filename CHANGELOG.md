@@ -1,21 +1,14 @@
 # Changelog
 
-## [4.0.1] - 2026-04-02
-
-### Changed
-- Telemetry now enabled by default (opt-out model). Records only skill slug +
-  date + anonymous UUID. No deal data, financials, prompts, or identity.
-  All data stays local at ~/.cre-skills/telemetry.jsonl.
-- First-run notice clearly explains what is and is not tracked, and how to opt out
-- Windows installer now registers plugin in ~/.claude/ plugin system instead of
-  %APPDATA%\Claude\skills\ (fixes Desktop not discovering plugin)
-
-### Fixed
-- Windows Desktop not seeing installed plugin (wrong install directory)
-
 ## [4.0.0] - 2026-04-02
 
 ### Added
+- MCP server (mcp-server.mjs): zero-dependency stdio JSON-RPC server with 8 tools
+  (cre_route, cre_list_skills, cre_skill_detail, cre_workspace_create/get/list/update,
+  cre_send_feedback) for Claude Desktop visibility
+- Feedback retry outbox (hooks/feedback-outbox.mjs): failed remote submissions are
+  queued in ~/.cre-skills/outbox.jsonl and retried on next session start (4s timeout
+  per request, max 5 attempts before eviction)
 - Canonical catalog system: catalog/catalog.yaml as single source of truth for all
   plugin metadata (196 items: 105 skills, 54 agents, 9 commands, 12 calculators,
   10 orchestrators, 6 workflows)
@@ -44,6 +37,12 @@
 - Router: markdown-table parsing -> catalog-driven with fallback
 - README Key Stats: hardcoded -> generated from catalog (18 categories)
 - Plugin version: 3.0.0 -> 4.0.0
+- Telemetry now enabled by default (opt-out model). Records only skill slug +
+  date + anonymous UUID. No deal data, financials, prompts, or identity.
+  All data stays local at ~/.cre-skills/telemetry.jsonl
+- First-run notice clearly explains what is and is not tracked, and how to opt out
+- Windows installer registers in ~/.claude/ plugin system instead of
+  %APPDATA%\Claude\skills\
 - Stale doc references: added notices to USER-GUIDE.md for unimplemented CLI scripts
 
 ### Fixed
@@ -52,6 +51,7 @@
 - docs/feedback-system.md: contradicted itself on default feedback mode
 - feedback-summary command: now reads both feedback.jsonl and feedback-log.jsonl
 - Hooks.json SessionStart prompt: counts now generated from catalog
+- Windows Desktop not seeing installed plugin (wrong install directory)
 
 ## [3.0.0] - 2026-04-01
 

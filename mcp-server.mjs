@@ -194,7 +194,7 @@ function toolSendFeedback(args) {
     submission_id: `fb_${randomUUID().replace(/-/g, "").slice(0, 16)}`,
     submission_type: args.type || "general",
     timestamp: new Date().toISOString(),
-    plugin_version: "4.0.1",
+    plugin_version: "4.0.0",
     message: (args.message || "").slice(0, 5000),
     rating: args.rating || null,
     severity: args.severity || null,
@@ -329,7 +329,7 @@ const TOOL_HANDLERS = {
 
 const SERVER_INFO = {
   name: "cre-skills",
-  version: "4.0.1",
+  version: "4.0.0",
 };
 
 const CAPABILITIES = {
