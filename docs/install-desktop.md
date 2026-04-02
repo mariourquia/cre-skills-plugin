@@ -2,6 +2,8 @@
 
 This guide is for Claude Desktop users on macOS and Windows. If you use Claude Code CLI, see the [main install guide](install-guide.md).
 
+> **Do not paste this repo URL into Claude Desktop's "Add marketplace" dialog.** This is not a marketplace plugin. The correct path for Claude Desktop is the DMG (macOS) or EXE (Windows) installer below. See [WHAT-TO-USE-WHEN.md](WHAT-TO-USE-WHEN.md) for details.
+
 ---
 
 ## macOS

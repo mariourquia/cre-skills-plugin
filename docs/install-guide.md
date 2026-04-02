@@ -2,6 +2,8 @@
 
 Version 4.0.0 | Apache 2.0 License
 
+> **Do not use "Add marketplace" in Claude Desktop with this repo URL.** This is not a marketplace plugin. Pasting this URL into Claude Desktop's "Add marketplace" dialog will produce a validation error. Use the installer or CLI method below. See [WHAT-TO-USE-WHEN.md](WHAT-TO-USE-WHEN.md) for the full explanation.
+
 ---
 
 ## Recommended: Download the Installer
@@ -224,13 +226,9 @@ You can also copy the plugin there directly and it will be picked up on next lau
 
 ## Claude.ai Web Installation
 
-When the Claude plugin marketplace is available:
+This plugin is not available in the Claude Desktop or Claude.ai marketplace. There is no `marketplace.json` in this repo and pasting the repo URL into "Add marketplace" will fail.
 
-1. Open claude.ai and go to **Settings** > **Plugins**.
-2. Search for "CRE Skills".
-3. Click **Install**.
-
-Until the marketplace is live, the plugin is available only via Claude Code CLI and Claude Desktop (local installation).
+The plugin is available via Claude Code CLI (plugin install) and Claude Desktop (DMG/EXE installer only). See [WHAT-TO-USE-WHEN.md](WHAT-TO-USE-WHEN.md) for which method to use.
 
 ---
 
