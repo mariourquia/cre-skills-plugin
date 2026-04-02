@@ -9,11 +9,12 @@ except ImportError:
     HAS_YAML = False
 
 PLUGIN_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SRC_DIR = os.path.join(PLUGIN_ROOT, 'src')
 
 
 def load_catalog():
     """Load the canonical catalog. Returns None if missing."""
-    path = os.path.join(PLUGIN_ROOT, 'catalog', 'catalog.yaml')
+    path = os.path.join(SRC_DIR, 'catalog', 'catalog.yaml')
     if not os.path.exists(path) or not HAS_YAML:
         json_path = os.path.join(PLUGIN_ROOT, 'dist', 'catalog.json')
         if os.path.exists(json_path):
@@ -28,28 +29,28 @@ class TestPluginStructure(unittest.TestCase):
     """Structural integrity tests."""
 
     def test_plugin_json_valid(self):
-        with open(os.path.join(PLUGIN_ROOT, '.claude-plugin/plugin.json')) as f:
+        with open(os.path.join(SRC_DIR, 'plugin/plugin.json')) as f:
             data = json.load(f)
         self.assertEqual(data['license'], 'Apache-2.0')
         self.assertIn('version', data)
 
     def test_all_skills_have_skillmd(self):
-        skill_dirs = glob.glob(os.path.join(PLUGIN_ROOT, 'skills/*/'))
+        skill_dirs = glob.glob(os.path.join(SRC_DIR, 'skills/*/'))
         complete = [d for d in skill_dirs if os.path.exists(os.path.join(d, 'SKILL.md'))]
         self.assertGreaterEqual(len(complete), 99)
 
     def test_hooks_json_valid(self):
-        with open(os.path.join(PLUGIN_ROOT, 'hooks/hooks.json')) as f:
+        with open(os.path.join(SRC_DIR, 'hooks/hooks.json')) as f:
             data = json.load(f)
         self.assertIn('hooks', data)
 
     def test_hook_scripts_syntax(self):
-        for hook in glob.glob(os.path.join(PLUGIN_ROOT, 'hooks/*.mjs')):
+        for hook in glob.glob(os.path.join(SRC_DIR, 'hooks/*.mjs')):
             result = subprocess.run(['node', '--check', hook], capture_output=True)
             self.assertEqual(result.returncode, 0, f'{hook} failed syntax check')
 
     def test_python_calculators_syntax(self):
-        for script in glob.glob(os.path.join(PLUGIN_ROOT, 'scripts/calculators/*.py')):
+        for script in glob.glob(os.path.join(SRC_DIR, 'calculators/*.py')):
             if script.endswith('README.md'):
                 continue
             with open(script) as f:
@@ -62,14 +63,14 @@ class TestPluginStructure(unittest.TestCase):
             self.assertTrue(os.path.exists(os.path.join(PLUGIN_ROOT, f)), f'Missing {f}')
 
     def test_agents_index_exists(self):
-        self.assertTrue(os.path.exists(os.path.join(PLUGIN_ROOT, 'agents/_index.md')))
+        self.assertTrue(os.path.exists(os.path.join(SRC_DIR, 'agents/_index.md')))
 
     def test_routing_index_exists(self):
-        self.assertTrue(os.path.exists(os.path.join(PLUGIN_ROOT, 'routing/CRE-ROUTING.md')))
+        self.assertTrue(os.path.exists(os.path.join(SRC_DIR, 'routing/CRE-ROUTING.md')))
 
     def test_feedback_schemas_valid(self):
         for name in ['feedback-submission.schema.json', 'feedback-config.schema.json']:
-            path = os.path.join(PLUGIN_ROOT, 'schemas', name)
+            path = os.path.join(SRC_DIR, 'schemas', name)
             self.assertTrue(os.path.exists(path), f'Missing {name}')
             with open(path) as f:
                 data = json.load(f)
@@ -77,7 +78,7 @@ class TestPluginStructure(unittest.TestCase):
 
     def test_feedback_commands_exist(self):
         for name in ['send-feedback.md', 'report-problem.md']:
-            path = os.path.join(PLUGIN_ROOT, 'commands', name)
+            path = os.path.join(SRC_DIR, 'commands', name)
             self.assertTrue(os.path.exists(path), f'Missing commands/{name}')
 
     def test_redaction_script_syntax(self):
@@ -106,7 +107,7 @@ class TestCatalogIntegrity(unittest.TestCase):
         self.assertGreater(len(self.catalog['items']), 100)
 
     def test_catalog_schema_exists(self):
-        path = os.path.join(PLUGIN_ROOT, 'catalog', 'catalog.schema.json')
+        path = os.path.join(SRC_DIR, 'catalog', 'catalog.schema.json')
         self.assertTrue(os.path.exists(path))
         with open(path) as f:
             schema = json.load(f)
@@ -164,7 +165,7 @@ class TestCatalogConsistency(unittest.TestCase):
         if not self.catalog:
             self.skipTest('No catalog')
         catalog_skills = [i for i in self.catalog['items'] if i['type'] == 'skill']
-        fs_skills = glob.glob(os.path.join(PLUGIN_ROOT, 'skills/*/SKILL.md'))
+        fs_skills = glob.glob(os.path.join(SRC_DIR, 'skills/*/SKILL.md'))
         self.assertEqual(len(catalog_skills), len(fs_skills),
                         f'Catalog has {len(catalog_skills)} skills but filesystem has {len(fs_skills)}')
 
@@ -173,7 +174,7 @@ class TestCatalogConsistency(unittest.TestCase):
             self.skipTest('No catalog')
         catalog_agents = [i for i in self.catalog['items'] if i['type'] == 'agent']
         fs_agents = []
-        for md in glob.glob(os.path.join(PLUGIN_ROOT, 'agents/**/*.md'), recursive=True):
+        for md in glob.glob(os.path.join(SRC_DIR, 'agents/**/*.md'), recursive=True):
             if os.path.basename(md) != '_index.md':
                 fs_agents.append(md)
         self.assertEqual(len(catalog_agents), len(fs_agents),
@@ -183,14 +184,14 @@ class TestCatalogConsistency(unittest.TestCase):
         if not self.catalog:
             self.skipTest('No catalog')
         catalog_cmds = [i for i in self.catalog['items'] if i['type'] == 'command']
-        fs_cmds = glob.glob(os.path.join(PLUGIN_ROOT, 'commands/*.md'))
+        fs_cmds = glob.glob(os.path.join(SRC_DIR, 'commands/*.md'))
         self.assertEqual(len(catalog_cmds), len(fs_cmds))
 
     def test_calculator_count_matches_filesystem(self):
         if not self.catalog:
             self.skipTest('No catalog')
         catalog_calcs = [i for i in self.catalog['items'] if i['type'] == 'calculator']
-        fs_calcs = [f for f in glob.glob(os.path.join(PLUGIN_ROOT, 'scripts/calculators/*.py'))
+        fs_calcs = [f for f in glob.glob(os.path.join(SRC_DIR, 'calculators/*.py'))
                     if not os.path.basename(f).startswith('__')]
         self.assertEqual(len(catalog_calcs), len(fs_calcs))
 
@@ -208,7 +209,7 @@ class TestRouterBehavior(unittest.TestCase):
 
     def test_router_loads_catalog(self):
         result = subprocess.run(
-            ['node', os.path.join(PLUGIN_ROOT, 'routing/skill-dispatcher.mjs'), '--list'],
+            ['node', os.path.join(SRC_DIR, 'routing/skill-dispatcher.mjs'), '--list'],
             capture_output=True, text=True
         )
         self.assertEqual(result.returncode, 0)
@@ -217,7 +218,7 @@ class TestRouterBehavior(unittest.TestCase):
 
     def test_router_high_confidence_match(self):
         result = subprocess.run(
-            ['node', os.path.join(PLUGIN_ROOT, 'routing/skill-dispatcher.mjs'), 'underwrite a deal'],
+            ['node', os.path.join(SRC_DIR, 'routing/skill-dispatcher.mjs'), 'underwrite a deal'],
             capture_output=True, text=True
         )
         self.assertEqual(result.returncode, 0)
@@ -228,7 +229,7 @@ class TestRouterBehavior(unittest.TestCase):
 
     def test_router_excludes_hidden_by_default(self):
         result = subprocess.run(
-            ['node', os.path.join(PLUGIN_ROOT, 'routing/skill-dispatcher.mjs'), '--list'],
+            ['node', os.path.join(SRC_DIR, 'routing/skill-dispatcher.mjs'), '--list'],
             capture_output=True, text=True
         )
         data = json.loads(result.stdout)
@@ -237,7 +238,7 @@ class TestRouterBehavior(unittest.TestCase):
 
     def test_router_includes_hidden_with_flag(self):
         result = subprocess.run(
-            ['node', os.path.join(PLUGIN_ROOT, 'routing/skill-dispatcher.mjs'), '--list', '--include-hidden'],
+            ['node', os.path.join(SRC_DIR, 'routing/skill-dispatcher.mjs'), '--list', '--include-hidden'],
             capture_output=True, text=True
         )
         data = json.loads(result.stdout)
@@ -245,7 +246,7 @@ class TestRouterBehavior(unittest.TestCase):
 
     def test_router_returns_alternatives(self):
         result = subprocess.run(
-            ['node', os.path.join(PLUGIN_ROOT, 'routing/skill-dispatcher.mjs'), 'deal analysis'],
+            ['node', os.path.join(SRC_DIR, 'routing/skill-dispatcher.mjs'), 'deal analysis'],
             capture_output=True, text=True
         )
         data = json.loads(result.stdout)
@@ -253,7 +254,7 @@ class TestRouterBehavior(unittest.TestCase):
 
     def test_router_reports_source(self):
         result = subprocess.run(
-            ['node', os.path.join(PLUGIN_ROOT, 'routing/skill-dispatcher.mjs'), 'test query'],
+            ['node', os.path.join(SRC_DIR, 'routing/skill-dispatcher.mjs'), 'test query'],
             capture_output=True, text=True
         )
         data = json.loads(result.stdout)
@@ -264,14 +265,14 @@ class TestFeedbackConfigParity(unittest.TestCase):
     """Verify feedback config is consistent across code and docs."""
 
     def test_telemetry_enabled_by_default(self):
-        path = os.path.join(PLUGIN_ROOT, 'hooks', 'telemetry-init.mjs')
+        path = os.path.join(SRC_DIR, 'hooks', 'telemetry-init.mjs')
         with open(path) as f:
             content = f.read()
         self.assertIn("telemetry: true", content,
                       'telemetry-init.mjs should default telemetry to true (opt-out model)')
 
     def test_feedback_defaults_ask_each_time(self):
-        path = os.path.join(PLUGIN_ROOT, 'hooks', 'telemetry-init.mjs')
+        path = os.path.join(SRC_DIR, 'hooks', 'telemetry-init.mjs')
         with open(path) as f:
             content = f.read()
         self.assertIn("mode: 'ask_each_time'", content,
@@ -303,7 +304,7 @@ class TestFeedbackConfigParity(unittest.TestCase):
                       'PRIVACY.md should explain how to opt out')
 
     def test_first_run_notice_explains_tracking(self):
-        path = os.path.join(PLUGIN_ROOT, 'hooks', 'telemetry-init.mjs')
+        path = os.path.join(SRC_DIR, 'hooks', 'telemetry-init.mjs')
         with open(path) as f:
             content = f.read()
         self.assertIn('NEVER tracked', content,
@@ -316,22 +317,26 @@ class TestDocReferences(unittest.TestCase):
     """Verify docs don't reference missing files."""
 
     def test_catalog_files_exist(self):
-        expected = [
+        src_expected = [
             'catalog/catalog.schema.json',
             'catalog/catalog.yaml',
+        ]
+        for f in src_expected:
+            self.assertTrue(os.path.exists(os.path.join(SRC_DIR, f)), f'Missing src/{f}')
+        root_expected = [
             'dist/catalog.json',
             'scripts/catalog-build.py',
             'scripts/catalog-generate.py',
         ]
-        for f in expected:
+        for f in root_expected:
             self.assertTrue(os.path.exists(os.path.join(PLUGIN_ROOT, f)), f'Missing {f}')
 
     def test_output_styles_exist(self):
         expected = ['exec-brief.md', 'ic-memo.md', 'pm-action-list.md',
                     'lender-brief.md', 'lp-update.md']
         for f in expected:
-            self.assertTrue(os.path.exists(os.path.join(PLUGIN_ROOT, 'output-styles', f)),
-                          f'Missing output-styles/{f}')
+            self.assertTrue(os.path.exists(os.path.join(SRC_DIR, 'templates', 'output-styles', f)),
+                          f'Missing src/templates/output-styles/{f}')
 
     def test_adr_exists(self):
         self.assertTrue(os.path.exists(
@@ -344,11 +349,11 @@ class TestDocReferences(unittest.TestCase):
         self.assertTrue(os.path.exists(os.path.join(PLUGIN_ROOT, 'docs/release-checklist.md')))
 
     def test_mcp_server_exists(self):
-        self.assertTrue(os.path.exists(os.path.join(PLUGIN_ROOT, 'mcp-server.mjs')))
+        self.assertTrue(os.path.exists(os.path.join(SRC_DIR, 'mcp-server.mjs')))
 
     def test_mcp_json_exists(self):
-        self.assertTrue(os.path.exists(os.path.join(PLUGIN_ROOT, '.mcp.json')))
-        with open(os.path.join(PLUGIN_ROOT, '.mcp.json')) as f:
+        self.assertTrue(os.path.exists(os.path.join(SRC_DIR, 'plugin', '.mcp.json')))
+        with open(os.path.join(SRC_DIR, 'plugin', '.mcp.json')) as f:
             data = json.load(f)
         self.assertIn('mcpServers', data)
         self.assertIn('cre-skills', data['mcpServers'])
@@ -359,14 +364,14 @@ class TestMcpServer(unittest.TestCase):
 
     def test_mcp_server_syntax(self):
         result = subprocess.run(
-            ['node', '--check', os.path.join(PLUGIN_ROOT, 'mcp-server.mjs')],
+            ['node', '--check', os.path.join(SRC_DIR, 'mcp-server.mjs')],
             capture_output=True
         )
         self.assertEqual(result.returncode, 0, 'mcp-server.mjs failed syntax check')
 
     def test_mcp_initialize(self):
         result = subprocess.run(
-            ['node', os.path.join(PLUGIN_ROOT, 'mcp-server.mjs')],
+            ['node', os.path.join(SRC_DIR, 'mcp-server.mjs')],
             input='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}\n',
             capture_output=True, text=True, timeout=5
         )
@@ -375,7 +380,7 @@ class TestMcpServer(unittest.TestCase):
 
     def test_mcp_tools_list(self):
         result = subprocess.run(
-            ['node', os.path.join(PLUGIN_ROOT, 'mcp-server.mjs')],
+            ['node', os.path.join(SRC_DIR, 'mcp-server.mjs')],
             input='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}\n{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}\n',
             capture_output=True, text=True, timeout=5
         )
@@ -390,7 +395,7 @@ class TestMcpServer(unittest.TestCase):
 
     def test_mcp_route_tool(self):
         result = subprocess.run(
-            ['node', os.path.join(PLUGIN_ROOT, 'mcp-server.mjs')],
+            ['node', os.path.join(SRC_DIR, 'mcp-server.mjs')],
             input='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}\n{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"cre_route","arguments":{"query":"underwrite a deal"}}}\n',
             capture_output=True, text=True, timeout=5
         )
@@ -399,6 +404,44 @@ class TestMcpServer(unittest.TestCase):
         content = json.loads(data['result']['content'][0]['text'])
         self.assertEqual(content['confidence'], 'high')
         self.assertIn('underwriting', content['recommendation']['skill'])
+
+
+class TestMcpWorkspace(unittest.TestCase):
+    """MCP server workspace and tool wire-protocol tests."""
+
+    def _mcp_call(self, tool_name, arguments):
+        """Send initialize + tools/call via JSON-RPC and return the parsed last response."""
+        init_msg = '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}'
+        call_msg = json.dumps({
+            "jsonrpc": "2.0", "id": 2, "method": "tools/call",
+            "params": {"name": tool_name, "arguments": arguments}
+        })
+        result = subprocess.run(
+            ['node', os.path.join(SRC_DIR, 'mcp-server.mjs')],
+            input=init_msg + '\n' + call_msg + '\n',
+            capture_output=True, text=True, timeout=5
+        )
+        lines = [l for l in result.stdout.strip().split('\n') if l.strip()]
+        return json.loads(lines[-1])
+
+    def test_mcp_skill_detail(self):
+        data = self._mcp_call('cre_skill_detail', {'slug': 'deal-quick-screen'})
+        content_text = data['result']['content'][0]['text']
+        self.assertIn('Deal QuickScreen', content_text)
+
+    def test_mcp_skill_detail_invalid(self):
+        data = self._mcp_call('cre_skill_detail', {'slug': 'nonexistent'})
+        content_text = data['result']['content'][0]['text']
+        parsed = json.loads(content_text)
+        self.assertIn('error', parsed)
+
+    def test_mcp_unknown_tool(self):
+        data = self._mcp_call('nonexistent_tool', {})
+        self.assertTrue(data['result'].get('isError', False),
+                        'unknown tool should return isError')
+        content_text = data['result']['content'][0]['text']
+        parsed = json.loads(content_text)
+        self.assertIn('error', parsed)
 
 
 if __name__ == '__main__':

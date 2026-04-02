@@ -101,7 +101,7 @@ send_telemetry() {
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 
-if [ ! -d "skills" ] || [ ! -d "agents" ]; then
+if [ ! -d "src/skills" ] || [ ! -d "src/agents" ]; then
     red "Could not find the CRE Skills Plugin files."
     echo "Make sure this file is in the cre-skills-plugin folder."
     press_to_exit 1
@@ -196,6 +196,11 @@ else
     fi
 fi
 
+if ! command -v python3 &>/dev/null; then
+    yellow "  python3 not found. Some features may be limited."
+    yellow "  Install with: xcode-select --install"
+fi
+
 if [ "$HAS_CLAUDE_CODE" = false ] && [ "$HAS_CLAUDE_DESKTOP" = false ]; then
     echo ""
     red "  Neither Claude Code nor Claude Desktop was found."
@@ -213,7 +218,7 @@ echo ""
 # ── Step 2: Register plugin ──────────────────────────────────────────
 
 INSTALL_DIR="$SCRIPT_DIR"
-PLUGIN_VERSION="$(python3 -c "import json; print(json.load(open('$SCRIPT_DIR/.claude-plugin/plugin.json'))['version'])" 2>/dev/null || echo "4.0.0")"
+PLUGIN_VERSION="$(python3 -c "import json; print(json.load(open('$SCRIPT_DIR/src/plugin/plugin.json'))['version'])" 2>/dev/null || echo "4.0.0")"
 CLAUDE_HOME="$HOME/.claude"
 PLUGINS_CACHE="$CLAUDE_HOME/plugins/cache/local/cre-skills-plugin/$PLUGIN_VERSION"
 INSTALLED_PLUGINS="$CLAUDE_HOME/plugins/installed_plugins.json"
@@ -225,12 +230,23 @@ bold "  Installing CRE Skills Plugin..."
 printf "  ${DIM}Source: %s${RESET}\n" "$INSTALL_DIR"
 echo ""
 
-# 1. Copy to plugin cache
+# 1. Copy to plugin cache (two-step: src/ contents first, then top-level items)
 mkdir -p "$PLUGINS_CACHE"
 rsync -a --delete \
     --exclude '.git' --exclude '__pycache__' --exclude 'node_modules' \
+    "$INSTALL_DIR/src/" "$PLUGINS_CACHE/"
+rsync -a \
+    --exclude '.git' --exclude '__pycache__' --exclude 'node_modules' \
     --exclude 'dist' --exclude '.venv' --exclude '.local' \
+    --exclude 'src' --exclude 'builds' --exclude 'tools' \
+    --exclude 'config' --exclude 'docs/plans' --exclude 'docs/specs' \
+    --exclude 'docs/design' --exclude 'tests/golden' \
+    --exclude 'tests/snapshots' --exclude 'tests/fixtures' \
     "$INSTALL_DIR/" "$PLUGINS_CACHE/"
+
+# Create .claude-plugin/ layout expected by Claude Code
+mkdir -p "$PLUGINS_CACHE/.claude-plugin"
+cp "$PLUGINS_CACHE/plugin/plugin.json" "$PLUGINS_CACHE/.claude-plugin/plugin.json" 2>/dev/null || true
 green "  Plugin files copied to cache"
 
 # Build catalog if not present

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Cowork Command Frontmatter",
+  "description": "Allowed frontmatter fields for commands in Cowork target (name is forbidden)",
+  "type": "object",
+  "properties": {
+    "description": { "type": "string", "minLength": 1 }
+  },
+  "not": {
+    "required": ["name"]
+  },
+  "additionalProperties": true
+}

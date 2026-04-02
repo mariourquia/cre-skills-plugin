@@ -15,12 +15,13 @@ import { fileURLToPath } from 'node:url';
 // Resolve plugin root relative to this file
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PLUGIN_ROOT = resolve(__dirname, '..');
+const SRC_DIR = resolve(PLUGIN_ROOT, 'src');
 
 // Import modules under test
-const verdictMod = await import(join(PLUGIN_ROOT, 'orchestrators', 'engine', 'verdict-evaluator.mjs'));
-const thresholdMod = await import(join(PLUGIN_ROOT, 'orchestrators', 'engine', 'threshold-merger.mjs'));
-const contractMod = await import(join(PLUGIN_ROOT, 'orchestrators', 'engine', 'data-contract-validator.mjs'));
-const profileMod = await import(join(PLUGIN_ROOT, 'orchestrators', 'engine', 'profile-loader.mjs'));
+const verdictMod = await import(join(SRC_DIR, 'orchestrators', 'engine', 'verdict-evaluator.mjs'));
+const thresholdMod = await import(join(SRC_DIR, 'orchestrators', 'engine', 'threshold-merger.mjs'));
+const contractMod = await import(join(SRC_DIR, 'orchestrators', 'engine', 'data-contract-validator.mjs'));
+const profileMod = await import(join(SRC_DIR, 'orchestrators', 'engine', 'profile-loader.mjs'));
 
 const { navigatePath, compareValues, evaluateVerdict } = verdictMod;
 const { mergeThresholds } = thresholdMod;
@@ -347,7 +348,7 @@ function testLoadProfile() {
   // Valid type: institutional
   {
     try {
-      const profile = loadProfile('institutional', PLUGIN_ROOT);
+      const profile = loadProfile('institutional', SRC_DIR);
       assert('loadProfile', 'institutional: loads', profile !== null);
       assert('loadProfile', 'institutional: has investorType', profile.investorType === 'institutional');
     } catch (err) {
@@ -358,7 +359,7 @@ function testLoadProfile() {
   // Alias resolution: pe -> private-equity
   {
     try {
-      const profile = loadProfile('pe', PLUGIN_ROOT);
+      const profile = loadProfile('pe', SRC_DIR);
       assert('loadProfile', 'alias pe: loads private-equity', profile !== null);
     } catch (err) {
       assert('loadProfile', `alias pe: loads (error: ${err.message})`, false);
@@ -368,7 +369,7 @@ function testLoadProfile() {
   // Alias resolution: pension-fund -> institutional
   {
     try {
-      const profile = loadProfile('pension-fund', PLUGIN_ROOT);
+      const profile = loadProfile('pension-fund', SRC_DIR);
       assert('loadProfile', 'alias pension-fund: loads institutional', profile.investorType === 'institutional');
     } catch (err) {
       assert('loadProfile', `alias pension-fund: loads (error: ${err.message})`, false);
@@ -378,7 +379,7 @@ function testLoadProfile() {
   // Invalid type throws
   {
     try {
-      loadProfile('nonexistent-type-xyz', PLUGIN_ROOT);
+      loadProfile('nonexistent-type-xyz', SRC_DIR);
       assert('loadProfile', 'invalid type: throws', false);
     } catch (err) {
       assert('loadProfile', 'invalid type: throws', err.message.includes('not found'));
@@ -388,7 +389,7 @@ function testLoadProfile() {
   // Null type throws
   {
     try {
-      loadProfile(null, PLUGIN_ROOT);
+      loadProfile(null, SRC_DIR);
       assert('loadProfile', 'null type: throws', false);
     } catch (err) {
       assert('loadProfile', 'null type: throws', err.message.includes('required'));

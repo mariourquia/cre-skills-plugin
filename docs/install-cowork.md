@@ -18,7 +18,7 @@ In your team's Claude Code settings (typically managed via your organization's c
     {
       "name": "cre-skills",
       "source": "github:mariourquia/cre-skills-plugin",
-      "version": "1.0.0",
+      "version": "4.0.0",
       "enabled": true
     }
   ]
@@ -48,7 +48,7 @@ To prevent unexpected changes from affecting active workflows, pin the plugin to
 ```json
 {
   "source": "github:mariourquia/cre-skills-plugin",
-  "version": "1.0.0"
+  "version": "4.0.0"
 }
 ```
 
@@ -71,7 +71,7 @@ To prevent unexpected changes from affecting active workflows, pin the plugin to
 
 ## Configuring Which Skills Are Enabled
 
-The plugin ships with all 105 skills active by default. For teams that only use a subset (e.g., an acquisitions team that does not need construction management skills), you can scope the active skills.
+The plugin ships with all 112 skills active by default. For teams that only use a subset (e.g., an acquisitions team that does not need construction management skills), you can scope the active skills.
 
 ### Option A: Registry-Based Filtering
 
@@ -91,7 +91,7 @@ skills:
 
 ### Option B: Routing Index Scoping
 
-Edit `routing/CRE-ROUTING.md` in your fork to remove categories or skills that are not relevant. The router only finds skills listed in the routing index, so removing entries effectively hides them.
+Edit `src/routing/CRE-ROUTING.md` in your fork to remove categories or skills that are not relevant. The router only finds skills listed in the routing index, so removing entries effectively hides them.
 
 ### Option C: Separate Plugin Forks per Team
 
@@ -103,7 +103,7 @@ cre-skills-plugin-asset-mgmt/     # 20 skills: NOI, capex, leasing, budgets
 cre-skills-plugin-development/    # 15 skills: proformas, entitlements, construction
 ```
 
-Each fork uses the same plugin structure but with a trimmed `skills/` directory and routing index.
+Each fork uses the same plugin structure but with a trimmed `src/skills/` directory and routing index.
 
 ---
 
@@ -134,7 +134,7 @@ For organizations using managed Claude Desktop deployments, include the plugin p
     {
       "name": "cre-skills",
       "source": "github:mariourquia/cre-skills-plugin",
-      "version": "1.0.0",
+      "version": "4.0.0",
       "autoEnable": true,
       "allowDisable": false
     }
@@ -175,8 +175,8 @@ Track which skills your team uses most frequently to identify:
 
 ## Security Notes
 
-- The plugin contains no executable code. All files are Markdown, YAML, and JSON.
-- No data leaves the conversation. The plugin provides structured prompts and reference material only.
+- The plugin's skill content is Markdown, YAML, and JSON. JavaScript hooks (telemetry, feedback) and the MCP server run locally with no external network calls unless the user explicitly opts in to remote feedback submission.
+- No deal data leaves the conversation. The plugin provides structured prompts and reference material. Telemetry records only skill slugs and dates locally.
 - No API keys, tokens, or credentials are required.
-- The plugin does not modify files on disk, make network requests, or access external services.
-- Safe to deploy in regulated environments (FINRA, SEC, SOX) as it is purely instructional content.
+- Python calculators (in `src/calculators/`) are zero-dependency scripts that run locally.
+- Safe to deploy in regulated environments (FINRA, SEC, SOX) with appropriate review of the hook scripts and calculator code.

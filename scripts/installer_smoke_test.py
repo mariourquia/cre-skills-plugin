@@ -69,11 +69,15 @@ def load_json(path: Path) -> dict | None:
 
 
 def get_plugin_version(install_dir: Path) -> str:
-    """Read version from .claude-plugin/plugin.json."""
-    pj = install_dir / ".claude-plugin" / "plugin.json"
-    data = load_json(pj)
-    if data and "version" in data:
-        return data["version"]
+    """Read version from plugin.json (src/plugin/ or .claude-plugin/)."""
+    # Prefer src/plugin/ (canonical), fall back to .claude-plugin/ (symlink/cache)
+    for pj_path in [
+        install_dir / "src" / "plugin" / "plugin.json",
+        install_dir / ".claude-plugin" / "plugin.json",
+    ]:
+        data = load_json(pj_path)
+        if data and "version" in data:
+            return data["version"]
     return ""
 
 
@@ -235,7 +239,10 @@ def check_mcp_server_syntax(install_dir: Path) -> None:
     print("  5. MCP server syntax")
     print("  " + "-" * 50)
 
-    mcp_file = install_dir / "mcp-server.mjs"
+    # Prefer src/ (canonical), fall back to root (symlink/cache)
+    mcp_file = install_dir / "src" / "mcp-server.mjs"
+    if not mcp_file.is_file():
+        mcp_file = install_dir / "mcp-server.mjs"
     if not mcp_file.is_file():
         _fail(f"mcp-server.mjs not found at: {mcp_file}")
         return
@@ -349,7 +356,7 @@ def main() -> int:
     version = get_plugin_version(install_dir)
     if not version:
         print()
-        _fail(f"Cannot read version from {install_dir / '.claude-plugin' / 'plugin.json'}")
+        _fail(f"Cannot read version from {install_dir / 'src' / 'plugin' / 'plugin.json'}")
         print()
         print(f"  Results: 0 passed, 1 failed, 0 skipped")
         return 1

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validate that all installer version references match plugin.json.
 
-Source of truth: .claude-plugin/plugin.json  (field: "version")
+Source of truth: src/plugin/plugin.json  (field: "version")
 
 After the dynamic-read fix, the primary code path reads from plugin.json
 at install time. This script validates that the FALLBACK values embedded
@@ -26,7 +26,7 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
-PLUGIN_JSON = REPO_ROOT / ".claude-plugin" / "plugin.json"
+PLUGIN_JSON = REPO_ROOT / "src" / "plugin" / "plugin.json"
 
 # ---------------------------------------------------------------------------
 # Fallback-value patterns per installer file
@@ -163,7 +163,7 @@ def main() -> int:
 
     print("cre-skills-plugin Version Check")
     print("=" * 50)
-    print(f"Source of truth: .claude-plugin/plugin.json")
+    print(f"Source of truth: src/plugin/plugin.json")
     print(f"Expected version: {expected}")
     print()
 

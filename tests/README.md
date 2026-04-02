@@ -28,14 +28,14 @@ python -m pytest tests/test_plugin_integrity.py::TestPluginStructure -v
 
 | Test | Description |
 |------|-------------|
-| `test_plugin_json_valid` | `plugin.json` parses as valid JSON, version is 3.0.0, license is Apache-2.0 |
-| `test_all_skills_have_skillmd` | Every directory under `skills/` contains a `SKILL.md` |
-| `test_hooks_json_valid` | `hooks/hooks.json` parses as valid JSON and has a `hooks` key |
-| `test_hook_scripts_syntax` | All `.mjs` files in `hooks/` pass `node --check` |
-| `test_python_calculators_syntax` | All `.py` files in `scripts/calculators/` are syntactically valid Python |
+| `test_plugin_json_valid` | `plugin.json` parses as valid JSON, version is 4.0.0, license is Apache-2.0 |
+| `test_all_skills_have_skillmd` | Every directory under `src/skills/` contains a `SKILL.md` |
+| `test_hooks_json_valid` | `src/hooks/hooks.json` parses as valid JSON and has a `hooks` key |
+| `test_hook_scripts_syntax` | All `.mjs` files in `src/hooks/` pass `node --check` |
+| `test_python_calculators_syntax` | All `.py` files in `src/calculators/` are syntactically valid Python |
 | `test_required_files_exist` | Root-level required files are present (LICENSE, NOTICE, README.md, etc.) |
-| `test_agents_index_exists` | `agents/_index.md` exists |
-| `test_routing_index_exists` | `routing/CRE-ROUTING.md` exists |
+| `test_agents_index_exists` | `src/agents/_index.md` exists |
+| `test_routing_index_exists` | `src/routing/CRE-ROUTING.md` exists |
 | `test_skill_count_matches_plugin_json` | At least 88 `SKILL.md` files exist across skill directories |
 
 ## CI

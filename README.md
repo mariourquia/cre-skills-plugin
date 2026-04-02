@@ -43,9 +43,9 @@ A Claude plugin delivering **112 institutional-grade commercial real estate skil
 
 ## What's New in v4.0.0
 
-**Catalog-driven architecture**: Single source of truth (`catalog/catalog.yaml`, 203 items). Every public surface -- README stats, plugin.json, hooks prompt, routing table, registry -- is generated from the catalog. CI catches drift.
+**Catalog-driven architecture**: Single source of truth (`src/catalog/catalog.yaml`, 203 items). Every public surface -- README stats, plugin.json, hooks prompt, routing table, registry -- is generated from the catalog. CI catches drift.
 
-**MCP server**: Zero-dependency MCP server (`mcp-server.mjs`) with 21 tools for Claude Desktop support. macOS DMG and Windows .exe installers auto-detect Claude Code and Claude Desktop.
+**MCP server**: Zero-dependency MCP server (`src/mcp-server.mjs`) with 21 tools for Claude Desktop support. macOS DMG and Windows .exe installers auto-detect Claude Code and Claude Desktop.
 
 **7 workspace skills**: deal-intake, lease-strategy-papering, asset-ops-cockpit, capital-projects-development, fund-lp-reporting, navigator, plugin-admin. Persistent workspace state for cross-session continuity.
 
@@ -167,7 +167,7 @@ Raleigh NC, $42M asking, 2018 vintage, 93% occupied, $2.6M NOI, rents 12% below 
 
 ## Skill Categories
 
-### By Category (16 subcategories, 105 skills)
+### By Category (16 subcategories, 112 skills)
 
 | # | Category | Count | Key Skills |
 |---|----------|-------|------------|
@@ -203,7 +203,7 @@ Six end-to-end workflow chains that orchestrate multiple skills in sequence.
 | 5 | **Development Pipeline** | land-residual + entitlement -> dev-proforma -> construction-budget -> loan-sizing -> capital-stack -> ic-memo -> lease-up-war-room -> refi-decision |
 | 6 | **Fund Management** | fund-formation -> pitch-deck -> capital-raise -> portfolio-allocator -> [deploy via acquisition pipeline] -> quarterly-update + performance-attribution |
 
-Each chain has a detailed workflow document in `routing/workflows/` with step-by-step orchestration logic.
+Each chain has a detailed workflow document in `src/routing/workflows/` with step-by-step orchestration logic.
 
 ---
 
@@ -228,7 +228,7 @@ The plugin includes a multi-agent orchestration engine (derived from [Avi Hacker
 
 Run with: `/cre-skills:orchestrate acquisition`
 
-See `orchestrators/README.md` for full documentation.
+See `src/orchestrators/README.md` for full documentation.
 
 ---
 
@@ -274,7 +274,7 @@ The **Deal Team Lead** agent assembles multi-agent teams from 10 pre-built compo
 | `monte_carlo_simulator.py` | monte-carlo-return-simulator | Stochastic return distributions, confidence intervals, tail risk |
 | `fund_fee_modeler.py` | fund-raise-negotiation-engine | Management fee modeling, carried interest schedules, blended fee load, MFN cascade |
 
-All calculators are in `scripts/calculators/`. Run directly with `python3 scripts/calculators/<script>.py`.
+All calculators are in `src/calculators/`. Run directly with `python3 src/calculators/<script>.py`.
 
 ---
 
@@ -379,49 +379,54 @@ See [PRIVACY.md](PRIVACY.md) for what is and is not collected.
 
 ```
 cre-skills-plugin/
-  .claude-plugin/
-    plugin.json            # Plugin manifest
-  skills/
-    <slug>/
-      SKILL.md             # Skill definition (process, inputs, outputs)
-      references/          # Supporting reference documents (.md and .yaml)
-  agents/
-    _index.md              # Agent roster and team compositions
-    <agent>.md             # 54 expert agent definitions (flat directory)
-  orchestrators/
-    engine/                # Pipeline engine schema and handoff registry
-    configs/               # 10 orchestrator JSON configurations
-    prompts/               # 16 orchestrator prompt files
-    challenge-layer/       # Post-pipeline adversarial review config
-    investor-profiles/     # 8 investor profiles + strategy matrix
-    schemas/               # Disagreement and reversal trigger schemas
-    thresholds.json        # Investment thresholds (base + investor overrides)
-    README.md              # Orchestration engine documentation
-  commands/
-    cre-route.md           # Skill router command
-    cre-workflows.md       # Workflow chain browser
-    cre-agents.md          # Agent roster browser
-    brand-config.md        # Brand guidelines setup
-    customize-skill.md     # Skill customization workflow
-    orchestrate.md         # Multi-agent pipeline orchestrator
-    usage-stats.md         # Telemetry summary
-    feedback-summary.md    # Session feedback log
-    send-feedback.md       # Share feedback
-    report-problem.md      # Report a bug
-  lib/
-    customization.mjs      # Skill override CRUD and resolution
-    diff.mjs               # LCS-based line diff engine
-    feedback-payload.mjs   # Customization feedback payload builder
-  routing/
-    CRE-ROUTING.md         # Master routing index
-    workflows/             # Detailed workflow chain documents
-  hooks/
-    hooks.json             # Hook definitions (SessionStart, PostToolUse, Stop)
-    telemetry-init.mjs     # Initializes user config on first run
-    telemetry-capture.mjs  # Tracks skill invocations (opt-in)
-    session-summary.mjs    # Session end record and feedback
+  src/
+    plugin/
+      plugin.json            # Plugin manifest
+    skills/
+      <slug>/
+        SKILL.md             # Skill definition (process, inputs, outputs)
+        references/          # Supporting reference documents (.md and .yaml)
+    agents/
+      _index.md              # Agent roster and team compositions
+      <agent>.md             # 54 expert agent definitions (flat directory)
+    orchestrators/
+      engine/                # Pipeline engine schema and handoff registry
+      configs/               # 10 orchestrator JSON configurations
+      prompts/               # 16 orchestrator prompt files
+      challenge-layer/       # Post-pipeline adversarial review config
+      investor-profiles/     # 8 investor profiles + strategy matrix
+      schemas/               # Disagreement and reversal trigger schemas
+      thresholds.json        # Investment thresholds (base + investor overrides)
+      README.md              # Orchestration engine documentation
+    commands/
+      cre-route.md           # Skill router command
+      cre-workflows.md       # Workflow chain browser
+      cre-agents.md          # Agent roster browser
+      brand-config.md        # Brand guidelines setup
+      customize-skill.md     # Skill customization workflow
+      orchestrate.md         # Multi-agent pipeline orchestrator
+      usage-stats.md         # Telemetry summary
+      feedback-summary.md    # Session feedback log
+      send-feedback.md       # Share feedback
+      report-problem.md      # Report a bug
+    lib/
+      customization.mjs      # Skill override CRUD and resolution
+      diff.mjs               # LCS-based line diff engine
+      feedback-payload.mjs   # Customization feedback payload builder
+    routing/
+      CRE-ROUTING.md         # Master routing index
+      workflows/             # Detailed workflow chain documents
+    hooks/
+      hooks.json             # Hook definitions (SessionStart, PostToolUse, Stop)
+      telemetry-init.mjs     # Initializes user config on first run
+      telemetry-capture.mjs  # Tracks skill invocations (opt-in)
+      session-summary.mjs    # Session end record and feedback
+    calculators/             # 12 Python calculator scripts
+    catalog/                 # Catalog schema and canonical catalog.yaml
+    mcp-server.mjs           # MCP server for Claude Desktop
+    templates/
+      output-styles/         # Output format templates
   scripts/
-    calculators/           # 12 Python calculator scripts
     redact-feedback.mjs    # Feedback sanitization utility
     install.sh             # Fresh install with v1->v2 migration
     update.sh              # Pull latest, detect breaking changes

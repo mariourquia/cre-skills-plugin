@@ -85,6 +85,16 @@ export function enqueue(entry) {
  * @returns {Promise<{sent: number, failed: number, evicted: number}>}
  */
 export async function drain(backendUrl) {
+  // Validate that the backend URL uses HTTPS to prevent data exfiltration
+  try {
+    const u = new URL(backendUrl);
+    if (u.protocol !== 'https:') {
+      return { sent: 0, failed: 0, evicted: 0 };
+    }
+  } catch {
+    return { sent: 0, failed: 0, evicted: 0 };
+  }
+
   const entries = readOutbox();
   if (entries.length === 0) {
     return { sent: 0, failed: 0, evicted: 0 };

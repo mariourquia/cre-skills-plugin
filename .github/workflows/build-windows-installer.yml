@@ -55,6 +55,35 @@ jobs:
         run: |
           New-Item -ItemType Directory -Path dist -Force | Out-Null
 
+      - name: Verify source layout for Inno Setup
+        shell: pwsh
+        run: |
+          $required = @(
+            "src\skills",
+            "src\agents",
+            "src\commands",
+            "src\hooks",
+            "src\orchestrators",
+            "src\routing",
+            "src\mcp-server.mjs",
+            "src\plugin\plugin.json",
+            "scripts\Install.ps1",
+            "LICENSE"
+          )
+          $missing = @()
+          foreach ($path in $required) {
+            if (-not (Test-Path $path)) {
+              $missing += $path
+            } else {
+              Write-Host "OK: $path" -ForegroundColor Green
+            }
+          }
+          if ($missing.Count -gt 0) {
+            foreach ($m in $missing) { Write-Host "MISSING: $m" -ForegroundColor Red }
+            Write-Error "Required source files missing. The .iss expects plugin content under src/."
+            exit 1
+          }
+
       - name: Compile installer
         shell: pwsh
         env:

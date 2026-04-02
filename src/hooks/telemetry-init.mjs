@@ -28,25 +28,6 @@ function defaultConfig() {
     firstRunComplete: false,
     version: '4.0.0',
   };
-
-  // Drain the feedback outbox (retry failed remote submissions).
-  // Fire-and-forget: never block session start on network failures.
-  const feedbackMode = (config.feedback && config.feedback.mode) || 'local_only';
-  const backendUrl = config.feedback && config.feedback.backend_url;
-
-  if (feedbackMode !== 'local_only' && backendUrl && pendingOutbox() > 0) {
-    drainOutbox(backendUrl)
-      .then(result => {
-        if (result.sent > 0) {
-          process.stdout.write(
-            `[CRE Skills] Retried ${result.sent} queued feedback submission${result.sent > 1 ? 's' : ''}.\n`
-          );
-        }
-      })
-      .catch(() => {
-        // Silent failure -- outbox entries stay for next session.
-      });
-  }
 }
 
 function readConfig() {
@@ -56,25 +37,6 @@ function readConfig() {
   } catch {
     return null;
   }
-
-  // Drain the feedback outbox (retry failed remote submissions).
-  // Fire-and-forget: never block session start on network failures.
-  const feedbackMode = (config.feedback && config.feedback.mode) || 'local_only';
-  const backendUrl = config.feedback && config.feedback.backend_url;
-
-  if (feedbackMode !== 'local_only' && backendUrl && pendingOutbox() > 0) {
-    drainOutbox(backendUrl)
-      .then(result => {
-        if (result.sent > 0) {
-          process.stdout.write(
-            `[CRE Skills] Retried ${result.sent} queued feedback submission${result.sent > 1 ? 's' : ''}.\n`
-          );
-        }
-      })
-      .catch(() => {
-        // Silent failure -- outbox entries stay for next session.
-      });
-  }
 }
 
 function writeConfig(config) {
@@ -83,25 +45,6 @@ function writeConfig(config) {
     writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2) + '\n', 'utf8');
   } catch {
     // Never crash the session over a config write failure.
-  }
-
-  // Drain the feedback outbox (retry failed remote submissions).
-  // Fire-and-forget: never block session start on network failures.
-  const feedbackMode = (config.feedback && config.feedback.mode) || 'local_only';
-  const backendUrl = config.feedback && config.feedback.backend_url;
-
-  if (feedbackMode !== 'local_only' && backendUrl && pendingOutbox() > 0) {
-    drainOutbox(backendUrl)
-      .then(result => {
-        if (result.sent > 0) {
-          process.stdout.write(
-            `[CRE Skills] Retried ${result.sent} queued feedback submission${result.sent > 1 ? 's' : ''}.\n`
-          );
-        }
-      })
-      .catch(() => {
-        // Silent failure -- outbox entries stay for next session.
-      });
   }
 }
 
@@ -113,9 +56,8 @@ function main() {
     writeConfig(config);
   }
 
-  // Backfill: enable telemetry for existing installs upgrading to v4
-  if (config.version && config.version < '4.0.0' && config.telemetry === false) {
-    config.telemetry = true;
+  // Backfill: update version marker for existing installs upgrading to v4
+  if (config.version && config.version < '4.0.0') {
     config.version = '4.0.0';
     writeConfig(config);
   }

@@ -23,17 +23,19 @@ jobs:
       - name: Install test dependencies
         run: pip install pytest pyyaml
       - name: Build catalog (required before tests)
-        run: python scripts/catalog-build.py
+        run: |
+          python scripts/catalog-build.py
+          python scripts/catalog-generate.py
       - name: Run integrity tests
         run: python -m pytest tests/ -v
       - name: Validate hooks JSON
-        run: python -c "import json; json.load(open('hooks/hooks.json')); print('hooks.json OK')"
+        run: python -c "import json; json.load(open('src/hooks/hooks.json')); print('hooks.json OK')"
       - name: Validate hook scripts
         run: |
-          for f in hooks/*.mjs; do node --check "$f"; done
+          for f in src/hooks/*.mjs; do node --check "$f"; done
       - name: Validate Python calculators
         run: |
-          for f in scripts/calculators/*.py; do python -c "compile(open('$f').read(), '$f', 'exec')"; done
+          for f in src/calculators/*.py; do python -c "compile(open('$f').read(), '$f', 'exec')"; done
       - name: Check version consistency
         run: python3 scripts/version_check.py
       - name: Verify plugin structure

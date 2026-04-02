@@ -5,6 +5,8 @@
 .env
 .env.*
 node_modules/
+builds/
+tools/node_modules/
 
 # Secrets and credentials
 *.pem

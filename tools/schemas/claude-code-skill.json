@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Claude Code Skill Frontmatter",
+  "description": "Required frontmatter fields for skills in Claude Code target",
+  "type": "object",
+  "properties": {
+    "name": { "type": "string", "minLength": 1 },
+    "description": { "type": "string", "minLength": 1 },
+    "slug": { "type": "string" },
+    "version": { "type": "string" },
+    "status": { "type": "string" },
+    "category": { "type": "string" },
+    "targets": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": ["name", "description"],
+  "additionalProperties": true
+}

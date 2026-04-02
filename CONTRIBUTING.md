@@ -21,12 +21,12 @@ Contributions fall into four categories: new skills, new agents, improvements to
 
 ## Adding a New Skill
 
-Skills live in `skills/<slug>/` where `<slug>` is a lowercase-hyphenated name describing the skill's function.
+Skills live in `src/skills/<slug>/` where `<slug>` is a lowercase-hyphenated name describing the skill's function.
 
 ### Directory Structure
 
 ```
-skills/<slug>/
+src/skills/<slug>/
   SKILL.md                    # Skill definition (required)
   references/                 # Supporting reference files (required, at least 1)
     <reference-file>.md       # Markdown reference
@@ -90,7 +90,7 @@ Which skill(s) come before and after this one in a workflow:
 
 ### Reference Files
 
-Every skill must include at least one reference file in `references/`. Reference files provide the domain knowledge the skill depends on:
+Every skill must include at least one reference file in its `references/` directory. Reference files provide the domain knowledge the skill depends on:
 
 - **Methodology files** (`.md`): Explain formulas, frameworks, industry standards, or analytical approaches.
 - **Data files** (`.yaml`): Structured lookup tables, benchmarks, checklists, templates, or worked examples.
@@ -101,7 +101,7 @@ Name reference files descriptively: `loan-sizing-formulas.md`, `replacement-cost
 
 ## Adding a New Agent
 
-Agents live in `agents/<name>.md` where `<name>` is a lowercase-hyphenated role identifier.
+Agents live in `src/agents/<name>.md` where `<name>` is a lowercase-hyphenated role identifier.
 
 ### Agent File Format
 
@@ -141,7 +141,7 @@ How the agent formats responses: tone, structure, level of detail.
 
 ### Agent Categories
 
-Place new agents into the appropriate category. If adding a new category, update `agents/_index.md` to include it.
+Place new agents into the appropriate category. If adding a new category, update `src/agents/_index.md` to include it.
 
 | Category | Purpose | Examples |
 |---|---|---|
@@ -168,7 +168,7 @@ A skill is ready for merge when it meets all of the following:
 - [ ] **Red flags are domain-specific** -- not generic risk warnings
 - [ ] **Chain notes point to real skills** that exist in the plugin (or are being added in the same PR)
 - [ ] **No hallucinated data** -- reference files use real industry benchmarks or clearly label examples as illustrative
-- [ ] **Slug matches directory name** -- `skills/foo-bar/SKILL.md` has `slug: foo-bar` in frontmatter
+- [ ] **Slug matches directory name** -- `src/skills/foo-bar/SKILL.md` has `slug: foo-bar` in frontmatter
 
 ---
 
@@ -182,7 +182,7 @@ An agent is ready for merge when it meets all of the following:
 - [ ] **Output format** -- defined tone, structure, and detail level
 - [ ] **Challenge patterns** -- assumptions the agent pushes back on
 - [ ] **Category fit** -- placed in the correct agent category
-- [ ] **Listed in `_index.md`** -- the agent roster index includes the new agent
+- [ ] **Listed in `src/agents/_index.md`** -- the agent roster index includes the new agent
 - [ ] **Description frontmatter** -- the `description` field in YAML frontmatter is a complete one-paragraph summary
 
 ---
@@ -206,14 +206,14 @@ When improving, preserve the existing structure. Do not reorganize sections or r
 
 Changes to these files require extra review:
 
-- `.claude-plugin/plugin.json` -- plugin manifest
-- `hooks/hooks.json` -- session start behavior
-- `routing/CRE-ROUTING.md` -- routing index (must stay in sync with skills)
+- `src/plugin/plugin.json` -- plugin manifest
+- `src/hooks/hooks.json` -- session start behavior
+- `src/routing/CRE-ROUTING.md` -- routing index (must stay in sync with skills)
 - `registry.yaml` -- machine-readable skill index (must stay in sync with skills)
-- `commands/*.md` -- slash commands
+- `src/commands/*.md` -- slash commands
 
 If you add a new skill, you must also:
-1. Add it to `routing/CRE-ROUTING.md` with appropriate trigger patterns
+1. Add it to `src/routing/CRE-ROUTING.md` with appropriate trigger patterns
 2. Add it to `registry.yaml` with correct metadata
 
 ---
@@ -255,7 +255,7 @@ No Apple code signing is required for distribution. The DMG installer is a shell
 ```markdown
 - [ ] SKILL.md has all required sections
 - [ ] At least 1 reference file included
-- [ ] Added to routing/CRE-ROUTING.md
+- [ ] Added to src/routing/CRE-ROUTING.md
 - [ ] Added to registry.yaml
 - [ ] Slug matches directory name
 - [ ] No hallucinated benchmarks or data

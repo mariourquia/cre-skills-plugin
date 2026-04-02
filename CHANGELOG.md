@@ -3,22 +3,22 @@
 ## [4.0.0] - 2026-04-02
 
 ### Added
-- MCP server (mcp-server.mjs): zero-dependency stdio JSON-RPC server with 8 tools
+- MCP server (src/mcp-server.mjs): zero-dependency stdio JSON-RPC server with 8 tools
   (cre_route, cre_list_skills, cre_skill_detail, cre_workspace_create/get/list/update,
   cre_send_feedback) for Claude Desktop visibility
-- Feedback retry outbox (hooks/feedback-outbox.mjs): failed remote submissions are
+- Feedback retry outbox (src/hooks/feedback-outbox.mjs): failed remote submissions are
   queued in ~/.cre-skills/outbox.jsonl and retried on next session start (4s timeout
   per request, max 5 attempts before eviction)
-- Canonical catalog system: catalog/catalog.yaml as single source of truth for all
+- Canonical catalog system: src/catalog/catalog.yaml as single source of truth for all
   plugin metadata (196 items: 105 skills, 54 agents, 9 commands, 12 calculators,
   10 orchestrators, 6 workflows)
-- Catalog schema: catalog/catalog.schema.json
+- Catalog schema: src/catalog/catalog.schema.json
 - Build script: scripts/catalog-build.py (scan repo -> catalog.yaml + dist/catalog.json)
 - Generator script: scripts/catalog-generate.py (catalog -> README, hooks, plugin.json,
   routing, registry)
-- Catalog-driven router: routing/skill-dispatcher.mjs now reads dist/catalog.json with
+- Catalog-driven router: src/routing/skill-dispatcher.mjs now reads dist/catalog.json with
   artifact-aware matching, confidence scoring, downstream recommendations, and markdown fallback
-- Output styles: output-styles/ with 5 format templates (exec-brief, ic-memo,
+- Output styles: src/templates/output-styles/ with 5 format templates (exec-brief, ic-memo,
   pm-action-list, lender-brief, lp-update)
 - userConfig in plugin.json: primary_asset_types, preferred_markets, default_output_style,
   feedback_mode, brand_name
@@ -31,6 +31,10 @@
 - Next-best-action footer: mandatory structured output for workspace skills
 
 ### Changed
+- Build system refactor: all source content (skills, agents, commands, hooks, routing,
+  orchestrators, calculators, lib, catalog, MCP server, templates) moved from repo root
+  into `src/`. Symlinks removed. `scripts/`, `docs/`, `tests/`, `dist/`, `registry.yaml`,
+  and `README.md` remain at repo root. Build output goes to `builds/`.
 - Feedback default mode: ask_each_time -> local_only (privacy-first)
 - Feedback backend_url default: pre-configured -> empty (opt-in remote submission)
 - registry.yaml: manually maintained -> generated from catalog
