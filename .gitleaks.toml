@@ -1,0 +1,46 @@
+# Gitleaks configuration for secret scanning
+# https://github.com/gitleaks/gitleaks
+
+title = "cre-skills-plugin gitleaks config"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "apple-team-id"
+description = "Hardcoded Apple Team ID"
+regex = '''(?i)(team[_-]?id\s*[:=]\s*|--team-id\s+)([A-Z0-9]{10})'''
+keywords = ["team-id", "team_id", "teamid"]
+
+  [rules.allowlist]
+  regexes = [
+    '''YOUR_TEAM_ID''',
+    '''\$APPLE_TEAM_ID''',
+    '''\$\{\{\s*secrets\.''',
+    '''PLACEHOLDER''',
+  ]
+
+[[rules]]
+id = "personal-email"
+description = "Personal email address (use noreply instead)"
+regex = '''mario@mariourquia\.com'''
+keywords = ["mario@mariourquia"]
+
+[[rules]]
+id = "local-filesystem-path"
+description = "Hardcoded local filesystem path"
+regex = '''/Users/\w+/'''
+keywords = ["/Users/"]
+
+  [rules.allowlist]
+  paths = [
+    '''\.github/workflows/.*\.yml$''',
+  ]
+
+[allowlist]
+paths = [
+  '''\.gitleaks\.toml$''',
+  '''node_modules/''',
+  '''\.venv/''',
+  '''__pycache__/''',
+]
