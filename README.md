@@ -35,7 +35,7 @@ A Claude plugin delivering **112 institutional-grade commercial real estate skil
 | Python Calculators | **12** |
 | Workflow Chains | **6** |
 | Orchestrator Pipelines | **10** |
-| Slash Commands | **9** |
+| Slash Commands | **11** |
 | Skill Categories | **18** |
 <!-- CATALOG:STATS:END -->
 
@@ -45,13 +45,13 @@ A Claude plugin delivering **112 institutional-grade commercial real estate skil
 
 **Catalog-driven architecture**: Single source of truth (`catalog/catalog.yaml`, 203 items). Every public surface -- README stats, plugin.json, hooks prompt, routing table, registry -- is generated from the catalog. CI catches drift.
 
-**MCP server**: Zero-dependency MCP server (`mcp-server.mjs`) with 8 tools for Claude Desktop support. macOS DMG and Windows .exe installers auto-detect Claude Code and Claude Desktop.
+**MCP server**: Zero-dependency MCP server (`mcp-server.mjs`) with 21 tools for Claude Desktop support. macOS DMG and Windows .exe installers auto-detect Claude Code and Claude Desktop.
 
 **7 workspace skills**: deal-intake, lease-strategy-papering, asset-ops-cockpit, capital-projects-development, fund-lp-reporting, navigator, plugin-admin. Persistent workspace state for cross-session continuity.
 
 **Feedback system**: `/cre-skills:send-feedback` and `/cre-skills:report-problem` with automatic redaction, optional remote submission (ask_each_time mode), and retry outbox for failed sends.
 
-**112 skills, 54 agents, 12 calculators, 9 commands**: Full counts after prior additions (construction estimator, PM orchestrator, space planning) plus catalog, MCP server, workspace skills.
+**112 skills, 54 agents, 12 calculators, 11 commands**: Full counts after prior additions (construction estimator, PM orchestrator, space planning) plus catalog, MCP server, workspace skills, and skill customization.
 
 See [CHANGELOG.md](CHANGELOG.md) for full history.
 
@@ -106,10 +106,11 @@ For a full structural check: `./scripts/verify-install.sh`
 | | Claude Desktop | Claude Code |
 |---|---|---|
 | **Install method** | DMG / EXE (download) | CLI one-liner |
-| **Access to 112 skills** | Via 8 MCP tools | Via `/cre-skills:*` commands |
+| **Access to 112 skills** | Via 21 MCP tools | Via `/cre-skills:*` commands |
 | **Skill routing** | Ask Claude or use `cre_route` tool | `/cre-skills:cre-route` |
 | **Workspace persistence** | Yes (via MCP tools) | Yes (via commands) |
 | **Feedback & bug reports** | Yes (via MCP tool) | Yes (via `/cre-skills:send-feedback`) |
+| **Skill customization** | Yes (via MCP tools) | Yes (via `/cre-skills:customize-skill`) |
 | **Auto-routing on session start** | No | Yes (SessionStart hook) |
 | **Telemetry & session tracking** | No | Yes (opt-out) |
 
@@ -334,6 +335,33 @@ View your feedback history with `/cre-skills:feedback-summary`.
 
 ---
 
+## Skill Customization
+
+Adapt any skill to how your team actually works. Local overrides take priority over base skills -- the base files are never modified.
+
+```
+/cre-skills:customize-skill
+```
+
+The plugin walks you through: select a skill, make changes, record why. Common customizations:
+
+| Category | Example |
+|----------|---------|
+| Terminology | Rename fields to match your organization |
+| Approval chain | Add compliance officer review steps |
+| Required steps | Insert ESG screening into underwriting |
+| Deliverable format | Restructure IC memo for your committee |
+| Calculation method | Use MOIC instead of IRR as primary metric |
+| Regional / market | Add NYC transfer tax tiers |
+
+Customizations are stored at `~/.cre-skills/customizations/<slug>/` and persist across plugin updates. You can optionally share structured feedback about your changes with the maintainer to help improve the plugin.
+
+**Privacy**: Default mode is `metadata_only` -- only skill name, change categories, and rationale are shared. No skill content leaves your machine without explicit consent. Set `customization.feedback_mode` to `off` in `~/.cre-skills/config.json` to disable entirely.
+
+See [docs/customization-guide.md](docs/customization-guide.md) for full details, configuration examples, and MCP tool reference.
+
+---
+
 ## Privacy & Telemetry
 
 Anonymous usage telemetry is **enabled by default** and **local-only**. It records which skills you use (slug only) and the date -- nothing else. No deal data, financial figures, file paths, prompts, or identity information is ever tracked. All data stays on your machine in `~/.cre-skills/telemetry.jsonl`. To opt out: set `"telemetry": false` in `~/.cre-skills/config.json`.
@@ -374,11 +402,16 @@ cre-skills-plugin/
     cre-workflows.md       # Workflow chain browser
     cre-agents.md          # Agent roster browser
     brand-config.md        # Brand guidelines setup
+    customize-skill.md     # Skill customization workflow
     orchestrate.md         # Multi-agent pipeline orchestrator
     usage-stats.md         # Telemetry summary
     feedback-summary.md    # Session feedback log
     send-feedback.md       # Share feedback
     report-problem.md      # Report a bug
+  lib/
+    customization.mjs      # Skill override CRUD and resolution
+    diff.mjs               # LCS-based line diff engine
+    feedback-payload.mjs   # Customization feedback payload builder
   routing/
     CRE-ROUTING.md         # Master routing index
     workflows/             # Detailed workflow chain documents

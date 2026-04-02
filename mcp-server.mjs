@@ -7,15 +7,28 @@
  *
  * Protocol: JSON-RPC 2.0 over stdin/stdout (MCP stdio transport)
  *
- * Tools:
+ * Tools (21):
  *   cre_route          - Route a CRE query to the right skill
  *   cre_list_skills    - List available skills with optional filter
- *   cre_skill_detail   - Get full SKILL.md content for a skill
+ *   cre_skill_detail   - Get full SKILL.md content (resolves local overrides first)
  *   cre_workspace_create - Create a persistent workspace
  *   cre_workspace_get    - Get workspace state
  *   cre_workspace_list   - List all workspaces
  *   cre_workspace_update - Update workspace state
  *   cre_send_feedback    - Submit feedback or bug report
+ *   cre_customize_skill  - Initialize a local skill customization
+ *   cre_save_customization - Save customization content and metadata
+ *   cre_list_customizations - List all active local customizations
+ *   cre_customization_detail - Get customization metadata and diff
+ *   cre_revert_customization - Remove a local customization
+ *   cre_submit_customization_feedback - Submit structured customization feedback
+ *   cre_export_customization - Export customization as portable bundle
+ *   cre_import_customization - Import customization from bundle
+ *   cre_customization_health_check - Check for base skill drift
+ *   cre_list_templates   - List available customization templates
+ *   cre_apply_template   - Apply a pre-built customization template
+ *   cre_upstream_suggestion - Generate upstream improvement suggestion
+ *   cre_customization_analytics - Analyze customization patterns
  */
 
 import { readFileSync, writeFileSync, appendFileSync, mkdirSync, existsSync, readdirSync, unlinkSync } from "node:fs";
@@ -24,6 +37,19 @@ import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline";
 import { randomUUID } from "node:crypto";
 import { homedir } from "node:os";
+import {
+  hasCustomization, createCustomization, saveCustomization,
+  getCustomization, listCustomizations, revertCustomization,
+  resolveSkillPath, CHANGE_CATEGORIES,
+  exportCustomization, importCustomization, healthCheck, healthCheckAll,
+  listTemplates, createFromTemplate,
+} from "./lib/customization.mjs";
+import { computeDiff, summarizeDiff, formatDiffText } from "./lib/diff.mjs";
+import {
+  buildPayload, filterByMode, previewPayload,
+  savePayloadLocally, enqueueForRetry, getCustomizationConfig,
+  buildUpstreamSuggestion, analyzeCustomizationFeedback,
+} from "./lib/feedback-payload.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -130,9 +156,9 @@ function toolListSkills(args) {
 
 function toolSkillDetail(args) {
   const slug = args.slug || "";
-  const skillPath = join(SKILLS_DIR, slug, "SKILL.md");
-  if (!existsSync(skillPath)) return { error: `Skill '${slug}' not found` };
-  return { slug, content: readFileSync(skillPath, "utf-8") };
+  const { path, source } = resolveSkillPath(slug, SKILLS_DIR);
+  if (!existsSync(path)) return { error: `Skill '${slug}' not found` };
+  return { slug, content: readFileSync(path, "utf-8"), source };
 }
 
 function toolWorkspaceCreate(args) {
@@ -202,6 +228,176 @@ function toolSendFeedback(args) {
   };
   appendFileSync(join(CONFIG_DIR, "feedback-log.jsonl"), JSON.stringify(record) + "\n");
   return { saved: true, submission_id: record.submission_id };
+}
+
+// ---------------------------------------------------------------------------
+// Skill customization tools
+// ---------------------------------------------------------------------------
+
+function toolCustomizeSkill(args) {
+  const slug = args.slug || "";
+  if (hasCustomization(slug)) {
+    return { error: `Customization already exists for '${slug}'. Use cre_save_customization to update or cre_revert_customization to start fresh.` };
+  }
+  const basePath = join(SKILLS_DIR, slug, "SKILL.md");
+  if (!existsSync(basePath)) return { error: `Skill '${slug}' not found in base catalog` };
+  const baseContent = readFileSync(basePath, "utf-8");
+  const record = createCustomization(slug, baseContent, SERVER_INFO.version);
+  return { ...record, message: `Customization initialized for '${slug}'. Use cre_save_customization to save changes.` };
+}
+
+function toolSaveCustomization(args) {
+  const slug = args.slug || "";
+  if (!hasCustomization(slug)) return { error: `No customization exists for '${slug}'. Use cre_customize_skill first.` };
+  const content = args.content;
+  if (!content) return { error: "content is required" };
+  const updates = {};
+  if (args.rationale !== undefined) updates.rationale = args.rationale;
+  if (args.change_categories !== undefined) updates.change_categories = args.change_categories;
+  if (args.notes !== undefined) updates.notes = args.notes;
+  const record = saveCustomization(slug, content, updates);
+  return { ...record, message: `Customization saved for '${slug}'.` };
+}
+
+function toolListCustomizations() {
+  const items = listCustomizations();
+  return { count: items.length, customizations: items };
+}
+
+function toolCustomizationDetail(args) {
+  const slug = args.slug || "";
+  const cust = getCustomization(slug);
+  if (!cust) return { error: `No customization found for '${slug}'` };
+  let diffResult = null, diffSummary = null, diffText = null;
+  if (cust.base) {
+    diffResult = computeDiff(cust.base, cust.content);
+    diffSummary = summarizeDiff(diffResult);
+    diffText = formatDiffText(diffResult);
+  }
+  return {
+    slug,
+    metadata: cust.metadata,
+    diff_summary: diffSummary,
+    diff_text: args.include_diff ? diffText : null,
+    diff_stats: diffResult ? diffResult.stats : null,
+    sections_changed: diffResult ? diffResult.sections_changed : null,
+    content: args.include_content ? cust.content : null,
+    base_content: args.include_base ? cust.base : null,
+  };
+}
+
+function toolRevertCustomization(args) {
+  const slug = args.slug || "";
+  const removed = revertCustomization(slug);
+  if (!removed) return { error: `No customization found for '${slug}'` };
+  return { slug, reverted: true, message: `Customization for '${slug}' removed. Base skill is now active.` };
+}
+
+function toolSubmitCustomizationFeedback(args) {
+  const slug = args.slug || "";
+  const cust = getCustomization(slug);
+  if (!cust) return { error: `No customization found for '${slug}'` };
+  const config = getCustomizationConfig();
+  if (!config.feedback_enabled || config.feedback_mode === "off") {
+    return { error: "Customization feedback is disabled in config" };
+  }
+  let diffResult = null, diffSummaryText = null, diffTextStr = null;
+  if (cust.base) {
+    diffResult = computeDiff(cust.base, cust.content);
+    diffSummaryText = summarizeDiff(diffResult);
+    diffTextStr = formatDiffText(diffResult);
+  }
+  const payload = buildPayload({
+    metadata: cust.metadata,
+    diffSummary: diffSummaryText || "",
+    diffText: diffTextStr || "",
+    modifiedContent: cust.content,
+    diffStats: diffResult ? diffResult.stats : {},
+    sectionsChanged: diffResult ? diffResult.sections_changed : [],
+    pluginVersion: SERVER_INFO.version,
+    wantsUpstreamConsideration: args.wants_upstream ?? false,
+    consentedToContent: args.consented_to_content ?? false,
+  });
+  const filtered = filterByMode(payload, config.feedback_mode);
+
+  // Enforce require_consent: return preview for caller to show user first
+  if (config.require_consent && !args.user_confirmed) {
+    return {
+      requires_consent: true,
+      preview: previewPayload(filtered, config.feedback_mode),
+      feedback_id: filtered.feedback_id,
+      message: "User must confirm before sending. Call again with user_confirmed: true after showing preview.",
+    };
+  }
+
+  if (args.dry_run || config.dry_run) {
+    return { preview: previewPayload(filtered, config.feedback_mode), dry_run: true, payload: filtered };
+  }
+  savePayloadLocally(filtered);
+  if (config.feedback_endpoint) {
+    enqueueForRetry(filtered);
+    return { saved: true, queued_for_remote: true, feedback_id: filtered.feedback_id, preview: previewPayload(filtered, config.feedback_mode) };
+  }
+  return { saved: true, queued_for_remote: false, feedback_id: filtered.feedback_id, preview: previewPayload(filtered, config.feedback_mode) };
+}
+
+function toolExportCustomization(args) {
+  const slug = args.slug || "";
+  const bundle = exportCustomization(slug);
+  if (!bundle) return { error: `No customization found for '${slug}'` };
+  return bundle;
+}
+
+function toolImportCustomization(args) {
+  if (!args.bundle) return { error: "bundle is required (JSON object)" };
+  try {
+    const bundle = typeof args.bundle === "string" ? JSON.parse(args.bundle) : args.bundle;
+    const result = importCustomization(bundle);
+    return { ...result, message: `Customization imported for '${result.slug}'.` };
+  } catch (err) {
+    return { error: err.message };
+  }
+}
+
+function toolHealthCheck(args) {
+  if (args.all) {
+    return { results: healthCheckAll(SKILLS_DIR) };
+  }
+  const slug = args.slug || "";
+  return healthCheck(slug, SKILLS_DIR);
+}
+
+function toolListTemplates() {
+  const TEMPLATES_DIR = join(__dirname, "templates");
+  return { templates: listTemplates(TEMPLATES_DIR) };
+}
+
+function toolApplyTemplate(args) {
+  const templateId = args.template_id || "";
+  const TEMPLATES_DIR = join(__dirname, "templates");
+  try {
+    const record = createFromTemplate(templateId, SKILLS_DIR, TEMPLATES_DIR, SERVER_INFO.version);
+    return { ...record, message: `Template '${templateId}' applied to '${record.skill_slug}'.` };
+  } catch (err) {
+    return { error: err.message };
+  }
+}
+
+function toolUpstreamSuggestion(args) {
+  const slug = args.slug || "";
+  const cust = getCustomization(slug);
+  if (!cust) return { error: `No customization found for '${slug}'` };
+  let diffSummaryText = "", diffTextStr = "";
+  if (cust.base) {
+    const diffResult = computeDiff(cust.base, cust.content);
+    diffSummaryText = summarizeDiff(diffResult);
+    diffTextStr = formatDiffText(diffResult);
+  }
+  return buildUpstreamSuggestion(cust.metadata, diffSummaryText, diffTextStr);
+}
+
+function toolCustomizationAnalytics() {
+  return analyzeCustomizationFeedback();
 }
 
 // ---------------------------------------------------------------------------
@@ -310,6 +506,147 @@ const TOOLS = [
       required: ["message"],
     },
   },
+  // ── Skill customization tools ──────────────────────────────────────────────
+  {
+    name: "cre_customize_skill",
+    description: "Initialize a local customization of a CRE skill. Creates an editable override copy without modifying the base skill. Returns the customization record.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        slug: { type: "string", description: "Skill slug to customize (e.g. 'deal-quick-screen')" },
+      },
+      required: ["slug"],
+    },
+  },
+  {
+    name: "cre_save_customization",
+    description: "Save updated content and metadata for an existing skill customization.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        slug: { type: "string", description: "Skill slug" },
+        content: { type: "string", description: "The full modified SKILL.md content" },
+        rationale: { type: "string", description: "Why the user made this change" },
+        change_categories: {
+          type: "array",
+          items: { type: "string", enum: CHANGE_CATEGORIES },
+          description: "Category tags: terminology, approval_chain, required_steps, compliance_governance, deliverable_format, tone_style, missing_fields, output_structure, calculation_method, regional_market, other",
+        },
+        notes: { type: "string", description: "Additional notes" },
+      },
+      required: ["slug", "content"],
+    },
+  },
+  {
+    name: "cre_list_customizations",
+    description: "List all active local skill customizations with their status and timestamps.",
+    inputSchema: { type: "object", properties: {} },
+  },
+  {
+    name: "cre_customization_detail",
+    description: "Get detailed information about a skill customization including metadata, diff summary, and optionally the full diff or content.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        slug: { type: "string", description: "Skill slug" },
+        include_diff: { type: "boolean", description: "Include the full unified diff text" },
+        include_content: { type: "boolean", description: "Include the full customized SKILL.md content" },
+        include_base: { type: "boolean", description: "Include the original base SKILL.md content" },
+      },
+      required: ["slug"],
+    },
+  },
+  {
+    name: "cre_revert_customization",
+    description: "Remove a local skill customization, restoring the base skill as the active version.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        slug: { type: "string", description: "Skill slug to revert" },
+      },
+      required: ["slug"],
+    },
+  },
+  {
+    name: "cre_submit_customization_feedback",
+    description: "Build and submit structured feedback about a skill customization. Respects privacy config. Use dry_run to preview without sending.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        slug: { type: "string", description: "Skill slug" },
+        wants_upstream: { type: "boolean", description: "Whether user wants maintainer to consider incorporating this change" },
+        consented_to_content: { type: "boolean", description: "Explicit consent to include full content (only relevant in metadata_and_content mode)" },
+        dry_run: { type: "boolean", description: "Preview the payload without sending" },
+        user_confirmed: { type: "boolean", description: "Set to true after showing the user a preview and getting their consent. Required when require_consent is enabled." },
+      },
+      required: ["slug"],
+    },
+  },
+  {
+    name: "cre_export_customization",
+    description: "Export a skill customization as a portable JSON bundle for sharing with teammates or backup.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        slug: { type: "string", description: "Skill slug to export" },
+      },
+      required: ["slug"],
+    },
+  },
+  {
+    name: "cre_import_customization",
+    description: "Import a skill customization from a JSON bundle previously created by cre_export_customization.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        bundle: { type: "object", description: "The customization bundle JSON object" },
+      },
+      required: ["bundle"],
+    },
+  },
+  {
+    name: "cre_customization_health_check",
+    description: "Check if base skills have been updated since customizations were created. Detects drift between your customization and the current plugin version.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        slug: { type: "string", description: "Skill slug to check (omit for all)" },
+        all: { type: "boolean", description: "Check all customizations" },
+      },
+    },
+  },
+  {
+    name: "cre_list_templates",
+    description: "List available customization templates -- pre-built starting points for common enterprise needs.",
+    inputSchema: { type: "object", properties: {} },
+  },
+  {
+    name: "cre_apply_template",
+    description: "Create a customization from a pre-built template. Templates provide common adaptations for specific markets, property types, or regulatory regimes.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        template_id: { type: "string", description: "Template identifier" },
+      },
+      required: ["template_id"],
+    },
+  },
+  {
+    name: "cre_upstream_suggestion",
+    description: "Generate a structured upstream improvement suggestion from a customization, suitable for filing as a GitHub issue.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        slug: { type: "string", description: "Skill slug" },
+      },
+      required: ["slug"],
+    },
+  },
+  {
+    name: "cre_customization_analytics",
+    description: "Analyze local customization feedback patterns -- which skills are customized most, what categories of changes are common, upstream request rate.",
+    inputSchema: { type: "object", properties: {} },
+  },
 ];
 
 const TOOL_HANDLERS = {
@@ -321,6 +658,19 @@ const TOOL_HANDLERS = {
   cre_workspace_list: toolWorkspaceList,
   cre_workspace_update: toolWorkspaceUpdate,
   cre_send_feedback: toolSendFeedback,
+  cre_customize_skill: toolCustomizeSkill,
+  cre_save_customization: toolSaveCustomization,
+  cre_list_customizations: toolListCustomizations,
+  cre_customization_detail: toolCustomizationDetail,
+  cre_revert_customization: toolRevertCustomization,
+  cre_submit_customization_feedback: toolSubmitCustomizationFeedback,
+  cre_export_customization: toolExportCustomization,
+  cre_import_customization: toolImportCustomization,
+  cre_customization_health_check: toolHealthCheck,
+  cre_list_templates: toolListTemplates,
+  cre_apply_template: toolApplyTemplate,
+  cre_upstream_suggestion: toolUpstreamSuggestion,
+  cre_customization_analytics: toolCustomizationAnalytics,
 };
 
 // ---------------------------------------------------------------------------

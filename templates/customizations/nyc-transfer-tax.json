@@ -1,0 +1,21 @@
+{
+  "name": "NYC Transfer Tax Integration",
+  "description": "Adds New York City and New York State transfer tax calculations to deal-quick-screen. Includes NYC RPT (1.0%/1.425%), NYS transfer tax (0.4%), and mansion tax tiers for residential.",
+  "target_skill": "deal-quick-screen",
+  "categories": ["regional_market", "calculation_method", "required_steps"],
+  "rationale": "NYC transactions have significant transfer tax obligations that materially affect deal economics. This template adds accurate tiered calculations at the screening stage so KILL/KEEP verdicts account for closing costs.",
+  "replacements": [
+    {
+      "find": "### Step 3: Back-of-Envelope Debt Sizing",
+      "replace": "### Step 3: NYC Transfer Tax Estimate\nIf property is in NYC, compute:\n- **NYC RPT**: 1.0% if price <= $500K, 1.425% if price > $500K\n- **NYS Transfer Tax**: $2 per $500 (0.4%)\n- **Mansion Tax** (residential only): tiered from 1.0% ($1M+) to 3.9% ($25M+)\n- **Total transfer tax** = RPT + NYS + Mansion Tax (if applicable)\n- Add to Sources & Uses as buyer closing cost\n\nIf property is NOT in NYC, skip this step.\n\n### Step 4: Back-of-Envelope Debt Sizing"
+    },
+    {
+      "find": "### Step 4: Replacement Cost Check",
+      "replace": "### Step 5: Replacement Cost Check"
+    },
+    {
+      "find": "### Step 5: Back-of-Napkin Returns",
+      "replace": "### Step 6: Back-of-Napkin Returns"
+    }
+  ]
+}

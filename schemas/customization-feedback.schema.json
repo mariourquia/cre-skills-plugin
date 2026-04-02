@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mariourquia/cre-skills-plugin/schemas/customization-feedback.schema.json",
+  "title": "CRE Skills Customization Feedback",
+  "description": "Schema for structured feedback payloads sent when a user customizes a skill. Fields are progressively disclosed based on the configured privacy mode.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "feedback_id",
+    "feedback_type",
+    "timestamp",
+    "plugin_version",
+    "skill_slug",
+    "customization_id",
+    "base_content_hash",
+    "modified_content_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version. Increment on breaking changes."
+    },
+    "feedback_id": {
+      "type": "string",
+      "pattern": "^cfb_[a-zA-Z0-9]{16}$",
+      "description": "Unique feedback identifier"
+    },
+    "feedback_type": {
+      "type": "string",
+      "const": "customization_feedback",
+      "description": "Discriminator for payload routing"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "plugin_version": {
+      "type": "string"
+    },
+    "platform": {
+      "type": "string",
+      "description": "OS platform (darwin, win32, linux)"
+    },
+
+    "skill_slug": {
+      "type": "string",
+      "description": "Slug of the customized skill"
+    },
+    "customization_id": {
+      "type": "string",
+      "description": "Customization record ID from metadata.json"
+    },
+
+    "base_content_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the original base skill content"
+    },
+    "modified_content_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the modified skill content"
+    },
+
+    "change_categories": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "terminology",
+          "approval_chain",
+          "required_steps",
+          "compliance_governance",
+          "deliverable_format",
+          "tone_style",
+          "missing_fields",
+          "output_structure",
+          "calculation_method",
+          "regional_market",
+          "other"
+        ]
+      },
+      "description": "What type of changes were made"
+    },
+
+    "diff_stats": {
+      "type": ["object", "null"],
+      "properties": {
+        "added": { "type": "integer", "minimum": 0 },
+        "removed": { "type": "integer", "minimum": 0 },
+        "unchanged": { "type": "integer", "minimum": 0 }
+      },
+      "description": "Line-level change statistics. Included in metadata_and_summary mode and above."
+    },
+    "sections_changed": {
+      "type": ["array", "null"],
+      "items": { "type": "string" },
+      "description": "Markdown section headings affected by changes. Included in metadata_and_summary mode and above."
+    },
+
+    "rationale": {
+      "type": ["string", "null"],
+      "maxLength": 2000,
+      "description": "User-provided reason for the customization"
+    },
+    "notes": {
+      "type": ["string", "null"],
+      "maxLength": 2000
+    },
+
+    "diff_summary": {
+      "type": ["string", "null"],
+      "description": "Human-readable diff summary. Included in metadata_and_summary mode and above."
+    },
+    "diff_text": {
+      "type": ["string", "null"],
+      "description": "Full unified diff text. Included in metadata_and_diff mode and above."
+    },
+    "modified_content": {
+      "type": ["string", "null"],
+      "description": "Full modified SKILL.md content. Only included in metadata_and_content mode with explicit user consent."
+    },
+
+    "wants_upstream_consideration": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user wants the maintainer to consider incorporating this change"
+    },
+
+    "consented_to_content": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user explicitly consented to sharing content"
+    },
+    "consent_timestamp": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "When consent was granted (null if not consented)"
+    }
+  },
+  "additionalProperties": true
+}
