@@ -4,21 +4,35 @@ Version 4.0.0 | Apache 2.0 License
 
 ---
 
-## Recommended: Plugin Install (Claude Code)
+## Recommended: Download the Installer
 
-```bash
-claude plugin add github:mariourquia/cre-skills-plugin
-```
+The fastest way to get started on any platform.
 
-This is the primary install method. It clones the repo and registers the plugin automatically.
+### macOS
 
-## Alternative: One-Line Installer
+Download [`cre-skills-v4.0.0.dmg`](https://github.com/mariourquia/cre-skills-plugin/releases/latest), open it, and double-click **CRE Skills Installer**. The installer auto-detects Claude Desktop, Claude Code, or both.
+
+### Windows
+
+Download [`cre-skills-v4.0.0-setup.exe`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) and run the wizard. No admin privileges required. SmartScreen may warn you -- click "More info" > "Run anyway".
+
+After either installer finishes, restart Claude Desktop or start a new Claude Code session.
+
+---
+
+## Alternative: Claude Code CLI
+
+For developers who prefer the command line:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/mariourquia/cre-skills-plugin/main/scripts/install.sh | bash
 ```
 
-This detects your platform, checks prerequisites, clones the repo, and registers the plugin with Claude Code.
+Or add directly:
+
+```bash
+claude plugin add github:mariourquia/cre-skills-plugin
+```
 
 ## Local Development / Testing
 
@@ -27,7 +41,7 @@ git clone https://github.com/mariourquia/cre-skills-plugin.git
 claude plugin add --plugin-dir ./cre-skills-plugin
 ```
 
-Use `--plugin-dir` for local development. Changes to skills/ and commands/ take effect immediately without reinstalling.
+Changes to skills/ and commands/ take effect immediately without reinstalling.
 
 ---
 
