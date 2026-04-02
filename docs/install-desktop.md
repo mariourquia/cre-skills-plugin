@@ -1,153 +1,141 @@
-# Installing CRE Skills Plugin -- Claude Desktop / Claude.ai
+# Installing CRE Skills Plugin -- Claude Desktop
 
-This guide covers installing the CRE Skills Plugin for Claude Desktop (the macOS/Windows app) and Claude.ai (the browser interface).
-
----
-
-## Recommended: macOS DMG Installer
-
-The simplest installation method for Claude Desktop users on macOS.
-
-1. Download `cre-skills-v4.0.0.dmg` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
-2. Open the DMG.
-3. Double-click "CRE Skills Installer".
-4. Follow the Terminal prompts. The installer detects whether you have Claude Code, Claude Desktop, or both, and configures each automatically.
-5. Restart Claude Desktop.
-
-After installation, start a new conversation and use `/cre-skills:cre-route` to verify the plugin is active.
-
-If you prefer a manual approach or are on Windows, use one of the options below.
+This guide is for Claude Desktop users on macOS and Windows. If you use Claude Code CLI, see the [main install guide](install-guide.md).
 
 ---
 
-## Option A: Plugin Marketplace (When Available)
+## macOS
 
-When the Claude plugin marketplace is live, this will be the simplest path.
+Download [`cre-skills-v4.0.0.dmg`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) from the latest release.
 
-1. Open Claude Desktop or navigate to claude.ai
-2. Open **Settings** > **Plugins**
-3. Search for **"CRE Skills"** or **"commercial real estate"**
-4. Click **Install**
-5. The plugin loads automatically in all new conversations
+1. Open the DMG in Finder
+2. Double-click **CRE Skills Installer**
+3. A Terminal window opens -- follow the prompts (no commands to type)
+4. Restart Claude Desktop
 
-<!-- Screenshot placeholder: marketplace search results showing cre-skills plugin -->
-<!-- Screenshot placeholder: plugin detail page with Install button -->
+The installer:
+- Copies the plugin to `~/.claude/plugins/`
+- Registers the MCP server in Claude Desktop's config
+- Detects if you also have Claude Code and configures both
 
----
+## Windows
 
-## Option B: Manual Plugin Loading
+Download [`cre-skills-v4.0.0-setup.exe`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) from the latest release.
 
-Until the marketplace is available, load the plugin manually.
+1. Run the installer. Windows SmartScreen may warn you -- click **More info**, then **Run anyway** (the installer is not code-signed yet; you can verify the SHA256 checksum from the release page)
+2. Follow the wizard. Default location: `%APPDATA%\cre-skills-plugin`
+3. Restart Claude Desktop
 
-### Prerequisites
-
-- Claude Desktop installed (macOS or Windows), or a Claude.ai Pro/Team account
-- Git installed on your machine
-
-### Steps
-
-**1. Clone the repository**
-
-```bash
-git clone https://github.com/mariourquia/cre-skills-plugin.git
-```
-
-Note where you cloned it. Example: `~/Documents/GitHub/cre-skills-plugin`
-
-**2. Open Claude Desktop settings**
-
-- macOS: **Claude** menu > **Settings** > **Plugins**
-- Windows: **File** menu > **Settings** > **Plugins**
-
-<!-- Screenshot placeholder: Claude Desktop Settings window with Plugins tab -->
-
-**3. Add the plugin directory**
-
-Click **Add Plugin** (or **Load from Disk**) and select the cloned `cre-skills-plugin` directory.
-
-<!-- Screenshot placeholder: file picker selecting the plugin directory -->
-
-**4. Confirm the plugin is loaded**
-
-After adding, you should see `cre-skills` in your plugin list with status **Active**.
-
-<!-- Screenshot placeholder: plugin list showing cre-skills as Active -->
-
-**5. Restart the conversation**
-
-Start a new conversation. The SessionStart hook will load the CRE routing index automatically.
+No admin privileges required. The installer detects Claude Desktop and Claude Code and configures both.
 
 ---
 
-## Using Skills Once Installed
+## After Installation
 
-All skills are under the `/cre-skills:` namespace. Three entry points:
+Restart Claude Desktop, then start a new conversation. The plugin's MCP server gives Claude 8 tools it can call automatically:
 
-### `/cre-skills:cre-route`
+| Tool | What it does | Example prompt |
+|------|-------------|----------------|
+| `cre_route` | Routes your request to the right CRE skill | "Screen this deal -- 240-unit multifamily, Raleigh, $42M" |
+| `cre_list_skills` | Browse and filter the 112 skills | "What leasing skills do you have?" |
+| `cre_skill_detail` | Read the full process for a skill | "Show me the full deal-quick-screen process" |
+| `cre_workspace_create` | Start tracking a deal or asset | "Create a workspace for the Raleigh deal" |
+| `cre_workspace_get` | Resume a workspace from a prior session | "Load my Raleigh deal workspace" |
+| `cre_workspace_list` | See all your active workspaces | "List my workspaces" |
+| `cre_workspace_update` | Add notes, decisions, next actions | "Update the Raleigh workspace with today's findings" |
+| `cre_send_feedback` | Report issues or suggest improvements | "Send feedback about the deal screening skill" |
 
-The main router. Describe your task and it finds the right skill.
+You do not need to call these tools by name. Just describe your CRE task in plain language and Claude will use the right tool automatically.
 
-```
-/cre-skills:cre-route quick screen this deal
-/cre-skills:cre-route size a loan for a $15M multifamily
-/cre-skills:cre-route normalize this T-12
-```
+### Example Prompts for Desktop Users
 
-### `/cre-skills:cre-workflows`
+**Deal screening:**
+> Screen this deal -- 240-unit garden-style multifamily in Raleigh NC, $42M asking, 2018 vintage, 93% occupied, $2.6M NOI, rents 12% below market
 
-Browse the 6 end-to-end workflow chains that connect multiple skills into a pipeline:
+**Loan sizing:**
+> Size a loan for a $15M multifamily acquisition at 65% LTV
 
-- Deal Pipeline (Acquisition)
-- Capital Stack Assembly
-- Hold Period Management
-- Disposition Pipeline
-- Development Pipeline
-- Fund Management
+**Lease analysis:**
+> Analyze the rent roll I pasted above and flag rollover risk
 
-### `/cre-skills:cre-agents`
+**Market research:**
+> Give me a submarket brief for downtown Austin office
 
-List the 55 expert subagents organized by category:
+**Underwriting:**
+> Walk me through a full acquisition underwriting for this deal
 
-- **Investment Function** (8): Acquisitions analyst, asset manager, capital markets, etc.
-- **Adversarial / Challenge** (6): Conservative lender, IC challenger, skeptical LP, etc.
-- **Titan Thinking-Style** (6): Channel Zell, Linneman, Sternlicht, Ross, Gray, Barrack
-- **Stakeholder Perspective** (8): Tenant, lender, municipality, appraiser, etc.
-- **Institutional Buyer** (5): Pension fund, PE, REIT, family office, syndicator
-- **Analytical Lens** (5): Quantitative, qualitative, contrarian, risk, ESG
-- **Composite** (2): CRE veteran, deal team lead
+Claude will route each prompt to the appropriate specialist skill, which provides a structured process, red flags, and follow-up recommendations.
 
 ---
 
 ## How It Works
 
-The plugin does not run any code. It is a structured knowledge base:
+The MCP server (`mcp-server.mjs`) runs locally on your machine. No data leaves your computer. No API keys required.
 
-- **105 SKILL.md files**: Each defines a specific CRE workflow step with trigger conditions, input schema, step-by-step process, output format, red flags, and chain notes pointing to the next skill.
-- **55 agent definitions**: Expert personas with analytical frameworks, key questions, and output styles.
-- **Routing index**: Maps natural language requests to the right skill without loading all 105 skill files.
-- **SessionStart hook**: Injects a brief system prompt telling Claude the plugin is active and where to find the routing index.
+When you ask Claude a CRE question in Desktop:
+1. Claude calls `cre_route` to find the matching skill
+2. Claude reads the skill's full process via `cre_skill_detail`
+3. Claude follows the structured steps to produce institutional-grade output
+4. If you create a workspace, state persists at `~/.cre-skills/workspaces/` for future sessions
 
-No API keys, no external services, no data leaves your conversation.
+The plugin itself is a structured knowledge base (112 process documents, 247 reference files, 54 expert agent definitions). Claude reads these docs to guide its analysis -- no external services or AI models beyond Claude itself.
+
+---
+
+## Claude Desktop vs Claude Code
+
+| Feature | Desktop | Code |
+|---------|---------|------|
+| Skills available | 112 (via MCP routing) | 112 (via slash commands) |
+| How you invoke skills | Plain language prompts | `/cre-skills:cre-route` or slash commands |
+| Auto-routing on session start | No -- ask Claude directly | Yes -- SessionStart hook loads router |
+| Persistent workspaces | Yes | Yes |
+| Telemetry | Not collected | Opt-out (local only) |
+| Feedback commands | Via MCP tool | Via `/cre-skills:send-feedback` |
+| Python calculators | Requires Node.js | Requires Node.js + Python 3.10+ |
+| Output styles | Not yet supported | 5 styles (exec-brief, ic-memo, etc.) |
+
+Both platforms access the same 112 skills. Desktop users just interact through natural conversation instead of slash commands.
 
 ---
 
 ## Updating
 
-To update to the latest version:
-
-```bash
-cd path/to/cre-skills-plugin
-git pull
-```
-
-Then restart Claude Desktop or start a new conversation.
+Download the latest DMG or EXE from the [releases page](https://github.com/mariourquia/cre-skills-plugin/releases) and run the installer again. Your workspaces and settings at `~/.cre-skills/` are preserved across updates.
 
 ---
 
 ## Troubleshooting
 
-**Skills not appearing**: Make sure you started a new conversation after adding the plugin. The SessionStart hook only fires at conversation start.
+**MCP tools not showing up:**
+- Restart Claude Desktop after installation
+- Check that `cre-skills` appears in Claude Desktop's MCP server list (Settings > Developer > MCP Servers)
+- Verify Node.js 18+ is installed: open Terminal and run `node --version`
 
-**Commands not recognized**: Verify the plugin shows as Active in Settings > Plugins. If it shows an error, check that the `.claude-plugin/plugin.json` file exists in the repo root.
+**"cre-skills" not in MCP list:**
+- The installer writes to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows)
+- Check that the file contains a `"cre-skills"` entry under `"mcpServers"`
+- If missing, add manually:
+  ```json
+  {
+    "mcpServers": {
+      "cre-skills": {
+        "command": "node",
+        "args": ["/path/to/cre-skills-plugin/mcp-server.mjs"]
+      }
+    }
+  }
+  ```
 
-**Wrong skill activated**: Use `/cre-skills:cre-route` with a description of your task. The router matches against 80+ trigger patterns. If the match is ambiguous, it will present 2-3 options.
+**Skills seem to give generic responses:**
+- Make sure you are describing a specific CRE task, not asking a general question
+- Try: "Screen this deal -- [property details]" instead of "Tell me about CRE"
+- The routing works best with concrete deal parameters
+
+**Windows SmartScreen blocks the installer:**
+- Click "More info" then "Run anyway"
+- The installer is not code-signed yet. You can verify integrity by comparing the SHA256 checksum from the release page
+
+**Node.js not found:**
+- Download Node.js 18+ from https://nodejs.org
+- After installing Node.js, re-run the CRE Skills installer
