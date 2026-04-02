@@ -1,0 +1,221 @@
+name: Verify and Promote Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to verify (e.g. v3.1.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  verify-windows:
+    name: Verify Windows installer
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout at tag
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.tag }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+
+      - name: Determine version
+        id: version
+        shell: pwsh
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          $ver = $env:TAG -replace '^v', ''
+          echo "VERSION=$ver" >> $env:GITHUB_OUTPUT
+
+      - name: Download .exe and .sha256 from draft release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag }}
+          APP_VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          $exe = "cre-skills-v$($env:APP_VERSION)-setup.exe"
+          $sha = "cre-skills-v$($env:APP_VERSION)-setup.exe.sha256"
+          New-Item -ItemType Directory -Path download -Force | Out-Null
+          gh release download $env:TAG --pattern $exe --dir download
+          gh release download $env:TAG --pattern $sha --dir download
+          Get-ChildItem download\
+
+      - name: Verify SHA256 checksum
+        shell: pwsh
+        env:
+          APP_VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          $exe = "download\cre-skills-v$($env:APP_VERSION)-setup.exe"
+          $shaFile = "download\cre-skills-v$($env:APP_VERSION)-setup.exe.sha256"
+          $expected = (Get-Content $shaFile -Raw).Trim().Split(" ")[0]
+          $actual = (Get-FileHash $exe -Algorithm SHA256).Hash.ToLower()
+          if ($expected -ne $actual) {
+            Write-Error "SHA256 mismatch: expected=$expected actual=$actual"
+            exit 1
+          }
+          Write-Host "SHA256 verified: $actual"
+
+      - name: Create fake Claude home
+        shell: pwsh
+        run: |
+          $claudeHome = "$env:USERPROFILE\.claude"
+          New-Item -ItemType Directory -Path $claudeHome -Force | Out-Null
+          '{"permissions":{},"mcpServers":{}}' | Out-File "$claudeHome\settings.json" -Encoding utf8
+
+      - name: Run installer silently
+        shell: pwsh
+        env:
+          APP_VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          $exe = Resolve-Path "download\cre-skills-v$($env:APP_VERSION)-setup.exe"
+          $installDir = "$env:TEMP\cre-verify"
+          Write-Host "Installing to: $installDir"
+          Start-Process -FilePath $exe -ArgumentList "/VERYSILENT /DIR=$installDir /SUPPRESSMSGBOXES /NORESTART" -Wait
+          Start-Sleep -Seconds 5
+          Write-Host "Install complete"
+
+      - name: Run smoke test
+        shell: pwsh
+        run: |
+          $installDir = "$env:TEMP\cre-verify"
+          python scripts/installer_smoke_test.py --claude-home "$env:USERPROFILE\.claude" --install-dir $installDir
+
+  verify-macos:
+    name: Verify macOS DMG
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout at tag
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.tag }}
+
+      - name: Determine version
+        id: version
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          VERSION="${TAG#v}"
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Download .dmg from draft release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag }}
+          APP_VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          DMG="cre-skills-v${APP_VERSION}.dmg"
+          SHA="cre-skills-v${APP_VERSION}.dmg.sha256"
+          mkdir -p download
+          gh release download "$TAG" --pattern "$DMG" --dir download
+          gh release download "$TAG" --pattern "$SHA" --dir download || true
+          ls -la download/
+
+      - name: Verify SHA256 checksum
+        env:
+          APP_VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          DMG="download/cre-skills-v${APP_VERSION}.dmg"
+          SHA_FILE="download/cre-skills-v${APP_VERSION}.dmg.sha256"
+          if [ -f "$SHA_FILE" ]; then
+            EXPECTED=$(awk '{print $1}' "$SHA_FILE")
+            ACTUAL=$(shasum -a 256 "$DMG" | awk '{print $1}')
+            if [ "$EXPECTED" != "$ACTUAL" ]; then
+              echo "::error::SHA256 mismatch: expected=$EXPECTED actual=$ACTUAL"
+              exit 1
+            fi
+            echo "SHA256 verified: $ACTUAL"
+          else
+            echo "::warning::No .sha256 file found -- skipping checksum verification"
+          fi
+
+      - name: Mount and verify DMG contents
+        id: mount
+        env:
+          APP_VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          DMG="download/cre-skills-v${APP_VERSION}.dmg"
+          MOUNT_POINT="/Volumes/CRE-Skills-Plugin"
+
+          hdiutil attach "$DMG" -nobrowse -noverify
+          echo "MOUNT_POINT=$MOUNT_POINT" >> "$GITHUB_OUTPUT"
+
+          # Verify the DMG has contents
+          FILE_COUNT=$(find "$MOUNT_POINT" -maxdepth 2 -type f | wc -l | tr -d ' ')
+          if [ "$FILE_COUNT" -eq 0 ]; then
+            echo "::error::DMG is empty -- no files found"
+            exit 1
+          fi
+          echo "DMG contains $FILE_COUNT files"
+          ls -la "$MOUNT_POINT"/
+
+      - name: Verify code signature (best-effort)
+        continue-on-error: true
+        env:
+          APP_VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          DMG="download/cre-skills-v${APP_VERSION}.dmg"
+          codesign --verify --verbose "$DMG" 2>&1 || echo "::warning::DMG is not signed or signature could not be verified"
+
+      - name: Unmount DMG
+        if: always()
+        run: |
+          MOUNT_POINT="/Volumes/CRE-Skills-Plugin"
+          if [ -d "$MOUNT_POINT" ]; then
+            hdiutil detach "$MOUNT_POINT" -force || true
+          fi
+
+  promote:
+    name: Promote draft to live
+    needs: [verify-windows, verify-macos]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Promote release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          gh release edit "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --draft=false
+          echo "Release $TAG promoted to live"
+
+  on-failure:
+    name: Report verification failure
+    needs: [verify-windows, verify-macos]
+    if: failure()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create failure issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh issue create \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Release $TAG verification failed" \
+            --body "Automated verification of release **$TAG** failed.
+
+          **Workflow run:** $RUN_URL
+
+          Review the logs to determine which platform (Windows, macOS, or both) failed verification. Fix the issue and re-run the verify-release workflow." \
+            --label "bug"

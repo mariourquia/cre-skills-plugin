@@ -1,22 +1,104 @@
-name: Build macOS DMG Installer
+name: Release (Draft)
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version string (e.g. 2.0.0)'
-        required: false
-        default: '3.0.0'
   push:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
-  build-dmg:
-    name: Build signed .dmg installer
+  build-windows:
+    name: Build Windows installer
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Determine version
+        id: version
+        shell: pwsh
+        env:
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          $ver = $env:REF_NAME -replace '^v', ''
+          if ($ver -notmatch '^\d+\.\d+\.\d+$') {
+            Write-Error "Invalid version format: $ver (expected X.Y.Z)"
+            exit 1
+          }
+          echo "VERSION=$ver" >> $env:GITHUB_OUTPUT
+          Write-Host "Building installer for version: $ver"
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          choco install innosetup -y --no-progress
+          Write-Host "Inno Setup installed"
+
+      - name: Create dist directory
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path dist -Force | Out-Null
+
+      - name: Compile installer
+        shell: pwsh
+        env:
+          APP_VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) {
+            Write-Error "Inno Setup compiler not found at: $iscc"
+            exit 1
+          }
+          $src = $env:GITHUB_WORKSPACE
+          $ver = $env:APP_VERSION
+          Write-Host "Compiling: ISCC /DSourceDir=$src /DAppVersion=$ver scripts\create-exe.iss"
+          & $iscc "/DSourceDir=$src" "/DAppVersion=$ver" "scripts\create-exe.iss"
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "Inno Setup compilation failed with exit code: $LASTEXITCODE"
+            exit 1
+          }
+
+      - name: Verify output
+        shell: pwsh
+        env:
+          APP_VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          $exe = "dist\cre-skills-v$($env:APP_VERSION)-setup.exe"
+          if (-not (Test-Path $exe)) {
+            Write-Error "Expected output not found: $exe"
+            Get-ChildItem dist\ -ErrorAction SilentlyContinue
+            exit 1
+          }
+          $size = (Get-Item $exe).Length
+          $sizeMB = [math]::Round($size / 1MB, 2)
+          Write-Host "Installer built: $exe ($sizeMB MB)"
+
+      - name: Generate SHA256 checksum
+        shell: pwsh
+        env:
+          APP_VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          $exe = "dist\cre-skills-v$($env:APP_VERSION)-setup.exe"
+          $hash = (Get-FileHash $exe -Algorithm SHA256).Hash.ToLower()
+          $filename = Split-Path $exe -Leaf
+          "$hash  $filename" | Out-File "dist\cre-skills-v$($env:APP_VERSION)-setup.exe.sha256" -Encoding ascii -NoNewline
+          Write-Host "SHA256: $hash"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-installer
+          path: |
+            dist/cre-skills-v${{ steps.version.outputs.VERSION }}-setup.exe
+            dist/cre-skills-v${{ steps.version.outputs.VERSION }}-setup.exe.sha256
+          retention-days: 30
+
+  build-macos:
+    name: Build macOS DMG
     runs-on: macos-latest
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout repository
@@ -25,15 +107,9 @@ jobs:
       - name: Determine version
         id: version
         env:
-          EVENT_NAME: ${{ github.event_name }}
           REF_NAME: ${{ github.ref_name }}
-          INPUT_VERSION: ${{ github.event.inputs.version }}
         run: |
-          if [ "$EVENT_NAME" = "push" ]; then
-            VERSION="${REF_NAME#v}"
-          else
-            VERSION="${INPUT_VERSION:-3.0.0}"
-          fi
+          VERSION="${REF_NAME#v}"
           if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
             echo "::error::Invalid version format: $VERSION (expected X.Y.Z)"
             exit 1
@@ -130,9 +206,42 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v7
         with:
-          name: cre-skills-macos-installer
+          name: macos-installer
           path: |
             dist/cre-skills-v${{ steps.version.outputs.VERSION }}.dmg
             dist/cre-skills-v${{ steps.version.outputs.VERSION }}.dmg.sha256
           retention-days: 30
 
+  create-draft-release:
+    name: Create draft release
+    needs: [build-windows, build-macos]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v7
+        with:
+          path: assets
+
+      - name: List downloaded assets
+        run: find assets -type f | sort
+
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          # Flatten artifacts into a single directory
+          mkdir -p release-assets
+          find assets -type f -exec cp {} release-assets/ \;
+          ls -la release-assets/
+
+          gh release create "$TAG" release-assets/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$TAG" \
+            --generate-notes \
+            --draft
+
+          echo "Draft release created for $TAG"
