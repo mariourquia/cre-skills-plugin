@@ -1,0 +1,48 @@
+name: Customization Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+      - name: Run customization tests
+        run: node tests/test-customization.mjs
+      - name: Run outbox tests
+        run: node tests/test-outbox.mjs
+      - name: Verify MCP server starts and exposes 21 tools
+        run: |
+          INIT='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"ci","version":"0.0.1"}}}'
+          LIST='{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}'
+          RESPONSE=$(printf '%s\n%s\n' "$INIT" "$LIST" | timeout 10 node mcp-server.mjs 2>/dev/null)
+          TOOL_COUNT=$(echo "$RESPONSE" | grep -o '"tools"' | head -1)
+          if [ -z "$TOOL_COUNT" ]; then
+            echo "FAIL: tools/list did not return a tools array"
+            echo "$RESPONSE"
+            exit 1
+          fi
+          COUNT=$(echo "$RESPONSE" | python3 -c "
+          import sys, json
+          for line in sys.stdin:
+              line = line.strip()
+              if not line:
+                  continue
+              try:
+                  msg = json.loads(line)
+                  if 'result' in msg and 'tools' in msg['result']:
+                      print(len(msg['result']['tools']))
+              except json.JSONDecodeError:
+                  pass
+          ")
+          echo "MCP server reported $COUNT tools"
+          if [ "$COUNT" != "21" ]; then
+            echo "FAIL: expected 21 tools, got $COUNT"
+            exit 1
+          fi
+          echo "PASS: MCP server exposes 21 tools"
