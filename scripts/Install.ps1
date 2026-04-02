@@ -8,11 +8,24 @@
 # ──────────────────────────────────────────────────────────────────────
 
 param(
-    [Parameter(Mandatory = $true)]
-    [string]$InstallDir
+    [string]$InstallDir = $PSScriptRoot
 )
 
+if ($InstallDir -eq $PSScriptRoot) {
+    $InstallDir = Split-Path $PSScriptRoot -Parent
+}
+
 $ErrorActionPreference = 'Continue'
+
+# Global error trap: ensure the window stays open on any crash
+trap {
+    Write-Host ""
+    Write-Host "  An error occurred: $_" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "  Press Enter to close this window." -ForegroundColor White
+    Read-Host
+    exit 1
+}
 
 # ── Colors ──────────────────────────────────────────────────────────
 
@@ -248,49 +261,82 @@ if ($HasClaudeCode -or $HasClaudeDesktop) {
         Write-Green "  Plugin enabled in settings.json"
 
         # 4. Register MCP server in Claude Desktop config
-        #    Per Anthropic docs: Claude Desktop reads ONLY from
-        #    %APPDATA%\Claude\claude_desktop_config.json (not .mcp.json)
-        #    Windows requires cmd /c wrapper for stdio MCP servers
+        #    Uses Python for JSON manipulation (PowerShell can't handle hyphenated keys)
+        #    Windows stdio MCP servers need cmd /c wrapper per Anthropic docs
         $DesktopConfigDir = Join-Path $env:APPDATA "Claude"
         $DesktopConfigFile = Join-Path $DesktopConfigDir "claude_desktop_config.json"
 
+        # Check if Node.js is available (required for MCP server)
+        $hasNode = Get-Command node -ErrorAction SilentlyContinue
+        if (-not $hasNode) {
+            Write-Yellow "  Node.js not found -- MCP server for Claude Desktop requires Node.js"
+            Write-Dim  "  Install: https://nodejs.org/"
+        }
+
         try {
-            # Ensure the Claude Desktop config directory exists
             if (-not (Test-Path $DesktopConfigDir)) {
                 New-Item -ItemType Directory -Path $DesktopConfigDir -Force | Out-Null
             }
+            if (-not (Test-Path $DesktopConfigFile)) {
+                '{"mcpServers":{}}' | Set-Content $DesktopConfigFile -Encoding UTF8
+            }
 
-            if (Test-Path $DesktopConfigFile) {
-                $desktopConfig = Get-Content $DesktopConfigFile -Raw | ConvertFrom-Json
+            # Use Python to manipulate JSON (avoids PowerShell hyphenated key bug)
+            $tempScript = Join-Path $env:TEMP "cre_skills_setup_desktop.py"
+            $mcpServerPath = Join-Path $PluginCachePath "mcp-server.mjs"
+            @"
+import json, shutil, os, sys
+from datetime import datetime
+
+config_path = sys.argv[1]
+mcp_server = sys.argv[2]
+
+if os.path.exists(config_path):
+    backup = config_path + '.backup-' + datetime.now().strftime('%Y%m%d-%H%M%S')
+    shutil.copy2(config_path, backup)
+
+if os.path.exists(config_path):
+    with open(config_path, 'r', encoding='utf-8') as f:
+        config = json.load(f)
+else:
+    config = {}
+
+if 'mcpServers' not in config:
+    config['mcpServers'] = {}
+
+config['mcpServers']['cre-skills'] = {
+    'command': 'cmd',
+    'args': ['/c', 'node', mcp_server]
+}
+
+with open(config_path, 'w', encoding='utf-8') as f:
+    json.dump(config, f, indent=2)
+
+print('OK')
+"@ | Set-Content $tempScript -Encoding UTF8
+
+            # Try Python first (guaranteed to be installed for CRE via pip)
+            $pyCmd = Get-Command python -ErrorAction SilentlyContinue
+            if (-not $pyCmd) { $pyCmd = Get-Command python3 -ErrorAction SilentlyContinue }
+            if (-not $pyCmd) { $pyCmd = Get-Command py -ErrorAction SilentlyContinue }
+
+            if ($pyCmd) {
+                $result = & $pyCmd.Source $tempScript $DesktopConfigFile $mcpServerPath 2>&1
+                Remove-Item $tempScript -ErrorAction SilentlyContinue
+                if ($result -match "OK") {
+                    Write-Green "  MCP server registered for Claude Desktop"
+                    Write-Dim  "  Config: $DesktopConfigFile"
+                    Write-Dim  "  Restart Claude Desktop to activate"
+                } else {
+                    Write-Yellow "  Desktop config update returned: $result"
+                }
             } else {
-                $desktopConfig = [PSCustomObject]@{ mcpServers = [PSCustomObject]@{} }
+                Remove-Item $tempScript -ErrorAction SilentlyContinue
+                Write-Yellow "  Python not found -- could not update Claude Desktop config"
+                Write-Dim  "  Manual: add cre-skills MCP server to $DesktopConfigFile"
             }
-
-            if (-not $desktopConfig.PSObject.Properties.Name -contains "mcpServers") {
-                $desktopConfig | Add-Member -NotePropertyName "mcpServers" -NotePropertyValue ([PSCustomObject]@{})
-            }
-
-            # Windows stdio MCP servers need cmd /c wrapper per Anthropic docs
-            $mcpEntry = [PSCustomObject]@{
-                command = "cmd"
-                args = @("/c", "node", "$PluginCachePath\mcp-server.mjs")
-            }
-
-            if ($desktopConfig.mcpServers.PSObject.Properties.Name -contains "cre-skills") {
-                $desktopConfig.mcpServers.'cre-skills' = $mcpEntry
-            } else {
-                $desktopConfig.mcpServers | Add-Member -NotePropertyName "cre-skills" -NotePropertyValue $mcpEntry
-            }
-
-            $desktopConfig | ConvertTo-Json -Depth 10 | Set-Content $DesktopConfigFile -Encoding UTF8
-            Write-Green "  MCP server registered for Claude Desktop"
-            Write-Dim  "  Config: $DesktopConfigFile"
-            Write-Dim  "  Restart Claude Desktop to activate"
         } catch {
             Write-Yellow "  Could not register MCP server: $_"
-            Write-Host ""
-            Write-Host "  Manual: add this to $DesktopConfigFile:"
-            Write-Dim  '  {"mcpServers":{"cre-skills":{"command":"cmd","args":["/c","node","' + $PluginCachePath + '\mcp-server.mjs"]}}}'
         }
 
         $InstalledSomewhere = $true
@@ -336,12 +382,9 @@ Write-Host ""
 
 Write-Bold "  What's Included"
 Write-Host ""
-Write-Host "  " -NoNewline; Write-Green "112" -NoNewline:$false
-Write-Host " skills across 18 categories"
-Write-Host "  " -NoNewline; Write-Green "54" -NoNewline:$false
-Write-Host " expert agents (Pension Fund, PE, REIT, Risk Mgr, ...)"
-Write-Host "  " -NoNewline; Write-Green " 6" -NoNewline:$false
-Write-Host " workflow chains (Acquisition, Capital Stack, Hold, ...)"
+Write-Host "  112 skills across 18 categories" -ForegroundColor Green
+Write-Host "   54 expert agents (Pension Fund, PE, REIT, Risk Mgr, ...)" -ForegroundColor Green
+Write-Host "    6 workflow chains (Acquisition, Capital Stack, Hold, ...)" -ForegroundColor Green
 Write-Host ""
 Write-Dim  "  Plugin location: $InstallDir"
 Write-Host ""
