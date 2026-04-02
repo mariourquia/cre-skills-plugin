@@ -17,7 +17,7 @@ if ($InstallDir -eq $PSScriptRoot) {
 
 $ErrorActionPreference = 'Continue'
 
-# Global error trap: ensure the window stays open on any crash, generate diagnostic report
+# Global error trap: ensure the window stays open on any crash
 trap {
     Write-Host ""
     Write-Host "  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Red
@@ -27,29 +27,13 @@ trap {
     Write-Host "  $($_.Exception.Message)" -ForegroundColor Red
     Write-Host ""
 
-    # Try to run diagnostic report generator
-    $diagScript = Join-Path $InstallDir "scripts" "diagnostic_report.py"
-    $escapedError = ($_.Exception.Message) -replace '"', '\"'
-    $diagRan = $false
-    try {
-        if (Test-Path $diagScript) {
-            & python3 $diagScript --error "$escapedError" --step "install" 2>$null
-            if ($LASTEXITCODE -eq 0) { $diagRan = $true }
-        }
-    } catch {}
-    if (-not $diagRan) {
-        try {
-            & python $diagScript --error "$escapedError" --step "install" 2>$null
-            if ($LASTEXITCODE -eq 0) { $diagRan = $true }
-        } catch {}
-    }
+    Send-InstallerTelemetry -StepFailed "unhandled_exception" -ErrorMsg $_.Exception.Message
 
-    if (-not $diagRan) {
-        Write-Host "  Submit a bug report:" -ForegroundColor Yellow
-        Write-Host "  https://github.com/mariourquia/cre-skills-plugin/issues/new?labels=bug,installer" -ForegroundColor Cyan
-        Write-Host ""
-    }
-
+    Write-Host "  An anonymous error report was sent to help improve the installer." -ForegroundColor DarkGray
+    Write-Host ""
+    Write-Host "  You can also submit a bug report:" -ForegroundColor Yellow
+    Write-Host "  https://github.com/mariourquia/cre-skills-plugin/issues/new?labels=bug,installer" -ForegroundColor Cyan
+    Write-Host ""
     Write-Host "  Press Enter to close this window." -ForegroundColor White
     Read-Host
     exit 1
@@ -65,6 +49,116 @@ function Write-Red    { param([string]$Text) Write-Host $Text -ForegroundColor R
 function Write-Bold   { param([string]$Text) Write-Host $Text -ForegroundColor White }
 function Write-Dim    { param([string]$Text) Write-Host $Text -ForegroundColor DarkGray }
 
+# ── Telemetry (PowerShell-native, no Python/Node dependency) ───────
+
+$TelemetryUrl = "https://cre-skills-feedback-api.vercel.app/api/installer-telemetry"
+$PluginNameConst = "cre-skills-plugin"
+$InstallerVersionConst = "4.1.0"
+
+function Send-InstallerTelemetry {
+    param(
+        [string]$StepFailed,
+        [string]$ErrorMsg,
+        [string]$PrereqsJson = "{}"
+    )
+    try {
+        $idSource = "$env:COMPUTERNAME-$env:USERNAME"
+        $sha = [System.Security.Cryptography.SHA256]::Create()
+        $hashBytes = $sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($idSource))
+        $installHash = [System.BitConverter]::ToString($hashBytes).Replace("-", "").ToLower()
+
+        $eventSeed = "$StepFailed-$ErrorMsg-$(Get-Date -Format 'yyyyMMddHHmmssffff')"
+        $eventBytes = $sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($eventSeed))
+        $eventId = "it_" + [System.BitConverter]::ToString($eventBytes).Replace("-", "").ToLower().Substring(0, 16)
+
+        $truncatedMsg = $ErrorMsg
+        if ($ErrorMsg.Length -gt 2000) { $truncatedMsg = $ErrorMsg.Substring(0, 2000) }
+
+        $body = @{
+            id              = $eventId
+            plugin_name     = $PluginNameConst
+            plugin_version  = $InstallerVersionConst
+            installer_type  = "ps1"
+            os              = "windows"
+            os_version      = [System.Environment]::OSVersion.Version.ToString()
+            arch            = $env:PROCESSOR_ARCHITECTURE
+            step_failed     = $StepFailed
+            error_message   = $truncatedMsg
+            prereqs         = $PrereqsJson | ConvertFrom-Json
+            install_id_hash = $installHash
+        } | ConvertTo-Json -Depth 5 -Compress
+
+        Invoke-RestMethod -Uri $TelemetryUrl -Method POST -Body $body `
+            -ContentType "application/json" -TimeoutSec 5 `
+            -ErrorAction SilentlyContinue | Out-Null
+    } catch {
+        # Telemetry is best-effort -- never block installation
+    }
+}
+
+# ── Node.js detection and auto-install ─────────────────────────────
+
+function Find-OrInstallNode {
+    # 1. Check if node is already available and working
+    $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
+    if ($nodeCmd) {
+        try {
+            $ver = & node --version 2>&1
+            if ($ver -match "v\d+\.\d+") {
+                Write-Green "  Node.js found: $ver"
+                return $true
+            }
+        } catch {}
+    }
+
+    # 2. Check common install locations
+    foreach ($path in @(
+        "${env:ProgramFiles}\nodejs\node.exe",
+        "${env:ProgramFiles(x86)}\nodejs\node.exe"
+    )) {
+        if (Test-Path $path) {
+            $env:PATH = "$(Split-Path $path);$env:PATH"
+            $ver = & $path --version 2>&1
+            Write-Green "  Node.js found at: $path ($ver)"
+            return $true
+        }
+    }
+
+    Write-Yellow "  Node.js not found. Attempting to install..."
+
+    # 3. Try winget (most common on modern Windows, no admin needed)
+    $winget = Get-Command winget -ErrorAction SilentlyContinue
+    if ($winget) {
+        Write-Dim "  Installing via winget..."
+        & winget install OpenJS.NodeJS.LTS --accept-source-agreements --accept-package-agreements --silent 2>&1 | Out-Null
+        $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH", "User")
+
+        $nodeCheck = Get-Command node -ErrorAction SilentlyContinue
+        if ($nodeCheck) {
+            $ver = & node --version 2>&1
+            Write-Green "  Node.js installed via winget: $ver"
+            return $true
+        }
+    }
+
+    # 4. Try chocolatey
+    $choco = Get-Command choco -ErrorAction SilentlyContinue
+    if ($choco) {
+        Write-Dim "  Installing via chocolatey..."
+        & choco install nodejs-lts -y --no-progress 2>&1 | Out-Null
+        $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH", "User")
+
+        $nodeCheck = Get-Command node -ErrorAction SilentlyContinue
+        if ($nodeCheck) {
+            $ver = & node --version 2>&1
+            Write-Green "  Node.js installed via chocolatey: $ver"
+            return $true
+        }
+    }
+
+    return $false
+}
+
 # ── ASCII art header ────────────────────────────────────────────────
 
 Write-Host ""
@@ -76,7 +170,7 @@ Write-Host "  \____|_| \_\_____| |____/|_|\_\_|_|_|___/" -ForegroundColor Cyan
 Write-Host "" -ForegroundColor Cyan
 Write-Host "  Commercial Real Estate Skills for Claude" -ForegroundColor Cyan
 
-Write-Blue  "  Plugin Installer v4.0.0"
+Write-Blue  "  Plugin Installer v4.1.0"
 Write-Dim   "  112 skills | 54 agents | 6 workflow chains"
 Write-Host  ""
 
@@ -168,6 +262,20 @@ if (Test-Path $ClaudeDesktopDir) {
     }
 }
 
+# Node.js is required for the MCP server
+$HasNode = Find-OrInstallNode
+if (-not $HasNode) {
+    Write-Red "  Node.js is required but could not be installed."
+    Write-Host ""
+    Write-Host "  Install manually: https://nodejs.org/"
+    Write-Host ""
+    Send-InstallerTelemetry -StepFailed "node_install" `
+        -ErrorMsg "Node.js not found and auto-install failed"
+    Write-Bold "  Press Enter to close this window."
+    Read-Host
+    exit 1
+}
+
 # At least one must exist
 if (-not $HasClaudeCode -and -not $HasClaudeDesktop -and -not $HasClaudeHome) {
     Write-Host ""
@@ -180,6 +288,7 @@ if (-not $HasClaudeCode -and -not $HasClaudeDesktop -and -not $HasClaudeHome) {
     Write-Host "  After installing, re-run this script or register manually:"
     Write-Dim  "    claude plugin add `"$InstallDir`""
     Write-Host ""
+    Send-InstallerTelemetry -StepFailed "no_claude" -ErrorMsg "Neither Claude Code nor Claude Desktop found"
     Write-Bold "  Press Enter to close this window."
     Read-Host
     exit 0
@@ -202,7 +311,7 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
     # Plugin cache location: ~/.claude/plugins/cache/local/cre-skills-plugin/<version>
     $ClaudeHome = Join-Path $env:USERPROFILE ".claude"
     $PluginVersion = (Get-Content (Join-Path $InstallDir ".claude-plugin\plugin.json") | ConvertFrom-Json).version
-    if (-not $PluginVersion) { $PluginVersion = "4.0.0" }
+    if (-not $PluginVersion) { $PluginVersion = "4.1.0" }
     $PluginCachePath = Join-Path $ClaudeHome "plugins\cache\local\cre-skills-plugin\$PluginVersion"
     $InstalledPluginsFile = Join-Path $ClaudeHome "plugins\installed_plugins.json"
     $SettingsFile = Join-Path $ClaudeHome "settings.json"
@@ -280,17 +389,11 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
         Write-Green "  Plugin enabled in settings.json"
 
         # 4. Register MCP server in Claude Desktop config
-        #    Uses Python for JSON manipulation (PowerShell can't handle hyphenated keys)
+        #    Uses Node.js for JSON manipulation (PowerShell can't handle hyphenated keys)
         #    Windows stdio MCP servers need cmd /c wrapper per Anthropic docs
         $DesktopConfigDir = Join-Path $env:APPDATA "Claude"
         $DesktopConfigFile = Join-Path $DesktopConfigDir "claude_desktop_config.json"
-
-        # Check if Node.js is available (required for MCP server)
-        $hasNode = Get-Command node -ErrorAction SilentlyContinue
-        if (-not $hasNode) {
-            Write-Yellow "  Node.js not found -- MCP server for Claude Desktop requires Node.js"
-            Write-Dim  "  Install: https://nodejs.org/"
-        }
+        $mcpServerPath = Join-Path $PluginCachePath "mcp-server.mjs"
 
         try {
             if (-not (Test-Path $DesktopConfigDir)) {
@@ -300,63 +403,48 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
                 '{"mcpServers":{}}' | Set-Content $DesktopConfigFile -Encoding UTF8
             }
 
-            # Use Python to manipulate JSON (avoids PowerShell hyphenated key bug)
-            $tempScript = Join-Path $env:TEMP "cre_skills_setup_desktop.py"
-            $mcpServerPath = Join-Path $PluginCachePath "mcp-server.mjs"
+            # Backup before modifying
+            $backup = $DesktopConfigFile + ".backup-" + (Get-Date -Format "yyyyMMdd-HHmmss")
+            Copy-Item $DesktopConfigFile $backup -ErrorAction SilentlyContinue
+
+            Write-Dim "  Config: $DesktopConfigFile"
+            Write-Dim "  MCP server: $mcpServerPath"
+
+            # Use Node.js for JSON (no Python dependency)
+            $tempJs = Join-Path $env:TEMP "cre_skills_mcp_config.js"
             @"
-import json, shutil, os, sys
-from datetime import datetime
+const fs = require('fs');
+const cp = process.argv[1];
+const sp = process.argv[2];
+let d = {};
+try { d = JSON.parse(fs.readFileSync(cp, 'utf8')); } catch {}
+d.mcpServers = d.mcpServers || {};
+d.mcpServers['cre-skills'] = { command: 'cmd', args: ['/c', 'node', sp] };
+fs.writeFileSync(cp, JSON.stringify(d, null, 2));
+console.log('OK');
+"@ | Set-Content $tempJs -Encoding UTF8
 
-config_path = sys.argv[1]
-mcp_server = sys.argv[2]
+            $result = & node $tempJs $DesktopConfigFile $mcpServerPath 2>&1
+            Remove-Item $tempJs -ErrorAction SilentlyContinue
 
-if os.path.exists(config_path):
-    backup = config_path + '.backup-' + datetime.now().strftime('%Y%m%d-%H%M%S')
-    shutil.copy2(config_path, backup)
+            if ("$result" -match "OK") {
+                Write-Green "  MCP server registered for Claude Desktop"
+                Write-Dim  "  Restart Claude Desktop to activate"
 
-if os.path.exists(config_path):
-    with open(config_path, 'r', encoding='utf-8') as f:
-        config = json.load(f)
-else:
-    config = {}
-
-if 'mcpServers' not in config:
-    config['mcpServers'] = {}
-
-config['mcpServers']['cre-skills'] = {
-    'command': 'cmd',
-    'args': ['/c', 'node', mcp_server]
-}
-
-with open(config_path, 'w', encoding='utf-8') as f:
-    json.dump(config, f, indent=2)
-
-print('OK')
-"@ | Set-Content $tempScript -Encoding UTF8
-
-            # Try Python first (guaranteed to be installed for CRE via pip)
-            $pyCmd = Get-Command python -ErrorAction SilentlyContinue
-            if (-not $pyCmd) { $pyCmd = Get-Command python3 -ErrorAction SilentlyContinue }
-            if (-not $pyCmd) { $pyCmd = Get-Command py -ErrorAction SilentlyContinue }
-
-            if ($pyCmd) {
-                Write-Dim  "  Config: $DesktopConfigFile"
-                Write-Dim  "  MCP server: $mcpServerPath"
-                $result = & $pyCmd.Source $tempScript $DesktopConfigFile $mcpServerPath 2>&1
-                Remove-Item $tempScript -ErrorAction SilentlyContinue
-                if ($result -match "OK") {
-                    Write-Green "  MCP server registered for Claude Desktop"
-                    Write-Dim  "  Restart Claude Desktop to activate"
+                # Verify the MCP server file exists at the registered path
+                if (-not (Test-Path $mcpServerPath)) {
+                    Write-Yellow "  WARNING: MCP server file not found at: $mcpServerPath"
+                    Send-InstallerTelemetry -StepFailed "mcp_verify" -ErrorMsg "mcp-server.mjs not found at $mcpServerPath"
                 } else {
-                    Write-Yellow "  Desktop config update returned: $result"
+                    Write-Green "  MCP config verified"
                 }
             } else {
-                Remove-Item $tempScript -ErrorAction SilentlyContinue
-                Write-Yellow "  Python not found -- could not update Claude Desktop config"
-                Write-Dim  "  Manual: add cre-skills MCP server to $DesktopConfigFile"
+                Write-Yellow "  MCP config update returned: $result"
+                Send-InstallerTelemetry -StepFailed "mcp_config_write" -ErrorMsg "Node returned: $result"
             }
         } catch {
             Write-Yellow "  Could not register MCP server: $_"
+            Send-InstallerTelemetry -StepFailed "mcp_config_exception" -ErrorMsg "$_"
         }
 
         $InstalledSomewhere = $true
@@ -364,6 +452,7 @@ print('OK')
     } catch {
         Write-Yellow "  Could not register plugin automatically."
         Write-Host "  Error: $_"
+        Send-InstallerTelemetry -StepFailed "plugin_registration" -ErrorMsg "$_"
         Write-Host ""
         Write-Host "  Manual install: run this in Claude Code CLI:"
         Write-Dim  "    claude --plugin-dir `"$InstallDir`""
