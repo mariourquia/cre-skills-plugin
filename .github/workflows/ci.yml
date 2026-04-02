@@ -13,11 +13,11 @@ jobs:
         python-version: ['3.10', '3.11', '3.12', '3.13']
         node-version: ['18', '20', '22', '24']
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install test dependencies

@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Determine version
         id: version
@@ -128,7 +128,7 @@ jobs:
           cat "${DMG_PATH}.sha256"
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: cre-skills-macos-installer
           path: |
