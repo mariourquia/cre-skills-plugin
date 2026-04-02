@@ -82,7 +82,12 @@ export function parseFrontmatter(content: string): {
   if (!match) {
     return { frontmatter: {}, body: content };
   }
-  const frontmatter = parseYaml(match[1]) ?? {};
+  let frontmatter: Record<string, unknown>;
+  try {
+    frontmatter = parseYaml(match[1]) ?? {};
+  } catch {
+    return { frontmatter: {}, body: content };
+  }
   return { frontmatter, body: match[2] };
 }
 

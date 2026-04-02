@@ -213,7 +213,7 @@ echo ""
 # ── Step 2: Register plugin ──────────────────────────────────────────
 
 INSTALL_DIR="$SCRIPT_DIR"
-PLUGIN_VERSION="$(python3 -c "import json; print(json.load(open('$SCRIPT_DIR/.claude-plugin/plugin.json'))['version'])" 2>/dev/null || echo "4.0.0")"
+PLUGIN_VERSION="$(python3 -c "import json; print(json.load(open('$SCRIPT_DIR/src/plugin/plugin.json'))['version'])" 2>/dev/null || echo "4.0.0")"
 CLAUDE_HOME="$HOME/.claude"
 PLUGINS_CACHE="$CLAUDE_HOME/plugins/cache/local/cre-skills-plugin/$PLUGIN_VERSION"
 INSTALLED_PLUGINS="$CLAUDE_HOME/plugins/installed_plugins.json"
@@ -225,11 +225,14 @@ bold "  Installing CRE Skills Plugin..."
 printf "  ${DIM}Source: %s${RESET}\n" "$INSTALL_DIR"
 echo ""
 
-# 1. Copy to plugin cache
+# 1. Copy to plugin cache (dereference symlinks, exclude build tooling)
 mkdir -p "$PLUGINS_CACHE"
-rsync -a --delete \
+rsync -aL --delete \
     --exclude '.git' --exclude '__pycache__' --exclude 'node_modules' \
     --exclude 'dist' --exclude '.venv' --exclude '.local' \
+    --exclude 'src' --exclude 'builds' --exclude 'tools' --exclude 'config' \
+    --exclude 'docs/plans' --exclude 'docs/specs' --exclude 'docs/design' \
+    --exclude 'tests/golden' --exclude 'tests/snapshots' --exclude 'tests/fixtures' \
     "$INSTALL_DIR/" "$PLUGINS_CACHE/"
 green "  Plugin files copied to cache"
 

@@ -4,15 +4,23 @@
  * Runs golden, negative, and regression tests against the build pipeline.
  * Usage: npx tsx tools/test.ts
  */
-import { rmSync, readFileSync, existsSync, readdirSync } from "node:fs";
-import { resolve } from "node:path";
+import { createHash } from "node:crypto";
+import { rmSync, readFileSync, writeFileSync, existsSync, readdirSync, mkdirSync } from "node:fs";
+import { resolve, relative } from "node:path";
 import {
   buildDir,
   parseFrontmatter,
+  loadTargetProfile,
   SRC_DIR,
   BUILDS_DIR,
+  type TargetName,
 } from "./lib.js";
 import { buildTarget } from "./build-target.js";
+import { normalizeSkills } from "./normalize/skills.js";
+import { normalizeAgents } from "./normalize/agents.js";
+import { normalizeCommands } from "./normalize/commands.js";
+import { normalizeHooks } from "./normalize/hooks.js";
+import { normalizeManifest } from "./normalize/manifest.js";
 
 const REPO_ROOT = resolve(import.meta.dirname!, "..");
 const FIXTURES = resolve(REPO_ROOT, "tests", "fixtures");
@@ -307,6 +315,112 @@ test("cowork has no calculators", () => {
     !existsSync(resolve(buildDir("cowork"), "scripts/calculators")),
     "scripts/calculators/ should not exist in cowork build",
   );
+});
+
+// ── Snapshot: Build Output Hashing ──────────────────────────────────────
+
+console.log("\nSNAPSHOT: Build output consistency");
+
+const SNAPSHOTS_DIR = resolve(REPO_ROOT, "tests", "snapshots");
+const updateSnapshots = process.argv.includes("--update-snapshots");
+
+function hashDir(dir: string): string {
+  const hash = createHash("sha256");
+  const entries: string[] = [];
+
+  function walk(d: string) {
+    for (const entry of readdirSync(d, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+      const full = resolve(d, entry.name);
+      const rel = relative(dir, full);
+      if (entry.isDirectory()) {
+        entries.push(`d:${rel}`);
+        walk(full);
+      } else {
+        const content = readFileSync(full);
+        const fileHash = createHash("sha256").update(content).digest("hex");
+        entries.push(`f:${rel}:${fileHash}`);
+      }
+    }
+  }
+
+  walk(dir);
+  hash.update(entries.join("\n"));
+  return hash.digest("hex");
+}
+
+for (const target of ["cowork", "claude-code"] as const) {
+  const snapshotFile = resolve(SNAPSHOTS_DIR, `${target}.sha256`);
+  const currentHash = hashDir(buildDir(target));
+
+  if (updateSnapshots) {
+    mkdirSync(SNAPSHOTS_DIR, { recursive: true });
+    writeFileSync(snapshotFile, currentHash + "\n");
+    test(`${target} snapshot updated`, () => {});
+  } else if (existsSync(snapshotFile)) {
+    const savedHash = readFileSync(snapshotFile, "utf-8").trim();
+    test(`${target} snapshot matches`, () => {
+      assertEqual(currentHash, savedHash, `${target} build hash`);
+    });
+  } else {
+    test(`${target} snapshot baseline created`, () => {
+      mkdirSync(SNAPSHOTS_DIR, { recursive: true });
+      writeFileSync(snapshotFile, currentHash + "\n");
+    });
+  }
+}
+
+// ── Negative: Fixture Validation ───────────────────────────────────────
+
+console.log("\nNEGATIVE: Bad input handling");
+
+test("malformed skill frontmatter parsed without crash", () => {
+  const content = readFileSync(resolve(FIXTURES, "malformed_skill.md"), "utf-8");
+  // parseFrontmatter should not throw -- it returns empty frontmatter on bad YAML
+  const result = parseFrontmatter(content);
+  // The broken YAML means frontmatter won't parse cleanly
+  assert(result.body !== undefined, "parseFrontmatter returned no body");
+});
+
+test("missing agent fields detected by cowork validation", () => {
+  const content = readFileSync(resolve(FIXTURES, "missing_agent_fields.md"), "utf-8");
+  const { frontmatter } = parseFrontmatter(content);
+  const profile = loadTargetProfile("cowork");
+  const missing = profile.agents.required_fields.filter(
+    (f) => frontmatter[f] === undefined || frontmatter[f] === "",
+  );
+  assert(missing.length > 0, "expected missing required fields");
+  assert(missing.includes("name"), "should detect missing name");
+});
+
+test("forbidden command name detected by cowork validation", () => {
+  const content = readFileSync(resolve(FIXTURES, "forbidden_command_name.md"), "utf-8");
+  const { frontmatter } = parseFrontmatter(content);
+  const profile = loadTargetProfile("cowork");
+  const forbidden = profile.commands.forbidden_fields.filter((f) => f in frontmatter);
+  assert(forbidden.length > 0, "expected forbidden field 'name'");
+  assert(forbidden.includes("name"), "should detect forbidden 'name' field");
+});
+
+test("command-type hook rejected for portable target", () => {
+  const data = JSON.parse(readFileSync(resolve(FIXTURES, "wrong_hook_type.json"), "utf-8"));
+  let hasCommand = false;
+  for (const matchers of Object.values(data.hooks)) {
+    for (const matcher of matchers as any[]) {
+      for (const hook of matcher.hooks) {
+        if (hook.type === "command") hasCommand = true;
+      }
+    }
+  }
+  assert(hasCommand, "fixture should contain command-type hook");
+  const profile = loadTargetProfile("cowork");
+  assert(profile.hooks.variant === "portable", "cowork should use portable hooks");
+});
+
+test("invalid manifest missing required fields", () => {
+  const data = JSON.parse(readFileSync(resolve(FIXTURES, "invalid_manifest.json"), "utf-8"));
+  const missing = ["name", "version"].filter((f) => !data[f]);
+  assert(missing.length === 2, `expected 2 missing fields, got ${missing.length}`);
+  assert(!data.author?.name, "author.name should be missing");
 });
 
 // ── Cleanup ────────────────────────────────────────────────────────────

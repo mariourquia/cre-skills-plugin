@@ -310,7 +310,7 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
 
     # Plugin cache location: ~/.claude/plugins/cache/local/cre-skills-plugin/<version>
     $ClaudeHome = Join-Path $env:USERPROFILE ".claude"
-    $PluginVersion = (Get-Content (Join-Path $InstallDir ".claude-plugin\plugin.json") | ConvertFrom-Json).version
+    $PluginVersion = (Get-Content (Join-Path $InstallDir "src\plugin\plugin.json") | ConvertFrom-Json).version
     if (-not $PluginVersion) { $PluginVersion = "4.0.0" }
     $PluginCachePath = Join-Path $ClaudeHome "plugins\cache\local\cre-skills-plugin\$PluginVersion"
     $InstalledPluginsFile = Join-Path $ClaudeHome "plugins\installed_plugins.json"
@@ -322,11 +322,26 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
             New-Item -ItemType Directory -Path $PluginCachePath -Force | Out-Null
         }
 
+        # Robocopy does not dereference symlinks by default. Copy src/ content
+        # to the expected top-level layout, then copy remaining top-level items.
+        # Step 1: Copy src/ contents to cache root (resolves the source layout)
+        $srcDir = Join-Path $InstallDir "src"
+        $robocopyArgsSrc = @(
+            $srcDir,
+            $PluginCachePath,
+            '/MIR',
+            '/XD', '.git', '__pycache__', 'node_modules',
+            '/XF', '*.pyc', '.DS_Store',
+            '/NFL', '/NDL', '/NJH', '/NJS', '/NP'
+        )
+        & robocopy @robocopyArgsSrc | Out-Null
+
+        # Step 2: Copy non-src top-level items (scripts, docs, registry, etc.)
         $robocopyArgs = @(
             $InstallDir,
             $PluginCachePath,
-            '/MIR',
-            '/XD', '.git', '__pycache__', 'node_modules', 'dist', '.venv', '.local', '.claude',
+            '/E',
+            '/XD', '.git', '__pycache__', 'node_modules', 'dist', '.venv', '.local', '.claude', 'src', 'builds', 'tools', 'config',
             '/XF', '*.pyc', '.DS_Store',
             '/NFL', '/NDL', '/NJH', '/NJS', '/NP'
         )
