@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install.sh -- Single-command installer for the CRE Skills Plugin v4.0.1
+# install.sh -- Single-command installer for the CRE Skills Plugin v4.0.0
 #
 # Usage (remote):
 #   curl -fsSL https://raw.githubusercontent.com/mariourquia/cre-skills-plugin/main/scripts/install.sh | bash
@@ -40,7 +40,7 @@ print_banner() {
  | |    |  _  /|  __|   ___) | . \| | | \__ \
  | |____|_| \_\|_|____ |____/|_|\_\_|_|_|___/
   \_____|      |______|
-   Plugin v4.0.1 -- 112 skills, 54 agents, 6 workflows
+   Plugin v4.0.0 -- 112 skills, 54 agents, 6 workflows
 
 BANNER
   printf "${RESET}"
@@ -281,7 +281,9 @@ install_plugin() {
   info "Registering plugin..."
 
   local claude_home="$HOME/.claude"
-  local plugins_cache="$claude_home/plugins/cache/local/cre-skills-plugin/4.0.1"
+  local plugin_version
+  plugin_version="$(python3 -c "import json; print(json.load(open('$INSTALL_DIR/.claude-plugin/plugin.json'))['version'])" 2>/dev/null || echo "4.0.0")"
+  local plugins_cache="$claude_home/plugins/cache/local/cre-skills-plugin/$plugin_version"
   local installed_file="$claude_home/plugins/installed_plugins.json"
   local settings_file="$claude_home/settings.json"
   local plugin_key="cre-skills@local"
@@ -306,7 +308,7 @@ with open('$installed_file') as f:
 data.setdefault('plugins', {})['$plugin_key'] = [{
     'scope': 'user',
     'installPath': '$plugins_cache',
-    'version': '4.0.1',
+    'version': '$plugin_version',
     'installedAt': '$now',
     'lastUpdated': '$now'
 }]
@@ -315,8 +317,8 @@ with open('$installed_file', 'w') as f:
 " 2>/dev/null && success "Registered in installed_plugins.json" || warn "Could not update installed_plugins.json"
   else
     mkdir -p "$(dirname "$installed_file")"
-    printf '{"version":2,"plugins":{"%s":[{"scope":"user","installPath":"%s","version":"4.0.1","installedAt":"%s","lastUpdated":"%s"}]}}' \
-      "$plugin_key" "$plugins_cache" "$now" "$now" > "$installed_file"
+    printf '{"version":2,"plugins":{"%s":[{"scope":"user","installPath":"%s","version":"%s","installedAt":"%s","lastUpdated":"%s"}]}}' \
+      "$plugin_key" "$plugins_cache" "$plugin_version" "$now" "$now" > "$installed_file"
     success "Created installed_plugins.json"
   fi
 
@@ -391,7 +393,7 @@ print_success() {
   printf "${GREEN}${BOLD}"
   cat << 'SUCCESS'
   ============================================
-       CRE Skills Plugin v4.0.1 -- Installed
+       CRE Skills Plugin v4.0.0 -- Installed
   ============================================
 SUCCESS
   printf "${RESET}"
