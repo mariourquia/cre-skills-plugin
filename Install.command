@@ -2,8 +2,9 @@
 # ──────────────────────────────────────────────────────────────────────
 # CRE Skills Plugin installer (double-click from Finder or run in DMG)
 #
-# For non-technical users: the .app bundle calls this automatically.
-# For developers: just run this file directly.
+# 1. Copies plugin to ~/.claude/plugins/cache/local/cre-skills-plugin/
+# 2. Registers in installed_plugins.json + settings.json
+# 3. Registers MCP server in Claude Desktop config
 # ──────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
@@ -39,7 +40,6 @@ press_to_exit() {
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 
-# Verify we're in the right place
 if [ ! -d "skills" ] || [ ! -d "agents" ]; then
     red "Could not find the CRE Skills Plugin files."
     echo "Make sure this file is in the cre-skills-plugin folder."
@@ -58,19 +58,24 @@ cat << 'HEADER'
 ╚██████╗██║  ██║███████╗    ███████║██║  ██╗██║███████╗███████╗███████║
  ╚═════╝╚═╝  ╚═╝╚══════╝    ╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝╚══════╝
 
-            ┌──┐                        ┌─────┐   ┌──┐
-            │  │  ┌──┐    ┌───┐  ┌──┐   │     │   │  │     ┌─┐
-       ┌──┐ │  │  │  │ ┌┐ │   │  │  │┌──┤     │┌──┤  │  ┌┐ │ │  ┌──┐
-       │  │ │  │┌─┤  │ ││ │   │┌─┤  ││  │     ││  │  │┌─┤│ │ │┌─┤  │
-    ┌──┤  │ │  ││ │  ├─┤│ │   ││ │  ││  │     ││  │  ││ ││ │ ││ │  │
-  ──┤  │  ├─┤  ││ │  │ ││ │   ││ │  ││  │     ││  │  ││ ││ │ ││ │  ├──
-  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+                                            ╔═╗
+                                     ┌─┐    ║ ║  ┌─┐
+                              ┌──┐   │ │    ║ ║  │ │
+                     ┌───┐    │  │   │ │ ┌┐ ║ ║  │ │ ┌──┐
+              ┌──┐   │   │ ┌┐ │  │┌──┤ │ ││ ║ ║  │ │ │  │   ┌─┐
+         ┌──┐ │  │   │   │ ││ │  ││  │ │ ││ ║ ║┌─┤ │ │  │┌──┤ │
+    ┌─┐  │  │ │  │┌──┤   │ ││ │  ││  │ │ ││ ║ ║│ │ │ │  ││  │ │  ┌─┐
+    │ │  │  │ │  ││  │   │ ││ │  ││  │ │ ││ ║ ║│ │ │ │  ││  │ │  │ │
+  ──┤ ├──┤  ├─┤  ││  │   ├─┤│ │  ││  │ ├─┤│ ║ ║│ │ ├─┤  ││  │ ├──┤ ├──
+  ░░│B├░░│R├░│O├░│O├░│K├░│L├│Y│N│░░░░░░║M║A║N║H║A║T║T║A║N║░░░░░░░░░░░░
+  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+  ░░░░░░░░░░░░≈≈≈≈≈≈≈≈≈ EAST  RIVER ≈≈≈≈≈≈≈≈≈░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 HEADER
 printf "${RESET}"
 
-printf "${BLUE}  Plugin Installer v2.5.0${RESET}\n"
-printf "${DIM}  105 skills | 55 agents | 6 workflow chains${RESET}\n"
+printf "${BLUE}  Plugin Installer v4.1.0${RESET}\n"
+printf "${DIM}  112 skills | 54 agents | 8 MCP tools | 6 workflow chains${RESET}\n"
 echo ""
 
 # ── Step 1: Check prerequisites ──────────────────────────────────────
@@ -81,7 +86,6 @@ echo ""
 HAS_CLAUDE_CODE=false
 HAS_CLAUDE_DESKTOP=false
 
-# Check for Claude Code CLI
 if command -v claude &>/dev/null; then
     HAS_CLAUDE_CODE=true
     green "  Claude Code CLI found: $(claude --version 2>/dev/null || echo 'installed')"
@@ -89,7 +93,6 @@ else
     yellow "  Claude Code CLI not found (optional)"
 fi
 
-# Check for Claude Desktop
 CLAUDE_DESKTOP_APP="/Applications/Claude.app"
 CLAUDE_CONFIG_DIR="$HOME/Library/Application Support/Claude"
 if [ -d "$CLAUDE_DESKTOP_APP" ] || [ -d "$CLAUDE_CONFIG_DIR" ]; then
@@ -99,13 +102,18 @@ else
     yellow "  Claude Desktop not found (optional)"
 fi
 
-# At least one must exist
+if command -v node &>/dev/null; then
+    green "  Node.js found: $(node --version 2>/dev/null)"
+else
+    yellow "  Node.js not found (required for MCP server)"
+fi
+
 if [ "$HAS_CLAUDE_CODE" = false ] && [ "$HAS_CLAUDE_DESKTOP" = false ]; then
     echo ""
     red "  Neither Claude Code nor Claude Desktop was found."
     echo ""
     echo "  Install one of these first:"
-    printf "    ${CYAN}Claude Code:${RESET}    npm install -g @anthropic-ai/claude-code\n"
+    printf "    ${CYAN}Claude Code:${RESET}    https://claude.ai/download\n"
     printf "    ${CYAN}Claude Desktop:${RESET} https://claude.ai/download\n"
     echo ""
     press_to_exit 1
@@ -113,88 +121,124 @@ fi
 
 echo ""
 
-# ── Step 2: Install the plugin ────────────────────────────────────────
+# ── Step 2: Register plugin ──────────────────────────────────────────
 
 INSTALL_DIR="$SCRIPT_DIR"
+PLUGIN_VERSION="4.1.0"
+CLAUDE_HOME="$HOME/.claude"
+PLUGINS_CACHE="$CLAUDE_HOME/plugins/cache/local/cre-skills-plugin/$PLUGIN_VERSION"
+INSTALLED_PLUGINS="$CLAUDE_HOME/plugins/installed_plugins.json"
+SETTINGS_FILE="$CLAUDE_HOME/settings.json"
+PLUGIN_KEY="cre-skills@local"
+NOW="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+
 bold "  Installing CRE Skills Plugin..."
-printf "  ${DIM}Location: %s${RESET}\n" "$INSTALL_DIR"
+printf "  ${DIM}Source: %s${RESET}\n" "$INSTALL_DIR"
 echo ""
 
-INSTALLED_SOMEWHERE=false
+# 1. Copy to plugin cache
+mkdir -p "$PLUGINS_CACHE"
+rsync -a --delete \
+    --exclude '.git' --exclude '__pycache__' --exclude 'node_modules' \
+    --exclude 'dist' --exclude '.venv' --exclude '.local' \
+    "$INSTALL_DIR/" "$PLUGINS_CACHE/"
+green "  Plugin files copied to cache"
 
-# Install to Claude Code if available
-if [ "$HAS_CLAUDE_CODE" = true ]; then
-    printf "  ${BLUE}Installing to Claude Code...${RESET}\n"
-    if claude plugin add "$INSTALL_DIR" 2>/dev/null; then
-        green "  Claude Code plugin registered"
-        INSTALLED_SOMEWHERE=true
-    else
-        yellow "  Claude Code 'plugin add' not available in this version."
-        printf "  ${DIM}Use: claude --plugin-dir %s${RESET}\n" "$INSTALL_DIR"
-        INSTALLED_SOMEWHERE=true
-    fi
-    echo ""
+# Build catalog if not present
+if [ ! -f "$PLUGINS_CACHE/dist/catalog.json" ] && command -v python3 &>/dev/null; then
+    (cd "$PLUGINS_CACHE" && python3 scripts/catalog-build.py 2>/dev/null) && \
+        green "  Catalog built" || true
 fi
 
-# Install to Claude Desktop if available
-if [ "$HAS_CLAUDE_DESKTOP" = true ]; then
-    printf "  ${BLUE}Configuring Claude Desktop...${RESET}\n"
-
-    CLAUDE_SKILLS_DIR="$HOME/Library/Application Support/Claude/skills/cre-skills-plugin"
-
-    mkdir -p "$CLAUDE_SKILLS_DIR"
-    rsync -rlpt --delete \
-        --exclude='.git' \
-        --exclude='__pycache__' \
-        --exclude='.DS_Store' \
-        --exclude='node_modules' \
-        --exclude='dist' \
-        "$INSTALL_DIR/" "$CLAUDE_SKILLS_DIR/" 2>/dev/null && {
-        green "  Skills copied to Claude Desktop"
-        INSTALLED_SOMEWHERE=true
-    } || {
-        yellow "  Could not copy skills to Claude Desktop directory."
-        dim "  You can manually copy the plugin folder to Claude Desktop's skills location."
-    }
-    echo ""
+# 2. Register in installed_plugins.json
+if [ -f "$INSTALLED_PLUGINS" ]; then
+    python3 -c "
+import json
+with open('$INSTALLED_PLUGINS') as f:
+    data = json.load(f)
+data.setdefault('plugins', {})['$PLUGIN_KEY'] = [{
+    'scope': 'user',
+    'installPath': '$PLUGINS_CACHE',
+    'version': '$PLUGIN_VERSION',
+    'installedAt': '$NOW',
+    'lastUpdated': '$NOW'
+}]
+with open('$INSTALLED_PLUGINS', 'w') as f:
+    json.dump(data, f, indent=2)
+" 2>/dev/null && green "  Registered in installed_plugins.json" || yellow "  Could not update installed_plugins.json"
+else
+    mkdir -p "$(dirname "$INSTALLED_PLUGINS")"
+    printf '{"version":2,"plugins":{"%s":[{"scope":"user","installPath":"%s","version":"%s","installedAt":"%s","lastUpdated":"%s"}]}}' \
+        "$PLUGIN_KEY" "$PLUGINS_CACHE" "$PLUGIN_VERSION" "$NOW" "$NOW" > "$INSTALLED_PLUGINS"
+    green "  Created installed_plugins.json"
 fi
 
-if [ "$INSTALLED_SOMEWHERE" = false ]; then
-    yellow "  Automatic registration did not succeed."
-    printf "  ${DIM}Manual: claude --plugin-dir %s${RESET}\n" "$INSTALL_DIR"
+# 3. Enable in settings.json
+if [ -f "$SETTINGS_FILE" ]; then
+    python3 -c "
+import json
+with open('$SETTINGS_FILE') as f:
+    data = json.load(f)
+data.setdefault('enabledPlugins', {})['$PLUGIN_KEY'] = True
+with open('$SETTINGS_FILE', 'w') as f:
+    json.dump(data, f, indent=2)
+" 2>/dev/null && green "  Enabled in settings.json" || yellow "  Could not update settings.json"
+else
+    printf '{"enabledPlugins":{"%s":true}}' "$PLUGIN_KEY" > "$SETTINGS_FILE"
+    green "  Created settings.json"
 fi
+
+# 4. Register MCP server for Claude Desktop
+DESKTOP_CONFIG="$HOME/Library/Application Support/Claude/claude_desktop_config.json"
+if [ ! -d "$(dirname "$DESKTOP_CONFIG")" ]; then
+    DESKTOP_CONFIG="$HOME/.config/Claude/claude_desktop_config.json"
+fi
+
+if [ -d "$(dirname "$DESKTOP_CONFIG")" ] || [ "$HAS_CLAUDE_DESKTOP" = true ]; then
+    python3 -c "
+import json, os
+config_path = '''$DESKTOP_CONFIG'''
+os.makedirs(os.path.dirname(config_path), exist_ok=True)
+if os.path.exists(config_path):
+    with open(config_path) as f:
+        data = json.load(f)
+else:
+    data = {}
+data.setdefault('mcpServers', {})['cre-skills'] = {
+    'command': 'node',
+    'args': ['$PLUGINS_CACHE/mcp-server.mjs']
+}
+with open(config_path, 'w') as f:
+    json.dump(data, f, indent=2)
+" 2>/dev/null && green "  MCP server registered for Claude Desktop" || yellow "  Could not register MCP server (non-fatal)"
+fi
+
+echo ""
 
 # ── Step 3: Success ───────────────────────────────────────────────────
 
-echo ""
 echo "  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-green "  CRE Skills Plugin installed successfully!"
+green "  CRE Skills Plugin v4.1.0 installed!"
 echo "  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
 printf "  ${BOLD}Quick Start${RESET}\n"
 echo ""
-printf "  ${CYAN}/cre-skills:cre-route${RESET}        Route any CRE task to the right skill\n"
-printf "  ${CYAN}/cre-skills:deal-quick-screen${RESET} Screen a deal in seconds\n"
-printf "  ${CYAN}/cre-skills:cre-workflows${RESET}    Browse 6 end-to-end workflow chains\n"
-printf "  ${CYAN}/cre-skills:cre-agents${RESET}       List 55 expert agents\n"
+printf "  ${CYAN}/cre-skills:cre-route${RESET}         Route any CRE task to the right skill\n"
+printf "  ${CYAN}/cre-skills:deal-intake${RESET}       Start a deal workspace\n"
+printf "  ${CYAN}/cre-skills:navigator${RESET}         Browse all 112 skills\n"
+printf "  ${CYAN}/cre-skills:cre-agents${RESET}        List 54 expert agents\n"
 echo ""
 
-printf "  ${BOLD}Example${RESET}\n"
+printf "  ${BOLD}Where It Works${RESET}\n"
 echo ""
-printf "  ${DIM}> /cre-skills:deal-quick-screen${RESET}\n"
-printf "  ${DIM}  240-unit garden-style multifamily in Raleigh, NC.${RESET}\n"
-printf "  ${DIM}  Asking \$42M. 2018 vintage. Occupancy 93%%.${RESET}\n"
-printf "  ${DIM}  In-place NOI \$2.6M. Rents 12%% below market.${RESET}\n"
+printf "  ${GREEN}Claude Code${RESET}     112 skills + 54 agents + hooks\n"
+printf "  ${GREEN}Claude Desktop${RESET}  8 MCP tools (route, list, workspace, feedback)\n"
 echo ""
 
-printf "  ${BOLD}What's Included${RESET}\n"
+printf "  ${BOLD}Restart Claude Desktop${RESET} to see the MCP server.\n"
 echo ""
-printf "  ${GREEN}105${RESET} skills across 16 categories\n"
-printf "  ${GREEN}55${RESET} expert agents (Pension Fund, PE, REIT, Risk Mgr, ...)\n"
-printf "  ${GREEN} 6${RESET} workflow chains (Acquisition, Capital Stack, Hold, ...)\n"
-echo ""
-printf "  Plugin location: ${DIM}%s${RESET}\n" "$INSTALL_DIR"
+printf "  Plugin location: ${DIM}%s${RESET}\n" "$PLUGINS_CACHE"
 echo ""
 
 press_to_exit 0
