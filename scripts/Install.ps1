@@ -247,6 +247,40 @@ if ($HasClaudeCode -or $HasClaudeDesktop) {
         $settings | ConvertTo-Json -Depth 10 | Set-Content $SettingsFile -Encoding UTF8
         Write-Green "  Plugin enabled in settings.json"
 
+        # 4. Register MCP server for Claude Desktop
+        $DesktopConfigFile = Join-Path $env:APPDATA "Claude\claude_desktop_config.json"
+        if (-not (Test-Path $DesktopConfigFile)) {
+            $DesktopConfigFile = Join-Path $ClaudeHome "claude_desktop_config.json"
+        }
+
+        try {
+            if (Test-Path $DesktopConfigFile) {
+                $desktopConfig = Get-Content $DesktopConfigFile -Raw | ConvertFrom-Json
+            } else {
+                $desktopConfig = [PSCustomObject]@{ mcpServers = [PSCustomObject]@{} }
+            }
+
+            if (-not $desktopConfig.PSObject.Properties.Name -contains "mcpServers") {
+                $desktopConfig | Add-Member -NotePropertyName "mcpServers" -NotePropertyValue ([PSCustomObject]@{})
+            }
+
+            $mcpEntry = [PSCustomObject]@{
+                command = "node"
+                args = @("$PluginCachePath\mcp-server.mjs")
+            }
+
+            if ($desktopConfig.mcpServers.PSObject.Properties.Name -contains "cre-skills") {
+                $desktopConfig.mcpServers.'cre-skills' = $mcpEntry
+            } else {
+                $desktopConfig.mcpServers | Add-Member -NotePropertyName "cre-skills" -NotePropertyValue $mcpEntry
+            }
+
+            $desktopConfig | ConvertTo-Json -Depth 10 | Set-Content $DesktopConfigFile -Encoding UTF8
+            Write-Green "  MCP server registered for Claude Desktop"
+        } catch {
+            Write-Yellow "  Could not register MCP server (non-fatal)"
+        }
+
         $InstalledSomewhere = $true
 
     } catch {
@@ -254,7 +288,7 @@ if ($HasClaudeCode -or $HasClaudeDesktop) {
         Write-Host "  Error: $_"
         Write-Host ""
         Write-Host "  Manual install: run this in Claude Code CLI:"
-        Write-Dim  "    claude plugin add `"$InstallDir`""
+        Write-Dim  "    claude --plugin-dir `"$InstallDir`""
     }
     Write-Host ""
 }

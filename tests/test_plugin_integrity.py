@@ -343,6 +343,63 @@ class TestDocReferences(unittest.TestCase):
     def test_release_checklist_exists(self):
         self.assertTrue(os.path.exists(os.path.join(PLUGIN_ROOT, 'docs/release-checklist.md')))
 
+    def test_mcp_server_exists(self):
+        self.assertTrue(os.path.exists(os.path.join(PLUGIN_ROOT, 'mcp-server.mjs')))
+
+    def test_mcp_json_exists(self):
+        self.assertTrue(os.path.exists(os.path.join(PLUGIN_ROOT, '.mcp.json')))
+        with open(os.path.join(PLUGIN_ROOT, '.mcp.json')) as f:
+            data = json.load(f)
+        self.assertIn('mcpServers', data)
+        self.assertIn('cre-skills', data['mcpServers'])
+
+
+class TestMcpServer(unittest.TestCase):
+    """MCP server behavioral tests."""
+
+    def test_mcp_server_syntax(self):
+        result = subprocess.run(
+            ['node', '--check', os.path.join(PLUGIN_ROOT, 'mcp-server.mjs')],
+            capture_output=True
+        )
+        self.assertEqual(result.returncode, 0, 'mcp-server.mjs failed syntax check')
+
+    def test_mcp_initialize(self):
+        result = subprocess.run(
+            ['node', os.path.join(PLUGIN_ROOT, 'mcp-server.mjs')],
+            input='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}\n',
+            capture_output=True, text=True, timeout=5
+        )
+        data = json.loads(result.stdout.strip())
+        self.assertEqual(data['result']['serverInfo']['name'], 'cre-skills')
+
+    def test_mcp_tools_list(self):
+        result = subprocess.run(
+            ['node', os.path.join(PLUGIN_ROOT, 'mcp-server.mjs')],
+            input='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}\n{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}\n',
+            capture_output=True, text=True, timeout=5
+        )
+        lines = [l for l in result.stdout.strip().split('\n') if l.strip()]
+        data = json.loads(lines[-1])
+        tools = data['result']['tools']
+        self.assertGreaterEqual(len(tools), 8)
+        tool_names = [t['name'] for t in tools]
+        self.assertIn('cre_route', tool_names)
+        self.assertIn('cre_list_skills', tool_names)
+        self.assertIn('cre_workspace_create', tool_names)
+
+    def test_mcp_route_tool(self):
+        result = subprocess.run(
+            ['node', os.path.join(PLUGIN_ROOT, 'mcp-server.mjs')],
+            input='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}\n{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"cre_route","arguments":{"query":"underwrite a deal"}}}\n',
+            capture_output=True, text=True, timeout=5
+        )
+        lines = [l for l in result.stdout.strip().split('\n') if l.strip()]
+        data = json.loads(lines[-1])
+        content = json.loads(data['result']['content'][0]['text'])
+        self.assertEqual(content['confidence'], 'high')
+        self.assertIn('underwriting', content['recommendation']['skill'])
+
 
 if __name__ == '__main__':
     unittest.main()
