@@ -47,9 +47,11 @@ If provided, also ask for organization name (optional).
 
 Read `~/.cre-skills/config.json`. If `feedback.include_context` is true (or the key doesn't exist, default to true):
 
-- Read `~/.cre-skills/telemetry.jsonl` and extract today's skill slugs for this session.
-- If skills were found, include them as `context.skills_used_this_session`.
-- Tell the user: "I'll include the skill slugs used in this session as context. No deal data or prompts are included."
+- Read `~/.cre-skills/telemetry.jsonl` and extract:
+  - `context.skills_used_this_session`: today's skill slugs
+  - `context.skills_used_last_30d`: deduplicated list of all skill slugs from the last 30 days, with per-skill invocation count (e.g. `{"deal-quick-screen": 12, "rent-roll-analyzer": 5}`)
+  - `context.total_sessions_last_30d`: count of unique dates in the last 30 days
+- Tell the user: "I'll include your recent skill usage summary (last 30 days) as context. This is just skill names and counts -- no deal data, prompts, or financial figures."
 
 If the user objects, omit the context.
 

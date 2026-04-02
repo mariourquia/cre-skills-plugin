@@ -44,20 +44,20 @@ Added to `~/.cre-skills/config.json` by `telemetry-init.mjs`:
 ```json
 {
   "feedback": {
-    "mode": "local_only",
+    "mode": "ask_each_time",
     "include_context": true,
-    "backend_url": ""
+    "backend_url": "https://cre-skills-feedback-api.vercel.app/api/feedback"
   }
 }
 ```
 
 | Key | Purpose | Default |
 |-----|---------|---------|
-| `mode` | `local_only`, `ask_each_time`, `anonymous_remote`, `remote_with_contact` | `local_only` |
-| `include_context` | Attach sanitized session metadata | `true` |
-| `backend_url` | HTTPS endpoint for remote submission. Empty = disabled. | `""` (empty) |
+| `mode` | `local_only`, `ask_each_time`, `anonymous_remote`, `remote_with_contact` | `ask_each_time` |
+| `include_context` | Attach 30-day usage summary and session metadata | `true` |
+| `backend_url` | HTTPS endpoint for remote submission | `https://cre-skills-feedback-api.vercel.app/api/feedback` |
 
-Existing installs get this block backfilled on next session start with `local_only` defaults. Remote submission activates only when the user explicitly sets `mode` to a non-`local_only` value AND provides a non-empty HTTPS `backend_url`.
+Users are prompted before each remote send (`ask_each_time`). To disable remote submission entirely, set `mode` to `local_only`. Existing installs get this block backfilled on next session start.
 
 ## Data Flow
 
@@ -77,7 +77,7 @@ All files in `~/.cre-skills/`:
 | File | Format | Purpose |
 |------|--------|---------|
 | `config.json` | JSON | User preferences, anonymousId, feedback settings |
-| `telemetry.jsonl` | JSONL | Skill invocation events (opt-in) |
+| `telemetry.jsonl` | JSONL | Skill invocation events (enabled by default, opt-out) |
 | `feedback.jsonl` | JSONL | Session survey responses (existing, opt-in) |
 | `feedback-log.jsonl` | JSONL | Structured feedback submissions (this system) |
 
@@ -85,16 +85,17 @@ All files in `~/.cre-skills/`:
 
 ## Remote Submission
 
-Remote submission is **disabled by default** (`local_only` mode). Users who want to share feedback with the maintainer must explicitly configure it.
-
-**To enable remote submission:**
-1. Set `feedback.mode` to `ask_each_time`, `anonymous_remote`, or `remote_with_contact`
-2. Set `feedback.backend_url` to `https://cre-skills-feedback-api.vercel.app/api/feedback`
+Remote submission defaults to `ask_each_time` mode. When a user submits feedback or a bug report, they are asked: "Would you also like to send this to the plugin maintainer?" before anything leaves their machine.
 
 **Modes:**
-- `local_only` (default) -- all feedback stays on your machine
-- `ask_each_time` -- prompt user before each remote send
-- `anonymous_remote` -- send without contact_email/organization
-- `remote_with_contact` -- send all fields
+- `ask_each_time` (default) -- prompt user before each remote send
+- `anonymous_remote` -- send automatically, strips contact_email/organization
+- `remote_with_contact` -- send automatically with all fields
+- `local_only` -- all feedback stays on your machine, nothing sent
 
-**Backend:** Vercel Function + Supabase. Secrets are server-side only. The plugin only knows the public URL. See the [cre-skills-feedback-api](https://github.com/mariourquia/cre-skills-feedback-api) repo.
+**What is sent (when user approves):**
+- The redacted feedback/bug record (same fields stored locally)
+- 30-day skill usage summary (skill slugs + invocation counts, no deal data)
+- Session count for the last 30 days
+
+**Backend:** Vercel Function + Supabase at `https://cre-skills-feedback-api.vercel.app/api/feedback`. Secrets are server-side only. The plugin only knows the public URL. See the [cre-skills-feedback-api](https://github.com/mariourquia/cre-skills-feedback-api) repo.
