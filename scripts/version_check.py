@@ -26,7 +26,8 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
-PLUGIN_JSON = REPO_ROOT / ".claude-plugin" / "plugin.json"
+SRC_DIR = REPO_ROOT / "src"
+PLUGIN_JSON = SRC_DIR / "plugin" / "plugin.json"
 
 # ---------------------------------------------------------------------------
 # Fallback-value patterns per installer file

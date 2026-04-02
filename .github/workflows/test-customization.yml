@@ -20,7 +20,7 @@ jobs:
         run: |
           INIT='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"ci","version":"0.0.1"}}}'
           LIST='{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}'
-          RESPONSE=$(printf '%s\n%s\n' "$INIT" "$LIST" | timeout 10 node mcp-server.mjs 2>/dev/null)
+          RESPONSE=$(printf '%s\n%s\n' "$INIT" "$LIST" | timeout 10 node src/mcp-server.mjs 2>/dev/null)
           TOOL_COUNT=$(echo "$RESPONSE" | grep -o '"tools"' | head -1)
           if [ -z "$TOOL_COUNT" ]; then
             echo "FAIL: tools/list did not return a tools array"

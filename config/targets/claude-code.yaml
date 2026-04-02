@@ -1,0 +1,29 @@
+name: claude-code
+description: Claude Code plugin package (full-featured)
+
+skills:
+  allowed_frontmatter: all
+  strip_fields: []
+
+agents:
+  required_fields:
+    - name
+    - description
+
+commands:
+  forbidden_fields: []
+
+hooks:
+  variant: full
+
+manifest:
+  strip_fields: []
+
+orchestrators:
+  include: true
+
+mcp_server:
+  include: true
+
+calculators:
+  include: true

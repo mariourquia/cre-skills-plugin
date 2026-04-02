@@ -1,0 +1,44 @@
+name: cowork
+description: Cowork-compatible plugin package
+
+skills:
+  allowed_frontmatter:
+    - name
+    - description
+  strip_fields:
+    - slug
+    - version
+    - status
+    - category
+    - targets
+
+agents:
+  required_fields:
+    - name
+    - model
+    - color
+    - description
+  defaults_file: ../defaults/agent-defaults.yaml
+
+commands:
+  forbidden_fields:
+    - name
+
+hooks:
+  variant: portable
+  # Portable hooks: SessionStart prompt only, no command hooks,
+  # no PostToolUse telemetry, no Stop session-summary.
+
+manifest:
+  strip_fields:
+    - userConfig
+  overrides_file: ../defaults/manifest-defaults.yaml
+
+orchestrators:
+  include: false
+
+mcp_server:
+  include: false
+
+calculators:
+  include: false

@@ -35,6 +35,7 @@ except ImportError:
     sys.exit(1)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+SRC_DIR = REPO_ROOT / "src"
 
 # ---------------------------------------------------------------------------
 # YAML frontmatter parser (no external deps beyond pyyaml)
@@ -89,7 +90,7 @@ def load_registry() -> dict:
 
 def parse_routing_triggers() -> dict:
     """Parse CRE-ROUTING.md and return {slug: [trigger phrases]}."""
-    routing_path = REPO_ROOT / "routing" / "CRE-ROUTING.md"
+    routing_path = SRC_DIR / "routing" / "CRE-ROUTING.md"
     if not routing_path.exists():
         return {}
     triggers = {}
@@ -117,7 +118,7 @@ def parse_routing_triggers() -> dict:
 
 def parse_workflow_chains() -> list:
     """Parse workflow chains from CRE-ROUTING.md."""
-    routing_path = REPO_ROOT / "routing" / "CRE-ROUTING.md"
+    routing_path = SRC_DIR / "routing" / "CRE-ROUTING.md"
     if not routing_path.exists():
         return []
     text = routing_path.read_text(encoding="utf-8")
@@ -220,7 +221,7 @@ SKILL_CALCULATOR_MAP = {
 def scan_skills(registry: dict, triggers: dict) -> list:
     """Scan skills/ directory and produce catalog items."""
     items = []
-    skills_dir = REPO_ROOT / "skills"
+    skills_dir = SRC_DIR / "skills"
     for skill_dir in sorted(skills_dir.iterdir()):
         if not skill_dir.is_dir():
             continue
@@ -275,7 +276,7 @@ def scan_skills(registry: dict, triggers: dict) -> list:
 def scan_agents() -> list:
     """Scan agents/ directory (flat, no subdirs) and produce catalog items."""
     items = []
-    agents_dir = REPO_ROOT / "agents"
+    agents_dir = SRC_DIR / "agents"
     for md_path in sorted(agents_dir.glob("*.md")):
         if md_path.name == "_index.md":
             continue
@@ -318,7 +319,7 @@ def scan_agents() -> list:
 def scan_commands() -> list:
     """Scan commands/ directory."""
     items = []
-    commands_dir = REPO_ROOT / "commands"
+    commands_dir = SRC_DIR / "commands"
     for md_path in sorted(commands_dir.iterdir()):
         if not md_path.suffix == ".md":
             continue
@@ -356,7 +357,7 @@ def scan_commands() -> list:
 def scan_calculators() -> list:
     """Scan scripts/calculators/ directory."""
     items = []
-    calc_dir = REPO_ROOT / "scripts" / "calculators"
+    calc_dir = SRC_DIR / "calculators"
     for py_path in sorted(calc_dir.iterdir()):
         if py_path.suffix != ".py" or py_path.name == "__init__.py":
             continue
@@ -402,7 +403,7 @@ def scan_calculators() -> list:
 def scan_orchestrators() -> list:
     """Scan orchestrators/configs/ directory."""
     items = []
-    configs_dir = REPO_ROOT / "orchestrators" / "configs"
+    configs_dir = SRC_DIR / "orchestrators" / "configs"
     if not configs_dir.exists():
         return items
     for json_path in sorted(configs_dir.iterdir()):
@@ -482,7 +483,7 @@ def build_workflow_items(chains: list) -> list:
 # ---------------------------------------------------------------------------
 
 def get_plugin_version() -> str:
-    pj = REPO_ROOT / ".claude-plugin" / "plugin.json"
+    pj = SRC_DIR / "plugin" / "plugin.json"
     if pj.exists():
         data = json.loads(pj.read_text(encoding="utf-8"))
         return data.get("version", "0.0.0")
@@ -548,7 +549,7 @@ def main():
     args = parser.parse_args()
 
     if args.validate:
-        catalog_path = REPO_ROOT / "catalog" / "catalog.yaml"
+        catalog_path = SRC_DIR / "catalog" / "catalog.yaml"
         if not catalog_path.exists():
             print("ERROR: catalog/catalog.yaml not found. Run without --validate first.", file=sys.stderr)
             sys.exit(1)
@@ -573,7 +574,7 @@ def main():
             print(f"  - {issue}", file=sys.stderr)
 
     # Write catalog.yaml
-    catalog_yaml_path = REPO_ROOT / "catalog" / "catalog.yaml"
+    catalog_yaml_path = SRC_DIR / "catalog" / "catalog.yaml"
     with open(catalog_yaml_path, "w", encoding="utf-8") as f:
         yaml.dump(catalog, f, default_flow_style=False, sort_keys=False, allow_unicode=True, width=120)
     print(f"Wrote {catalog_yaml_path} ({len(catalog['items'])} items)")
