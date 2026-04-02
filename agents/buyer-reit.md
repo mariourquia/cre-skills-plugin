@@ -1,4 +1,5 @@
 ---
+name: buyer-reit
 description: "Public REIT acquisitions team evaluating deals through FFO/AFFO accretion, NAV impact, portfolio fit, and equity analyst reaction. Disciplined to NAV methodology, pays with equity or cash from 1031 proceeds and credit facilities. Deploy when analyzing how publicly traded capital evaluates an asset, when testing portfolio complementarity, or when assessing whether a deal moves the stock price."
 ---
 

@@ -1,1461 +1,1266 @@
 # CRE Skills Registry
-# Generated: 2026-03-17
-# Updated: 2026-04-01
-# Total Skills: 105
+# GENERATED from catalog/catalog.yaml — do not edit manually
+# Run: python scripts/catalog-generate.py
+# Generated: 2026-04-02
+# Total Skills: 112
 
 metadata:
-  version: "1.4"
-  generated: "2026-03-17"
-  updated: "2026-03-26"
-  total_skills: 105
-  categories: 16
-  source_prompts_audited: 155
-  gap_fill_prompts_added: 32
-  prompts_merged: 85
-  prompts_retired: 33
-  workflow_coverage: "97%"
-
-# ============================================================================
-# EXISTING DEPLOYED SKILLS (3)
-# ============================================================================
+  version: "2.0"
+  generated: "2026-04-02"
+  total_skills: 112
+  source: catalog/catalog.yaml
 
 skills:
-  # --- Existing Deployed ---
-
-  - slug: reit-profile-builder
-    name: REIT Profile Builder
-    category: existing-deployed
-    priority: deployed
-    phase: 0
-    status: deployed
-    effort_hours: 0
-    plan_file: plans/reit-cre/reit-profile-builder.md
-    source_prompts: []
-    chains_to: [ic-memo-generator, lp-pitch-deck-builder, portfolio-allocator]
-    chains_from: []
-    daily_ops_support: []
-
-  - slug: deal-underwriting-assistant
-    name: Deal Underwriting Assistant
-    category: existing-deployed
-    priority: deployed
-    phase: 0
-    status: deployed
-    effort_hours: 0
-    plan_file: plans/reit-cre/deal-underwriting-assistant.md
-    source_prompts: []
-    chains_to: [sensitivity-stress-test, ic-memo-generator, disposition-strategy-engine]
-    chains_from: [deal-quick-screen, rent-roll-analyzer, market-memo-generator]
-    daily_ops_support: [t12-normalizer, rent-roll-formatter]
-
-  - slug: market-memo-generator
-    name: Market Memo Generator
-    category: existing-deployed
-    priority: deployed
-    phase: 0
-    status: deployed
-    effort_hours: 0
-    plan_file: plans/reit-cre/market-memo-generator.md
-    source_prompts: []
-    chains_to: [deal-underwriting-assistant, submarket-truth-serum, comp-snapshot, supply-demand-forecast, acquisition-underwriting-engine]
-    chains_from: []
-    daily_ops_support: []
-
-  # ============================================================================
-  # 01-DEAL-SCREENING (2 skills)
-  # ============================================================================
-
-  - slug: deal-quick-screen
-    name: Deal Quick Screen
-    category: 01-deal-screening
-    priority: P0
-    phase: 1
-    status: planned
-    effort_hours: 2
-    plan_file: plans/reit-cre/01-deal-screening/deal-quick-screen.md
-    source_prompts: [AQ-13, AQ-17]
-    chains_to: [acquisition-underwriting-engine, om-reverse-pricing, submarket-truth-serum, comp-snapshot]
-    chains_from: [sourcing-outreach-system]
-    daily_ops_support: []
-
-  - slug: om-reverse-pricing
-    name: OM Reverse Pricing
-    category: 01-deal-screening
-    priority: P0
-    phase: 1
-    status: planned
-    effort_hours: 2
-    plan_file: plans/reit-cre/01-deal-screening/om-reverse-pricing.md
-    source_prompts: [AQ-07]
-    chains_to: [acquisition-underwriting-engine, comp-snapshot, submarket-truth-serum]
-    chains_from: [deal-quick-screen]
-    daily_ops_support: []
-
-  # ============================================================================
-  # 02-UNDERWRITING-ANALYSIS (3 skills)
-  # ============================================================================
-
-  - slug: acquisition-underwriting-engine
-    name: Acquisition Underwriting Engine
-    category: 02-underwriting-analysis
-    priority: P0
-    phase: 2
-    status: planned
-    effort_hours: 8
-    plan_file: plans/reit-cre/02-underwriting-analysis/acquisition-underwriting-engine.md
-    source_prompts: [AQ-06, AQ-12, AQ-08, AQ-11, FM-01, FM-02, FM-06]
-    chains_to: [sensitivity-stress-test, ic-memo-generator, dd-command-center, jv-waterfall-architect]
-    chains_from: [deal-quick-screen, om-reverse-pricing, rent-roll-analyzer, submarket-truth-serum, comp-snapshot, market-memo-generator, loan-sizing-engine]
-    daily_ops_support: [t12-normalizer, rent-roll-formatter]
-
-  - slug: rent-roll-analyzer
-    name: Rent Roll Analyzer
-    category: 02-underwriting-analysis
-    priority: P0
-    phase: 1
-    status: planned
-    effort_hours: 4
-    plan_file: plans/reit-cre/02-underwriting-analysis/rent-roll-analyzer.md
-    source_prompts: [AQ-18]
-    chains_to: [acquisition-underwriting-engine, loan-sizing-engine, annual-budget-engine, property-performance-dashboard]
-    chains_from: []
-    daily_ops_support: [rent-roll-formatter]
-
-  - slug: sensitivity-stress-test
-    name: Sensitivity & Stress Test
-    category: 02-underwriting-analysis
-    priority: P1
-    phase: 2
-    status: planned
-    effort_hours: 4
-    plan_file: plans/reit-cre/02-underwriting-analysis/sensitivity-stress-test.md
-    source_prompts: [AQ-14, FM-07]
-    chains_to: [ic-memo-generator]
-    chains_from: [acquisition-underwriting-engine, annual-budget-engine, property-performance-dashboard]
-    daily_ops_support: []
-
-  # ============================================================================
-  # 03-DEAL-STRUCTURING (5 skills)
-  # ============================================================================
-
-  - slug: loi-offer-builder
-    name: LOI & Offer Builder
-    category: 03-deal-structuring
-    priority: P1
-    phase: 2
-    status: planned
-    effort_hours: 2
-    plan_file: plans/reit-cre/03-deal-structuring/loi-offer-builder.md
-    source_prompts: [DS-11, DS-12, DS-01]
-    chains_to: [psa-redline-strategy, dd-command-center]
-    chains_from: [acquisition-underwriting-engine, comp-snapshot, sourcing-outreach-system]
-    daily_ops_support: []
-
-  - slug: psa-redline-strategy
-    name: PSA Redline Strategy
-    category: 03-deal-structuring
-    priority: P1
-    phase: 2
-    status: planned
-    effort_hours: 1.5
-    plan_file: plans/reit-cre/03-deal-structuring/psa-redline-strategy.md
-    source_prompts: [DS-02]
-    chains_to: [dd-command-center]
-    chains_from: [loi-offer-builder]
-    daily_ops_support: []
-
-  - slug: jv-waterfall-architect
-    name: JV Waterfall Architect
-    category: 03-deal-structuring
-    priority: P1
-    phase: 2
-    status: planned
-    effort_hours: 3
-    plan_file: plans/reit-cre/03-deal-structuring/jv-waterfall-architect.md
-    source_prompts: [DS-03, FM-04, IR-05]
-    chains_to: [acquisition-underwriting-engine, capital-stack-optimizer, dd-command-center, noi-sprint-plan, partnership-allocation-engine]
-    chains_from: [acquisition-underwriting-engine]
-    daily_ops_support: []
-
-  - slug: 1031-exchange-executor
-    name: 1031 Exchange Executor
-    category: 03-deal-structuring
-    priority: P1
-    phase: 2
-    status: planned
-    effort_hours: 2
-    plan_file: plans/reit-cre/03-deal-structuring/1031-exchange-executor.md
-    source_prompts: [DS-06, DI-02, DI-09]
-    chains_to: [disposition-strategy-engine]
-    chains_from: [disposition-strategy-engine, portfolio-allocator]
-    daily_ops_support: []
-
-  - slug: creative-seller-financing
-    name: Creative Seller Financing
-    category: 03-deal-structuring
-    priority: P2
-    phase: 3
-    status: planned
-    effort_hours: 4
-    plan_file: plans/reit-cre/03-deal-structuring/creative-seller-financing.md
-    source_prompts: [DS-05, DS-10]
-    chains_to: [acquisition-underwriting-engine, loan-sizing-engine]
-    chains_from: [loi-offer-builder]
-    daily_ops_support: []
-
-  # ============================================================================
-  # 04-DUE-DILIGENCE (2 skills)
-  # ============================================================================
-
-  - slug: dd-command-center
-    name: DD Command Center
-    category: 04-due-diligence
-    priority: P0
-    phase: 1
-    status: planned
-    effort_hours: 3
-    plan_file: plans/reit-cre/04-due-diligence/dd-command-center.md
-    source_prompts: [DS-04, AQ-02]
-    chains_to: [distressed-acquisition-playbook, tenant-retention-engine, noi-sprint-plan]
-    chains_from: [acquisition-underwriting-engine, loi-offer-builder, psa-redline-strategy, jv-waterfall-architect]
-    daily_ops_support: [closing-checklist-tracker, estoppel-certificate-generator]
-
-  - slug: distressed-acquisition-playbook
-    name: Distressed Acquisition Playbook
-    category: 04-due-diligence
-    priority: P1
-    phase: 2
-    status: planned
-    effort_hours: 2
-    plan_file: plans/reit-cre/04-due-diligence/distressed-acquisition-playbook.md
-    source_prompts: [DS-07, CM-09]
-    chains_to: [noi-sprint-plan, tenant-retention-engine, workout-playbook]
-    chains_from: [dd-command-center]
-    daily_ops_support: []
-
-  # ============================================================================
-  # 05-CAPITAL-MARKETS (6 skills)
-  # ============================================================================
-
-  - slug: loan-sizing-engine
-    name: Loan Sizing Engine
-    category: 05-capital-markets
-    priority: P0
-    phase: 1
-    status: planned
-    effort_hours: 4
-    plan_file: plans/reit-cre/05-capital-markets/loan-sizing-engine.md
-    source_prompts: [CM-01]
-    chains_to: [acquisition-underwriting-engine, refi-decision-analyzer, mezz-pref-structurer, capital-stack-optimizer]
-    chains_from: [rent-roll-analyzer]
-    daily_ops_support: [t12-normalizer, debt-covenant-monitor]
-
-  - slug: mezz-pref-structurer
-    name: Mezz / Pref Equity Structurer
-    category: 05-capital-markets
-    priority: P1
-    phase: 2
-    status: planned
-    effort_hours: 3
-    plan_file: plans/reit-cre/05-capital-markets/mezz-pref-structurer.md
-    source_prompts: [CM-02]
-    chains_to: [capital-stack-optimizer, acquisition-underwriting-engine, workout-playbook]
-    chains_from: [loan-sizing-engine]
-    daily_ops_support: []
-
-  - slug: refi-decision-analyzer
-    name: Refinancing Decision Analyzer
-    category: 05-capital-markets
-    priority: P1
-    phase: 2
-    status: planned
-    effort_hours: 5
-    plan_file: plans/reit-cre/05-capital-markets/refi-decision-analyzer.md
-    source_prompts: [AQ-04, AQ-10, CM-07]
-    chains_to: [mezz-pref-structurer, capital-stack-optimizer, workout-playbook]
-    chains_from: [loan-sizing-engine, debt-portfolio-monitor]
-    daily_ops_support: [debt-covenant-monitor]
-
-  - slug: capital-stack-optimizer
-    name: Capital Stack Optimizer
-    category: 05-capital-markets
-    priority: P0
-    phase: 1
-    status: planned
-    effort_hours: 6
-    plan_file: plans/reit-cre/05-capital-markets/capital-stack-optimizer.md
-    source_prompts: [CM-03, CM-04]
-    chains_to: [acquisition-underwriting-engine, refi-decision-analyzer]
-    chains_from: [loan-sizing-engine, mezz-pref-structurer, jv-waterfall-architect]
-    daily_ops_support: []
-
-  - slug: debt-portfolio-monitor
-    name: Debt Portfolio Monitor
-    category: 05-capital-markets
-    priority: P1
-    phase: 2
-    status: planned
-    effort_hours: 5
-    plan_file: plans/reit-cre/05-capital-markets/debt-portfolio-monitor.md
-    source_prompts: [CM-05, CM-06, CM-08]
-    chains_to: [workout-playbook, refi-decision-analyzer]
-    chains_from: [loan-sizing-engine, capital-stack-optimizer]
-    daily_ops_support: [debt-covenant-monitor]
-
-  - slug: workout-playbook
-    name: Workout Playbook
-    category: 05-capital-markets
-    priority: P2
-    phase: 3
-    status: planned
-    effort_hours: 3
-    plan_file: plans/reit-cre/05-capital-markets/workout-playbook.md
-    source_prompts: [CM-09]
-    chains_to: [loan-sizing-engine]
-    chains_from: [debt-portfolio-monitor, refi-decision-analyzer, distressed-acquisition-playbook, mezz-pref-structurer]
-    daily_ops_support: [debt-covenant-monitor]
-
-  # ============================================================================
-  # 06-MARKET-RESEARCH (4 skills)
-  # ============================================================================
-
-  - slug: submarket-truth-serum
-    name: Submarket Truth Serum
-    category: 06-market-research
-    priority: P0
-    phase: 1
-    status: planned
-    effort_hours: 3
-    plan_file: plans/reit-cre/06-market-research/submarket-truth-serum.md
-    source_prompts: [MR-12, MR-01, MR-03, MR-11]
-    chains_to: [acquisition-underwriting-engine, ic-memo-generator, comp-snapshot]
-    chains_from: [deal-quick-screen, om-reverse-pricing, market-memo-generator]
-    daily_ops_support: []
-
-  - slug: comp-snapshot
-    name: Comp Snapshot
-    category: 06-market-research
-    priority: P0
-    phase: 1
-    status: planned
-    effort_hours: 2
-    plan_file: plans/reit-cre/06-market-research/comp-snapshot.md
-    source_prompts: [MR-08, MR-13, MR-02, AQ-16]
-    chains_to: [acquisition-underwriting-engine, loi-offer-builder, ic-memo-generator]
-    chains_from: [deal-quick-screen, om-reverse-pricing, submarket-truth-serum]
-    daily_ops_support: []
-
-  - slug: supply-demand-forecast
-    name: Supply & Demand Forecast
-    category: 06-market-research
-    priority: P1
-    phase: 2
-    status: planned
-    effort_hours: 3
-    plan_file: plans/reit-cre/06-market-research/supply-demand-forecast.md
-    source_prompts: [MR-04, MR-10]
-    chains_to: [ic-memo-generator, disposition-strategy-engine, deal-underwriting-assistant]
-    chains_from: [market-memo-generator]
-    daily_ops_support: []
-
-  - slug: market-cycle-positioner
-    name: Market Cycle Positioner
-    category: 06-market-research
-    priority: P1
-    phase: 2
-    status: planned
-    effort_hours: 2
-    plan_file: plans/reit-cre/06-market-research/market-cycle-positioner.md
-    source_prompts: [MR-09, MR-05]
-    chains_to: [lease-up-war-room, quarterly-investor-update, disposition-prep-kit, capital-raise-machine]
-    chains_from: [market-memo-generator]
-    daily_ops_support: []
-
-  # ============================================================================
-  # 07-ASSET-MANAGEMENT (8 skills)
-  # ============================================================================
-
-  - slug: annual-budget-engine
-    name: Annual Budget Engine
-    category: 07-asset-management
-    priority: P0
-    phase: 1
-    status: planned
-    effort_hours: 5
-    plan_file: plans/reit-cre/07-asset-management/annual-budget-engine.md
-    source_prompts: [AM-01, AM-03]
-    chains_to: [sensitivity-stress-test, property-performance-dashboard]
-    chains_from: [rent-roll-analyzer, market-memo-generator]
-    daily_ops_support: [t12-normalizer, cam-reconciliation-calculator, variance-narrative-generator]
-
-  - slug: noi-sprint-plan
-    name: NOI Sprint Plan
-    category: 07-asset-management
-    priority: P1
-    phase: 2
-    status: planned
-    effort_hours: 2
-    plan_file: plans/reit-cre/07-asset-management/noi-sprint-plan.md
-    source_prompts: [AM-14]
-    chains_to: [jv-waterfall-architect, disposition-strategy-engine]
-    chains_from: [dd-command-center, distressed-acquisition-playbook, tenant-retention-engine]
-    daily_ops_support: [variance-narrative-generator]
-
-  - slug: property-performance-dashboard
-    name: Property Performance Dashboard
-    category: 07-asset-management
-    priority: P0
-    phase: 1
-    status: planned
-    effort_hours: 5
-    plan_file: plans/reit-cre/07-asset-management/property-performance-dashboard.md
-    source_prompts: [AM-08, AQ-01]
-    chains_to: [sensitivity-stress-test, quarterly-investor-update]
-    chains_from: [annual-budget-engine, rent-roll-analyzer, market-memo-generator]
-    daily_ops_support: [t12-normalizer, variance-narrative-generator, cam-reconciliation-calculator]
-
-  - slug: property-management-orchestrator
-    name: Property Management Orchestrator
-    category: 07-asset-management
-    priority: P0
-    phase: 3
-    status: deployed
-    effort_hours: 8
-    chains_to: [noi-sprint-plan, property-performance-dashboard, annual-budget-engine, disposition-strategy-engine, investor-lifecycle-manager]
-    chains_from: [post-close-onboarding-transition, construction-project-command-center]
-    daily_ops_support: [building-systems-maintenance-manager, work-order-triage, small-operator-pm, property-operations-admin-toolkit, cam-reconciliation-calculator, tenant-delinquency-workout, coi-compliance-checker, vendor-invoice-validator, compliance-regulatory-response-kit, capex-prioritizer]
-
-  - slug: space-planning-redesign-orchestrator
-    name: Space Planning & Redesign Orchestrator
-    category: 07-asset-management
-    priority: P2
-    phase: 3
-    status: stub
-    effort_hours: 12
-    chains_to: [construction-cost-estimator, construction-project-command-center, capex-prioritizer, annual-budget-engine, ic-memo-generator]
-    chains_from: [property-management-orchestrator, noi-sprint-plan, tenant-retention-engine, lease-up-war-room]
-
-  - slug: capex-prioritizer
-    name: CapEx Prioritizer
-    category: 07-asset-management
-    priority: P0
-    phase: 1
-    status: planned
-    effort_hours: 5
-    plan_file: plans/reit-cre/07-asset-management/capex-prioritizer.md
-    source_prompts: [AM-02, AM-06]
-    chains_to: [rent-optimization-planner, lease-compliance-auditor]
-    chains_from: [deal-underwriting-assistant, market-memo-generator, tenant-delinquency-workout]
-    daily_ops_support: [vendor-invoice-validator, work-order-triage]
-
-  - slug: lease-compliance-auditor
-    name: Lease Compliance Auditor
-    category: 07-asset-management
-    priority: P1
-    phase: 2
-    status: planned
-    effort_hours: 4
-    plan_file: plans/reit-cre/07-asset-management/lease-compliance-auditor.md
-    source_prompts: [AM-04, LS-05, LS-07]
-    chains_to: [tenant-delinquency-workout, capex-prioritizer, rent-optimization-planner, lease-negotiation-analyzer]
-    chains_from: []
-    daily_ops_support: [lease-abstract-extractor, coi-compliance-checker, cam-reconciliation-calculator]
-
-  - slug: tenant-delinquency-workout
-    name: Tenant Delinquency Workout
-    category: 07-asset-management
-    priority: P0
-    phase: 1
-    status: planned
-    effort_hours: 4
-    plan_file: plans/reit-cre/07-asset-management/tenant-delinquency-workout.md
-    source_prompts: [AM-13, AM-09, LS-10]
-    chains_to: [capex-prioritizer, rent-optimization-planner, lease-negotiation-analyzer]
-    chains_from: [lease-compliance-auditor]
-    daily_ops_support: [estoppel-certificate-generator]
-
-  # ============================================================================
-  # 08-LEASING (4 skills)
-  # ============================================================================
-
-  - slug: tenant-retention-engine
-    name: Tenant Retention Engine
-    category: 08-leasing
-    priority: P0
-    phase: 1
-    status: planned
-    effort_hours: 3
-    plan_file: plans/reit-cre/08-leasing/tenant-retention-engine.md
-    source_prompts: [LS-01, LS-16, LS-02, LS-08]
-    chains_to: [jv-waterfall-architect, noi-sprint-plan, disposition-strategy-engine]
-    chains_from: [dd-command-center, distressed-acquisition-playbook]
-    daily_ops_support: [lease-abstract-extractor, estoppel-certificate-generator]
-
-  - slug: lease-up-war-room
-    name: Lease-Up War Room
-    category: 08-leasing
-    priority: P1
-    phase: 2
-    status: planned
-    effort_hours: 1.5
-    plan_file: plans/reit-cre/08-leasing/lease-up-war-room.md
-    source_prompts: [LS-16]
-    chains_to: [quarterly-investor-update]
-    chains_from: [market-cycle-positioner, comp-snapshot]
-    daily_ops_support: []
-
-  - slug: lease-negotiation-analyzer
-    name: Lease Negotiation Analyzer
-    category: 08-leasing
-    priority: P2
-    phase: 3
-    status: planned
-    effort_hours: 8
-    plan_file: plans/reit-cre/08-leasing/lease-negotiation-analyzer.md
-    source_prompts: [LS-03, LS-04, LS-06, LS-09, LS-12, LS-13, LS-14, LS-15]
-    chains_to: [rent-optimization-planner, capex-prioritizer]
-    chains_from: [market-memo-generator, deal-underwriting-assistant, tenant-delinquency-workout, lease-compliance-auditor]
-    daily_ops_support: [lease-abstract-extractor]
-
-  - slug: rent-optimization-planner
-    name: Rent Optimization Planner
-    category: 08-leasing
-    priority: P1
-    phase: 2
-    status: planned
-    effort_hours: 3
-    plan_file: plans/reit-cre/08-leasing/rent-optimization-planner.md
-    source_prompts: [AM-15]
-    chains_to: [deal-underwriting-assistant]
-    chains_from: [lease-compliance-auditor, capex-prioritizer, market-memo-generator, tenant-delinquency-workout, lease-negotiation-analyzer]
-    daily_ops_support: [cpi-escalation-calculator]
-
-  # ============================================================================
-  # 09-INVESTOR-RELATIONS (5 skills)
-  # ============================================================================
-
-  - slug: quarterly-investor-update
-    name: Quarterly Investor Update
-    category: 09-investor-relations
-    priority: P1
-    phase: 2
-    status: planned
-    effort_hours: 2
-    plan_file: plans/reit-cre/09-investor-relations/quarterly-investor-update.md
-    source_prompts: [IR-03, IR-13, IR-16]
-    chains_to: [capital-raise-machine]
-    chains_from: [lease-up-war-room, market-cycle-positioner, property-performance-dashboard]
-    daily_ops_support: [variance-narrative-generator, lender-compliance-certificate]
-
-  - slug: capital-raise-machine
-    name: Capital Raise Machine
-    category: 09-investor-relations
-    priority: P2
-    phase: 3
-    status: planned
-    effort_hours: 2
-    plan_file: plans/reit-cre/09-investor-relations/capital-raise-machine.md
-    source_prompts: [IR-15, IR-04, IR-05, IR-07, IR-10]
-    chains_to: [quarterly-investor-update]
-    chains_from: [market-cycle-positioner, performance-attribution]
-    daily_ops_support: []
-
-  - slug: ic-memo-generator
-    name: IC Memo Generator
-    category: 09-investor-relations
-    priority: P0
-    phase: 1
-    status: planned
-    effort_hours: 5
-    plan_file: plans/reit-cre/09-investor-relations/ic-memo-generator.md
-    source_prompts: [AQ-15, IR-08, QR-01, QR-02, QR-03, QR-04, QR-05, QR-06]
-    chains_to: [lp-pitch-deck-builder, disposition-strategy-engine]
-    chains_from: [deal-underwriting-assistant, supply-demand-forecast, market-memo-generator, acquisition-underwriting-engine, submarket-truth-serum, comp-snapshot, sensitivity-stress-test, sourcing-outreach-system, portfolio-allocator, reit-profile-builder]
-    daily_ops_support: []
-
-  - slug: lp-pitch-deck-builder
-    name: LP Pitch Deck Builder
-    category: 09-investor-relations
-    priority: P1
-    phase: 2
-    status: planned
-    effort_hours: 4
-    plan_file: plans/reit-cre/09-investor-relations/lp-pitch-deck-builder.md
-    source_prompts: [IR-01, IR-12]
-    chains_to: []
-    chains_from: [ic-memo-generator, supply-demand-forecast, market-memo-generator, reit-profile-builder, performance-attribution, fund-formation-toolkit]
-    daily_ops_support: []
-
-  - slug: fund-formation-toolkit
-    name: Fund Formation Toolkit
-    category: 09-investor-relations
-    priority: P2
-    phase: 3
-    status: planned
-    effort_hours: 5
-    plan_file: plans/reit-cre/09-investor-relations/fund-formation-toolkit.md
-    source_prompts: [IR-02, IR-06, IR-14]
-    chains_to: [lp-pitch-deck-builder, quarterly-investor-update, performance-attribution, partnership-allocation-engine]
-    chains_from: [capital-raise-machine]
-    daily_ops_support: []
-
-  # ============================================================================
-  # 10-DEVELOPMENT (5 skills)
-  # ============================================================================
-
-  - slug: land-residual-hbu-analyzer
-    name: Land Residual & HBU Analyzer
-    category: 10-development
-    priority: P1
-    phase: 2
-    status: planned
-    effort_hours: 3
-    plan_file: plans/reit-cre/10-development/land-residual-hbu-analyzer.md
-    source_prompts: [Dev-01]
-    chains_to: [dev-proforma-engine, entitlement-feasibility]
-    chains_from: [market-memo-generator]
-    daily_ops_support: []
-
-  - slug: dev-proforma-engine
-    name: Development Pro Forma Engine
-    category: 10-development
-    priority: P0
-    phase: 1
-    status: planned
-    effort_hours: 6
-    plan_file: plans/reit-cre/10-development/dev-proforma-engine.md
-    source_prompts: [Dev-02, AQ-09, Dev-05]
-    chains_to: [acquisition-underwriting-engine, jv-waterfall-architect]
-    chains_from: [land-residual-hbu-analyzer, construction-budget-gc-analyzer, entitlement-feasibility, market-memo-generator]
-    daily_ops_support: []
-
-  - slug: entitlement-feasibility
-    name: Entitlement & Zoning Feasibility
-    category: 10-development
-    priority: P1
-    phase: 2
-    status: planned
-    effort_hours: 3
-    plan_file: plans/reit-cre/10-development/entitlement-feasibility.md
-    source_prompts: [Dev-03]
-    chains_to: [dev-proforma-engine]
-    chains_from: [land-residual-hbu-analyzer, market-memo-generator]
-    daily_ops_support: []
-
-  - slug: construction-budget-gc-analyzer
-    name: Construction Budget & GC Analyzer
-    category: 10-development
-    priority: P2
-    phase: 3
-    status: planned
-    effort_hours: 3
-    plan_file: plans/reit-cre/10-development/construction-budget-gc-analyzer.md
-    source_prompts: [Dev-04]
-    chains_to: [dev-proforma-engine]
-    chains_from: [land-residual-hbu-analyzer, entitlement-feasibility]
-    daily_ops_support: []
-
-  - slug: construction-cost-estimator
-    name: Construction Cost Estimator
-    category: 10-development
-    priority: P1
-    phase: 3
-    status: deployed
-    effort_hours: 6
-    chains_to: [dev-proforma-engine, construction-budget-gc-analyzer, loan-sizing-engine, capital-stack-optimizer, construction-project-command-center, ic-memo-generator]
-    chains_from: [entitlement-feasibility, land-residual-hbu-analyzer, comp-snapshot]
-
-  # ============================================================================
-  # 11-DISPOSITION (2 skills)
-  # ============================================================================
-
-  - slug: disposition-strategy-engine
-    name: Disposition Strategy Engine
-    category: 11-disposition
-    priority: P1
-    phase: 2
-    status: planned
-    effort_hours: 6
-    plan_file: plans/reit-cre/11-disposition/disposition-strategy-engine.md
-    source_prompts: [AQ-05, FM-05, DI-01, DI-02, DI-03, DI-04, DI-05, DI-06, DI-07, DI-08]
-    chains_to: [ic-memo-generator, lp-pitch-deck-builder, 1031-exchange-executor]
-    chains_from: [deal-underwriting-assistant, supply-demand-forecast, market-memo-generator, noi-sprint-plan, tenant-retention-engine, cost-segregation-analyzer, climate-risk-assessment, carbon-audit-compliance, partnership-allocation-engine]
-    daily_ops_support: []
-
-  - slug: disposition-prep-kit
-    name: Disposition Prep Kit
-    category: 11-disposition
-    priority: P2
-    phase: 3
-    status: planned
-    effort_hours: 2
-    plan_file: plans/reit-cre/11-disposition/disposition-prep-kit.md
-    source_prompts: [DI-16, DI-17, DI-06]
-    chains_to: [1031-exchange-executor, capital-raise-machine]
-    chains_from: [market-cycle-positioner, quarterly-investor-update]
-    daily_ops_support: [rent-roll-formatter, t12-normalizer, estoppel-certificate-generator]
-
-  # ============================================================================
-  # 12-DEAL-SOURCING (1 skill)
-  # ============================================================================
-
-  - slug: sourcing-outreach-system
-    name: Sourcing & Outreach System
-    category: 12-deal-sourcing
-    priority: P2
-    phase: 3
-    status: planned
-    effort_hours: 6
-    plan_file: plans/reit-cre/12-deal-sourcing/sourcing-outreach-system.md
-    source_prompts: [BD-19, BD-03, BD-04, BD-05, BD-06, BD-07, BD-08, BD-09, BD-10, BD-11]
-    chains_to: [deal-quick-screen, deal-underwriting-assistant, loi-offer-builder, ic-memo-generator, portfolio-allocator]
-    chains_from: [market-memo-generator, capital-raise-machine]
-    daily_ops_support: []
-
-  # ============================================================================
-  # 13-TAX-ENTITY (3 skills)
-  # ============================================================================
-
-  - slug: cost-segregation-analyzer
-    name: Cost Segregation Analyzer
-    category: 13-tax-entity
-    priority: P1
-    phase: 2
-    status: planned
-    effort_hours: 3
-    plan_file: plans/reit-cre/13-tax-entity/cost-segregation-analyzer.md
-    source_prompts: [Tax-01]
-    chains_to: [acquisition-underwriting-engine, disposition-strategy-engine, partnership-allocation-engine]
-    chains_from: [acquisition-underwriting-engine]
-    daily_ops_support: []
-
-  - slug: opportunity-zone-underwriter
-    name: Opportunity Zone Underwriter
-    category: 13-tax-entity
-    priority: P2
-    phase: 3
-    status: planned
-    effort_hours: 3
-    plan_file: plans/reit-cre/13-tax-entity/opportunity-zone-underwriter.md
-    source_prompts: [Tax-02]
-    chains_to: [acquisition-underwriting-engine]
-    chains_from: [acquisition-underwriting-engine]
-    daily_ops_support: []
-
-  - slug: partnership-allocation-engine
-    name: Partnership Allocation Engine
-    category: 13-tax-entity
-    priority: P2
-    phase: 3
-    status: planned
-    effort_hours: 5
-    plan_file: plans/reit-cre/13-tax-entity/partnership-allocation-engine.md
-    source_prompts: [Tax-03, Tax-04]
-    chains_to: [disposition-strategy-engine]
-    chains_from: [jv-waterfall-architect, fund-formation-toolkit, cost-segregation-analyzer, opportunity-zone-underwriter]
-    daily_ops_support: []
-
-  # ============================================================================
-  # 14-ESG-CLIMATE (2 skills)
-  # ============================================================================
-
-  - slug: carbon-audit-compliance
-    name: Carbon Audit & BPS Compliance
-    category: 14-esg-climate
-    priority: P2
-    phase: 3
-    status: planned
-    effort_hours: 4
-    plan_file: plans/reit-cre/14-esg-climate/carbon-audit-compliance.md
-    source_prompts: [ESG-01, ESG-02, AM-07]
-    chains_to: [climate-risk-assessment, disposition-strategy-engine]
-    chains_from: [acquisition-underwriting-engine, market-memo-generator]
-    daily_ops_support: []
-
-  - slug: climate-risk-assessment
-    name: Climate Risk Assessment
-    category: 14-esg-climate
-    priority: P2
-    phase: 3
-    status: planned
-    effort_hours: 3
-    plan_file: plans/reit-cre/14-esg-climate/climate-risk-assessment.md
-    source_prompts: [ESG-03]
-    chains_to: [disposition-strategy-engine, portfolio-allocator]
-    chains_from: [acquisition-underwriting-engine, carbon-audit-compliance, market-memo-generator]
-    daily_ops_support: []
-
-  # ============================================================================
-  # 15-PORTFOLIO-STRATEGY (2 skills)
-  # ============================================================================
-
-  - slug: portfolio-allocator
-    name: Portfolio Allocator
-    category: 15-portfolio-strategy
-    priority: P1
-    phase: 2
-    status: planned
-    effort_hours: 5
-    plan_file: plans/reit-cre/15-portfolio-strategy/portfolio-allocator.md
-    source_prompts: [Port-01, Port-02]
-    chains_to: [ic-memo-generator, loi-offer-builder, performance-attribution, quarterly-investor-update, 1031-exchange-executor, sourcing-outreach-system]
-    chains_from: [deal-underwriting-assistant, market-memo-generator, climate-risk-assessment]
-    daily_ops_support: []
-
-  - slug: performance-attribution
-    name: Performance Attribution
-    category: 15-portfolio-strategy
-    priority: P2
-    phase: 3
-    status: planned
-    effort_hours: 4
-    plan_file: plans/reit-cre/15-portfolio-strategy/performance-attribution.md
-    source_prompts: [Port-03, IR-11]
-    chains_to: [quarterly-investor-update, capital-raise-machine, lp-pitch-deck-builder, ic-memo-generator]
-    chains_from: [portfolio-allocator, deal-underwriting-assistant]
-    daily_ops_support: []
-
-  # ============================================================================
-  # 16-DAILY-OPERATIONS (15 skills)
-  # ============================================================================
-
-  - slug: cam-reconciliation-calculator
-    name: CAM Reconciliation Calculator
-    category: 16-daily-operations
-    priority: P0
-    phase: 3
-    status: planned
-    effort_hours: 4
-    plan_file: plans/reit-cre/16-daily-operations/cam-reconciliation-calculator.md
-    source_prompts: []
-    chains_to: [estoppel-certificate-generator, variance-narrative-generator, debt-covenant-monitor]
-    chains_from: [lease-abstract-extractor, cpi-escalation-calculator, t12-normalizer]
-    daily_ops_support: []
-
-  - slug: estoppel-certificate-generator
-    name: Estoppel Certificate Generator
-    category: 16-daily-operations
-    priority: P0
-    phase: 3
-    status: planned
-    effort_hours: 3
-    plan_file: plans/reit-cre/16-daily-operations/estoppel-certificate-generator.md
-    source_prompts: []
-    chains_to: [closing-checklist-tracker, debt-covenant-monitor]
-    chains_from: [lease-abstract-extractor, cam-reconciliation-calculator, cpi-escalation-calculator]
-    daily_ops_support: []
-
-  - slug: t12-normalizer
-    name: T-12 Operating Statement Normalizer
-    category: 16-daily-operations
-    priority: P0
-    phase: 3
-    status: planned
-    effort_hours: 4
-    plan_file: plans/reit-cre/16-daily-operations/t12-normalizer.md
-    source_prompts: []
-    chains_to: [cam-reconciliation-calculator, debt-covenant-monitor, deal-underwriting-assistant]
-    chains_from: [lease-abstract-extractor]
-    daily_ops_support: []
-
-  - slug: lease-abstract-extractor
-    name: Lease Abstract Extractor
-    category: 16-daily-operations
-    priority: P1
-    phase: 3
-    status: planned
-    effort_hours: 4
-    plan_file: plans/reit-cre/16-daily-operations/lease-abstract-extractor.md
-    source_prompts: []
-    chains_to: [cam-reconciliation-calculator, estoppel-certificate-generator, cpi-escalation-calculator, coi-compliance-checker, debt-covenant-monitor, t12-normalizer]
-    chains_from: []
-    daily_ops_support: []
-
-  - slug: coi-compliance-checker
-    name: COI Compliance Checker
-    category: 16-daily-operations
-    priority: P1
-    phase: 3
-    status: planned
-    effort_hours: 3
-    plan_file: plans/reit-cre/16-daily-operations/coi-compliance-checker.md
-    source_prompts: []
-    chains_to: [work-order-triage, debt-covenant-monitor]
-    chains_from: [lease-abstract-extractor]
-    daily_ops_support: []
-
-  - slug: work-order-triage
-    name: Work Order Triage
-    category: 16-daily-operations
-    priority: P1
-    phase: 3
-    status: planned
-    effort_hours: 2
-    plan_file: plans/reit-cre/16-daily-operations/work-order-triage.md
-    source_prompts: []
-    chains_to: [cam-reconciliation-calculator, variance-narrative-generator]
-    chains_from: [lease-abstract-extractor, coi-compliance-checker]
-    daily_ops_support: []
-
-  - slug: debt-covenant-monitor
-    name: Debt Covenant Monitor
-    category: 16-daily-operations
-    priority: P0
-    phase: 3
-    status: planned
-    effort_hours: 3
-    plan_file: plans/reit-cre/16-daily-operations/debt-covenant-monitor.md
-    source_prompts: []
-    chains_to: [deal-underwriting-assistant]
-    chains_from: [t12-normalizer, cam-reconciliation-calculator, lease-abstract-extractor, cpi-escalation-calculator, estoppel-certificate-generator, work-order-triage]
-    daily_ops_support: []
-
-  - slug: cpi-escalation-calculator
-    name: CPI Escalation Calculator
-    category: 16-daily-operations
-    priority: P1
-    phase: 3
-    status: planned
-    effort_hours: 2
-    plan_file: plans/reit-cre/16-daily-operations/cpi-escalation-calculator.md
-    source_prompts: []
-    chains_to: [cam-reconciliation-calculator, estoppel-certificate-generator, debt-covenant-monitor, t12-normalizer]
-    chains_from: [lease-abstract-extractor]
-    daily_ops_support: []
-
-  - slug: vendor-invoice-validator
-    name: Vendor Invoice Validator
-    category: 16-daily-operations
-    priority: P1
-    phase: 3
-    status: planned
-    effort_hours: 2
-    plan_file: plans/reit-cre/16-daily-operations/vendor-invoice-validator.md
-    source_prompts: []
-    chains_to: [variance-narrative-generator, lender-compliance-certificate, cam-reconciliation-calculator]
-    chains_from: []
-    daily_ops_support: []
-
-  - slug: property-tax-appeal-analyzer
-    name: Property Tax Appeal Analyzer
-    category: 16-daily-operations
-    priority: P1
-    phase: 3
-    status: planned
-    effort_hours: 3
-    plan_file: plans/reit-cre/16-daily-operations/property-tax-appeal-analyzer.md
-    source_prompts: []
-    chains_to: [lender-compliance-certificate, variance-narrative-generator]
-    chains_from: []
-    daily_ops_support: []
-
-  - slug: variance-narrative-generator
-    name: Variance Narrative Generator
-    category: 16-daily-operations
-    priority: P1
-    phase: 3
-    status: planned
-    effort_hours: 2
-    plan_file: plans/reit-cre/16-daily-operations/variance-narrative-generator.md
-    source_prompts: []
-    chains_to: [lender-compliance-certificate]
-    chains_from: [vendor-invoice-validator, cam-reconciliation-calculator, work-order-triage, property-tax-appeal-analyzer]
-    daily_ops_support: []
-
-  - slug: closing-checklist-tracker
-    name: Closing Checklist Tracker
-    category: 16-daily-operations
-    priority: P1
-    phase: 3
-    status: planned
-    effort_hours: 3
-    plan_file: plans/reit-cre/16-daily-operations/closing-checklist-tracker.md
-    source_prompts: []
-    chains_to: []
-    chains_from: [estoppel-certificate-generator, rent-roll-formatter, lender-compliance-certificate]
-    daily_ops_support: []
-
-  - slug: rent-roll-formatter
-    name: Rent Roll Formatter
-    category: 16-daily-operations
-    priority: P0
-    phase: 3
-    status: planned
-    effort_hours: 3
-    plan_file: plans/reit-cre/16-daily-operations/rent-roll-formatter.md
-    source_prompts: []
-    chains_to: [stacking-plan-builder, t12-normalizer, cam-reconciliation-calculator, closing-checklist-tracker, acquisition-underwriting-engine, variance-narrative-generator]
-    chains_from: []
-    daily_ops_support: []
-
-  - slug: lender-compliance-certificate
-    name: Lender Compliance Certificate
-    category: 16-daily-operations
-    priority: P1
-    phase: 3
-    status: planned
-    effort_hours: 3
-    plan_file: plans/reit-cre/16-daily-operations/lender-compliance-certificate.md
-    source_prompts: []
-    chains_to: [closing-checklist-tracker]
-    chains_from: [rent-roll-formatter, variance-narrative-generator, vendor-invoice-validator, debt-covenant-monitor]
-    daily_ops_support: []
-
-  - slug: stacking-plan-builder
-    name: Stacking Plan Builder
-    category: 16-daily-operations
-    priority: P2
-    phase: 3
-    status: planned
-    effort_hours: 2
-    plan_file: plans/reit-cre/16-daily-operations/stacking-plan-builder.md
-    source_prompts: []
-    chains_to: []
-    chains_from: [rent-roll-formatter]
-    daily_ops_support: []
-
-  # ============================================================================
-  # NEW SKILLS -- DEPLOYED 2026-03-25 (8 skills: 6 deepened stubs + 2 new)
-  # ============================================================================
-
-  - slug: title-commitment-reviewer
-    name: Title Commitment Reviewer
-    category: 04-due-diligence
-    priority: P1
-    phase: 2
-    status: deployed
-    effort_hours: 3
-    plan_file: ""
-    source_prompts: []
-    chains_to: [psa-redline-strategy, closing-checklist-tracker]
-    chains_from: [dd-command-center]
-    daily_ops_support: []
-
-  - slug: tenant-credit-analyzer
-    name: Tenant Credit Analyzer
-    category: 04-due-diligence
-    priority: P1
-    phase: 2
-    status: deployed
-    effort_hours: 3
-    plan_file: ""
-    source_prompts: []
-    chains_to: [acquisition-underwriting-engine, loan-sizing-engine]
-    chains_from: [rent-roll-analyzer]
-    daily_ops_support: []
-
-  - slug: term-sheet-builder
-    name: Term Sheet Builder
-    category: 05-capital-markets
-    priority: P1
-    phase: 2
-    status: deployed
-    effort_hours: 2
-    plan_file: ""
-    source_prompts: []
-    chains_to: [loan-document-reviewer]
-    chains_from: [loan-sizing-engine, capital-stack-optimizer]
-    daily_ops_support: []
-
-  - slug: loan-document-reviewer
-    name: Loan Document Reviewer
-    category: legal
-    priority: P1
-    phase: 2
-    status: deployed
-    effort_hours: 4
-    plan_file: ""
-    source_prompts: []
-    chains_to: [closing-checklist-tracker, debt-covenant-monitor]
-    chains_from: [term-sheet-builder]
-    daily_ops_support: []
-
-  - slug: transfer-document-preparer
-    name: Transfer Document Preparer
-    category: legal
-    priority: P1
-    phase: 2
-    status: deployed
-    effort_hours: 3
-    plan_file: ""
-    source_prompts: []
-    chains_to: [closing-checklist-tracker]
-    chains_from: [psa-redline-strategy]
-    daily_ops_support: []
-
-  - slug: funds-flow-calculator
-    name: Funds Flow Calculator
-    category: closing
-    priority: P0
-    phase: 2
-    status: deployed
-    effort_hours: 2
-    plan_file: ""
-    source_prompts: []
-    chains_to: []
-    chains_from: [closing-checklist-tracker]
-    daily_ops_support: []
-
-  - slug: lease-option-structurer
-    name: Lease Option Structurer
-    category: 08-leasing
-    priority: P1
-    phase: 2
-    status: deployed
-    effort_hours: 3
-    plan_file: ""
-    source_prompts: []
-    chains_to: [lease-document-factory, tenant-retention-engine]
-    chains_from: [lease-negotiation-analyzer, rent-optimization-planner]
-    daily_ops_support: []
-
-  - slug: lease-trade-out-analyzer
-    name: Lease Trade-Out Analyzer
-    category: 08-leasing
-    priority: P1
-    phase: 2
-    status: deployed
-    effort_hours: 2
-    plan_file: ""
-    source_prompts: []
-    chains_to: [lease-up-war-room, lease-negotiation-analyzer]
-    chains_from: [tenant-retention-engine, rent-optimization-planner]
-    daily_ops_support: []
-
-  # ============================================================================
-  # LP INTELLIGENCE (3 skills)
-  # ============================================================================
-
-  - slug: lp-data-request-generator
-    name: LP Data Request Generator
-    category: investor-relations
-    priority: P1
-    phase: 3
-    status: planned
-    effort_hours: 3
-    plan_file: ""
-    source_prompts: []
-    chains_to: [gp-performance-evaluator]
-    chains_from: [quarterly-investor-update]
-    daily_ops_support: []
-
-  - slug: gp-performance-evaluator
-    name: GP Performance Evaluator
-    category: investor-relations
-    priority: P1
-    phase: 3
-    status: planned
-    effort_hours: 4
-    plan_file: ""
-    source_prompts: []
-    chains_to: [fund-terms-comparator]
-    chains_from: [lp-data-request-generator, performance-attribution]
-    daily_ops_support: []
-
-  - slug: fund-terms-comparator
-    name: Fund Terms Comparator
-    category: investor-relations
-    priority: P1
-    phase: 3
-    status: planned
-    effort_hours: 3
-    plan_file: ""
-    source_prompts: []
-    chains_to: []
-    chains_from: [gp-performance-evaluator, fund-formation-toolkit]
-    daily_ops_support: []
-
-  # ============================================================================
-  # v1.0.0 DEPLOYED SKILLS (14 skills -- gap fills from initial deployment)
-  # ============================================================================
-
-  - slug: building-systems-maintenance-manager
-    name: Building Systems Maintenance Manager
-    category: 16-daily-operations
-    priority: P1
-    phase: 3
-    status: deployed
-    effort_hours: 3
-    plan_file: ""
-    source_prompts: []
-    chains_to: [work-order-triage, capex-prioritizer]
-    chains_from: [property-performance-dashboard]
-    daily_ops_support: []
-
-  - slug: compliance-regulatory-response-kit
-    name: Compliance & Regulatory Response Kit
-    category: 16-daily-operations
-    priority: P2
-    phase: 3
-    status: deployed
-    effort_hours: 3
-    plan_file: ""
-    source_prompts: []
-    chains_to: [insurance-risk-manager]
-    chains_from: [property-operations-admin-toolkit]
-    daily_ops_support: []
-
-  - slug: construction-procurement-contracts-engine
-    name: Construction Procurement & Contracts Engine
-    category: 10-development
-    priority: P2
-    phase: 3
-    status: deployed
-    effort_hours: 4
-    plan_file: ""
-    source_prompts: []
-    chains_to: [construction-project-command-center, construction-budget-gc-analyzer]
-    chains_from: [dev-proforma-engine]
-    daily_ops_support: []
-
-  - slug: construction-project-command-center
-    name: Construction Project Command Center
-    category: 10-development
-    priority: P1
-    phase: 3
-    status: deployed
-    effort_hours: 4
-    plan_file: ""
-    source_prompts: []
-    chains_to: [post-close-onboarding-transition]
-    chains_from: [construction-procurement-contracts-engine, construction-budget-gc-analyzer]
-    daily_ops_support: []
-
-  - slug: crisis-special-situations-playbook
-    name: Crisis & Special Situations Playbook
-    category: 16-daily-operations
-    priority: P2
-    phase: 3
-    status: deployed
-    effort_hours: 3
-    plan_file: ""
-    source_prompts: []
-    chains_to: [workout-playbook, insurance-risk-manager]
-    chains_from: []
-    daily_ops_support: []
-
-  - slug: fund-operations-compliance-dashboard
-    name: Fund Operations & Compliance Dashboard
-    category: 09-investor-relations
-    priority: P2
-    phase: 3
-    status: deployed
-    effort_hours: 4
-    plan_file: ""
-    source_prompts: []
-    chains_to: [quarterly-investor-update, lp-data-request-generator]
-    chains_from: [fund-formation-toolkit]
-    daily_ops_support: []
-
-  - slug: insurance-risk-manager
-    name: Insurance & Risk Manager
-    category: 16-daily-operations
-    priority: P2
-    phase: 3
-    status: deployed
-    effort_hours: 3
-    plan_file: ""
-    source_prompts: []
-    chains_to: [compliance-regulatory-response-kit]
-    chains_from: [crisis-special-situations-playbook, property-operations-admin-toolkit]
-    daily_ops_support: []
-
-  - slug: investor-lifecycle-manager
-    name: Investor Lifecycle Manager
-    category: 09-investor-relations
-    priority: P1
-    phase: 3
-    status: deployed
-    effort_hours: 4
-    plan_file: ""
-    source_prompts: []
-    chains_to: [quarterly-investor-update, capital-raise-machine]
-    chains_from: [fund-operations-compliance-dashboard]
-    daily_ops_support: []
-
-  - slug: lease-document-factory
-    name: Lease Document Factory
-    category: 08-leasing
-    priority: P1
-    phase: 3
-    status: deployed
-    effort_hours: 3
-    plan_file: ""
-    source_prompts: []
-    chains_to: [lease-abstract-extractor, estoppel-certificate-generator]
-    chains_from: [lease-option-structurer, lease-negotiation-analyzer]
-    daily_ops_support: []
-
-  - slug: leasing-operations-engine
-    name: Leasing Operations Engine
-    category: 08-leasing
-    priority: P1
-    phase: 3
-    status: deployed
-    effort_hours: 3
-    plan_file: ""
-    source_prompts: []
-    chains_to: [lease-up-war-room, tenant-retention-engine]
-    chains_from: [leasing-strategy-marketing-planner]
-    daily_ops_support: []
-
-  - slug: leasing-strategy-marketing-planner
-    name: Leasing Strategy & Marketing Planner
-    category: 08-leasing
-    priority: P1
-    phase: 3
-    status: deployed
-    effort_hours: 3
-    plan_file: ""
-    source_prompts: []
-    chains_to: [leasing-operations-engine, lease-up-war-room]
-    chains_from: [market-cycle-positioner, comp-snapshot]
-    daily_ops_support: []
-
-  - slug: post-close-onboarding-transition
-    name: Post-Close Onboarding & Transition
-    category: 10-development
-    priority: P1
-    phase: 3
-    status: deployed
-    effort_hours: 3
-    plan_file: ""
-    source_prompts: []
-    chains_to: [annual-budget-engine, property-performance-dashboard]
-    chains_from: [construction-project-command-center, closing-checklist-tracker]
-    daily_ops_support: []
-
-  - slug: property-operations-admin-toolkit
-    name: Property Operations Admin Toolkit
-    category: 16-daily-operations
-    priority: P2
-    phase: 3
-    status: deployed
-    effort_hours: 2
-    plan_file: ""
-    source_prompts: []
-    chains_to: [compliance-regulatory-response-kit, insurance-risk-manager]
-    chains_from: [building-systems-maintenance-manager]
-    daily_ops_support: []
-
-  - slug: tenant-event-planner
-    name: Tenant Event Planner
-    category: 16-daily-operations
-    priority: P2
-    phase: 3
-    status: deployed
-    effort_hours: 2
-    plan_file: ""
-    source_prompts: []
-    chains_to: [tenant-retention-engine]
-    chains_from: [property-operations-admin-toolkit]
-    daily_ops_support: []
-
-  # ============================================================================
-  # ORCHESTRATOR GAP-CLOSING SKILLS (7 skills -- deployed 2026-03-25)
-  # ============================================================================
-
-  - slug: sec-reg-d-compliance
-    name: SEC Reg D Compliance
-    category: 09-investor-relations
-    priority: P1
-    phase: 3
-    status: deployed
-    effort_hours: 4
-    plan_file: ""
-    source_prompts: []
-    chains_to: [fund-formation-toolkit, capital-raise-machine, lp-pitch-deck-builder]
-    chains_from: [fund-operations-compliance-dashboard]
-    daily_ops_support: []
-
-  - slug: monte-carlo-return-simulator
-    name: Monte Carlo Return Simulator
-    category: 02-underwriting-analysis
-    priority: P1
-    phase: 3
-    status: deployed
-    effort_hours: 3
-    plan_file: ""
-    source_prompts: []
-    chains_to: [sensitivity-stress-test, ic-memo-generator]
-    chains_from: [acquisition-underwriting-engine, portfolio-allocator]
-    daily_ops_support: []
-
-  - slug: small-operator-pm
-    name: Property Management Operations
-    category: 07-asset-management
-    priority: P1
-    phase: 3
-    status: deployed
-    effort_hours: 3
-    plan_file: ""
-    source_prompts: []
-    chains_to: [work-order-triage, building-systems-maintenance-manager, vendor-invoice-validator]
-    chains_from: [post-close-onboarding-transition, annual-budget-engine]
-    daily_ops_support: []
-
-  - slug: distribution-notice-generator
-    name: Distribution Notice Generator
-    category: 09-investor-relations
-    priority: P1
-    phase: 3
-    status: deployed
-    effort_hours: 2
-    plan_file: ""
-    source_prompts: []
-    chains_to: [quarterly-investor-update]
-    chains_from: [jv-waterfall-architect, partnership-allocation-engine]
-    daily_ops_support: []
-
-  - slug: 1031-pipeline-manager
-    name: 1031 Pipeline Manager
-    category: 03-deal-structuring
-    priority: P1
-    phase: 3
-    status: deployed
-    effort_hours: 3
-    plan_file: ""
-    source_prompts: []
-    chains_to: [1031-exchange-executor, deal-quick-screen, acquisition-underwriting-engine]
-    chains_from: [disposition-strategy-engine, portfolio-allocator]
-    daily_ops_support: []
-
-  - slug: deal-attribution-tracker
-    name: Deal Attribution Tracker
-    category: 15-portfolio-strategy
-    priority: P1
-    phase: 3
-    status: deployed
-    effort_hours: 3
-    plan_file: ""
-    source_prompts: []
-    chains_to: [performance-attribution, quarterly-investor-update, ic-memo-generator]
-    chains_from: [acquisition-underwriting-engine, disposition-strategy-engine]
-    daily_ops_support: []
-
-  - slug: emerging-manager-evaluator
-    name: Emerging Manager Evaluator
-    category: 09-investor-relations
-    priority: P1
-    phase: 3
-    status: deployed
-    effort_hours: 3
-    plan_file: ""
-    source_prompts: []
-    chains_to: [gp-performance-evaluator, fund-terms-comparator]
-    chains_from: [lp-data-request-generator, capital-raise-machine]
-    daily_ops_support: []
-
-  - slug: fund-raise-negotiation-engine
-    name: Fund Capital Raise Negotiation Engine
-    category: 09-investor-relations
-    priority: P0
-    phase: 3
-    status: deployed
-    effort_hours: 8
-    plan_file: ""
-    source_prompts: []
-    chains_to: [distribution-notice-generator, quarterly-investor-update, deal-attribution-tracker]
-    chains_from: [capital-raise-machine, fund-formation-toolkit, fund-terms-comparator]
-    lateral: [jv-waterfall-architect, sec-reg-d-compliance, lp-pitch-deck-builder]
-    daily_ops_support: []
+- slug: 1031-exchange-executor
+  name: 1031 Exchange Executor
+  category: 03-deal-structuring
+  priority: P1
+  status: deployed
+  chains_to:
+  - disposition-strategy-engine
+  chains_from:
+  - disposition-strategy-engine
+  - portfolio-allocator
+- slug: 1031-pipeline-manager
+  name: 1031 Pipeline Manager
+  category: 03-deal-structuring
+  priority: P1
+  status: deployed
+  chains_to:
+  - 1031-exchange-executor
+  - deal-quick-screen
+  - acquisition-underwriting-engine
+  chains_from:
+  - disposition-strategy-engine
+  - portfolio-allocator
+- slug: acquisition-underwriting-engine
+  name: Acquisition Underwriting Engine
+  category: 02-underwriting-analysis
+  priority: P0
+  status: deployed
+  chains_to:
+  - sensitivity-stress-test
+  - ic-memo-generator
+  - dd-command-center
+  - jv-waterfall-architect
+  chains_from:
+  - deal-quick-screen
+  - om-reverse-pricing
+  - rent-roll-analyzer
+  - submarket-truth-serum
+  - comp-snapshot
+  - market-memo-generator
+  - loan-sizing-engine
+- slug: annual-budget-engine
+  name: Annual Budget Engine
+  category: 07-asset-management
+  priority: P0
+  status: deployed
+  chains_to:
+  - sensitivity-stress-test
+  - property-performance-dashboard
+  chains_from:
+  - rent-roll-analyzer
+  - market-memo-generator
+- slug: asset-ops-cockpit
+  name: Asset Operations Cockpit
+  category: cross-cutting
+  priority: P1
+  status: deployed
+  chains_to: []
+  chains_from: []
+- slug: building-systems-maintenance-manager
+  name: Building Systems Maintenance Manager
+  category: 16-daily-operations
+  priority: P1
+  status: deployed
+  chains_to:
+  - work-order-triage
+  - capex-prioritizer
+  chains_from:
+  - property-performance-dashboard
+- slug: cam-reconciliation-calculator
+  name: CAM Reconciliation Calculator
+  category: 16-daily-operations
+  priority: P0
+  status: deployed
+  chains_to:
+  - estoppel-certificate-generator
+  - variance-narrative-generator
+  - debt-covenant-monitor
+  chains_from:
+  - lease-abstract-extractor
+  - cpi-escalation-calculator
+  - t12-normalizer
+- slug: capex-prioritizer
+  name: CapEx Prioritizer
+  category: 07-asset-management
+  priority: P0
+  status: deployed
+  chains_to:
+  - rent-optimization-planner
+  - lease-compliance-auditor
+  chains_from:
+  - deal-underwriting-assistant
+  - market-memo-generator
+  - tenant-delinquency-workout
+- slug: capital-projects-development
+  name: Capital Projects & Development
+  category: cross-cutting
+  priority: P1
+  status: deployed
+  chains_to: []
+  chains_from: []
+- slug: capital-raise-machine
+  name: Capital Raise Machine
+  category: 09-investor-relations
+  priority: P2
+  status: deployed
+  chains_to:
+  - quarterly-investor-update
+  chains_from:
+  - market-cycle-positioner
+  - performance-attribution
+- slug: capital-stack-optimizer
+  name: Capital Stack Optimizer
+  category: 05-capital-markets
+  priority: P0
+  status: deployed
+  chains_to:
+  - acquisition-underwriting-engine
+  - refi-decision-analyzer
+  chains_from:
+  - loan-sizing-engine
+  - mezz-pref-structurer
+  - jv-waterfall-architect
+- slug: carbon-audit-compliance
+  name: Carbon Audit & BPS Compliance
+  category: 14-esg-climate
+  priority: P2
+  status: deployed
+  chains_to:
+  - climate-risk-assessment
+  - disposition-strategy-engine
+  chains_from:
+  - acquisition-underwriting-engine
+  - market-memo-generator
+- slug: climate-risk-assessment
+  name: Climate Risk Assessment
+  category: 14-esg-climate
+  priority: P2
+  status: deployed
+  chains_to:
+  - disposition-strategy-engine
+  - portfolio-allocator
+  chains_from:
+  - acquisition-underwriting-engine
+  - carbon-audit-compliance
+  - market-memo-generator
+- slug: closing-checklist-tracker
+  name: Closing Checklist Tracker
+  category: 16-daily-operations
+  priority: P1
+  status: deployed
+  chains_to: []
+  chains_from:
+  - estoppel-certificate-generator
+  - rent-roll-formatter
+  - lender-compliance-certificate
+- slug: coi-compliance-checker
+  name: COI Compliance Checker
+  category: 16-daily-operations
+  priority: P1
+  status: deployed
+  chains_to:
+  - work-order-triage
+  - debt-covenant-monitor
+  chains_from:
+  - lease-abstract-extractor
+- slug: comp-snapshot
+  name: Comp Snapshot
+  category: 06-market-research
+  priority: P0
+  status: deployed
+  chains_to:
+  - acquisition-underwriting-engine
+  - loi-offer-builder
+  - ic-memo-generator
+  chains_from:
+  - deal-quick-screen
+  - om-reverse-pricing
+  - submarket-truth-serum
+- slug: compliance-regulatory-response-kit
+  name: Compliance & Regulatory Response Kit
+  category: 16-daily-operations
+  priority: P2
+  status: deployed
+  chains_to:
+  - insurance-risk-manager
+  chains_from:
+  - property-operations-admin-toolkit
+- slug: construction-budget-gc-analyzer
+  name: Construction Budget & GC Contract Analyzer
+  category: 10-development
+  priority: P2
+  status: deployed
+  chains_to:
+  - dev-proforma-engine
+  chains_from:
+  - land-residual-hbu-analyzer
+  - entitlement-feasibility
+- slug: construction-cost-estimator
+  name: Construction Cost Estimator
+  category: 10-development
+  priority: P1
+  status: deployed
+  chains_to:
+  - dev-proforma-engine
+  - construction-budget-gc-analyzer
+  - loan-sizing-engine
+  - capital-stack-optimizer
+  - construction-project-command-center
+  - ic-memo-generator
+  chains_from:
+  - entitlement-feasibility
+  - land-residual-hbu-analyzer
+  - comp-snapshot
+- slug: construction-procurement-contracts-engine
+  name: Construction Procurement & Contracts Engine
+  category: 10-development
+  priority: P2
+  status: deployed
+  chains_to:
+  - construction-project-command-center
+  - construction-budget-gc-analyzer
+  chains_from:
+  - dev-proforma-engine
+- slug: construction-project-command-center
+  name: Construction Project Command Center
+  category: 10-development
+  priority: P1
+  status: deployed
+  chains_to:
+  - post-close-onboarding-transition
+  chains_from:
+  - construction-procurement-contracts-engine
+  - construction-budget-gc-analyzer
+- slug: cost-segregation-analyzer
+  name: Cost Segregation Analyzer
+  category: 13-tax-entity
+  priority: P1
+  status: deployed
+  chains_to:
+  - acquisition-underwriting-engine
+  - disposition-strategy-engine
+  - partnership-allocation-engine
+  chains_from:
+  - acquisition-underwriting-engine
+- slug: cpi-escalation-calculator
+  name: CPI Rent Escalation Calculator
+  category: 16-daily-operations
+  priority: P1
+  status: deployed
+  chains_to:
+  - cam-reconciliation-calculator
+  - estoppel-certificate-generator
+  - debt-covenant-monitor
+  - t12-normalizer
+  chains_from:
+  - lease-abstract-extractor
+- slug: creative-seller-financing
+  name: Creative Seller Financing
+  category: 03-deal-structuring
+  priority: P2
+  status: deployed
+  chains_to:
+  - acquisition-underwriting-engine
+  - loan-sizing-engine
+  chains_from:
+  - loi-offer-builder
+- slug: crisis-special-situations-playbook
+  name: Crisis & Special Situations Playbook
+  category: 16-daily-operations
+  priority: P2
+  status: deployed
+  chains_to:
+  - workout-playbook
+  - insurance-risk-manager
+  chains_from: []
+- slug: dd-command-center
+  name: DD Command Center
+  category: 04-due-diligence
+  priority: P0
+  status: deployed
+  chains_to:
+  - distressed-acquisition-playbook
+  - tenant-retention-engine
+  - noi-sprint-plan
+  chains_from:
+  - acquisition-underwriting-engine
+  - loi-offer-builder
+  - psa-redline-strategy
+  - jv-waterfall-architect
+- slug: deal-attribution-tracker
+  name: Deal Attribution Tracker
+  category: 15-portfolio-strategy
+  priority: P1
+  status: deployed
+  chains_to:
+  - performance-attribution
+  - quarterly-investor-update
+  - ic-memo-generator
+  chains_from:
+  - acquisition-underwriting-engine
+  - disposition-strategy-engine
+- slug: deal-intake
+  name: Deal Intake
+  category: cross-cutting
+  priority: P1
+  status: deployed
+  chains_to: []
+  chains_from: []
+- slug: deal-quick-screen
+  name: Deal QuickScreen
+  category: 01-deal-screening
+  priority: P0
+  status: deployed
+  chains_to:
+  - acquisition-underwriting-engine
+  - om-reverse-pricing
+  - submarket-truth-serum
+  - comp-snapshot
+  chains_from:
+  - sourcing-outreach-system
+- slug: deal-underwriting-assistant
+  name: Deal Underwriting Assistant
+  category: existing-deployed
+  priority: deployed
+  status: deployed
+  chains_to:
+  - sensitivity-stress-test
+  - ic-memo-generator
+  - disposition-strategy-engine
+  chains_from:
+  - deal-quick-screen
+  - rent-roll-analyzer
+  - market-memo-generator
+- slug: debt-covenant-monitor
+  name: Debt Covenant Compliance Monitor
+  category: 16-daily-operations
+  priority: P0
+  status: deployed
+  chains_to:
+  - deal-underwriting-assistant
+  chains_from:
+  - t12-normalizer
+  - cam-reconciliation-calculator
+  - lease-abstract-extractor
+  - cpi-escalation-calculator
+  - estoppel-certificate-generator
+  - work-order-triage
+- slug: debt-portfolio-monitor
+  name: Debt Portfolio Monitor
+  category: 05-capital-markets
+  priority: P1
+  status: deployed
+  chains_to:
+  - workout-playbook
+  - refi-decision-analyzer
+  chains_from:
+  - loan-sizing-engine
+  - capital-stack-optimizer
+- slug: dev-proforma-engine
+  name: Development Pro Forma Engine
+  category: 10-development
+  priority: P0
+  status: deployed
+  chains_to:
+  - acquisition-underwriting-engine
+  - jv-waterfall-architect
+  chains_from:
+  - land-residual-hbu-analyzer
+  - construction-budget-gc-analyzer
+  - entitlement-feasibility
+  - market-memo-generator
+- slug: disposition-prep-kit
+  name: Disposition Prep Kit
+  category: 11-disposition
+  priority: P2
+  status: deployed
+  chains_to:
+  - 1031-exchange-executor
+  - capital-raise-machine
+  chains_from:
+  - market-cycle-positioner
+  - quarterly-investor-update
+- slug: disposition-strategy-engine
+  name: Disposition Strategy Engine
+  category: 11-disposition
+  priority: P1
+  status: deployed
+  chains_to:
+  - ic-memo-generator
+  - lp-pitch-deck-builder
+  - 1031-exchange-executor
+  chains_from:
+  - deal-underwriting-assistant
+  - supply-demand-forecast
+  - market-memo-generator
+  - noi-sprint-plan
+  - tenant-retention-engine
+  - cost-segregation-analyzer
+  - climate-risk-assessment
+  - carbon-audit-compliance
+  - partnership-allocation-engine
+- slug: distressed-acquisition-playbook
+  name: Distressed Acquisition Playbook
+  category: 04-due-diligence
+  priority: P1
+  status: deployed
+  chains_to:
+  - noi-sprint-plan
+  - tenant-retention-engine
+  - workout-playbook
+  chains_from:
+  - dd-command-center
+- slug: distribution-notice-generator
+  name: Distribution Notice Generator
+  category: 09-investor-relations
+  priority: P1
+  status: deployed
+  chains_to:
+  - quarterly-investor-update
+  chains_from:
+  - jv-waterfall-architect
+  - partnership-allocation-engine
+- slug: emerging-manager-evaluator
+  name: Emerging Manager Evaluator
+  category: 09-investor-relations
+  priority: P1
+  status: deployed
+  chains_to:
+  - gp-performance-evaluator
+  - fund-terms-comparator
+  chains_from:
+  - lp-data-request-generator
+  - capital-raise-machine
+- slug: entitlement-feasibility
+  name: Entitlement & Zoning Feasibility Assessment
+  category: 10-development
+  priority: P1
+  status: deployed
+  chains_to:
+  - dev-proforma-engine
+  chains_from:
+  - land-residual-hbu-analyzer
+  - market-memo-generator
+- slug: estoppel-certificate-generator
+  name: Estoppel Certificate Generator
+  category: 16-daily-operations
+  priority: P0
+  status: deployed
+  chains_to:
+  - closing-checklist-tracker
+  - debt-covenant-monitor
+  chains_from:
+  - lease-abstract-extractor
+  - cam-reconciliation-calculator
+  - cpi-escalation-calculator
+- slug: fund-formation-toolkit
+  name: Fund Formation Toolkit
+  category: 09-investor-relations
+  priority: P2
+  status: deployed
+  chains_to:
+  - lp-pitch-deck-builder
+  - quarterly-investor-update
+  - performance-attribution
+  - partnership-allocation-engine
+  chains_from:
+  - capital-raise-machine
+- slug: fund-lp-reporting
+  name: Fund & LP Reporting
+  category: cross-cutting
+  priority: P1
+  status: deployed
+  chains_to: []
+  chains_from: []
+- slug: fund-operations-compliance-dashboard
+  name: Fund Operations Compliance Dashboard
+  category: 09-investor-relations
+  priority: P2
+  status: deployed
+  chains_to:
+  - quarterly-investor-update
+  - lp-data-request-generator
+  chains_from:
+  - fund-formation-toolkit
+- slug: fund-raise-negotiation-engine
+  name: Fund Raise Negotiation Engine
+  category: 09-investor-relations
+  priority: P0
+  status: deployed
+  chains_to:
+  - distribution-notice-generator
+  - quarterly-investor-update
+  - deal-attribution-tracker
+  chains_from:
+  - capital-raise-machine
+  - fund-formation-toolkit
+  - fund-terms-comparator
+- slug: fund-terms-comparator
+  name: Fund Terms Comparator
+  category: investor-relations
+  priority: P1
+  status: deployed
+  chains_to: []
+  chains_from:
+  - gp-performance-evaluator
+  - fund-formation-toolkit
+- slug: funds-flow-calculator
+  name: Funds Flow Calculator
+  category: closing
+  priority: P0
+  status: deployed
+  chains_to: []
+  chains_from:
+  - closing-checklist-tracker
+- slug: gp-performance-evaluator
+  name: GP Performance Evaluator
+  category: investor-relations
+  priority: P1
+  status: deployed
+  chains_to:
+  - fund-terms-comparator
+  chains_from:
+  - lp-data-request-generator
+  - performance-attribution
+- slug: ic-memo-generator
+  name: IC Memo Generator
+  category: 09-investor-relations
+  priority: P0
+  status: deployed
+  chains_to:
+  - lp-pitch-deck-builder
+  - disposition-strategy-engine
+  chains_from:
+  - deal-underwriting-assistant
+  - supply-demand-forecast
+  - market-memo-generator
+  - acquisition-underwriting-engine
+  - submarket-truth-serum
+  - comp-snapshot
+  - sensitivity-stress-test
+  - sourcing-outreach-system
+  - portfolio-allocator
+  - reit-profile-builder
+- slug: insurance-risk-manager
+  name: Insurance & Risk Manager
+  category: 16-daily-operations
+  priority: P2
+  status: deployed
+  chains_to:
+  - compliance-regulatory-response-kit
+  chains_from:
+  - crisis-special-situations-playbook
+  - property-operations-admin-toolkit
+- slug: investor-lifecycle-manager
+  name: Investor Lifecycle Manager
+  category: 09-investor-relations
+  priority: P1
+  status: deployed
+  chains_to:
+  - quarterly-investor-update
+  - capital-raise-machine
+  chains_from:
+  - fund-operations-compliance-dashboard
+- slug: jv-waterfall-architect
+  name: JV Waterfall Architect
+  category: 03-deal-structuring
+  priority: P1
+  status: deployed
+  chains_to:
+  - acquisition-underwriting-engine
+  - capital-stack-optimizer
+  - dd-command-center
+  - noi-sprint-plan
+  - partnership-allocation-engine
+  chains_from:
+  - acquisition-underwriting-engine
+- slug: land-residual-hbu-analyzer
+  name: Land Residual & HBU Analyzer
+  category: 10-development
+  priority: P1
+  status: deployed
+  chains_to:
+  - dev-proforma-engine
+  - entitlement-feasibility
+  chains_from:
+  - market-memo-generator
+- slug: lease-abstract-extractor
+  name: Lease Abstract Extractor
+  category: 16-daily-operations
+  priority: P1
+  status: deployed
+  chains_to:
+  - cam-reconciliation-calculator
+  - estoppel-certificate-generator
+  - cpi-escalation-calculator
+  - coi-compliance-checker
+  - debt-covenant-monitor
+  - t12-normalizer
+  chains_from: []
+- slug: lease-compliance-auditor
+  name: Lease Compliance Auditor
+  category: 07-asset-management
+  priority: P1
+  status: deployed
+  chains_to:
+  - tenant-delinquency-workout
+  - capex-prioritizer
+  - rent-optimization-planner
+  - lease-negotiation-analyzer
+  chains_from: []
+- slug: lease-document-factory
+  name: Lease Document Factory
+  category: 08-leasing
+  priority: P1
+  status: deployed
+  chains_to:
+  - lease-abstract-extractor
+  - estoppel-certificate-generator
+  chains_from:
+  - lease-option-structurer
+  - lease-negotiation-analyzer
+- slug: lease-negotiation-analyzer
+  name: Lease Negotiation Analyzer
+  category: 08-leasing
+  priority: P2
+  status: deployed
+  chains_to:
+  - rent-optimization-planner
+  - capex-prioritizer
+  chains_from:
+  - market-memo-generator
+  - deal-underwriting-assistant
+  - tenant-delinquency-workout
+  - lease-compliance-auditor
+- slug: lease-option-structurer
+  name: Lease Option Structurer
+  category: 08-leasing
+  priority: P1
+  status: deployed
+  chains_to:
+  - lease-document-factory
+  - tenant-retention-engine
+  chains_from:
+  - lease-negotiation-analyzer
+  - rent-optimization-planner
+- slug: lease-strategy-papering
+  name: Lease Strategy & Papering
+  category: cross-cutting
+  priority: P1
+  status: deployed
+  chains_to: []
+  chains_from: []
+- slug: lease-trade-out-analyzer
+  name: Lease Trade-Out Analyzer
+  category: 08-leasing
+  priority: P1
+  status: deployed
+  chains_to:
+  - lease-up-war-room
+  - lease-negotiation-analyzer
+  chains_from:
+  - tenant-retention-engine
+  - rent-optimization-planner
+- slug: lease-up-war-room
+  name: Lease-Up War Room
+  category: 08-leasing
+  priority: P1
+  status: deployed
+  chains_to:
+  - quarterly-investor-update
+  chains_from:
+  - market-cycle-positioner
+  - comp-snapshot
+- slug: leasing-operations-engine
+  name: Leasing Operations Engine
+  category: 08-leasing
+  priority: P1
+  status: deployed
+  chains_to:
+  - lease-up-war-room
+  - tenant-retention-engine
+  chains_from:
+  - leasing-strategy-marketing-planner
+- slug: leasing-strategy-marketing-planner
+  name: Leasing Strategy & Marketing Planner
+  category: 08-leasing
+  priority: P1
+  status: deployed
+  chains_to:
+  - leasing-operations-engine
+  - lease-up-war-room
+  chains_from:
+  - market-cycle-positioner
+  - comp-snapshot
+- slug: lender-compliance-certificate
+  name: Lender Compliance Certificate
+  category: 16-daily-operations
+  priority: P1
+  status: deployed
+  chains_to:
+  - closing-checklist-tracker
+  chains_from:
+  - rent-roll-formatter
+  - variance-narrative-generator
+  - vendor-invoice-validator
+  - debt-covenant-monitor
+- slug: loan-document-reviewer
+  name: Loan Document Reviewer
+  category: legal
+  priority: P1
+  status: deployed
+  chains_to:
+  - closing-checklist-tracker
+  - debt-covenant-monitor
+  chains_from:
+  - term-sheet-builder
+- slug: loan-sizing-engine
+  name: Loan Sizing Engine
+  category: 05-capital-markets
+  priority: P0
+  status: deployed
+  chains_to:
+  - acquisition-underwriting-engine
+  - refi-decision-analyzer
+  - mezz-pref-structurer
+  - capital-stack-optimizer
+  chains_from:
+  - rent-roll-analyzer
+- slug: loi-offer-builder
+  name: LOI & Offer Builder
+  category: 03-deal-structuring
+  priority: P1
+  status: deployed
+  chains_to:
+  - psa-redline-strategy
+  - dd-command-center
+  chains_from:
+  - acquisition-underwriting-engine
+  - comp-snapshot
+  - sourcing-outreach-system
+- slug: lp-data-request-generator
+  name: LP Data Request Generator
+  category: investor-relations
+  priority: P1
+  status: deployed
+  chains_to:
+  - gp-performance-evaluator
+  chains_from:
+  - quarterly-investor-update
+- slug: lp-pitch-deck-builder
+  name: LP Pitch Deck Builder
+  category: 09-investor-relations
+  priority: P1
+  status: deployed
+  chains_to: []
+  chains_from:
+  - ic-memo-generator
+  - supply-demand-forecast
+  - market-memo-generator
+  - reit-profile-builder
+  - performance-attribution
+  - fund-formation-toolkit
+- slug: market-cycle-positioner
+  name: Market Cycle Positioner
+  category: 06-market-research
+  priority: P1
+  status: deployed
+  chains_to:
+  - lease-up-war-room
+  - quarterly-investor-update
+  - disposition-prep-kit
+  - capital-raise-machine
+  chains_from:
+  - market-memo-generator
+- slug: market-memo-generator
+  name: Market Memo Generator
+  category: existing-deployed
+  priority: deployed
+  status: deployed
+  chains_to:
+  - deal-underwriting-assistant
+  - submarket-truth-serum
+  - comp-snapshot
+  - supply-demand-forecast
+  - acquisition-underwriting-engine
+  chains_from: []
+- slug: mezz-pref-structurer
+  name: Mezz / Pref Equity Structurer
+  category: 05-capital-markets
+  priority: P1
+  status: deployed
+  chains_to:
+  - capital-stack-optimizer
+  - acquisition-underwriting-engine
+  - workout-playbook
+  chains_from:
+  - loan-sizing-engine
+- slug: monte-carlo-return-simulator
+  name: Monte Carlo Return Simulator
+  category: 02-underwriting-analysis
+  priority: P1
+  status: deployed
+  chains_to:
+  - sensitivity-stress-test
+  - ic-memo-generator
+  chains_from:
+  - acquisition-underwriting-engine
+  - portfolio-allocator
+- slug: navigator
+  name: Navigator
+  category: cross-cutting
+  priority: P1
+  status: deployed
+  chains_to: []
+  chains_from: []
+- slug: noi-sprint-plan
+  name: NOI Sprint Plan
+  category: 07-asset-management
+  priority: P1
+  status: deployed
+  chains_to:
+  - jv-waterfall-architect
+  - disposition-strategy-engine
+  chains_from:
+  - dd-command-center
+  - distressed-acquisition-playbook
+  - tenant-retention-engine
+- slug: om-reverse-pricing
+  name: OM Reverse Pricing
+  category: 01-deal-screening
+  priority: P0
+  status: deployed
+  chains_to:
+  - acquisition-underwriting-engine
+  - comp-snapshot
+  - submarket-truth-serum
+  chains_from:
+  - deal-quick-screen
+- slug: opportunity-zone-underwriter
+  name: Opportunity Zone Underwriter
+  category: 13-tax-entity
+  priority: P2
+  status: deployed
+  chains_to:
+  - acquisition-underwriting-engine
+  chains_from:
+  - acquisition-underwriting-engine
+- slug: partnership-allocation-engine
+  name: Partnership Allocation Engine
+  category: 13-tax-entity
+  priority: P2
+  status: deployed
+  chains_to:
+  - disposition-strategy-engine
+  chains_from:
+  - jv-waterfall-architect
+  - fund-formation-toolkit
+  - cost-segregation-analyzer
+  - opportunity-zone-underwriter
+- slug: performance-attribution
+  name: Performance Attribution
+  category: 15-portfolio-strategy
+  priority: P2
+  status: deployed
+  chains_to:
+  - quarterly-investor-update
+  - capital-raise-machine
+  - lp-pitch-deck-builder
+  - ic-memo-generator
+  chains_from:
+  - portfolio-allocator
+  - deal-underwriting-assistant
+- slug: plugin-admin
+  name: Plugin Admin
+  category: cross-cutting
+  priority: P1
+  status: deployed
+  chains_to: []
+  chains_from: []
+- slug: portfolio-allocator
+  name: Portfolio Allocator
+  category: 15-portfolio-strategy
+  priority: P1
+  status: deployed
+  chains_to:
+  - ic-memo-generator
+  - loi-offer-builder
+  - performance-attribution
+  - quarterly-investor-update
+  - 1031-exchange-executor
+  - sourcing-outreach-system
+  chains_from:
+  - deal-underwriting-assistant
+  - market-memo-generator
+  - climate-risk-assessment
+- slug: post-close-onboarding-transition
+  name: Post-Close Onboarding & Transition
+  category: 10-development
+  priority: P1
+  status: deployed
+  chains_to:
+  - annual-budget-engine
+  - property-performance-dashboard
+  chains_from:
+  - construction-project-command-center
+  - closing-checklist-tracker
+- slug: property-management-orchestrator
+  name: Property Management Orchestrator
+  category: 07-asset-management
+  priority: P0
+  status: deployed
+  chains_to:
+  - noi-sprint-plan
+  - property-performance-dashboard
+  - annual-budget-engine
+  - disposition-strategy-engine
+  - investor-lifecycle-manager
+  chains_from:
+  - post-close-onboarding-transition
+  - construction-project-command-center
+- slug: property-operations-admin-toolkit
+  name: Property Operations & Admin Toolkit
+  category: 16-daily-operations
+  priority: P2
+  status: deployed
+  chains_to:
+  - compliance-regulatory-response-kit
+  - insurance-risk-manager
+  chains_from:
+  - building-systems-maintenance-manager
+- slug: property-performance-dashboard
+  name: Property Performance Dashboard
+  category: 07-asset-management
+  priority: P0
+  status: deployed
+  chains_to:
+  - sensitivity-stress-test
+  - quarterly-investor-update
+  chains_from:
+  - annual-budget-engine
+  - rent-roll-analyzer
+  - market-memo-generator
+- slug: property-tax-appeal-analyzer
+  name: Property Tax Appeal Analyzer
+  category: 16-daily-operations
+  priority: P1
+  status: deployed
+  chains_to:
+  - lender-compliance-certificate
+  - variance-narrative-generator
+  chains_from: []
+- slug: psa-redline-strategy
+  name: PSA Redline Strategy
+  category: 03-deal-structuring
+  priority: P1
+  status: deployed
+  chains_to:
+  - dd-command-center
+  chains_from:
+  - loi-offer-builder
+- slug: quarterly-investor-update
+  name: Quarterly Investor Update
+  category: 09-investor-relations
+  priority: P1
+  status: deployed
+  chains_to:
+  - capital-raise-machine
+  chains_from:
+  - lease-up-war-room
+  - market-cycle-positioner
+  - property-performance-dashboard
+- slug: refi-decision-analyzer
+  name: Refinancing Decision Analyzer
+  category: 05-capital-markets
+  priority: P1
+  status: deployed
+  chains_to:
+  - mezz-pref-structurer
+  - capital-stack-optimizer
+  - workout-playbook
+  chains_from:
+  - loan-sizing-engine
+  - debt-portfolio-monitor
+- slug: reit-profile-builder
+  name: REIT Profile Builder
+  category: existing-deployed
+  priority: deployed
+  status: deployed
+  chains_to:
+  - ic-memo-generator
+  - lp-pitch-deck-builder
+  - portfolio-allocator
+  chains_from: []
+- slug: rent-optimization-planner
+  name: Rent Optimization Planner
+  category: 08-leasing
+  priority: P1
+  status: deployed
+  chains_to:
+  - deal-underwriting-assistant
+  chains_from:
+  - lease-compliance-auditor
+  - capex-prioritizer
+  - market-memo-generator
+  - tenant-delinquency-workout
+  - lease-negotiation-analyzer
+- slug: rent-roll-analyzer
+  name: Rent Roll Analyzer
+  category: 02-underwriting-analysis
+  priority: P0
+  status: deployed
+  chains_to:
+  - acquisition-underwriting-engine
+  - loan-sizing-engine
+  - annual-budget-engine
+  - property-performance-dashboard
+  chains_from: []
+- slug: rent-roll-formatter
+  name: Rent Roll Formatter
+  category: 16-daily-operations
+  priority: P0
+  status: deployed
+  chains_to:
+  - stacking-plan-builder
+  - t12-normalizer
+  - cam-reconciliation-calculator
+  - closing-checklist-tracker
+  - acquisition-underwriting-engine
+  - variance-narrative-generator
+  chains_from: []
+- slug: sec-reg-d-compliance
+  name: SEC Regulation D Compliance
+  category: 09-investor-relations
+  priority: P1
+  status: deployed
+  chains_to:
+  - fund-formation-toolkit
+  - capital-raise-machine
+  - lp-pitch-deck-builder
+  chains_from:
+  - fund-operations-compliance-dashboard
+- slug: sensitivity-stress-test
+  name: Sensitivity & Stress Test Engine
+  category: 02-underwriting-analysis
+  priority: P1
+  status: deployed
+  chains_to:
+  - ic-memo-generator
+  chains_from:
+  - acquisition-underwriting-engine
+  - annual-budget-engine
+  - property-performance-dashboard
+- slug: small-operator-pm
+  name: Small Operator PM
+  category: 07-asset-management
+  priority: P1
+  status: deployed
+  chains_to:
+  - work-order-triage
+  - building-systems-maintenance-manager
+  - vendor-invoice-validator
+  chains_from:
+  - post-close-onboarding-transition
+  - annual-budget-engine
+- slug: sourcing-outreach-system
+  name: Sourcing & Outreach System
+  category: 12-deal-sourcing
+  priority: P2
+  status: deployed
+  chains_to:
+  - deal-quick-screen
+  - deal-underwriting-assistant
+  - loi-offer-builder
+  - ic-memo-generator
+  - portfolio-allocator
+  chains_from:
+  - market-memo-generator
+  - capital-raise-machine
+- slug: space-planning-redesign-orchestrator
+  name: Space Planning & Redesign Orchestrator
+  category: 07-asset-management
+  priority: P2
+  status: stub
+  chains_to:
+  - construction-cost-estimator
+  - construction-project-command-center
+  - capex-prioritizer
+  - annual-budget-engine
+  - ic-memo-generator
+  chains_from:
+  - property-management-orchestrator
+  - noi-sprint-plan
+  - tenant-retention-engine
+  - lease-up-war-room
+- slug: stacking-plan-builder
+  name: Stacking Plan Builder
+  category: 16-daily-operations
+  priority: P2
+  status: deployed
+  chains_to: []
+  chains_from:
+  - rent-roll-formatter
+- slug: submarket-truth-serum
+  name: Submarket Truth Serum
+  category: 06-market-research
+  priority: P0
+  status: deployed
+  chains_to:
+  - acquisition-underwriting-engine
+  - ic-memo-generator
+  - comp-snapshot
+  chains_from:
+  - deal-quick-screen
+  - om-reverse-pricing
+  - market-memo-generator
+- slug: supply-demand-forecast
+  name: Supply-Demand Forecast
+  category: 06-market-research
+  priority: P1
+  status: deployed
+  chains_to:
+  - ic-memo-generator
+  - disposition-strategy-engine
+  - deal-underwriting-assistant
+  chains_from:
+  - market-memo-generator
+- slug: t12-normalizer
+  name: T-12 Operating Statement Normalizer
+  category: 16-daily-operations
+  priority: P0
+  status: deployed
+  chains_to:
+  - cam-reconciliation-calculator
+  - debt-covenant-monitor
+  - deal-underwriting-assistant
+  chains_from:
+  - lease-abstract-extractor
+- slug: tenant-credit-analyzer
+  name: Tenant Credit Analyzer
+  category: 04-due-diligence
+  priority: P1
+  status: deployed
+  chains_to:
+  - acquisition-underwriting-engine
+  - loan-sizing-engine
+  chains_from:
+  - rent-roll-analyzer
+- slug: tenant-delinquency-workout
+  name: Tenant Delinquency Workout
+  category: 07-asset-management
+  priority: P0
+  status: deployed
+  chains_to:
+  - capex-prioritizer
+  - rent-optimization-planner
+  - lease-negotiation-analyzer
+  chains_from:
+  - lease-compliance-auditor
+- slug: tenant-event-planner
+  name: Tenant Event Planner
+  category: 16-daily-operations
+  priority: P2
+  status: deployed
+  chains_to:
+  - tenant-retention-engine
+  chains_from:
+  - property-operations-admin-toolkit
+- slug: tenant-retention-engine
+  name: Tenant Retention Engine
+  category: 08-leasing
+  priority: P0
+  status: deployed
+  chains_to:
+  - jv-waterfall-architect
+  - noi-sprint-plan
+  - disposition-strategy-engine
+  chains_from:
+  - dd-command-center
+  - distressed-acquisition-playbook
+- slug: term-sheet-builder
+  name: Term Sheet Builder
+  category: 05-capital-markets
+  priority: P1
+  status: deployed
+  chains_to:
+  - loan-document-reviewer
+  chains_from:
+  - loan-sizing-engine
+  - capital-stack-optimizer
+- slug: title-commitment-reviewer
+  name: Title Commitment Reviewer
+  category: 04-due-diligence
+  priority: P1
+  status: deployed
+  chains_to:
+  - psa-redline-strategy
+  - closing-checklist-tracker
+  chains_from:
+  - dd-command-center
+- slug: transfer-document-preparer
+  name: Transfer Document Preparer
+  category: legal
+  priority: P1
+  status: deployed
+  chains_to:
+  - closing-checklist-tracker
+  chains_from:
+  - psa-redline-strategy
+- slug: variance-narrative-generator
+  name: Variance Narrative Generator
+  category: 16-daily-operations
+  priority: P1
+  status: deployed
+  chains_to:
+  - lender-compliance-certificate
+  chains_from:
+  - vendor-invoice-validator
+  - cam-reconciliation-calculator
+  - work-order-triage
+  - property-tax-appeal-analyzer
+- slug: vendor-invoice-validator
+  name: Vendor Invoice Validator
+  category: 16-daily-operations
+  priority: P1
+  status: deployed
+  chains_to:
+  - variance-narrative-generator
+  - lender-compliance-certificate
+  - cam-reconciliation-calculator
+  chains_from: []
+- slug: work-order-triage
+  name: Work Order Triage and Priority Scorer
+  category: 16-daily-operations
+  priority: P1
+  status: deployed
+  chains_to:
+  - cam-reconciliation-calculator
+  - variance-narrative-generator
+  chains_from:
+  - lease-abstract-extractor
+  - coi-compliance-checker
+- slug: workout-playbook
+  name: Workout Playbook
+  category: 05-capital-markets
+  priority: P2
+  status: deployed
+  chains_to:
+  - loan-sizing-engine
+  chains_from:
+  - debt-portfolio-monitor
+  - refi-decision-analyzer
+  - distressed-acquisition-playbook
+  - mezz-pref-structurer

@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mariourquia/cre-skills-plugin/catalog/catalog.schema.json",
+  "title": "CRE Skills Plugin Catalog",
+  "description": "Canonical source of truth for all plugin items: skills, agents, commands, calculators, workflows, and orchestrators.",
+  "type": "object",
+  "required": ["version", "generated_at", "items"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version (semver)"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of last generation"
+    },
+    "plugin_version": {
+      "type": "string",
+      "description": "Plugin version from plugin.json"
+    },
+    "items": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/CatalogItem" }
+    }
+  },
+  "$defs": {
+    "CatalogItem": {
+      "type": "object",
+      "required": ["id", "display_name", "type", "status", "source_path"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier (slug for skills/commands, filename stem for agents/calculators)"
+        },
+        "display_name": {
+          "type": "string",
+          "description": "Human-readable name"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["skill", "agent", "command", "calculator", "workflow", "orchestrator"],
+          "description": "Item type"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["stable", "experimental", "stub", "deprecated"],
+          "description": "Maturity status"
+        },
+        "source_path": {
+          "type": "string",
+          "description": "Relative path from repo root to the item's primary file"
+        },
+        "domain": {
+          "type": "string",
+          "description": "Functional domain (e.g., deal-screening, underwriting, leasing)"
+        },
+        "persona": {
+          "type": "string",
+          "description": "Brief description of the item's role or persona"
+        },
+        "lifecycle_phase": {
+          "type": "string",
+          "enum": ["screening", "underwriting", "structuring", "due-diligence", "capital-markets", "market-research", "asset-management", "leasing", "investor-relations", "development", "disposition", "sourcing", "tax-entity", "esg-climate", "portfolio-strategy", "daily-operations", "legal", "closing", "fund-management", "cross-cutting"],
+          "description": "Where in the CRE lifecycle this item operates"
+        },
+        "aliases": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Alternative names or slugs"
+        },
+        "intent_triggers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Phrases that should route to this item"
+        },
+        "input_artifacts": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Types of input documents or data this item expects (e.g., OM, rent roll, lease)"
+        },
+        "outputs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Types of output produced"
+        },
+        "downstream_items": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Item IDs that typically follow this item in a workflow"
+        },
+        "upstream_items": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Item IDs that typically precede this item"
+        },
+        "hidden_from_default_catalog": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, excluded from default routing and navigation"
+        },
+        "legacy_wrapper_for": {
+          "type": ["string", "null"],
+          "default": null,
+          "description": "If this item is a backward-compat wrapper, the ID of the item it wraps"
+        },
+        "owner": {
+          "type": "string",
+          "default": "Mario Urquia"
+        },
+        "last_reviewed_at": {
+          "type": ["string", "null"],
+          "format": "date",
+          "default": null
+        },
+        "notes": {
+          "type": "string",
+          "default": ""
+        },
+        "calculator_file": {
+          "type": ["string", "null"],
+          "default": null,
+          "description": "Path to associated Python calculator, if any"
+        },
+        "priority": {
+          "type": ["string", "null"],
+          "description": "Development priority from registry (P0/P1/P2)"
+        },
+        "version": {
+          "type": ["string", "null"],
+          "description": "Item version from frontmatter"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

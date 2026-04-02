@@ -1,16 +1,33 @@
 # CRE Skills Plugin -- Installation Guide
 
-Version 3.0.0 | Apache 2.0 License
+Version 4.0.0 | Apache 2.0 License
 
 ---
 
-## Quick Install (One Command)
+## Recommended: Plugin Install (Claude Code)
+
+```bash
+claude plugin add github:mariourquia/cre-skills-plugin
+```
+
+This is the primary install method. It clones the repo and registers the plugin automatically.
+
+## Alternative: One-Line Installer
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/mariourquia/cre-skills-plugin/main/scripts/install.sh | bash
 ```
 
 This detects your platform, checks prerequisites, clones the repo, and registers the plugin with Claude Code.
+
+## Local Development / Testing
+
+```bash
+git clone https://github.com/mariourquia/cre-skills-plugin.git
+claude plugin add --plugin-dir ./cre-skills-plugin
+```
+
+Use `--plugin-dir` for local development. Changes to skills/ and commands/ take effect immediately without reinstalling.
 
 ---
 

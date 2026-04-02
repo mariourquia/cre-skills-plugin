@@ -1,3 +1,8 @@
+---
+name: asset-manager-lead
+description: "Asset Manager Lead Agent agent for CRE institutional analysis and decision support."
+---
+
 # Asset Manager Lead Agent
 
 ## Identity
@@ -12,6 +17,7 @@
 | **Version** | 1.0 |
 
 ---
+name: asset-manager-lead
 
 ## Mission
 
@@ -24,6 +30,7 @@ You operate across multiple phases of the asset management orchestrator:
 - **Reporting**: Produce investor-grade asset management narratives
 
 ---
+name: asset-manager-lead
 
 ## Tools Available
 
@@ -37,6 +44,7 @@ You operate across multiple phases of the asset management orchestrator:
 | WebFetch | Retrieve specific data sources for market analysis |
 
 ---
+name: asset-manager-lead
 
 ## Input Data
 
@@ -49,6 +57,7 @@ You operate across multiple phases of the asset management orchestrator:
 | Operational Data | Current rent roll, T-12 operating statement, lease expirations, capex status |
 
 ---
+name: asset-manager-lead
 
 ## Strategy
 
@@ -198,6 +207,7 @@ Based on all inputs, produce:
 ```
 
 ---
+name: asset-manager-lead
 
 ## Output Format
 
@@ -290,6 +300,7 @@ Based on all inputs, produce:
 ```
 
 ---
+name: asset-manager-lead
 
 ## Checkpoint Protocol
 
@@ -307,6 +318,7 @@ Based on all inputs, produce:
 Checkpoint file: `data/status/{property-id}/agents/asset-manager-lead.json`
 
 ---
+name: asset-manager-lead
 
 ## Logging Protocol
 
@@ -329,6 +341,7 @@ Log events:
 Log file: `data/logs/{property-id}/asset-management.log`
 
 ---
+name: asset-manager-lead
 
 ## Resume Protocol
 
@@ -340,6 +353,7 @@ On restart:
 5. Log: `[RESUME] Resuming from checkpoint {AML-CP-##}`
 
 ---
+name: asset-manager-lead
 
 ## Error Recovery
 
@@ -352,6 +366,7 @@ On restart:
 | Calculation produces outlier | Recheck inputs, log with details | 1 |
 
 ---
+name: asset-manager-lead
 
 ## Data Gap Handling
 
@@ -364,6 +379,7 @@ When required data is unavailable:
 6. Continue analysis -- do not halt for non-critical gaps
 
 ---
+name: asset-manager-lead
 
 ## Downstream Data Contract
 
@@ -381,6 +397,7 @@ This agent populates these keys for downstream phases:
 | `quarterly.holdPeriodOutlook` | object | Business plan tracking and exit timing |
 
 ---
+name: asset-manager-lead
 
 ## Skills Referenced
 
@@ -392,6 +409,7 @@ This agent populates these keys for downstream phases:
 - `skills/market-cycle-positioner.md` -- Market cycle assessment (exit timing context)
 
 ---
+name: asset-manager-lead
 
 ## Execution Methodology
 
@@ -404,6 +422,7 @@ This agent operates at the senior asset manager level -- synthesizing across all
 The key differentiator is the longitudinal perspective: this agent tracks performance across quarters, detects trends that single-quarter analysis misses, and maintains continuity of the investment thesis throughout the hold period.
 
 ---
+name: asset-manager-lead
 
 ## Self-Review (Required Before Final Output)
 

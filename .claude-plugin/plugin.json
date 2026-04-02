@@ -1,7 +1,7 @@
 {
   "name": "cre-skills",
-  "description": "105 institutional-grade CRE skills covering ~97% of commercial real estate workflow steps. Deal screening, underwriting, structuring, due diligence, capital markets, market research, asset management, leasing, investor relations, development, disposition, sourcing, tax, ESG, portfolio strategy, and daily operations. Includes Monte Carlo simulation, SEC Reg D compliance, property management ops, deal attribution tracking, 1031 pipeline management, distribution notice generation, fund-raise LP negotiation tracking, and emerging manager evaluation. 55 expert subagents, 247 reference files, 12 Python calculators, 6 workflow chains, 10 orchestrator pipelines, and orchestrator integration for multi-agent acquisition pipelines.",
-  "version": "3.0.0",
+  "description": "112 institutional-grade CRE skills covering ~97% of commercial real estate workflow steps. Deal screening, underwriting, structuring, due diligence, capital markets, market research, asset management, leasing, investor relations, development, disposition, sourcing, tax, ESG, portfolio strategy, and daily operations. Includes Monte Carlo simulation, SEC Reg D compliance, property management ops, deal attribution tracking, 1031 pipeline management, distribution notice generation, fund-raise LP negotiation tracking, and emerging manager evaluation. 54 expert subagents, 247 reference files, 12 Python calculators, 6 workflow chains, 10 orchestrator pipelines, and orchestrator integration for multi-agent acquisition pipelines.",
+  "version": "4.0.0",
   "author": {
     "name": "Mario Urquia",
     "url": "https://mariourquia.com"
@@ -21,5 +21,45 @@
     "property-management",
     "institutional",
     "finance"
-  ]
+  ],
+  "userConfig": {
+    "primary_asset_types": {
+      "type": "string",
+      "description": "Comma-separated property types to prioritize (e.g., multifamily, industrial, office)",
+      "default": ""
+    },
+    "preferred_markets": {
+      "type": "string",
+      "description": "Comma-separated MSAs or submarkets to weight in analysis (e.g., NYC, DFW, ATL)",
+      "default": ""
+    },
+    "default_output_style": {
+      "type": "string",
+      "description": "Default output format for skill results",
+      "enum": [
+        "exec-brief",
+        "ic-memo",
+        "pm-action-list",
+        "lender-brief",
+        "lp-update"
+      ],
+      "default": "exec-brief"
+    },
+    "feedback_mode": {
+      "type": "string",
+      "description": "Feedback submission mode",
+      "enum": [
+        "local_only",
+        "ask_each_time",
+        "anonymous_remote",
+        "remote_with_contact"
+      ],
+      "default": "local_only"
+    },
+    "brand_name": {
+      "type": "string",
+      "description": "Company or fund name for branded deliverables",
+      "default": ""
+    }
+  }
 }

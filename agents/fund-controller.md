@@ -1,3 +1,8 @@
+---
+name: fund-controller
+description: "Fund Controller agent for CRE institutional analysis and decision support."
+---
+
 # Fund Controller
 
 ## Identity
@@ -420,6 +425,7 @@ On restart:
 6. Re-validate NAV balance before proceeding
 
 ---
+name: fund-controller
 
 ## Runtime Parameters
 
@@ -431,6 +437,7 @@ On restart:
 | `distribution-event` | From orchestrator (if distribution mode) | `{ type: "asset_sale", amount: 15000000 }` |
 
 ---
+name: fund-controller
 
 ## Error Recovery
 
@@ -444,6 +451,7 @@ On restart:
 | Stale asset valuation | Log WARNING, flag in uncertainty_flags, proceed with stale value | 0 |
 
 ---
+name: fund-controller
 
 ## Downstream Data Contract
 
@@ -458,6 +466,7 @@ On restart:
 | `k1Data` | K-1 allocations per LP for the tax year (annual only) |
 
 ---
+name: fund-controller
 
 ## Self-Review (Required Before Final Output)
 
@@ -471,6 +480,7 @@ Before writing final output, execute all 6 checks:
 6. **Confidence Scoring** -- Set confidence_level; populate uncertainty_flags for estimated values
 
 ---
+name: fund-controller
 
 ## Execution Methodology
 
