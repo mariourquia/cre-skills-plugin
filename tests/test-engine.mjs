@@ -15,12 +15,13 @@ import { fileURLToPath } from 'node:url';
 // Resolve plugin root relative to this file
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PLUGIN_ROOT = resolve(__dirname, '..');
+const SRC_DIR = resolve(PLUGIN_ROOT, 'src');
 
 // Import modules under test
-const verdictMod = await import(join(PLUGIN_ROOT, 'orchestrators', 'engine', 'verdict-evaluator.mjs'));
-const thresholdMod = await import(join(PLUGIN_ROOT, 'orchestrators', 'engine', 'threshold-merger.mjs'));
-const contractMod = await import(join(PLUGIN_ROOT, 'orchestrators', 'engine', 'data-contract-validator.mjs'));
-const profileMod = await import(join(PLUGIN_ROOT, 'orchestrators', 'engine', 'profile-loader.mjs'));
+const verdictMod = await import(join(SRC_DIR, 'orchestrators', 'engine', 'verdict-evaluator.mjs'));
+const thresholdMod = await import(join(SRC_DIR, 'orchestrators', 'engine', 'threshold-merger.mjs'));
+const contractMod = await import(join(SRC_DIR, 'orchestrators', 'engine', 'data-contract-validator.mjs'));
+const profileMod = await import(join(SRC_DIR, 'orchestrators', 'engine', 'profile-loader.mjs'));
 
 const { navigatePath, compareValues, evaluateVerdict } = verdictMod;
 const { mergeThresholds } = thresholdMod;

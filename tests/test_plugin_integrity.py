@@ -50,7 +50,7 @@ class TestPluginStructure(unittest.TestCase):
             self.assertEqual(result.returncode, 0, f'{hook} failed syntax check')
 
     def test_python_calculators_syntax(self):
-        for script in glob.glob(os.path.join(PLUGIN_ROOT, 'scripts/calculators/*.py')):
+        for script in glob.glob(os.path.join(SRC_DIR, 'calculators/*.py')):
             if script.endswith('README.md'):
                 continue
             with open(script) as f:
@@ -70,7 +70,7 @@ class TestPluginStructure(unittest.TestCase):
 
     def test_feedback_schemas_valid(self):
         for name in ['feedback-submission.schema.json', 'feedback-config.schema.json']:
-            path = os.path.join(PLUGIN_ROOT, 'schemas', name)
+            path = os.path.join(SRC_DIR, 'schemas', name)
             self.assertTrue(os.path.exists(path), f'Missing {name}')
             with open(path) as f:
                 data = json.load(f)
@@ -78,7 +78,7 @@ class TestPluginStructure(unittest.TestCase):
 
     def test_feedback_commands_exist(self):
         for name in ['send-feedback.md', 'report-problem.md']:
-            path = os.path.join(PLUGIN_ROOT, 'commands', name)
+            path = os.path.join(SRC_DIR, 'commands', name)
             self.assertTrue(os.path.exists(path), f'Missing commands/{name}')
 
     def test_redaction_script_syntax(self):
@@ -191,7 +191,7 @@ class TestCatalogConsistency(unittest.TestCase):
         if not self.catalog:
             self.skipTest('No catalog')
         catalog_calcs = [i for i in self.catalog['items'] if i['type'] == 'calculator']
-        fs_calcs = [f for f in glob.glob(os.path.join(PLUGIN_ROOT, 'scripts/calculators/*.py'))
+        fs_calcs = [f for f in glob.glob(os.path.join(SRC_DIR, 'calculators/*.py'))
                     if not os.path.basename(f).startswith('__')]
         self.assertEqual(len(catalog_calcs), len(fs_calcs))
 
@@ -265,14 +265,14 @@ class TestFeedbackConfigParity(unittest.TestCase):
     """Verify feedback config is consistent across code and docs."""
 
     def test_telemetry_enabled_by_default(self):
-        path = os.path.join(PLUGIN_ROOT, 'hooks', 'telemetry-init.mjs')
+        path = os.path.join(SRC_DIR, 'hooks', 'telemetry-init.mjs')
         with open(path) as f:
             content = f.read()
         self.assertIn("telemetry: true", content,
                       'telemetry-init.mjs should default telemetry to true (opt-out model)')
 
     def test_feedback_defaults_ask_each_time(self):
-        path = os.path.join(PLUGIN_ROOT, 'hooks', 'telemetry-init.mjs')
+        path = os.path.join(SRC_DIR, 'hooks', 'telemetry-init.mjs')
         with open(path) as f:
             content = f.read()
         self.assertIn("mode: 'ask_each_time'", content,
@@ -304,7 +304,7 @@ class TestFeedbackConfigParity(unittest.TestCase):
                       'PRIVACY.md should explain how to opt out')
 
     def test_first_run_notice_explains_tracking(self):
-        path = os.path.join(PLUGIN_ROOT, 'hooks', 'telemetry-init.mjs')
+        path = os.path.join(SRC_DIR, 'hooks', 'telemetry-init.mjs')
         with open(path) as f:
             content = f.read()
         self.assertIn('NEVER tracked', content,
@@ -352,8 +352,8 @@ class TestDocReferences(unittest.TestCase):
         self.assertTrue(os.path.exists(os.path.join(SRC_DIR, 'mcp-server.mjs')))
 
     def test_mcp_json_exists(self):
-        self.assertTrue(os.path.exists(os.path.join(PLUGIN_ROOT, '.mcp.json')))
-        with open(os.path.join(PLUGIN_ROOT, '.mcp.json')) as f:
+        self.assertTrue(os.path.exists(os.path.join(SRC_DIR, 'plugin', '.mcp.json')))
+        with open(os.path.join(SRC_DIR, 'plugin', '.mcp.json')) as f:
             data = json.load(f)
         self.assertIn('mcpServers', data)
         self.assertIn('cre-skills', data['mcpServers'])

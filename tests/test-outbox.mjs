@@ -48,7 +48,8 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PLUGIN_ROOT = resolve(__dirname, '..');
-const originalSource = readFileSync(join(PLUGIN_ROOT, 'hooks', 'feedback-outbox.mjs'), 'utf8');
+const SRC_DIR = resolve(PLUGIN_ROOT, 'src');
+const originalSource = readFileSync(join(SRC_DIR, 'hooks', 'feedback-outbox.mjs'), 'utf8');
 
 // Replace the CONFIG_DIR and OUTBOX_PATH with our temp paths
 const patchedSource = originalSource
