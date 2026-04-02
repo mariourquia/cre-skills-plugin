@@ -48,7 +48,7 @@ Write-Host "  \____|_| \_\_____| |____/|_|\_\_|_|_|___/" -ForegroundColor Cyan
 Write-Host "" -ForegroundColor Cyan
 Write-Host "  Commercial Real Estate Skills for Claude" -ForegroundColor Cyan
 
-Write-Blue  "  Plugin Installer v4.0.0"
+Write-Blue  "  Plugin Installer v4.1.0"
 Write-Dim   "  112 skills | 54 agents | 6 workflow chains"
 Write-Host  ""
 
@@ -105,6 +105,8 @@ if (-not $ClaudePath) {
 $ClaudeConfigDir = Join-Path $env:USERPROFILE ".claude"
 $HasClaudeConfig = Test-Path $ClaudeConfigDir
 
+$HasClaudeHome = Test-Path (Join-Path $env:USERPROFILE ".claude")
+
 if ($ClaudePath) {
     $HasClaudeCode = $true
     try {
@@ -113,13 +115,12 @@ if ($ClaudePath) {
     } catch {
         Write-Green "  Claude Code CLI found at: $ClaudePath"
     }
-} elseif ($HasClaudeConfig) {
-    $HasClaudeCode = $true
-    Write-Green "  Claude Code detected (~/.claude exists)"
-    Write-Yellow "  CLI binary not in PATH -- will show manual registration"
 } else {
-    Write-Yellow "  Claude Code CLI not found (optional)"
+    Write-Yellow "  Claude Code CLI not found"
     Write-Dim  "  Install: irm https://claude.ai/install.ps1 | iex"
+    if ($HasClaudeHome) {
+        Write-Dim  "  (~/.claude exists -- will register plugin there)"
+    }
 }
 
 # Check for Claude Desktop -- official config location: %APPDATA%\Claude
@@ -140,7 +141,7 @@ if (Test-Path $ClaudeDesktopDir) {
 }
 
 # At least one must exist
-if (-not $HasClaudeCode -and -not $HasClaudeDesktop) {
+if (-not $HasClaudeCode -and -not $HasClaudeDesktop -and -not $HasClaudeHome) {
     Write-Host ""
     Write-Red "  Neither Claude Code nor Claude Desktop was found."
     Write-Host ""
@@ -167,8 +168,8 @@ Write-Host ""
 $InstalledSomewhere = $false
 
 # Register plugin in ~/.claude/ plugin system (works for both Claude Code and Desktop)
-if ($HasClaudeCode -or $HasClaudeDesktop) {
-    Write-Blue "  Registering plugin for Claude Desktop..."
+if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
+    Write-Blue "  Registering plugin..."
 
     # Plugin cache location: ~/.claude/plugins/cache/local/cre-skills-plugin/<version>
     $ClaudeHome = Join-Path $env:USERPROFILE ".claude"
