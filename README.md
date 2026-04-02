@@ -22,7 +22,7 @@
 
 # CRE Skills Plugin
 
-A Claude plugin delivering **105 institutional-grade commercial real estate skills** covering the full investment lifecycle -- deal sourcing, screening, underwriting, structuring, due diligence, capital markets, market research, asset management, leasing, investor relations, development, disposition, tax planning, ESG, portfolio strategy, and daily property operations. Each skill includes structured process logic, reference documents, chain connections to other skills, and Python calculators for precise quantitative output. Deploy as a plugin in Claude Code, Claude Desktop, or Claude.ai and get an entire CRE PE shop in your terminal.
+A Claude plugin delivering **112 institutional-grade commercial real estate skills** covering the full investment lifecycle -- deal sourcing, screening, underwriting, structuring, due diligence, capital markets, market research, asset management, leasing, investor relations, development, disposition, tax planning, ESG, portfolio strategy, and daily property operations. Each skill includes structured process logic, reference documents, chain connections to other skills, and Python calculators for precise quantitative output. Deploy as a plugin in Claude Code, Claude Desktop, or Claude.ai and get an entire CRE PE shop in your terminal.
 
 ## Key Stats
 
@@ -47,7 +47,7 @@ A Claude plugin delivering **105 institutional-grade commercial real estate skil
 
 **Weekly feedback prompt**: Brief, non-intrusive reminder at session end after 7+ days of use. Shown once per week, only when CRE skills were used. No opt-in required.
 
-**105 skills, 54 agents, 12 calculators, 9 commands**: Full counts after prior additions (construction estimator, PM orchestrator, space planning) plus v3.0.0 feedback commands.
+**112 skills, 54 agents, 12 calculators, 9 commands**: Full counts after prior additions (construction estimator, PM orchestrator, space planning) plus v3.0.0 feedback commands.
 
 **Claude Desktop support**: macOS DMG and Windows .exe installers auto-detect Claude Code and Claude Desktop. Both platforms fully supported.
 
@@ -324,7 +324,7 @@ View your feedback history with `/cre-skills:feedback-summary`.
 
 ## Privacy & Telemetry
 
-Usage telemetry is **opt-in only** and **local-only**. Data is stored in `~/.cre-skills/` and never leaves your machine.
+Anonymous usage telemetry is **enabled by default** and **local-only**. It records which skills you use (slug only) and the date -- nothing else. No deal data, financial figures, file paths, prompts, or identity information is ever tracked. All data stays on your machine in `~/.cre-skills/telemetry.jsonl`. To opt out: set `"telemetry": false` in `~/.cre-skills/config.json`.
 
 - `/cre-skills:usage-stats` -- view your aggregated skill usage patterns
 - `/cre-skills:feedback-summary` -- view your session ratings and comments
