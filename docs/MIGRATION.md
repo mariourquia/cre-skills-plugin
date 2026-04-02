@@ -1,4 +1,4 @@
-# Migration Guide: v3.0.0 -> v4.0.0
+# Migration Guide: v3.0.0 -> v4.1.0
 
 ## Breaking Changes
 

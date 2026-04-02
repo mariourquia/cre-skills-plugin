@@ -6,7 +6,7 @@
 
 ## Context
 
-Prior to v4.0.0, the plugin maintained counts and metadata in multiple independent locations:
+Prior to v4.1.0, the plugin maintained counts and metadata in multiple independent locations:
 - `plugin.json` description (hardcoded counts)
 - `README.md` Key Stats table (hardcoded counts)
 - `hooks.json` SessionStart prompt (hardcoded counts)
