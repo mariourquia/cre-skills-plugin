@@ -334,6 +334,34 @@ with open('$settings_file', 'w') as f:
     printf '{"enabledPlugins":{"%s":true}}' "$plugin_key" > "$settings_file"
     success "Created settings.json"
   fi
+
+  # 4. Register MCP server for Claude Desktop
+  #    Per Anthropic docs: Claude Desktop reads ONLY from
+  #    ~/Library/Application Support/Claude/claude_desktop_config.json (macOS)
+  local desktop_config="$HOME/Library/Application Support/Claude/claude_desktop_config.json"
+  if [ ! -d "$(dirname "$desktop_config")" ]; then
+    # Try Linux path
+    desktop_config="$HOME/.config/Claude/claude_desktop_config.json"
+  fi
+
+  if [ -d "$(dirname "$desktop_config")" ] || [ -f "$desktop_config" ]; then
+    python3 -c "
+import json, os
+config_path = '$desktop_config'
+os.makedirs(os.path.dirname(config_path), exist_ok=True)
+if os.path.exists(config_path):
+    with open(config_path) as f:
+        data = json.load(f)
+else:
+    data = {}
+data.setdefault('mcpServers', {})['cre-skills'] = {
+    'command': 'node',
+    'args': ['$plugins_cache/mcp-server.mjs']
+}
+with open(config_path, 'w') as f:
+    json.dump(data, f, indent=2)
+" 2>/dev/null && success "MCP server registered for Claude Desktop" || warn "Could not register MCP server (non-fatal)"
+  fi
 }
 
 # ---------------------------------------------------------------------------
