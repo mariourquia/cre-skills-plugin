@@ -1,6 +1,6 @@
 # CRE Skills Plugin -- Installation Guide
 
-Version 4.0.0 | Apache 2.0 License
+Version 4.1.0 | Apache 2.0 License
 
 ---
 
