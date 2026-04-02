@@ -59,6 +59,26 @@ Added to `~/.cre-skills/config.json` by `telemetry-init.mjs`:
 
 Users are prompted before each remote send (`ask_each_time`). To disable remote submission entirely, set `mode` to `local_only`. Existing installs get this block backfilled on next session start.
 
+## Retry Outbox
+
+When a remote submission fails (network error or non-2xx response), the record is appended to `~/.cre-skills/outbox.jsonl` for automatic retry on next session start.
+
+**Implementation:** `hooks/feedback-outbox.mjs`
+
+| Function | Purpose |
+|----------|---------||
+| `enqueue(entry)` | Append a failed submission with `_outbox` metadata (queued_at, attempts, last_attempt_at) |
+| `drain(backendUrl)` | Retry all pending entries. Remove on 2xx, bump attempts on failure, evict after 5 attempts |
+| `pending()` | Return count of queued items |
+
+**Behavior:**
+- `drain()` is called from `telemetry-init.mjs` (SessionStart hook) as fire-and-forget
+- Each retry request has a 4-second timeout (AbortController) to avoid blocking session start
+- Entries exceeding 5 attempts are permanently evicted (dropped)
+- Only runs when feedback mode is not `local_only` and a `backend_url` is configured
+- Sends `X-Outbox-Retry: <attempt>` header for server-side deduplication
+- `/cre-skills:feedback-summary` shows pending outbox count when entries exist
+
 ## Data Flow
 
 ```
@@ -80,6 +100,7 @@ All files in `~/.cre-skills/`:
 | `telemetry.jsonl` | JSONL | Skill invocation events (enabled by default, opt-out) |
 | `feedback.jsonl` | JSONL | Session survey responses (existing, opt-in) |
 | `feedback-log.jsonl` | JSONL | Structured feedback submissions (this system) |
+| `outbox.jsonl` | JSONL | Failed remote submissions queued for retry |
 
 `feedback-log.jsonl` is distinct from `feedback.jsonl`. The former stores structured command-driven submissions; the latter stores the existing session-end survey responses.
 

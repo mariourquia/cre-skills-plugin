@@ -41,15 +41,17 @@ A Claude plugin delivering **112 institutional-grade commercial real estate skil
 
 ---
 
-## What's New in v4.1.0
+## What's New in v4.0.0
 
-**Feedback system**: `/cre-skills:send-feedback` and `/cre-skills:report-problem` for structured feedback without leaving your session. Submissions are saved locally with automatic redaction (file paths, emails, digit sequences, env vars stripped). Optional remote submission to the maintainer (ask_each_time mode -- you confirm each send).
+**Catalog-driven architecture**: Single source of truth (`catalog/catalog.yaml`, 203 items). Every public surface -- README stats, plugin.json, hooks prompt, routing table, registry -- is generated from the catalog. CI catches drift.
 
-**Weekly feedback prompt**: Brief, non-intrusive reminder at session end after 7+ days of use. Shown once per week, only when CRE skills were used. No opt-in required.
+**MCP server**: Zero-dependency MCP server (`mcp-server.mjs`) with 8 tools for Claude Desktop support. macOS DMG and Windows .exe installers auto-detect Claude Code and Claude Desktop.
 
-**112 skills, 54 agents, 12 calculators, 9 commands**: Full counts after prior additions (construction estimator, PM orchestrator, space planning) plus v4.1.0 catalog, MCP server, workspace skills.
+**7 workspace skills**: deal-intake, lease-strategy-papering, asset-ops-cockpit, capital-projects-development, fund-lp-reporting, navigator, plugin-admin. Persistent workspace state for cross-session continuity.
 
-**Claude Desktop support**: macOS DMG and Windows .exe installers auto-detect Claude Code and Claude Desktop. Both platforms fully supported.
+**Feedback system**: `/cre-skills:send-feedback` and `/cre-skills:report-problem` with automatic redaction, optional remote submission (ask_each_time mode), and retry outbox for failed sends.
+
+**112 skills, 54 agents, 12 calculators, 9 commands**: Full counts after prior additions (construction estimator, PM orchestrator, space planning) plus catalog, MCP server, workspace skills.
 
 See [CHANGELOG.md](CHANGELOG.md) for full history.
 
@@ -77,7 +79,7 @@ curl -fsSL https://raw.githubusercontent.com/mariourquia/cre-skills-plugin/main/
 
 ### macOS DMG (Double-Click Installer)
 
-Download `cre-skills-v4.1.0.dmg` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
+Download `cre-skills-v4.0.0.dmg` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
 
 1. Open the DMG
 2. Double-click "CRE Skills Installer"
@@ -88,7 +90,7 @@ The installer automatically detects whether you have Claude Code, Claude Desktop
 
 ### Windows .exe Installer
 
-Download `cre-skills-v4.1.0-setup.exe` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
+Download `cre-skills-v4.0.0-setup.exe` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
 
 1. Run the installer (SmartScreen warning: click "More info" > "Run anyway")
 2. Follow the wizard

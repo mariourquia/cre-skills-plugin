@@ -1,6 +1,6 @@
 # Changelog
 
-## [4.0.1] - 2026-04-02
+## [4.0.0] - 2026-04-02
 
 ### Changed
 - Telemetry now enabled by default (opt-out model). Records only skill slug +
@@ -16,6 +16,12 @@
 ## [4.0.0] - 2026-04-02
 
 ### Added
+- MCP server (mcp-server.mjs): zero-dependency stdio JSON-RPC server with 8 tools
+  (cre_route, cre_list_skills, cre_skill_detail, cre_workspace_create/get/list/update,
+  cre_send_feedback) for Claude Desktop visibility
+- Feedback retry outbox (hooks/feedback-outbox.mjs): failed remote submissions are
+  queued in ~/.cre-skills/outbox.jsonl and retried on next session start (4s timeout
+  per request, max 5 attempts before eviction)
 - Canonical catalog system: catalog/catalog.yaml as single source of truth for all
   plugin metadata (196 items: 105 skills, 54 agents, 9 commands, 12 calculators,
   10 orchestrators, 6 workflows)
