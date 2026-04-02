@@ -57,10 +57,16 @@ See [CHANGELOG.md](CHANGELOG.md) for full history.
 
 ## Installation
 
-### Claude Code (CLI)
+### Claude Code (Recommended)
 
 ```bash
-claude plugin add github:mariourquia/cre-skills-plugin
+curl -fsSL https://raw.githubusercontent.com/mariourquia/cre-skills-plugin/main/scripts/install.sh | bash
+```
+
+Or for a single session:
+
+```bash
+claude --plugin-dir /path/to/cre-skills-plugin
 ```
 
 ### One-Line Installer
