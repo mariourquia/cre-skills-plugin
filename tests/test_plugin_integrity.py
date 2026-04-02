@@ -270,12 +270,14 @@ class TestFeedbackConfigParity(unittest.TestCase):
         self.assertIn("telemetry: true", content,
                       'telemetry-init.mjs should default telemetry to true (opt-out model)')
 
-    def test_feedback_defaults_local_only(self):
+    def test_feedback_defaults_ask_each_time(self):
         path = os.path.join(PLUGIN_ROOT, 'hooks', 'telemetry-init.mjs')
         with open(path) as f:
             content = f.read()
-        self.assertIn("mode: 'local_only'", content,
-                      'telemetry-init.mjs should default feedback mode to local_only')
+        self.assertIn("mode: 'ask_each_time'", content,
+                      'telemetry-init.mjs should default feedback mode to ask_each_time')
+        self.assertIn("cre-skills-feedback-api.vercel.app", content,
+                      'telemetry-init.mjs should have feedback backend URL configured')
 
     def test_privacy_md_not_future(self):
         path = os.path.join(PLUGIN_ROOT, 'PRIVACY.md')
@@ -288,8 +290,8 @@ class TestFeedbackConfigParity(unittest.TestCase):
         path = os.path.join(PLUGIN_ROOT, 'docs', 'feedback-system.md')
         with open(path) as f:
             content = f.read()
-        self.assertIn('disabled by default', content,
-                      'feedback-system.md should say remote is disabled by default')
+        self.assertIn('ask_each_time', content,
+                      'feedback-system.md should reflect ask_each_time default')
 
     def test_privacy_md_reflects_opt_out(self):
         path = os.path.join(PLUGIN_ROOT, 'PRIVACY.md')
