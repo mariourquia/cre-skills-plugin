@@ -23,7 +23,9 @@ jobs:
       - name: Install test dependencies
         run: pip install pytest pyyaml
       - name: Build catalog (required before tests)
-        run: python scripts/catalog-build.py
+        run: |
+          python scripts/catalog-build.py
+          python scripts/catalog-generate.py
       - name: Run integrity tests
         run: python -m pytest tests/ -v
       - name: Validate hooks JSON
