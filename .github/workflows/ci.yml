@@ -22,6 +22,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Install test dependencies
         run: pip install pytest pyyaml
+      - name: Build catalog (required before tests)
+        run: python scripts/catalog-build.py
       - name: Run integrity tests
         run: python -m pytest tests/ -v
       - name: Validate hooks JSON
