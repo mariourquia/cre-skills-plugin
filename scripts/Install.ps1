@@ -71,41 +71,67 @@ $HasClaudeCode = $false
 $HasClaudeDesktop = $false
 $ClaudePath = $null
 
-# Check for Claude Code CLI -- try PATH first, then known npm global location
-$claudeCmd = Get-Command claude -ErrorAction SilentlyContinue
-if ($claudeCmd) {
-    $HasClaudeCode = $true
-    $ClaudePath = $claudeCmd.Source
-    try {
-        $ver = & claude --version 2>$null
-        Write-Green "  Claude Code CLI found: $ver"
-    } catch {
-        Write-Green "  Claude Code CLI found"
-    }
-} else {
-    # Check npm global install location explicitly
-    $npmClaudePath = Join-Path $env:APPDATA "npm\claude.cmd"
-    if (Test-Path $npmClaudePath) {
-        $HasClaudeCode = $true
-        $ClaudePath = $npmClaudePath
-        Write-Green "  Claude Code CLI found at: $npmClaudePath"
-    } else {
-        Write-Yellow "  Claude Code CLI not found (optional)"
+# Check for Claude Code CLI
+# Official install paths per Anthropic docs:
+#   Windows native: $env:USERPROFILE\.local\bin\claude.exe
+#   npm global:     $env:APPDATA\npm\claude.cmd
+$ClaudePath = $null
+
+# Method 1: PATH lookup
+$found = Get-Command claude -ErrorAction SilentlyContinue
+if ($found) {
+    $ClaudePath = $found.Source
+}
+
+# Method 2: Official Windows native install location
+if (-not $ClaudePath) {
+    $nativePath = Join-Path $env:USERPROFILE ".local\bin\claude.exe"
+    if (Test-Path $nativePath) {
+        $ClaudePath = $nativePath
     }
 }
 
-# Check for Claude Desktop
+# Method 3: npm global install
+if (-not $ClaudePath) {
+    $npmPath = Join-Path $env:APPDATA "npm\claude.cmd"
+    if (Test-Path $npmPath) {
+        $ClaudePath = $npmPath
+    }
+}
+
+# Method 4: Check ~/.claude config dir (proof Claude Code was used)
+$ClaudeConfigDir = Join-Path $env:USERPROFILE ".claude"
+$HasClaudeConfig = Test-Path $ClaudeConfigDir
+
+if ($ClaudePath) {
+    $HasClaudeCode = $true
+    try {
+        $ver = & $ClaudePath --version 2>$null
+        Write-Green "  Claude Code CLI found: $ver"
+    } catch {
+        Write-Green "  Claude Code CLI found at: $ClaudePath"
+    }
+} elseif ($HasClaudeConfig) {
+    $HasClaudeCode = $true
+    Write-Green "  Claude Code detected (~/.claude exists)"
+    Write-Yellow "  CLI binary not in PATH -- will show manual registration"
+} else {
+    Write-Yellow "  Claude Code CLI not found (optional)"
+    Write-Dim  "  Install: irm https://claude.ai/install.ps1 | iex"
+}
+
+# Check for Claude Desktop -- official config location: %APPDATA%\Claude
 $ClaudeDesktopDir = Join-Path $env:APPDATA "Claude"
 if (Test-Path $ClaudeDesktopDir) {
     $HasClaudeDesktop = $true
     Write-Green "  Claude Desktop found"
 } else {
-    # Also check LocalAppData
+    # Also check LocalAppData (some versions)
     $ClaudeLocalDir = Join-Path $env:LOCALAPPDATA "Claude"
     if (Test-Path $ClaudeLocalDir) {
         $HasClaudeDesktop = $true
         $ClaudeDesktopDir = $ClaudeLocalDir
-        Write-Green "  Claude Desktop found"
+        Write-Green "  Claude Desktop found (LocalAppData)"
     } else {
         Write-Yellow "  Claude Desktop not found (optional)"
     }
@@ -117,8 +143,8 @@ if (-not $HasClaudeCode -and -not $HasClaudeDesktop) {
     Write-Red "  Neither Claude Code nor Claude Desktop was found."
     Write-Host ""
     Write-Host "  Install one of these first:"
-    Write-Cyan "    Claude Code:    npm install -g @anthropic-ai/claude-code"
-    Write-Cyan "    Claude Desktop: https://claude.ai/download"
+    Write-Host "    Claude Code:    irm https://claude.ai/install.ps1 | iex"
+    Write-Host "    Claude Desktop: https://claude.ai/download"
     Write-Host ""
     Write-Host "  After installing, re-run this script or register manually:"
     Write-Dim  "    claude plugin add `"$InstallDir`""
