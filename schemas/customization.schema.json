@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mariourquia/cre-skills-plugin/schemas/customization.schema.json",
+  "title": "CRE Skills Customization Schemas",
+  "description": "Unified schema for all customization-related data: local metadata, feedback payloads, and config.",
+
+  "$defs": {
+    "change_category": {
+      "type": "string",
+      "enum": [
+        "terminology",
+        "approval_chain",
+        "required_steps",
+        "compliance_governance",
+        "deliverable_format",
+        "tone_style",
+        "missing_fields",
+        "output_structure",
+        "calculation_method",
+        "regional_market",
+        "other"
+      ]
+    },
+    "sha256_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+
+    "metadata": {
+      "title": "Customization Metadata",
+      "description": "Stored at ~/.cre-skills/customizations/<slug>/metadata.json",
+      "type": "object",
+      "required": [
+        "customization_id",
+        "skill_slug",
+        "created_at",
+        "updated_at",
+        "base_content_hash",
+        "modified_content_hash",
+        "status",
+        "plugin_version"
+      ],
+      "properties": {
+        "customization_id": {
+          "type": "string",
+          "pattern": "^cust_[a-zA-Z0-9]{12}$",
+          "description": "Unique identifier: cust_ prefix + 12 random alphanumeric"
+        },
+        "skill_slug": {
+          "type": "string",
+          "description": "Slug of the customized skill (matches catalog id)"
+        },
+        "created_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" },
+        "base_content_hash": { "$ref": "#/$defs/sha256_hash", "description": "SHA-256 of base SKILL.md at customization time" },
+        "modified_content_hash": { "$ref": "#/$defs/sha256_hash", "description": "SHA-256 of current customized SKILL.md" },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "active"],
+          "description": "draft = unchanged from base; active = content differs"
+        },
+        "rationale": { "type": ["string", "null"], "maxLength": 2000 },
+        "change_categories": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/change_category" }
+        },
+        "notes": { "type": ["string", "null"], "maxLength": 2000 },
+        "plugin_version": { "type": "string" },
+        "platform": { "type": "string", "description": "OS platform (darwin, win32, linux)" },
+        "imported_at": { "type": ["string", "null"], "format": "date-time", "description": "Set if imported from a bundle" }
+      },
+      "additionalProperties": true
+    },
+
+    "feedback": {
+      "title": "Customization Feedback Payload",
+      "description": "Structured feedback sent when a user customizes a skill. Fields progressively disclosed by privacy mode.",
+      "type": "object",
+      "required": [
+        "schema_version",
+        "feedback_id",
+        "feedback_type",
+        "timestamp",
+        "plugin_version",
+        "skill_slug",
+        "customization_id",
+        "base_content_hash",
+        "modified_content_hash"
+      ],
+      "properties": {
+        "schema_version": { "type": "string", "const": "1.0", "description": "Increment on breaking changes" },
+        "feedback_id": { "type": "string", "pattern": "^cfb_[a-zA-Z0-9]{16}$" },
+        "feedback_type": { "type": "string", "const": "customization_feedback" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "plugin_version": { "type": "string" },
+        "platform": { "type": "string" },
+        "skill_slug": { "type": "string" },
+        "customization_id": { "type": "string" },
+        "base_content_hash": { "$ref": "#/$defs/sha256_hash" },
+        "modified_content_hash": { "$ref": "#/$defs/sha256_hash" },
+        "change_categories": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/change_category" }
+        },
+        "diff_stats": {
+          "type": ["object", "null"],
+          "properties": {
+            "added": { "type": "integer", "minimum": 0 },
+            "removed": { "type": "integer", "minimum": 0 },
+            "unchanged": { "type": "integer", "minimum": 0 }
+          },
+          "description": "Included at metadata_and_summary and above"
+        },
+        "sections_changed": {
+          "type": ["array", "null"],
+          "items": { "type": "string" },
+          "description": "Included at metadata_and_summary and above"
+        },
+        "rationale": { "type": ["string", "null"], "maxLength": 2000 },
+        "notes": { "type": ["string", "null"], "maxLength": 2000 },
+        "diff_summary": { "type": ["string", "null"], "description": "Included at metadata_and_summary and above" },
+        "diff_text": { "type": ["string", "null"], "description": "Included at metadata_and_diff and above" },
+        "modified_content": { "type": ["string", "null"], "description": "Only at metadata_and_content with explicit consent" },
+        "wants_upstream_consideration": { "type": "boolean", "default": false },
+        "consented_to_content": { "type": "boolean", "default": false },
+        "consent_timestamp": { "type": ["string", "null"], "format": "date-time" }
+      },
+      "additionalProperties": true
+    },
+
+    "config": {
+      "title": "Customization Configuration",
+      "description": "The 'customization' block in ~/.cre-skills/config.json",
+      "type": "object",
+      "properties": {
+        "feedback_enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Master switch. When false, no feedback payloads are created."
+        },
+        "feedback_mode": {
+          "type": "string",
+          "enum": ["off", "metadata_only", "metadata_and_summary", "metadata_and_diff", "metadata_and_content"],
+          "default": "metadata_only",
+          "description": "Privacy level. metadata_and_content requires explicit consent regardless."
+        },
+        "feedback_endpoint": {
+          "type": "string",
+          "default": "",
+          "description": "HTTPS endpoint for remote submission. Empty = local-only."
+        },
+        "require_consent": {
+          "type": "boolean",
+          "default": true,
+          "description": "When true, user must confirm before any remote send."
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview payloads without sending."
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}
