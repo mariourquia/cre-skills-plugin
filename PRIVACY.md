@@ -95,17 +95,17 @@ The `contact_email` field is NOT redacted because the user explicitly provides i
 
 **Storage:** `~/.cre-skills/feedback-log.jsonl`. Local-only. The user owns and controls this file.
 
-## Remote Feedback Submission (Opt-In)
+## Remote Feedback Submission (Ask Each Time)
 
-Remote feedback submission is **disabled by default** (`local_only` mode). To enable:
-1. Set `feedback.mode` to `ask_each_time`, `anonymous_remote`, or `remote_with_contact` in `~/.cre-skills/config.json`
-2. Set `feedback.backend_url` to `https://cre-skills-feedback-api.vercel.app/api/feedback`
+When you submit feedback or a bug report, you are **prompted before sending** ("Would you also like to send this to the plugin maintainer?"). Nothing leaves your machine without your explicit approval.
 
-When enabled, remote submission:
-- Transmits only the same redacted/anonymized fields stored locally
-- Uses HTTPS POST to the configured endpoint
-- Never transmits deal data, financial figures, or PII
-- Endpoint: `https://cre-skills-feedback-api.vercel.app/api/feedback` (Vercel Function + Supabase)
+Default mode is `ask_each_time`. To disable remote submission entirely, set `feedback.mode` to `local_only` in `~/.cre-skills/config.json`.
+
+When you approve a remote send:
+- The redacted feedback/bug record is transmitted (same fields stored locally)
+- A 30-day skill usage summary is included (skill slugs + counts only)
+- HTTPS POST to `https://cre-skills-feedback-api.vercel.app/api/feedback` (Vercel Function + Supabase)
+- Deal data, financial figures, prompts, and PII are never transmitted
 
 Data deletion: open an issue at https://github.com/mariourquia/cre-skills-plugin/issues with your `install_id_hash` (found in your local feedback-log.jsonl records).
 

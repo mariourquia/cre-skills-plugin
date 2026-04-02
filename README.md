@@ -316,7 +316,7 @@ Share feedback or report problems without leaving your session:
 - `/cre-skills:send-feedback` -- share feedback about skill quality, missing capabilities, or general suggestions
 - `/cre-skills:report-problem` -- report a bug with structured severity, reproduction context, and skill identification
 
-Feedback is saved locally to `~/.cre-skills/feedback-log.jsonl`. Free-text fields are automatically sanitized (file paths, emails, digit sequences stripped). No deal data, prompts, or financial figures are ever stored. Remote submission is available but disabled by default (configure in `~/.cre-skills/config.json`).
+Feedback is saved locally to `~/.cre-skills/feedback-log.jsonl`. Free-text fields are automatically sanitized (file paths, emails, digit sequences stripped). No deal data, prompts, or financial figures are ever stored. After submitting, you're asked if you'd also like to send it to the maintainer (you approve each send). To disable: set `feedback.mode` to `local_only` in `~/.cre-skills/config.json`.
 
 View your feedback history with `/cre-skills:feedback-summary`.
 
