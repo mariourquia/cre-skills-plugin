@@ -17,11 +17,39 @@ if ($InstallDir -eq $PSScriptRoot) {
 
 $ErrorActionPreference = 'Continue'
 
-# Global error trap: ensure the window stays open on any crash
+# Global error trap: ensure the window stays open on any crash, generate diagnostic report
 trap {
     Write-Host ""
-    Write-Host "  An error occurred: $_" -ForegroundColor Red
+    Write-Host "  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Red
+    Write-Host "  INSTALLATION ERROR" -ForegroundColor Red
+    Write-Host "  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Red
     Write-Host ""
+    Write-Host "  $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host ""
+
+    # Try to run diagnostic report generator
+    $diagScript = Join-Path $InstallDir "scripts" "diagnostic_report.py"
+    $escapedError = ($_.Exception.Message) -replace '"', '\"'
+    $diagRan = $false
+    try {
+        if (Test-Path $diagScript) {
+            & python3 $diagScript --error "$escapedError" --step "install" 2>$null
+            if ($LASTEXITCODE -eq 0) { $diagRan = $true }
+        }
+    } catch {}
+    if (-not $diagRan) {
+        try {
+            & python $diagScript --error "$escapedError" --step "install" 2>$null
+            if ($LASTEXITCODE -eq 0) { $diagRan = $true }
+        } catch {}
+    }
+
+    if (-not $diagRan) {
+        Write-Host "  Submit a bug report:" -ForegroundColor Yellow
+        Write-Host "  https://github.com/mariourquia/cre-skills-plugin/issues/new?labels=bug,installer" -ForegroundColor Cyan
+        Write-Host ""
+    }
+
     Write-Host "  Press Enter to close this window." -ForegroundColor White
     Read-Host
     exit 1
@@ -48,7 +76,7 @@ Write-Host "  \____|_| \_\_____| |____/|_|\_\_|_|_|___/" -ForegroundColor Cyan
 Write-Host "" -ForegroundColor Cyan
 Write-Host "  Commercial Real Estate Skills for Claude" -ForegroundColor Cyan
 
-Write-Blue  "  Plugin Installer v4.1.0"
+Write-Blue  "  Plugin Installer v4.0.0"
 Write-Dim   "  112 skills | 54 agents | 6 workflow chains"
 Write-Host  ""
 
@@ -173,7 +201,8 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
 
     # Plugin cache location: ~/.claude/plugins/cache/local/cre-skills-plugin/<version>
     $ClaudeHome = Join-Path $env:USERPROFILE ".claude"
-    $PluginVersion = "4.0.0"
+    $PluginVersion = (Get-Content (Join-Path $InstallDir ".claude-plugin\plugin.json") | ConvertFrom-Json).version
+    if (-not $PluginVersion) { $PluginVersion = "4.0.0" }
     $PluginCachePath = Join-Path $ClaudeHome "plugins\cache\local\cre-skills-plugin\$PluginVersion"
     $InstalledPluginsFile = Join-Path $ClaudeHome "plugins\installed_plugins.json"
     $SettingsFile = Join-Path $ClaudeHome "settings.json"

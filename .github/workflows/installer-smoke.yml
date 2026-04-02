@@ -1,0 +1,146 @@
+name: Installer Smoke Tests
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/Install.ps1'
+      - 'Install.command'
+      - 'scripts/install.sh'
+      - '.claude-plugin/**'
+      - 'mcp-server.mjs'
+      - 'hooks/**'
+  workflow_dispatch:
+
+jobs:
+  smoke-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+
+      - name: Install test dependencies
+        run: pip install pyyaml
+
+      - name: Create fake Claude home
+        shell: pwsh
+        run: |
+          $claudeHome = Join-Path $env:USERPROFILE ".claude"
+          New-Item -ItemType Directory -Path $claudeHome -Force | Out-Null
+          '{}' | Set-Content (Join-Path $claudeHome "settings.json") -Encoding UTF8
+          Write-Host "Created $claudeHome with empty settings.json"
+
+      - name: Build catalog
+        run: python scripts/catalog-build.py
+
+      - name: Create required directories for installer
+        shell: pwsh
+        run: |
+          # Ensure skills/ and agents/ exist (installer checks for them)
+          if (-not (Test-Path "skills")) { Write-Host "skills/ missing"; exit 1 }
+          if (-not (Test-Path "agents")) { Write-Host "agents/ missing"; exit 1 }
+          Write-Host "Plugin directories verified"
+
+      - name: Run Install.ps1
+        shell: pwsh
+        run: |
+          # Install.ps1 ends with Read-Host which hangs in CI.
+          # Pipe empty input to satisfy it.
+          echo "" | powershell -ExecutionPolicy Bypass -File scripts/Install.ps1 -InstallDir (Get-Location).Path
+
+      - name: Run installer smoke test
+        shell: pwsh
+        run: |
+          python scripts/installer_smoke_test.py --claude-home "$env:USERPROFILE\.claude" --install-dir .
+
+  smoke-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+
+      - name: Install test dependencies
+        run: pip install pyyaml
+
+      - name: Create fake Claude home
+        run: |
+          mkdir -p "$HOME/.claude"
+          echo '{}' > "$HOME/.claude/settings.json"
+          echo "Created $HOME/.claude with empty settings.json"
+
+      - name: Build catalog
+        run: python3 scripts/catalog-build.py
+
+      - name: Simulate installer registration
+        run: |
+          # Install.command has interactive prompts (press-to-exit, prerequisite
+          # checks for Claude CLI/Desktop). Instead of running it directly, we
+          # replicate the registration logic in a CI-friendly way. This mirrors
+          # the exact steps Install.command performs internally.
+
+          set -euo pipefail
+
+          INSTALL_DIR="$(pwd)"
+          PLUGIN_VERSION="$(python3 -c "import json; print(json.load(open('.claude-plugin/plugin.json'))['version'])")"
+          CLAUDE_HOME="$HOME/.claude"
+          PLUGINS_CACHE="$CLAUDE_HOME/plugins/cache/local/cre-skills-plugin/$PLUGIN_VERSION"
+          INSTALLED_PLUGINS="$CLAUDE_HOME/plugins/installed_plugins.json"
+          SETTINGS_FILE="$CLAUDE_HOME/settings.json"
+          PLUGIN_KEY="cre-skills@local"
+          NOW="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+
+          echo "Version: $PLUGIN_VERSION"
+          echo "Cache:   $PLUGINS_CACHE"
+
+          # 1. Copy plugin files to cache (same rsync as Install.command)
+          mkdir -p "$PLUGINS_CACHE"
+          rsync -a --delete \
+            --exclude '.git' --exclude '__pycache__' --exclude 'node_modules' \
+            --exclude 'dist' --exclude '.venv' --exclude '.local' \
+            "$INSTALL_DIR/" "$PLUGINS_CACHE/"
+          echo "Plugin files copied to cache"
+
+          # 2. Register in installed_plugins.json
+          mkdir -p "$(dirname "$INSTALLED_PLUGINS")"
+          python3 -c "
+          import json
+          data = {'version': 2, 'plugins': {}}
+          data['plugins']['$PLUGIN_KEY'] = [{
+              'scope': 'user',
+              'installPath': '$PLUGINS_CACHE',
+              'version': '$PLUGIN_VERSION',
+              'installedAt': '$NOW',
+              'lastUpdated': '$NOW'
+          }]
+          with open('$INSTALLED_PLUGINS', 'w') as f:
+              json.dump(data, f, indent=2)
+          "
+          echo "Created installed_plugins.json"
+
+          # 3. Enable in settings.json
+          python3 -c "
+          import json
+          with open('$SETTINGS_FILE') as f:
+              data = json.load(f)
+          data.setdefault('enabledPlugins', {})['$PLUGIN_KEY'] = True
+          with open('$SETTINGS_FILE', 'w') as f:
+              json.dump(data, f, indent=2)
+          "
+          echo "Plugin enabled in settings.json"
+
+      - name: Run installer smoke test
+        run: |
+          python3 scripts/installer_smoke_test.py --claude-home "$HOME/.claude" --install-dir .
