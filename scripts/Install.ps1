@@ -392,9 +392,10 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
         if (-not (Test-Path $claudePluginDir)) {
             New-Item -ItemType Directory -Path $claudePluginDir -Force | Out-Null
         }
-        $srcPluginJson = Join-Path $PluginCachePath "plugin" "plugin.json"
+        $srcPluginJson = Join-Path (Join-Path $PluginCachePath "plugin") "plugin.json"
+        $dstPluginJson = Join-Path $claudePluginDir "plugin.json"
         if (Test-Path $srcPluginJson) {
-            Copy-Item $srcPluginJson (Join-Path $claudePluginDir "plugin.json") -Force
+            Copy-Item -Path $srcPluginJson -Destination $dstPluginJson -Force
         }
 
         Write-Green "  Plugin files copied to cache"
