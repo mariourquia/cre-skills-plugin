@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.0.1] - 2026-04-02
+
+### Changed
+- Telemetry now enabled by default (opt-out model). Records only skill slug +
+  date + anonymous UUID. No deal data, financials, prompts, or identity.
+  All data stays local at ~/.cre-skills/telemetry.jsonl.
+- First-run notice clearly explains what is and is not tracked, and how to opt out
+- Windows installer now registers plugin in ~/.claude/ plugin system instead of
+  %APPDATA%\Claude\skills\ (fixes Desktop not discovering plugin)
+
+### Fixed
+- Windows Desktop not seeing installed plugin (wrong install directory)
+
 ## [4.0.0] - 2026-04-02
 
 ### Added
