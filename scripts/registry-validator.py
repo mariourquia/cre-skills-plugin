@@ -348,6 +348,7 @@ def validate_stale_versions() -> list[str]:
         "scripts/create-dmg.sh",   # example command in header comment
         "scripts/install.sh",      # v1->v2 migration messaging
         "docs/install-guide.md",   # migration comparison table
+        "docs/MIGRATION.md",       # migration guide references source version by design
     }
 
     scan_extensions = {".md", ".json", ".mjs", ".sh", ".ps1", ".iss", ".yml"}
