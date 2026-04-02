@@ -59,57 +59,61 @@ See [CHANGELOG.md](CHANGELOG.md) for full history.
 
 ## Installation
 
-### Claude Code (Recommended)
+### macOS -- Download and Double-Click
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/mariourquia/cre-skills-plugin/main/scripts/install.sh | bash
-```
-
-Or for a single session:
-
-```bash
-claude --plugin-dir /path/to/cre-skills-plugin
-```
-
-### One-Line Installer
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/mariourquia/cre-skills-plugin/main/scripts/install.sh | bash
-```
-
-### macOS DMG (Double-Click Installer)
-
-Download `cre-skills-v4.0.0.dmg` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
+Download [`cre-skills-v4.0.0.dmg`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) from the latest release.
 
 1. Open the DMG
-2. Double-click "CRE Skills Installer"
-3. Follow the Terminal prompts
-4. Restart Claude Code or Claude Desktop
+2. Double-click **CRE Skills Installer**
+3. The installer auto-detects Claude Desktop, Claude Code, or both and configures each
+4. Restart Claude Desktop (or start a new Claude Code session)
 
-The installer automatically detects whether you have Claude Code, Claude Desktop, or both, and configures accordingly.
+No terminal knowledge required. The installer registers the plugin and its MCP server automatically.
 
-### Windows .exe Installer
+### Windows -- Download and Run
 
-Download `cre-skills-v4.0.0-setup.exe` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
+Download [`cre-skills-v4.0.0-setup.exe`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) from the latest release.
 
-1. Run the installer (SmartScreen warning: click "More info" > "Run anyway")
-2. Follow the wizard
-3. Restart Claude Code or Claude Desktop
+1. Run the installer (SmartScreen: click "More info" > "Run anyway")
+2. Follow the wizard -- no admin privileges required
+3. Restart Claude Desktop (or start a new Claude Code session)
 
-The installer detects Claude Code CLI and Claude Desktop and configures both automatically. No admin privileges required.
+The installer detects Claude Desktop and Claude Code and configures both automatically.
 
-### Manual (Local Development)
+### Claude Code CLI
 
 ```bash
-git clone https://github.com/mariourquia/cre-skills-plugin.git
-claude plugin add ./cre-skills-plugin
+curl -fsSL https://raw.githubusercontent.com/mariourquia/cre-skills-plugin/main/scripts/install.sh | bash
+```
+
+Or add directly:
+
+```bash
+claude plugin add github:mariourquia/cre-skills-plugin
 ```
 
 ### Verify Installation
 
-```bash
-./scripts/verify-install.sh
+After restarting, ask Claude: **"What CRE skills do you have?"** or try:
 ```
+/cre-skills:cre-route screen this deal
+```
+
+For a full structural check: `./scripts/verify-install.sh`
+
+### What You Get
+
+| | Claude Desktop | Claude Code |
+|---|---|---|
+| **Install method** | DMG / EXE (download) | CLI one-liner |
+| **Access to 112 skills** | Via 8 MCP tools | Via `/cre-skills:*` commands |
+| **Skill routing** | Ask Claude or use `cre_route` tool | `/cre-skills:cre-route` |
+| **Workspace persistence** | Yes (via MCP tools) | Yes (via commands) |
+| **Feedback & bug reports** | Yes (via MCP tool) | Yes (via `/cre-skills:send-feedback`) |
+| **Auto-routing on session start** | No | Yes (SessionStart hook) |
+| **Telemetry & session tracking** | No | Yes (opt-out) |
+
+Claude Desktop users access skills through the MCP server -- ask Claude about any CRE topic and it will route to the right skill automatically. Claude Code users get the full hook-driven experience with auto-routing on every conversation start.
 
 ---
 
