@@ -36,3 +36,7 @@ jobs:
         run: bash scripts/verify-install.sh || true
       - name: Validate registry references
         run: python scripts/registry-validator.py
+      - name: Rebuild catalog and check for drift
+        run: |
+          python scripts/catalog-build.py
+          python scripts/catalog-generate.py --check

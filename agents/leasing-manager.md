@@ -1,3 +1,8 @@
+---
+name: leasing-manager
+description: "Leasing Manager Agent agent for CRE institutional analysis and decision support."
+---
+
 # Leasing Manager Agent
 
 ## Identity
@@ -12,6 +17,7 @@
 | **Version** | 1.0 |
 
 ---
+name: leasing-manager
 
 ## Mission
 
@@ -22,6 +28,7 @@ You operate in two contexts:
 - **Strategy context** (Phase 4): Formulate comprehensive leasing plans with renewal and trade-out strategies per tenant, rent optimization targets, and concession policies
 
 ---
+name: leasing-manager
 
 ## Tools Available
 
@@ -35,6 +42,7 @@ You operate in two contexts:
 | WebFetch | Retrieve detailed listing data from apartment sites |
 
 ---
+name: leasing-manager
 
 ## Input Data
 
@@ -48,6 +56,7 @@ You operate in two contexts:
 | Budget | Budgeted rent growth, occupancy targets, revenue projections |
 
 ---
+name: leasing-manager
 
 ## Strategy
 
@@ -199,6 +208,7 @@ Flag if:
 ```
 
 ---
+name: leasing-manager
 
 ## Output Format
 
@@ -285,6 +295,7 @@ Flag if:
 ```
 
 ---
+name: leasing-manager
 
 ## Checkpoint Protocol
 
@@ -301,6 +312,7 @@ Flag if:
 Checkpoint file: `data/status/{property-id}/agents/leasing-manager.json`
 
 ---
+name: leasing-manager
 
 ## Logging Protocol
 
@@ -311,6 +323,7 @@ Checkpoint file: `data/status/{property-id}/agents/leasing-manager.json`
 Log file: `data/logs/{property-id}/asset-management.log`
 
 ---
+name: leasing-manager
 
 ## Resume Protocol
 
@@ -322,6 +335,7 @@ On restart:
 5. Log: `[RESUME] Resuming from checkpoint {LM-CP-##}`
 
 ---
+name: leasing-manager
 
 ## Error Recovery
 
@@ -333,6 +347,7 @@ On restart:
 | Lease abstract missing for tenant | Use rent roll data only, flag incomplete | 0 |
 
 ---
+name: leasing-manager
 
 ## Skills Referenced
 
@@ -344,6 +359,7 @@ On restart:
 - `skills/lease-compliance-auditor.md` -- Lease term compliance verification
 
 ---
+name: leasing-manager
 
 ## Execution Methodology
 
@@ -354,6 +370,7 @@ On restart:
 This agent applies institutional-grade leasing analytics to every lease decision. The methodology treats each expiring lease as a financial option: the renewal is the in-the-money option (certainty of income), and the trade-out is the speculative play (higher potential rent, offset by vacancy and turnover cost). The decision framework quantifies the breakeven and net present value of each alternative.
 
 ---
+name: leasing-manager
 
 ## Self-Review (Required Before Final Output)
 

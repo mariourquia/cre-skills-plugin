@@ -1,6 +1,6 @@
 # CRE Skill Routing Index
 
-> 105 CRE skills across 16 subcategories. Use this index to find the right skill -- do NOT load all SKILL.md files.
+> 112 CRE skills across 16 subcategories. Use this index to find the right skill -- do NOT load all SKILL.md files.
 > When a CRE task comes in, match the user's request to a category below, then invoke the specific skill via `/skill-slug`.
 > Only read the full SKILL.md + references when you need the detailed process.
 
@@ -8,110 +8,107 @@
 
 | User says... | Invoke this skill |
 |---|---|
-| "screen this deal", "should I look at this", new OM/listing | `/deal-quick-screen` |
-| "reverse price this OM", "what should I pay" | `/om-reverse-pricing` |
-| "underwrite this deal", "run the numbers", "model this property" | `/acquisition-underwriting-engine` |
-| "analyze this rent roll", "clean up this rent roll" | `/rent-roll-analyzer` |
-| "stress test", "sensitivity analysis", "where does it break" | `/sensitivity-stress-test` |
-| "draft an LOI", "build an offer", "structure the bid" | `/loi-offer-builder` |
-| "review this PSA", "redline strategy" | `/psa-redline-strategy` |
-| "waterfall", "promote", "preferred return", "GP/LP split" | `/jv-waterfall-architect` |
 | "1031", "like-kind exchange", "tax deferral" | `/1031-exchange-executor` |
-| "seller financing", "carryback", "assumption vs new loan" | `/creative-seller-financing` |
-| "due diligence", "DD period", "inspection period" | `/dd-command-center` |
-| "distressed", "special servicing", "note purchase", "REO" | `/distressed-acquisition-playbook` |
-| "size the loan", "DSCR/LTV/debt yield", "agency loan" | `/loan-sizing-engine` |
-| "mezz", "preferred equity", "subordinate capital" | `/mezz-pref-structurer` |
-| "refinance", "refi", "loan maturity" | `/refi-decision-analyzer` |
-| "capital stack", "optimal leverage", "WACC" | `/capital-stack-optimizer` |
-| "debt portfolio", "loan watchlist", "maturity wall" | `/debt-portfolio-monitor` |
-| "workout", "loan modification", "forbearance", "DPO" | `/workout-playbook` |
-| "submarket analysis", "market reality check" | `/submarket-truth-serum` |
-| "comps", "comparable sales", "rent comps" | `/comp-snapshot` |
-| "supply pipeline", "absorption forecast" | `/supply-demand-forecast` |
-| "market cycle", "where are we in the cycle", "Mueller" | `/market-cycle-positioner` |
+| "1031 pipeline", "replacement property pipeline", "exchange timeline", "1031 ID deadline" | `/1031-pipeline-manager` |
+| "underwrite this deal", "run the numbers", "model this property" | `/acquisition-underwriting-engine` |
 | "annual budget", "operating budget", "IREM benchmark" | `/annual-budget-engine` |
-| "NOI sprint", "90-day plan", "stabilize NOI" | `/noi-sprint-plan` |
-| "property performance", "dashboard", "hold/sell/refi" | `/property-performance-dashboard` |
+| "PM schedule", "HVAC maintenance", "elevator inspection" | `/building-systems-maintenance-manager` |
+| "CAM reconciliation", "tenant billing", "common area maintenance" | `/cam-reconciliation-calculator` |
 | "capex", "capital projects", "replacement reserves" | `/capex-prioritizer` |
-| "lease compliance", "CAM audit", "percentage rent audit" | `/lease-compliance-auditor` |
-| "delinquent tenant", "eviction", "tenant workout" | `/tenant-delinquency-workout` |
-| "tenant retention", "lease renewal", "WALT impact" | `/tenant-retention-engine` |
-| "lease-up", "absorption", "concession strategy" | `/lease-up-war-room` |
-| "lease negotiation", "anchor replacement", "sublease consent" | `/lease-negotiation-analyzer` |
-| "rent optimization", "loss-to-lease", "rent increase plan" | `/rent-optimization-planner` |
-| "IC memo", "investment committee", "deal presentation" | `/ic-memo-generator` |
-| "investor update", "quarterly report", "LP letter" | `/quarterly-investor-update` |
-| "pitch deck", "LP presentation", "track record" | `/lp-pitch-deck-builder` |
 | "capital raise", "data room", "capital call" | `/capital-raise-machine` |
-| "fund formation", "PPM", "Reg D", "GP commitment" | `/fund-formation-toolkit` |
-| "land residual", "HBU", "highest and best use" | `/land-residual-hbu-analyzer` |
-| "development proforma", "construction budget", "draw schedule" | `/dev-proforma-engine` |
-| "zoning", "entitlement", "rezoning", "variance" | `/entitlement-feasibility` |
-| "estimate construction costs", "how much to build", "TDC estimate", "price this floor plan" | `/construction-cost-estimator` |
-| "GC budget", "CSI benchmarks", "construction costs" | `/construction-budget-gc-analyzer` |
-| "sell vs hold", "disposition strategy", "exit analysis" | `/disposition-strategy-engine` |
-| "prepare for sale", "broker selection", "disposition prep" | `/disposition-prep-kit` |
-| "deal sourcing", "off-market", "outreach", "broker network" | `/sourcing-outreach-system` |
-| "cost segregation", "accelerated depreciation", "bonus depreciation" | `/cost-segregation-analyzer` |
-| "opportunity zone", "OZ", "QOZB" | `/opportunity-zone-underwriter` |
-| "partnership allocation", "704(b)", "UBIT", "K-1" | `/partnership-allocation-engine` |
+| "capital stack", "optimal leverage", "WACC" | `/capital-stack-optimizer` |
 | "carbon audit", "LL97", "GRESB", "emissions" | `/carbon-audit-compliance` |
 | "climate risk", "flood risk", "TCFD", "stranded asset" | `/climate-risk-assessment` |
-| "portfolio allocation", "concentration risk", "rebalancing" | `/portfolio-allocator` |
-| "performance attribution", "alpha", "NCREIF benchmark" | `/performance-attribution` |
-| "CAM reconciliation", "tenant billing", "common area maintenance" | `/cam-reconciliation-calculator` |
-| "estoppel", "estoppel certificate" | `/estoppel-certificate-generator` |
-| "normalize T-12", "trailing twelve", "one-time items" | `/t12-normalizer` |
-| "lease abstract", "extract lease terms" | `/lease-abstract-extractor` |
-| "certificate of insurance", "COI", "insurance compliance" | `/coi-compliance-checker` |
-| "work order", "maintenance request", "triage" | `/work-order-triage` |
-| "debt covenant", "DSCR compliance", "covenant breach" | `/debt-covenant-monitor` |
-| "CPI escalation", "rent escalation", "CPI adjustment" | `/cpi-escalation-calculator` |
-| "vendor invoice", "invoice validation" | `/vendor-invoice-validator` |
-| "property tax appeal", "assessment challenge" | `/property-tax-appeal-analyzer` |
-| "variance narrative", "budget vs actual explanation" | `/variance-narrative-generator` |
 | "closing checklist", "title review", "closing timeline" | `/closing-checklist-tracker` |
-| "standardize rent roll", "format rent roll" | `/rent-roll-formatter` |
-| "lender compliance certificate", "lender reporting" | `/lender-compliance-certificate` |
-| "stacking plan", "floor plan", "space layout" | `/stacking-plan-builder` |
-| "RFI", "submittal", "construction draw", "punch list" | `/construction-project-command-center` |
-| "fund compliance", "capital account", "Form D", "LPAC" | `/fund-operations-compliance-dashboard` |
-| "PM schedule", "HVAC maintenance", "elevator inspection" | `/building-systems-maintenance-manager` |
-| "leasing pipeline", "tour prep", "prospect follow-up" | `/leasing-operations-engine` |
-| "investor meeting", "audit coordination", "GIPS composite" | `/investor-lifecycle-manager` |
-| "environmental remediation", "tenant bankruptcy", "condemnation" | `/crisis-special-situations-playbook` |
+| "certificate of insurance", "COI", "insurance compliance" | `/coi-compliance-checker` |
+| "comps", "comparable sales", "rent comps" | `/comp-snapshot` |
 | "building code violation", "OSHA", "ADA compliance" | `/compliance-regulatory-response-kit` |
-| "parking management", "janitorial", "tenant survey" | `/property-operations-admin-toolkit` |
+| "GC budget", "CSI benchmarks", "construction costs" | `/construction-budget-gc-analyzer` |
+| "estimate construction costs", "how much to build", "TDC estimate", "price this floor plan" | `/construction-cost-estimator` |
 | "GC selection", "bid leveling", "GMP negotiation" | `/construction-procurement-contracts-engine` |
-| "insurance renewal", "coverage adequacy", "builder's risk" | `/insurance-risk-manager` |
-| "lease amendment", "expansion option", "build-to-suit" | `/lease-document-factory` |
-| "marketing plan", "TI benchmarks", "commission benchmarks" | `/leasing-strategy-marketing-planner` |
-| "post-close onboarding", "PM transition", "asset handoff" | `/post-close-onboarding-transition` |
-| "tenant event", "appreciation event", "holiday party" | `/tenant-event-planner` |
-| "review title commitment", "title exceptions", "title insurance schedule B", "title defects" | `/title-commitment-reviewer` |
-| "analyze tenant credit", "tenant financials", "tenant creditworthiness", "guarantor strength" | `/tenant-credit-analyzer` |
-| "build term sheet", "lender term sheet", "loan term sheet", "quote term sheet" | `/term-sheet-builder` |
-| "review loan documents", "loan agreement review", "promissory note review", "security agreement review" | `/loan-document-reviewer` |
-| "prepare transfer documents", "deed preparation", "assignment of leases", "transfer instruments" | `/transfer-document-preparer` |
+| "RFI", "submittal", "construction draw", "punch list" | `/construction-project-command-center` |
+| "cost segregation", "accelerated depreciation", "bonus depreciation" | `/cost-segregation-analyzer` |
+| "CPI escalation", "rent escalation", "CPI adjustment" | `/cpi-escalation-calculator` |
+| "seller financing", "carryback", "assumption vs new loan" | `/creative-seller-financing` |
+| "environmental remediation", "tenant bankruptcy", "condemnation" | `/crisis-special-situations-playbook` |
+| "due diligence", "DD period", "inspection period" | `/dd-command-center` |
+| "deal attribution", "deal-level P&L", "track record attribution", "realized/unrealized" | `/deal-attribution-tracker` |
+| "screen this deal", "should I look at this", "new OM/listing" | `/deal-quick-screen` |
+| "debt covenant", "DSCR compliance", "covenant breach" | `/debt-covenant-monitor` |
+| "debt portfolio", "loan watchlist", "maturity wall" | `/debt-portfolio-monitor` |
+| "development proforma", "construction budget", "draw schedule" | `/dev-proforma-engine` |
+| "prepare for sale", "broker selection", "disposition prep" | `/disposition-prep-kit` |
+| "sell vs hold", "disposition strategy", "exit analysis" | `/disposition-strategy-engine` |
+| "distressed", "special servicing", "note purchase", "REO" | `/distressed-acquisition-playbook` |
+| "distribution notice", "capital distribution", "distribution waterfall letter" | `/distribution-notice-generator` |
+| "emerging manager", "first-time fund", "emerging GP evaluation", "seed allocation" | `/emerging-manager-evaluator` |
+| "zoning", "entitlement", "rezoning", "variance" | `/entitlement-feasibility` |
+| "estoppel", "estoppel certificate" | `/estoppel-certificate-generator` |
+| "fund formation", "PPM", "Reg D", "GP commitment" | `/fund-formation-toolkit` |
+| "fund compliance", "capital account", "Form D", "LPAC" | `/fund-operations-compliance-dashboard` |
+| "track fund raise", "LP negotiation tracker", "model fee concession", "blended management fee", "MFN cascade analysis" | `/fund-raise-negotiation-engine` |
+| "compare fund terms", "fee comparison", "carried interest benchmark", "fund economics comparison" | `/fund-terms-comparator` |
 | "calculate funds flow", "closing statement", "HUD-1", "settlement statement", "wire amounts" | `/funds-flow-calculator` |
+| "evaluate GP performance", "assess GP track record", "GP evaluation", "manager due diligence" | `/gp-performance-evaluator` |
+| "IC memo", "investment committee", "deal presentation" | `/ic-memo-generator` |
+| "insurance renewal", "coverage adequacy", "builder's risk" | `/insurance-risk-manager` |
+| "investor meeting", "audit coordination", "GIPS composite" | `/investor-lifecycle-manager` |
+| "waterfall", "promote", "preferred return", "GP/LP split" | `/jv-waterfall-architect` |
+| "land residual", "HBU", "highest and best use" | `/land-residual-hbu-analyzer` |
+| "lease abstract", "extract lease terms" | `/lease-abstract-extractor` |
+| "lease compliance", "CAM audit", "percentage rent audit" | `/lease-compliance-auditor` |
+| "lease amendment", "expansion option", "build-to-suit" | `/lease-document-factory` |
+| "lease negotiation", "anchor replacement", "sublease consent" | `/lease-negotiation-analyzer` |
 | "structure lease options", "purchase option", "ROFR", "ROFO", "expansion option structure" | `/lease-option-structurer` |
 | "trade out analysis", "lease trade-out", "effective rent trade-out", "roll-to-market delta" | `/lease-trade-out-analyzer` |
-| "evaluate GP performance", "assess GP track record", "GP evaluation", "manager due diligence" | `/gp-performance-evaluator` |
-| "compare fund terms", "fee comparison", "carried interest benchmark", "fund economics comparison" | `/fund-terms-comparator` |
+| "lease-up", "absorption", "concession strategy" | `/lease-up-war-room` |
+| "leasing pipeline", "tour prep", "prospect follow-up" | `/leasing-operations-engine` |
+| "marketing plan", "TI benchmarks", "commission benchmarks" | `/leasing-strategy-marketing-planner` |
+| "lender compliance certificate", "lender reporting" | `/lender-compliance-certificate` |
+| "review loan documents", "loan agreement review", "promissory note review", "security agreement review" | `/loan-document-reviewer` |
+| "size the loan", "DSCR/LTV/debt yield", "agency loan" | `/loan-sizing-engine` |
+| "draft an LOI", "build an offer", "structure the bid" | `/loi-offer-builder` |
 | "generate LP data request", "LP questionnaire", "DDQ", "LP information request" | `/lp-data-request-generator` |
-| "Reg D", "506(b)", "506(c)", "accredited investor verification", "blue sky filing" | `/sec-reg-d-compliance` |
+| "pitch deck", "LP presentation", "track record" | `/lp-pitch-deck-builder` |
+| "market cycle", "where are we in the cycle", "Mueller" | `/market-cycle-positioner` |
+| "mezz", "preferred equity", "subordinate capital" | `/mezz-pref-structurer` |
 | "Monte Carlo", "return simulation", "probability distribution", "stochastic model" | `/monte-carlo-return-simulator` |
+| "NOI sprint", "90-day plan", "stabilize NOI" | `/noi-sprint-plan` |
+| "reverse price this OM", "what should I pay" | `/om-reverse-pricing` |
+| "opportunity zone", "OZ", "QOZB" | `/opportunity-zone-underwriter` |
+| "partnership allocation", "704(b)", "UBIT", "K-1" | `/partnership-allocation-engine` |
+| "performance attribution", "alpha", "NCREIF benchmark" | `/performance-attribution` |
+| "portfolio allocation", "concentration risk", "rebalancing" | `/portfolio-allocator` |
+| "post-close onboarding", "PM transition", "asset handoff" | `/post-close-onboarding-transition` |
 | "property management command center", "PM dashboard", "full PM operations" | `/property-management-orchestrator` |
-| "space planning", "redesign", "amenity addition", "reposition this space" | `/space-planning-redesign-orchestrator` |
+| "parking management", "janitorial", "tenant survey" | `/property-operations-admin-toolkit` |
+| "property performance", "dashboard", "hold/sell/refi" | `/property-performance-dashboard` |
+| "property tax appeal", "assessment challenge" | `/property-tax-appeal-analyzer` |
+| "review this PSA", "redline strategy" | `/psa-redline-strategy` |
+| "investor update", "quarterly report", "LP letter" | `/quarterly-investor-update` |
+| "refinance", "refi", "loan maturity" | `/refi-decision-analyzer` |
+| "rent optimization", "loss-to-lease", "rent increase plan" | `/rent-optimization-planner` |
+| "analyze this rent roll", "clean up this rent roll" | `/rent-roll-analyzer` |
+| "standardize rent roll", "format rent roll" | `/rent-roll-formatter` |
+| "Reg D", "506(b)", "506(c)", "accredited investor verification", "blue sky filing" | `/sec-reg-d-compliance` |
+| "stress test", "sensitivity analysis", "where does it break" | `/sensitivity-stress-test` |
 | "small operator PM", "self-manage", "landlord operations", "1-50 units" | `/small-operator-pm` |
-| "distribution notice", "capital distribution", "distribution waterfall letter" | `/distribution-notice-generator` |
-| "1031 pipeline", "replacement property pipeline", "exchange timeline", "1031 ID deadline" | `/1031-pipeline-manager` |
-| "deal attribution", "deal-level P&L", "track record attribution", "realized/unrealized" | `/deal-attribution-tracker` |
-| "emerging manager", "first-time fund", "emerging GP evaluation", "seed allocation" | `/emerging-manager-evaluator` |
-| "track fund raise", "LP negotiation tracker" | `/fund-raise-negotiation-engine` |
-| "model fee concession", "blended management fee" | `/fund-raise-negotiation-engine` |
-| "MFN cascade analysis" | `/fund-raise-negotiation-engine` |
+| "deal sourcing", "off-market", "outreach", "broker network" | `/sourcing-outreach-system` |
+| "stacking plan", "floor plan", "space layout" | `/stacking-plan-builder` |
+| "submarket analysis", "market reality check" | `/submarket-truth-serum` |
+| "supply pipeline", "absorption forecast" | `/supply-demand-forecast` |
+| "normalize T-12", "trailing twelve", "one-time items" | `/t12-normalizer` |
+| "analyze tenant credit", "tenant financials", "tenant creditworthiness", "guarantor strength" | `/tenant-credit-analyzer` |
+| "delinquent tenant", "eviction", "tenant workout" | `/tenant-delinquency-workout` |
+| "tenant event", "appreciation event", "holiday party" | `/tenant-event-planner` |
+| "tenant retention", "lease renewal", "WALT impact" | `/tenant-retention-engine` |
+| "build term sheet", "lender term sheet", "loan term sheet", "quote term sheet" | `/term-sheet-builder` |
+| "review title commitment", "title exceptions", "title insurance schedule B", "title defects" | `/title-commitment-reviewer` |
+| "prepare transfer documents", "deed preparation", "assignment of leases", "transfer instruments" | `/transfer-document-preparer` |
+| "variance narrative", "budget vs actual explanation" | `/variance-narrative-generator` |
+| "vendor invoice", "invoice validation" | `/vendor-invoice-validator` |
+| "work order", "maintenance request", "triage" | `/work-order-triage` |
+| "workout", "loan modification", "forbearance", "DPO" | `/workout-playbook` |
 
 ## Workflow Chains
 

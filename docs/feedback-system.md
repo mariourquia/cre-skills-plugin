@@ -55,9 +55,9 @@ Added to `~/.cre-skills/config.json` by `telemetry-init.mjs`:
 |-----|---------|---------|
 | `mode` | `local_only`, `ask_each_time`, `anonymous_remote`, `remote_with_contact` | `local_only` |
 | `include_context` | Attach sanitized session metadata | `true` |
-| `backend_url` | HTTPS endpoint for remote submission. Empty = disabled. | `""` |
+| `backend_url` | HTTPS endpoint for remote submission. Empty = disabled. | `""` (empty) |
 
-Existing installs get this block backfilled on next session start. Remote submission activates only when both `mode != "local_only"` and `backend_url` is a non-empty HTTPS URL.
+Existing installs get this block backfilled on next session start with `local_only` defaults. Remote submission activates only when the user explicitly sets `mode` to a non-`local_only` value AND provides a non-empty HTTPS `backend_url`.
 
 ## Data Flow
 
@@ -85,15 +85,16 @@ All files in `~/.cre-skills/`:
 
 ## Remote Submission
 
-Remote submission is active by default (`ask_each_time` mode). The commands POST redacted submissions to `https://cre-skills-feedback-api.vercel.app/api/feedback` after local save, with user confirmation.
+Remote submission is **disabled by default** (`local_only` mode). Users who want to share feedback with the maintainer must explicitly configure it.
+
+**To enable remote submission:**
+1. Set `feedback.mode` to `ask_each_time`, `anonymous_remote`, or `remote_with_contact`
+2. Set `feedback.backend_url` to `https://cre-skills-feedback-api.vercel.app/api/feedback`
 
 **Modes:**
-- `ask_each_time` (default) -- prompt user before each remote send
+- `local_only` (default) -- all feedback stays on your machine
+- `ask_each_time` -- prompt user before each remote send
 - `anonymous_remote` -- send without contact_email/organization
 - `remote_with_contact` -- send all fields
-- `local_only` -- disable remote submission entirely
 
 **Backend:** Vercel Function + Supabase. Secrets are server-side only. The plugin only knows the public URL. See the [cre-skills-feedback-api](https://github.com/mariourquia/cre-skills-feedback-api) repo.
-
-**Remaining work:**
-- `hooks/feedback-outbox.mjs` -- SessionStart hook to retry failed remote sends

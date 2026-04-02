@@ -5,13 +5,15 @@ description: View aggregated feedback ratings and comments from CRE skill sessio
 
 # CRE Skill Feedback Summary
 
-Read `~/.cre-skills/feedback.jsonl`. If the file does not exist or is empty, respond:
+Read both `~/.cre-skills/feedback.jsonl` (session survey responses) and `~/.cre-skills/feedback-log.jsonl` (structured feedback submissions). If neither file exists or both are empty, respond:
 
 ```
-No feedback data found. Enable the survey in ~/.cre-skills/config.json by setting "survey": true.
+No feedback data found.
+- To enable session surveys: set "survey": true in ~/.cre-skills/config.json
+- To submit feedback anytime: /cre-skills:send-feedback or /cre-skills:report-problem
 ```
 
-Otherwise, parse all JSONL records and produce the following sections.
+Otherwise, parse all JSONL records from both files and produce the following sections.
 
 ## Overall Average Rating
 
