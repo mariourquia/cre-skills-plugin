@@ -170,7 +170,7 @@ Write-Host "  \____|_| \_\_____| |____/|_|\_\_|_|_|___/" -ForegroundColor Cyan
 Write-Host "" -ForegroundColor Cyan
 Write-Host "  Commercial Real Estate Skills for Claude" -ForegroundColor Cyan
 
-Write-Blue  "  Plugin Installer v4.1.0"
+Write-Blue  "  Plugin Installer v4.0.0"
 Write-Dim   "  112 skills | 54 agents | 6 workflow chains"
 Write-Host  ""
 
