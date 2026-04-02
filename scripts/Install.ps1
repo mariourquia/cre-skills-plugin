@@ -138,33 +138,8 @@ Write-Host ""
 
 $InstalledSomewhere = $false
 
-# Install to Claude Code if available
-if ($HasClaudeCode) {
-    Write-Blue "  Registering with Claude Code..."
-    try {
-        if ($ClaudePath -and $ClaudePath -ne "claude") {
-            $output = & $ClaudePath plugin add $InstallDir 2>&1
-        } else {
-            $output = & claude plugin add $InstallDir 2>&1
-        }
-        if ($LASTEXITCODE -eq 0 -or $null -eq $LASTEXITCODE) {
-            Write-Green "  Claude Code plugin registered"
-            $InstalledSomewhere = $true
-        } else {
-            Write-Yellow "  Claude Code 'plugin add' returned non-zero. Plugin may still work."
-            Write-Dim  "  Fallback: claude --plugin-dir `"$InstallDir`""
-            $InstalledSomewhere = $true
-        }
-    } catch {
-        Write-Yellow "  Claude Code 'plugin add' not available in this version."
-        Write-Dim  "  Use: claude --plugin-dir `"$InstallDir`""
-        $InstalledSomewhere = $true
-    }
-    Write-Host ""
-}
-
-# Install to Claude Desktop (register in ~/.claude/ plugin system)
-if ($HasClaudeDesktop -and -not $HasClaudeCode) {
+# Register plugin in ~/.claude/ plugin system (works for both Claude Code and Desktop)
+if ($HasClaudeCode -or $HasClaudeDesktop) {
     Write-Blue "  Registering plugin for Claude Desktop..."
 
     # Plugin cache location: ~/.claude/plugins/cache/local/cre-skills-plugin/<version>

@@ -278,21 +278,61 @@ validate_plugin() {
 # Install the plugin
 # ---------------------------------------------------------------------------
 install_plugin() {
-  info "Installing plugin via Claude Code CLI..."
+  info "Registering plugin..."
 
-  if claude plugin add "$INSTALL_DIR" 2>/dev/null; then
-    success "Plugin installed successfully"
+  local claude_home="$HOME/.claude"
+  local plugins_cache="$claude_home/plugins/cache/local/cre-skills-plugin/4.0.1"
+  local installed_file="$claude_home/plugins/installed_plugins.json"
+  local settings_file="$claude_home/settings.json"
+  local plugin_key="cre-skills@local"
+  local now
+  now="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+
+  # 1. Copy plugin to the plugins cache
+  mkdir -p "$plugins_cache"
+  rsync -a --delete \
+    --exclude '.git' --exclude '__pycache__' --exclude 'node_modules' \
+    --exclude 'dist' --exclude '.venv' --exclude '.local' \
+    "$INSTALL_DIR/" "$plugins_cache/"
+  success "Plugin files copied to $plugins_cache"
+
+  # 2. Register in installed_plugins.json
+  if [ -f "$installed_file" ]; then
+    # Add or update the local plugin entry
+    python3 -c "
+import json, sys
+with open('$installed_file') as f:
+    data = json.load(f)
+data.setdefault('plugins', {})['$plugin_key'] = [{
+    'scope': 'user',
+    'installPath': '$plugins_cache',
+    'version': '4.0.1',
+    'installedAt': '$now',
+    'lastUpdated': '$now'
+}]
+with open('$installed_file', 'w') as f:
+    json.dump(data, f, indent=2)
+" 2>/dev/null && success "Registered in installed_plugins.json" || warn "Could not update installed_plugins.json"
   else
-    # Fall back to manual instructions if plugin subcommand not available
-    warn "Automatic installation via 'claude plugin add' did not succeed."
-    warn "This may mean the plugin subcommand is not yet available in your CLI version."
-    echo ""
-    info "Manual installation: run Claude Code with the plugin directory:"
-    echo ""
-    printf "  ${BOLD}claude --plugin-dir %s${RESET}\n" "$INSTALL_DIR"
-    echo ""
-    info "Or add to your Claude Code settings to load it automatically."
-    return 1
+    mkdir -p "$(dirname "$installed_file")"
+    printf '{"version":2,"plugins":{"%s":[{"scope":"user","installPath":"%s","version":"4.0.1","installedAt":"%s","lastUpdated":"%s"}]}}' \
+      "$plugin_key" "$plugins_cache" "$now" "$now" > "$installed_file"
+    success "Created installed_plugins.json"
+  fi
+
+  # 3. Enable in settings.json
+  if [ -f "$settings_file" ]; then
+    python3 -c "
+import json
+with open('$settings_file') as f:
+    data = json.load(f)
+data.setdefault('enabledPlugins', {})['$plugin_key'] = True
+with open('$settings_file', 'w') as f:
+    json.dump(data, f, indent=2)
+" 2>/dev/null && success "Enabled in settings.json" || warn "Could not update settings.json"
+  else
+    printf '{"enabledPlugins":{"%s":true}}' "$plugin_key" > "$settings_file"
+    success "Created settings.json"
   fi
 }
 
@@ -305,8 +345,13 @@ verify_installation() {
   if claude plugin list 2>/dev/null | grep -q "cre-skills"; then
     success "Plugin 'cre-skills' is registered"
   else
-    warn "Could not verify plugin registration via 'claude plugin list'."
-    warn "The plugin may still work. Try running: /cre-skills:cre-route"
+    # Check if registered in settings.json directly
+    if [ -f "$HOME/.claude/settings.json" ] && grep -q "cre-skills" "$HOME/.claude/settings.json" 2>/dev/null; then
+      success "Plugin registered in settings.json (restart Claude to activate)"
+    else
+      warn "Could not verify plugin registration."
+      info "Try: claude --plugin-dir $INSTALL_DIR"
+    fi
   fi
 }
 
