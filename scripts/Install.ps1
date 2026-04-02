@@ -40,24 +40,13 @@ function Write-Dim    { param([string]$Text) Write-Host $Text -ForegroundColor D
 # ── ASCII art header ────────────────────────────────────────────────
 
 Write-Host ""
-Write-Cyan @"
-
- ██████╗██████╗ ███████╗    ███████╗██╗  ██╗██╗██╗     ██╗     ███████╗
-██╔════╝██╔══██╗██╔════╝    ██╔════╝██║ ██╔╝██║██║     ██║     ██╔════╝
-██║     ██████╔╝█████╗      ███████╗█████╔╝ ██║██║     ██║     ███████╗
-██║     ██╔══██╗██╔══╝      ╚════██║██╔═██╗ ██║██║     ██║     ╚════██║
-╚██████╗██║  ██║███████╗    ███████║██║  ██╗██║███████╗███████╗███████║
- ╚═════╝╚═╝  ╚═╝╚══════╝    ╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝╚══════╝
-
-            ┌──┐                        ┌─────┐   ┌──┐
-            │  │  ┌──┐    ┌───┐  ┌──┐   │     │   │  │     ┌─┐
-       ┌──┐ │  │  │  │ ┌┐ │   │  │  │┌──┤     │┌──┤  │  ┌┐ │ │  ┌──┐
-       │  │ │  │┌─┤  │ ││ │   │┌─┤  ││  │     ││  │  │┌─┤│ │ │┌─┤  │
-    ┌──┤  │ │  ││ │  ├─┤│ │   ││ │  ││  │     ││  │  ││ ││ │ ││ │  │
-  ──┤  │  ├─┤  ││ │  │ ││ │   ││ │  ││  │     ││  │  ││ ││ │ ││ │  ├──
-  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-
-"@
+Write-Host "   ____ ____  _____   ____  _    _ _ _     " -ForegroundColor Cyan
+Write-Host "  / ___|  _ \| ____| / ___|| | _(_) | |___ " -ForegroundColor Cyan
+Write-Host " | |   | |_) |  _|   \___ \| |/ / | | / __|" -ForegroundColor Cyan
+Write-Host " | |___|  _ <| |___   ___) |   <| | | \__ \" -ForegroundColor Cyan
+Write-Host "  \____|_| \_\_____| |____/|_|\_\_|_|_|___/" -ForegroundColor Cyan
+Write-Host "" -ForegroundColor Cyan
+Write-Host "  Commercial Real Estate Skills for Claude" -ForegroundColor Cyan
 
 Write-Blue  "  Plugin Installer v4.0.0"
 Write-Dim   "  112 skills | 54 agents | 6 workflow chains"
@@ -321,11 +310,12 @@ print('OK')
             if (-not $pyCmd) { $pyCmd = Get-Command py -ErrorAction SilentlyContinue }
 
             if ($pyCmd) {
+                Write-Dim  "  Config: $DesktopConfigFile"
+                Write-Dim  "  MCP server: $mcpServerPath"
                 $result = & $pyCmd.Source $tempScript $DesktopConfigFile $mcpServerPath 2>&1
                 Remove-Item $tempScript -ErrorAction SilentlyContinue
                 if ($result -match "OK") {
                     Write-Green "  MCP server registered for Claude Desktop"
-                    Write-Dim  "  Config: $DesktopConfigFile"
                     Write-Dim  "  Restart Claude Desktop to activate"
                 } else {
                     Write-Yellow "  Desktop config update returned: $result"
