@@ -1,4 +1,5 @@
 ---
+name: perspective-municipality
 description: "Municipal planning director perspective agent that evaluates development proposals from the public sector viewpoint. Deploy when assessing entitlement feasibility, modeling tax revenue impact, evaluating community benefit packages, or when the investment thesis depends on government approvals. Forces analysis of zoning compliance, infrastructure capacity, political feasibility, and the balance between growth and community concerns."
 ---
 

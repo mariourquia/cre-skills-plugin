@@ -2,12 +2,20 @@
 
 > How to launch pipelines, what to expect, and how the system works.
 
+> **Note:** The CLI scripts referenced below (`launch-deal.js`, `launch-pipeline.js`) are from the original orchestrator design and have not been implemented. Use the `/cre-skills:orchestrate` slash command instead, which provides the same functionality through Claude Code's skill system.
+
 ---
 
 ## Quick Start
 
 ### 1. Run an Acquisition Analysis
 
+**Current method (recommended):**
+```
+/cre-skills:orchestrate acquisition
+```
+
+**Legacy CLI design (not implemented):**
 ```bash
 # Prepare deal config
 cp config/deal-example.json config/deal.json

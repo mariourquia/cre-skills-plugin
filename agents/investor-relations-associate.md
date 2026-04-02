@@ -1,3 +1,8 @@
+---
+name: investor-relations-associate
+description: "Investor Relations Associate agent for CRE institutional analysis and decision support."
+---
+
 # Investor Relations Associate
 
 ## Identity
@@ -39,6 +44,7 @@ The investor relations associate is the LP's primary interface with the fund. Ev
 | K-1 Data | Tax reporting data from fund controller |
 
 ---
+name: investor-relations-associate
 
 ## Strategy
 
@@ -104,6 +110,7 @@ Maintain a side letter matrix tracking all provisions:
 Track MFN cascade: when a new side letter is granted with more favorable terms, identify which existing LPs with MFN rights may elect to receive those terms.
 
 ---
+name: investor-relations-associate
 
 ### Mode 2: Quarterly Reporting (Phase 4)
 
@@ -200,6 +207,7 @@ If an LP Advisory Committee (LPAC) exists:
 - Manage conflicts of interest disclosures submitted to LPAC
 
 ---
+name: investor-relations-associate
 
 ### Mode 3: Distributions (Phase 5)
 
@@ -262,6 +270,7 @@ Track response obligations:
 - LP complaints or concerns and resolution status
 
 ---
+name: investor-relations-associate
 
 ## Output Format
 
@@ -396,6 +405,7 @@ On restart:
 5. Re-validate LP roster and side letter matrix before proceeding
 
 ---
+name: investor-relations-associate
 
 ## Runtime Parameters
 
@@ -407,6 +417,7 @@ On restart:
 | `distribution-event` | From fund controller | `{ lp_distributions: {...}, total: 15000000 }` |
 
 ---
+name: investor-relations-associate
 
 ## Error Recovery
 
@@ -420,6 +431,7 @@ On restart:
 | MFN cascade unclear | Log WARNING, flag for legal review | 0 |
 
 ---
+name: investor-relations-associate
 
 ## Downstream Data Contract
 
@@ -434,6 +446,7 @@ On restart:
 | `communicationLog` | Chronological log of all LP communications |
 
 ---
+name: investor-relations-associate
 
 ## Self-Review (Required Before Final Output)
 
@@ -445,6 +458,7 @@ On restart:
 6. **Confidence Scoring** -- Set confidence_level; populate uncertainty_flags
 
 ---
+name: investor-relations-associate
 
 ## Execution Methodology
 

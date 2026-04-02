@@ -91,16 +91,19 @@ The `contact_email` field is NOT redacted because the user explicitly provides i
 
 **Storage:** `~/.cre-skills/feedback-log.jsonl`. Local-only. The user owns and controls this file.
 
-## Remote Submission (Future -- Not Available Yet)
+## Remote Feedback Submission (Opt-In)
 
-Remote feedback/telemetry submission will:
-- Require a SEPARATE opt-in (`feedback.mode` set to `ask_each_time`, `anonymous_remote`, or `remote_with_contact`)
-- Default mode is `local_only` -- nothing leaves your machine unless you change this
-- Transmit only the same redacted/anonymized fields stored locally
-- Use HTTPS POST to a documented endpoint
-- Never transmit deal data, financial figures, or PII
-- Have its endpoint URL, data schema, retention policy, and deletion process published in this privacy policy before activation
-- Support a data deletion request process (details TBD before activation)
+Remote feedback submission is **disabled by default** (`local_only` mode). To enable:
+1. Set `feedback.mode` to `ask_each_time`, `anonymous_remote`, or `remote_with_contact` in `~/.cre-skills/config.json`
+2. Set `feedback.backend_url` to `https://cre-skills-feedback-api.vercel.app/api/feedback`
+
+When enabled, remote submission:
+- Transmits only the same redacted/anonymized fields stored locally
+- Uses HTTPS POST to the configured endpoint
+- Never transmits deal data, financial figures, or PII
+- Endpoint: `https://cre-skills-feedback-api.vercel.app/api/feedback` (Vercel Function + Supabase)
+
+Data deletion: open an issue at https://github.com/mariourquia/cre-skills-plugin/issues with your `install_id_hash` (found in your local feedback-log.jsonl records).
 
 ## Third-Party Services
 

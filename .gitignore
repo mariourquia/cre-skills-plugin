@@ -10,3 +10,13 @@ __pycache__/
 .idea/
 dist/
 .local/
+
+# Local-only: specs, design docs, implementation plans
+docs/specs/
+docs/design/
+docs/plans/
+docs/drafts/
+
+# macOS duplicate saves
+**/SKILL 2.md
+**/SKILL copy.md

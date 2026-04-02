@@ -1,5 +1,6 @@
 ---
-description: "Agent roster index for the CRE skills plugin. Lists all 55 agents grouped by 13 categories with one-line descriptions. Used by deal-team-lead to select agents for multi-agent analysis. Includes 10 pre-built team compositions for common CRE tasks."
+name: _index
+description: "Agent roster index for the CRE skills plugin. Lists all 54 agents grouped by 13 categories with one-line descriptions. Used by deal-team-lead to select agents for multi-agent analysis. Includes 10 pre-built team compositions for common CRE tasks."
 ---
 
 # CRE Agent Roster
