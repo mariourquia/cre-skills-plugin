@@ -53,7 +53,11 @@ import {
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const CATALOG_PATH = join(__dirname, "dist", "catalog.json");
+// In installed plugin: dist/ is at same level as mcp-server.mjs
+// In repo: dist/ is at repo root (two levels up from src/)
+const CATALOG_PATH = existsSync(join(__dirname, "dist", "catalog.json"))
+  ? join(__dirname, "dist", "catalog.json")
+  : join(__dirname, "..", "dist", "catalog.json");
 const SKILLS_DIR = join(__dirname, "skills");
 const WORKSPACE_DIR = join(homedir(), ".cre-skills", "workspaces");
 const CONFIG_DIR = join(homedir(), ".cre-skills");

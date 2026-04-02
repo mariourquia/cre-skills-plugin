@@ -176,15 +176,19 @@ Write-Host  ""
 
 # ── Verify plugin files exist ───────────────────────────────────────
 
-if (-not (Test-Path (Join-Path $InstallDir "src\skills")) -or
-    -not (Test-Path (Join-Path $InstallDir "src\agents"))) {
+# Check for plugin files (flat layout from Inno Setup, or src/ layout from repo)
+$hasFlat = (Test-Path (Join-Path $InstallDir "skills")) -and (Test-Path (Join-Path $InstallDir "agents"))
+$hasSrc = (Test-Path (Join-Path $InstallDir "src\skills")) -and (Test-Path (Join-Path $InstallDir "src\agents"))
+if (-not $hasFlat -and -not $hasSrc) {
     Write-Red "  Could not find the CRE Skills Plugin files."
     Write-Host "  Expected at: $InstallDir"
+    Write-Host "  Looked for: skills\ and agents\ (or src\skills\ and src\agents\)"
     Write-Host ""
     Write-Bold "  Press Enter to close this window."
     Read-Host
     exit 1
 }
+$LayoutIsFlat = $hasFlat
 
 # ── Step 1: Check prerequisites ─────────────────────────────────────
 
@@ -310,52 +314,77 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
 
     # Plugin cache location: ~/.claude/plugins/cache/local/cre-skills-plugin/<version>
     $ClaudeHome = Join-Path $env:USERPROFILE ".claude"
-    $pjPath = Join-Path $InstallDir "src\plugin\plugin.json"
-    if (-not (Test-Path $pjPath)) {
-        $pjPath = Join-Path $InstallDir ".claude-plugin\plugin.json"
+
+    # Find plugin.json (flat layout: plugin\plugin.json, src layout: src\plugin\plugin.json)
+    $pjPath = $null
+    foreach ($candidate in @(
+        (Join-Path $InstallDir "plugin\plugin.json"),
+        (Join-Path $InstallDir "src\plugin\plugin.json"),
+        (Join-Path $InstallDir ".claude-plugin\plugin.json")
+    )) {
+        if (Test-Path $candidate) { $pjPath = $candidate; break }
     }
-    $PluginVersion = (Get-Content $pjPath | ConvertFrom-Json).version
+    if ($pjPath) {
+        $PluginVersion = (Get-Content $pjPath | ConvertFrom-Json).version
+    }
     if (-not $PluginVersion) { $PluginVersion = "4.0.0" }
     $PluginCachePath = Join-Path $ClaudeHome "plugins\cache\local\cre-skills-plugin\$PluginVersion"
     $InstalledPluginsFile = Join-Path $ClaudeHome "plugins\installed_plugins.json"
     $SettingsFile = Join-Path $ClaudeHome "settings.json"
 
     try {
-        # 1. Copy plugin files to the plugin cache (two-step: src/ contents first, then top-level items)
+        # 1. Copy plugin files to the plugin cache
         if (Test-Path $PluginCachePath) {
             Remove-Item -Path $PluginCachePath -Recurse -Force
         }
         New-Item -ItemType Directory -Path $PluginCachePath -Force | Out-Null
 
-        # Step 1: Copy src/ contents to cache root
-        $srcDir = Join-Path $InstallDir "src"
-        $robocopyArgs1 = @(
-            $srcDir,
-            $PluginCachePath,
-            '/E',
-            '/XD', '.git', '__pycache__', 'node_modules',
-            '/XF', '*.pyc', '.DS_Store',
-            '/NFL', '/NDL', '/NJH', '/NJS', '/NP'
-        )
-        & robocopy @robocopyArgs1 | Out-Null
+        if ($LayoutIsFlat) {
+            # Flat layout (from Inno Setup extraction): files are directly at $InstallDir
+            $robocopyArgs = @(
+                $InstallDir,
+                $PluginCachePath,
+                '/E',
+                '/XD', '.git', '__pycache__', 'node_modules', 'dist', '.venv', '.local', '.claude', 'scripts',
+                '/XF', '*.pyc', '.DS_Store',
+                '/NFL', '/NDL', '/NJH', '/NJS', '/NP'
+            )
+            & robocopy @robocopyArgs | Out-Null
 
-        if ($LASTEXITCODE -ge 8) {
-            throw "Robocopy step 1 (src/) failed with exit code $LASTEXITCODE"
-        }
+            if ($LASTEXITCODE -ge 8) {
+                throw "Robocopy failed with exit code $LASTEXITCODE"
+            }
+        } else {
+            # Src layout (from repo checkout): content is under src/
+            $srcDir = Join-Path $InstallDir "src"
+            $robocopyArgs1 = @(
+                $srcDir,
+                $PluginCachePath,
+                '/E',
+                '/XD', '.git', '__pycache__', 'node_modules',
+                '/XF', '*.pyc', '.DS_Store',
+                '/NFL', '/NDL', '/NJH', '/NJS', '/NP'
+            )
+            & robocopy @robocopyArgs1 | Out-Null
 
-        # Step 2: Copy non-src top-level items
-        $robocopyArgs2 = @(
-            $InstallDir,
-            $PluginCachePath,
-            '/E',
-            '/XD', '.git', '__pycache__', 'node_modules', 'dist', '.venv', '.local', '.claude', 'src', 'builds', 'tools', 'config',
-            '/XF', '*.pyc', '.DS_Store',
-            '/NFL', '/NDL', '/NJH', '/NJS', '/NP'
-        )
-        & robocopy @robocopyArgs2 | Out-Null
+            if ($LASTEXITCODE -ge 8) {
+                throw "Robocopy step 1 (src/) failed with exit code $LASTEXITCODE"
+            }
 
-        if ($LASTEXITCODE -ge 8) {
-            throw "Robocopy step 2 (top-level) failed with exit code $LASTEXITCODE"
+            # Copy non-src top-level items (README, LICENSE, registry, etc.)
+            $robocopyArgs2 = @(
+                $InstallDir,
+                $PluginCachePath,
+                '/E',
+                '/XD', '.git', '__pycache__', 'node_modules', 'dist', '.venv', '.local', '.claude', 'src', 'builds', 'tools', 'config',
+                '/XF', '*.pyc', '.DS_Store',
+                '/NFL', '/NDL', '/NJH', '/NJS', '/NP'
+            )
+            & robocopy @robocopyArgs2 | Out-Null
+
+            if ($LASTEXITCODE -ge 8) {
+                throw "Robocopy step 2 (top-level) failed with exit code $LASTEXITCODE"
+            }
         }
 
         Write-Green "  Plugin files copied to cache"
@@ -410,12 +439,30 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
         $settings | ConvertTo-Json -Depth 10 | Set-Content $SettingsFile -Encoding UTF8
         Write-Green "  Plugin enabled in settings.json"
 
+        # Verify mcp-server.mjs ended up in the cache
+        $mcpInCache = Join-Path $PluginCachePath "mcp-server.mjs"
+        if (-not (Test-Path $mcpInCache)) {
+            Write-Yellow "  WARNING: mcp-server.mjs not found in plugin cache at: $mcpInCache"
+            # Try to find and copy it manually
+            $mcpSources = @(
+                (Join-Path $InstallDir "mcp-server.mjs"),
+                (Join-Path $InstallDir "src\mcp-server.mjs")
+            )
+            foreach ($src in $mcpSources) {
+                if (Test-Path $src) {
+                    Copy-Item $src $mcpInCache
+                    Write-Green "  Recovered mcp-server.mjs from: $src"
+                    break
+                }
+            }
+        }
+
         # 4. Register MCP server in Claude Desktop config
         #    Uses Node.js for JSON manipulation (PowerShell can't handle hyphenated keys)
         #    Windows stdio MCP servers need cmd /c wrapper per Anthropic docs
         $DesktopConfigDir = Join-Path $env:APPDATA "Claude"
         $DesktopConfigFile = Join-Path $DesktopConfigDir "claude_desktop_config.json"
-        $mcpServerPath = Join-Path $PluginCachePath "mcp-server.mjs"
+        $mcpServerPath = $mcpInCache
 
         try {
             if (-not (Test-Path $DesktopConfigDir)) {

@@ -29,7 +29,7 @@ import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const REPO_ROOT = join(__dirname, "..");
+const REPO_ROOT = join(__dirname, "..", "..");
 const CATALOG_PATH = join(REPO_ROOT, "dist", "catalog.json");
 const ROUTING_MD_PATH = join(__dirname, "CRE-ROUTING.md");
 
