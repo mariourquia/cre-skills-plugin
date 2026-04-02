@@ -303,6 +303,9 @@ install_plugin() {
     --exclude 'docs/design' --exclude 'tests/golden' \
     --exclude 'tests/snapshots' --exclude 'tests/fixtures' \
     "$INSTALL_DIR/" "$plugins_cache/"
+  # Create .claude-plugin/ layout expected by Claude Code
+  mkdir -p "$plugins_cache/.claude-plugin"
+  cp "$plugins_cache/plugin/plugin.json" "$plugins_cache/.claude-plugin/plugin.json" 2>/dev/null || true
   success "Plugin files copied to $plugins_cache"
 
   # 2. Register in installed_plugins.json

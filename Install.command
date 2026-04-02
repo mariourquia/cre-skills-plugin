@@ -243,6 +243,10 @@ rsync -a \
     --exclude 'docs/design' --exclude 'tests/golden' \
     --exclude 'tests/snapshots' --exclude 'tests/fixtures' \
     "$INSTALL_DIR/" "$PLUGINS_CACHE/"
+
+# Create .claude-plugin/ layout expected by Claude Code
+mkdir -p "$PLUGINS_CACHE/.claude-plugin"
+cp "$PLUGINS_CACHE/plugin/plugin.json" "$PLUGINS_CACHE/.claude-plugin/plugin.json" 2>/dev/null || true
 green "  Plugin files copied to cache"
 
 # Build catalog if not present

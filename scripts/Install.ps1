@@ -387,6 +387,16 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
             }
         }
 
+        # Create .claude-plugin/ layout expected by Claude Code
+        $claudePluginDir = Join-Path $PluginCachePath ".claude-plugin"
+        if (-not (Test-Path $claudePluginDir)) {
+            New-Item -ItemType Directory -Path $claudePluginDir -Force | Out-Null
+        }
+        $srcPluginJson = Join-Path $PluginCachePath "plugin" "plugin.json"
+        if (Test-Path $srcPluginJson) {
+            Copy-Item $srcPluginJson (Join-Path $claudePluginDir "plugin.json") -Force
+        }
+
         Write-Green "  Plugin files copied to cache"
 
         # 2. Register in installed_plugins.json
@@ -534,6 +544,63 @@ if (-not $InstalledSomewhere) {
     Write-Dim  "  Manual: claude --plugin-dir `"$InstallDir`""
 }
 
+# ── Post-install verification ──────────────────────────────────────
+
+Write-Host ""
+Write-Blue "  Running post-install verification..."
+$verifyFails = 0
+
+# Check 1: Plugin cache has skills
+$cacheSkills = Join-Path $PluginCachePath "skills"
+if (Test-Path $cacheSkills) {
+    $skillCount = (Get-ChildItem $cacheSkills -Directory -ErrorAction SilentlyContinue | Measure-Object).Count
+    Write-Green "  Plugin cache: $skillCount skill directories"
+} else {
+    Write-Red "  Plugin cache missing skills directory: $cacheSkills"
+    $verifyFails++
+}
+
+# Check 2: mcp-server.mjs in cache
+$cacheMcp = Join-Path $PluginCachePath "mcp-server.mjs"
+if (Test-Path $cacheMcp) {
+    Write-Green "  MCP server in cache: OK"
+} else {
+    Write-Red "  MCP server missing from cache: $cacheMcp"
+    $verifyFails++
+}
+
+# Check 3: installed_plugins.json has our entry
+if (Test-Path $InstalledPluginsFile) {
+    $content = Get-Content $InstalledPluginsFile -Raw
+    if ($content -match "cre-skills") {
+        Write-Green "  installed_plugins.json: OK"
+    } else {
+        Write-Red "  installed_plugins.json: entry missing"
+        $verifyFails++
+    }
+} else {
+    Write-Red "  installed_plugins.json: file missing"
+    $verifyFails++
+}
+
+# Check 4: settings.json has plugin enabled
+if (Test-Path $SettingsFile) {
+    $content = Get-Content $SettingsFile -Raw
+    if ($content -match "cre-skills") {
+        Write-Green "  settings.json: plugin enabled"
+    } else {
+        Write-Red "  settings.json: plugin not enabled"
+        $verifyFails++
+    }
+}
+
+if ($verifyFails -gt 0) {
+    Write-Yellow "  $verifyFails verification check(s) failed"
+    Send-InstallerTelemetry -StepFailed "post_verify" -ErrorMsg "$verifyFails checks failed"
+} else {
+    Write-Green "  All verification checks passed"
+}
+
 # ── Step 3: Success ─────────────────────────────────────────────────
 
 Write-Host ""
@@ -547,7 +614,7 @@ Write-Host ""
 Write-Cyan "  /cre-skills:cre-route         Route any CRE task to the right skill"
 Write-Cyan "  /cre-skills:deal-quick-screen  Screen a deal in seconds"
 Write-Cyan "  /cre-skills:cre-workflows      Browse 6 end-to-end workflow chains"
-Write-Cyan "  /cre-skills:cre-agents         List 55 expert agents"
+Write-Cyan "  /cre-skills:cre-agents         List 54 expert agents"
 Write-Host ""
 
 Write-Bold "  Example"

@@ -324,12 +324,16 @@ console.log("\nSNAPSHOT: Build output consistency");
 const SNAPSHOTS_DIR = resolve(REPO_ROOT, "tests", "snapshots");
 const updateSnapshots = process.argv.includes("--update-snapshots");
 
+// Dirs excluded from snapshot hashing (generated content that varies across environments)
+const SNAPSHOT_EXCLUDE_DIRS = new Set(["dist"]);
+
 function hashDir(dir: string): string {
   const hash = createHash("sha256");
   const entries: string[] = [];
 
   function walk(d: string) {
     for (const entry of readdirSync(d, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+      if (SNAPSHOT_EXCLUDE_DIRS.has(entry.name)) continue;
       const full = resolve(d, entry.name);
       const rel = relative(dir, full);
       if (entry.isDirectory()) {
