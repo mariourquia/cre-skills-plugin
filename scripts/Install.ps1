@@ -202,7 +202,7 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
     # Plugin cache location: ~/.claude/plugins/cache/local/cre-skills-plugin/<version>
     $ClaudeHome = Join-Path $env:USERPROFILE ".claude"
     $PluginVersion = (Get-Content (Join-Path $InstallDir ".claude-plugin\plugin.json") | ConvertFrom-Json).version
-    if (-not $PluginVersion) { $PluginVersion = "4.0.0" }
+    if (-not $PluginVersion) { $PluginVersion = "4.1.0" }
     $PluginCachePath = Join-Path $ClaudeHome "plugins\cache\local\cre-skills-plugin\$PluginVersion"
     $InstalledPluginsFile = Join-Path $ClaudeHome "plugins\installed_plugins.json"
     $SettingsFile = Join-Path $ClaudeHome "settings.json"
