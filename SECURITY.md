@@ -4,7 +4,7 @@
 
 If you discover a security vulnerability in this project, please report it responsibly.
 
-**Do NOT open a public issue.** Instead, email security concerns to mario@mariourquia.com with:
+**Do NOT open a public issue.** Instead, email security concerns to 60152193+mariourquia@users.noreply.github.com with:
 
 1. Description of the vulnerability
 2. Steps to reproduce
