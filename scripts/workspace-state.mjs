@@ -17,7 +17,7 @@
  */
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, unlinkSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve, sep } from "node:path";
 import { randomUUID } from "node:crypto";
 import { homedir } from "node:os";
 
@@ -71,7 +71,17 @@ function ensureDir() {
   mkdirSync(WORKSPACE_DIR, { recursive: true });
 }
 
+function assertSafeWorkspaceId(id) {
+  if (!id || typeof id !== 'string') throw new Error('workspace_id is required');
+  if (/[\/\\]/.test(id) || id.includes('..')) throw new Error('Invalid workspace_id');
+  const resolved = resolve(WORKSPACE_DIR, `${id}.json`);
+  if (!resolved.startsWith(resolve(WORKSPACE_DIR) + sep)) {
+    throw new Error('workspace_id escapes directory');
+  }
+}
+
 function wsPath(id) {
+  assertSafeWorkspaceId(id);
   return join(WORKSPACE_DIR, `${id}.json`);
 }
 

@@ -423,6 +423,43 @@ test("invalid manifest missing required fields", () => {
   assert(!data.author?.name, "author.name should be missing");
 });
 
+// ── PACKAGING: Artifact generation ─────────────────────────────────────
+
+console.log("\nPACKAGING: Artifact generation");
+
+// Rebuild for packaging tests
+for (const target of ["cowork", "claude-code"] as const) {
+  buildTarget(target, true);
+}
+
+test("claude-code build contains expected structure", () => {
+  const outDir = buildDir("claude-code");
+  assert(existsSync(resolve(outDir, ".claude-plugin/plugin.json")), "missing plugin.json");
+  assert(existsSync(resolve(outDir, "hooks/hooks.json")), "missing hooks.json");
+  assert(existsSync(resolve(outDir, "mcp-server.mjs")), "missing mcp-server.mjs");
+});
+
+test("cowork build excludes orchestrators and mcp-server", () => {
+  const outDir = buildDir("cowork");
+  assert(!existsSync(resolve(outDir, "orchestrators")), "orchestrators should not exist");
+  assert(!existsSync(resolve(outDir, "mcp-server.mjs")), "mcp-server should not exist");
+  assert(!existsSync(resolve(outDir, ".mcp.json")), ".mcp.json should not exist");
+});
+
+// ── VALIDATION: Validator correctness ──────────────────────────────────
+
+console.log("\nVALIDATION: Validator correctness");
+
+test("cowork source validation catches forbidden fields", () => {
+  const skillFile = resolve(SRC_DIR, "skills/deal-quick-screen/SKILL.md");
+  const { frontmatter } = parseFrontmatter(readFileSync(skillFile, "utf-8"));
+  const profile = loadTargetProfile("cowork");
+  const allowed = new Set(profile.skills.allowed_frontmatter as string[]);
+  const forbidden = Object.keys(frontmatter).filter(k => !allowed.has(k));
+  assert(forbidden.length > 0, "source skill should have forbidden fields for cowork");
+  assert(forbidden.includes("slug"), "should detect 'slug' as forbidden");
+});
+
 // ── Cleanup ────────────────────────────────────────────────────────────
 
 rmSync(BUILDS_DIR, { recursive: true, force: true });

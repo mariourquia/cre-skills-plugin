@@ -406,5 +406,43 @@ class TestMcpServer(unittest.TestCase):
         self.assertIn('underwriting', content['recommendation']['skill'])
 
 
+class TestMcpWorkspace(unittest.TestCase):
+    """MCP server workspace and tool wire-protocol tests."""
+
+    def _mcp_call(self, tool_name, arguments):
+        """Send initialize + tools/call via JSON-RPC and return the parsed last response."""
+        init_msg = '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}'
+        call_msg = json.dumps({
+            "jsonrpc": "2.0", "id": 2, "method": "tools/call",
+            "params": {"name": tool_name, "arguments": arguments}
+        })
+        result = subprocess.run(
+            ['node', os.path.join(SRC_DIR, 'mcp-server.mjs')],
+            input=init_msg + '\n' + call_msg + '\n',
+            capture_output=True, text=True, timeout=5
+        )
+        lines = [l for l in result.stdout.strip().split('\n') if l.strip()]
+        return json.loads(lines[-1])
+
+    def test_mcp_skill_detail(self):
+        data = self._mcp_call('cre_skill_detail', {'slug': 'deal-quick-screen'})
+        content_text = data['result']['content'][0]['text']
+        self.assertIn('Deal QuickScreen', content_text)
+
+    def test_mcp_skill_detail_invalid(self):
+        data = self._mcp_call('cre_skill_detail', {'slug': 'nonexistent'})
+        content_text = data['result']['content'][0]['text']
+        parsed = json.loads(content_text)
+        self.assertIn('error', parsed)
+
+    def test_mcp_unknown_tool(self):
+        data = self._mcp_call('nonexistent_tool', {})
+        self.assertTrue(data['result'].get('isError', False),
+                        'unknown tool should return isError')
+        content_text = data['result']['content'][0]['text']
+        parsed = json.loads(content_text)
+        self.assertIn('error', parsed)
+
+
 if __name__ == '__main__':
     unittest.main()

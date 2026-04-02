@@ -99,7 +99,7 @@ The `contact_email` field is NOT redacted because the user explicitly provides i
 
 When you submit feedback or a bug report, you are **prompted before sending** ("Would you also like to send this to the plugin maintainer?"). Nothing leaves your machine without your explicit approval.
 
-Default mode is `ask_each_time`. To disable remote submission entirely, set `feedback.mode` to `local_only` in `~/.cre-skills/config.json`.
+Default mode is `local_only`. To enable remote submission, set `feedback.mode` to `ask_each_time`, `anonymous_remote`, or `remote_with_contact` in `~/.cre-skills/config.json`.
 
 When you approve a remote send:
 - The redacted feedback/bug record is transmitted (same fields stored locally)

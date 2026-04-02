@@ -32,7 +32,7 @@
  */
 
 import { readFileSync, writeFileSync, appendFileSync, mkdirSync, existsSync, readdirSync, unlinkSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline";
 import { randomUUID } from "node:crypto";
@@ -100,6 +100,19 @@ function scoreEntry(queryTokens, entryTokens) {
     else { for (const et of entryTokens) { if (et.startsWith(qt) || qt.startsWith(et)) { partial += 0.6; break; } } }
   }
   return (match + partial) / queryTokens.length * 0.7 + match / Math.min(entryTokens.length, 10) * 0.3;
+}
+
+// ---------------------------------------------------------------------------
+// Workspace path safety
+// ---------------------------------------------------------------------------
+
+function assertSafeWorkspaceId(id) {
+  if (!id || typeof id !== 'string') throw new Error('workspace_id is required');
+  if (/[\/\\]/.test(id) || id.includes('..')) throw new Error('Invalid workspace_id');
+  const resolved = resolve(WORKSPACE_DIR, `${id}.json`);
+  if (!resolved.startsWith(resolve(WORKSPACE_DIR) + sep)) {
+    throw new Error('workspace_id escapes directory');
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -177,6 +190,7 @@ function toolWorkspaceCreate(args) {
 }
 
 function toolWorkspaceGet(args) {
+  try { assertSafeWorkspaceId(args.workspace_id); } catch (e) { return { error: e.message }; }
   const p = join(WORKSPACE_DIR, `${args.workspace_id}.json`);
   if (!existsSync(p)) return { error: `Workspace ${args.workspace_id} not found` };
   return JSON.parse(readFileSync(p, "utf-8"));
@@ -199,6 +213,7 @@ function toolWorkspaceList(args) {
 }
 
 function toolWorkspaceUpdate(args) {
+  try { assertSafeWorkspaceId(args.workspace_id); } catch (e) { return { error: e.message }; }
   const p = join(WORKSPACE_DIR, `${args.workspace_id}.json`);
   if (!existsSync(p)) return { error: `Workspace ${args.workspace_id} not found` };
   const ws = JSON.parse(readFileSync(p, "utf-8"));

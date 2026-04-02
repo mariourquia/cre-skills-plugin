@@ -34,8 +34,10 @@ If you have extended the plugin with real API integrations or live deal data pip
 
 | Version | Supported |
 |---------|-----------|
+| 4.0.x   | Yes       |
+| 3.0.x   | Yes       |
 | 2.0.x   | Yes       |
-| 1.0.x   | Yes       |
+| 1.0.x   | No        |
 
 ## Privacy
 

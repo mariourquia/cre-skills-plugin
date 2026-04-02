@@ -176,8 +176,8 @@ Write-Host  ""
 
 # ── Verify plugin files exist ───────────────────────────────────────
 
-if (-not (Test-Path (Join-Path $InstallDir "skills")) -or
-    -not (Test-Path (Join-Path $InstallDir "agents"))) {
+if (-not (Test-Path (Join-Path $InstallDir "src\skills")) -or
+    -not (Test-Path (Join-Path $InstallDir "src\agents"))) {
     Write-Red "  Could not find the CRE Skills Plugin files."
     Write-Host "  Expected at: $InstallDir"
     Write-Host ""
@@ -310,34 +310,41 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
 
     # Plugin cache location: ~/.claude/plugins/cache/local/cre-skills-plugin/<version>
     $ClaudeHome = Join-Path $env:USERPROFILE ".claude"
-    $PluginVersion = (Get-Content (Join-Path $InstallDir "src\plugin\plugin.json") | ConvertFrom-Json).version
+    $pjPath = Join-Path $InstallDir "src\plugin\plugin.json"
+    if (-not (Test-Path $pjPath)) {
+        $pjPath = Join-Path $InstallDir ".claude-plugin\plugin.json"
+    }
+    $PluginVersion = (Get-Content $pjPath | ConvertFrom-Json).version
     if (-not $PluginVersion) { $PluginVersion = "4.0.0" }
     $PluginCachePath = Join-Path $ClaudeHome "plugins\cache\local\cre-skills-plugin\$PluginVersion"
     $InstalledPluginsFile = Join-Path $ClaudeHome "plugins\installed_plugins.json"
     $SettingsFile = Join-Path $ClaudeHome "settings.json"
 
     try {
-        # 1. Copy plugin files to the plugin cache
-        if (-not (Test-Path $PluginCachePath)) {
-            New-Item -ItemType Directory -Path $PluginCachePath -Force | Out-Null
+        # 1. Copy plugin files to the plugin cache (two-step: src/ contents first, then top-level items)
+        if (Test-Path $PluginCachePath) {
+            Remove-Item -Path $PluginCachePath -Recurse -Force
         }
+        New-Item -ItemType Directory -Path $PluginCachePath -Force | Out-Null
 
-        # Robocopy does not dereference symlinks by default. Copy src/ content
-        # to the expected top-level layout, then copy remaining top-level items.
-        # Step 1: Copy src/ contents to cache root (resolves the source layout)
+        # Step 1: Copy src/ contents to cache root
         $srcDir = Join-Path $InstallDir "src"
-        $robocopyArgsSrc = @(
+        $robocopyArgs1 = @(
             $srcDir,
             $PluginCachePath,
-            '/MIR',
+            '/E',
             '/XD', '.git', '__pycache__', 'node_modules',
             '/XF', '*.pyc', '.DS_Store',
             '/NFL', '/NDL', '/NJH', '/NJS', '/NP'
         )
-        & robocopy @robocopyArgsSrc | Out-Null
+        & robocopy @robocopyArgs1 | Out-Null
 
-        # Step 2: Copy non-src top-level items (scripts, docs, registry, etc.)
-        $robocopyArgs = @(
+        if ($LASTEXITCODE -ge 8) {
+            throw "Robocopy step 1 (src/) failed with exit code $LASTEXITCODE"
+        }
+
+        # Step 2: Copy non-src top-level items
+        $robocopyArgs2 = @(
             $InstallDir,
             $PluginCachePath,
             '/E',
@@ -345,10 +352,10 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
             '/XF', '*.pyc', '.DS_Store',
             '/NFL', '/NDL', '/NJH', '/NJS', '/NP'
         )
-        & robocopy @robocopyArgs | Out-Null
+        & robocopy @robocopyArgs2 | Out-Null
 
         if ($LASTEXITCODE -ge 8) {
-            throw "Robocopy failed with exit code $LASTEXITCODE"
+            throw "Robocopy step 2 (top-level) failed with exit code $LASTEXITCODE"
         }
 
         Write-Green "  Plugin files copied to cache"

@@ -21,12 +21,12 @@ Contributions fall into four categories: new skills, new agents, improvements to
 
 ## Adding a New Skill
 
-Skills live in `src/skills/<slug>/` where `<slug>` is a lowercase-hyphenated name describing the skill's function. **Always edit files under `src/`, never under `builds/`.**
+Skills live in `src/skills/<slug>/` where `<slug>` is a lowercase-hyphenated name describing the skill's function.
 
 ### Directory Structure
 
 ```
-skills/<slug>/
+src/skills/<slug>/
   SKILL.md                    # Skill definition (required)
   references/                 # Supporting reference files (required, at least 1)
     <reference-file>.md       # Markdown reference
@@ -90,7 +90,7 @@ Which skill(s) come before and after this one in a workflow:
 
 ### Reference Files
 
-Every skill must include at least one reference file in `references/`. Reference files provide the domain knowledge the skill depends on:
+Every skill must include at least one reference file in its `references/` directory. Reference files provide the domain knowledge the skill depends on:
 
 - **Methodology files** (`.md`): Explain formulas, frameworks, industry standards, or analytical approaches.
 - **Data files** (`.yaml`): Structured lookup tables, benchmarks, checklists, templates, or worked examples.
@@ -141,7 +141,7 @@ How the agent formats responses: tone, structure, level of detail.
 
 ### Agent Categories
 
-Place new agents into the appropriate category. If adding a new category, update `agents/_index.md` to include it.
+Place new agents into the appropriate category. If adding a new category, update `src/agents/_index.md` to include it.
 
 | Category | Purpose | Examples |
 |---|---|---|
@@ -168,7 +168,7 @@ A skill is ready for merge when it meets all of the following:
 - [ ] **Red flags are domain-specific** -- not generic risk warnings
 - [ ] **Chain notes point to real skills** that exist in the plugin (or are being added in the same PR)
 - [ ] **No hallucinated data** -- reference files use real industry benchmarks or clearly label examples as illustrative
-- [ ] **Slug matches directory name** -- `skills/foo-bar/SKILL.md` has `slug: foo-bar` in frontmatter
+- [ ] **Slug matches directory name** -- `src/skills/foo-bar/SKILL.md` has `slug: foo-bar` in frontmatter
 
 ---
 
@@ -182,7 +182,7 @@ An agent is ready for merge when it meets all of the following:
 - [ ] **Output format** -- defined tone, structure, and detail level
 - [ ] **Challenge patterns** -- assumptions the agent pushes back on
 - [ ] **Category fit** -- placed in the correct agent category
-- [ ] **Listed in `_index.md`** -- the agent roster index includes the new agent
+- [ ] **Listed in `src/agents/_index.md`** -- the agent roster index includes the new agent
 - [ ] **Description frontmatter** -- the `description` field in YAML frontmatter is a complete one-paragraph summary
 
 ---
@@ -211,52 +211,10 @@ Changes to these files require extra review:
 - `src/routing/CRE-ROUTING.md` -- routing index (must stay in sync with skills)
 - `registry.yaml` -- machine-readable skill index (must stay in sync with skills)
 - `src/commands/*.md` -- slash commands
-- `config/targets/*.yaml` -- build target profiles
-- `config/defaults/agent-defaults.yaml` -- agent model/color defaults
 
 If you add a new skill, you must also:
 1. Add it to `src/routing/CRE-ROUTING.md` with appropriate trigger patterns
 2. Add it to `registry.yaml` with correct metadata
-3. Run `npx --prefix tools tsx tools/build.ts --target all` to verify both targets build cleanly
-4. Run `npx --prefix tools tsx tools/validate.ts --target all` to verify no schema violations
-
----
-
-## Build System
-
-The repo uses a build system to produce target-specific artifacts from a single source. **All edits go in `src/`.** Never edit files under `builds/`.
-
-### Key Commands
-
-```bash
-# Build both targets
-npx --prefix tools tsx tools/build.ts --target all
-
-# Validate build output
-npx --prefix tools tsx tools/validate.ts --target all
-
-# Preview what the build changes
-npx --prefix tools tsx tools/diff.ts --target cowork
-
-# Health check
-npx --prefix tools tsx tools/doctor.ts
-
-# Run build system tests
-npx --prefix tools tsx tools/test.ts
-
-# Package artifacts
-npx --prefix tools tsx tools/package/package-cowork.ts
-npx --prefix tools tsx tools/package/package-claude-code.ts
-```
-
-### How It Works
-
-Source files under `src/` contain the full-fidelity content (all frontmatter fields, all hooks, all components). The build system normalizes this for each target:
-
-- **Cowork**: Strips skill frontmatter to `name`+`description`, injects `model`+`color` on agents, removes `name` from commands, emits portable hooks (no Node.js scripts), strips `userConfig` from manifest, excludes orchestrators/MCP/calculators.
-- **Claude Code**: Pass-through (keeps everything).
-
-Build output goes to `builds/` (gitignored). Packaged artifacts go to `dist/`.
 
 ---
 
@@ -266,17 +224,14 @@ Release artifacts are published to GitHub Releases when a version tag is pushed.
 
 ### Artifacts
 
-| Target | Artifact | Install Method |
-|--------|----------|----------------|
-| Cowork | `cre-skills-cowork.zip` | Cowork plugin import |
-| Claude Code | `cre-skills-claude-code.zip` | `claude plugin install` or `--plugin-dir` |
-| Source | Git repo | Development only |
+- **Source archives** (`.tar.gz`, `.zip`): Auto-generated by GitHub when a release is created from a tag.
+- **macOS DMG** (`cre-skills-v<version>.dmg`): Built locally via the `scripts/create-dmg.sh` script. The DMG contains a self-extracting installer that detects Claude Code and/or Claude Desktop and configures both.
 
 ### Release Process
 
-1. Tag the release: `git tag v4.1.0 && git push origin v4.1.0`
-2. CI builds both targets, validates, packages, and attaches artifacts to the GitHub release
-3. Optionally build DMG locally: `./scripts/create-dmg.sh`
+1. Tag the release: `git tag v4.0.0 && git push origin v4.0.0`
+2. Build the DMG: `./scripts/create-dmg.sh`
+3. Create a GitHub release from the tag and attach the DMG as a release asset alongside the auto-generated source archives.
 
 ### Code Signing
 
@@ -300,7 +255,7 @@ No Apple code signing is required for distribution. The DMG installer is a shell
 ```markdown
 - [ ] SKILL.md has all required sections
 - [ ] At least 1 reference file included
-- [ ] Added to routing/CRE-ROUTING.md
+- [ ] Added to src/routing/CRE-ROUTING.md
 - [ ] Added to registry.yaml
 - [ ] Slug matches directory name
 - [ ] No hallucinated benchmarks or data

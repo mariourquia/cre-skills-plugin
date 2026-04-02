@@ -101,7 +101,7 @@ send_telemetry() {
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 
-if [ ! -d "skills" ] || [ ! -d "agents" ]; then
+if [ ! -d "src/skills" ] || [ ! -d "src/agents" ]; then
     red "Could not find the CRE Skills Plugin files."
     echo "Make sure this file is in the cre-skills-plugin folder."
     press_to_exit 1
@@ -196,6 +196,11 @@ else
     fi
 fi
 
+if ! command -v python3 &>/dev/null; then
+    yellow "  python3 not found. Some features may be limited."
+    yellow "  Install with: xcode-select --install"
+fi
+
 if [ "$HAS_CLAUDE_CODE" = false ] && [ "$HAS_CLAUDE_DESKTOP" = false ]; then
     echo ""
     red "  Neither Claude Code nor Claude Desktop was found."
@@ -225,14 +230,18 @@ bold "  Installing CRE Skills Plugin..."
 printf "  ${DIM}Source: %s${RESET}\n" "$INSTALL_DIR"
 echo ""
 
-# 1. Copy to plugin cache (dereference symlinks, exclude build tooling)
+# 1. Copy to plugin cache (two-step: src/ contents first, then top-level items)
 mkdir -p "$PLUGINS_CACHE"
-rsync -aL --delete \
+rsync -a --delete \
+    --exclude '.git' --exclude '__pycache__' --exclude 'node_modules' \
+    "$INSTALL_DIR/src/" "$PLUGINS_CACHE/"
+rsync -a \
     --exclude '.git' --exclude '__pycache__' --exclude 'node_modules' \
     --exclude 'dist' --exclude '.venv' --exclude '.local' \
-    --exclude 'src' --exclude 'builds' --exclude 'tools' --exclude 'config' \
-    --exclude 'docs/plans' --exclude 'docs/specs' --exclude 'docs/design' \
-    --exclude 'tests/golden' --exclude 'tests/snapshots' --exclude 'tests/fixtures' \
+    --exclude 'src' --exclude 'builds' --exclude 'tools' \
+    --exclude 'config' --exclude 'docs/plans' --exclude 'docs/specs' \
+    --exclude 'docs/design' --exclude 'tests/golden' \
+    --exclude 'tests/snapshots' --exclude 'tests/fixtures' \
     "$INSTALL_DIR/" "$PLUGINS_CACHE/"
 green "  Plugin files copied to cache"
 
