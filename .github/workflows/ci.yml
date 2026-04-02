@@ -34,8 +34,10 @@ jobs:
       - name: Validate Python calculators
         run: |
           for f in scripts/calculators/*.py; do python -c "compile(open('$f').read(), '$f', 'exec')"; done
+      - name: Check version consistency
+        run: python3 scripts/version_check.py
       - name: Verify plugin structure
-        run: bash scripts/verify-install.sh || true
+        run: bash scripts/verify-install.sh
       - name: Validate registry references
         run: python scripts/registry-validator.py
       - name: Rebuild catalog and check for drift
