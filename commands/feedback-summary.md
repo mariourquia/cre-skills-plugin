@@ -41,6 +41,16 @@ Use block characters or dashes if block characters are unavailable.
 
 List the 10 most recent records where `comment` is not null. For each, show the date and the comment text. Do not show rating or anonymous_id. Present as a simple numbered list.
 
+## Outbox (Pending Retries)
+
+Check if `~/.cre-skills/outbox.jsonl` exists and has entries. If it does, count the lines and display:
+
+```
+Pending retries: 3 submission(s) queued for next session
+```
+
+If the file is empty or does not exist, omit this section entirely.
+
 ## Trend
 
 Compute this only if data spans >= 28 days (4 weeks).

@@ -126,7 +126,7 @@ X-Plugin-Version: <version>
 ```
 
 - On success (2xx): confirm "Bug report saved locally and sent to maintainer."
-- On failure (network error, non-2xx): confirm "Bug report saved locally. Remote submission failed -- it will be retried next session." Append the submission to `~/.cre-skills/outbox.jsonl` for retry (Slice 3 retry logic).
+- On failure (network error, non-2xx): confirm "Bug report saved locally. Remote submission failed -- it will be retried next session." Append the submission to `~/.cre-skills/outbox.jsonl` via `hooks/feedback-outbox.mjs` `enqueue()` for automatic retry on next session start.
 - Never block the session on a failed send. Local save is always the source of truth.
 
 ## Notes
