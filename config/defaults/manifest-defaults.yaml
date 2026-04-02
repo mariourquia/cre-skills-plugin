@@ -1,0 +1,7 @@
+cowork:
+  # Overrides applied to plugin.json for Cowork target
+  # userConfig is stripped (see target profile), these are additive overrides
+  description: "112 institutional-grade CRE skills for commercial real estate workflows. Deal screening, underwriting, structuring, due diligence, capital markets, market research, asset management, leasing, investor relations, development, disposition, sourcing, tax, ESG, portfolio strategy, and daily operations."
+
+claude-code:
+  # No overrides needed -- full plugin.json used as-is

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Cowork Agent Frontmatter",
+  "description": "Required frontmatter fields for agents in Cowork target",
+  "type": "object",
+  "properties": {
+    "name": { "type": "string", "minLength": 1 },
+    "description": { "type": "string", "minLength": 1 },
+    "model": { "type": "string", "enum": ["sonnet", "opus", "haiku"] },
+    "color": { "type": "string", "minLength": 1 }
+  },
+  "required": ["name", "description", "model", "color"],
+  "additionalProperties": false
+}

@@ -41,7 +41,7 @@ git clone https://github.com/mariourquia/cre-skills-plugin.git
 claude plugin add --plugin-dir ./cre-skills-plugin
 ```
 
-Changes to skills/ and commands/ take effect immediately without reinstalling.
+Changes to src/skills/ and src/commands/ take effect immediately without reinstalling.
 
 ---
 
@@ -160,7 +160,7 @@ To load the plugin automatically in every session, add the `plugin-dir` to your 
 ### Step 3: Make calculators executable
 
 ```bash
-chmod +x ~/.claude/plugins/cre-skills-plugin/scripts/calculators/*.py
+chmod +x ~/.claude/plugins/cre-skills-plugin/src/calculators/*.py
 ```
 
 ### Step 4: Verify
@@ -198,7 +198,7 @@ For Windows users with Claude Code CLI or Claude Desktop.
 The plugin directory for Claude Desktop on Windows is:
 
 ```
-%APPDATA%\Claude\skills\cre-skills-plugin\
+%APPDATA%\cre-skills-plugin\
 ```
 
 ### Manual Claude Desktop Configuration
@@ -251,13 +251,14 @@ There is no separate VS Code extension or JetBrains plugin.
 
 ### What Changed
 
-| Area | v3.0.0 | v2.0.0 |
-|------|--------|--------|
-| Skills | 80 | 91 (+11 orchestrator gap skills) |
-| License | MIT | Apache 2.0 |
-| Hooks | SessionStart only | SessionStart + PostToolUse + Stop |
-| Calculators | None | 7 Python calculator scripts |
-| Commands | 3 | 5 (+ brand-config, usage-stats) |
+| Area | v1.0.0 | v2.0.0 | v3.0.0 | v4.0.0 |
+|------|--------|--------|--------|--------|
+| Skills | 80 | 99 | 105 | 112 |
+| License | MIT | Apache 2.0 | Apache 2.0 | Apache 2.0 |
+| Hooks | SessionStart | SessionStart + PostToolUse + Stop | Same | Same |
+| Calculators | 0 | 11 | 11 | 12 |
+| Commands | 3 | 7 | 9 | 11 |
+| Source layout | flat (root) | flat (root) | flat (root) | `src/` directory |
 
 ### License Change Notice
 
@@ -318,10 +319,10 @@ Run the health check:
 Expected output (healthy):
 
 ```
-  PASS  105 skill directories all have SKILL.md
+  PASS  112 skill directories all have SKILL.md
   PASS  247 reference files all non-empty
   PASS  12 Python calculators are syntactically valid
-  PASS  hooks/hooks.json is valid JSON
+  PASS  src/hooks/hooks.json is valid JSON
   PASS  All 3 Node.js hook scripts parse correctly
   PASS  ~/.cre-skills exists and is writable
 ```
@@ -377,10 +378,10 @@ nvm install 20 && nvm use 20
 python3 --version  # needs 3.10+
 
 # Make executable
-chmod +x /path/to/cre-skills-plugin/scripts/calculators/*.py
+chmod +x /path/to/cre-skills-plugin/src/calculators/*.py
 
 # Test a calculator directly
-python3 /path/to/cre-skills-plugin/scripts/calculators/debt_sizing.py
+python3 /path/to/cre-skills-plugin/src/calculators/debt_sizing.py
 ```
 
 ### Wrong skill activates

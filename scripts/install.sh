@@ -202,14 +202,14 @@ INSTALL_DIR=""
 
 locate_repo() {
   # If we are already inside the repo (local install), use that.
-  if [ -f ".claude-plugin/plugin.json" ]; then
+  if [ -f "src/plugin/plugin.json" ]; then
     INSTALL_DIR="$(pwd)"
     info "Running from inside the repo: $INSTALL_DIR"
     return
   fi
 
   # Check one level up (in case cwd is scripts/)
-  if [ -f "../.claude-plugin/plugin.json" ]; then
+  if [ -f "../src/plugin/plugin.json" ]; then
     INSTALL_DIR="$(cd .. && pwd)"
     info "Running from scripts/ directory. Repo root: $INSTALL_DIR"
     return
@@ -255,21 +255,21 @@ make_calculators_executable() {
 validate_plugin() {
   local errors=0
 
-  [ -f "$INSTALL_DIR/.claude-plugin/plugin.json" ] || { warn "Missing .claude-plugin/plugin.json"; errors=$((errors + 1)); }
-  [ -d "$INSTALL_DIR/skills" ]                      || { warn "Missing skills/ directory"; errors=$((errors + 1)); }
-  [ -d "$INSTALL_DIR/agents" ]                      || { warn "Missing agents/ directory"; errors=$((errors + 1)); }
-  [ -d "$INSTALL_DIR/routing" ]                     || { warn "Missing routing/ directory"; errors=$((errors + 1)); }
-  [ -d "$INSTALL_DIR/commands" ]                    || { warn "Missing commands/ directory"; errors=$((errors + 1)); }
-  [ -f "$INSTALL_DIR/hooks/hooks.json" ]            || { warn "Missing hooks/hooks.json"; errors=$((errors + 1)); }
+  [ -f "$INSTALL_DIR/src/plugin/plugin.json" ] || { warn "Missing src/plugin/plugin.json"; errors=$((errors + 1)); }
+  [ -d "$INSTALL_DIR/src/skills" ]              || { warn "Missing src/skills/ directory"; errors=$((errors + 1)); }
+  [ -d "$INSTALL_DIR/src/agents" ]              || { warn "Missing src/agents/ directory"; errors=$((errors + 1)); }
+  [ -d "$INSTALL_DIR/src/routing" ]             || { warn "Missing src/routing/ directory"; errors=$((errors + 1)); }
+  [ -d "$INSTALL_DIR/src/commands" ]            || { warn "Missing src/commands/ directory"; errors=$((errors + 1)); }
+  [ -f "$INSTALL_DIR/src/hooks/hooks.json" ]    || { warn "Missing src/hooks/hooks.json"; errors=$((errors + 1)); }
 
   if [ "$errors" -gt 0 ]; then
     fail "Plugin structure validation failed ($errors errors). The repo may be incomplete."
   fi
 
   local skill_count
-  skill_count="$(find "$INSTALL_DIR/skills" -maxdepth 1 -mindepth 1 -type d | wc -l | tr -d ' ')"
+  skill_count="$(find "$INSTALL_DIR/src/skills" -maxdepth 1 -mindepth 1 -type d | wc -l | tr -d ' ')"
   local agent_count
-  agent_count="$(find "$INSTALL_DIR/agents" -maxdepth 1 -name '*.md' ! -name '_*' | wc -l | tr -d ' ')"
+  agent_count="$(find "$INSTALL_DIR/src/agents" -maxdepth 1 -name '*.md' ! -name '_*' | wc -l | tr -d ' ')"
 
   success "Plugin structure valid: $skill_count skills, $agent_count agents"
 }
@@ -282,7 +282,7 @@ install_plugin() {
 
   local claude_home="$HOME/.claude"
   local plugin_version
-  plugin_version="$(python3 -c "import json; print(json.load(open('$INSTALL_DIR/.claude-plugin/plugin.json'))['version'])" 2>/dev/null || echo "4.0.0")"
+  plugin_version="$(python3 -c "import json; print(json.load(open('$INSTALL_DIR/src/plugin/plugin.json'))['version'])" 2>/dev/null || echo "4.0.0")"
   local plugins_cache="$claude_home/plugins/cache/local/cre-skills-plugin/$plugin_version"
   local installed_file="$claude_home/plugins/installed_plugins.json"
   local settings_file="$claude_home/settings.json"
@@ -290,12 +290,22 @@ install_plugin() {
   local now
   now="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
 
-  # 1. Copy plugin to the plugins cache
+  # 1. Copy plugin to the plugins cache (two-step: src/ contents first, then top-level items)
   mkdir -p "$plugins_cache"
   rsync -a --delete \
     --exclude '.git' --exclude '__pycache__' --exclude 'node_modules' \
+    "$INSTALL_DIR/src/" "$plugins_cache/"
+  rsync -a \
+    --exclude '.git' --exclude '__pycache__' --exclude 'node_modules' \
     --exclude 'dist' --exclude '.venv' --exclude '.local' \
+    --exclude 'src' --exclude 'builds' --exclude 'tools' \
+    --exclude 'config' --exclude 'docs/plans' --exclude 'docs/specs' \
+    --exclude 'docs/design' --exclude 'tests/golden' \
+    --exclude 'tests/snapshots' --exclude 'tests/fixtures' \
     "$INSTALL_DIR/" "$plugins_cache/"
+  # Create .claude-plugin/ layout expected by Claude Code
+  mkdir -p "$plugins_cache/.claude-plugin"
+  cp "$plugins_cache/plugin/plugin.json" "$plugins_cache/.claude-plugin/plugin.json" 2>/dev/null || true
   success "Plugin files copied to $plugins_cache"
 
   # 2. Register in installed_plugins.json

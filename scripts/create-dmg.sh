@@ -81,6 +81,15 @@ rsync -rlpt \
     --exclude='.claude-plugin' \
     --exclude='*.pyc' \
     --exclude='*.egg-info' \
+    --exclude='.pytest_cache' \
+    --exclude='.github' \
+    --exclude='tests' \
+    --exclude='tools' \
+    --exclude='builds' \
+    --exclude='config' \
+    --exclude='.gitleaks.toml' \
+    --exclude='.gitignore' \
+    --exclude='.local' \
     "$REPO_ROOT/" "$STAGING_DIR/$DMG_NAME/.content/"
 
 chflags hidden "$STAGING_DIR/$DMG_NAME/.content" 2>/dev/null || true
@@ -361,7 +370,7 @@ cat > "$STAGING_DIR/$DMG_NAME/README.txt" << README
     ║                                                  ║
     ╚══════════════════════════════════════════════════╝
 
-    105 skills | 55 agents | 6 workflow chains | 12 calculators
+    112 skills | 54 agents | 6 workflow chains | 12 calculators
     Deal sourcing, underwriting, capital markets, leasing,
     asset management, investor relations, and more.
 

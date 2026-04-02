@@ -27,8 +27,9 @@ fail()    { printf "${RED}[FAIL]${RESET}  %s\n" "$1"; exit 1; }
 # ---------------------------------------------------------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+SRC_DIR="$REPO_ROOT/src"
 
-if [ ! -f "$REPO_ROOT/.claude-plugin/plugin.json" ]; then
+if [ ! -f "$SRC_DIR/plugin/plugin.json" ]; then
   fail "Cannot locate plugin root. Run this script from inside the cre-skills-plugin directory."
 fi
 

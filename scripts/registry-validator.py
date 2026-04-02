@@ -28,8 +28,9 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 PLUGIN_ROOT = SCRIPT_DIR.parent
+SRC_DIR = PLUGIN_ROOT / "src"
 REGISTRY_PATH = PLUGIN_ROOT / "registry.yaml"
-SKILLS_DIR = PLUGIN_ROOT / "skills"
+SKILLS_DIR = SRC_DIR / "skills"
 
 
 # ---------------------------------------------------------------------------
@@ -182,12 +183,12 @@ def validate_count_consistency(skills: list[dict]) -> list[str]:
 
     # Actual counts from disk
     actual_skills = len(list(SKILLS_DIR.glob("*/SKILL.md")))
-    actual_agents = len(list((PLUGIN_ROOT / "agents").glob("*.md"))) if (PLUGIN_ROOT / "agents").is_dir() else 0
-    actual_calcs = len(list((PLUGIN_ROOT / "scripts" / "calculators").glob("*.py"))) if (PLUGIN_ROOT / "scripts" / "calculators").is_dir() else 0
+    actual_agents = len(list((SRC_DIR / "agents").glob("*.md"))) if (SRC_DIR / "agents").is_dir() else 0
+    actual_calcs = len(list((SRC_DIR / "calculators").glob("*.py"))) if (SRC_DIR / "calculators").is_dir() else 0
 
     # Files that embed counts -- check each for the expected number
     count_files = {
-        ".claude-plugin/plugin.json": None,
+        "plugin/plugin.json": None,
         "hooks/hooks.json": None,
         "routing/CRE-ROUTING.md": None,
     }
@@ -195,7 +196,7 @@ def validate_count_consistency(skills: list[dict]) -> list[str]:
     import re
 
     for relpath in count_files:
-        fpath = PLUGIN_ROOT / relpath
+        fpath = SRC_DIR / relpath
         if not fpath.is_file():
             continue
         content = fpath.read_text(encoding="utf-8")
@@ -229,7 +230,7 @@ def validate_asset_type_neutrality() -> list[str]:
     Returns list of failure messages.
     """
     failures: list[str] = []
-    configs_dir = PLUGIN_ROOT / "orchestrators" / "configs"
+    configs_dir = SRC_DIR / "orchestrators" / "configs"
 
     if not configs_dir.is_dir():
         return failures
@@ -253,7 +254,7 @@ def validate_asset_type_neutrality() -> list[str]:
                 )
 
     # Also check handoff registry
-    handoff_file = PLUGIN_ROOT / "orchestrators" / "engine" / "handoff-registry.json"
+    handoff_file = SRC_DIR / "orchestrators" / "engine" / "handoff-registry.json"
     if handoff_file.is_file():
         content = handoff_file.read_text(encoding="utf-8")
         for pattern in banned_patterns:
@@ -276,9 +277,9 @@ def validate_version_consistency() -> list[str]:
     failures: list[str] = []
 
     # Source of truth
-    pj_path = PLUGIN_ROOT / ".claude-plugin" / "plugin.json"
+    pj_path = SRC_DIR / "plugin" / "plugin.json"
     if not pj_path.is_file():
-        failures.append("FAIL  .claude-plugin/plugin.json not found")
+        failures.append("FAIL  src/plugin/plugin.json not found")
         return failures
 
     pj = json.loads(pj_path.read_text(encoding="utf-8"))
@@ -288,14 +289,15 @@ def validate_version_consistency() -> list[str]:
         return failures
 
     # Files that must contain this version
+    # (base_dir, relative_path, pattern) -- hooks are under SRC_DIR, docs at PLUGIN_ROOT
     version_files = [
-        ("hooks/telemetry-init.mjs", re.compile(r"version:\s*['\"](\d+\.\d+\.\d+)['\"]")),
-        ("docs/install-guide.md", re.compile(r"Version\s+(\d+\.\d+\.\d+)")),
-        ("PRIVACY.md", re.compile(r"Plugin\s+v(\d+\.\d+\.\d+)")),
+        (SRC_DIR, "hooks/telemetry-init.mjs", re.compile(r"version:\s*['\"](\d+\.\d+\.\d+)['\"]")),
+        (PLUGIN_ROOT, "docs/install-guide.md", re.compile(r"Version\s+(\d+\.\d+\.\d+)")),
+        (PLUGIN_ROOT, "PRIVACY.md", re.compile(r"Plugin\s+v(\d+\.\d+\.\d+)")),
     ]
 
-    for relpath, pattern in version_files:
-        fpath = PLUGIN_ROOT / relpath
+    for base, relpath, pattern in version_files:
+        fpath = base / relpath
         if not fpath.is_file():
             continue
         content = fpath.read_text(encoding="utf-8")
@@ -319,7 +321,7 @@ def validate_stale_versions() -> list[str]:
     import json, re
     failures: list[str] = []
 
-    pj_path = PLUGIN_ROOT / ".claude-plugin" / "plugin.json"
+    pj_path = SRC_DIR / "plugin" / "plugin.json"
     if not pj_path.is_file():
         return failures
 
@@ -402,36 +404,37 @@ def validate_full_counts() -> list[str]:
     # Actual counts from disk
     counts = {
         "skills": len(list(SKILLS_DIR.glob("*/SKILL.md"))) if SKILLS_DIR.is_dir() else 0,
-        "agents": len(list((PLUGIN_ROOT / "agents").glob("*.md"))) if (PLUGIN_ROOT / "agents").is_dir() else 0,
-        "commands": len(list((PLUGIN_ROOT / "commands").glob("*.md"))) if (PLUGIN_ROOT / "commands").is_dir() else 0,
-        "calculators": len(list((PLUGIN_ROOT / "scripts" / "calculators").glob("*.py"))) if (PLUGIN_ROOT / "scripts" / "calculators").is_dir() else 0,
+        "agents": len(list((SRC_DIR / "agents").glob("*.md"))) if (SRC_DIR / "agents").is_dir() else 0,
+        "commands": len(list((SRC_DIR / "commands").glob("*.md"))) if (SRC_DIR / "commands").is_dir() else 0,
+        "calculators": len(list((SRC_DIR / "calculators").glob("*.py"))) if (SRC_DIR / "calculators").is_dir() else 0,
     }
 
     # Subtract _index.md from agents count (it's an index, not an agent)
-    if (PLUGIN_ROOT / "agents" / "_index.md").is_file():
+    if (SRC_DIR / "agents" / "_index.md").is_file():
         counts["agents"] -= 1
 
     # Also count agents in subdirectories
-    for subdir in (PLUGIN_ROOT / "agents").iterdir() if (PLUGIN_ROOT / "agents").is_dir() else []:
+    for subdir in (SRC_DIR / "agents").iterdir() if (SRC_DIR / "agents").is_dir() else []:
         if subdir.is_dir():
             counts["agents"] += len(list(subdir.glob("*.md")))
 
     # Files to check and what to look for
-    check_files = {
-        "README.md": {
+    # (base_dir, relative_path, patterns) -- README at PLUGIN_ROOT, hooks under SRC_DIR
+    check_files = [
+        (PLUGIN_ROOT, "README.md", {
             "skills": re.compile(r"\*\*(\d+)\*\*.*Skills|Skills\s*\|\s*\*\*(\d+)\*\*"),
             "agents": re.compile(r"Expert\s+Agents\s*\|\s*\*\*(\d+)\*\*|(\d+)\s+expert\s+agents", re.IGNORECASE),
             "commands": re.compile(r"Slash\s+Commands\s*\|\s*\*\*(\d+)\*\*"),
             "calculators": re.compile(r"Python\s+Calculators\s*\|\s*\*\*(\d+)\*\*"),
-        },
-        "hooks/hooks.json": {
+        }),
+        (SRC_DIR, "hooks/hooks.json", {
             "skills": re.compile(r"(\d+)\s+(?:CRE\s+)?skills"),
             "agents": re.compile(r"(\d+)\s+expert\s+agents"),
-        },
-    }
+        }),
+    ]
 
-    for relpath, patterns in check_files.items():
-        fpath = PLUGIN_ROOT / relpath
+    for base, relpath, patterns in check_files:
+        fpath = base / relpath
         if not fpath.is_file():
             continue
         content = fpath.read_text(encoding="utf-8")

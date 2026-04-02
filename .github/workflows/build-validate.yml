@@ -1,0 +1,43 @@
+name: Build & Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-system:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install pyyaml
+          cd tools && npm ci
+
+      - name: Build catalog (needed by MCP server in build output)
+        run: |
+          python scripts/catalog-build.py
+          python scripts/catalog-generate.py
+
+      - name: Run doctor
+        run: npx --prefix tools tsx tools/doctor.ts
+
+      - name: Build all targets
+        run: npx --prefix tools tsx tools/build.ts --target all
+
+      - name: Validate all targets
+        run: npx --prefix tools tsx tools/validate.ts --target all
+
+      - name: Run build system tests
+        run: npx --prefix tools tsx tools/test.ts --update-snapshots

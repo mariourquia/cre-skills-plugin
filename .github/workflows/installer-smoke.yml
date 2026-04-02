@@ -6,9 +6,9 @@ on:
       - 'scripts/Install.ps1'
       - 'Install.command'
       - 'scripts/install.sh'
-      - '.claude-plugin/**'
-      - 'mcp-server.mjs'
-      - 'hooks/**'
+      - 'src/plugin/**'
+      - 'src/mcp-server.mjs'
+      - 'src/hooks/**'
   workflow_dispatch:
 
 jobs:
@@ -42,9 +42,9 @@ jobs:
       - name: Create required directories for installer
         shell: pwsh
         run: |
-          # Ensure skills/ and agents/ exist (installer checks for them)
-          if (-not (Test-Path "skills")) { Write-Host "skills/ missing"; exit 1 }
-          if (-not (Test-Path "agents")) { Write-Host "agents/ missing"; exit 1 }
+          # Ensure src/skills/ and src/agents/ exist
+          if (-not (Test-Path "src/skills")) { Write-Host "src/skills/ missing"; exit 1 }
+          if (-not (Test-Path "src/agents")) { Write-Host "src/agents/ missing"; exit 1 }
           Write-Host "Plugin directories verified"
 
       - name: Run Install.ps1
@@ -94,7 +94,7 @@ jobs:
           set -euo pipefail
 
           INSTALL_DIR="$(pwd)"
-          PLUGIN_VERSION="$(python3 -c "import json; print(json.load(open('.claude-plugin/plugin.json'))['version'])")"
+          PLUGIN_VERSION="$(python3 -c "import json; print(json.load(open('src/plugin/plugin.json'))['version'])")"
           CLAUDE_HOME="$HOME/.claude"
           PLUGINS_CACHE="$CLAUDE_HOME/plugins/cache/local/cre-skills-plugin/$PLUGIN_VERSION"
           INSTALLED_PLUGINS="$CLAUDE_HOME/plugins/installed_plugins.json"
@@ -105,12 +105,19 @@ jobs:
           echo "Version: $PLUGIN_VERSION"
           echo "Cache:   $PLUGINS_CACHE"
 
-          # 1. Copy plugin files to cache (same rsync as Install.command)
+          # 1. Copy plugin files to cache (two-step, mirrors Install.command)
           mkdir -p "$PLUGINS_CACHE"
           rsync -a --delete \
             --exclude '.git' --exclude '__pycache__' --exclude 'node_modules' \
+            "$INSTALL_DIR/src/" "$PLUGINS_CACHE/"
+          rsync -a \
+            --exclude '.git' --exclude '__pycache__' --exclude 'node_modules' \
             --exclude 'dist' --exclude '.venv' --exclude '.local' \
+            --exclude 'src' --exclude 'builds' --exclude 'tools' --exclude 'config' \
             "$INSTALL_DIR/" "$PLUGINS_CACHE/"
+          # Create .claude-plugin/ layout expected by Claude Code
+          mkdir -p "$PLUGINS_CACHE/.claude-plugin"
+          cp "$PLUGINS_CACHE/plugin/plugin.json" "$PLUGINS_CACHE/.claude-plugin/plugin.json"
           echo "Plugin files copied to cache"
 
           # 2. Register in installed_plugins.json

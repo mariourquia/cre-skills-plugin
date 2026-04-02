@@ -28,8 +28,9 @@ fail()    { printf "${RED}[FAIL]${RESET}  %s\n" "$1"; exit 1; }
 # ---------------------------------------------------------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+SRC_DIR="$REPO_ROOT/src"
 
-if [ ! -f "$REPO_ROOT/.claude-plugin/plugin.json" ]; then
+if [ ! -f "$SRC_DIR/plugin/plugin.json" ]; then
   fail "Cannot locate plugin root. Run this script from inside the cre-skills-plugin directory."
 fi
 
@@ -51,7 +52,7 @@ DATA_DIR="$HOME/.cre-skills"
 get_local_version() {
   python3 -c "
 import json
-with open('$REPO_ROOT/.claude-plugin/plugin.json') as f:
+with open('$SRC_DIR/plugin/plugin.json') as f:
     d = json.load(f)
 print(d.get('version', 'unknown'))
 " 2>/dev/null || echo "unknown"
@@ -152,7 +153,7 @@ pull_updates() {
 
   # Get remote version (from fetched plugin.json)
   local remote_ver
-  remote_ver="$(git show origin/main:.claude-plugin/plugin.json 2>/dev/null | python3 -c "
+  remote_ver="$(git show origin/main:src/plugin/plugin.json 2>/dev/null | python3 -c "
 import json, sys
 d = json.load(sys.stdin)
 print(d.get('version', 'unknown'))
@@ -219,7 +220,7 @@ check_hooks_registration() {
 # Make calculators executable
 # ---------------------------------------------------------------------------
 make_calculators_executable() {
-  local calc_dir="$REPO_ROOT/scripts/calculators"
+  local calc_dir="$SRC_DIR/calculators"
   if [ -d "$calc_dir" ]; then
     chmod +x "$calc_dir"/*.py 2>/dev/null || true
   fi

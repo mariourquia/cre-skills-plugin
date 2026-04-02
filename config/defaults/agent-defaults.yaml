@@ -1,0 +1,42 @@
+defaults:
+  model: sonnet
+  color: blue
+
+overrides:
+  # Titans -- gold
+  titan-zell: { color: gold }
+  titan-linneman: { color: gold }
+  titan-sternlicht: { color: gold }
+  titan-ross: { color: gold }
+  titan-gray: { color: gold }
+  titan-barrack: { color: gold }
+
+  # Challenge agents -- red
+  aggressive-gp: { color: red }
+  conservative-lender: { color: red }
+  skeptical-lp: { color: red }
+  ic-challenger: { color: red }
+
+  # Buyer personas -- green
+  buyer-pension-fund: { color: green }
+  buyer-private-equity: { color: green }
+  buyer-reit: { color: green }
+  buyer-family-office: { color: green }
+  buyer-syndicator: { color: green }
+
+  # Perspective/stakeholder agents -- purple
+  perspective-tenant: { color: purple }
+  perspective-lender: { color: purple }
+  perspective-municipality: { color: purple }
+  perspective-insurance: { color: purple }
+  perspective-appraiser: { color: purple }
+  perspective-environmental: { color: purple }
+  perspective-construction: { color: purple }
+  perspective-legal: { color: purple }
+
+  # Analytical lenses -- teal
+  lens-contrarian: { color: teal }
+  lens-esg-impact: { color: teal }
+  lens-qualitative: { color: teal }
+  lens-quantitative: { color: teal }
+  lens-risk-manager: { color: teal }

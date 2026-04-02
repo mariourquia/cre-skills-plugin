@@ -212,9 +212,64 @@ jobs:
             dist/cre-skills-v${{ steps.version.outputs.VERSION }}.dmg.sha256
           retention-days: 30
 
+  build-packages:
+    name: Build and package targets
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: tools/package-lock.json
+
+      - name: Install tools dependencies
+        run: cd tools && npm ci
+
+      - name: Build all targets
+        run: npx --prefix tools tsx tools/build.ts --target all
+
+      - name: Validate all targets
+        run: npx --prefix tools tsx tools/validate.ts --target all
+
+      - name: Package Cowork target
+        run: npx --prefix tools tsx tools/package/package-cowork.ts
+
+      - name: Package Claude Code target
+        run: npx --prefix tools tsx tools/package/package-claude-code.ts
+
+      - name: Verify package outputs
+        run: |
+          for f in \
+            dist/cre-skills-cowork.zip \
+            dist/cre-skills-cowork.zip.sha256 \
+            dist/cre-skills-claude-code.zip \
+            dist/cre-skills-claude-code.zip.sha256; do
+            if [ ! -f "$f" ]; then
+              echo "::error::Expected output not found: $f"
+              exit 1
+            fi
+          done
+          ls -la dist/
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: target-packages
+          path: |
+            dist/cre-skills-cowork.zip
+            dist/cre-skills-cowork.zip.sha256
+            dist/cre-skills-claude-code.zip
+            dist/cre-skills-claude-code.zip.sha256
+          retention-days: 30
+
   create-draft-release:
     name: Create draft release
-    needs: [build-windows, build-macos]
+    needs: [build-windows, build-macos, build-packages]
     runs-on: ubuntu-latest
     permissions:
       contents: write

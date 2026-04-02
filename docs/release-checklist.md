@@ -4,14 +4,14 @@ Use this checklist before publishing a new version.
 
 ## Pre-Release
 
-- [ ] Update version in `.claude-plugin/plugin.json`
+- [ ] Update version in `src/plugin/plugin.json`
 - [ ] Run `python scripts/catalog-build.py` to rebuild catalog from repo state
 - [ ] Run `python scripts/catalog-generate.py` to regenerate all public surfaces
 - [ ] Run `python scripts/catalog-generate.py --check` to verify zero drift
 - [ ] Run `python scripts/catalog-build.py --validate` to verify catalog integrity
 - [ ] Run `pytest tests/` to verify all structural and consistency tests pass
-- [ ] Run `node --check` on all `.mjs` files in `hooks/` and `scripts/`
-- [ ] Verify `node routing/skill-dispatcher.mjs --list` returns correct skill count
+- [ ] Run `node --check` on all `.mjs` files in `src/hooks/` and `scripts/`
+- [ ] Verify `node src/routing/skill-dispatcher.mjs --list` returns correct skill count
 - [ ] Update `CHANGELOG.md` with version entry
 - [ ] Update `docs/install-guide.md` version reference
 - [ ] Review README for any manually-maintained text that references old counts or behavior

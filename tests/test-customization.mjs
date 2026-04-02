@@ -109,14 +109,15 @@ writeFileSync(join(TEMP_SKILLS_DIR, FAKE_SLUG, "SKILL.md"), FAKE_SKILL_CONTENT);
 
 const __dirname_test = dirname(fileURLToPath(import.meta.url));
 const PLUGIN_ROOT = resolve(__dirname_test, "..");
+const SRC_DIR = resolve(PLUGIN_ROOT, "src");
 
 // Import diff module (no patching needed, it's stateless)
 const { computeDiff, summarizeDiff, formatDiffText, contentHash } = await import(
-  join(PLUGIN_ROOT, "lib", "diff.mjs")
+  join(SRC_DIR, "lib", "diff.mjs")
 );
 
 // Import customization module and patch paths
-const custModule = await import(join(PLUGIN_ROOT, "lib", "customization.mjs"));
+const custModule = await import(join(SRC_DIR, "lib", "customization.mjs"));
 custModule._setTestPaths(TEMP_CUST_DIR, TEMP_INDEX_PATH);
 
 const {
@@ -131,7 +132,7 @@ const {
 const {
   buildPayload, filterByMode, previewPayload, FEEDBACK_MODES,
   buildUpstreamSuggestion, analyzeCustomizationFeedback,
-} = await import(join(PLUGIN_ROOT, "lib", "feedback-payload.mjs"));
+} = await import(join(SRC_DIR, "lib", "feedback-payload.mjs"));
 
 // ---------------------------------------------------------------------------
 // 1. Diff tests

@@ -47,34 +47,48 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Messages]
 WelcomeLabel1=CRE Skills Plugin for Claude
-WelcomeLabel2=This will install the CRE Skills Plugin v{#AppVersion} on your computer.%n%n105 institutional-grade CRE skills covering deal sourcing, underwriting, capital markets, leasing, asset management, investor relations, development, and more.%n%nWorks with Claude Code CLI and Claude Desktop.%n%nApache License 2.0
+WelcomeLabel2=This will install the CRE Skills Plugin v{#AppVersion} on your computer.%n%n112 institutional-grade CRE skills covering deal sourcing, underwriting, capital markets, leasing, asset management, investor relations, development, and more.%n%nClaude Code: 112 skills, 54 agents, hooks, commands.%nClaude Desktop: 21 MCP tools (route, workspace, feedback, customize).%n%nApache License 2.0
 
 ; ──────────────────────────────────────────────────────────────────────
 ; Files -- explicit whitelist (no .git, dist, .local, tests, etc.)
+;
+; Source layout: all plugin content lives under src/ in the repo.
+; We flatten src/ into {app}/ so post-install scripts find files at
+; {app}\skills\*, {app}\mcp-server.mjs, etc. (no src\ prefix).
 ; ──────────────────────────────────────────────────────────────────────
 
 [Files]
-; Core plugin directories
-Source: "{#SourceDir}\skills\*"; DestDir: "{app}\skills"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "{#SourceDir}\agents\*"; DestDir: "{app}\agents"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "{#SourceDir}\commands\*"; DestDir: "{app}\commands"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "{#SourceDir}\hooks\*"; DestDir: "{app}\hooks"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "{#SourceDir}\orchestrators\*"; DestDir: "{app}\orchestrators"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "{#SourceDir}\routing\*"; DestDir: "{app}\routing"; Flags: ignoreversion recursesubdirs createallsubdirs
+; Core plugin directories (from src/)
+Source: "{#SourceDir}\src\skills\*"; DestDir: "{app}\skills"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#SourceDir}\src\agents\*"; DestDir: "{app}\agents"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#SourceDir}\src\commands\*"; DestDir: "{app}\commands"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#SourceDir}\src\hooks\*"; DestDir: "{app}\hooks"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#SourceDir}\src\orchestrators\*"; DestDir: "{app}\orchestrators"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#SourceDir}\src\routing\*"; DestDir: "{app}\routing"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#SourceDir}\src\lib\*"; DestDir: "{app}\lib"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#SourceDir}\src\schemas\*"; DestDir: "{app}\schemas"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#SourceDir}\src\templates\*"; DestDir: "{app}\templates"; Flags: ignoreversion recursesubdirs createallsubdirs
 
-; Plugin manifest
-Source: "{#SourceDir}\.claude-plugin\*"; DestDir: "{app}\.claude-plugin"; Flags: ignoreversion recursesubdirs createallsubdirs
+; Plugin manifest (from src/plugin/ -> .claude-plugin/)
+Source: "{#SourceDir}\src\plugin\plugin.json"; DestDir: "{app}\plugin"; Flags: ignoreversion
+Source: "{#SourceDir}\src\plugin\.mcp.json"; DestDir: "{app}\plugin"; Flags: ignoreversion
 
-; Calculator scripts
-Source: "{#SourceDir}\scripts\calculators\*"; DestDir: "{app}\scripts\calculators"; Flags: ignoreversion recursesubdirs createallsubdirs
+; Calculator scripts (from src/calculators/)
+Source: "{#SourceDir}\src\calculators\*"; DestDir: "{app}\calculators"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+; Catalog (from src/catalog/)
+Source: "{#SourceDir}\src\catalog\*"; DestDir: "{app}\catalog"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+; MCP server (from src/)
+Source: "{#SourceDir}\src\mcp-server.mjs"; DestDir: "{app}"; Flags: ignoreversion
 
 ; Windows installer script (post-install)
 Source: "{#SourceDir}\scripts\Install.ps1"; DestDir: "{app}\scripts"; Flags: ignoreversion
 
 ; Verification and utility scripts (useful for manual troubleshooting)
-Source: "{#SourceDir}\scripts\verify-install.sh"; DestDir: "{app}\scripts"; Flags: ignoreversion
-Source: "{#SourceDir}\scripts\uninstall.sh"; DestDir: "{app}\scripts"; Flags: ignoreversion
-Source: "{#SourceDir}\scripts\update.sh"; DestDir: "{app}\scripts"; Flags: ignoreversion
+Source: "{#SourceDir}\scripts\verify-install.sh"; DestDir: "{app}\scripts"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "{#SourceDir}\scripts\uninstall.sh"; DestDir: "{app}\scripts"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "{#SourceDir}\scripts\update.sh"; DestDir: "{app}\scripts"; Flags: ignoreversion skipifsourcedoesntexist
 
 ; Root files
 Source: "{#SourceDir}\registry.yaml"; DestDir: "{app}"; Flags: ignoreversion
@@ -85,9 +99,6 @@ Source: "{#SourceDir}\CHANGELOG.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourceDir}\PRIVACY.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourceDir}\SECURITY.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourceDir}\CONTRIBUTING.md"; DestDir: "{app}"; Flags: ignoreversion
-
-; MCP server (required for Claude Desktop integration)
-Source: "{#SourceDir}\mcp-server.mjs"; DestDir: "{app}"; Flags: ignoreversion
 
 ; Pre-built catalog (optional, speeds up first load)
 Source: "{#SourceDir}\dist\catalog.json"; DestDir: "{app}\dist"; Flags: ignoreversion skipifsourcedoesntexist
