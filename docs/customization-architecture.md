@@ -155,8 +155,7 @@ Test coverage (152 assertions):
 
 1. Add to `FEEDBACK_MODES` in `lib/feedback-payload.mjs`
 2. Add filtering logic in `filterByMode()`
-3. Add to the enum in `schemas/customization-config.schema.json`
-4. Add to the enum in `schemas/customization-feedback.schema.json`
+3. Add to the enums in `schemas/customization.schema.json` (`$defs/config` and `$defs/feedback`)
 5. Add a bullet in the Step 7 mode description list in `commands/customize-skill.md`
 6. Update `docs/customization-guide.md` table
 
