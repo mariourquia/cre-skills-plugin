@@ -247,13 +247,19 @@ if ($HasClaudeCode -or $HasClaudeDesktop) {
         $settings | ConvertTo-Json -Depth 10 | Set-Content $SettingsFile -Encoding UTF8
         Write-Green "  Plugin enabled in settings.json"
 
-        # 4. Register MCP server for Claude Desktop
-        $DesktopConfigFile = Join-Path $env:APPDATA "Claude\claude_desktop_config.json"
-        if (-not (Test-Path $DesktopConfigFile)) {
-            $DesktopConfigFile = Join-Path $ClaudeHome "claude_desktop_config.json"
-        }
+        # 4. Register MCP server in Claude Desktop config
+        #    Per Anthropic docs: Claude Desktop reads ONLY from
+        #    %APPDATA%\Claude\claude_desktop_config.json (not .mcp.json)
+        #    Windows requires cmd /c wrapper for stdio MCP servers
+        $DesktopConfigDir = Join-Path $env:APPDATA "Claude"
+        $DesktopConfigFile = Join-Path $DesktopConfigDir "claude_desktop_config.json"
 
         try {
+            # Ensure the Claude Desktop config directory exists
+            if (-not (Test-Path $DesktopConfigDir)) {
+                New-Item -ItemType Directory -Path $DesktopConfigDir -Force | Out-Null
+            }
+
             if (Test-Path $DesktopConfigFile) {
                 $desktopConfig = Get-Content $DesktopConfigFile -Raw | ConvertFrom-Json
             } else {
@@ -264,9 +270,10 @@ if ($HasClaudeCode -or $HasClaudeDesktop) {
                 $desktopConfig | Add-Member -NotePropertyName "mcpServers" -NotePropertyValue ([PSCustomObject]@{})
             }
 
+            # Windows stdio MCP servers need cmd /c wrapper per Anthropic docs
             $mcpEntry = [PSCustomObject]@{
-                command = "node"
-                args = @("$PluginCachePath\mcp-server.mjs")
+                command = "cmd"
+                args = @("/c", "node", "$PluginCachePath\mcp-server.mjs")
             }
 
             if ($desktopConfig.mcpServers.PSObject.Properties.Name -contains "cre-skills") {
@@ -277,8 +284,13 @@ if ($HasClaudeCode -or $HasClaudeDesktop) {
 
             $desktopConfig | ConvertTo-Json -Depth 10 | Set-Content $DesktopConfigFile -Encoding UTF8
             Write-Green "  MCP server registered for Claude Desktop"
+            Write-Dim  "  Config: $DesktopConfigFile"
+            Write-Dim  "  Restart Claude Desktop to activate"
         } catch {
-            Write-Yellow "  Could not register MCP server (non-fatal)"
+            Write-Yellow "  Could not register MCP server: $_"
+            Write-Host ""
+            Write-Host "  Manual: add this to $DesktopConfigFile:"
+            Write-Dim  '  {"mcpServers":{"cre-skills":{"command":"cmd","args":["/c","node","' + $PluginCachePath + '\mcp-server.mjs"]}}}'
         }
 
         $InstalledSomewhere = $true
