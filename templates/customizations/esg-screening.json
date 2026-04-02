@@ -1,0 +1,13 @@
+{
+  "name": "ESG Pre-Screening",
+  "description": "Adds environmental, social, and governance screening to the acquisition underwriting process. Checks for GRESB alignment, carbon audit flags, and social impact indicators.",
+  "target_skill": "acquisition-underwriting-engine",
+  "categories": ["compliance_governance", "required_steps", "missing_fields"],
+  "rationale": "Institutional investors increasingly require ESG screening as part of the investment process. This template adds a structured ESG assessment step between T-12 normalization and proforma construction.",
+  "replacements": [
+    {
+      "find": "### Step 4: Operating Proforma",
+      "replace": "### Step 4: ESG Pre-Screen\nAssess the following ESG dimensions:\n\n**Environmental:**\n- Energy Star score (if available) or estimated energy intensity\n- Known environmental contamination or remediation history\n- Proximity to flood zones (FEMA Zone A/V)\n- Local Building Performance Standard compliance (NYC LL97, DC BEPS, Boston BERDO)\n- Estimated carbon intensity (kgCO2e/SF/year)\n\n**Social:**\n- Affordable housing component or rent-restricted units\n- Tenant demographic stability\n- Proximity to transit, schools, healthcare\n- Community benefit obligations\n\n**Governance:**\n- Property management track record on safety/compliance\n- Outstanding code violations\n- ADA compliance status\n\n**ESG Verdict:** GREEN (no flags) / YELLOW (manageable flags) / RED (material ESG risk)\nIf RED, add ESG remediation costs to Sources & Uses.\n\n### Step 5: Operating Proforma"
+    }
+  ]
+}

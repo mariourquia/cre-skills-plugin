@@ -4919,6 +4919,61 @@ items:
   calculator_file: null
   priority: null
   version: null
+- id: customize-skill
+  display_name: Customize a CRE Skill
+  type: command
+  status: stable
+  source_path: commands/customize-skill.md
+  domain: cross-cutting
+  persona: Adapt a CRE skill to your workplace workflow -- creates a local override without
+    modifying base skill files
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers:
+  - customize
+  - adapt skill
+  - modify skill
+  - change skill
+  - override skill
+  - local skill
+  input_artifacts: []
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
+  version: null
+- id: customization-analytics
+  display_name: Customization Analytics
+  type: command
+  status: stable
+  source_path: commands/customization-analytics.md
+  domain: cross-cutting
+  persona: View aggregated analytics about local skill customizations -- which skills
+    are adapted most, common change patterns, and upstream suggestion rate
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers:
+  - customization patterns
+  - customization stats
+  - customization analytics
+  input_artifacts: []
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
+  version: null
 - id: usage-stats
   display_name: CRE Skill Usage Stats
   type: command

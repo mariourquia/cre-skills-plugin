@@ -32,7 +32,7 @@ No admin privileges required. The installer detects Claude Desktop and Claude Co
 
 ## After Installation
 
-Restart Claude Desktop, then start a new conversation. The plugin's MCP server gives Claude 8 tools it can call automatically:
+Restart Claude Desktop, then start a new conversation. The plugin's MCP server gives Claude 21 tools it can call automatically. Core tools:
 
 | Tool | What it does | Example prompt |
 |------|-------------|----------------|
