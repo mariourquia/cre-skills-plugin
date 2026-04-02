@@ -46,8 +46,8 @@ Write-Cyan @"
 
 "@
 
-Write-Blue  "  Plugin Installer v3.0.0"
-Write-Dim   "  105 skills | 55 agents | 6 workflow chains"
+Write-Blue  "  Plugin Installer v4.0.0"
+Write-Dim   "  112 skills | 54 agents | 6 workflow chains"
 Write-Host  ""
 
 # ── Verify plugin files exist ───────────────────────────────────────
@@ -163,40 +163,97 @@ if ($HasClaudeCode) {
     Write-Host ""
 }
 
-# Install to Claude Desktop if available
-if ($HasClaudeDesktop) {
-    Write-Blue "  Configuring Claude Desktop..."
+# Install to Claude Desktop (register in ~/.claude/ plugin system)
+if ($HasClaudeDesktop -and -not $HasClaudeCode) {
+    Write-Blue "  Registering plugin for Claude Desktop..."
 
-    $SkillsDest = Join-Path $ClaudeDesktopDir "skills\cre-skills-plugin"
+    # Plugin cache location: ~/.claude/plugins/cache/local/cre-skills-plugin/<version>
+    $ClaudeHome = Join-Path $env:USERPROFILE ".claude"
+    $PluginVersion = "4.0.0"
+    $PluginCachePath = Join-Path $ClaudeHome "plugins\cache\local\cre-skills-plugin\$PluginVersion"
+    $InstalledPluginsFile = Join-Path $ClaudeHome "plugins\installed_plugins.json"
+    $SettingsFile = Join-Path $ClaudeHome "settings.json"
 
     try {
-        # Create destination if needed
-        if (-not (Test-Path $SkillsDest)) {
-            New-Item -ItemType Directory -Path $SkillsDest -Force | Out-Null
+        # 1. Copy plugin files to the plugin cache
+        if (-not (Test-Path $PluginCachePath)) {
+            New-Item -ItemType Directory -Path $PluginCachePath -Force | Out-Null
         }
 
-        # Use robocopy for rsync-like behavior with exclusions
         $robocopyArgs = @(
             $InstallDir,
-            $SkillsDest,
+            $PluginCachePath,
             '/MIR',
             '/XD', '.git', '__pycache__', 'node_modules', 'dist', '.venv', '.local', '.claude',
-            '/XF', '*.pyc', '.DS_Store', 'PLUGIN-BUILD-PLAN.md',
+            '/XF', '*.pyc', '.DS_Store',
             '/NFL', '/NDL', '/NJH', '/NJS', '/NP'
         )
         & robocopy @robocopyArgs | Out-Null
 
-        # Robocopy: exit codes < 8 indicate success (1 = files copied, 0 = no change)
-        if ($LASTEXITCODE -lt 8) {
-            Write-Green "  Skills copied to Claude Desktop"
-            $InstalledSomewhere = $true
-        } else {
-            Write-Yellow "  Could not copy skills to Claude Desktop directory."
-            Write-Dim  "  You can manually copy the plugin folder to: $SkillsDest"
+        if ($LASTEXITCODE -ge 8) {
+            throw "Robocopy failed with exit code $LASTEXITCODE"
         }
+
+        Write-Green "  Plugin files copied to cache"
+
+        # 2. Register in installed_plugins.json
+        $pluginKey = "cre-skills@local"
+        $now = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+
+        if (Test-Path $InstalledPluginsFile) {
+            $ipData = Get-Content $InstalledPluginsFile -Raw | ConvertFrom-Json
+        } else {
+            New-Item -ItemType Directory -Path (Split-Path $InstalledPluginsFile) -Force | Out-Null
+            $ipData = [PSCustomObject]@{ version = 2; plugins = [PSCustomObject]@{} }
+        }
+
+        $entry = @(
+            [PSCustomObject]@{
+                scope = "user"
+                installPath = $PluginCachePath
+                version = $PluginVersion
+                installedAt = $now
+                lastUpdated = $now
+            }
+        )
+
+        if ($ipData.plugins.PSObject.Properties.Name -contains $pluginKey) {
+            $ipData.plugins.$pluginKey = $entry
+        } else {
+            $ipData.plugins | Add-Member -NotePropertyName $pluginKey -NotePropertyValue $entry
+        }
+
+        $ipData | ConvertTo-Json -Depth 10 | Set-Content $InstalledPluginsFile -Encoding UTF8
+        Write-Green "  Plugin registered in installed_plugins.json"
+
+        # 3. Enable in settings.json
+        if (Test-Path $SettingsFile) {
+            $settings = Get-Content $SettingsFile -Raw | ConvertFrom-Json
+        } else {
+            $settings = [PSCustomObject]@{ enabledPlugins = [PSCustomObject]@{} }
+        }
+
+        if (-not $settings.PSObject.Properties.Name -contains "enabledPlugins") {
+            $settings | Add-Member -NotePropertyName "enabledPlugins" -NotePropertyValue ([PSCustomObject]@{})
+        }
+
+        if ($settings.enabledPlugins.PSObject.Properties.Name -contains $pluginKey) {
+            $settings.enabledPlugins.$pluginKey = $true
+        } else {
+            $settings.enabledPlugins | Add-Member -NotePropertyName $pluginKey -NotePropertyValue $true
+        }
+
+        $settings | ConvertTo-Json -Depth 10 | Set-Content $SettingsFile -Encoding UTF8
+        Write-Green "  Plugin enabled in settings.json"
+
+        $InstalledSomewhere = $true
+
     } catch {
-        Write-Yellow "  Could not copy skills to Claude Desktop directory."
-        Write-Dim  "  You can manually copy the plugin folder to: $SkillsDest"
+        Write-Yellow "  Could not register plugin automatically."
+        Write-Host "  Error: $_"
+        Write-Host ""
+        Write-Host "  Manual install: run this in Claude Code CLI:"
+        Write-Dim  "    claude plugin add `"$InstallDir`""
     }
     Write-Host ""
 }
@@ -232,9 +289,9 @@ Write-Host ""
 
 Write-Bold "  What's Included"
 Write-Host ""
-Write-Host "  " -NoNewline; Write-Green "99" -NoNewline:$false
-Write-Host " skills across 16 categories"
-Write-Host "  " -NoNewline; Write-Green "55" -NoNewline:$false
+Write-Host "  " -NoNewline; Write-Green "112" -NoNewline:$false
+Write-Host " skills across 18 categories"
+Write-Host "  " -NoNewline; Write-Green "54" -NoNewline:$false
 Write-Host " expert agents (Pension Fund, PE, REIT, Risk Mgr, ...)"
 Write-Host "  " -NoNewline; Write-Green " 6" -NoNewline:$false
 Write-Host " workflow chains (Acquisition, Capital Stack, Hold, ...)"

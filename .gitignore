@@ -3,7 +3,15 @@
 *.swo
 *~
 .env
+.env.*
 node_modules/
+
+# Secrets and credentials
+*.pem
+*.key
+*.p12
+credentials.json
+serviceAccountKey.json
 __pycache__/
 *.pyc
 .vscode/
