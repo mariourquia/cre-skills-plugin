@@ -263,14 +263,19 @@ class TestRouterBehavior(unittest.TestCase):
 class TestFeedbackConfigParity(unittest.TestCase):
     """Verify feedback config is consistent across code and docs."""
 
-    def test_telemetry_init_defaults_local_only(self):
+    def test_telemetry_enabled_by_default(self):
+        path = os.path.join(PLUGIN_ROOT, 'hooks', 'telemetry-init.mjs')
+        with open(path) as f:
+            content = f.read()
+        self.assertIn("telemetry: true", content,
+                      'telemetry-init.mjs should default telemetry to true (opt-out model)')
+
+    def test_feedback_defaults_local_only(self):
         path = os.path.join(PLUGIN_ROOT, 'hooks', 'telemetry-init.mjs')
         with open(path) as f:
             content = f.read()
         self.assertIn("mode: 'local_only'", content,
-                      'telemetry-init.mjs should default to local_only')
-        self.assertNotIn("mode: 'ask_each_time'", content,
-                        'telemetry-init.mjs should not default to ask_each_time')
+                      'telemetry-init.mjs should default feedback mode to local_only')
 
     def test_privacy_md_not_future(self):
         path = os.path.join(PLUGIN_ROOT, 'PRIVACY.md')
@@ -285,6 +290,24 @@ class TestFeedbackConfigParity(unittest.TestCase):
             content = f.read()
         self.assertIn('disabled by default', content,
                       'feedback-system.md should say remote is disabled by default')
+
+    def test_privacy_md_reflects_opt_out(self):
+        path = os.path.join(PLUGIN_ROOT, 'PRIVACY.md')
+        with open(path) as f:
+            content = f.read()
+        self.assertIn('Enabled by Default', content,
+                      'PRIVACY.md should reflect opt-out telemetry model')
+        self.assertIn('opt out', content.lower(),
+                      'PRIVACY.md should explain how to opt out')
+
+    def test_first_run_notice_explains_tracking(self):
+        path = os.path.join(PLUGIN_ROOT, 'hooks', 'telemetry-init.mjs')
+        with open(path) as f:
+            content = f.read()
+        self.assertIn('NEVER tracked', content,
+                      'First-run notice should explain what is never tracked')
+        self.assertIn('opt out', content.lower(),
+                      'First-run notice should explain how to opt out')
 
 
 class TestDocReferences(unittest.TestCase):
