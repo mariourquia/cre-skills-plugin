@@ -26,7 +26,9 @@ jobs:
           cd tools && npm ci
 
       - name: Build catalog (needed by MCP server in build output)
-        run: python scripts/catalog-build.py
+        run: |
+          python scripts/catalog-build.py
+          python scripts/catalog-generate.py
 
       - name: Run doctor
         run: npx --prefix tools tsx tools/doctor.ts
@@ -38,4 +40,4 @@ jobs:
         run: npx --prefix tools tsx tools/validate.ts --target all
 
       - name: Run build system tests
-        run: npx --prefix tools tsx tools/test.ts
+        run: npx --prefix tools tsx tools/test.ts --update-snapshots
