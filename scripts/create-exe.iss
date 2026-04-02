@@ -86,6 +86,12 @@ Source: "{#SourceDir}\PRIVACY.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourceDir}\SECURITY.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourceDir}\CONTRIBUTING.md"; DestDir: "{app}"; Flags: ignoreversion
 
+; MCP server (required for Claude Desktop integration)
+Source: "{#SourceDir}\mcp-server.mjs"; DestDir: "{app}"; Flags: ignoreversion
+
+; Pre-built catalog (optional, speeds up first load)
+Source: "{#SourceDir}\dist\catalog.json"; DestDir: "{app}\dist"; Flags: ignoreversion skipifsourcedoesntexist
+
 ; ──────────────────────────────────────────────────────────────────────
 ; Post-install: run Install.ps1 to register with Claude Code / Desktop
 ; ──────────────────────────────────────────────────────────────────────
