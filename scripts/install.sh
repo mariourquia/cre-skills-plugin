@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install.sh -- Single-command installer for the CRE Skills Plugin v3.0.0
+# install.sh -- Single-command installer for the CRE Skills Plugin v4.0.1
 #
 # Usage (remote):
 #   curl -fsSL https://raw.githubusercontent.com/mariourquia/cre-skills-plugin/main/scripts/install.sh | bash
@@ -40,7 +40,7 @@ print_banner() {
  | |    |  _  /|  __|   ___) | . \| | | \__ \
  | |____|_| \_\|_|____ |____/|_|\_\_|_|_|___/
   \_____|      |______|
-   Plugin v3.0.0 -- 105 skills, 55 agents, 6 workflows
+   Plugin v4.0.1 -- 112 skills, 54 agents, 6 workflows
 
 BANNER
   printf "${RESET}"
@@ -363,7 +363,7 @@ print_success() {
   printf "${GREEN}${BOLD}"
   cat << 'SUCCESS'
   ============================================
-       CRE Skills Plugin v3.0.0 -- Installed
+       CRE Skills Plugin v4.0.1 -- Installed
   ============================================
 SUCCESS
   printf "${RESET}"
@@ -372,7 +372,7 @@ SUCCESS
   echo ""
   printf "  ${CYAN}/cre-skills:cre-route${RESET}       Find the right skill for any CRE task\n"
   printf "  ${CYAN}/cre-skills:cre-workflows${RESET}   Browse 6 end-to-end workflow chains\n"
-  printf "  ${CYAN}/cre-skills:cre-agents${RESET}      List 55 expert subagents\n"
+  printf "  ${CYAN}/cre-skills:cre-agents${RESET}      List 54 expert subagents\n"
   echo ""
   printf "  ${BOLD}Example Commands${RESET}\n"
   echo ""
@@ -381,7 +381,7 @@ SUCCESS
   printf "  ${DIM}/cre-skills:cre-route generate an IC memo${RESET}\n"
   printf "  ${DIM}/cre-skills:cre-route normalize this T-12${RESET}\n"
   echo ""
-  printf "  ${BOLD}Skill Categories (105 skills)${RESET}\n"
+  printf "  ${BOLD}Skill Categories (112 skills)${RESET}\n"
   echo ""
   printf "  Deal Pipeline      Screening, underwriting, DD, closing\n"
   printf "  Capital Markets    Loan sizing, cap stack, debt monitoring, refi\n"
