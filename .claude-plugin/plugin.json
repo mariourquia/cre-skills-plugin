@@ -60,6 +60,23 @@
       "type": "string",
       "description": "Company or fund name for branded deliverables",
       "default": ""
+    },
+    "customization_feedback_mode": {
+      "type": "string",
+      "description": "Privacy level for skill customization feedback. Controls how much data is shared when you customize a skill and opt in to feedback.",
+      "enum": [
+        "off",
+        "metadata_only",
+        "metadata_and_summary",
+        "metadata_and_diff",
+        "metadata_and_content"
+      ],
+      "default": "metadata_only"
+    },
+    "customization_feedback_endpoint": {
+      "type": "string",
+      "description": "HTTPS endpoint for customization feedback. Empty string = local-only (no remote sends). Can point to your own enterprise endpoint.",
+      "default": ""
     }
   }
 }

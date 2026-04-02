@@ -1,0 +1,13 @@
+{
+  "name": "FIRPTA Compliance Screening",
+  "description": "Adds FIRPTA (Foreign Investment in Real Property Tax Act) screening as an early step in deal-quick-screen. Flags foreign seller indicators and estimates withholding obligations before full underwriting.",
+  "target_skill": "deal-quick-screen",
+  "categories": ["compliance_governance", "required_steps"],
+  "rationale": "US tax compliance requires FIRPTA analysis for any acquisition involving a foreign seller. This template adds an early screening step to catch FIRPTA obligations before resources are committed to full underwriting.",
+  "replacements": [
+    {
+      "find": "### Step 6: Verdict Logic",
+      "replace": "### Step 6: FIRPTA Quick Screen\nCheck for foreign seller indicators:\n- Entity domicile outside US\n- Foreign-sounding entity names (verify, do not assume)\n- Seller requesting wire to non-US bank\n- Prior FIRPTA withholding on title\n\nIf any indicator present, flag: **FIRPTA REVIEW REQUIRED**\n- Estimated withholding: 15% of purchase price (default) or 10% if buyer certifies will use as residence\n- Note: Withholding obligation falls on BUYER. Factor into cash-at-close.\n\n### Step 7: Verdict Logic"
+    }
+  ]
+}
