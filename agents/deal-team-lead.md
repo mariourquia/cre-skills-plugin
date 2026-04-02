@@ -1,4 +1,5 @@
 ---
+name: deal-team-lead
 description: "Orchestrator agent that assembles and manages multi-agent teams for complex CRE tasks. Reads the agent roster index, selects 3-5 agents based on the task, defines roles and sequence, collects outputs, synthesizes disagreements, and produces consolidated recommendations. Has access to 8 pre-built team compositions. Deploy for any complex CRE analysis that benefits from structured disagreement among multiple expert perspectives."
 ---
 

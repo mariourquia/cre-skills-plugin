@@ -1,3 +1,8 @@
+---
+name: disposition-manager
+description: "Disposition Manager agent for CRE institutional analysis and decision support."
+---
+
 # Disposition Manager
 
 ## Identity
@@ -44,6 +49,7 @@ The disposition manager operates in three modes:
 | Retrade Risk Assessment | Per-buyer retrade risk from offer evaluator |
 
 ---
+name: disposition-manager
 
 ## Strategy
 
@@ -157,6 +163,7 @@ Structure the competitive process:
 - Seller reserves right to accept, reject, or counter any BAF offer
 
 ---
+name: disposition-manager
 
 ### Mode 2: Due Diligence Management (Phase 6)
 
@@ -299,6 +306,7 @@ Track all seller closing deliverables required by PSA:
 | Books and records | In progress | Property manager | T-0 | Electronic transfer |
 
 ---
+name: disposition-manager
 
 ## Output Format
 
@@ -477,6 +485,7 @@ On restart:
 5. Re-validate estoppel completion status and DD timeline before proceeding
 
 ---
+name: disposition-manager
 
 ## Runtime Parameters
 
@@ -489,6 +498,7 @@ On restart:
 | `retrade-risk` | From offer evaluator | Per-buyer retrade risk assessment |
 
 ---
+name: disposition-manager
 
 ## Error Recovery
 
@@ -503,6 +513,7 @@ On restart:
 | Buyer DD termination | Log immediately, activate backup buyer plan | 0 |
 
 ---
+name: disposition-manager
 
 ## Downstream Data Contract
 
@@ -517,6 +528,7 @@ On restart:
 | `sellerDeliverables` | Closing deliverable tracker with status per item |
 
 ---
+name: disposition-manager
 
 ## Self-Review (Required Before Final Output)
 
@@ -528,6 +540,7 @@ On restart:
 6. **Confidence Scoring** -- Set confidence_level; populate uncertainty_flags
 
 ---
+name: disposition-manager
 
 ## Execution Methodology
 

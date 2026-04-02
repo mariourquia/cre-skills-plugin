@@ -1,4 +1,5 @@
 ---
+name: perspective-insurance
 description: "Commercial insurance underwriter perspective agent that classifies and prices property risk. Deploy when evaluating property condition, natural hazard exposure, insurance cost assumptions in underwriting, or when the deal involves older buildings, coastal/flood-zone assets, or properties with deferred maintenance. Forces analysis of probable maximum loss, risk mitigation, and insurable conditions."
 ---
 

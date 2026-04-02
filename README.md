@@ -6,13 +6,18 @@
 ╚██████╗██║  ██║███████╗    ███████║██║  ██╗██║███████╗███████╗███████║
  ╚═════╝╚═╝  ╚═╝╚══════╝    ╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝╚══════╝
 
-            ┌──┐                        ┌─────┐   ┌──┐
-            │  │  ┌──┐    ┌───┐  ┌──┐   │     │   │  │     ┌─┐
-       ┌──┐ │  │  │  │ ┌┐ │   │  │  │┌──┤     │┌──┤  │  ┌┐ │ │  ┌──┐
-       │  │ │  │┌─┤  │ ││ │   │┌─┤  ││  │     ││  │  │┌─┤│ │ │┌─┤  │
-    ┌──┤  │ │  ││ │  ├─┤│ │   ││ │  ││  │     ││  │  ││ ││ │ ││ │  │
-  ──┤  │  ├─┤  ││ │  │ ││ │   ││ │  ││  │     ││  │  ││ ││ │ ││ │  ├──
-  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+                                            ╔═╗
+                                     ┌─┐    ║ ║  ┌─┐
+                              ┌──┐   │ │    ║ ║  │ │
+                     ┌───┐    │  │   │ │ ┌┐ ║ ║  │ │ ┌──┐
+              ┌──┐   │   │ ┌┐ │  │┌──┤ │ ││ ║ ║  │ │ │  │   ┌─┐
+         ┌──┐ │  │   │   │ ││ │  ││  │ │ ││ ║ ║┌─┤ │ │  │┌──┤ │
+    ┌─┐  │  │ │  │┌──┤   │ ││ │  ││  │ │ ││ ║ ║│ │ │ │  ││  │ │  ┌─┐
+    │ │  │  │ │  ││  │   │ ││ │  ││  │ │ ││ ║ ║│ │ │ │  ││  │ │  │ │
+  ──┤ ├──┤  ├─┤  ││  │   ├─┤│ │  ││  │ ├─┤│ ║ ║│ │ ├─┤  ││  │ ├──┤ ├──
+  ░░│B├░░│R├░│O├░│O├░│K├░│L├│Y│N│░░░░░░║M║A║N║H║A║T║T║A║N║░░░░░░░░░░░░
+  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+  ░░░░░░░░░░░░≈≈≈≈≈≈≈≈≈ EAST  RIVER ≈≈≈≈≈≈≈≈≈░░░░░░░░░░░░░░░░░░░░░░░░░░
 ```
 
 # CRE Skills Plugin
@@ -21,16 +26,18 @@ A Claude plugin delivering **105 institutional-grade commercial real estate skil
 
 ## Key Stats
 
+<!-- CATALOG:STATS:START -->
 | Metric | Count |
 |--------|-------|
-| Skills | **105** |
+| Skills | **112** |
 | Expert Agents | **54** |
 | Reference Files | **247** |
 | Python Calculators | **12** |
 | Workflow Chains | **6** |
 | Orchestrator Pipelines | **10** |
 | Slash Commands | **9** |
-| Skill Categories | **16** |
+| Skill Categories | **18** |
+<!-- CATALOG:STATS:END -->
 
 ---
 
@@ -309,7 +316,7 @@ Share feedback or report problems without leaving your session:
 - `/cre-skills:send-feedback` -- share feedback about skill quality, missing capabilities, or general suggestions
 - `/cre-skills:report-problem` -- report a bug with structured severity, reproduction context, and skill identification
 
-Feedback is saved locally to `~/.cre-skills/feedback-log.jsonl`. Free-text fields are automatically sanitized (file paths, emails, digit sequences stripped). No deal data, prompts, or financial figures are ever stored. Remote submission is not yet available.
+Feedback is saved locally to `~/.cre-skills/feedback-log.jsonl`. Free-text fields are automatically sanitized (file paths, emails, digit sequences stripped). No deal data, prompts, or financial figures are ever stored. Remote submission is available but disabled by default (configure in `~/.cre-skills/config.json`).
 
 View your feedback history with `/cre-skills:feedback-summary`.
 
@@ -340,14 +347,7 @@ cre-skills-plugin/
       references/          # Supporting reference documents (.md and .yaml)
   agents/
     _index.md              # Agent roster and team compositions
-    <agent>.md             # Individual agent definitions (54 core agents)
-    research/              # Market research lifecycle agents (2)
-    strategy/              # Investment strategy lifecycle agents (2)
-    asset-management/      # Asset management lifecycle agents (2)
-    portfolio/             # Portfolio oversight lifecycle agents (2)
-    fund/                  # Fund management lifecycle agents (2)
-    disposition/           # Disposition lifecycle agents (1)
-    lp/                    # LP intelligence lifecycle agents (3)
+    <agent>.md             # 54 expert agent definitions (flat directory)
   orchestrators/
     engine/                # Pipeline engine schema and handoff registry
     configs/               # 10 orchestrator JSON configurations

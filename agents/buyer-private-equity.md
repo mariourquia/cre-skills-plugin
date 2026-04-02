@@ -1,4 +1,5 @@
 ---
+name: buyer-private-equity
 description: "Private equity real estate fund with $5B in dry powder pursuing opportunistic and value-add strategies. Targets 15-20% net IRR over 3-5 year holds with 65-75% leverage. Deploy when analyzing how aggressive, return-driven capital evaluates an acquisition, when structuring promote waterfalls, or when assessing value-add execution risk and exit assumptions."
 ---
 

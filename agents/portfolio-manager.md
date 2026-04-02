@@ -1,3 +1,8 @@
+---
+name: portfolio-manager
+description: "Portfolio Manager Agent agent for CRE institutional analysis and decision support."
+---
+
 # Portfolio Manager Agent
 
 ## Identity
@@ -12,6 +17,7 @@
 | **Version** | 1.0 |
 
 ---
+name: portfolio-manager
 
 ## Mission
 
@@ -24,6 +30,7 @@ You serve as the portfolio management orchestrator's primary analytical agent, a
 - **Rebalancing Strategy** (Phase 4): Formulate actionable rebalancing recommendations
 
 ---
+name: portfolio-manager
 
 ## Tools Available
 
@@ -37,6 +44,7 @@ You serve as the portfolio management orchestrator's primary analytical agent, a
 | WebFetch | Retrieve benchmark data, NCREIF indices, market reports |
 
 ---
+name: portfolio-manager
 
 ## Input Data
 
@@ -50,6 +58,7 @@ You serve as the portfolio management orchestrator's primary analytical agent, a
 | Hold Period Verdicts | CONTINUE/INTERVENE/EXIT status per asset |
 
 ---
+name: portfolio-manager
 
 ## Strategy
 
@@ -240,6 +249,7 @@ After performance-analyst completes return decomposition:
 ```
 
 ---
+name: portfolio-manager
 
 ## Output Format
 
@@ -342,6 +352,7 @@ After performance-analyst completes return decomposition:
 ```
 
 ---
+name: portfolio-manager
 
 ## Checkpoint Protocol
 
@@ -360,6 +371,7 @@ After performance-analyst completes return decomposition:
 Checkpoint file: `data/status/portfolio/{portfolio-id}/agents/portfolio-manager.json`
 
 ---
+name: portfolio-manager
 
 ## Logging Protocol
 
@@ -372,6 +384,7 @@ Levels: `INFO`, `WARN`, `ERROR`, `DEBUG`
 Log file: `data/logs/portfolio/{portfolio-id}/portfolio-management.log`
 
 ---
+name: portfolio-manager
 
 ## Resume Protocol
 
@@ -382,6 +395,7 @@ On restart:
 4. Log: `[RESUME] Resuming from checkpoint {PM-CP-##}`
 
 ---
+name: portfolio-manager
 
 ## Error Recovery
 
@@ -394,6 +408,7 @@ On restart:
 | Allocation target not in config | Use default allocation policy, warn | 0 |
 
 ---
+name: portfolio-manager
 
 ## Data Gap Handling
 
@@ -405,6 +420,7 @@ On restart:
 6. Continue -- partial portfolio analysis is better than none
 
 ---
+name: portfolio-manager
 
 ## Downstream Data Contract
 
@@ -419,6 +435,7 @@ On restart:
 | `assessment.managerSkill` | object | Alpha, strategy adherence, skill rating |
 
 ---
+name: portfolio-manager
 
 ## Skills Referenced
 
@@ -429,6 +446,7 @@ On restart:
 - `skills/sensitivity-stress-test.md` -- Scenario analysis for rebalancing risk assessment
 
 ---
+name: portfolio-manager
 
 ## Execution Methodology
 
@@ -441,6 +459,7 @@ This agent applies institutional portfolio management principles to CRE. It trea
 The agent elevates decision-making from property-level (the asset manager's domain) to portfolio-level, where the interactions between assets, concentration risks, and allocation dynamics become visible.
 
 ---
+name: portfolio-manager
 
 ## Self-Review (Required Before Final Output)
 

@@ -1,5 +1,45 @@
 # Changelog
 
+## [4.0.0] - 2026-04-02
+
+### Added
+- Canonical catalog system: catalog/catalog.yaml as single source of truth for all
+  plugin metadata (196 items: 105 skills, 54 agents, 9 commands, 12 calculators,
+  10 orchestrators, 6 workflows)
+- Catalog schema: catalog/catalog.schema.json
+- Build script: scripts/catalog-build.py (scan repo -> catalog.yaml + dist/catalog.json)
+- Generator script: scripts/catalog-generate.py (catalog -> README, hooks, plugin.json,
+  routing, registry)
+- Catalog-driven router: routing/skill-dispatcher.mjs now reads dist/catalog.json with
+  artifact-aware matching, confidence scoring, downstream recommendations, and markdown fallback
+- Output styles: output-styles/ with 5 format templates (exec-brief, ic-memo,
+  pm-action-list, lender-brief, lp-update)
+- userConfig in plugin.json: primary_asset_types, preferred_markets, default_output_style,
+  feedback_mode, brand_name
+- ADR: docs/adr/0001-catalog-source-of-truth.md
+- Migration guide: docs/MIGRATION.md
+- Release checklist: docs/release-checklist.md
+- Workspace entrypoints: 7 top-level skills (deal-intake, lease-strategy-papering,
+  asset-ops-cockpit, capital-projects-development, fund-lp-reporting, navigator, plugin-admin)
+- Persistent workspace state: local JSON storage for session continuity
+- Next-best-action footer: mandatory structured output for workspace skills
+
+### Changed
+- Feedback default mode: ask_each_time -> local_only (privacy-first)
+- Feedback backend_url default: pre-configured -> empty (opt-in remote submission)
+- registry.yaml: manually maintained -> generated from catalog
+- Router: markdown-table parsing -> catalog-driven with fallback
+- README Key Stats: hardcoded -> generated from catalog (18 categories)
+- Plugin version: 3.0.0 -> 4.0.0
+- Stale doc references: added notices to USER-GUIDE.md for unimplemented CLI scripts
+
+### Fixed
+- PRIVACY.md: claimed remote submission was "Future -- Not Available Yet" when code
+  had it active by default. Now accurately describes it as available but opt-in.
+- docs/feedback-system.md: contradicted itself on default feedback mode
+- feedback-summary command: now reads both feedback.jsonl and feedback-log.jsonl
+- Hooks.json SessionStart prompt: counts now generated from catalog
+
 ## [3.0.0] - 2026-04-01
 
 ### Added
