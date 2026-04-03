@@ -95,7 +95,7 @@ function Write-Step($Description) {
 
 $TelemetryUrl = "https://cre-skills-feedback-api.vercel.app/api/installer-telemetry"
 $PluginNameConst = "cre-skills-plugin"
-$InstallerVersionConst = "4.1.0"
+$InstallerVersionConst = "4.1.1"
 
 function Send-InstallerTelemetry {
     param(
@@ -697,9 +697,43 @@ if (Test-Path $cacheAgents) {
 $cacheMcp = Join-Path $PluginCachePath "mcp-server.mjs"
 if (Test-Path $cacheMcp) {
     Write-Green "  MCP server in cache: OK"
+
+    # Check 2b: MCP server can parse (quick smoke test)
+    $nodeCheck = Get-Command node -ErrorAction SilentlyContinue
+    if ($nodeCheck) {
+        try {
+            $mcpSyntax = & node -e "try { require('$($cacheMcp -replace '\\','/')'); } catch(e) { if(e.code!=='MODULE_NOT_FOUND') throw e; } console.log('SYNTAX_OK')" 2>&1
+            if ("$mcpSyntax" -match "SYNTAX_OK") {
+                Write-Green "  MCP server syntax: OK"
+            } else {
+                Write-Yellow "  MCP server syntax issue: $mcpSyntax"
+            }
+        } catch {
+            Write-Yellow "  MCP server syntax check skipped"
+        }
+    }
 } else {
     Write-Red "  MCP server missing from cache: $cacheMcp"
     $verifyFails++
+}
+
+# Check 2c: .claude-plugin/plugin.json in cache (required for Desktop Code tab)
+$cachePluginJson = Join-Path $PluginCachePath ".claude-plugin\plugin.json"
+if (Test-Path $cachePluginJson) {
+    Write-Green "  .claude-plugin/plugin.json: OK"
+} else {
+    Write-Yellow "  .claude-plugin/plugin.json missing -- skills won't load in Desktop Code tab"
+    # Attempt recovery from plugin\ directory
+    $srcPj = Join-Path $PluginCachePath "plugin\plugin.json"
+    if (Test-Path $srcPj) {
+        $cpDir = Join-Path $PluginCachePath ".claude-plugin"
+        New-Item -ItemType Directory -Path $cpDir -Force | Out-Null
+        Copy-Item $srcPj (Join-Path $cpDir "plugin.json") -Force
+        Write-Green "  Recovered .claude-plugin/plugin.json from plugin\ directory"
+        Add-Remediation "claude_plugin_json_recovery"
+    } else {
+        $verifyFails++
+    }
 }
 
 # Check 3: installed_plugins.json has our entry
