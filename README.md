@@ -153,6 +153,39 @@ For a structural check: `bash scripts/verify-install.sh`
 1. Click Customize > Browse plugins to check if CRE Skills is installed
 2. If not listed, upload the plugin ZIP from the release page
 
+### Windows known issues
+
+**Update Claude Code first.** Older versions of Claude Code on Windows have a bug where
+colons in MCP log directory paths cause plugin MCP servers to fail silently
+([anthropics/claude-code#13679](https://github.com/anthropics/claude-code/issues/13679)).
+Update to the latest version before installing:
+
+```powershell
+npm i -g @anthropic-ai/claude-code@latest
+# or: irm https://claude.ai/install.ps1 | iex
+```
+
+**Cowork marketplace empty on Windows.** The Cowork plugin marketplace may not load
+because `plugins.claude.ai` does not resolve via DNS on some Windows configurations.
+This is an Anthropic infrastructure issue
+([anthropics/claude-code#28853](https://github.com/anthropics/claude-code/issues/28853)).
+The plugin still works in the Code tab and CLI.
+
+**Plugin installed but not showing.** If the installer completed but skills don't
+appear, verify the plugin is enabled in `~/.claude/settings.json`:
+
+```json
+{
+  "enabledPlugins": {
+    "cre-skills@local": true
+  }
+}
+```
+
+The installer writes this automatically, but some Claude Code versions have a bug where
+`enabledPlugins` is not populated
+([anthropics/claude-code#20661](https://github.com/anthropics/claude-code/issues/20661)).
+
 See [docs/INSTALL.md](docs/INSTALL.md) for detailed per-platform instructions.
 
 ---
