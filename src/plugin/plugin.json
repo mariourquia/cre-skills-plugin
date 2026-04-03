@@ -22,6 +22,11 @@
     "institutional",
     "finance"
   ],
+  "skills": "./src/skills/",
+  "agents": "./src/agents/",
+  "commands": "./src/commands/",
+  "hooks": "./src/hooks/hooks.json",
+  "mcpServers": "./src/plugin/.mcp.json",
   "userConfig": {
     "primary_asset_types": {
       "type": "string",
