@@ -1,4 +1,4 @@
-name: Release (Draft)
+name: Release
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   build-windows:
@@ -76,24 +77,11 @@ jobs:
           $sizeMB = [math]::Round($size / 1MB, 2)
           Write-Host "Installer built: $exe ($sizeMB MB)"
 
-      - name: Generate SHA256 checksum
-        shell: pwsh
-        env:
-          APP_VERSION: ${{ steps.version.outputs.VERSION }}
-        run: |
-          $exe = "dist\cre-skills-v$($env:APP_VERSION)-setup.exe"
-          $hash = (Get-FileHash $exe -Algorithm SHA256).Hash.ToLower()
-          $filename = Split-Path $exe -Leaf
-          "$hash  $filename" | Out-File "dist\cre-skills-v$($env:APP_VERSION)-setup.exe.sha256" -Encoding ascii -NoNewline
-          Write-Host "SHA256: $hash"
-
       - name: Upload build artifact
         uses: actions/upload-artifact@v7
         with:
           name: windows-installer
-          path: |
-            dist/cre-skills-v${{ steps.version.outputs.VERSION }}-setup.exe
-            dist/cre-skills-v${{ steps.version.outputs.VERSION }}-setup.exe.sha256
+          path: dist/cre-skills-v${{ steps.version.outputs.VERSION }}-setup.exe
           retention-days: 30
 
   build-macos:
@@ -195,21 +183,11 @@ jobs:
         run: |
           echo "::warning::Notarization failed. DMG is signed but not notarized. Regenerate app-specific password at appleid.apple.com if this persists."
 
-      - name: Generate SHA256 checksum
-        env:
-          APP_VERSION: ${{ steps.version.outputs.VERSION }}
-        run: |
-          DMG_PATH="dist/cre-skills-v${APP_VERSION}.dmg"
-          shasum -a 256 "$DMG_PATH" > "${DMG_PATH}.sha256"
-          cat "${DMG_PATH}.sha256"
-
       - name: Upload build artifact
         uses: actions/upload-artifact@v7
         with:
           name: macos-installer
-          path: |
-            dist/cre-skills-v${{ steps.version.outputs.VERSION }}.dmg
-            dist/cre-skills-v${{ steps.version.outputs.VERSION }}.dmg.sha256
+          path: dist/cre-skills-v${{ steps.version.outputs.VERSION }}.dmg
           retention-days: 30
 
   build-packages:
@@ -242,13 +220,22 @@ jobs:
       - name: Package Claude Code target
         run: npx --prefix tools tsx tools/package/package-claude-code.ts
 
+      - name: Build source archives
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          git archive --format=tar.gz --prefix="cre-skills-plugin-${TAG_NAME}/" HEAD -o "dist/cre-skills-plugin-${TAG_NAME}.tar.gz"
+          git archive --format=zip --prefix="cre-skills-plugin-${TAG_NAME}/" HEAD -o "dist/cre-skills-plugin-${TAG_NAME}.zip"
+
       - name: Verify package outputs
+        env:
+          TAG_NAME: ${{ github.ref_name }}
         run: |
           for f in \
             dist/cre-skills-cowork.zip \
-            dist/cre-skills-cowork.zip.sha256 \
             dist/cre-skills-claude-code.zip \
-            dist/cre-skills-claude-code.zip.sha256; do
+            "dist/cre-skills-plugin-${TAG_NAME}.tar.gz" \
+            "dist/cre-skills-plugin-${TAG_NAME}.zip"; do
             if [ ! -f "$f" ]; then
               echo "::error::Expected output not found: $f"
               exit 1
@@ -262,71 +249,142 @@ jobs:
           name: target-packages
           path: |
             dist/cre-skills-cowork.zip
-            dist/cre-skills-cowork.zip.sha256
             dist/cre-skills-claude-code.zip
-            dist/cre-skills-claude-code.zip.sha256
+            dist/cre-skills-plugin-${{ github.ref_name }}.tar.gz
+            dist/cre-skills-plugin-${{ github.ref_name }}.zip
           retention-days: 30
 
-  create-draft-release:
-    name: Create draft release
+  create-release:
+    name: Create release
     needs: [build-windows, build-macos, build-packages]
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
       - name: Download all artifacts
         uses: actions/download-artifact@v7
         with:
           path: assets
 
-      - name: List downloaded assets
-        run: find assets -type f | sort
+      - name: Prepare release assets
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          CLEAN_VERSION="${TAG_NAME#v}"
+          mkdir -p final-assets
 
-      - name: Generate release notes with install instructions
+          # Flatten all artifacts into one directory
+          find assets -type f -exec cp {} final-assets/ \;
+
+          # Normalize Windows installer filename to include tag
+          if [ -f "final-assets/cre-skills-v${CLEAN_VERSION}-setup.exe" ]; then
+            mv "final-assets/cre-skills-v${CLEAN_VERSION}-setup.exe" \
+               "final-assets/cre-skills-plugin-${TAG_NAME}-setup.exe"
+          fi
+
+          # Normalize DMG filename to include tag
+          if [ -f "final-assets/cre-skills-v${CLEAN_VERSION}.dmg" ]; then
+            mv "final-assets/cre-skills-v${CLEAN_VERSION}.dmg" \
+               "final-assets/cre-skills-plugin-${TAG_NAME}.dmg"
+          fi
+
+          ls -lah final-assets/
+
+      - name: Create consolidated checksums
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          cd final-assets
+          sha256sum \
+            "cre-skills-plugin-${TAG_NAME}.tar.gz" \
+            "cre-skills-plugin-${TAG_NAME}.zip" \
+            cre-skills-claude-code.zip \
+            cre-skills-cowork.zip \
+            "cre-skills-plugin-${TAG_NAME}.dmg" \
+            "cre-skills-plugin-${TAG_NAME}-setup.exe" \
+            > "cre-skills-plugin-${TAG_NAME}.sha256"
+          cat "cre-skills-plugin-${TAG_NAME}.sha256"
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac  # v3
+
+      - name: Sign release assets (keyless OIDC)
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          cd final-assets
+          for f in "cre-skills-plugin-${TAG_NAME}.tar.gz" \
+                   "cre-skills-plugin-${TAG_NAME}.zip" \
+                   "cre-skills-claude-code.zip" \
+                   "cre-skills-cowork.zip" \
+                   "cre-skills-plugin-${TAG_NAME}.dmg" \
+                   "cre-skills-plugin-${TAG_NAME}-setup.exe" \
+                   "cre-skills-plugin-${TAG_NAME}.sha256"; do
+            cosign sign-blob --yes "$f" \
+              --output-signature "${f}.sig" \
+              --output-certificate "${f}.cert"
+          done
+
+      - name: Generate release notes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ github.ref_name }}
+          TAG_NAME: ${{ github.ref_name }}
           REPO: ${{ github.repository }}
         run: |
-          # Generate GitHub's auto-notes into a temp file
           gh api "repos/${REPO}/releases/generate-notes" \
-            -f tag_name="$TAG" \
+            -f tag_name="$TAG_NAME" \
             --jq '.body' > /tmp/auto-notes.md 2>/dev/null || echo "" > /tmp/auto-notes.md
 
           cat > /tmp/release-notes.md << 'HEADER'
           ## Install
 
-          **Claude Code CLI (recommended):**
+          **Marketplace (recommended):**
           ```
-          claude plugin install --file /path/to/cre-skills-plugin
+          claude plugin marketplace add mariourquia/cre-skills-plugin
+          claude plugin install cre-skills@cre-skills-plugin
           ```
 
           **Installer:** Download the DMG (macOS) or EXE (Windows) from the assets below.
 
-          **Cowork:** Download `cre-skills-cowork.zip` from the assets below.
+          **Cowork:** Download `cre-skills-cowork.zip` and upload via Customize > Browse plugins.
 
           See [README](https://github.com/mariourquia/cre-skills-plugin#install) for all install methods.
 
           HEADER
 
-          # Append auto-generated notes
           cat /tmp/auto-notes.md >> /tmp/release-notes.md
 
-      - name: Create draft release
+      - name: Create release and upload assets
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ github.ref_name }}
+          TAG_NAME: ${{ github.ref_name }}
         run: |
-          # Flatten artifacts into a single directory
-          mkdir -p release-assets
-          find assets -type f -exec cp {} release-assets/ \;
-          ls -la release-assets/
-
-          gh release create "$TAG" release-assets/* \
-            --repo "$GITHUB_REPOSITORY" \
-            --title "$TAG" \
-            --notes-file /tmp/release-notes.md \
-            --draft
-
-          echo "Draft release created for $TAG"
+          gh release create "$TAG_NAME" \
+            "final-assets/cre-skills-plugin-${TAG_NAME}.tar.gz" \
+            "final-assets/cre-skills-plugin-${TAG_NAME}.zip" \
+            "final-assets/cre-skills-claude-code.zip" \
+            "final-assets/cre-skills-cowork.zip" \
+            "final-assets/cre-skills-plugin-${TAG_NAME}.dmg" \
+            "final-assets/cre-skills-plugin-${TAG_NAME}-setup.exe" \
+            "final-assets/cre-skills-plugin-${TAG_NAME}.sha256" \
+            "final-assets/cre-skills-plugin-${TAG_NAME}.tar.gz.sig" \
+            "final-assets/cre-skills-plugin-${TAG_NAME}.tar.gz.cert" \
+            "final-assets/cre-skills-plugin-${TAG_NAME}.zip.sig" \
+            "final-assets/cre-skills-plugin-${TAG_NAME}.zip.cert" \
+            "final-assets/cre-skills-claude-code.zip.sig" \
+            "final-assets/cre-skills-claude-code.zip.cert" \
+            "final-assets/cre-skills-cowork.zip.sig" \
+            "final-assets/cre-skills-cowork.zip.cert" \
+            "final-assets/cre-skills-plugin-${TAG_NAME}.dmg.sig" \
+            "final-assets/cre-skills-plugin-${TAG_NAME}.dmg.cert" \
+            "final-assets/cre-skills-plugin-${TAG_NAME}-setup.exe.sig" \
+            "final-assets/cre-skills-plugin-${TAG_NAME}-setup.exe.cert" \
+            "final-assets/cre-skills-plugin-${TAG_NAME}.sha256.sig" \
+            "final-assets/cre-skills-plugin-${TAG_NAME}.sha256.cert" \
+            --title "$TAG_NAME" \
+            --notes-file /tmp/release-notes.md
