@@ -109,10 +109,10 @@ Source: "{#SourceDir}\dist\catalog.json"; DestDir: "{app}\dist"; Flags: ignoreve
 
 [Run]
 Filename: "powershell.exe"; \
-    Parameters: "-ExecutionPolicy Bypass -NoProfile -File ""{app}\scripts\Install.ps1"" -InstallDir ""{app}"""; \
+    Parameters: "-ExecutionPolicy Bypass -NoProfile -File ""{app}\scripts\Install.ps1"" -InstallDir ""{app}"" -NonInteractive"; \
     Description: "Configure CRE Skills Plugin (register with Claude Code / Desktop)"; \
     StatusMsg: "Configuring CRE Skills Plugin..."; \
-    Flags: postinstall shellexec waituntilterminated
+    Flags: postinstall runhidden waituntilterminated
 
 ; ──────────────────────────────────────────────────────────────────────
 ; Uninstall: remove plugin registration and Claude Desktop copy

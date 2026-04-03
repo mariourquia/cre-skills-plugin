@@ -116,6 +116,62 @@ def check_installers(expected: str) -> list[dict]:
     return results
 
 
+def check_root_plugin_json_sync(expected: str) -> list[dict]:
+    """Verify .claude-plugin/plugin.json at repo root matches src/plugin/plugin.json."""
+    results: list[dict] = []
+    root_pj = REPO_ROOT / ".claude-plugin" / "plugin.json"
+
+    if not root_pj.is_file():
+        results.append({
+            "file": ".claude-plugin/plugin.json",
+            "status": "FAIL",
+            "details": "file missing (Claude Code requires this for /doctor)",
+        })
+        return results
+
+    try:
+        root_data = json.loads(root_pj.read_text(encoding="utf-8"))
+        root_version = root_data.get("version", "")
+    except (json.JSONDecodeError, OSError) as exc:
+        results.append({
+            "file": ".claude-plugin/plugin.json",
+            "status": "FAIL",
+            "details": f"could not parse: {exc}",
+        })
+        return results
+
+    if root_version == expected:
+        results.append({
+            "file": ".claude-plugin/plugin.json",
+            "status": "PASS",
+            "details": f"version {root_version} matches src/plugin/plugin.json",
+        })
+    else:
+        results.append({
+            "file": ".claude-plugin/plugin.json",
+            "status": "FAIL",
+            "details": f"version {root_version} does not match src/plugin/plugin.json ({expected})",
+        })
+
+    # Also verify full content matches (not just version)
+    src_content = PLUGIN_JSON.read_text(encoding="utf-8").strip()
+    root_content = root_pj.read_text(encoding="utf-8").strip()
+    if src_content == root_content:
+        results.append({
+            "file": ".claude-plugin/plugin.json",
+            "status": "PASS",
+            "details": "content identical to src/plugin/plugin.json",
+        })
+    else:
+        results.append({
+            "file": ".claude-plugin/plugin.json",
+            "status": "FAIL",
+            "details": "content differs from src/plugin/plugin.json -- run: cp src/plugin/plugin.json .claude-plugin/plugin.json",
+        })
+
+    return results
+
+
 def check_dynamic_read() -> list[dict]:
     """Verify that each installer reads version dynamically from plugin.json."""
     results: list[dict] = []
@@ -168,6 +224,16 @@ def main() -> int:
     print()
 
     all_pass = True
+
+    # Check 0: Root .claude-plugin/plugin.json in sync
+    print("Root plugin.json sync:")
+    sync_results = check_root_plugin_json_sync(expected)
+    for r in sync_results:
+        tag = r["status"]
+        print(f"  {tag:4s}  {r['file']}: {r['details']}")
+        if tag == "FAIL":
+            all_pass = False
+    print()
 
     # Check 1: Dynamic read
     print("Dynamic version read:")
