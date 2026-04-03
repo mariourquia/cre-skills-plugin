@@ -88,16 +88,39 @@ send_telemetry() {
             error_msg="${error_msg:0:2000}"
         fi
 
+        # Compute duration since install start (0 if not yet set)
+        local duration=0
+        if [ -n "${INSTALL_START:-}" ]; then
+            duration=$(( $(date +%s) - INSTALL_START ))
+        fi
+
+        # Build status field
+        local status="failure"
+        if [ -z "$step_failed" ] && [ -z "$error_msg" ]; then
+            status="success"
+        fi
+
         curl -s -X POST "$TELEMETRY_URL" \
             -H "Content-Type: application/json" \
-            -d "$(printf '{"id":"%s","plugin_name":"%s","plugin_version":"%s","installer_type":"command","os":"macos","os_version":"%s","arch":"%s","step_failed":"%s","error_message":"%s","prereqs":%s,"install_id_hash":"%s"}' \
+            -d "$(printf '{"id":"%s","plugin_name":"%s","plugin_version":"%s","installer_type":"command","os":"macos","os_version":"%s","arch":"%s","status":"%s","step_failed":"%s","error_message":"%s","prereqs":%s,"install_id_hash":"%s","python_version":"%s","python_source":"%s","node_version":"%s","node_source":"%s","claude_code_present":%s,"claude_desktop_present":%s,"step_results":{%s},"edge_cases":"%s","remediations":"%s","total_duration_s":%d}' \
                 "$event_id" "$PLUGIN_NAME_CONST" "$INSTALLER_VERSION_CONST" \
                 "$(sw_vers -productVersion 2>/dev/null || uname -r)" \
                 "$(uname -m)" \
+                "$status" \
                 "$step_failed" \
                 "$error_msg" \
                 "$prereqs_json" \
-                "$install_hash")" \
+                "$install_hash" \
+                "${PYTHON_VERSION:-not_found}" \
+                "${PYTHON_SOURCE:-not_found}" \
+                "${NODE_VERSION:-not_found}" \
+                "${NODE_SOURCE:-not_found}" \
+                "${HAS_CLAUDE_CODE:-false}" \
+                "${HAS_CLAUDE_DESKTOP:-false}" \
+                "${STEP_RESULTS:-}" \
+                "${EDGE_CASES:-}" \
+                "${REMEDIATIONS:-}" \
+                "$duration")" \
             --connect-timeout 5 --max-time 10 2>/dev/null
     } &
 }
@@ -145,6 +168,45 @@ printf "${BLUE}  Plugin Installer v4.0.0${RESET}\n"
 printf "${DIM}  112 skills | 54 agents | 8 MCP tools | 6 workflow chains${RESET}\n"
 echo ""
 
+# ── Timing and structured telemetry tracking ────────────────────────
+
+INSTALL_START=$(date +%s)
+STEP_RESULTS=""
+EDGE_CASES=""
+REMEDIATIONS=""
+
+add_step_result() { STEP_RESULTS="${STEP_RESULTS:+$STEP_RESULTS,}\"$1\":\"$2\""; }
+add_edge_case()   { EDGE_CASES="${EDGE_CASES:+$EDGE_CASES,}$1"; }
+add_remediation()  { REMEDIATIONS="${REMEDIATIONS:+$REMEDIATIONS,}$1"; }
+
+detect_python_source() {
+    local py_path
+    py_path="$(command -v python3 2>/dev/null || true)"
+    if [ -z "$py_path" ]; then
+        echo "not_found"
+    elif echo "$py_path" | grep -q "Cellar\|Homebrew"; then
+        echo "brew"
+    elif echo "$py_path" | grep -q "CommandLineTools\|Xcode"; then
+        echo "xcode-clt"
+    else
+        echo "system"
+    fi
+}
+
+detect_node_source() {
+    local node_path
+    node_path="$(command -v node 2>/dev/null || true)"
+    if [ -z "$node_path" ]; then
+        echo "not_found"
+    elif echo "$node_path" | grep -q "Cellar\|Homebrew"; then
+        echo "brew"
+    elif echo "$node_path" | grep -q ".nvm"; then
+        echo "nvm"
+    else
+        echo "system"
+    fi
+}
+
 # ── Step counter ─────────────────────────────────────────────────────
 
 STEP=0
@@ -153,6 +215,16 @@ step() {
     STEP=$((STEP + 1))
     bold "  [$STEP/$TOTAL_STEPS] $1"
 }
+
+# ── Edge case detection ─────────────────────────────────────────────
+
+if echo "$HOME" | grep -q ' '; then
+    add_edge_case "spaces_in_home"
+    yellow "  Warning: Home path contains spaces. This may cause issues."
+fi
+if echo "$HOME" | LC_ALL=C grep -q '[^[:print:]]'; then
+    add_edge_case "non_ascii_username"
+fi
 
 # ── Step 1: Check prerequisites ──────────────────────────────────────
 
@@ -193,6 +265,7 @@ else
 
         if command -v node &>/dev/null; then
             green "  Node.js installed: $(node --version)"
+            add_remediation "node_brew_install"
         else
             red "  Node.js installation failed."
             echo "  Install manually: https://nodejs.org/"
@@ -211,10 +284,20 @@ else
     fi
 fi
 
-if ! command -v python3 &>/dev/null; then
+# Detect python version and source
+PYTHON_VERSION="not_found"
+PYTHON_SOURCE="not_found"
+if command -v python3 &>/dev/null; then
+    PYTHON_VERSION="$(python3 --version 2>/dev/null | awk '{print $2}' || echo "unknown")"
+    PYTHON_SOURCE="$(detect_python_source)"
+else
     yellow "  python3 not found. Some features may be limited."
     yellow "  Install with: xcode-select --install"
 fi
+
+# Detect node version and source
+NODE_VERSION="$(node --version 2>/dev/null || echo "not_found")"
+NODE_SOURCE="$(detect_node_source)"
 
 if [ "$HAS_CLAUDE_CODE" = false ] && [ "$HAS_CLAUDE_DESKTOP" = false ]; then
     echo ""
@@ -228,6 +311,7 @@ if [ "$HAS_CLAUDE_CODE" = false ] && [ "$HAS_CLAUDE_DESKTOP" = false ]; then
     press_to_exit 1
 fi
 
+add_step_result "prereqs" "ok"
 echo ""
 
 # ── Step 2: Register plugin ──────────────────────────────────────────
@@ -240,6 +324,20 @@ INSTALLED_PLUGINS="$CLAUDE_HOME/plugins/installed_plugins.json"
 SETTINGS_FILE="$CLAUDE_HOME/settings.json"
 PLUGIN_KEY="cre-skills@local"
 NOW="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+
+# Edge case: spaces in install path or read-only filesystem
+if echo "$INSTALL_DIR" | grep -q ' '; then
+    add_edge_case "spaces_in_path"
+    yellow "  Warning: Install path contains spaces. This may cause issues."
+fi
+if ! touch "$INSTALL_DIR/.write_test" 2>/dev/null; then
+    add_edge_case "read_only_filesystem"
+    red "  Error: Cannot write to install directory."
+    send_telemetry "read_only_fs" "Install directory is read-only"
+    press_to_exit 1
+else
+    rm -f "$INSTALL_DIR/.write_test"
+fi
 
 step "Copying plugin files..."
 printf "  ${DIM}Source: %s${RESET}\n" "$INSTALL_DIR"
@@ -263,11 +361,18 @@ rsync -a \
 mkdir -p "$PLUGINS_CACHE/.claude-plugin"
 cp "$PLUGINS_CACHE/plugin/plugin.json" "$PLUGINS_CACHE/.claude-plugin/plugin.json" 2>/dev/null || true
 green "  Plugin files copied to cache"
+add_step_result "copy_files" "ok"
 
 step "Building catalog..."
 if [ ! -f "$PLUGINS_CACHE/dist/catalog.json" ] && command -v python3 &>/dev/null; then
-    (cd "$PLUGINS_CACHE" && python3 scripts/catalog-build.py 2>/dev/null) && \
-        green "  Catalog built" || true
+    if (cd "$PLUGINS_CACHE" && python3 scripts/catalog-build.py 2>/dev/null); then
+        green "  Catalog built"
+        add_step_result "catalog" "ok"
+    else
+        add_step_result "catalog" "skipped"
+    fi
+else
+    add_step_result "catalog" "skipped"
 fi
 
 step "Registering plugin..."
@@ -309,6 +414,7 @@ else
     printf '{"enabledPlugins":{"%s":true}}' "$PLUGIN_KEY" > "$SETTINGS_FILE"
     green "  Created settings.json"
 fi
+add_step_result "register" "ok"
 
 step "Configuring MCP server..."
 
@@ -334,8 +440,9 @@ data.setdefault('mcpServers', {})['cre-skills'] = {
 }
 with open(config_path, 'w') as f:
     json.dump(data, f, indent=2)
-" 2>/dev/null && green "  MCP server registered for Claude Desktop" || {
+" 2>/dev/null && { green "  MCP server registered for Claude Desktop"; add_step_result "mcp_config" "ok"; } || {
     yellow "  Could not register MCP server (non-fatal)"
+    add_step_result "mcp_config" "fail"
     send_telemetry "mcp_config" "Python MCP config write failed"
 }
 fi
@@ -351,10 +458,36 @@ AGENT_COUNT="$(find "$PLUGINS_CACHE/agents" -maxdepth 1 -name '*.md' ! -name '_*
 MCP_OK="false"
 [ -f "$PLUGINS_CACHE/mcp-server.mjs" ] && MCP_OK="true"
 
+VERIFY_FAILS=0
 green "  Verification:"
 echo "    Skills: $SKILL_COUNT (expected 112)"
 echo "    Agents: $AGENT_COUNT (expected 54)"
 echo "    MCP server: $MCP_OK"
+
+# Verify registration files
+if [ -f "$INSTALLED_PLUGINS" ]; then
+    if python3 -c "import json; d=json.load(open('$INSTALLED_PLUGINS')); assert 'cre-skills@local' in d.get('plugins',{})" 2>/dev/null; then
+        echo "    installed_plugins.json: OK"
+    else
+        echo "    installed_plugins.json: entry missing"
+        VERIFY_FAILS=$((VERIFY_FAILS + 1))
+    fi
+fi
+if [ -f "$SETTINGS_FILE" ]; then
+    if python3 -c "import json; d=json.load(open('$SETTINGS_FILE')); assert d.get('enabledPlugins',{}).get('cre-skills@local')" 2>/dev/null; then
+        echo "    settings.json: plugin enabled"
+    else
+        echo "    settings.json: plugin not enabled"
+        VERIFY_FAILS=$((VERIFY_FAILS + 1))
+    fi
+fi
+
+if [ "$VERIFY_FAILS" -gt 0 ]; then
+    yellow "  $VERIFY_FAILS verification check(s) failed"
+    add_step_result "verify" "fail"
+else
+    add_step_result "verify" "ok"
+fi
 echo ""
 
 # ── Done ─────────────────────────────────────────────────────────────
@@ -384,5 +517,9 @@ printf "  ${BOLD}Restart Claude Desktop${RESET} to see the MCP server.\n"
 echo ""
 printf "  Plugin location: ${DIM}%s${RESET}\n" "$PLUGINS_CACHE"
 echo ""
+
+# ── Success telemetry ────────────────────────────────────────────────
+
+send_telemetry "" ""
 
 press_to_exit 0

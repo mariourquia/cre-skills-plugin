@@ -16,6 +16,19 @@ if ($InstallDir -eq $PSScriptRoot) {
     $InstallDir = Split-Path $PSScriptRoot -Parent
 }
 
+# Auto-detect non-interactive mode
+if (-not $NonInteractive) {
+    if ((-not [Environment]::UserInteractive) -or [Console]::IsInputRedirected -or ($env:CI -eq "true")) {
+        $NonInteractive = $true
+    }
+}
+
+# Log to file when non-interactive
+$LogFile = Join-Path $env:TEMP "cre-skills-plugin-install.log"
+if ($NonInteractive) {
+    Start-Transcript -Path $LogFile -Force | Out-Null
+}
+
 $ErrorActionPreference = 'Continue'
 
 # Global error trap: ensure the window stays open on any crash
@@ -28,7 +41,7 @@ trap {
     Write-Host "  $($_.Exception.Message)" -ForegroundColor Red
     Write-Host ""
 
-    Send-InstallerTelemetry -StepFailed "unhandled_exception" -ErrorMsg $_.Exception.Message
+    Send-InstallerTelemetry -Status "failure" -StepFailed "unhandled_exception" -ErrorMsg $_.Exception.Message
 
     Write-Host "  An anonymous error report was sent to help improve the installer." -ForegroundColor DarkGray
     Write-Host ""
@@ -52,6 +65,32 @@ function Write-Red    { param([string]$Text) Write-Host $Text -ForegroundColor R
 function Write-Bold   { param([string]$Text) Write-Host $Text -ForegroundColor White }
 function Write-Dim    { param([string]$Text) Write-Host $Text -ForegroundColor DarkGray }
 
+# ── Timing and structured telemetry tracking ──────────────────────
+
+$InstallStart = Get-Date
+$StepResults = @{}
+$EdgeCases = [System.Collections.Generic.List[string]]::new()
+$Remediations = [System.Collections.Generic.List[string]]::new()
+
+function Add-StepResult($Name, $Status) { $StepResults[$Name] = $Status }
+function Add-EdgeCase($Case) { $EdgeCases.Add($Case) }
+function Add-Remediation($Fix) { $Remediations.Add($Fix) }
+
+# Structured version/source detection
+$PythonVersion = "not_found"
+$PythonSource = "not_found"
+$NodeVersion = "not_found"
+$NodeSource = "not_found"
+
+# ── Step counter ──────────────────────────────────────────────────
+
+$Step = 0
+$TotalSteps = 6
+function Write-Step($Description) {
+    $script:Step++
+    Write-Host "  [$script:Step/$TotalSteps] $Description" -ForegroundColor White
+}
+
 # ── Telemetry (PowerShell-native, no Python/Node dependency) ───────
 
 $TelemetryUrl = "https://cre-skills-feedback-api.vercel.app/api/installer-telemetry"
@@ -60,8 +99,9 @@ $InstallerVersionConst = "4.1.0"
 
 function Send-InstallerTelemetry {
     param(
-        [string]$StepFailed,
-        [string]$ErrorMsg,
+        [string]$Status = "failure",
+        [string]$StepFailed = "",
+        [string]$ErrorMsg = "",
         [string]$PrereqsJson = "{}"
     )
     try {
@@ -77,6 +117,7 @@ function Send-InstallerTelemetry {
             $installHash | Set-Content $installIdFile -Encoding UTF8
         }
 
+        $sha = [System.Security.Cryptography.SHA256]::Create()
         $eventSeed = "$StepFailed-$ErrorMsg-$(Get-Date -Format 'yyyyMMddHHmmssffff')"
         $eventBytes = $sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($eventSeed))
         $eventId = "it_" + [System.BitConverter]::ToString($eventBytes).Replace("-", "").ToLower().Substring(0, 16)
@@ -84,18 +125,31 @@ function Send-InstallerTelemetry {
         $truncatedMsg = $ErrorMsg
         if ($ErrorMsg.Length -gt 2000) { $truncatedMsg = $ErrorMsg.Substring(0, 2000) }
 
+        $Duration = [int](New-TimeSpan -Start $InstallStart -End (Get-Date)).TotalSeconds
+
         $body = @{
-            id              = $eventId
-            plugin_name     = $PluginNameConst
-            plugin_version  = $InstallerVersionConst
-            installer_type  = "ps1"
-            os              = "windows"
-            os_version      = [System.Environment]::OSVersion.Version.ToString()
-            arch            = $env:PROCESSOR_ARCHITECTURE
-            step_failed     = $StepFailed
-            error_message   = $truncatedMsg
-            prereqs         = $PrereqsJson | ConvertFrom-Json
-            install_id_hash = $installHash
+            id                    = $eventId
+            plugin_name           = $PluginNameConst
+            plugin_version        = $InstallerVersionConst
+            installer_type        = "ps1"
+            os                    = "windows"
+            os_version            = [System.Environment]::OSVersion.Version.ToString()
+            arch                  = $env:PROCESSOR_ARCHITECTURE
+            status                = $Status
+            step_failed           = $StepFailed
+            error_message         = $truncatedMsg
+            prereqs               = $PrereqsJson | ConvertFrom-Json
+            install_id_hash       = $installHash
+            python_version        = $PythonVersion
+            python_source         = $PythonSource
+            node_version          = $NodeVersion
+            node_source           = $NodeSource
+            claude_code_present   = $HasClaudeCode
+            claude_desktop_present = $HasClaudeDesktop
+            step_results          = $StepResults
+            edge_cases            = ($EdgeCases -join ",")
+            remediations          = ($Remediations -join ",")
+            total_duration_s      = $Duration
         } | ConvertTo-Json -Depth 5 -Compress
 
         Invoke-RestMethod -Uri $TelemetryUrl -Method POST -Body $body `
@@ -147,6 +201,7 @@ function Find-OrInstallNode {
         if ($nodeCheck) {
             $ver = & node --version 2>&1
             Write-Green "  Node.js installed via winget: $ver"
+            Add-Remediation "node_winget_install"
             return $true
         }
     }
@@ -162,6 +217,7 @@ function Find-OrInstallNode {
         if ($nodeCheck) {
             $ver = & node --version 2>&1
             Write-Green "  Node.js installed via chocolatey: $ver"
+            Add-Remediation "node_choco_install"
             return $true
         }
     }
@@ -202,9 +258,24 @@ if (-not $hasFlat -and -not $hasSrc) {
 }
 $LayoutIsFlat = $hasFlat
 
+# ── Edge case detection ────────────────────────────────────────────
+
+if ($InstallDir -match ' ') { Add-EdgeCase "spaces_in_path" }
+if ($env:USERNAME -match '[^\x20-\x7E]') { Add-EdgeCase "non_ascii_username" }
+
+# Windows Store Python stub detection
+$pythonPathCheck = Get-Command python3 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source
+if ($pythonPathCheck -and $pythonPathCheck -match 'WindowsApps') {
+    Add-EdgeCase "windows_store_stub"
+    Write-Yellow "  Warning: Detected Windows Store Python stub. Using Node.js for JSON operations."
+}
+
+# Proxy detection
+if ($env:HTTP_PROXY -or $env:HTTPS_PROXY) { Add-EdgeCase "corporate_proxy" }
+
 # ── Step 1: Check prerequisites ─────────────────────────────────────
 
-Write-Bold "  Checking prerequisites..."
+Write-Step "Checking prerequisites..."
 Write-Host ""
 
 $HasClaudeCode = $false
@@ -285,7 +356,7 @@ if (-not $HasNode) {
     Write-Host ""
     Write-Host "  Install manually: https://nodejs.org/"
     Write-Host ""
-    Send-InstallerTelemetry -StepFailed "node_install" `
+    Send-InstallerTelemetry -Status "failure" -StepFailed "node_install" `
         -ErrorMsg "Node.js not found and auto-install failed"
     if (-not $NonInteractive) {
         Write-Bold "  Press Enter to close this window."
@@ -293,6 +364,32 @@ if (-not $HasNode) {
     }
     exit 1
 }
+
+# Detect python version and source
+try {
+    $pyCmd = Get-Command python3 -ErrorAction SilentlyContinue
+    if (-not $pyCmd) { $pyCmd = Get-Command python -ErrorAction SilentlyContinue }
+    if ($pyCmd) {
+        $PythonVersion = (& $pyCmd.Source --version 2>&1) -replace 'Python ',''
+        $pySource = $pyCmd.Source
+        if ($pySource -match 'WindowsApps') { $PythonSource = "store_stub" }
+        elseif ($pySource -match 'chocolatey') { $PythonSource = "chocolatey" }
+        elseif ($pySource -match 'winget|scoop') { $PythonSource = "winget" }
+        else { $PythonSource = "system" }
+    }
+} catch {}
+
+# Detect node version and source
+try {
+    $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
+    if ($nodeCmd) {
+        $NodeVersion = (& node --version 2>&1).Trim()
+        $nodeSrc = $nodeCmd.Source
+        if ($nodeSrc -match 'chocolatey') { $NodeSource = "chocolatey" }
+        elseif ($nodeSrc -match 'winget|scoop') { $NodeSource = "winget" }
+        else { $NodeSource = "system" }
+    }
+} catch {}
 
 # At least one must exist
 if (-not $HasClaudeCode -and -not $HasClaudeDesktop -and -not $HasClaudeHome) {
@@ -306,7 +403,7 @@ if (-not $HasClaudeCode -and -not $HasClaudeDesktop -and -not $HasClaudeHome) {
     Write-Host "  After installing, re-run this script or register manually:"
     Write-Dim  "    claude plugin add `"$InstallDir`""
     Write-Host ""
-    Send-InstallerTelemetry -StepFailed "no_claude" -ErrorMsg "Neither Claude Code nor Claude Desktop found"
+    Send-InstallerTelemetry -Status "failure" -StepFailed "no_claude" -ErrorMsg "Neither Claude Code nor Claude Desktop found"
     if (-not $NonInteractive) {
         Write-Bold "  Press Enter to close this window."
         Read-Host
@@ -314,11 +411,12 @@ if (-not $HasClaudeCode -and -not $HasClaudeDesktop -and -not $HasClaudeHome) {
     exit 0
 }
 
+Add-StepResult "prereqs" "ok"
 Write-Host ""
 
 # ── Step 2: Install the plugin ──────────────────────────────────────
 
-Write-Bold "  Installing CRE Skills Plugin..."
+Write-Step "Installing CRE Skills Plugin..."
 Write-Dim  "  Location: $InstallDir"
 Write-Host ""
 
@@ -326,7 +424,7 @@ $InstalledSomewhere = $false
 
 # Register plugin in ~/.claude/ plugin system (works for both Claude Code and Desktop)
 if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
-    Write-Blue "  Registering plugin..."
+    Write-Step "Registering plugin..."
 
     # Plugin cache location: ~/.claude/plugins/cache/local/cre-skills-plugin/<version>
     $ClaudeHome = Join-Path $env:USERPROFILE ".claude"
@@ -415,6 +513,7 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
         }
 
         Write-Green "  Plugin files copied to cache"
+        Add-StepResult "copy_files" "ok"
 
         # 2. Register in installed_plugins.json
         $pluginKey = "cre-skills@local"
@@ -465,6 +564,7 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
 
         $settings | ConvertTo-Json -Depth 10 | Set-Content $SettingsFile -Encoding UTF8
         Write-Green "  Plugin enabled in settings.json"
+        Add-StepResult "register" "ok"
 
         # Verify mcp-server.mjs ended up in the cache
         $mcpInCache = Join-Path $PluginCachePath "mcp-server.mjs"
@@ -479,12 +579,14 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
                 if (Test-Path $src) {
                     Copy-Item $src $mcpInCache
                     Write-Green "  Recovered mcp-server.mjs from: $src"
+                    Add-Remediation "mcp_server_recovery"
                     break
                 }
             }
         }
 
         # 4. Register MCP server in Claude Desktop config
+        Write-Step "Configuring MCP server..."
         #    Uses Node.js for JSON manipulation (PowerShell can't handle hyphenated keys)
         #    Windows stdio MCP servers need cmd /c wrapper per Anthropic docs
         $DesktopConfigDir = Join-Path $env:APPDATA "Claude"
@@ -526,21 +628,24 @@ console.log('OK');
             if ("$result" -match "OK") {
                 Write-Green "  MCP server registered for Claude Desktop"
                 Write-Dim  "  Restart Claude Desktop to activate"
+                Add-StepResult "mcp_config" "ok"
 
                 # Verify the MCP server file exists at the registered path
                 if (-not (Test-Path $mcpServerPath)) {
                     Write-Yellow "  WARNING: MCP server file not found at: $mcpServerPath"
-                    Send-InstallerTelemetry -StepFailed "mcp_verify" -ErrorMsg "mcp-server.mjs not found at $mcpServerPath"
+                    Send-InstallerTelemetry -Status "failure" -StepFailed "mcp_verify" -ErrorMsg "mcp-server.mjs not found at $mcpServerPath"
                 } else {
                     Write-Green "  MCP config verified"
                 }
             } else {
                 Write-Yellow "  MCP config update returned: $result"
-                Send-InstallerTelemetry -StepFailed "mcp_config_write" -ErrorMsg "Node returned: $result"
+                Add-StepResult "mcp_config" "fail"
+                Send-InstallerTelemetry -Status "failure" -StepFailed "mcp_config_write" -ErrorMsg "Node returned: $result"
             }
         } catch {
             Write-Yellow "  Could not register MCP server: $_"
-            Send-InstallerTelemetry -StepFailed "mcp_config_exception" -ErrorMsg "$_"
+            Add-StepResult "mcp_config" "fail"
+            Send-InstallerTelemetry -Status "failure" -StepFailed "mcp_config_exception" -ErrorMsg "$_"
         }
 
         $InstalledSomewhere = $true
@@ -548,7 +653,8 @@ console.log('OK');
     } catch {
         Write-Yellow "  Could not register plugin automatically."
         Write-Host "  Error: $_"
-        Send-InstallerTelemetry -StepFailed "plugin_registration" -ErrorMsg "$_"
+        Add-StepResult "register" "fail"
+        Send-InstallerTelemetry -Status "failure" -StepFailed "plugin_registration" -ErrorMsg "$_"
         Write-Host ""
         Write-Host "  Manual install: run this in Claude Code CLI:"
         Write-Dim  "    claude --plugin-dir `"$InstallDir`""
@@ -564,7 +670,7 @@ if (-not $InstalledSomewhere) {
 # ── Post-install verification ──────────────────────────────────────
 
 Write-Host ""
-Write-Blue "  Running post-install verification..."
+Write-Step "Running post-install verification..."
 $verifyFails = 0
 
 # Check 1: Plugin cache has skills
@@ -623,13 +729,16 @@ if (Test-Path $SettingsFile) {
 
 if ($verifyFails -gt 0) {
     Write-Yellow "  $verifyFails verification check(s) failed"
-    Send-InstallerTelemetry -StepFailed "post_verify" -ErrorMsg "$verifyFails checks failed"
+    Add-StepResult "verify" "fail"
+    Send-InstallerTelemetry -Status "failure" -StepFailed "post_verify" -ErrorMsg "$verifyFails checks failed"
 } else {
     Write-Green "  All verification checks passed"
+    Add-StepResult "verify" "ok"
 }
 
-# ── Step 3: Success ─────────────────────────────────────────────────
+# ── Done ───────────────────────────────────────────────────────────
 
+Write-Step "Done!"
 Write-Host ""
 Write-Host "  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 Write-Green "  CRE Skills Plugin installed successfully!"
@@ -660,7 +769,15 @@ Write-Host "    6 workflow chains (Acquisition, Capital Stack, Hold, ...)" -Fore
 Write-Host ""
 Write-Dim  "  Plugin location: $InstallDir"
 Write-Host ""
+
+# ── Success telemetry ─────────────────────────────────────────────
+
+Send-InstallerTelemetry -Status "success"
+
 Write-Host ""
+if ($NonInteractive) {
+    Stop-Transcript | Out-Null
+}
 if (-not $NonInteractive) {
     Write-Bold "  Press Enter to close this window."
     Read-Host
