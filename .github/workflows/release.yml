@@ -283,6 +283,36 @@ jobs:
       - name: List downloaded assets
         run: find assets -type f | sort
 
+      - name: Generate release notes with install instructions
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          # Generate GitHub's auto-notes into a temp file
+          gh api "repos/${REPO}/releases/generate-notes" \
+            -f tag_name="$TAG" \
+            --jq '.body' > /tmp/auto-notes.md 2>/dev/null || echo "" > /tmp/auto-notes.md
+
+          cat > /tmp/release-notes.md << 'HEADER'
+          ## Install
+
+          **Claude Code CLI (recommended):**
+          ```
+          claude plugin install --file /path/to/cre-skills-plugin
+          ```
+
+          **Installer:** Download the DMG (macOS) or EXE (Windows) from the assets below.
+
+          **Cowork:** Download `cre-skills-cowork.zip` from the assets below.
+
+          See [README](https://github.com/mariourquia/cre-skills-plugin#install) for all install methods.
+
+          HEADER
+
+          # Append auto-generated notes
+          cat /tmp/auto-notes.md >> /tmp/release-notes.md
+
       - name: Create draft release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -296,7 +326,7 @@ jobs:
           gh release create "$TAG" release-assets/* \
             --repo "$GITHUB_REPOSITORY" \
             --title "$TAG" \
-            --generate-notes \
+            --notes-file /tmp/release-notes.md \
             --draft
 
           echo "Draft release created for $TAG"
