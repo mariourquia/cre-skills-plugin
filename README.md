@@ -59,79 +59,101 @@ See [CHANGELOG.md](CHANGELOG.md) for full history.
 
 ## Installation
 
-> **Do not use "Add marketplace" in Claude Desktop with this repo URL.** This is not a marketplace plugin. Pasting this repo URL into Claude Desktop's "Add marketplace" dialog will fail with a validation error. Use the installer or CLI method below instead. See [docs/WHAT-TO-USE-WHEN.md](docs/WHAT-TO-USE-WHEN.md) for the full explanation.
+This repo is a self-contained Claude marketplace. Choose the install method that fits your setup.
 
-### Claude Desktop -- Download the Installer
+> See [docs/WHAT-TO-USE-WHEN.md](docs/WHAT-TO-USE-WHEN.md) for a detailed comparison of all install surfaces.
 
-Download the installer from the [latest GitHub Release](https://github.com/mariourquia/cre-skills-plugin/releases/latest):
+| Method | Best for | What you get |
+|--------|----------|-------------|
+| **Marketplace install** | Claude Code users (CLI or Desktop Code tab) | Full: 112 skills, 54 agents, 11 commands, hooks, 21 MCP tools |
+| **macOS DMG** | Non-technical macOS users | Full plugin + Claude Desktop MCP registration |
+| **Windows EXE** | Non-technical Windows users | Full plugin + Claude Desktop MCP registration |
+| **Cowork upload** | Cowork tab users | Skills, agents, commands (no hooks/orchestrators) |
+| **Manual config** | Chat tab only (MCP tools) | 21 MCP tools via claude_desktop_config.json |
 
-- **macOS**: Download `cre-skills-v4.0.0.dmg`, open it, double-click **CRE Skills Installer**
-- **Windows**: Download `cre-skills-v4.0.0-setup.exe`, run the wizard (SmartScreen: click "More info" > "Run anyway"). No admin privileges required.
+### Marketplace Install (recommended)
 
-The installer auto-detects Claude Desktop, Claude Code, or both and configures each. Restart Claude Desktop after installation.
-
-### Claude Code -- CLI
+From Claude Code CLI or the Desktop Code tab:
 
 ```bash
-claude plugin install --repo mariourquia/cre-skills-plugin
+claude plugin marketplace add mariourquia/cre-skills-plugin
+claude plugin install cre-skills@cre-skills
 ```
 
-Or via the install script:
+Or interactively: type `/plugin` in Claude Code, select **Add plugin**, and search for `cre-skills`.
+
+This gives you 112 skills, 54 agents, 11 commands, hooks, and 21 MCP tools.
+
+### Installer (macOS DMG / Windows EXE)
+
+Download from the [latest GitHub release](https://github.com/mariourquia/cre-skills-plugin/releases/latest):
+
+- **macOS**: Download the `.dmg`, open it, double-click **CRE Skills Installer**
+- **Windows**: Download the `.exe`, run the wizard (SmartScreen: click "More info" > "Run anyway")
+
+The installer auto-detects Claude Desktop, Claude Code, or both and configures each. No admin privileges required. Restart Claude Desktop after installation.
+
+### Cowork Tab
+
+In the Claude Desktop Cowork tab, click **Customize** > **Browse plugins** to find CRE Skills, or upload the plugin ZIP from the release page. Skills, agents, and commands work in Cowork. Hooks and orchestrators are Code-tab only.
+
+### CLI Alternatives
 
 ```bash
+# Install script (downloads and registers automatically)
 curl -fsSL https://raw.githubusercontent.com/mariourquia/cre-skills-plugin/main/scripts/install.sh | bash
-```
 
-Or add from a local clone:
-
-```bash
+# Local development
 git clone https://github.com/mariourquia/cre-skills-plugin.git
-claude plugin add --plugin-dir ./cre-skills-plugin
+claude --plugin-dir ./cre-skills-plugin
 ```
-
-### Cowork
-
-Download `cre-skills-cowork.zip` from the [latest GitHub Release](https://github.com/mariourquia/cre-skills-plugin/releases/latest) and import via Cowork's plugin interface. The Cowork build includes skills, agents, and commands but excludes orchestrators, the MCP server, and Python calculators.
 
 ### What to Expect After Installation
 
-| | Claude Desktop | Claude Code | Cowork |
-|---|---|---|---|
-| **Install method** | DMG / EXE installer | CLI (`plugin install`) | Cowork zip import |
-| **Access to 112 skills** | Via 21 MCP tools | Via `/cre-skills:*` commands | Via commands |
-| **Skill routing** | Ask Claude or use `cre_route` tool | `/cre-skills:cre-route` | Manual |
-| **Orchestrator pipelines** | Not available | `/cre-skills:orchestrate` | Not available |
-| **Workspace persistence** | Yes (via MCP tools) | Yes (via commands) | No |
-| **Feedback & bug reports** | Yes (via MCP tool) | Yes (via `/cre-skills:send-feedback`) | No |
-| **Skill customization** | Yes (via MCP tools) | Yes (via `/cre-skills:customize-skill`) | No |
-| **Auto-routing on session start** | No | Yes (SessionStart hook) | No |
-| **Telemetry & session tracking** | No | Yes (opt-out) | No |
+Claude Desktop has three tabs. Each provides different capabilities:
 
-Claude Desktop users access skills through the MCP server -- ask Claude about any CRE topic and it will route to the right skill automatically. Claude Code users get the full hook-driven experience with auto-routing on every conversation start.
+| | Code Tab | Chat Tab | Cowork Tab |
+|---|---|---|---|
+| **Install method** | Marketplace or installer | Installer (MCP config) | Cowork plugin import |
+| **112 skills** | Yes, via `/cre-skills:*` | No (21 MCP tools instead) | Yes, via `/` commands |
+| **54 agents** | Yes, auto-invoked | No | Yes, as sub-agents |
+| **Skill routing** | `/cre-skills:cre-route` | `cre_route` MCP tool | Manual |
+| **Orchestrators** | `/cre-skills:orchestrate` | Not available | Not available |
+| **Workspace** | Yes | Yes (MCP tools) | No |
+| **Hooks** | Yes (session start/stop) | No | No |
+| **Customization** | Yes | Yes (MCP tools) | No |
+
+**Code tab** gives the full experience. **Chat tab** gives 21 MCP tools. **Cowork tab** gives skills and agents without hooks or orchestrators.
 
 ### Verify Installation
 
-After restarting, ask Claude: **"What CRE skills do you have?"** or try:
+After restarting, try:
 ```
 /cre-skills:cre-route screen this deal
 ```
 
-For a full structural check: `./scripts/verify-install.sh`
+Or ask Claude: **"What CRE skills do you have?"**
+
+For a structural check: `bash scripts/verify-install.sh`
 
 ### Troubleshooting
 
-**Skills don't appear in Claude Desktop:**
-1. Restart Claude Desktop after installation.
-2. Check Settings > Developer > MCP Servers for `cre-skills`.
-3. Verify Node.js 18+ is installed (`node --version` in Terminal).
-4. If `cre-skills` is missing from the MCP list, re-run the installer.
+**Skills don't appear (Code tab):**
+1. Start a new conversation (SessionStart hook fires at start)
+2. Run `/plugin` to verify the plugin is enabled
+3. If not listed: `claude plugin marketplace add mariourquia/cre-skills-plugin`
 
-**Skills don't appear in Claude Code:**
-1. Start a **new** conversation (the SessionStart hook only fires at start).
-2. Confirm the plugin is listed: `claude plugin list`
-3. If not listed: `claude plugin add /path/to/cre-skills-plugin`
+**MCP tools don't appear (Chat tab):**
+1. Restart Claude Desktop completely
+2. Check Settings > Developer > MCP Servers for `cre-skills`
+3. Verify Node.js 18+ is installed (`node --version`)
+4. Re-run the installer if the MCP entry is missing
 
-See [docs/INSTALL.md](docs/INSTALL.md) for detailed per-platform instructions and [docs/WHAT-TO-USE-WHEN.md](docs/WHAT-TO-USE-WHEN.md) for choosing between install methods.
+**Cowork tab:**
+1. Click Customize > Browse plugins to check if CRE Skills is installed
+2. If not listed, upload the plugin ZIP from the release page
+
+See [docs/INSTALL.md](docs/INSTALL.md) for detailed per-platform instructions.
 
 ---
 

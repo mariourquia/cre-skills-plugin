@@ -12,7 +12,7 @@ CRE Skills Plugin is a structured knowledge base of 112 institutional-grade comm
 |---|---|---|
 | **Claude Code (CLI)** | `claude plugin install` or DMG/EXE installer | Full plugin: 112 skills, 54 agents, 6 workflow chains, 10 orchestrators, 11 slash commands, SessionStart hook, telemetry |
 | **Claude Desktop (app)** | DMG (macOS) or EXE (Windows) installer | MCP server with 21 tools for routing, skill detail, workspace management, feedback |
-| **Cowork** | Download `cre-skills-cowork.zip` from the latest [GitHub Release](https://github.com/mariourquia/cre-skills-plugin/releases/latest) | Stripped plugin: skills + agents + commands (no MCP server, no orchestrators, no calculators) |
+| **Cowork** | Download `cre-skills-cowork.zip` from the latest [GitHub Release](https://github.com/mariourquia/cre-skills-plugin/releases/latest) | Stripped plugin: skills + agents + commands (no MCP server, no orchestrators, no calculators). Uses the same SKILL.md format recognized by Claude Code and Cowork. |
 
 ---
 
