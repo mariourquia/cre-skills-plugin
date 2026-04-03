@@ -206,7 +206,8 @@ When improving, preserve the existing structure. Do not reorganize sections or r
 
 Changes to these files require extra review:
 
-- `src/plugin/plugin.json` -- plugin manifest
+- `src/plugin/plugin.json` -- plugin manifest (source of truth)
+- `.claude-plugin/plugin.json` -- **must be kept in sync** with `src/plugin/plugin.json`. Claude Code reads this file from the repo root for `/doctor` and plugin detection. After changing `src/plugin/plugin.json`, copy it: `cp src/plugin/plugin.json .claude-plugin/plugin.json`. The CI version check (`scripts/version_check.py`) will fail if they diverge.
 - `src/hooks/hooks.json` -- session start behavior
 - `src/routing/CRE-ROUTING.md` -- routing index (must stay in sync with skills)
 - `registry.yaml` -- machine-readable skill index (must stay in sync with skills)

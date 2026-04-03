@@ -68,10 +68,16 @@ send_telemetry() {
     local prereqs_json="${3:-{}}"
 
     {
-        local id_source
-        id_source="$(hostname)-$(whoami)"
-        local install_hash
-        install_hash=$(printf '%s' "$id_source" | shasum -a 256 | cut -d' ' -f1)
+        local install_id_file="$HOME/.cre-skills/install-id"
+        local install_uuid
+        if [ -f "$install_id_file" ]; then
+            install_uuid="$(cat "$install_id_file")"
+        else
+            mkdir -p "$HOME/.cre-skills"
+            install_uuid="$(python3 -c 'import uuid; print(uuid.uuid4())' 2>/dev/null || cat /proc/sys/kernel/random/uuid 2>/dev/null || echo "unknown-$(date +%s)")"
+            echo "$install_uuid" > "$install_id_file"
+        fi
+        local install_hash="$install_uuid"
         local event_seed
         event_seed="$step_failed-$error_msg-$(date +%s)"
         local event_id
@@ -139,9 +145,18 @@ printf "${BLUE}  Plugin Installer v4.0.0${RESET}\n"
 printf "${DIM}  112 skills | 54 agents | 8 MCP tools | 6 workflow chains${RESET}\n"
 echo ""
 
+# ── Step counter ─────────────────────────────────────────────────────
+
+STEP=0
+TOTAL_STEPS=7
+step() {
+    STEP=$((STEP + 1))
+    bold "  [$STEP/$TOTAL_STEPS] $1"
+}
+
 # ── Step 1: Check prerequisites ──────────────────────────────────────
 
-bold "  Checking prerequisites..."
+step "Checking prerequisites..."
 echo ""
 
 HAS_CLAUDE_CODE=false
@@ -218,7 +233,7 @@ echo ""
 # ── Step 2: Register plugin ──────────────────────────────────────────
 
 INSTALL_DIR="$SCRIPT_DIR"
-PLUGIN_VERSION="$(python3 -c "import json; print(json.load(open('$SCRIPT_DIR/src/plugin/plugin.json'))['version'])" 2>/dev/null || echo "4.0.0")"
+PLUGIN_VERSION="$(python3 -c "import json; print(json.load(open('$SCRIPT_DIR/src/plugin/plugin.json'))['version'])" 2>/dev/null || echo "4.1.0")"
 CLAUDE_HOME="$HOME/.claude"
 PLUGINS_CACHE="$CLAUDE_HOME/plugins/cache/local/cre-skills-plugin/$PLUGIN_VERSION"
 INSTALLED_PLUGINS="$CLAUDE_HOME/plugins/installed_plugins.json"
@@ -226,7 +241,7 @@ SETTINGS_FILE="$CLAUDE_HOME/settings.json"
 PLUGIN_KEY="cre-skills@local"
 NOW="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
 
-bold "  Installing CRE Skills Plugin..."
+step "Copying plugin files..."
 printf "  ${DIM}Source: %s${RESET}\n" "$INSTALL_DIR"
 echo ""
 
@@ -249,11 +264,13 @@ mkdir -p "$PLUGINS_CACHE/.claude-plugin"
 cp "$PLUGINS_CACHE/plugin/plugin.json" "$PLUGINS_CACHE/.claude-plugin/plugin.json" 2>/dev/null || true
 green "  Plugin files copied to cache"
 
-# Build catalog if not present
+step "Building catalog..."
 if [ ! -f "$PLUGINS_CACHE/dist/catalog.json" ] && command -v python3 &>/dev/null; then
     (cd "$PLUGINS_CACHE" && python3 scripts/catalog-build.py 2>/dev/null) && \
         green "  Catalog built" || true
 fi
+
+step "Registering plugin..."
 
 # 2. Register in installed_plugins.json
 if [ -f "$INSTALLED_PLUGINS" ]; then
@@ -293,6 +310,8 @@ else
     green "  Created settings.json"
 fi
 
+step "Configuring MCP server..."
+
 # 4. Register MCP server for Claude Desktop
 DESKTOP_CONFIG="$HOME/Library/Application Support/Claude/claude_desktop_config.json"
 if [ ! -d "$(dirname "$DESKTOP_CONFIG")" ]; then
@@ -323,10 +342,27 @@ fi
 
 echo ""
 
-# ── Step 3: Success ───────────────────────────────────────────────────
+# ── Post-install verification ────────────────────────────────────────
+
+step "Verifying installation..."
+
+SKILL_COUNT="$(find "$PLUGINS_CACHE/skills" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')"
+AGENT_COUNT="$(find "$PLUGINS_CACHE/agents" -maxdepth 1 -name '*.md' ! -name '_*' 2>/dev/null | wc -l | tr -d ' ')"
+MCP_OK="false"
+[ -f "$PLUGINS_CACHE/mcp-server.mjs" ] && MCP_OK="true"
+
+green "  Verification:"
+echo "    Skills: $SKILL_COUNT (expected 112)"
+echo "    Agents: $AGENT_COUNT (expected 54)"
+echo "    MCP server: $MCP_OK"
+echo ""
+
+# ── Done ─────────────────────────────────────────────────────────────
+
+step "Done!"
 
 echo "  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-green "  CRE Skills Plugin v4.0.0 installed!"
+green "  CRE Skills Plugin v$PLUGIN_VERSION installed!"
 echo "  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 

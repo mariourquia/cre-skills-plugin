@@ -8,7 +8,8 @@
 # ──────────────────────────────────────────────────────────────────────
 
 param(
-    [string]$InstallDir = $PSScriptRoot
+    [string]$InstallDir = $PSScriptRoot,
+    [switch]$NonInteractive
 )
 
 if ($InstallDir -eq $PSScriptRoot) {
@@ -34,8 +35,10 @@ trap {
     Write-Host "  You can also submit a bug report:" -ForegroundColor Yellow
     Write-Host "  https://github.com/mariourquia/cre-skills-plugin/issues/new?labels=bug,installer" -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "  Press Enter to close this window." -ForegroundColor White
-    Read-Host
+    if (-not $NonInteractive) {
+        Write-Host "  Press Enter to close this window." -ForegroundColor White
+        Read-Host
+    }
     exit 1
 }
 
@@ -62,10 +65,17 @@ function Send-InstallerTelemetry {
         [string]$PrereqsJson = "{}"
     )
     try {
-        $idSource = "$env:COMPUTERNAME-$env:USERNAME"
-        $sha = [System.Security.Cryptography.SHA256]::Create()
-        $hashBytes = $sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($idSource))
-        $installHash = [System.BitConverter]::ToString($hashBytes).Replace("-", "").ToLower()
+        $installIdFile = Join-Path $env:USERPROFILE ".cre-skills\install-id"
+        if (Test-Path $installIdFile) {
+            $installHash = (Get-Content $installIdFile -Raw).Trim()
+        } else {
+            $installIdDir = Split-Path $installIdFile -Parent
+            if (-not (Test-Path $installIdDir)) {
+                New-Item -ItemType Directory -Path $installIdDir -Force | Out-Null
+            }
+            $installHash = [System.Guid]::NewGuid().ToString()
+            $installHash | Set-Content $installIdFile -Encoding UTF8
+        }
 
         $eventSeed = "$StepFailed-$ErrorMsg-$(Get-Date -Format 'yyyyMMddHHmmssffff')"
         $eventBytes = $sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($eventSeed))
@@ -184,8 +194,10 @@ if (-not $hasFlat -and -not $hasSrc) {
     Write-Host "  Expected at: $InstallDir"
     Write-Host "  Looked for: skills\ and agents\ (or src\skills\ and src\agents\)"
     Write-Host ""
-    Write-Bold "  Press Enter to close this window."
-    Read-Host
+    if (-not $NonInteractive) {
+        Write-Bold "  Press Enter to close this window."
+        Read-Host
+    }
     exit 1
 }
 $LayoutIsFlat = $hasFlat
@@ -275,8 +287,10 @@ if (-not $HasNode) {
     Write-Host ""
     Send-InstallerTelemetry -StepFailed "node_install" `
         -ErrorMsg "Node.js not found and auto-install failed"
-    Write-Bold "  Press Enter to close this window."
-    Read-Host
+    if (-not $NonInteractive) {
+        Write-Bold "  Press Enter to close this window."
+        Read-Host
+    }
     exit 1
 }
 
@@ -293,8 +307,10 @@ if (-not $HasClaudeCode -and -not $HasClaudeDesktop -and -not $HasClaudeHome) {
     Write-Dim  "    claude plugin add `"$InstallDir`""
     Write-Host ""
     Send-InstallerTelemetry -StepFailed "no_claude" -ErrorMsg "Neither Claude Code nor Claude Desktop found"
-    Write-Bold "  Press Enter to close this window."
-    Read-Host
+    if (-not $NonInteractive) {
+        Write-Bold "  Press Enter to close this window."
+        Read-Host
+    }
     exit 0
 }
 
@@ -327,7 +343,7 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
     if ($pjPath) {
         $PluginVersion = (Get-Content $pjPath | ConvertFrom-Json).version
     }
-    if (-not $PluginVersion) { $PluginVersion = "4.0.0" }
+    if (-not $PluginVersion) { $PluginVersion = "4.1.0" }
     $PluginCachePath = Join-Path $ClaudeHome "plugins\cache\local\cre-skills-plugin\$PluginVersion"
     $InstalledPluginsFile = Join-Path $ClaudeHome "plugins\installed_plugins.json"
     $SettingsFile = Join-Path $ClaudeHome "settings.json"
@@ -555,9 +571,19 @@ $verifyFails = 0
 $cacheSkills = Join-Path $PluginCachePath "skills"
 if (Test-Path $cacheSkills) {
     $skillCount = (Get-ChildItem $cacheSkills -Directory -ErrorAction SilentlyContinue | Measure-Object).Count
-    Write-Green "  Plugin cache: $skillCount skill directories"
+    Write-Green "  Skills: $skillCount (expected 112)"
 } else {
     Write-Red "  Plugin cache missing skills directory: $cacheSkills"
+    $verifyFails++
+}
+
+# Check 1b: Agent count
+$cacheAgents = Join-Path $PluginCachePath "agents"
+if (Test-Path $cacheAgents) {
+    $agentCount = (Get-ChildItem $cacheAgents -File -Filter "*.md" -ErrorAction SilentlyContinue | Where-Object { $_.Name -notlike "_*" } | Measure-Object).Count
+    Write-Green "  Agents: $agentCount (expected 54)"
+} else {
+    Write-Red "  Plugin cache missing agents directory: $cacheAgents"
     $verifyFails++
 }
 
@@ -635,5 +661,7 @@ Write-Host ""
 Write-Dim  "  Plugin location: $InstallDir"
 Write-Host ""
 Write-Host ""
-Write-Bold "  Press Enter to close this window."
-Read-Host
+if (-not $NonInteractive) {
+    Write-Bold "  Press Enter to close this window."
+    Read-Host
+}
