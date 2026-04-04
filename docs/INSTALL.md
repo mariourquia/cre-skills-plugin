@@ -215,9 +215,10 @@ Artifacts appear in `dist/` with SHA-256 checksums.
 
 ---
 
-## Checksums and Signatures
+<details>
+<summary>Verify downloads (developers)</summary>
 
-All release assets are signed with [Sigstore cosign](https://www.sigstore.dev/) (keyless OIDC). Verify with:
+All release assets include SHA-256 checksums (`.sha256` file) and [Sigstore cosign](https://www.sigstore.dev/) signatures (`.sig` + `.cert` files) for supply-chain verification. Most users do not need these.
 
 ```bash
 cosign verify-blob --certificate cre-skills-*.cert \
@@ -226,8 +227,7 @@ cosign verify-blob --certificate cre-skills-*.cert \
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
   cre-skills-*.zip
 ```
-
-SHA-256 checksums are in the consolidated `.sha256` file in each release.
+</details>
 
 ---
 
