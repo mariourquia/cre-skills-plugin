@@ -1,10 +1,31 @@
 # Installation Guide
 
-> **Do not use "Add marketplace" in Claude Desktop with this repo URL.** This is not a marketplace plugin. Pasting `https://github.com/mariourquia/cre-skills-plugin` into Claude Desktop's "Add marketplace" dialog will fail with a validation error. Use the installer or CLI method below instead. See [WHAT-TO-USE-WHEN.md](WHAT-TO-USE-WHEN.md) for the full explanation of which install method to use.
+No coding experience required. Choose the method that matches your setup.
+
+## Quickest Install (non-technical users)
+
+**macOS:** Download the `.dmg` file from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest), open it, and double-click the installer. That's it.
+
+**Windows:** Download the `.exe` file from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest) and run the wizard. If Windows SmartScreen warns you, click "More info" then "Run anyway."
+
+After installing, open Claude Desktop or Claude Code and type:
+
+```
+/cre-skills:deal-quick-screen
+```
+
+Then paste your deal details. The 112 CRE skills are ready to use.
+
+> **Important:** On Windows, update Claude Code to the latest version first.
+> Open PowerShell and run: `npm i -g @anthropic-ai/claude-code@latest`
+
+> **Do not use "Add marketplace" in Claude Desktop with this repo URL.** This is not a marketplace plugin. Use the installer or CLI method below instead. See [WHAT-TO-USE-WHEN.md](WHAT-TO-USE-WHEN.md) for details.
 
 ---
 
-## Claude Code
+## All Install Methods
+
+### Claude Code
 
 ### One-liner (recommended)
 
