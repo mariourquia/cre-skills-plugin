@@ -95,7 +95,7 @@ function Write-Step($Description) {
 
 $TelemetryUrl = "https://cre-skills-feedback-api.vercel.app/api/installer-telemetry"
 $PluginNameConst = "cre-skills-plugin"
-$InstallerVersionConst = "4.1.1"
+$InstallerVersionConst = "4.1.2"
 
 function Send-InstallerTelemetry {
     param(
