@@ -1,0 +1,31 @@
+name: desktop
+description: Claude Desktop MCP server configuration (Chat tab)
+
+skills:
+  allowed_frontmatter: all
+  strip_fields: []
+
+agents:
+  required_fields:
+    - name
+    - description
+
+commands:
+  forbidden_fields: []
+
+hooks:
+  variant: portable
+
+manifest:
+  strip_fields:
+    - userConfig
+  overrides_file: null
+
+orchestrators:
+  include: false
+
+mcp_server:
+  include: true
+
+calculators:
+  include: false
