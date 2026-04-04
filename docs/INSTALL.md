@@ -98,6 +98,77 @@ See [COMPATIBILITY.md](COMPATIBILITY.md) for the full matrix.
 
 ---
 
+## Codex CLI (OpenAI)
+
+```bash
+# Download portable.zip from the latest release
+unzip cre-skills-portable.zip -d /tmp/cre-skills
+
+# Project-level (recommended)
+cp -r /tmp/cre-skills/skills/ .agents/skills/
+
+# User-level (all projects)
+cp -r /tmp/cre-skills/skills/ ~/.codex/skills/
+```
+
+Skills are detected automatically. Run `/skills` to verify.
+
+---
+
+## Gemini CLI (Google)
+
+```bash
+# Download portable.zip from the latest release
+unzip cre-skills-portable.zip -d /tmp/cre-skills
+
+# Workspace-level (recommended)
+cp -r /tmp/cre-skills/skills/ .gemini/skills/
+
+# User-level (all projects)
+cp -r /tmp/cre-skills/skills/ ~/.gemini/skills/
+```
+
+Or install via `gemini skills install` if available.
+
+---
+
+## Grok CLI (xAI)
+
+```bash
+# Download portable.zip from the latest release
+unzip cre-skills-portable.zip -d /tmp/cre-skills
+
+# Project-level
+cp -r /tmp/cre-skills/skills/ .agents/skills/
+
+# User-level
+cp -r /tmp/cre-skills/skills/ ~/.agents/skills/
+```
+
+Run `/skills` in the TUI to verify.
+
+---
+
+## Manus
+
+```bash
+# Download portable.zip from the latest release
+unzip cre-skills-portable.zip -d /tmp/cre-skills
+
+# Copy to Manus skills directory
+cp -r /tmp/cre-skills/skills/* /home/ubuntu/skills/
+```
+
+Skills are auto-detected. Type `/SKILL_NAME` to invoke.
+
+---
+
+## Any Other Agent
+
+The `cre-skills-portable.zip` contains universal `SKILL.md` files that work with any AI agent supporting the Agent Skills standard. Extract and copy the `skills/` directory to wherever your agent reads skill definitions.
+
+---
+
 ## Building From Source
 
 If you need to build target-specific artifacts yourself:
@@ -106,29 +177,36 @@ If you need to build target-specific artifacts yourself:
 # Install build tools
 cd tools && npm install && cd ..
 
-# Build both targets
+# Build all 4 targets
 npx --prefix tools tsx tools/build.ts --target all
 
 # Validate
 npx --prefix tools tsx tools/validate.ts --target all
 
 # Package
-npx --prefix tools tsx tools/package/package-cowork.ts
 npx --prefix tools tsx tools/package/package-claude-code.ts
+npx --prefix tools tsx tools/package/package-cowork.ts
+npx --prefix tools tsx tools/package/package-desktop.ts
+npx --prefix tools tsx tools/package/package-portable.ts
 ```
 
 Artifacts appear in `dist/` with SHA-256 checksums.
 
 ---
 
-## Verification
+## Checksums and Signatures
 
-After installing, verify the checksum:
+All release assets are signed with [Sigstore cosign](https://www.sigstore.dev/) (keyless OIDC). Verify with:
 
 ```bash
-shasum -a 256 -c cre-skills-cowork.zip.sha256
-shasum -a 256 -c cre-skills-claude-code.zip.sha256
+cosign verify-blob --certificate cre-skills-*.cert \
+  --signature cre-skills-*.sig \
+  --certificate-identity-regexp "github.com/mariourquia" \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+  cre-skills-*.zip
 ```
+
+SHA-256 checksums are in the consolidated `.sha256` file in each release.
 
 ---
 
