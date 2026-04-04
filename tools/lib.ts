@@ -10,7 +10,7 @@ export const SRC_DIR = resolve(REPO_ROOT, "src");
 export const CONFIG_DIR = resolve(REPO_ROOT, "config");
 export const BUILDS_DIR = resolve(REPO_ROOT, "builds");
 
-export const VALID_TARGETS = ["cowork", "claude-code"] as const;
+export const VALID_TARGETS = ["cowork", "claude-code", "desktop", "portable"] as const;
 export type TargetName = (typeof VALID_TARGETS)[number];
 
 export interface TargetProfile {
@@ -111,6 +111,11 @@ export function serializeFrontmatter(
 }
 
 export function buildDir(target: TargetName): string {
-  const dirName = target === "cowork" ? "cowork-plugin" : "claude-code";
-  return resolve(BUILDS_DIR, dirName);
+  const dirNames: Record<TargetName, string> = {
+    "cowork": "cowork-plugin",
+    "claude-code": "claude-code",
+    "desktop": "desktop",
+    "portable": "portable",
+  };
+  return resolve(BUILDS_DIR, dirNames[target]);
 }

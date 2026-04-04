@@ -220,6 +220,12 @@ jobs:
       - name: Package Claude Code target
         run: npx --prefix tools tsx tools/package/package-claude-code.ts
 
+      - name: Package Desktop target
+        run: npx --prefix tools tsx tools/package/package-desktop.ts
+
+      - name: Package Portable target
+        run: npx --prefix tools tsx tools/package/package-portable.ts
+
       - name: Build source archives
         env:
           TAG_NAME: ${{ github.ref_name }}
@@ -234,6 +240,8 @@ jobs:
           for f in \
             dist/cre-skills-cowork.zip \
             dist/cre-skills-claude-code.zip \
+            dist/cre-skills-desktop.zip \
+            dist/cre-skills-portable.zip \
             "dist/cre-skills-plugin-${TAG_NAME}.tar.gz" \
             "dist/cre-skills-plugin-${TAG_NAME}.zip"; do
             if [ ! -f "$f" ]; then
@@ -250,6 +258,8 @@ jobs:
           path: |
             dist/cre-skills-cowork.zip
             dist/cre-skills-claude-code.zip
+            dist/cre-skills-desktop.zip
+            dist/cre-skills-portable.zip
             dist/cre-skills-plugin-${{ github.ref_name }}.tar.gz
             dist/cre-skills-plugin-${{ github.ref_name }}.zip
           retention-days: 30
@@ -305,6 +315,8 @@ jobs:
             "cre-skills-plugin-${TAG_NAME}.zip" \
             cre-skills-claude-code.zip \
             cre-skills-cowork.zip \
+            cre-skills-desktop.zip \
+            cre-skills-portable.zip \
             "cre-skills-plugin-${TAG_NAME}.dmg" \
             "cre-skills-plugin-${TAG_NAME}-setup.exe" \
             > "cre-skills-plugin-${TAG_NAME}.sha256"
@@ -322,6 +334,8 @@ jobs:
                    "cre-skills-plugin-${TAG_NAME}.zip" \
                    "cre-skills-claude-code.zip" \
                    "cre-skills-cowork.zip" \
+                   "cre-skills-desktop.zip" \
+                   "cre-skills-portable.zip" \
                    "cre-skills-plugin-${TAG_NAME}.dmg" \
                    "cre-skills-plugin-${TAG_NAME}-setup.exe" \
                    "cre-skills-plugin-${TAG_NAME}.sha256"; do
@@ -369,6 +383,8 @@ jobs:
             "final-assets/cre-skills-plugin-${TAG_NAME}.zip" \
             "final-assets/cre-skills-claude-code.zip" \
             "final-assets/cre-skills-cowork.zip" \
+            "final-assets/cre-skills-desktop.zip" \
+            "final-assets/cre-skills-portable.zip" \
             "final-assets/cre-skills-plugin-${TAG_NAME}.dmg" \
             "final-assets/cre-skills-plugin-${TAG_NAME}-setup.exe" \
             "final-assets/cre-skills-plugin-${TAG_NAME}.sha256" \
@@ -380,6 +396,10 @@ jobs:
             "final-assets/cre-skills-claude-code.zip.cert" \
             "final-assets/cre-skills-cowork.zip.sig" \
             "final-assets/cre-skills-cowork.zip.cert" \
+            "final-assets/cre-skills-desktop.zip.sig" \
+            "final-assets/cre-skills-desktop.zip.cert" \
+            "final-assets/cre-skills-portable.zip.sig" \
+            "final-assets/cre-skills-portable.zip.cert" \
             "final-assets/cre-skills-plugin-${TAG_NAME}.dmg.sig" \
             "final-assets/cre-skills-plugin-${TAG_NAME}.dmg.cert" \
             "final-assets/cre-skills-plugin-${TAG_NAME}-setup.exe.sig" \

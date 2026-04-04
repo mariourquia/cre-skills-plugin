@@ -1,0 +1,39 @@
+name: portable
+description: Portable skills for Codex, OpenCode, Gemini, and other agent systems
+
+skills:
+  allowed_frontmatter:
+    - name
+    - description
+  strip_fields:
+    - slug
+    - version
+    - status
+    - category
+    - targets
+
+agents:
+  required_fields:
+    - name
+    - description
+
+commands:
+  forbidden_fields:
+    - name
+
+hooks:
+  variant: portable
+
+manifest:
+  strip_fields:
+    - userConfig
+  overrides_file: null
+
+orchestrators:
+  include: false
+
+mcp_server:
+  include: false
+
+calculators:
+  include: false
