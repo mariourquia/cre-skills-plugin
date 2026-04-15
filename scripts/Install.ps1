@@ -441,7 +441,7 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
     if ($pjPath) {
         $PluginVersion = (Get-Content $pjPath | ConvertFrom-Json).version
     }
-    if (-not $PluginVersion) { $PluginVersion = "4.1.0" }
+    if (-not $PluginVersion) { $PluginVersion = "4.1.2" }
     $PluginCachePath = Join-Path $ClaudeHome "plugins\cache\local\cre-skills-plugin\$PluginVersion"
     $InstalledPluginsFile = Join-Path $ClaudeHome "plugins\installed_plugins.json"
     $SettingsFile = Join-Path $ClaudeHome "settings.json"
