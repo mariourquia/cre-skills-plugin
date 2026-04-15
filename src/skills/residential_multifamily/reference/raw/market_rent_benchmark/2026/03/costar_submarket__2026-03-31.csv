@@ -1,0 +1,4 @@
+source_row_id,market,submarket,segment,property_form,property_class,unit_type_label,unit_beds,unit_baths,unit_sf_avg,benchmark_rent,rent_per_sf,sample_size_properties,trailing_3mo_change_pct,source_file,source_date,as_of_date,notes
+CS-SM-2026Q1-CLT-SOU-A1,Charlotte,South End,middle_market,garden,B,A1,1,1,720,1625,2.26,14,1.8,CoStar_Submarket_Charlotte_Q1_2026.xlsx,2026-04-05,2026-03-31,Submarket aggregate.
+CS-SM-2026Q1-CLT-SOU-B1,Charlotte,South End,middle_market,garden,B,B1,2,2,1050,1935,1.84,14,2.1,CoStar_Submarket_Charlotte_Q1_2026.xlsx,2026-04-05,2026-03-31,Submarket aggregate.
+CS-SM-2026Q1-CLT-UNI-A1,Charlotte,University,middle_market,garden,B,A1,1,1,715,1465,2.05,9,1.2,CoStar_Submarket_Charlotte_Q1_2026.xlsx,2026-04-05,2026-03-31,Submarket aggregate.

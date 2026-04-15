@@ -1,0 +1,120 @@
+# Development question bank
+# Audience: development_manager, estimator_preconstruction_lead (dev slice)
+# Depth: 12 questions covering deal criteria, entitlement risk tolerance,
+# GC selection process, design partners, lease-up expectations.
+
+bank_slug: development
+audience: development_manager
+version: "0.1.0"
+questions:
+
+  - id: dev_001
+    question_text: What is the org's development deal criteria anchor? (single_choice)
+    purpose: Sets development screening overlay.
+    answer_type: single_choice
+    choices:
+      - target_untrended_yield_on_cost
+      - target_trended_yield_on_cost
+      - target_equity_multiple
+      - target_irr
+      - target_development_spread_to_market_cap
+    target_overlay_ref: overlay.yaml#development.deal_criteria_anchor
+    follow_up_ids: []
+
+  - id: dev_002
+    question_text: What is the entitlement risk tolerance?
+    purpose: Sets entitlement risk overlay.
+    answer_type: single_choice
+    choices:
+      - by_right_only
+      - minor_variance_ok
+      - major_variance_with_precedent_ok
+      - spot_rezoning_ok_with_price_adjustment
+      - full_rezoning_only_strategic
+    target_overlay_ref: overlay.yaml#development.entitlement_risk_tolerance
+    follow_up_ids: []
+
+  - id: dev_003
+    question_text: What is the preferred GC selection process?
+    purpose: Sets GC selection workflow overlay.
+    answer_type: single_choice
+    choices:
+      - open_competitive_bid
+      - invited_bid_3_to_5_gcs
+      - negotiated_with_preferred_gc
+      - gc_by_project_size_tier
+    target_overlay_ref: overlay.yaml#development.gc_selection_process
+    follow_up_ids: []
+
+  - id: dev_004
+    question_text: Who are the preferred design partners the org uses across development projects?
+    purpose: Sets preferred_design_partners overlay.
+    answer_type: free_text
+    target_overlay_ref: overlay.yaml#development.preferred_design_partners
+    follow_up_ids: []
+
+  - id: dev_005
+    question_text: What is the expected lease-up pace the org underwrites for middle-market garden / wrap? (units per month)
+    purpose: Sets lease_up_pace overlay for development pro formas. Numeric; operator-specific.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#development.lease_up_pace_units_per_month
+    follow_up_ids: []
+
+  - id: dev_006
+    question_text: What is the minimum stabilized DSCR the org requires to close a construction loan?
+    purpose: Sets construction_loan_dscr_floor overlay.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#development.construction_loan_dscr_floor
+    follow_up_ids: []
+
+  - id: dev_007
+    question_text: Please upload the current development budget template.
+    purpose: Needed to align dev_proforma workflow to operator format.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#development.dev_budget_template_ref
+    missing_doc_triggers: [development_budget_template]
+
+  - id: dev_008
+    question_text: What is the org's typical hard cost contingency assumption in development pro formas? (numeric, percent)
+    purpose: Sets hard_cost_contingency_pct overlay.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#development.hard_cost_contingency_pct
+    follow_up_ids: []
+
+  - id: dev_009
+    question_text: What is the typical soft cost contingency assumption? (numeric, percent)
+    purpose: Sets soft_cost_contingency_pct overlay.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#development.soft_cost_contingency_pct
+    follow_up_ids: []
+
+  - id: dev_010
+    question_text: What is the org's approach to land residual analysis?
+    purpose: Sets land_residual workflow approach.
+    answer_type: single_choice
+    choices:
+      - land_residual_based_on_target_yield
+      - land_residual_based_on_target_irr
+      - market_comparable_land_then_test
+      - custom_model_per_submarket
+    target_overlay_ref: overlay.yaml#development.land_residual_approach
+    follow_up_ids: []
+
+  - id: dev_011
+    question_text: Does the org require a pre-development committee approval before land site control?
+    purpose: Sets pre_dev_committee overlay trigger.
+    answer_type: boolean
+    target_overlay_ref: overlay.yaml#development.pre_dev_committee_required
+    follow_up_ids: []
+
+  - id: dev_012
+    question_text: What is the org's preferred handoff from development to operations (timing and artifact)?
+    purpose: Sets post_close_onboarding handoff overlay.
+    answer_type: single_choice
+    choices:
+      - at_tco_with_operating_plan
+      - at_50pct_leased_with_operating_plan
+      - at_stabilization_with_final_plan
+      - continuous_with_weekly_handoff_meetings
+    target_overlay_ref: overlay.yaml#development.handoff_timing
+    follow_up_ids: []

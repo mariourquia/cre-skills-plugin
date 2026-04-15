@@ -1,0 +1,154 @@
+# Metric Contract Schema
+# Every canonical metric in _core/metrics.md must conform to this shape.
+# Tests in tests/residential_multifamily/test_metric_contracts.py enforce.
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: MetricContract
+type: object
+required:
+  - name
+  - slug
+  - description
+  - family
+  - grain
+  - time_basis
+  - scenario
+  - unit
+  - rollup_rule
+  - null_handling
+  - source_fields
+  - qa_rule
+  - reconciliation_rule
+  - open_questions
+properties:
+  name:
+    type: string
+    description: Human-readable metric name.
+  slug:
+    type: string
+    pattern: "^[a-z][a-z0-9_]*$"
+    description: Canonical snake_case slug. Unique across all metrics in this subsystem.
+  description:
+    type: string
+    description: One-paragraph plain-English definition.
+  family:
+    type: string
+    enum:
+      - property_operations
+      - asset_management
+      - portfolio_management
+      - development_construction
+      - tpm_oversight
+    description: Metric family.
+  grain:
+    type: string
+    enum:
+      - unit
+      - lease
+      - property
+      - building
+      - portfolio
+      - market
+      - submarket
+      - vendor
+      - project
+      - bid
+      - org
+    description: Smallest entity the metric is defined at.
+  time_basis:
+    type: string
+    enum:
+      - as_of_date
+      - period_cumulative
+      - rolling_window
+      - snapshot
+      - event_stamped
+    description: How the metric is timed.
+  time_basis_window:
+    type: string
+    description: |
+      Required iff time_basis is rolling_window or period_cumulative.
+      Examples: 'T3', 'T12', 'YTD', 'QTD', 'MTD', 'calendar_month', 'calendar_year'.
+  scenario:
+    type: array
+    items:
+      type: string
+      enum:
+        - actual
+        - budget
+        - forecast
+        - reforecast
+        - underwriting
+        - estimate
+        - bid
+        - benchmark
+    minItems: 1
+    description: Which scenarios the metric is defined against.
+  unit:
+    type: string
+    description: |
+      e.g., 'count', 'percent', 'dollars', 'dollars_per_unit', 'dollars_per_nrsf',
+      'days', 'ratio', 'months'.
+  numerator:
+    type: string
+    description: Plain-English or structured numerator. Required for rates/ratios.
+  denominator:
+    type: string
+    description: Plain-English or structured denominator. Required for rates/ratios.
+  filters_default:
+    type: array
+    items:
+      type: string
+    description: Default filters applied when metric is computed (e.g., exclude model units).
+  inclusions:
+    type: array
+    items:
+      type: string
+    description: Things explicitly included.
+  exclusions:
+    type: array
+    items:
+      type: string
+    description: Things explicitly excluded.
+  rollup_rule:
+    type: string
+    description: |
+      How the metric aggregates from its grain to a higher grain.
+      E.g., 'weighted_by_unit_count', 'sum', 'weighted_by_gross_potential_rent',
+      'not_rollupable (must be recomputed at target grain)'.
+  null_handling:
+    type: string
+    description: What to do if required inputs are missing.
+  source_fields:
+    type: array
+    items:
+      type: string
+    description: Canonical ontology fields that feed this metric.
+  qa_rule:
+    type: string
+    description: One or more automated checks that flag suspect values.
+  reconciliation_rule:
+    type: string
+    description: How the metric reconciles to authoritative reports (GL, rent roll, bank, etc.).
+  aliases:
+    type: array
+    items:
+      type: string
+    description: Known alternate names / misreadings. Also logged in alias_registry.yaml.
+  overlays_may_override:
+    type: array
+    items:
+      type: string
+      enum:
+        - threshold
+        - target_band
+        - filters_default
+        - inclusions
+        - exclusions
+    description: Which parts of the contract overlays are permitted to override.
+  open_questions:
+    type: array
+    items:
+      type: string
+    description: Known TBDs. Empty array allowed.
+additionalProperties: false

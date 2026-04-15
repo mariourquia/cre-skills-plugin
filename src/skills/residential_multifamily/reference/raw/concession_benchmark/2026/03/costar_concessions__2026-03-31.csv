@@ -1,0 +1,4 @@
+source_row_id,market,submarket,segment,property_form,lifecycle_stage,lease_term_months,pct_comps_offering,concession_months_offered,avg_concession_dollars,new_lease_trade_out_avg,source_file,source_date,as_of_date,notes
+CS-CON-2026Q1-CLT-SOU-STAB,Charlotte,South End,middle_market,garden,stabilized,12,0.45,0.5,820,1.8,CoStar_Concessions_Charlotte_Q1_2026.xlsx,2026-04-05,2026-03-31,Q1 survey.
+CS-CON-2026Q1-CLT-UPT-STAB,Charlotte,Uptown,middle_market,urban_mid_rise,stabilized,12,0.65,1.0,1850,1.2,CoStar_Concessions_Charlotte_Q1_2026.xlsx,2026-04-05,2026-03-31,Q1 survey.
+CS-CON-2026Q1-CLT-UPT-LU,Charlotte,Uptown,middle_market,urban_mid_rise,lease_up,12,0.90,2.0,4150,-1.2,CoStar_Concessions_Charlotte_Q1_2026.xlsx,2026-04-05,2026-03-31,Q1 survey.

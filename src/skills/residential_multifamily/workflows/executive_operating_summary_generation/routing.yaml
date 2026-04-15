@@ -1,0 +1,32 @@
+pack_slug: executive_operating_summary_generation
+pack_type: workflow
+priority: 10
+triggers:
+  explicit_phrases:
+    - "executive summary"
+    - "board packet"
+    - "LP quarterly"
+    - "LP narrative"
+    - "lender summary"
+    - "CEO one-pager"
+    - "COO monthly"
+    - "CFO monthly"
+  implicit_signals:
+    - "board / LP / lender calendar event"
+    - "material risk signal requiring executive review"
+    - "fund event (capital call, distribution, reporting deadline)"
+    - "month or quarter close with executive deliverable due"
+required_axes:
+  - asset_class
+  - segment
+  - audience
+  - org_id
+  - period
+optional_axes:
+  - role
+  - management_mode
+  - output_type
+  - loan_id
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

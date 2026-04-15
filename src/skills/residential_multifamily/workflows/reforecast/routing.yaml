@@ -1,0 +1,28 @@
+pack_slug: reforecast
+pack_type: workflow
+priority: 20
+triggers:
+  explicit_phrases:
+    - "reforecast"
+    - "update forecast"
+    - "year-end landing"
+    - "roll forecast"
+    - "quarterly reforecast"
+  implicit_signals:
+    - "as-of month closed"
+    - "material variance vs. prior forecast"
+    - "assumption reference updated above materiality"
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - lifecycle_stage
+  - management_mode
+  - market
+optional_axes:
+  - role
+  - jurisdiction
+  - output_type
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

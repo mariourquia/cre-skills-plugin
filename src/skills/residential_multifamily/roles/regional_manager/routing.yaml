@@ -1,0 +1,32 @@
+pack_slug: regional_manager
+pack_type: role
+priority: 40
+triggers:
+  explicit_phrases:
+    - "regional manager"
+    - "regional scorecard"
+    - "regional operating review"
+    - "corrective action plan"
+    - "CAP"
+    - "regional vendor review"
+    - "regional staffing plan"
+    - "regional capex ranking"
+    - "regional 1:1"
+  implicit_signals:
+    - "asker is tagged role=regional_manager in session context"
+    - "request scope is multiple properties under a single region"
+required_axes:
+  - asset_class
+  - segment
+  - management_mode
+  - role
+optional_axes:
+  - market
+  - submarket
+  - form_factor
+  - lifecycle_stage
+  - output_type
+  - decision_severity
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

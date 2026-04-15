@@ -1,0 +1,221 @@
+# CFO / Finance Leadership question bank
+# Audience: cfo_finance_leader, reporting_finance_ops_lead
+# Depth: 28 questions covering budget process, forecast cadence, chart of accounts
+# mapping, reporting calendar, variance thresholds, disbursement thresholds, banking
+# conventions, audit cycle, investor reporting format.
+
+bank_slug: cfo
+audience: cfo_finance_leader
+version: "0.1.0"
+questions:
+
+  - id: cfo_001
+    question_text: What is the fiscal year convention?
+    purpose: Sets reporting calendar anchor and variance window.
+    answer_type: single_choice
+    choices: [calendar_year, fiscal_jul_jun, fiscal_apr_mar, fiscal_oct_sep, other]
+    target_overlay_ref: overlay.yaml#finance.fiscal_year_convention
+    follow_up_ids: []
+
+  - id: cfo_002
+    question_text: What is the annual budget build kickoff cadence?
+    purpose: Sets budget workflow trigger window.
+    answer_type: single_choice
+    choices: [jul_for_next_fy, aug_for_next_fy, sep_for_next_fy, oct_for_next_fy, other]
+    target_overlay_ref: overlay.yaml#finance.budget_kickoff_window
+    follow_up_ids: []
+
+  - id: cfo_003
+    question_text: What is the forecast reforecast cadence?
+    purpose: Sets reforecast workflow cadence.
+    answer_type: single_choice
+    choices: [monthly, quarterly, semi_annual, annual, ad_hoc]
+    target_overlay_ref: overlay.yaml#finance.reforecast_cadence
+    follow_up_ids: []
+
+  - id: cfo_004
+    question_text: Please upload the current chart of accounts and any mapping to standard NOI-line categories.
+    purpose: COA mapping is required for automated variance commentary.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#finance.coa_ref
+    missing_doc_triggers: [chart_of_accounts_mapping]
+
+  - id: cfo_005
+    question_text: Please upload the current budget template (workbook format or canonical form).
+    purpose: Needed so budget_build workflow aligns to operator's template rather than canonical starter.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#finance.budget_template_ref
+    missing_doc_triggers: [budget_template]
+
+  - id: cfo_006
+    question_text: Please upload the current forecast / reforecast template.
+    purpose: Needed so reforecast workflow binds to operator template.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#finance.forecast_template_ref
+    missing_doc_triggers: [forecast_template]
+
+  - id: cfo_007
+    question_text: What is the variance threshold for a line item to require written narrative? (numeric, percent)
+    purpose: Sets variance_narrative generation trigger.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#finance.variance_narrative_threshold_pct
+    follow_up_ids: []
+
+  - id: cfo_008
+    question_text: What is the variance threshold in dollars for a line item to require written narrative? (numeric, dollars)
+    purpose: Variance narrative dual threshold (either-or).
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#finance.variance_narrative_threshold_dollars
+    follow_up_ids: []
+
+  - id: cfo_009
+    question_text: What is the monthly reporting close target in business days after month end? (numeric)
+    purpose: Sets monthly_property_operating_review workflow cadence.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#finance.monthly_close_target_bdays
+    follow_up_ids: []
+
+  - id: cfo_010
+    question_text: What is the property manager's autonomous disbursement threshold? (numeric, dollars) — re-confirm if coo answered; this is the finance-side ceiling.
+    purpose: Reconciles to approval_matrix row 6; flags if conflicting with COO answer.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#approval_matrix.threshold_disbursement_1
+    follow_up_ids: []
+
+  - id: cfo_011
+    question_text: What is the regional manager's autonomous disbursement threshold? (numeric, dollars)
+    purpose: Reconciles to approval_matrix row 7.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#approval_matrix.threshold_disbursement_2
+    follow_up_ids: []
+
+  - id: cfo_012
+    question_text: What are the banking conventions? (single_choice)
+    purpose: Sets banking convention overlay; informs AR/AP workflow.
+    answer_type: single_choice
+    choices: [central_ops_account_per_fund, account_per_property, hybrid_central_plus_property_ops, unknown]
+    target_overlay_ref: overlay.yaml#finance.banking_structure
+    follow_up_ids: []
+
+  - id: cfo_013
+    question_text: What is the preferred banking partner for operating accounts? (free text)
+    purpose: Informs banking_integration module selection at ingest.
+    answer_type: free_text
+    target_overlay_ref: overlay.yaml#finance.banking_partner
+    follow_up_ids: []
+
+  - id: cfo_014
+    question_text: Who is the external auditor and what is the audit cycle?
+    purpose: Sets audit_calendar overlay.
+    answer_type: free_text
+    target_overlay_ref: overlay.yaml#finance.external_auditor
+    follow_up_ids: []
+
+  - id: cfo_015
+    question_text: When does the audit cycle begin relative to fiscal year end? (single_choice)
+    purpose: Sets audit workflow trigger.
+    answer_type: single_choice
+    choices: [within_30_days, within_60_days, within_90_days, within_120_days, later]
+    target_overlay_ref: overlay.yaml#finance.audit_cycle_start
+    follow_up_ids: []
+
+  - id: cfo_016
+    question_text: What is the investor reporting cadence?
+    purpose: Sets investor_reporting workflow cadence.
+    answer_type: single_choice
+    choices: [monthly, quarterly, semi_annual, annual]
+    target_overlay_ref: overlay.yaml#finance.investor_reporting_cadence
+    follow_up_ids: []
+
+  - id: cfo_017
+    question_text: What investor reporting format does the org use?
+    purpose: Sets investor_reporting template overlay.
+    answer_type: single_choice
+    choices:
+      - ilpa_template_compatible
+      - proprietary_pdf
+      - proprietary_xlsx
+      - investor_portal_only
+      - hybrid_portal_plus_pdf
+    target_overlay_ref: overlay.yaml#finance.investor_reporting_format
+    follow_up_ids: []
+
+  - id: cfo_018
+    question_text: Please upload a sample monthly owner report (redact as needed).
+    purpose: Needed so monthly_property_operating_review workflow aligns to operator's owner report format.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#finance.sample_monthly_owner_report_ref
+    missing_doc_triggers: [sample_monthly_owner_report]
+
+  - id: cfo_019
+    question_text: Please upload the current reporting calendar.
+    purpose: Sets reporting_calendar in the org overlay.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#finance.reporting_calendar_ref
+    missing_doc_triggers: [reporting_calendar]
+
+  - id: cfo_020
+    question_text: Who signs off on final owner-facing reports before distribution?
+    purpose: Sets approval_matrix row 15 approver role for investor-facing submissions.
+    answer_type: single_choice
+    choices: [asset_manager, portfolio_manager, cfo_finance_leader, ceo_executive_leader, multiple_required]
+    target_overlay_ref: overlay.yaml#approval_matrix.investor_reporting_signoff_role
+    follow_up_ids: []
+
+  - id: cfo_021
+    question_text: What accounting policy does the org apply to concession granting (straight-line over lease term vs. as-incurred)?
+    purpose: Sets economic_occupancy denominator reconciliation rule for this org.
+    answer_type: single_choice
+    choices: [straight_line_over_lease, as_incurred, hybrid_by_type, unknown]
+    target_overlay_ref: overlay.yaml#finance.concession_accounting_policy
+    follow_up_ids: []
+
+  - id: cfo_022
+    question_text: What accounting policy does the org apply to bad debt write-offs (days aged before write-off)? (numeric, days)
+    purpose: Sets bad_debt_rate derivation filter for this org.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#finance.bad_debt_writeoff_days
+    follow_up_ids: []
+
+  - id: cfo_023
+    question_text: What capex approval threshold distinguishes routine R&M from capex? (numeric, dollars)
+    purpose: Sets capex intake threshold overlay.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#finance.capex_vs_rm_threshold_dollars
+    follow_up_ids: []
+
+  - id: cfo_024
+    question_text: Please upload the current capex approval policy.
+    purpose: Required to finalize capex_approval_policy overlay.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#finance.capex_approval_policy_ref
+    missing_doc_triggers: [capex_approval_policy]
+
+  - id: cfo_025
+    question_text: What is the covenant reporting cadence to lenders?
+    purpose: Sets lender_compliance_certificate workflow cadence.
+    answer_type: single_choice
+    choices: [monthly, quarterly, semi_annual, annual, none_required]
+    target_overlay_ref: overlay.yaml#finance.lender_covenant_cadence
+    follow_up_ids: []
+
+  - id: cfo_026
+    question_text: What is the threshold for a deviation to lender-reported NOI that triggers a special conversation? (numeric, percent)
+    purpose: Sets lender_compliance escalation trigger.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#finance.lender_noi_deviation_trigger_pct
+    follow_up_ids: []
+
+  - id: cfo_027
+    question_text: What is the threshold for cash call or recall authorization that requires executive approval? (numeric, dollars)
+    purpose: Sets cash_management overlay threshold.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#finance.cash_call_exec_approval_threshold_dollars
+    follow_up_ids: []
+
+  - id: cfo_028
+    question_text: Does the org require a separate finance-side sign-off on the monthly operating review before it is released to the owner or asset manager?
+    purpose: Adds a finance review step to monthly_property_operating_review workflow.
+    answer_type: boolean
+    target_overlay_ref: overlay.yaml#finance.monthly_operating_review_finance_signoff
+    follow_up_ids: []

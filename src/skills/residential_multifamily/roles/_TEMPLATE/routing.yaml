@@ -1,0 +1,24 @@
+pack_slug: <role_slug>
+pack_type: role
+priority: 30
+triggers:
+  explicit_phrases:
+    - "<phrase 1>"
+    - "<phrase 2>"
+  implicit_signals:
+    - "<description of a signal that indicates this role>"
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - lifecycle_stage
+  - management_mode
+  - role
+optional_axes:
+  - market
+  - submarket
+  - output_type
+  - decision_severity
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

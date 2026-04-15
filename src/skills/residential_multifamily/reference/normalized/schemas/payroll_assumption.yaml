@@ -1,0 +1,52 @@
+# Category Schema: payroll_assumption
+# Salary bands, burden, and benefit load per on-site role.
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: PayrollAssumptionReferenceRecord
+description: |
+  Salary band and burden/benefit load for on-site operating roles. Used in budgeting and
+  annual salary review. Unit is typically dollars_per_year for base; percent for burden.
+extends: _core/schemas/reference_record.yaml
+required:
+  - reference_id
+  - category
+  - scope
+  - value
+  - unit
+  - scenario
+  - source_name
+  - source_type
+  - source_date
+  - as_of_date
+  - confidence
+  - status
+  - proposed_by
+  - role_slug
+  - band_type
+properties:
+  category:
+    const: payroll_assumption
+  scope:
+    type: object
+    required:
+      - market
+      - segment
+    properties:
+      market:
+        type: string
+      region:
+        type: string
+      segment:
+        type: string
+        enum: [middle_market, affordable, luxury]
+      management_mode:
+        type: string
+        enum: [self_managed, third_party_managed, owner_oversight]
+  role_slug:
+    type: string
+  band_type:
+    type: string
+    enum: [base_salary_low, base_salary_mid, base_salary_high, hourly_low, hourly_mid, hourly_high, burden_pct, benefits_pct, bonus_target_pct]
+  unit:
+    type: string
+    enum: [dollars_per_year, dollars_per_hour, percent]

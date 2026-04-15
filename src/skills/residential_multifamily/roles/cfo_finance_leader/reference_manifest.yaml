@@ -1,0 +1,58 @@
+pack_slug: cfo_finance_leader
+reads:
+  - path: reference/normalized/approval_threshold_defaults.csv
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/covenant_calculation_library.csv
+    category: covenant_library
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/fund_accounting_policies.csv
+    category: fund_accounting_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/debt_rate_reference__{product}.csv
+    category: debt_rate_benchmark
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: ask_user
+  - path: reference/normalized/variance_materiality_policy.csv
+    category: variance_materiality_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/derived/same_store_set.csv
+    category: portfolio_cohort
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/derived/watchlist_scoring.yaml
+    category: watchlist_scoring
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/derived/role_kpi_targets.csv
+    category: occupancy_benchmark
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/derived/budget_attainment_history.csv
+    category: budget_history
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: ask_user
+  - path: reference/derived/forecast_accuracy_history.csv
+    category: forecast_history
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: ask_user
+  - path: reference/normalized/cap_rate_benchmarks__{market}_mf.csv
+    category: cap_rate_benchmark
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: ask_user
+writes: []

@@ -1,0 +1,28 @@
+pack_slug: bid_leveling_procurement_review
+pack_type: workflow
+priority: 15
+triggers:
+  explicit_phrases:
+    - "level bids"
+    - "bid leveling"
+    - "procurement review"
+    - "award recommendation"
+    - "bid review"
+    - "buyout review"
+  implicit_signals:
+    - "bid package due date passes"
+    - "estimator flags leveling-ready"
+    - "capex project has bids in hand"
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - market
+optional_axes:
+  - role
+  - lifecycle_stage
+  - output_type
+  - loan_id
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

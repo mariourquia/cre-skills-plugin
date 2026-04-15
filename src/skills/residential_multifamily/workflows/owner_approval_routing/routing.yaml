@@ -1,0 +1,25 @@
+pack_slug: owner_approval_routing
+pack_type: workflow
+priority: 5
+triggers:
+  explicit_phrases:
+    - "route approval"
+    - "approval status"
+    - "open approval request"
+    - "approval packet"
+  implicit_signals:
+    - "any workflow writes an ApprovalRequest record"
+    - "approval SLA nearing breach"
+required_axes:
+  - asset_class
+  - segment
+  - management_mode
+  - org_id
+  - approval_matrix_row
+optional_axes:
+  - market
+  - role
+  - output_type
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

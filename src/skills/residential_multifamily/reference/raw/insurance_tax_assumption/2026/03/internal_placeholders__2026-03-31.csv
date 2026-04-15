@@ -1,0 +1,5 @@
+source_row_id,market,state,county,segment,property_form,assumption_slug,assumption_category,amount,unit,source_file,source_date,as_of_date,notes
+ITA-2026Q1-CLT-PROPINS,Charlotte,NC,Mecklenburg,middle_market,garden,property_insurance_per_unit,property_insurance,385,dollars_per_unit_per_year,uw_placeholders_2026Q1.xlsx,2026-03-28,2026-02-28,Placeholder.
+ITA-2026Q1-CLT-RETAX,Charlotte,NC,Mecklenburg,middle_market,garden,real_estate_tax_effective_rate,real_estate_tax,0.0105,percent_of_value,uw_placeholders_2026Q1.xlsx,2026-03-28,2026-02-28,Placeholder.
+ITA-2026Q1-DAL-PROPINS,Dallas,TX,Dallas,middle_market,garden,property_insurance_per_unit,property_insurance,445,dollars_per_unit_per_year,uw_placeholders_2026Q1.xlsx,2026-03-28,2026-02-28,Placeholder.
+ITA-2026Q1-DAL-RETAX,Dallas,TX,Dallas,middle_market,garden,real_estate_tax_effective_rate,real_estate_tax,0.0245,percent_of_value,uw_placeholders_2026Q1.xlsx,2026-03-28,2026-02-28,Placeholder.

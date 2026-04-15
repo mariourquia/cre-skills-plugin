@@ -1,0 +1,62 @@
+# Category Schema: utility_benchmark
+# Utility cost norms net of RUBS / billback by market and form.
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: UtilityBenchmarkReferenceRecord
+description: |
+  Benchmark utility expense per unit per month, by utility type, market, and form. Both
+  gross (owner-paid) and net (after RUBS recovery) are tracked so the underwriting skill can
+  produce apples-to-apples comparisons.
+extends: _core/schemas/reference_record.yaml
+required:
+  - reference_id
+  - category
+  - scope
+  - value
+  - unit
+  - scenario
+  - source_name
+  - source_type
+  - source_date
+  - as_of_date
+  - confidence
+  - status
+  - proposed_by
+  - utility_slug
+  - metering_basis
+properties:
+  category:
+    const: utility_benchmark
+  scope:
+    type: object
+    required:
+      - market
+      - property_form
+    properties:
+      market:
+        type: string
+      region:
+        type: string
+      segment:
+        type: string
+        enum: [middle_market, affordable, luxury]
+      property_form:
+        type: string
+        enum: [garden, walk_up, wrap, suburban_mid_rise, urban_mid_rise, high_rise]
+  utility_slug:
+    type: string
+    enum: [water_sewer, gas, electric_common, electric_in_unit, trash, cable_bulk, internet_bulk]
+  metering_basis:
+    type: string
+    enum: [master_metered, sub_metered, rubs, direct_resident_billed]
+  rubs_recovery_pct:
+    type: number
+    description: Fraction of gross owner-paid utility recovered via RUBS. 0-1 range.
+  gross_owner_paid:
+    type: number
+    description: Gross expense per unit per month owner-paid, before RUBS.
+  net_owner_paid:
+    type: number
+    description: Net expense per unit per month owner-paid after RUBS recovery.
+  unit:
+    const: dollars_per_unit_per_month

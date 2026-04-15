@@ -1,0 +1,99 @@
+# Router Axes Catalog
+# Machine-readable mirror of taxonomy.md.
+
+axes:
+  - slug: asset_class
+    required: true
+    values: [residential_multifamily]
+    default: residential_multifamily
+
+  - slug: segment
+    required: true
+    values: [middle_market, affordable, luxury]
+    default: null
+    ask_prompt: |
+      What segment is this property (middle_market, affordable, luxury)?
+
+  - slug: form_factor
+    required: true
+    values: [garden, walk_up, wrap, suburban_mid_rise, urban_mid_rise, high_rise]
+    default: null
+    ask_prompt: |
+      What is the property form factor (garden, walk_up, wrap, suburban_mid_rise, urban_mid_rise, high_rise)?
+
+  - slug: lifecycle_stage
+    required: true
+    values: [development, construction, lease_up, stabilized, renovation, recap_support]
+    default: stabilized
+    ask_prompt: |
+      Lifecycle stage? (development, construction, lease_up, stabilized, renovation, recap_support)
+
+  - slug: management_mode
+    required: true
+    values: [self_managed, third_party_managed, owner_oversight]
+    default: null
+    ask_prompt: |
+      Management mode? (self_managed, third_party_managed, owner_oversight)
+
+  - slug: role
+    required: conditional
+    required_when: "workflow is null"
+    values:
+      - property_manager
+      - assistant_property_manager
+      - leasing_manager
+      - maintenance_supervisor
+      - regional_manager
+      - director_of_operations
+      - asset_manager
+      - portfolio_manager
+      - third_party_manager_oversight_lead
+      - development_manager
+      - construction_manager
+      - estimator_preconstruction_lead
+      - reporting_finance_ops_lead
+      - coo_operations_leader
+      - cfo_finance_leader
+      - ceo_executive_leader
+    default: null
+    ask_prompt: |
+      What role are you in (or on behalf of)?
+
+  - slug: workflow
+    required: conditional
+    required_when: "role is null"
+    values: null    # any slug under workflows/
+    default: null
+    ask_prompt: |
+      Which workflow do you want to run?
+
+  - slug: market
+    required: conditional
+    required_when: "any loaded reference is market-scoped"
+    values: null
+    default: null
+    ask_prompt: |
+      Which market? (e.g., Charlotte, Atlanta, Dallas, Phoenix, Nashville)
+
+  - slug: submarket
+    required: false
+    values: null
+    default: null
+
+  - slug: output_type
+    required: false
+    values: [memo, kpi_review, checklist, estimate, operating_review, scorecard, dashboard, email_draft]
+    default: recommendation
+
+  - slug: decision_severity
+    required: false
+    values: [informational, recommendation, action_routable, action_requires_approval]
+    default: recommendation
+
+  - slug: org_id
+    required: false
+    values: null
+    default: null
+    note: |
+      When an org overlay is active, it is loaded before any other overlay and
+      may tighten thresholds or add approvers.

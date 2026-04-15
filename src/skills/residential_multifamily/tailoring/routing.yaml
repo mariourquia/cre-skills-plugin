@@ -1,0 +1,44 @@
+pack_slug: tailoring
+pack_type: tailoring
+priority: 10
+triggers:
+  explicit_phrases:
+    - "tailor the org overlay"
+    - "onboard a new operator"
+    - "onboard a new org"
+    - "tailoring interview"
+    - "COO interview"
+    - "CFO interview"
+    - "regional ops interview"
+    - "asset management interview"
+    - "development interview"
+    - "construction interview"
+    - "reporting interview"
+    - "refresh org overlay"
+    - "process missing docs queue"
+    - "resume tailoring session"
+    - "sign off tailoring"
+  implicit_signals:
+    - "router cannot resolve an org overlay for the requested org_id"
+    - "overlays/org/{org_id}/ does not exist"
+    - "overlays/org/{org_id}/overlay.yaml is empty or incomplete"
+    - "tailoring/missing_docs_queue.yaml has open entries blocking a requested output"
+    - "asker is tagged role in {coo_operations_leader, cfo_finance_leader, ceo_executive_leader, director_of_operations, regional_manager, asset_manager, portfolio_manager, development_manager, construction_manager, reporting_finance_ops_lead}"
+required_axes:
+  - asset_class
+  - org_id
+optional_axes:
+  - segment
+  - form_factor
+  - lifecycle_stage
+  - management_mode
+  - role
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default
+notes: |
+  Priority 10 makes tailoring the highest-priority router pack. When activation conditions
+  match, this pack wins against role and workflow packs so the operator is led through the
+  interview before authoritative role/workflow output is produced for their org. Other
+  packs with higher priority numbers (lower priority) resume once the org overlay is in
+  place and signed off.

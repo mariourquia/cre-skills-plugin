@@ -1,0 +1,32 @@
+pack_slug: ceo_executive_leader
+pack_type: role
+priority: 90
+triggers:
+  explicit_phrases:
+    - "CEO"
+    - "chief executive officer"
+    - "executive leader"
+    - "exec decision memo"
+    - "monthly exec meeting"
+    - "quarterly board"
+    - "quarterly IC"
+    - "board meeting"
+    - "IC meeting"
+    - "annual investor letter"
+    - "annual strategic plan"
+    - "major strategic pivot"
+  implicit_signals:
+    - "asker is tagged role=ceo_executive_leader in session context"
+    - "request is a strategic / board / IC level decision or rollup consumption"
+required_axes:
+  - asset_class
+  - segment
+  - role
+optional_axes:
+  - management_mode
+  - market
+  - output_type
+  - decision_severity
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

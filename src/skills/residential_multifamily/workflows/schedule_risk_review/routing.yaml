@@ -1,0 +1,27 @@
+pack_slug: schedule_risk_review
+pack_type: workflow
+priority: 20
+triggers:
+  explicit_phrases:
+    - "schedule risk"
+    - "schedule slip"
+    - "critical path"
+    - "rebaseline"
+  implicit_signals:
+    - "milestone slipped vs. baseline"
+    - "critical-path disruption"
+    - "weather delay beyond overlay tolerance"
+    - "lease-up pace approaching stabilization deadline"
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - market
+  - project_id
+optional_axes:
+  - role
+  - lifecycle_stage
+  - output_type
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

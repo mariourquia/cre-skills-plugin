@@ -1,0 +1,32 @@
+pack_slug: lead_to_lease_funnel_review
+pack_type: workflow
+priority: 20
+triggers:
+  explicit_phrases:
+    - "funnel review"
+    - "weekly leasing funnel"
+    - "lead to lease"
+    - "tour conversion"
+    - "funnel audit"
+    - "why aren't we leasing"
+    - "pipeline review"
+    - "source mix"
+  implicit_signals:
+    - "leased_occupancy below band for 2 consecutive weeks"
+    - "notice_exposure above band"
+    - "material step-to-step funnel fall-off vs. prior window"
+    - "request scope names a property and mentions leasing"
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - lifecycle_stage
+  - management_mode
+  - market
+optional_axes:
+  - role
+  - submarket
+  - output_type
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

@@ -1,0 +1,23 @@
+pack_slug: move_out_administration
+reads:
+  - path: reference/normalized/approval_threshold_defaults.csv
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/move_out_documents__{jurisdiction}.yaml
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/damage_charge_schedule__{org}.csv
+    category: vendor_rate
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/unit_turn_cost_library__{market}.csv
+    category: unit_turn_cost
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: use_portfolio_average
+writes: []

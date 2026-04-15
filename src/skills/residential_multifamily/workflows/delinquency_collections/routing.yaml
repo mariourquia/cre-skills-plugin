@@ -1,0 +1,36 @@
+pack_slug: delinquency_collections
+pack_type: workflow
+priority: 10
+triggers:
+  explicit_phrases:
+    - "delinquency review"
+    - "weekly delinquency"
+    - "collections review"
+    - "aging review"
+    - "payment plan"
+    - "legal notice"
+    - "pre-legal"
+    - "eviction"
+    - "write-off"
+    - "bad debt"
+  implicit_signals:
+    - "ledger balance transitions an aging bucket"
+    - "delinquency_rate_30plus week-over-week spike above overlay materiality"
+    - "resident payment plan request"
+    - "case approaching jurisdiction cure-period deadline"
+    - "write-off date approaching"
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - lifecycle_stage
+  - management_mode
+  - market
+  - jurisdiction
+optional_axes:
+  - role
+  - submarket
+  - output_type
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

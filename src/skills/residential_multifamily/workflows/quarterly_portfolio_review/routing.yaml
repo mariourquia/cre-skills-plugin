@@ -1,0 +1,27 @@
+pack_slug: quarterly_portfolio_review
+pack_type: workflow
+priority: 15
+triggers:
+  explicit_phrases:
+    - "quarterly portfolio review"
+    - "portfolio pack"
+    - "board packet"
+    - "LP quarterly"
+    - "portfolio trend"
+  implicit_signals:
+    - "quarter close"
+    - "fund calendar event"
+    - "watchlist distribution shift"
+    - "concentration threshold crossed"
+required_axes:
+  - asset_class
+  - segment
+  - management_mode
+optional_axes:
+  - market
+  - role
+  - output_type
+  - jurisdiction
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

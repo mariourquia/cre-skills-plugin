@@ -1,0 +1,94 @@
+# Overlay Manifest Schema
+# Every overlay directory must contain an overlay.yaml conforming to this schema.
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: OverlayManifest
+type: object
+required:
+  - overlay_id
+  - overlay_kind
+  - scope
+  - overrides
+  - authoring_notes
+properties:
+  overlay_id:
+    type: string
+  overlay_kind:
+    type: string
+    enum:
+      - segment
+      - form_factor
+      - lifecycle
+      - management_mode
+      - market
+      - org
+      - policy
+      - property
+  scope:
+    type: object
+    description: What the overlay applies to.
+    properties:
+      segment: { type: string }
+      form_factor: { type: string }
+      lifecycle: { type: string }
+      management_mode: { type: string }
+      market: { type: string }
+      submarket: { type: string }
+      org_id: { type: string }
+      property_id: { type: string }
+  overrides:
+    type: array
+    description: Each override cites the canonical target and the new value.
+    items:
+      type: object
+      required: [target_kind, target_ref, override_value, reason]
+      properties:
+        target_kind:
+          type: string
+          enum:
+            - metric_threshold
+            - metric_target_band
+            - metric_filters_default
+            - approval_threshold
+            - staffing_ratio
+            - service_standard
+            - finish_standard
+            - concession_policy
+            - renewal_strategy
+            - delinquency_playbook_stage
+            - resident_comm_tone
+            - reporting_emphasis
+            - screening_policy
+            - vendor_preference
+        target_ref:
+          type: string
+        override_value: {}
+        reason:
+          type: string
+        effective_start:
+          type: string
+          format: date
+        effective_end:
+          type: string
+          format: date
+  adds:
+    type: array
+    description: Overlay-specific additions that do not exist in canonical core.
+    items:
+      type: object
+      required: [added_kind, slug, definition_ref]
+      properties:
+        added_kind:
+          type: string
+          enum: [metric, threshold, template, checklist_item, escalation_kind]
+        slug:
+          type: string
+        definition_ref:
+          type: string
+  authoring_notes:
+    type: string
+  approvers:
+    type: array
+    items:
+      type: string
+additionalProperties: false

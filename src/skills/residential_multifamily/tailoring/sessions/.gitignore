@@ -1,0 +1,9 @@
+# Tailoring session files are operator-private by default.
+# The tailoring skill pack creates session YAML and summary markdown files in
+# this directory but does not commit them. To retain a session under version
+# control, an operator should deliberately add the specific file path to the
+# repo's main .gitignore exception list, not this directory as a whole.
+
+*
+!.gitignore
+!README.md

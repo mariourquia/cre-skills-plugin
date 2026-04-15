@@ -1,0 +1,31 @@
+pack_slug: work_order_triage
+pack_type: workflow
+priority: 15
+triggers:
+  explicit_phrases:
+    - "triage work orders"
+    - "WO triage"
+    - "daily WO"
+    - "priority this work order"
+    - "assign vendor"
+    - "P1"
+    - "life safety"
+  implicit_signals:
+    - "new WorkOrder created"
+    - "P1 acknowledgment SLA boundary"
+    - "work_order_aging transition"
+    - "repeat WO detected for same unit and category"
+required_axes:
+  - asset_class
+  - segment
+  - management_mode
+  - market
+optional_axes:
+  - role
+  - jurisdiction
+  - form_factor
+  - lifecycle_stage
+  - output_type
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

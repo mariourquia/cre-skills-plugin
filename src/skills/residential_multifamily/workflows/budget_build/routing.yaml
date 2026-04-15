@@ -1,0 +1,27 @@
+pack_slug: budget_build
+pack_type: workflow
+priority: 20
+triggers:
+  explicit_phrases:
+    - "build budget"
+    - "annual budget"
+    - "budget build"
+    - "operating budget"
+    - "budget cycle"
+  implicit_signals:
+    - "calendar approach of org budget season"
+    - "prior budget superseded or final approval expired"
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - lifecycle_stage
+  - management_mode
+  - market
+optional_axes:
+  - role
+  - jurisdiction
+  - output_type
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

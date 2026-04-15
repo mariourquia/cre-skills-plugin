@@ -1,0 +1,29 @@
+pack_slug: unit_turn_make_ready
+pack_type: workflow
+priority: 15
+triggers:
+  explicit_phrases:
+    - "unit turn"
+    - "make ready"
+    - "turn pipeline"
+    - "turn estimate"
+    - "start turn"
+    - "ready ETA"
+  implicit_signals:
+    - "move_out_administration wrote a turn handoff record"
+    - "turn project exceeded target cycle time"
+    - "materials delay detected"
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - lifecycle_stage
+  - management_mode
+  - market
+optional_axes:
+  - role
+  - submarket
+  - output_type
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

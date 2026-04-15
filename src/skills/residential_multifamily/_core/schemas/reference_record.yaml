@@ -1,0 +1,154 @@
+# Reference Record Schema
+# Every row in reference/normalized/*.csv and every record emitted by reference/raw/ ingest
+# must conform to this shape (plus category-specific extensions documented in reference/README.md).
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: ReferenceRecord
+type: object
+required:
+  - reference_id
+  - category
+  - scope
+  - value
+  - unit
+  - scenario
+  - source_name
+  - source_type
+  - source_date
+  - as_of_date
+  - confidence
+  - status
+  - proposed_by
+properties:
+  reference_id:
+    type: string
+    description: Unique ID for the reference row. Convention - <category>-<scope_hash>-<as_of_date>.
+  category:
+    type: string
+    enum:
+      - rent_comp
+      - market_rent_benchmark
+      - concession_benchmark
+      - occupancy_benchmark
+      - staffing_model
+      - payroll_assumption
+      - labor_rate
+      - material_cost
+      - vendor_rate
+      - unit_turn_cost
+      - capex_line_item
+      - development_budget_assumption
+      - construction_duration_assumption
+      - utility_benchmark
+      - insurance_tax_assumption
+      - approval_threshold_policy
+      - other
+  scope:
+    type: object
+    description: The scoping axes this reference applies to. All fields optional; absent = not scoped.
+    properties:
+      market:
+        type: string
+      submarket:
+        type: string
+      segment:
+        type: string
+      property_form:
+        type: string
+      lifecycle_stage:
+        type: string
+      management_mode:
+        type: string
+      role_or_workflow:
+        type: string
+      org_id:
+        type: string
+      property_id:
+        type: string
+    additionalProperties: true
+  value:
+    description: |
+      The reference value. Type depends on category (number for rates / dollars,
+      string for categorical assumptions, object for structured multi-field entries).
+  unit:
+    type: string
+    description: |
+      e.g., 'dollars_per_unit_per_month', 'dollars_per_sf', 'percent', 'months',
+      'days', 'ratio_units_per_fte', 'dollars'.
+  scenario:
+    type: string
+    enum:
+      - actual
+      - benchmark
+      - forecast
+      - underwriting
+      - estimate
+      - bid
+  source_name:
+    type: string
+    description: Human-readable source. E.g., 'CoStar 2026-Q1 Charlotte submarket report'.
+  source_type:
+    type: string
+    enum:
+      - costar
+      - yardi_matrix
+      - realpage_data
+      - reis
+      - cbre_research
+      - jll_research
+      - cushman_research
+      - local_survey
+      - vendor_bid
+      - internal_record
+      - owner_report
+      - commodity_index
+      - government_publication
+      - industry_benchmark
+      - other
+  source_date:
+    type: string
+    format: date
+    description: Date the source was published or retrieved.
+  as_of_date:
+    type: string
+    format: date
+    description: The date the value is valid as of.
+  effective_start:
+    type: string
+    format: date
+  effective_end:
+    type: string
+    format: date
+  confidence:
+    type: string
+    enum:
+      - low
+      - medium
+      - high
+      - verified
+  status:
+    type: string
+    enum:
+      - draft
+      - proposed
+      - approved
+      - deprecated
+      - sample
+      - starter
+      - illustrative
+      - placeholder
+  proposed_by:
+    type: string
+    description: Human or agent ID.
+  approved_by:
+    type: string
+    description: Human approver ID. Required if status=approved.
+  notes:
+    type: string
+  prior_reference_id:
+    type: string
+    description: If this record supersedes another, pointer to the prior. Used for audit trail.
+  change_log_entry_ref:
+    type: string
+    description: Pointer to the corresponding change log entry.
+additionalProperties: false

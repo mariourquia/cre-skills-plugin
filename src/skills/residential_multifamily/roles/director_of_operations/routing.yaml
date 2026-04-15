@@ -1,0 +1,29 @@
+pack_slug: director_of_operations
+pack_type: role
+priority: 50
+triggers:
+  explicit_phrases:
+    - "director of operations"
+    - "DOO"
+    - "cross-regional scorecard"
+    - "consolidated operating review"
+    - "policy change proposal"
+    - "SOP update"
+    - "enterprise vendor review"
+    - "training plan"
+    - "staffing model review"
+  implicit_signals:
+    - "asker is tagged role=director_of_operations in session context"
+    - "request scope spans multiple regions or addresses portfolio-level operating policy"
+required_axes:
+  - asset_class
+  - segment
+  - role
+optional_axes:
+  - management_mode
+  - market
+  - output_type
+  - decision_severity
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

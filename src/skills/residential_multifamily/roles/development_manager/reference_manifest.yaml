@@ -1,0 +1,53 @@
+pack_slug: development_manager
+reads:
+  - path: reference/normalized/material_costs__{region}_residential.csv
+    category: material_cost
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: ask_user
+  - path: reference/normalized/labor_rates__{market}_residential.csv
+    category: labor_rate
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: ask_user
+  - path: reference/normalized/dev_budget_benchmarks__{segment}_{form_factor}.csv
+    category: dev_budget_benchmark
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: ask_user
+  - path: reference/normalized/entitlement_timeline_norms__{market}.csv
+    category: entitlement_timeline
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: ask_user
+  - path: reference/normalized/soft_cost_benchmarks__middle_market.csv
+    category: soft_cost_benchmark
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: ask_user
+  - path: reference/normalized/cost_escalation_assumptions__{region}.csv
+    category: cost_escalation
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: ask_user
+  - path: reference/normalized/contingency_policy__middle_market.csv
+    category: contingency_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/debt_rate_reference__{product}.csv
+    category: debt_rate_benchmark
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: ask_user
+  - path: reference/normalized/approval_threshold_defaults.csv
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/derived/role_kpi_targets.csv
+    category: occupancy_benchmark
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+writes: []

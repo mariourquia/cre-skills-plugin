@@ -1,0 +1,28 @@
+pack_slug: renewal_retention
+reads:
+  - path: reference/normalized/market_rents__{market}_mf.csv
+    category: market_rent_benchmark
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: escalate
+  - path: reference/normalized/concession_benchmarks__{market}_mf.csv
+    category: concession_benchmark
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: use_prior_period
+  - path: reference/derived/role_kpi_targets.csv
+    category: occupancy_benchmark
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/derived/renewal_uplift_bands__middle_market.csv
+    category: concession_benchmark
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/approval_threshold_defaults.csv
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+writes: []

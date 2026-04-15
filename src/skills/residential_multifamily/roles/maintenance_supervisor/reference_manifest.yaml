@@ -1,0 +1,33 @@
+pack_slug: maintenance_supervisor
+reads:
+  - path: reference/normalized/preventive_maintenance_intervals__middle_market.csv
+    category: maintenance_interval_library
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/turn_cost_library__middle_market.csv
+    category: capex_line_item_library
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/vendor_rate_card__{market}_mf.csv
+    category: vendor_rate_card
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: ask_user
+  - path: reference/normalized/approval_threshold_defaults.csv
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/staffing_ratios__middle_market.csv
+    category: staffing_model
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: use_portfolio_average
+  - path: reference/derived/role_kpi_targets.csv
+    category: occupancy_benchmark
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+writes: []

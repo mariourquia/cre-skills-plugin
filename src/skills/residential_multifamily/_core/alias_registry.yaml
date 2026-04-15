@@ -1,0 +1,229 @@
+# Alias Registry
+# Prevents silent duplicate definitions. Every known alternate name for a canonical metric,
+# object, or concept is tracked here. Tests scan skill prose and fail if an unregistered
+# alias is used for a canonical concept.
+
+metric_aliases:
+  physical_occupancy:
+    canonical_slug: physical_occupancy
+    aliases: [occupancy_physical, actual_occupancy]
+    warning: |
+      Generic "occupancy" in a skill prompt is ambiguous. Always qualify:
+      physical, leased, economic, preleased, or notice_adjusted.
+  leased_occupancy:
+    canonical_slug: leased_occupancy
+    aliases: [occupancy_leased]
+  economic_occupancy:
+    canonical_slug: economic_occupancy
+    aliases: [econ_occ, collected_occupancy]
+  notice_exposure:
+    canonical_slug: notice_exposure
+    aliases: [exposure, open_exposure, ntv_exposure]
+  preleased_occupancy:
+    canonical_slug: preleased_occupancy
+    aliases: [pre_leased, preleased]
+  lead_response_time:
+    canonical_slug: lead_response_time
+    aliases: [response_time, lead_response]
+  tour_conversion:
+    canonical_slug: tour_conversion
+    aliases: [tour_to_app, tour_to_application]
+  application_conversion:
+    canonical_slug: application_conversion
+    aliases: [app_conversion, approval_rate_applicant]
+  approval_rate:
+    canonical_slug: approval_rate
+    aliases: [screening_approval_rate]
+  move_in_conversion:
+    canonical_slug: move_in_conversion
+    aliases: [approved_to_moved_in]
+  renewal_offer_rate:
+    canonical_slug: renewal_offer_rate
+    aliases: [renewal_reach_rate]
+  renewal_acceptance_rate:
+    canonical_slug: renewal_acceptance_rate
+    aliases: [renewal_conversion]
+  turnover_rate:
+    canonical_slug: turnover_rate
+    aliases: [unit_turnover, annual_turnover]
+    warning: |
+      Distinct from resident-level turnover and from employee turnover.
+      "Turnover" without qualifier in a resident context means this slug.
+  average_days_vacant:
+    canonical_slug: average_days_vacant
+    aliases: [days_vacant]
+  make_ready_days:
+    canonical_slug: make_ready_days
+    aliases: [ready_days, turn_days]
+    warning: |
+      Distinct variants exist (notice-to-ready vs. vacant-to-ready). Canonical here
+      is move_out_date -> actual_ready_date. Other variants require a new slug.
+  open_work_orders:
+    canonical_slug: open_work_orders
+    aliases: [open_wos]
+  work_order_aging:
+    canonical_slug: work_order_aging
+    aliases: [wo_aging]
+  repeat_work_order_rate:
+    canonical_slug: repeat_work_order_rate
+    aliases: [wo_rework_rate]
+  delinquency_rate_30plus:
+    canonical_slug: delinquency_rate_30plus
+    aliases: [delinq_30]
+    warning: |
+      "Delinquency" is ambiguous. Canonical here is 30+ days by unit.
+      Other definitions (60+, 90+, dollar-weighted) require their own slugs.
+  collections_rate:
+    canonical_slug: collections_rate
+    aliases: [rent_collection_rate]
+  bad_debt_rate:
+    canonical_slug: bad_debt_rate
+    aliases: [write_off_rate]
+  concession_rate:
+    canonical_slug: concession_rate
+    aliases: [concessions_pct]
+  rent_growth_new_lease:
+    canonical_slug: rent_growth_new_lease
+    aliases: [new_lease_trade_out, new_lease_rent_growth]
+    warning: |
+      "Rent growth" without qualifier is ambiguous. Must qualify as new-lease, renewal,
+      blended, same-store, portfolio, or market.
+  rent_growth_renewal:
+    canonical_slug: rent_growth_renewal
+    aliases: [renewal_trade_out, renewal_rent_growth]
+  blended_lease_trade_out:
+    canonical_slug: blended_lease_trade_out
+    aliases: [blended_rent_growth]
+  market_to_lease_gap:
+    canonical_slug: market_to_lease_gap
+    aliases: [rent_to_market_gap]
+  loss_to_lease:
+    canonical_slug: loss_to_lease
+    aliases: [ltl]
+  payroll_per_unit:
+    canonical_slug: payroll_per_unit
+    aliases: [payroll_per_door]
+  rm_per_unit:
+    canonical_slug: rm_per_unit
+    aliases: [rm_per_door]
+  utilities_per_unit:
+    canonical_slug: utilities_per_unit
+    aliases: [utils_per_door]
+  controllable_opex_per_unit:
+    canonical_slug: controllable_opex_per_unit
+    aliases: [ctrl_opex_per_door]
+
+  noi:
+    canonical_slug: noi
+    aliases: [net_operating_income]
+  noi_margin:
+    canonical_slug: noi_margin
+    aliases: []
+  dscr:
+    canonical_slug: dscr
+    aliases: [debt_service_coverage]
+  debt_yield:
+    canonical_slug: debt_yield
+    aliases: [dy]
+  capex_spend_vs_plan:
+    canonical_slug: capex_spend_vs_plan
+    aliases: [capex_attainment]
+  renovation_yield_on_cost:
+    canonical_slug: renovation_yield_on_cost
+    aliases: [reno_yoc]
+  stabilization_pace_vs_plan:
+    canonical_slug: stabilization_pace_vs_plan
+    aliases: [lease_up_pace]
+  forecast_accuracy:
+    canonical_slug: forecast_accuracy
+    aliases: [forecast_hit_rate]
+
+  same_store_noi_growth:
+    canonical_slug: same_store_noi_growth
+    aliases: [ss_noi_growth]
+  occupancy_by_market:
+    canonical_slug: occupancy_by_market
+    aliases: [market_occupancy]
+  delinquency_by_market:
+    canonical_slug: delinquency_by_market
+    aliases: [market_delinq]
+  portfolio_concentration_market:
+    canonical_slug: portfolio_concentration_market
+    aliases: [market_concentration]
+  asset_watchlist_score:
+    canonical_slug: asset_watchlist_score
+    aliases: [watchlist_score]
+  budget_attainment:
+    canonical_slug: budget_attainment
+    aliases: [budget_hit_rate]
+
+  dev_cost_per_unit:
+    canonical_slug: dev_cost_per_unit
+    aliases: [tdc_per_unit]
+  dev_cost_per_gsf:
+    canonical_slug: dev_cost_per_gsf
+    aliases: [tdc_per_gsf]
+  dev_cost_per_nrsf:
+    canonical_slug: dev_cost_per_nrsf
+    aliases: [tdc_per_nrsf]
+  contingency_remaining:
+    canonical_slug: contingency_remaining
+    aliases: [contingency_left]
+  change_orders_pct_of_contract:
+    canonical_slug: change_orders_pct_of_contract
+    aliases: [co_pct]
+  cost_to_complete:
+    canonical_slug: cost_to_complete
+    aliases: [etc, ctc]
+  schedule_variance_days:
+    canonical_slug: schedule_variance_days
+    aliases: [schedule_slip]
+  trade_buyout_variance:
+    canonical_slug: trade_buyout_variance
+    aliases: [buyout_delta]
+
+object_aliases:
+  unit_type:
+    canonical_object: UnitType
+    aliases: [FloorPlan, floor_plan]
+    warning: |
+      In marketing contexts a UnitType is often called a FloorPlan.
+      Canonical object is UnitType; FloorPlan is an alias only.
+  resident_account:
+    canonical_object: ResidentAccount
+    aliases: [Household, Tenant]
+    warning: |
+      "Tenant" is commonly used but can conflate lease-level and account-level.
+      Canonical object is ResidentAccount; each Lease points to one ResidentAccount.
+  capex_project:
+    canonical_object: CapexProject
+    aliases: [CapitalProject, CapEx]
+  development_project:
+    canonical_object: DevelopmentProject
+    aliases: [DevProject, GroundUpProject]
+  construction_project:
+    canonical_object: ConstructionProject
+    aliases: [ConProject]
+  market_comp:
+    canonical_object: MarketComp
+    aliases: [Comp, RentComp]
+    warning: |
+      "Comp" is ambiguous — rent comp, sales comp, or lease comp. In this subsystem,
+      MarketComp defaults to RentComp; sales comps live outside this subsystem.
+
+reserved_slots:
+  # These slugs are reserved for planned metrics. Do not use them for other meanings.
+  metrics:
+    - rent_growth_same_store
+    - rent_growth_new_supply
+    - absorption_rate
+    - lease_exposure_by_month
+    - rubs_recovery_rate
+    - insurance_claim_frequency
+    - capex_deferred_to_life_safety_ratio
+    - tenant_satisfaction_index
+    - vendor_scorecard_index
+  objects:
+    - StaffingRoster
+    - ResidentCommunication
+    - ComplianceAttestation

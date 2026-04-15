@@ -1,0 +1,66 @@
+# Category Schema: concession_benchmark
+# Market concession levels offered by comp set and segment.
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: ConcessionBenchmarkReferenceRecord
+description: |
+  Market-level concession benchmark. Reported as equivalent months off on a 12-month lease
+  plus the prevalence of concessions in the comp set.
+extends: _core/schemas/reference_record.yaml
+required:
+  - reference_id
+  - category
+  - scope
+  - value
+  - unit
+  - scenario
+  - source_name
+  - source_type
+  - source_date
+  - as_of_date
+  - confidence
+  - status
+  - proposed_by
+  - lease_term_months
+properties:
+  category:
+    const: concession_benchmark
+  scope:
+    type: object
+    required:
+      - market
+      - segment
+      - property_form
+    properties:
+      market:
+        type: string
+      submarket:
+        type: string
+      segment:
+        type: string
+        enum: [middle_market, affordable, luxury]
+      property_form:
+        type: string
+        enum: [garden, walk_up, wrap, suburban_mid_rise, urban_mid_rise, high_rise]
+      lifecycle_stage:
+        type: string
+        enum: [development, construction, lease_up, stabilized, renovation, recap_support]
+  lease_term_months:
+    type: integer
+    description: Lease term the concession applies to. Typically 12.
+  concession_months_offered:
+    type: number
+    description: Equivalent months off on the lease term.
+  pct_comps_offering:
+    type: number
+    description: Share of comps in the benchmark offering a concession, 0-1 range.
+  avg_concession_dollars:
+    type: number
+    description: Average dollar value of the concession offered.
+  new_lease_trade_out_avg:
+    type: number
+    description: Observed new-lease trade-out in the comp set, percent.
+  unit:
+    type: string
+    enum: [months, percent, dollars]
+    description: months for concession_months_offered as the primary value; percent for pct or trade-out.

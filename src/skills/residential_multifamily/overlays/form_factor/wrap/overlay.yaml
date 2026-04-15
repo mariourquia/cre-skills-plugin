@@ -1,0 +1,38 @@
+overlay_id: form_factor.wrap
+overlay_kind: form_factor
+scope:
+  form_factor: wrap
+authoring_notes: |
+  Wrap overlay. Apartments wrapping a structured parking deck; typically four to six
+  stories of residential around a precast or cast-in-place garage. Adds a parking-
+  structure maintenance surface (striping, signage, bollards, lighting, leakage),
+  larger elevator count than garden/walk-up, and an amenity program that often
+  includes pool and fitness. No numeric targets embedded; references point to rows.
+
+overrides:
+  - target_kind: service_standard
+    target_ref: _core/metrics.md#average_days_vacant
+    override_value:
+      service_standard_ref: reference/derived/role_kpi_targets.csv#row_ff_wrap_parking_structure_cadence
+    reason: |
+      Parking-structure maintenance (striping, signage, bollards, leakage) is a
+      material common-area surface in wrap properties.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#make_ready_days
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_ff_wrap_make_ready_days
+    reason: |
+      Wrap turn durations typically align with suburban mid-rise; row captures the
+      adjustment.
+  - target_kind: staffing_ratio
+    target_ref: _core/taxonomy.md#role.maintenance_supervisor
+    override_value:
+      staffing_ratio_ref: reference/derived/role_kpi_targets.csv#row_ff_wrap_maintenance_ratio
+    reason: |
+      Wrap properties staff closer to suburban mid-rise than to garden; elevator and
+      parking-deck maintenance shift the mix.
+
+adds: []
+
+approvers:
+  - director_of_operations

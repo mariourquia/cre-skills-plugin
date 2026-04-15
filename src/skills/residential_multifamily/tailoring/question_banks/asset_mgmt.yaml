@@ -1,0 +1,159 @@
+# Asset Management question bank
+# Audience: asset_manager, portfolio_manager, third_party_manager_oversight_lead
+# Depth: 15 questions covering watchlist criteria, capex policy, sell/hold/refi triggers,
+# TPM oversight intensity, LP reporting.
+
+bank_slug: asset_mgmt
+audience: asset_manager
+version: "0.1.0"
+questions:
+
+  - id: am_001
+    question_text: What criteria move a property onto the watchlist? (multi_choice)
+    purpose: Sets watchlist overlay triggers.
+    answer_type: multi_choice
+    choices:
+      - occupancy_below_band_for_n_months
+      - collections_below_band_for_n_months
+      - noi_variance_above_band
+      - delinquency_above_band
+      - turnover_above_band
+      - covenant_approaching_threshold
+      - capex_plan_behind_schedule
+      - leadership_change_at_site
+    target_overlay_ref: overlay.yaml#asset_management.watchlist_triggers
+    follow_up_ids: [am_002]
+
+  - id: am_002
+    question_text: How many months of below-band performance trigger watchlist placement? (numeric, months)
+    purpose: Sets watchlist overlay timing.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#asset_management.watchlist_months_below_band
+    follow_up_ids: []
+
+  - id: am_003
+    question_text: What is the org's capex policy approach? (single_choice)
+    purpose: Sets capex_policy overlay.
+    answer_type: single_choice
+    choices:
+      - strict_budget_with_contingency
+      - flexible_within_annual_cap
+      - project_by_project_with_executive_approval
+      - zero_based_per_asset_plan
+    target_overlay_ref: overlay.yaml#capex_policy.approach
+    follow_up_ids: []
+
+  - id: am_004
+    question_text: What annual contingency percentage is reserved across the capex plan? (numeric, percent)
+    purpose: Sets capex_policy.contingency_pct overlay.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#capex_policy.contingency_pct
+    follow_up_ids: []
+
+  - id: am_005
+    question_text: What triggers a sell evaluation?
+    purpose: Sets disposition overlay triggers.
+    answer_type: multi_choice
+    choices:
+      - market_cycle_signal
+      - asset_plan_target_met
+      - covenant_stress
+      - partner_buyout
+      - tax_event_optimization
+      - strategic_portfolio_rebalance
+      - under_performance_after_intervention
+    target_overlay_ref: overlay.yaml#asset_management.sell_triggers
+    follow_up_ids: []
+
+  - id: am_006
+    question_text: What triggers a refinance evaluation?
+    purpose: Sets refinance overlay triggers.
+    answer_type: multi_choice
+    choices:
+      - maturity_within_18_months
+      - interest_rate_move_favorable
+      - unlocked_value_through_value_add
+      - covenant_pressure
+      - partner_return_milestone
+    target_overlay_ref: overlay.yaml#asset_management.refi_triggers
+    follow_up_ids: []
+
+  - id: am_007
+    question_text: What is the default TPM oversight intensity for third-party-managed properties? (single_choice)
+    purpose: Sets TPM oversight overlay; drives scorecard cadence.
+    answer_type: single_choice
+    choices: [light_monthly_scorecard, standard_monthly_scorecard_plus_site_visit, intensive_weekly_calls, crisis_daily]
+    target_overlay_ref: overlay.yaml#tpm_oversight.default_intensity
+    follow_up_ids: []
+
+  - id: am_008
+    question_text: Please upload the current property management agreement (PMA) template.
+    purpose: Needed to define TPM contract norms and performance triggers.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#tpm_oversight.pma_template_ref
+    missing_doc_triggers: [pma_template]
+
+  - id: am_009
+    question_text: What is the PMA performance trigger that escalates a TPM to improvement-plan status?
+    purpose: Sets TPM scorecard threshold overlay.
+    answer_type: single_choice
+    choices:
+      - two_consecutive_months_below_scorecard_band
+      - three_consecutive_months_below_band
+      - covenant_trigger_breach
+      - resident_satisfaction_below_band
+    target_overlay_ref: overlay.yaml#tpm_oversight.improvement_plan_trigger
+    follow_up_ids: []
+
+  - id: am_010
+    question_text: What is the LP reporting cadence owned by asset management?
+    purpose: Sets LP reporting overlay cadence (distinct from CFO-owned cadence; reconciles at output).
+    answer_type: single_choice
+    choices: [quarterly, semi_annual, annual, on_demand]
+    target_overlay_ref: overlay.yaml#asset_management.lp_reporting_cadence
+    follow_up_ids: []
+
+  - id: am_011
+    question_text: What asset-level metrics does the asset manager review monthly?
+    purpose: Sets asset_manager_monthly_kpi_set overlay.
+    answer_type: multi_choice
+    choices:
+      - economic_occupancy
+      - collections_rate
+      - blended_lease_trade_out
+      - noi_variance_to_budget
+      - controllable_opex_per_unit
+      - capex_spend_pct_of_plan
+      - dscr_actual
+      - debt_yield_actual
+    target_overlay_ref: overlay.yaml#asset_management.monthly_kpi_set
+    follow_up_ids: []
+
+  - id: am_012
+    question_text: What is the variance threshold on NOI that automatically opens an AM-level review?
+    purpose: Sets NOI variance escalation overlay.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#asset_management.noi_variance_review_threshold_pct
+    follow_up_ids: []
+
+  - id: am_013
+    question_text: Does the org require a quarterly asset plan refresh per property?
+    purpose: Gates asset_plan workflow cadence.
+    answer_type: boolean
+    target_overlay_ref: overlay.yaml#asset_management.quarterly_asset_plan_refresh_required
+    follow_up_ids: []
+
+  - id: am_014
+    question_text: What is the asset manager's autonomous commitment threshold before needing portfolio manager approval?
+    purpose: Sets approval_matrix asset-level threshold.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#approval_matrix.asset_manager_commitment_threshold_dollars
+    follow_up_ids: []
+
+  - id: am_015
+    question_text: What is the preferred hold-period inflection-point check cadence?
+    purpose: Sets hold_period_inflection workflow cadence.
+    answer_type: single_choice
+    choices: [annual, semi_annual, quarterly, ad_hoc]
+    target_overlay_ref: overlay.yaml#asset_management.hold_inflection_cadence
+    follow_up_ids: []

@@ -1,0 +1,77 @@
+# Category Schema: occupancy_benchmark
+# Market physical / leased / economic occupancy norms AND collections/delinquency benchmarks
+# (collections behavior is treated as a facet of occupancy quality).
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: OccupancyBenchmarkReferenceRecord
+description: |
+  Occupancy quality benchmarks. Covers physical, leased, economic occupancy and the
+  related collections-side metrics (delinquency, bad debt, collections rate). Stored in
+  the same category so the tailoring skill can ingest collections_benchmarks as a
+  sub-file of occupancy_benchmark.
+extends: _core/schemas/reference_record.yaml
+required:
+  - reference_id
+  - category
+  - scope
+  - value
+  - unit
+  - scenario
+  - source_name
+  - source_type
+  - source_date
+  - as_of_date
+  - confidence
+  - status
+  - proposed_by
+  - metric_slug
+properties:
+  category:
+    const: occupancy_benchmark
+  scope:
+    type: object
+    required:
+      - segment
+    properties:
+      market:
+        type: string
+      submarket:
+        type: string
+      region:
+        type: string
+        description: e.g., southeast, sunbelt, northeast. Used when benchmarks are regional.
+      segment:
+        type: string
+        enum: [middle_market, affordable, luxury]
+      property_form:
+        type: string
+        enum: [garden, walk_up, wrap, suburban_mid_rise, urban_mid_rise, high_rise]
+      lifecycle_stage:
+        type: string
+        enum: [development, construction, lease_up, stabilized, renovation, recap_support]
+  metric_slug:
+    type: string
+    enum:
+      - physical_occupancy
+      - leased_occupancy
+      - economic_occupancy
+      - preleased_occupancy
+      - notice_exposure
+      - turnover_rate
+      - delinquency_rate_30plus
+      - delinquency_rate_60plus
+      - collections_rate
+      - bad_debt_rate
+      - concession_rate
+  band_low:
+    type: number
+    description: Lower bound of the target band.
+  band_high:
+    type: number
+    description: Upper bound of the target band.
+  peer_median:
+    type: number
+    description: Peer median observed, same unit as value.
+  unit:
+    type: string
+    enum: [percent, percent_of_gpr, ratio]
