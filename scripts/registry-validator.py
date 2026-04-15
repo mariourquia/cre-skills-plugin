@@ -186,17 +186,18 @@ def validate_count_consistency(skills: list[dict]) -> list[str]:
     actual_agents = len(list((SRC_DIR / "agents").glob("*.md"))) if (SRC_DIR / "agents").is_dir() else 0
     actual_calcs = len(list((SRC_DIR / "calculators").glob("*.py"))) if (SRC_DIR / "calculators").is_dir() else 0
 
-    # Files that embed counts -- check each for the expected number
-    count_files = {
-        "plugin/plugin.json": None,
-        "hooks/hooks.json": None,
-        "routing/CRE-ROUTING.md": None,
-    }
+    # Files that embed counts -- check each for the expected number.
+    # plugin.json lives at PLUGIN_ROOT/.claude-plugin/, the rest under SRC_DIR.
+    count_files = [
+        (PLUGIN_ROOT, ".claude-plugin/plugin.json"),
+        (SRC_DIR, "hooks/hooks.json"),
+        (SRC_DIR, "routing/CRE-ROUTING.md"),
+    ]
 
     import re
 
-    for relpath in count_files:
-        fpath = SRC_DIR / relpath
+    for base, relpath in count_files:
+        fpath = base / relpath
         if not fpath.is_file():
             continue
         content = fpath.read_text(encoding="utf-8")
@@ -277,9 +278,9 @@ def validate_version_consistency() -> list[str]:
     failures: list[str] = []
 
     # Source of truth
-    pj_path = SRC_DIR / "plugin" / "plugin.json"
+    pj_path = PLUGIN_ROOT / ".claude-plugin" / "plugin.json"
     if not pj_path.is_file():
-        failures.append("FAIL  src/plugin/plugin.json not found")
+        failures.append("FAIL  .claude-plugin/plugin.json not found")
         return failures
 
     pj = json.loads(pj_path.read_text(encoding="utf-8"))
@@ -321,7 +322,7 @@ def validate_stale_versions() -> list[str]:
     import json, re
     failures: list[str] = []
 
-    pj_path = SRC_DIR / "plugin" / "plugin.json"
+    pj_path = PLUGIN_ROOT / ".claude-plugin" / "plugin.json"
     if not pj_path.is_file():
         return failures
 

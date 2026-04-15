@@ -483,11 +483,39 @@ def build_workflow_items(chains: list) -> list:
 # ---------------------------------------------------------------------------
 
 def get_plugin_version() -> str:
-    pj = SRC_DIR / "plugin" / "plugin.json"
+    pj = REPO_ROOT / ".claude-plugin" / "plugin.json"
     if pj.exists():
         data = json.loads(pj.read_text(encoding="utf-8"))
         return data.get("version", "0.0.0")
     return "0.0.0"
+
+
+# ---------------------------------------------------------------------------
+# MCP tool inventory (parsed from src/mcp-server.mjs)
+# ---------------------------------------------------------------------------
+
+def scan_mcp_tools() -> list:
+    """Extract MCP tool definitions from src/mcp-server.mjs.
+
+    Parses the TOOLS array via regex (cheap and dependency-free). Each tool
+    must have a name and a description for the catalog entry to be valid.
+    """
+    mcp_file = SRC_DIR / "mcp-server.mjs"
+    if not mcp_file.exists():
+        return []
+    src = mcp_file.read_text(encoding="utf-8")
+
+    pattern = re.compile(
+        r'\{\s*name:\s*"(cre_[a-z_]+)"\s*,\s*description:\s*"([^"]+)"',
+        re.DOTALL,
+    )
+    tools = []
+    for match in pattern.finditer(src):
+        tools.append({
+            "name": match.group(1),
+            "description": match.group(2),
+        })
+    return tools
 
 
 # ---------------------------------------------------------------------------
@@ -512,6 +540,7 @@ def build_catalog() -> dict:
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "plugin_version": get_plugin_version(),
         "items": all_items,
+        "mcp_tools": scan_mcp_tools(),
     }
     return catalog
 

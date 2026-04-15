@@ -92,7 +92,7 @@ def collect_claude_state() -> dict:
     plugins_file = claude_home / "installed_plugins.json"
     if plugins_file.is_file():
         try:
-            data = json.loads(plugins_file.read_text(encoding="utf-8"))
+            data = json.loads(plugins_file.read_text(encoding="utf-8-sig"))
             state["installed_plugins_keys"] = list(data.keys()) if isinstance(data, dict) else str(type(data))
             state["plugin_registered"] = PLUGIN_KEY in data if isinstance(data, dict) else False
         except Exception as exc:
@@ -104,7 +104,7 @@ def collect_claude_state() -> dict:
     settings_file = claude_home / "settings.json"
     if settings_file.is_file():
         try:
-            data = json.loads(settings_file.read_text(encoding="utf-8"))
+            data = json.loads(settings_file.read_text(encoding="utf-8-sig"))
             enabled = data.get("enabledPlugins", [])
             state["enabled_plugins"] = enabled
             state["plugin_enabled"] = PLUGIN_KEY in enabled

@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """Validate that all installer version references match plugin.json.
 
-Source of truth: src/plugin/plugin.json  (field: "version")
+Source of truth: .claude-plugin/plugin.json  (field: "version")
 
-After the dynamic-read fix, the primary code path reads from plugin.json
-at install time. This script validates that the FALLBACK values embedded
-in each installer still match the source of truth, so they never silently
-drift.
+The primary code path reads from plugin.json at install time. This script
+validates that the FALLBACK values embedded in each installer still match
+the source of truth, so they never silently drift.
 
 Usage::
 
@@ -26,32 +25,22 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
-PLUGIN_JSON = REPO_ROOT / "src" / "plugin" / "plugin.json"
-
-# ---------------------------------------------------------------------------
-# Fallback-value patterns per installer file
-#
-# Each entry: (relative_path, list of (regex, description) tuples)
-# The regex must capture the version string in group(1).
-# ---------------------------------------------------------------------------
+PLUGIN_JSON = REPO_ROOT / ".claude-plugin" / "plugin.json"
 
 INSTALLER_CHECKS: list[tuple[str, list[tuple[str, str]]]] = [
     ("scripts/Install.ps1", [
-        # Fallback: if (-not $PluginVersion) { $PluginVersion = "X.Y.Z" }
         (
             r'if\s*\(\s*-not\s+\$PluginVersion\s*\)\s*\{\s*\$PluginVersion\s*=\s*"([^"]+)"',
             "PowerShell fallback version",
         ),
     ]),
     ("scripts/install.sh", [
-        # Fallback after plugin.json read: ...plugin.json...|| echo "X.Y.Z")
         (
             r"plugin\.json.*\|\|\s*echo\s+\"([^\"]+)\"\)",
             "Bash install.sh fallback version",
         ),
     ]),
     ("Install.command", [
-        # Fallback after plugin.json read: ...plugin.json...|| echo "X.Y.Z")
         (
             r"plugin\.json.*\|\|\s*echo\s+\"([^\"]+)\"\)",
             "Install.command fallback version",
@@ -61,7 +50,6 @@ INSTALLER_CHECKS: list[tuple[str, list[tuple[str, str]]]] = [
 
 
 def load_source_version() -> str:
-    """Read the canonical version from plugin.json."""
     if not PLUGIN_JSON.is_file():
         print(f"FAIL  Source of truth not found: {PLUGIN_JSON}")
         sys.exit(1)
@@ -74,7 +62,6 @@ def load_source_version() -> str:
 
 
 def check_installers(expected: str) -> list[dict]:
-    """Check each installer file for version references."""
     results: list[dict] = []
 
     for relpath, patterns in INSTALLER_CHECKS:
@@ -116,67 +103,10 @@ def check_installers(expected: str) -> list[dict]:
     return results
 
 
-def check_root_plugin_json_sync(expected: str) -> list[dict]:
-    """Verify .claude-plugin/plugin.json at repo root matches src/plugin/plugin.json."""
-    results: list[dict] = []
-    root_pj = REPO_ROOT / ".claude-plugin" / "plugin.json"
-
-    if not root_pj.is_file():
-        results.append({
-            "file": ".claude-plugin/plugin.json",
-            "status": "FAIL",
-            "details": "file missing (Claude Code requires this for /doctor)",
-        })
-        return results
-
-    try:
-        root_data = json.loads(root_pj.read_text(encoding="utf-8"))
-        root_version = root_data.get("version", "")
-    except (json.JSONDecodeError, OSError) as exc:
-        results.append({
-            "file": ".claude-plugin/plugin.json",
-            "status": "FAIL",
-            "details": f"could not parse: {exc}",
-        })
-        return results
-
-    if root_version == expected:
-        results.append({
-            "file": ".claude-plugin/plugin.json",
-            "status": "PASS",
-            "details": f"version {root_version} matches src/plugin/plugin.json",
-        })
-    else:
-        results.append({
-            "file": ".claude-plugin/plugin.json",
-            "status": "FAIL",
-            "details": f"version {root_version} does not match src/plugin/plugin.json ({expected})",
-        })
-
-    # Also verify full content matches (not just version)
-    src_content = PLUGIN_JSON.read_text(encoding="utf-8").strip()
-    root_content = root_pj.read_text(encoding="utf-8").strip()
-    if src_content == root_content:
-        results.append({
-            "file": ".claude-plugin/plugin.json",
-            "status": "PASS",
-            "details": "content identical to src/plugin/plugin.json",
-        })
-    else:
-        results.append({
-            "file": ".claude-plugin/plugin.json",
-            "status": "FAIL",
-            "details": "content differs from src/plugin/plugin.json -- run: cp src/plugin/plugin.json .claude-plugin/plugin.json",
-        })
-
-    return results
-
-
 def check_dynamic_read() -> list[dict]:
     """Verify that each installer reads version dynamically from plugin.json."""
     results: list[dict] = []
 
-    # Install.ps1 should read from plugin.json via ConvertFrom-Json
     ps1 = REPO_ROOT / "scripts" / "Install.ps1"
     if ps1.is_file():
         content = ps1.read_text(encoding="utf-8")
@@ -193,7 +123,6 @@ def check_dynamic_read() -> list[dict]:
                 "details": "does not read version dynamically from plugin.json",
             })
 
-    # install.sh should read via python3 -c ... plugin.json
     for relpath in ("scripts/install.sh", "Install.command"):
         fpath = REPO_ROOT / relpath
         if fpath.is_file():
@@ -219,23 +148,12 @@ def main() -> int:
 
     print("cre-skills-plugin Version Check")
     print("=" * 50)
-    print(f"Source of truth: src/plugin/plugin.json")
+    print(f"Source of truth: .claude-plugin/plugin.json")
     print(f"Expected version: {expected}")
     print()
 
     all_pass = True
 
-    # Check 0: Root .claude-plugin/plugin.json in sync
-    print("Root plugin.json sync:")
-    sync_results = check_root_plugin_json_sync(expected)
-    for r in sync_results:
-        tag = r["status"]
-        print(f"  {tag:4s}  {r['file']}: {r['details']}")
-        if tag == "FAIL":
-            all_pass = False
-    print()
-
-    # Check 1: Dynamic read
     print("Dynamic version read:")
     dynamic_results = check_dynamic_read()
     for r in dynamic_results:
@@ -245,7 +163,6 @@ def main() -> int:
             all_pass = False
     print()
 
-    # Check 2: Fallback values
     print("Fallback version values:")
     fallback_results = check_installers(expected)
     for r in fallback_results:
@@ -255,7 +172,6 @@ def main() -> int:
             all_pass = False
     print()
 
-    # Verdict
     if all_pass:
         print("RESULT: PASS")
         return 0

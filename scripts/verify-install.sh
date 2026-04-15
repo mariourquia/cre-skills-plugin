@@ -48,7 +48,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SRC_DIR="$REPO_ROOT/src"
 
-if [ ! -f "$SRC_DIR/plugin/plugin.json" ]; then
+if [ ! -f "$REPO_ROOT/.claude-plugin/plugin.json" ]; then
   printf "${RED}ERROR: Cannot locate plugin root at %s${RESET}\n" "$REPO_ROOT"
   exit 1
 fi
@@ -309,7 +309,7 @@ if [ "$JSON_MODE" = true ]; then
   python3 -c "
 import json
 print(json.dumps({
-    'version': open('$SRC_DIR/plugin/plugin.json').read(),
+    'version': open('$REPO_ROOT/.claude-plugin/plugin.json').read(),
     'failures': $FAILURES,
     'warnings': $WARNINGS,
     'skill_dirs': $SKILL_TOTAL,
