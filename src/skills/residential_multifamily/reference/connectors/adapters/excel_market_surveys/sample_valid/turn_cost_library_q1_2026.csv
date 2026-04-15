@@ -1,0 +1,7 @@
+scope_template,classic_to_renovated,market,region,segment,property_form,unit_type_label,category,low,typical,high,target_make_ready_days,as_of,source,source_basis,row_id
+light,classic_to_classic,Charlotte,southeast,middle_market,garden,A1,paint,180,220,275,5,2026-01-31,derived_from_labor+material_q1_2026,derived,tcl_0001
+light,classic_to_classic,Charlotte,southeast,middle_market,garden,A1,cleaning,85,110,140,5,2026-01-31,derived_from_labor+material_q1_2026,derived,tcl_0002
+standard,classic_to_classic,Charlotte,southeast,middle_market,garden,B1,paint,240,285,340,7,2026-01-31,derived_from_labor+material_q1_2026,derived,tcl_0003
+standard,classic_to_classic,Charlotte,southeast,middle_market,garden,B1,flooring,350,420,510,7,2026-01-31,derived_from_labor+material_q1_2026,derived,tcl_0004
+classic_reno,classic_to_renovated,Charlotte,southeast,middle_market,garden,B1,flooring,1150,1350,1600,14,2026-01-31,derived_from_labor+material_q1_2026,derived,tcl_0005
+classic_reno,classic_to_renovated,Charlotte,southeast,middle_market,garden,B1,appliance,2250,2600,3100,14,2026-01-31,derived_from_labor+material_q1_2026,derived,tcl_0006

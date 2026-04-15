@@ -1,0 +1,246 @@
+checks:
+- check_id: construction_record_count
+  check_kind: record_count
+  severity: blocker
+  description: Raw row count minus rejects equals normalized row count.
+  inputs:
+  - reference/raw/construction/<YYYY>/<MM>/<source>__<as_of>.*
+  - reference/normalized/construction_<entity>__<scope>.csv
+  expected_invariant: count(raw) - count(rejected) == count(normalized)
+  remediation: See qa/record_count.yaml.
+- check_id: construction_duplicate_primary_key
+  check_kind: duplicate_id
+  severity: blocker
+  description: No duplicate PKs across entities.
+  inputs:
+  - reference/normalized/construction_commitment__<scope>.csv
+  - reference/normalized/construction_change_order__<scope>.csv
+  expected_invariant: count(distinct pk) == count(records) per entity
+  remediation: See qa/duplicate_id.yaml.
+- check_id: construction_commitment_change_order_draw
+  check_kind: commitment_draw
+  severity: blocker
+  description: 'Cumulative approved draws cannot exceed commitment contract_total
+
+    plus sum of approved change orders.
+
+    '
+  inputs:
+  - reference/normalized/construction_commitment__<scope>.csv
+  - reference/normalized/construction_change_order__<scope>.csv
+  - reference/normalized/construction_draw_request__<scope>.csv
+  expected_invariant: 'for each commitment_id: sum(draws where approval_status IN
+    (approved, funded))
+
+    <= contract_total_cents + sum(co.cost_delta_cents where status = approved)
+
+    '
+  remediation: See qa/commitment_change_order_draw.yaml.
+- check_id: construction_change_order_commitment_fk
+  check_kind: null_critical
+  severity: blocker
+  description: Every change_order.commitment_id resolves to a construction.commitment.
+  inputs:
+  - reference/normalized/construction_change_order__<scope>.csv
+  - reference/normalized/construction_commitment__<scope>.csv
+  expected_invariant: change_order.commitment_id IN commitment.commitment_id
+  remediation: "Orphan CO blocks the landing \u2014 operator confirms whether it references\n\
+    a legacy commitment not captured in current feed or is a data-entry error.\n"
+- check_id: construction_schedule_milestone_monotonic
+  check_kind: date_coverage
+  severity: warning
+  description: current_forecast_date must be >= baseline_date for in-progress milestones.
+  inputs:
+  - reference/normalized/construction_schedule_milestone__<scope>.csv
+  expected_invariant: current_forecast_date >= baseline_date where actual_date IS
+    NULL
+  remediation: 'A current_forecast earlier than baseline typically reflects re-baselining
+
+    without updating the baseline snapshot; confirm with PM.
+
+    '
+- check_id: con_multiple_budget_versions_flagged
+  check_kind: date_coverage
+  severity: warning
+  description: Multiple dev_budget scenarios at the same as_of_date for the same project
+    are allowed but must carry distinct scenario labels and declare a current_of_record
+    pointer.
+  inputs:
+  - reference/normalized/construction_dev_budget__<scope>.csv
+  - reference/connectors/construction/manifest.yaml
+  expected_invariant: 'for each (project_id, as_of_date): distinct scenarios per budget_line_slug
+    AND exactly one scenario tagged current_of_record in construction/manifest.yaml'
+  remediation: 'Without a current_of_record pointer, reporting flips between baseline
+
+    and current arbitrarily. Operator sets the pointer per review cycle.
+
+    '
+- check_id: con_contingency_classification_correct
+  check_kind: null_critical
+  severity: warning
+  description: Contingency lines in dev_budget are classified as owner_contingency
+    or contractor_contingency; draw treatment must match the classification.
+  inputs:
+  - reference/normalized/construction_dev_budget__<scope>.csv
+  - reference/normalized/construction_draw_request__<scope>.csv
+  expected_invariant: 'for each dev_budget row where budget_line_slug = contingency:
+    contingency_class IN (owner_contingency, contractor_contingency) AND draw requests
+    that consume contingency reference the matching class'
+  remediation: 'Mixing the two contingency classes blurs risk accountability and
+
+    draw approval routing. Operator classifies each contingency line per
+
+    the construction agreement before re-landing.
+
+    '
+- check_id: con_pending_vs_approved_co_separated
+  check_kind: commitment_draw
+  severity: blocker
+  description: Pending, pending_approval, and proposed change orders are excluded
+    from the commitment ceiling computation; only status = approved COs count toward
+    the contract total extension.
+  inputs:
+  - reference/normalized/construction_change_order__<scope>.csv
+  - reference/normalized/construction_commitment__<scope>.csv
+  - reference/normalized/construction_draw_request__<scope>.csv
+  expected_invariant: 'for each commitment_id: sum(draws where approval_status IN
+    (approved, funded)) <= contract_total_cents + sum(co.cost_delta_cents where status
+    = approved) AND draws that reference pending COs are flagged for review'
+  remediation: 'Drawing against pending COs is an early warning of overrun. Operator
+
+    either approves the CO or holds the draw.
+
+    '
+- check_id: con_revised_completion_date_history
+  check_kind: date_coverage
+  severity: warning
+  description: Each schedule_milestone carries the full history of current_forecast_date
+    revisions; the latest revision is the current_forecast_date of record.
+  inputs:
+  - reference/normalized/construction_schedule_milestone__<scope>.csv
+  expected_invariant: 'for each milestone_id: exists a forecast_revision_history array
+    with monotonically increasing revision_timestamp AND current_forecast_date ==
+    last_revision.forecast_date'
+  remediation: 'Without revision history, slippage is invisible. Operator captures
+
+    each forecast update and re-lands.
+
+    '
+- check_id: con_draw_timing_vs_commitment
+  check_kind: date_coverage
+  severity: warning
+  description: Draw requests reference commitment_ids with a commitment execution_date
+    prior to or equal to the draw period; draws referencing commitments not yet executed
+    are flagged.
+  inputs:
+  - reference/normalized/construction_draw_request__<scope>.csv
+  - reference/normalized/construction_commitment__<scope>.csv
+  expected_invariant: 'for each draw_request where commitment_id IS NOT NULL: commitment.execution_date
+    <= draw_period_end_date OR draw carries early_work_authorization_flag'
+  remediation: 'Drawing against a commitment that has not been executed signals
+
+    either an early-work authorization (allowed with flag) or a data-entry
+
+    error. Operator reconciles.
+
+    '
+- check_id: con_project_phase_consistency
+  check_kind: null_critical
+  severity: warning
+  description: Project phase (predevelopment, design, permitting, construction, lease_up,
+    stabilized) is consistent across dev_budget, schedule_milestone, draw_request,
+    and commitment rows at a given as_of_date.
+  inputs:
+  - reference/normalized/construction_dev_budget__<scope>.csv
+  - reference/normalized/construction_schedule_milestone__<scope>.csv
+  - reference/normalized/construction_draw_request__<scope>.csv
+  - reference/normalized/construction_commitment__<scope>.csv
+  expected_invariant: 'for each project_id and as_of_date: project_phase value matches
+    across all entity rows OR carries a phase_transition_note explaining the crossover'
+  remediation: 'Conflicting phase tags break phase-based reporting. Operator sets
+
+    the phase of record at each landing.
+
+    '
+- check_id: con_rehab_vs_opex_capex_coding_correct
+  check_kind: null_critical
+  severity: warning
+  description: Rehab postings associated with a capex project are coded to capex accounts;
+    rehab postings below the capitalization threshold are allowed as opex only with
+    a rehab_as_opex flag.
+  inputs:
+  - reference/normalized/construction_commitment__<scope>.csv
+  - reference/normalized/gl_actual__<scope>.csv
+  - reference/normalized/gl_capex_actual__<scope>.csv
+  - overlays/org/<org_id>/overlay.yaml
+  expected_invariant: 'for each construction commitment associated with rehab scope:
+    matching gl postings are in gl_capex_actual above the capitalization threshold
+    OR carry rehab_as_opex = true with documented reason'
+  remediation: 'Misclassified rehab distorts both NOI and renovation-yield metrics.
+
+    Operator reclassifies or flags the exception.
+
+    '
+- check_id: con_cost_to_complete_inputs_complete
+  check_kind: null_critical
+  severity: warning
+  description: Every active project carries the inputs required to compute the cost_to_complete
+    metric (committed, invoiced, approved COs, contingency remaining, pending commitments).
+  inputs:
+  - reference/normalized/construction_commitment__<scope>.csv
+  - reference/normalized/construction_change_order__<scope>.csv
+  - reference/normalized/construction_draw_request__<scope>.csv
+  - reference/normalized/construction_dev_budget__<scope>.csv
+  expected_invariant: 'for each project where phase IN (construction): all required
+    inputs are present and non-null for the cost_to_complete metric contract'
+  remediation: 'A project missing cost_to_complete inputs cannot be reported reliably.
+
+    Operator fills the gap before the draw review workflow runs.
+
+    '
+- check_id: con_schedule_milestone_completion_evidence_required
+  check_kind: null_critical
+  severity: warning
+  description: Milestones marked actual_date IS NOT NULL must carry a completion_evidence_ref
+    (inspection report, CO issuance, TCO, AIA G702, or equivalent).
+  inputs:
+  - reference/normalized/construction_schedule_milestone__<scope>.csv
+  expected_invariant: 'for each schedule_milestone where actual_date IS NOT NULL:
+    completion_evidence_ref IS NOT NULL'
+  remediation: 'Marking a milestone complete without evidence leaves the schedule
+
+    un-auditable. Operator uploads the evidence or rolls back the actual_date.
+
+    '
+- check_id: con_lien_waiver_tracking_flag
+  check_kind: null_critical
+  severity: warning
+  description: Draw requests that include payments to subcontractors must reference
+    lien_waiver_status = received for the period being paid.
+  inputs:
+  - reference/normalized/construction_draw_request__<scope>.csv
+  - reference/normalized/construction_commitment__<scope>.csv
+  expected_invariant: 'for each draw_request that pays subcontractor commitments:
+    lien_waiver_received_flag = true for the prior period AND conditional_lien_waiver_received_flag
+    = true for the current period'
+  remediation: 'Paying without lien waivers exposes the owner to mechanic-lien risk.
+
+    Operator collects waivers before the draw is funded.
+
+    '
+- check_id: con_punchlist_item_tracked_to_closeout
+  check_kind: null_critical
+  severity: warning
+  description: Projects in closeout phase must have punch_item records with status
+    IN (resolved, verified) equal to the total punch_item count, or remaining items
+    carry a deferred_to_warranty flag.
+  inputs:
+  - reference/normalized/construction_punch_item__<scope>.csv
+  expected_invariant: 'for each project_id in closeout phase: count(punch_item where
+    status IN (resolved, verified)) + count(punch_item where deferred_to_warranty
+    = true) == count(punch_item) for that project_id'
+  remediation: 'Open punch items block final CO and unit delivery. Operator resolves
+
+    or defers to warranty before closeout.
+
+    '

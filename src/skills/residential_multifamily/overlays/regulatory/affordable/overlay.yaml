@@ -1,0 +1,157 @@
+overlay_id: regulatory.affordable
+overlay_kind: regulatory
+status: stub
+scope:
+  regulatory_program:
+    - lihtc
+    - hud_section_8
+    - hud_202_811
+    - usda_rd
+    - state_program
+    - mixed_income
+authoring_notes: |
+  Parent overlay for the regulatory family covering regulated affordable housing,
+  HUD and USDA subsidized programs, state and local HFA programs, and
+  mixed-income properties. Only loads when the property's regulatory_program
+  axis is non-`none`.
+
+  This overlay does NOT redefine segment posture (middle_market, luxury).
+  Market-positioning continues to be owned by `overlays/segments/*`. This
+  overlay adds compliance surfaces: eligibility certification, income and rent
+  limit testing, utility allowance reconciliation, recertification cadence,
+  agency reporting, file-audit preparedness, inspection readiness, and
+  compliance-escalation routing.
+
+  Phase 1 is architecture only. Program overlays under `programs/*/overlay.yaml`
+  carry program-specific divergences. `_shared/*.md` files define the target-key
+  shape of each compliance concept; the reference tables that hold numeric
+  schedules (rent limits, income limits, UA, agency report catalogs) are
+  deferred to Phase 2.
+
+  Merging order: segment loads first, then regulatory (this overlay, then the
+  program overlay), then form_factor, lifecycle, management_mode, market, org.
+  Org always wins. See overlays/regulatory/OVERLAY_FAMILY.md for the full
+  composition rule.
+
+overrides:
+  - target_kind: screening_policy
+    target_ref: _core/guardrails.md#screening
+    override_value:
+      screening_policy_ref: overlays/regulatory/_shared/eligibility_and_certification.md
+    reason: |
+      Adds program-specific eligibility gates (income band, student status,
+      household composition, subsidy documentation) on top of the segment's
+      screening policy. Does not replace the segment policy.
+  - target_kind: reporting_emphasis
+    target_ref: _core/metrics.md#collections_rate
+    override_value:
+      reporting_emphasis_ref: overlays/regulatory/_shared/rent_limits.md
+    reason: |
+      Regulated collections must reconcile tenant portion vs. subsidy portion
+      vs. contract rent. Rent-limit compliance waterfall is a primary
+      reporting surface and is not present in conventional segments.
+  - target_kind: reporting_emphasis
+    target_ref: _core/metrics.md#concession_rate
+    override_value:
+      reporting_emphasis_ref: overlays/regulatory/_shared/rent_limits.md
+    reason: |
+      Concessions are restricted or prohibited under most regulated programs.
+      The reporting emphasis shifts to program-compliance posture rather than
+      market-gap closure.
+  - target_kind: reporting_emphasis
+    target_ref: _core/metrics.md#delinquency_rate_30plus
+    override_value:
+      reporting_emphasis_ref: overlays/regulatory/_shared/recertification.md
+    reason: |
+      Interim recertification on income loss changes the tenant portion and
+      may reset the delinquency posture; the reporting emphasis surfaces this
+      interaction.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#rent_growth_new_lease
+    override_value:
+      target_band_ref: overlays/regulatory/_shared/rent_limits.md
+    reason: |
+      Rent growth on new leases is capped at the program's allowable limit
+      increase, not at the segment's market-driven band. Program overlay
+      points at `reference/normalized/rent_limits__{program}__{market}.csv`.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#rent_growth_renewal
+    override_value:
+      target_band_ref: overlays/regulatory/_shared/rent_limits.md
+    reason: |
+      Renewal rent growth is capped at the program's allowable limit.
+      Utility-allowance refresh can move the allowable tenant portion
+      without a true rent increase; the overlay separates the two.
+  - target_kind: delinquency_playbook_stage
+    target_ref: overlays/segments/middle_market/delinquency_playbook.md
+    override_value:
+      stage_ref: overlays/regulatory/_shared/recertification.md
+    reason: |
+      Affordability-driven delinquency playbook separates tenant portion and
+      subsidy portion in the ledger and integrates interim recert on income
+      loss. Payment plans and waivers follow program rules; ad-hoc deals are
+      prohibited. Eviction pathways may carry agency-notice prerequisites.
+  - target_kind: resident_comm_tone
+    target_ref: overlays/segments/middle_market/resident_comm_tone.md
+    override_value:
+      comm_tone_ref: overlays/regulatory/_shared/eligibility_and_certification.md
+    reason: |
+      Program-specific notices (annual recertification notice, income
+      verification requests, rent-adjustment notices per program cadence)
+      require legal-review banners and plain-language multi-lingual
+      communication. Base tone continues from segment.
+  - target_kind: approval_threshold
+    target_ref: _core/approval_matrix.md#compliance_escalation
+    override_value:
+      threshold_ref: overlays/regulatory/_shared/escalation_sensitivity.md
+    reason: |
+      Compliance escalation events (REAC / NSPIRE finding, agency
+      noncompliance notice, recapture risk, VAWA event, fair-housing
+      complaint, file-audit finding) route to compliance_lead and
+      legal_counsel. Does not override the org approval matrix; layers
+      alongside it.
+  - target_kind: staffing_ratio
+    target_ref: _core/taxonomy.md#role.compliance_lead
+    override_value:
+      staffing_ratio_ref: overlays/regulatory/_shared/file_audit_preparedness.md
+    reason: |
+      A designated compliance lead (in-house or outsourced) is required.
+      Staffing ratio anchors to the file-audit preparedness and agency-
+      reporting load; the concrete ratio is filled during org tailoring.
+
+adds:
+  - added_kind: metric
+    slug: rent_limit_compliance_rate
+    definition_ref: overlays/regulatory/_shared/rent_limits.md
+  - added_kind: metric
+    slug: income_certification_timeliness
+    definition_ref: overlays/regulatory/_shared/eligibility_and_certification.md
+  - added_kind: metric
+    slug: ua_reconciliation_status
+    definition_ref: overlays/regulatory/_shared/utility_allowance.md
+  - added_kind: metric
+    slug: agency_inspection_readiness_score
+    definition_ref: overlays/regulatory/_shared/file_audit_preparedness.md
+  - added_kind: threshold
+    slug: extended_use_covenant_window
+    definition_ref: overlays/regulatory/affordable/programs/lihtc/overlay.yaml
+  - added_kind: threshold
+    slug: qualified_contract_window
+    definition_ref: overlays/regulatory/affordable/programs/lihtc/overlay.yaml
+  - added_kind: escalation_kind
+    slug: reac_nspire_finding
+    definition_ref: overlays/regulatory/_shared/escalation_sensitivity.md
+  - added_kind: escalation_kind
+    slug: agency_noncompliance_notice
+    definition_ref: overlays/regulatory/_shared/escalation_sensitivity.md
+  - added_kind: escalation_kind
+    slug: recapture_risk_trigger
+    definition_ref: overlays/regulatory/_shared/escalation_sensitivity.md
+  - added_kind: escalation_kind
+    slug: vawa_event
+    definition_ref: overlays/regulatory/_shared/escalation_sensitivity.md
+
+approvers:
+  - director_of_operations
+  - compliance_lead
+  - legal_counsel

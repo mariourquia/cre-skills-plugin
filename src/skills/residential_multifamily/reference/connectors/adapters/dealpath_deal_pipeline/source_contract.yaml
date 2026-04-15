@@ -1,0 +1,185 @@
+# Dealpath raw payload shapes per entity.
+# Describes the Dealpath API response fields as they arrive at raw landing.
+# Dealpath field names are preserved in snake_case (matching the public
+# Dealpath API). The ingestion layer appends the provenance envelope at
+# landing. Types follow Dealpath API conventions (ids = string, dates =
+# ISO, money = decimal USD).
+#
+# Canonical object mapping lives in normalized_contract.yaml and
+# field_mapping.yaml. This file documents the raw shape only.
+
+status_tag: sample
+
+provenance_envelope:
+  description: |
+    Every raw record at landing carries this envelope. Not part of the
+    Dealpath payload proper; set by the extractor. Matches the envelope
+    shape used by other wave-4 adapters for consistency.
+  required:
+    - { field: source_name,        type: string,   value: dealpath_prod }
+    - { field: source_type,        type: string,   value: deal_pipeline }
+    - { field: source_date,        type: date,     note: extract-window as-of date }
+    - { field: extracted_at,       type: datetime, note: extractor run timestamp }
+    - { field: extractor_version,  type: string,   note: adapter version }
+    - { field: source_row_id,      type: string,   note: Dealpath primary key preserved as-is }
+
+entities:
+
+  deal:
+    dealpath_endpoint: GET /api/v1/deals
+    grain: one record per Dealpath deal
+    note: |
+      A Dealpath deal is the pre-close artifact — sourcing through close.
+      deal_id is stable across renames. asset_id links to the Dealpath
+      asset master; a deal may reference an asset that is also referenced
+      by another deal (refi / recap workflows).
+    required_fields:
+      - { name: deal_id,                type: string,   note: Dealpath stable id }
+      - { name: deal_name,              type: string,   note: operator-maintained; can be renamed post-IC }
+      - { name: asset_id,               type: string,   note: FK to Dealpath asset master }
+      - { name: deal_type,              type: enum,     values: [acquisition, development, refi, recap, other] }
+      - { name: pipeline_stage,         type: enum,     values: [sourcing, screened, under_loi, psa_executed, dd, ic_scheduled, ic_approved, ic_declined, ic_deferred, under_contract, funded, closed, dead, on_hold] }
+      - { name: market,                 type: string,   note: Dealpath market label; requires market_crosswalk resolution }
+      - { name: deal_status,            type: enum,     values: [active, closed, dead, on_hold], note: "Dealpath API field is `status`; adapter renames to `deal_status` at landing to avoid collision with the provenance envelope status tag." }
+    optional_fields:
+      - { name: submarket,              type: string }
+      - { name: target_close_date,      type: date,     note: forecast close date }
+      - { name: actual_close_date,      type: date,     note: populated on close }
+      - { name: ic_decision_date,       type: date,     note: populated when IC renders a decision }
+      - { name: deal_lead,              type: string,   note: investments_lead user id in Dealpath }
+      - { name: total_purchase_price,   type: number,   note: USD dollars, decimal }
+      - { name: equity_required,        type: number,   note: USD dollars, decimal }
+      - { name: debt_target,            type: number,   note: USD dollars; sum of target debt placements }
+      - { name: sponsor_entity_id,      type: string,   note: not yet resolved to Intacct legal_entity_id }
+      - { name: created_at,             type: datetime }
+      - { name: updated_at,             type: datetime }
+      - { name: deleted_flag,           type: boolean,  note: true = Dealpath deal soft-deleted }
+
+  asset:
+    dealpath_endpoint: GET /api/v1/assets
+    grain: one record per Dealpath asset master row
+    note: |
+      Dealpath asset master is the pre-close asset registry. Post-close it
+      becomes secondary to AppFolio + Intacct for operating identity.
+    required_fields:
+      - { name: asset_id,               type: string,   note: Dealpath stable id }
+      - { name: asset_name,             type: string }
+      - { name: market,                 type: string,   note: Dealpath market label }
+      - { name: asset_type,             type: enum,     values: [multifamily, student_housing, build_to_rent, mixed_use, senior_housing, other] }
+    optional_fields:
+      - { name: address,                type: string,   note: redact-partial at landing }
+      - { name: city,                   type: string }
+      - { name: state,                  type: string }
+      - { name: zip,                    type: string }
+      - { name: submarket,              type: string }
+      - { name: unit_count,             type: integer,  note: planned or actual }
+      - { name: year_built,             type: integer,  note: null for ground-up pre-delivery }
+      - { name: parcel_acres,           type: number }
+      - { name: created_at,             type: datetime }
+      - { name: updated_at,             type: datetime }
+
+  deal_milestone:
+    dealpath_endpoint: GET /api/v1/deals/{id}/milestones
+    grain: one record per (deal_id, milestone_type)
+    note: |
+      Dealpath milestones span sourcing through close. Enum is operator-
+      tunable; the adapter maps to a canonical lifecycle milestone set.
+    required_fields:
+      - { name: milestone_id,           type: string }
+      - { name: deal_id,                type: string }
+      - { name: milestone_type,         type: enum,     values: [sourcing, loi_signed, psa_signed, dd_started, dd_completed, ic_scheduled, ic_approved, ic_declined, ic_deferred, debt_term_sheet, debt_committed, equity_committed, close, funded, gc_selected, gc_award] }
+      - { name: milestone_status,       type: enum,     values: [not_started, in_progress, achieved, slipped, waived, blocked], note: "Dealpath API field is `status`; adapter renames to `milestone_status` at landing to avoid collision with the provenance envelope status tag." }
+    optional_fields:
+      - { name: target_date,            type: date,     note: baseline milestone target }
+      - { name: actual_date,            type: date,     note: populated when achieved }
+      - { name: owner,                  type: string,   note: Dealpath user id responsible }
+      - { name: notes,                  type: string,   note: free text; PII redact at landing }
+      - { name: created_at,             type: datetime }
+      - { name: updated_at,             type: datetime }
+
+  deal_key_date:
+    dealpath_endpoint: GET /api/v1/deals/{id}/key_dates
+    grain: one record per (deal_id, date_type)
+    note: |
+      Key dates are contract- and due-diligence-driven dates that anchor
+      timelines (e.g., LOI expiry, DD period end). Dealpath treats these
+      as separate from milestones. Both are needed for downstream
+      acquisition_handoff sequencing.
+    required_fields:
+      - { name: key_date_id,            type: string }
+      - { name: deal_id,                type: string }
+      - { name: date_type,              type: enum,     values: [loi_expiry, psa_expiry, due_diligence_period_end, financing_contingency, close_target, tax_lookback, escrow_release, earnest_money_hard, insurance_effective, rate_lock_expiry] }
+      - { name: date_value,             type: date }
+    optional_fields:
+      - { name: source_doc_ref,         type: string,   note: Dealpath document id or URL placeholder }
+      - { name: extended_from,          type: date,     note: original date if extended }
+      - { name: extension_reason,       type: string }
+      - { name: created_at,             type: datetime }
+      - { name: updated_at,             type: datetime }
+
+  deal_team_member:
+    dealpath_endpoint: GET /api/v1/deals/{id}/team
+    grain: one record per (deal_id, member_id)
+    required_fields:
+      - { name: deal_id,                type: string }
+      - { name: member_id,              type: string,   note: Dealpath user id }
+      - { name: role,                   type: enum,     values: [deal_lead, analyst, associate, debt_lead, diligence_lead, ic_sponsor, asset_mgmt_handoff, legal, tax] }
+    optional_fields:
+      - { name: allocation_pct,         type: number,   note: 0-100; operator-maintained attribution weight }
+      - { name: assigned_at,            type: datetime }
+      - { name: removed_at,             type: datetime }
+      - { name: email_hash,             type: string,   note: hashed at landing; PII policy }
+
+  ic_decision:
+    dealpath_endpoint: GET /api/v1/deals/{id}/ic_decisions
+    grain: one record per IC decision event (most deals have 1; re-presentations produce additional rows)
+    required_fields:
+      - { name: ic_decision_id,         type: string }
+      - { name: deal_id,                type: string }
+      - { name: decision,               type: enum,     values: [approved, conditional, declined, deferred] }
+      - { name: decided_date,           type: date }
+    optional_fields:
+      - { name: conditions,             type: array,    note: array of strings; populated when decision = conditional }
+      - { name: ic_members_present,     type: array,    note: array of Dealpath user ids }
+      - { name: vote_record_summary,    type: string,   note: free text; PII redact at landing }
+      - { name: tier,                   type: enum,     values: [tier1, tier2, tier3, exec_only, other] }
+      - { name: memo_doc_ref,           type: string,   note: Dealpath document id for the IC memo }
+      - { name: resolution_deadline,    type: date,     note: deadline for satisfying conditions }
+      - { name: created_at,             type: datetime }
+
+  deal_document:
+    dealpath_endpoint: GET /api/v1/deals/{id}/documents
+    grain: one record per document attached to a deal
+    note: |
+      Documents carry a doc_type that drives downstream classification
+      (IC memo, LOI, PSA, debt term sheet, final loan docs, insurance
+      binder, etc.). Payloads are referenced by URL; content is not
+      ingested by the adapter.
+    required_fields:
+      - { name: deal_document_id,       type: string }
+      - { name: deal_id,                type: string }
+      - { name: doc_type,               type: enum,     values: [loi, psa, ic_memo, debt_term_sheet, loan_docs, operating_agreement, insurance_binder, title, survey, zoning_report, environmental, appraisal, dd_report, closing_statement, other] }
+      - { name: uploaded_at,            type: datetime }
+    optional_fields:
+      - { name: url_ref,                type: string,   note: opaque reference; never resolved by adapter }
+      - { name: version,                type: string,   note: doc version label }
+      - { name: uploaded_by,            type: string,   note: Dealpath user id }
+      - { name: supersedes,             type: string,   note: prior deal_document_id this version supersedes }
+
+  deal_status_history:
+    dealpath_endpoint: GET /api/v1/deals/{id}/status_history
+    grain: one record per stage transition for a deal
+    note: |
+      Change log for pipeline_stage transitions, renames, and resurrection
+      events. Source of truth for change tracking referenced by
+      dp_renamed_after_approval and dead-deal resurrection edge cases.
+    required_fields:
+      - { name: status_history_id,      type: string }
+      - { name: deal_id,                type: string }
+      - { name: transition_type,        type: enum,     values: [stage_change, rename, resurrection, asset_id_reassignment, deal_type_change, status_change] }
+      - { name: occurred_at,            type: datetime }
+    optional_fields:
+      - { name: from_value,             type: string }
+      - { name: to_value,               type: string }
+      - { name: changed_by,             type: string,   note: Dealpath user id }
+      - { name: reason,                 type: string,   note: free text }

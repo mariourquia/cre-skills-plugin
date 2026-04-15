@@ -1,0 +1,25 @@
+# Construction commitment + change order + draw consistency.
+check_id: commitment_change_order_draw
+check_kind: commitment_draw
+severity: blocker
+description: |
+  For each construction commitment, cumulative draws cannot exceed
+  contract total plus approved change orders; proposed or rejected COs
+  do not count toward the ceiling.
+inputs:
+  - reference/normalized/construction_commitment__<scope>.csv
+  - reference/normalized/construction_change_order__<scope>.csv
+  - reference/normalized/construction_draw_request__<scope>.csv
+expected_invariant: |
+  for each commitment_id:
+    sum(draws where approval_status = approved)
+    <= commitment.contract_total
+       + sum(change_orders where status = approved)
+tolerance:
+  absolute: 0
+  relative_percent: 0.0
+remediation: |
+  Overdraw indicates either an unapproved CO already drawn against, a
+  retention-release math error, or a misclassified commitment. Hold the
+  draw request and escalate to the construction manager per the approval
+  matrix.

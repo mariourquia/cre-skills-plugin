@@ -1045,7 +1045,7 @@ skills:
   name: Residential Multifamily Operating System
   category: cross-cutting
   priority: P1
-  status: deployed
+  status: experimental
   chains_to: []
   chains_from: []
 - slug: sec-reg-d-compliance

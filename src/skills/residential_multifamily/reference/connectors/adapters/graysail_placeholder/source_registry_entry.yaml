@@ -1,0 +1,34 @@
+# Source registry FRAGMENT for GraySail (placeholder pending classification).
+# Merged into source_registry.yaml. Status reflects unresolved classification.
+
+records:
+
+  - source_id: graysail_pending_classification
+    source_name: GraySail (Pending Classification)
+    source_domain: other
+    vendor_family: graysail_family
+    ingestion_mode: manual_upload
+    environment: stage
+    cadence: on_demand
+    data_owner: asset_mgmt_director
+    business_owner: asset_mgmt_director
+    technical_owner: data_platform_team
+    credential_method: none
+    object_coverage:
+      - source_record_audit
+    expected_latency_minutes: 0
+    known_limitations:
+      - role unresolved; classification_worksheet.md must be completed
+      - no canonical workflow may treat GraySail as primary while status is placeholder
+      - bounded_assumptions.yaml documents what the placeholder assumes
+      - blocked_workflows.md lists workflows that cannot rely on GraySail
+    pii_classification: none
+    financial_sensitivity: none
+    legal_sensitivity: none
+    status: planned
+    rollout_wave: wave_4
+    notes: |
+      Non-destructive integration stub. No data ingest occurs. Classification
+      must be confirmed via runbooks/graysail_classification_path.md before
+      this source can be promoted to `stubbed` or `active`. See
+      adapters/graysail_placeholder/README.md for evidence and required follow-up.

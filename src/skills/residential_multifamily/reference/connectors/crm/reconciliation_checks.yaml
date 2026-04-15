@@ -1,0 +1,237 @@
+checks:
+- check_id: crm_record_count
+  check_kind: record_count
+  severity: blocker
+  description: Raw row count minus rejects equals normalized row count.
+  inputs:
+  - reference/raw/crm/<YYYY>/<MM>/<source>__<as_of>.*
+  - reference/normalized/crm_<entity>__<scope>.csv
+  expected_invariant: count(raw) - count(rejected) == count(normalized)
+  remediation: See qa/record_count.yaml.
+- check_id: crm_duplicate_primary_key
+  check_kind: duplicate_id
+  severity: blocker
+  description: No duplicate PKs across lead_interaction, resident_communication, service_request,
+    follow_up_task, campaign_source.
+  inputs:
+  - reference/normalized/crm_lead_interaction__<scope>.csv
+  - reference/normalized/crm_resident_communication__<scope>.csv
+  - reference/normalized/crm_service_request__<scope>.csv
+  - reference/normalized/crm_follow_up_task__<scope>.csv
+  - reference/normalized/crm_campaign_source__<scope>.csv
+  expected_invariant: count(distinct pk) == count(records) per entity
+  remediation: See qa/duplicate_id.yaml.
+- check_id: crm_lead_interaction_lead_fk_coverage
+  check_kind: null_critical
+  severity: warning
+  description: Every lead_interaction.lead_id resolves to a pms.lead record.
+  inputs:
+  - reference/normalized/crm_lead_interaction__<scope>.csv
+  - reference/normalized/pms_lead__<scope>.csv
+  expected_invariant: for each lead_interaction, lead_id IN pms.lead.lead_id
+  remediation: 'An orphan lead_id in the CRM usually indicates a CRM/PMS sync lag or
+
+    a deleted PMS lead. Reconcile with the operator; do not silently drop.
+
+    '
+- check_id: crm_protected_class_scan
+  check_kind: null_critical
+  severity: blocker
+  description: interaction.notes and resident_communication templates must not contain
+    protected-class tokens.
+  inputs:
+  - reference/normalized/crm_lead_interaction__<scope>.csv
+  - reference/normalized/crm_resident_communication__<scope>.csv
+  expected_invariant: no token match against protected_class_lexicon
+  remediation: 'Any hit blocks the landing. Operator sanitizes or removes the offending
+
+    row before re-landing; escalate to compliance_risk audience.
+
+    '
+- check_id: crm_lead_duplicate_detection
+  check_kind: duplicate_id
+  severity: warning
+  description: Probable duplicate leads surfaced by composite-key match on normalized
+    contact and property scope within a short window.
+  inputs:
+  - reference/normalized/crm_lead_interaction__<scope>.csv
+  - reference/normalized/pms_lead__<scope>.csv
+  - reference/connectors/master_data/resident_crosswalk.yaml
+  expected_invariant: "for each (property_id, normalized_contact_hash) within the\
+    \ lookback window defined in master_data/resident_crosswalk.yaml: at most one\
+    \ active lead_id OR the redundant lead_ids carry a merged_into pointer"
+  remediation: 'Candidate duplicates are queued to the operator for merge. Survivor
+
+    lead_id is declared in master_data/resident_crosswalk.yaml; redundant
+
+    lead_ids must carry merged_into = survivor_lead_id before re-landing.
+
+    '
+- check_id: crm_merged_lead_survivorship
+  check_kind: null_critical
+  severity: blocker
+  description: Every non-survivor lead row carries a merged_into pointer to an active
+    survivor lead_id.
+  inputs:
+  - reference/normalized/crm_lead_interaction__<scope>.csv
+  - reference/normalized/pms_lead__<scope>.csv
+  - reference/connectors/master_data/resident_crosswalk.yaml
+  expected_invariant: 'for each lead flagged is_merged = true: merged_into IS NOT
+    NULL AND merged_into IN pms.lead.lead_id AND survivor.pipeline_stage NOT IN (lost)'
+  remediation: 'A merged lead without a survivor pointer breaks downstream funnel
+
+    attribution. Reconcile merge outcomes in master_data/resident_crosswalk.yaml
+
+    and re-land.
+
+    '
+- check_id: crm_offline_interaction_flagged
+  check_kind: null_critical
+  severity: warning
+  description: Walk-in, phone, and in_person_tour interactions require agent_id and
+    non-null interaction_date; missing logs indicate offline communication not captured
+    in system.
+  inputs:
+  - reference/normalized/crm_lead_interaction__<scope>.csv
+  expected_invariant: for each lead_interaction where channel IN (walk_in, phone,
+    in_person_tour), agent_id IS NOT NULL AND interaction_date IS NOT NULL
+  remediation: 'Offline interactions that reach the CRM without agent_id or timestamp
+
+    typically represent retroactive data entry. Confirm with the leasing team
+
+    whether the missing values reflect a system gap or a coaching opportunity
+
+    on timely CRM entry.
+
+    '
+- check_id: crm_lead_to_lease_traceability
+  check_kind: null_critical
+  severity: warning
+  description: Leads that reached application.approval_status = approved must trace
+    to a pms.lease row via the application bridge within the expected lag window.
+  inputs:
+  - reference/normalized/pms_lead__<scope>.csv
+  - reference/normalized/pms_application__<scope>.csv
+  - reference/normalized/pms_lease__<scope>.csv
+  expected_invariant: 'for each pms.application where approval_status = approved AND
+    applied_date <= today - expected_lag_days: exists pms.lease where lease.prior_lead_id
+    = application.lead_id OR lease.resident_account_id resolves to the application
+    applicant via master_data/resident_crosswalk.yaml'
+  remediation: 'A traced gap usually indicates a lead was approved but the lease was
+
+    never executed (lost to a competitor) or the crosswalk is stale. Update
+
+    master_data/resident_crosswalk.yaml or reclassify the lead pipeline_stage
+
+    to lost with a reason.
+
+    '
+- check_id: crm_campaign_taxonomy_conformance
+  check_kind: null_critical
+  severity: warning
+  description: Every campaign_source.medium value is in the canonical enum; source_channel
+    on pms.lead resolves to a known campaign_id or to the enum value direct/unknown.
+  inputs:
+  - reference/normalized/crm_campaign_source__<scope>.csv
+  - reference/normalized/pms_lead__<scope>.csv
+  expected_invariant: crm_campaign_source.medium IN canonical_enum AND for each pms.lead.source_channel
+    != null, source_channel IN (campaign_source.campaign_id UNION canonical_enum)
+  remediation: 'An unmapped medium breaks cost-per-lead attribution. Operator maps
+
+    the vendor campaign label to the canonical enum (see _core/taxonomy.md)
+
+    before re-landing.
+
+    '
+- check_id: crm_contact_dedup_across_applications
+  check_kind: duplicate_id
+  severity: warning
+  description: A single normalized contact hash that appears on two or more pms.application
+    rows within the same property and cycle must carry a household_id or co_applicant
+    link.
+  inputs:
+  - reference/normalized/pms_application__<scope>.csv
+  - reference/connectors/master_data/resident_crosswalk.yaml
+  expected_invariant: "for each (property_id, normalized_contact_hash, application_cycle):\
+    \ count(distinct application_id) == 1 OR the applications share household_id OR\
+    \ co_applicant_application_id points to the first application"
+  remediation: 'Duplicate contacts across applications in the same cycle signal
+
+    either re-applications (allowed, but must be flagged) or household members
+
+    filing as separate applicants (allowed with co_applicant link). Update
+
+    master_data/resident_crosswalk.yaml.
+
+    '
+- check_id: crm_timestamp_monotonic
+  check_kind: date_coverage
+  severity: warning
+  description: Event timestamps per lead_id (inquiry, first contact, tour, application,
+    approval, move-in) are chronologically ordered.
+  inputs:
+  - reference/normalized/crm_lead_interaction__<scope>.csv
+  - reference/normalized/pms_lead__<scope>.csv
+  - reference/normalized/pms_tour__<scope>.csv
+  - reference/normalized/pms_application__<scope>.csv
+  - reference/normalized/pms_lease__<scope>.csv
+  expected_invariant: "for each lead_id: inquiry_date <= first_outbound_interaction_date\
+    \ <= tour.scheduled_date <= application.applied_date <= lease.start_date"
+  remediation: 'Out-of-order timestamps typically reflect time-zone confusion or
+
+    back-dated CRM entry. Reconcile with the operator; do not silently reorder.
+
+    '
+- check_id: crm_missing_follow_up_aging
+  check_kind: date_coverage
+  severity: warning
+  description: Open follow_up_tasks must not age beyond the SLA referenced in the
+    active leasing workflow pack.
+  inputs:
+  - reference/normalized/crm_follow_up_task__<scope>.csv
+  - workflows/lead_to_lease_funnel_review/
+  expected_invariant: 'for each follow_up_task where status = open: today - due_date
+    <= max_follow_up_age_days declared in workflows/lead_to_lease_funnel_review/'
+  remediation: 'Stale open follow-ups are the leading indicator of funnel leakage.
+
+    Escalate to the leasing manager per the workflow SLA and reassign or
+
+    close before re-landing.
+
+    '
+- check_id: crm_stale_pipeline_stage
+  check_kind: date_coverage
+  severity: warning
+  description: Leads whose last_interaction_date is older than the pipeline-stage-aging
+    threshold but still carry an active pipeline_stage must be aged to lost or carry
+    a nurture reason.
+  inputs:
+  - reference/normalized/pms_lead__<scope>.csv
+  - reference/normalized/crm_lead_interaction__<scope>.csv
+  expected_invariant: 'for each pms.lead where pipeline_stage NOT IN (leased, lost):
+    today - max(lead_interaction.interaction_date) <= pipeline_stage_aging_threshold_days
+    defined in overlays/segments/<segment>/overlay.yaml'
+  remediation: 'A lead sitting in tour_scheduled for weeks without activity either
+
+    lost to a competitor or is a nurture lead. Operator confirms; re-stage
+
+    to lost or tag as nurture before re-landing.
+
+    '
+- check_id: crm_source_channel_enum_conforms
+  check_kind: null_critical
+  severity: blocker
+  description: Every pms.lead.source_channel value resolves to either a campaign_source.campaign_id
+    or a canonical medium enum value.
+  inputs:
+  - reference/normalized/pms_lead__<scope>.csv
+  - reference/normalized/crm_campaign_source__<scope>.csv
+  expected_invariant: 'for each pms.lead where source_channel IS NOT NULL: source_channel
+    IN (campaign_source.campaign_id UNION campaign_source.medium canonical_enum)'
+  remediation: 'Unmapped source_channel values silently aggregate to "other" and
+
+    distort attribution. Operator adds the campaign to master or maps to
+
+    the enum before re-landing.
+
+    '

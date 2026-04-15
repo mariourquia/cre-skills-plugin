@@ -1,0 +1,157 @@
+# Adapter Manifest Schema
+# Applies to every file at reference/connectors/adapters/<adapter_slug>/manifest.yaml.
+# Tests fail if an adapter manifest does not conform.
+#
+# Adapters are ergonomic overlays on top of canonical connectors. Canonical
+# connector contracts under reference/connectors/<domain>/ remain the source
+# of truth. Adapter manifests document vendor-family orientation and mapping
+# hints only.
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: AdapterManifest
+type: object
+required:
+  - adapter_id
+  - adapter_name
+  - vendor_family
+  - connector_domain
+  - status
+  - supported_source_systems
+  - mapping_hints
+  - known_gotchas
+  - reference_documentation
+  - author_metadata
+  - last_updated
+properties:
+  adapter_id:
+    type: string
+    pattern: "^[a-z][a-z0-9_]*$"
+    description: Stable snake_case slug. Matches the directory name under
+      reference/connectors/adapters/.
+  adapter_name:
+    type: string
+    description: Human-readable label for operators.
+  vendor_family:
+    type: string
+    description: Free-form vendor-family identifier. Not enumerated so that
+      new families can be added without a schema change. In stubs this is a
+      generic placeholder such as generic_pms_stub or excel_file_stub.
+  connector_domain:
+    type: string
+    enum:
+      - pms
+      - gl
+      - crm
+      - ap
+      - market_data
+      - construction
+      - hr_payroll
+      - manual_uploads
+      - deal_pipeline
+    description: Canonical connector this adapter overlays. Must match the
+      connector_id of a canonical connector under reference/connectors/.
+  status:
+    type: string
+    enum:
+      - stub
+      - starter
+      - production
+      - deprecated
+    description: Lifecycle stage. See adapter_lifecycle.md for gates.
+  supported_source_systems:
+    type: array
+    minItems: 1
+    description: source_id slugs from reference/connectors/source_registry/source_registry.yaml
+      that this adapter is expected to serve. In stubs these are placeholder
+      ids such as pms_generic_stub.
+    items:
+      type: string
+      pattern: "^[a-z][a-z0-9_]*$"
+  mapping_hints:
+    type: array
+    minItems: 1
+    description: Non-binding hints that suggest how a vendor-family column
+      label likely maps to a canonical field. Hints are illustrative and
+      always overridden by the canonical mapping.yaml when they conflict.
+    items:
+      type: object
+      required:
+        - source_field_pattern
+        - canonical_field
+      properties:
+        source_field_pattern:
+          type: string
+          description: Glob or regex fragment describing the source column
+            label pattern (e.g., resident*id or tenant*id).
+        canonical_field:
+          type: string
+          description: The canonical field name this pattern likely maps to.
+            Must exist in the matching canonical mapping.yaml.
+        transform_hint:
+          type: string
+          description: Optional hint for the transform function to apply.
+        notes:
+          type: string
+          description: Optional operator notes.
+      additionalProperties: false
+  known_gotchas:
+    type: array
+    minItems: 1
+    description: Cross-cutting issues operators commonly hit when ingesting
+      from this vendor family. Short strings, one per entry.
+    items:
+      type: string
+  reference_documentation:
+    type: array
+    description: Orientation references. URLs, citations, or internal doc
+      paths. In stubs these are placeholder labels.
+    items:
+      type: string
+  author_metadata:
+    type: object
+    description: Who authored the adapter and at what stage.
+    required:
+      - authored_by
+      - authored_role
+    properties:
+      authored_by:
+        type: string
+        description: Role slug or human label. Never a personal identifier
+          in stubs.
+      authored_role:
+        type: string
+        description: |
+          Role responsible for the adapter. Example values include
+          data_platform_team, finance_systems_team, and
+          operator_placeholder.
+      reviewed_by:
+        type: string
+        description: Role that reviewed the adapter. Required for starter
+          and production status.
+    additionalProperties: false
+  last_updated:
+    type: string
+    description: ISO-8601 date or datetime of the last edit to this manifest.
+  deprecation_metadata:
+    type: object
+    description: Populated only when status is deprecated.
+    properties:
+      replacement_adapter_id:
+        type: string
+        pattern: "^[a-z][a-z0-9_]*$"
+      dual_run_window_start:
+        type: string
+      dual_run_window_end:
+        type: string
+      cutoff_date:
+        type: string
+    additionalProperties: false
+  description:
+    type: string
+    description: Free-form operator description.
+  rollout_wave:
+    type: string
+    description: |
+      Optional rollout-wave tag. Example values include wave_0,
+      wave_1, wave_2, and wave_deferred.
+additionalProperties: false

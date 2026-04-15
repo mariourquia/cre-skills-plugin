@@ -1,0 +1,100 @@
+# CRM data-quality rules.
+rules:
+- rule_id: crm_freshness_interactions
+  dimension: freshness
+  severity: warning
+  description: Lead interaction feed is no older than the interaction-cadence days
+    declared in crm/manifest.yaml.
+  expected: max(crm.lead_interaction.interaction_date) >= today -
+    interaction_feed_max_age_days declared in crm/manifest.yaml
+  remediation: Operator re-lands the CRM feed per the declared cadence;
+    warnings escalate after two missed cycles.
+- rule_id: crm_completeness_required_fields
+  dimension: completeness
+  severity: blocker
+  description: Every required field in crm/schema.yaml is non-null in the
+    normalized landing.
+  expected: for each entity and required_field, count(null) == 0
+  remediation: Null in a required field usually indicates a mapping gap;
+    operator fixes mapping.yaml.
+- rule_id: crm_conformance_channel_enum
+  dimension: conformance
+  severity: blocker
+  description: lead_interaction.channel and resident_communication.channel are
+    in their canonical enums.
+  expected: channel IN canonical_enum for each entity
+  remediation: Unmapped source channels are rejected; operator extends mapping.
+- rule_id: crm_conformance_protected_class_clean
+  dimension: conformance
+  severity: blocker
+  description: Free-text notes on interactions and communication templates
+    contain no protected-class tokens.
+  expected: no token match against protected_class_lexicon
+  remediation: See crm_protected_class_scan reconciliation check.
+- rule_id: crm_consistency_pipeline_vs_events
+  dimension: consistency
+  severity: warning
+  description: pms.lead.pipeline_stage transitions are consistent with the
+    latest relevant interaction or artifact (tour, application, lease).
+  expected: for each lead, latest pipeline_stage matches the highest-rank artifact
+    observed (e.g., application exists -> stage >= applied)
+  remediation: Stale stage usually reflects agent not advancing the lead;
+    operator trains.
+- rule_id: crm_uniqueness_primary_keys
+  dimension: uniqueness
+  severity: blocker
+  description: No duplicate primary keys across CRM entities.
+  expected: count(distinct pk) == count(records) per entity
+  remediation: See qa/duplicate_id.yaml.
+- rule_id: crm_referential_integrity_lead_fk
+  dimension: referential_integrity
+  severity: warning
+  description: Every lead_interaction.lead_id and follow_up_task.related_lead_id
+    resolves to a pms.lead row.
+  expected: for each row with lead_id IS NOT NULL, lead_id IN pms.lead.lead_id
+  remediation: Orphan lead_id indicates CRM/PMS sync lag; operator reconciles
+    without silently dropping.
+- rule_id: crm_referential_integrity_campaign_fk
+  dimension: referential_integrity
+  severity: warning
+  description: pms.lead.source_channel resolves to a campaign_id OR canonical
+    medium enum.
+  expected: for each pms.lead with source_channel IS NOT NULL, source_channel
+    IN (campaign_source.campaign_id UNION canonical_medium_enum)
+  remediation: See crm_source_channel_enum_conforms.
+- rule_id: crm_reasonableness_follow_up_age
+  dimension: reasonableness
+  severity: warning
+  description: Open follow_up_task age does not exceed the max-follow-up-age days
+    declared in workflows/lead_to_lease_funnel_review/.
+  expected: for each follow_up_task where status = open, today - due_date <=
+    max_follow_up_age_days declared in workflows/lead_to_lease_funnel_review/
+  remediation: See crm_missing_follow_up_aging.
+- rule_id: crm_reasonableness_response_time
+  dimension: reasonableness
+  severity: warning
+  description: First outbound response to an inbound lead is within the
+    lead-response SLA declared in overlays/segments/<segment>/overlay.yaml.
+  expected: for each pms.lead with at least one inbound interaction, time to
+    first outbound interaction <= lead_response_sla_minutes declared in
+    overlays/segments/<segment>/overlay.yaml OR carries sla_exception_flag
+  remediation: Beyond-SLA leads feed the lead_response_time metric and flag
+    as underperforming agents in coaching reports.
+- rule_id: crm_consistency_timestamp_order
+  dimension: consistency
+  severity: warning
+  description: Per-lead event timestamps across CRM, tour, application, and
+    lease are chronologically ordered.
+  expected: see crm_timestamp_monotonic
+  remediation: See crm_timestamp_monotonic reconciliation check.
+- rule_id: crm_completeness_campaign_spend
+  dimension: completeness
+  severity: warning
+  description: Active campaigns with spend_cents IS NOT NULL have matching
+    inquiries for attribution.
+  expected: for each campaign_source with spend_cents IS NOT NULL AND
+    end_date IS NULL OR end_date >= today, exists pms.lead rows with
+    source_channel = campaign_id within the campaign window
+  remediation: Campaigns with spend but no inquiries indicate broken tracking
+    (UTM, phone-tracking, QR) or a zero-inquiry campaign; operator reconciles
+    before cost-per-lead reporting.

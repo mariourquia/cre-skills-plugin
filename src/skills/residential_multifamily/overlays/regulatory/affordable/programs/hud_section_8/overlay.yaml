@@ -1,0 +1,57 @@
+overlay_id: regulatory.affordable.hud_section_8
+overlay_kind: regulatory.program
+parent_overlay: regulatory.affordable
+status: stub
+scope:
+  regulatory_program: hud_section_8
+authoring_notes: |
+  Program overlay for HUD Section 8 in its project-based (PBRA, PBV) and
+  tenant-based (HCV) forms. Carries HAP contract mechanics, TRACS / iMAX
+  submissions, PHA utility allowance schedule, and voucher portability
+  coordination.
+
+  Phase 1 ships architecture only. HAP contract instances, TRACS submission
+  catalogs, and PHA UA schedules live in reference tables populated in Phase 2:
+  `reference/normalized/hap_contracts__{property}.csv`,
+  `reference/normalized/utility_allowance__hud_section_8__{market}.csv`,
+  `reference/normalized/agency_reports__hud_section_8.csv`.
+
+overrides:
+  - target_kind: reporting_emphasis
+    target_ref: overlays/regulatory/_shared/agency_reporting.md
+    override_value:
+      reporting_emphasis_ref: overlays/regulatory/affordable/programs/hud_section_8/overlay.yaml
+    reason: |
+      TRACS / iMAX voucher submissions, HAP billing reconciliation, and
+      special-claims filings add reporting surfaces not present in other
+      programs. Submission cadence is monthly for vouchers.
+  - target_kind: reporting_emphasis
+    target_ref: overlays/regulatory/_shared/utility_allowance.md
+    override_value:
+      reporting_emphasis_ref: overlays/regulatory/affordable/programs/hud_section_8/overlay.yaml
+    reason: |
+      UA schedule is published by the local PHA (for HCV and PBV) or set
+      under HUD methodology (for PBRA). Publisher-lag tracking is PHA-specific.
+  - target_kind: reporting_emphasis
+    target_ref: overlays/regulatory/_shared/file_audit_preparedness.md
+    override_value:
+      reporting_emphasis_ref: overlays/regulatory/affordable/programs/hud_section_8/overlay.yaml
+    reason: |
+      MOR (Management and Occupancy Review) and REAC / NSPIRE readiness
+      add HUD-specific file checklists beyond the shared baseline.
+
+adds:
+  - added_kind: metric
+    slug: hap_billing_reconciliation_status
+    definition_ref: overlays/regulatory/affordable/programs/hud_section_8/overlay.yaml
+  - added_kind: metric
+    slug: tracs_submission_timeliness
+    definition_ref: overlays/regulatory/affordable/programs/hud_section_8/overlay.yaml
+  - added_kind: checklist_item
+    slug: mor_management_occupancy_review_packet
+    definition_ref: overlays/regulatory/affordable/programs/hud_section_8/overlay.yaml
+
+approvers:
+  - director_of_operations
+  - compliance_lead
+  - legal_counsel

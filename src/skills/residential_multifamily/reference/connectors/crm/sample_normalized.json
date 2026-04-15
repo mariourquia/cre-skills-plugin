@@ -1,0 +1,101 @@
+{
+  "lead_interaction": [
+    {
+      "interaction_id": "int_sample_001",
+      "lead_id": "lead_sample_001",
+      "interaction_date": "2026-04-11T14:00:00Z",
+      "channel": "email",
+      "direction": "outbound",
+      "agent_id": "agent_sample_001",
+      "outcome": "reply_received",
+      "notes": "sample follow-up",
+      "source_name": "sample_feed",
+      "source_type": "crm",
+      "source_date": "2026-04-11",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "int_sample_001"
+    },
+    {
+      "interaction_id": "int_sample_002",
+      "lead_id": "lead_sample_001",
+      "interaction_date": "2026-04-12T16:30:00Z",
+      "channel": "in_person_tour",
+      "direction": "inbound",
+      "agent_id": "agent_sample_001",
+      "outcome": "tour_scheduled",
+      "notes": "sample tour notes",
+      "source_name": "sample_feed",
+      "source_type": "crm",
+      "source_date": "2026-04-12",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "int_sample_002"
+    }
+  ],
+  "campaign_source": [
+    {
+      "campaign_id": "camp_sample_001",
+      "campaign_label": "Sample ILS Campaign",
+      "medium": "ils",
+      "start_date": "2026-01-01",
+      "end_date": null,
+      "spend_cents": 500000,
+      "source_name": "sample_feed",
+      "source_type": "crm",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "camp_sample_001"
+    }
+  ],
+  "resident_communication": [
+    {
+      "communication_id": "comm_sample_001",
+      "resident_account_id": "resident_sample_001",
+      "communication_date": "2026-04-01T09:00:00Z",
+      "channel": "email",
+      "purpose": "renewal",
+      "template_ref": "tmpl_renewal_v1",
+      "response_received": false,
+      "source_name": "sample_feed",
+      "source_type": "crm",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "comm_sample_001"
+    }
+  ],
+  "service_request": [
+    {
+      "service_request_id": "sr_sample_001",
+      "resident_account_id": "resident_sample_001",
+      "request_type": "amenity_booking",
+      "created_date": "2026-04-10T12:00:00Z",
+      "status": "open",
+      "resolved_date": null,
+      "source_name": "sample_feed",
+      "source_type": "crm",
+      "source_date": "2026-04-10",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "sr_sample_001"
+    }
+  ],
+  "follow_up_task": [
+    {
+      "task_id": "task_sample_001",
+      "related_lead_id": "lead_sample_001",
+      "due_date": "2026-04-14",
+      "task_type": "call_back",
+      "status": "open",
+      "assigned_to": "agent_sample_001",
+      "source_name": "sample_feed",
+      "source_type": "crm",
+      "source_date": "2026-04-11",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "task_sample_001"
+    }
+  ]
+}

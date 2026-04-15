@@ -1,0 +1,682 @@
+# Procore Construction — Full per-entity field mapping.
+# Mirrors the shape of ../../construction/field_mapping.yaml but is
+# scoped to Procore raw fields. Canonical contract at
+# ../../construction/schema.yaml remains authoritative.
+
+status_tag: stub
+
+capex_project:
+  fields:
+    - canonical_field: capex_project_id
+      source_field: project_id
+      source_description: Procore project id
+      transform_rule: resolve_via_capex_project_crosswalk
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: canonical capex_project_id resolves via capex_project_crosswalk
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: project anchor
+    - canonical_field: project_name
+      source_field: name
+      source_description: Procore project display name
+      transform_rule: trim_string
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: non-empty
+      required_for_load: true
+      required_for_kpi: false
+      provenance_note: display
+    - canonical_field: project_type
+      source_field: project_type
+      source_description: Procore operator-defined project type
+      transform_rule: map_procore_project_type
+      type_cast_rule: enum
+      null_handling: default_to_null
+      default_rule: component_replacement
+      validation_rule: project_type IN (component_replacement, value_add, amenity_upgrade, deferred_mx, life_safety, compliance, other) when non-null
+      required_for_load: false
+      required_for_kpi: true
+      provenance_note: CapexProject subtype discrimination
+    - canonical_field: status
+      source_field: stage
+      source_description: Procore project stage
+      transform_rule: map_procore_stage
+      type_cast_rule: enum
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: status IN (proposed, approved, in_progress, complete, cancelled, deferred)
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: project lifecycle
+    - canonical_field: target_start
+      source_field: start_date
+      source_description: Procore planned start
+      transform_rule: to_iso_date
+      type_cast_rule: date
+      null_handling: default_to_null
+      default_rule: null
+      validation_rule: target_start IS NULL OR target_start <= target_completion
+      required_for_load: false
+      required_for_kpi: true
+      provenance_note: schedule anchor
+    - canonical_field: target_completion
+      source_field: completion_date
+      source_description: Procore planned completion
+      transform_rule: to_iso_date
+      type_cast_rule: date
+      null_handling: default_to_null
+      default_rule: null
+      validation_rule: target_completion IS NULL OR target_completion >= target_start
+      required_for_load: false
+      required_for_kpi: true
+      provenance_note: schedule anchor
+    - canonical_field: property_id
+      source_field: derived_via_crosswalk
+      source_description: Resolved via property_master_crosswalk at load time
+      transform_rule: resolve_via_property_master_crosswalk
+      type_cast_rule: string
+      null_handling: default_to_null
+      default_rule: null
+      validation_rule: property_id resolves or records enter pre_delivery_queue
+      required_for_load: false
+      required_for_kpi: true
+      provenance_note: property FK — null allowed for ground-up pre-delivery
+
+estimate_line_item:
+  fields:
+    - canonical_field: line_item_id
+      source_field: id
+      source_description: Procore budget_line_item id
+      transform_rule: prefix_with_adapter_then_trim_string
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: line_item_id unique
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: budget line anchor
+    - canonical_field: project_id
+      source_field: project_id
+      source_description: Procore project FK
+      transform_rule: resolve_via_capex_project_crosswalk
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: project_id resolves via capex_project_crosswalk
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: FK to capex_project
+    - canonical_field: line_label
+      source_field: description
+      source_description: Procore line description
+      transform_rule: trim_string
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: non-empty
+      required_for_load: true
+      required_for_kpi: false
+      provenance_note: display
+    - canonical_field: unit
+      source_field: unit
+      source_description: Procore unit of measure
+      transform_rule: map_uom
+      type_cast_rule: enum
+      null_handling: default_to_null
+      default_rule: lot
+      validation_rule: unit IN (ea, sf, lf, cy, ton, hr, lot)
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: takeoff UOM
+    - canonical_field: quantity
+      source_field: quantity
+      source_description: Procore quantity
+      transform_rule: to_number
+      type_cast_rule: number
+      null_handling: default_to_null
+      default_rule: 1
+      validation_rule: quantity > 0
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: takeoff quantity
+    - canonical_field: unit_cost_cents
+      source_field: unit_cost
+      source_description: Procore unit cost
+      transform_rule: dollars_to_cents
+      type_cast_rule: money_cents
+      null_handling: default_to_null
+      default_rule: 0
+      validation_rule: unit_cost_cents >= 0
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: unit rate
+    - canonical_field: extended_cost_cents
+      source_field: original_budget_amount
+      source_description: Procore original budget line amount
+      transform_rule: dollars_to_cents
+      type_cast_rule: money_cents
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: extended_cost_cents >= 0
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: line total
+    - canonical_field: csi_division
+      source_field: cost_code
+      source_description: Procore cost code
+      transform_rule: trim_string
+      type_cast_rule: string
+      null_handling: default_to_null
+      default_rule: null
+      validation_rule: optional
+      required_for_load: false
+      required_for_kpi: true
+      provenance_note: CSI-division spend analysis
+
+commitment:
+  fields:
+    - canonical_field: commitment_id
+      source_field: id
+      source_description: Procore commitment id (PO or subcontract)
+      transform_rule: prefix_with_adapter_then_trim_string
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: commitment_id unique
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: commitment anchor
+    - canonical_field: project_id
+      source_field: project_id
+      source_description: Procore project FK
+      transform_rule: resolve_via_capex_project_crosswalk
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: project_id resolves via capex_project_crosswalk
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: FK to capex_project
+    - canonical_field: vendor_id
+      source_field: vendor_id
+      source_description: Procore directory company id for vendor
+      transform_rule: resolve_via_vendor_master_crosswalk
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: vendor_id resolves via vendor_master_crosswalk
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: FK to vendor master
+    - canonical_field: scope_description
+      source_field: title
+      source_description: Procore commitment title
+      transform_rule: trim_string
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: non-empty
+      required_for_load: true
+      required_for_kpi: false
+      provenance_note: display
+    - canonical_field: contract_total_cents
+      source_field: original_commitment_amount
+      source_description: Procore original commitment amount
+      transform_rule: dollars_to_cents
+      type_cast_rule: money_cents
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: contract_total_cents > 0
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: commitment ceiling basis
+    - canonical_field: status
+      source_field: status
+      source_description: Procore commitment status
+      transform_rule: map_procore_commitment_status
+      type_cast_rule: enum
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: status IN (draft, signed, in_progress, closed, cancelled)
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: open-commitment filter
+    - canonical_field: retention_percent
+      source_field: retainage_percent
+      source_description: Procore retainage percent at commitment
+      transform_rule: to_number
+      type_cast_rule: number
+      null_handling: default_to_null
+      default_rule: null
+      validation_rule: retention_percent IS NULL OR retention_percent >= 0
+      required_for_load: false
+      required_for_kpi: true
+      provenance_note: retention-release tracking
+    - canonical_field: commitment_type
+      source_field: contract_type
+      source_description: Procore PO vs Work Order Contract
+      transform_rule: map_procore_commitment_type
+      type_cast_rule: enum
+      null_handling: default_to_null
+      default_rule: subcontract
+      validation_rule: commitment_type IN (purchase_order, subcontract)
+      required_for_load: false
+      required_for_kpi: true
+      provenance_note: PO vs subcontract analytics
+
+change_order:
+  fields:
+    - canonical_field: change_order_id
+      source_field: id
+      source_description: Procore CO id
+      transform_rule: prefix_with_adapter_then_trim_string
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: change_order_id unique
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: CO anchor
+    - canonical_field: project_id
+      source_field: project_id
+      source_description: Procore project FK
+      transform_rule: resolve_via_capex_project_crosswalk
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: project_id resolves via capex_project_crosswalk
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: FK to project
+    - canonical_field: commitment_id
+      source_field: commitment_id
+      source_description: Procore commitment FK
+      transform_rule: resolve_via_commitment_key
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: commitment_id IN construction.commitment.commitment_id
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: FK to commitment
+    - canonical_field: co_number
+      source_field: number
+      source_description: Procore CO number
+      transform_rule: trim_string
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: co_number unique per commitment
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: CO audit trail
+    - canonical_field: cost_delta_cents
+      source_field: amount
+      source_description: Procore CO cost delta
+      transform_rule: dollars_to_cents
+      type_cast_rule: money_cents
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: cost_delta_cents IS NOT NULL
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: ceiling extension basis
+    - canonical_field: status
+      source_field: status
+      source_description: Procore CO state
+      transform_rule: map_procore_co_status
+      type_cast_rule: enum
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: status IN (proposed, pending_approval, approved, rejected)
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: pending vs approved pivot
+    - canonical_field: time_delta_days
+      source_field: time_delta_days
+      source_description: Procore schedule impact
+      transform_rule: to_integer
+      type_cast_rule: integer
+      null_handling: default_to_null
+      default_rule: 0
+      validation_rule: time_delta_days IS NULL OR time_delta_days INTEGER
+      required_for_load: false
+      required_for_kpi: true
+      provenance_note: schedule impact analysis
+    - canonical_field: category
+      source_field: reason_code
+      source_description: Procore reason code
+      transform_rule: map_procore_co_category
+      type_cast_rule: enum
+      null_handling: default_to_null
+      default_rule: null
+      validation_rule: category IN (owner_directed, design_error, site_condition, scope_clarification, unforeseen) when non-null
+      required_for_load: false
+      required_for_kpi: true
+      provenance_note: CO driver analysis
+
+draw_request:
+  fields:
+    - canonical_field: draw_request_id
+      source_field: id
+      source_description: Procore pay app id
+      transform_rule: prefix_with_adapter_then_trim_string
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: draw_request_id unique
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: pay app anchor
+    - canonical_field: project_id
+      source_field: project_id
+      source_description: Procore project FK
+      transform_rule: resolve_via_capex_project_crosswalk
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: project_id resolves via capex_project_crosswalk
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: FK to project
+    - canonical_field: period
+      source_field: period_end
+      source_description: Procore pay-app period end; YYYY-MM derived from month of period_end
+      transform_rule: to_year_month
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: period matches YYYY-MM
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: draw cycle key
+    - canonical_field: amount_requested_cents
+      source_field: current_payment_due
+      source_description: Procore current payment due
+      transform_rule: dollars_to_cents
+      type_cast_rule: money_cents
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: amount_requested_cents > 0
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: draw amount
+    - canonical_field: approval_status
+      source_field: status
+      source_description: Procore pay app approval state
+      transform_rule: map_procore_pay_app_status
+      type_cast_rule: enum
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: approval_status IN (submitted, in_review, approved, approved_with_conditions, denied, funded)
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: funded-draw filter
+    - canonical_field: cost_to_date_cents
+      source_field: work_completed_to_date
+      source_description: Procore work completed to date
+      transform_rule: dollars_to_cents
+      type_cast_rule: money_cents
+      null_handling: default_to_null
+      default_rule: null
+      validation_rule: cost_to_date_cents IS NULL OR cost_to_date_cents >= 0
+      required_for_load: false
+      required_for_kpi: true
+      provenance_note: earned-value basis
+    - canonical_field: percent_complete_cost
+      source_field: percent_complete_cost
+      source_description: Procore cost-basis percent complete
+      transform_rule: to_number
+      type_cast_rule: number
+      null_handling: default_to_null
+      default_rule: null
+      validation_rule: percent_complete_cost IS NULL OR percent_complete_cost between 0 AND 100
+      required_for_load: false
+      required_for_kpi: true
+      provenance_note: earned-value calc
+
+schedule_milestone:
+  fields:
+    - canonical_field: milestone_id
+      source_field: id
+      source_description: Procore schedule task id
+      transform_rule: prefix_with_adapter_then_trim_string
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: milestone_id unique
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: milestone anchor
+    - canonical_field: project_id
+      source_field: project_id
+      source_description: Procore project FK
+      transform_rule: resolve_via_capex_project_crosswalk
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: project_id resolves via capex_project_crosswalk
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: FK to project
+    - canonical_field: milestone_name
+      source_field: name
+      source_description: Procore task name
+      transform_rule: trim_string
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: non-empty
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: schedule node label
+    - canonical_field: baseline_date
+      source_field: baseline_finish
+      source_description: Procore baseline finish
+      transform_rule: to_iso_date
+      type_cast_rule: date
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: baseline_date IS NOT NULL
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: baseline anchor; requires Procore schedule baseline feature enabled
+    - canonical_field: current_forecast_date
+      source_field: forecast_finish
+      source_description: Procore current forecast finish
+      transform_rule: to_iso_date
+      type_cast_rule: date
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: current_forecast_date IS NOT NULL
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: slippage computation basis
+    - canonical_field: actual_date
+      source_field: actual_finish
+      source_description: Procore actual finish
+      transform_rule: to_iso_date
+      type_cast_rule: date
+      null_handling: default_to_null
+      default_rule: null
+      validation_rule: actual_date IS NULL OR actual_date <= today
+      required_for_load: false
+      required_for_kpi: true
+      provenance_note: completed-milestone filter
+    - canonical_field: critical_path_flag
+      source_field: on_critical_path
+      source_description: Procore critical path flag
+      transform_rule: to_boolean
+      type_cast_rule: boolean
+      null_handling: default_to_null
+      default_rule: false
+      validation_rule: critical_path_flag IN (true, false)
+      required_for_load: false
+      required_for_kpi: true
+      provenance_note: critical-path slippage emphasis
+
+punch_item:
+  fields:
+    - canonical_field: punch_item_id
+      source_field: id
+      source_description: Procore punch item id
+      transform_rule: prefix_with_adapter_then_trim_string
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: punch_item_id unique
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: punch item anchor
+    - canonical_field: project_id
+      source_field: project_id
+      source_description: Procore project FK
+      transform_rule: resolve_via_capex_project_crosswalk
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: project_id resolves via capex_project_crosswalk
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: FK to project
+    - canonical_field: description
+      source_field: title
+      source_description: Procore punch item title
+      transform_rule: concat_title_and_description
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: non-empty
+      required_for_load: true
+      required_for_kpi: false
+      provenance_note: display
+    - canonical_field: status
+      source_field: status
+      source_description: Procore punch status
+      transform_rule: map_procore_punch_status
+      type_cast_rule: enum
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: status IN (open, in_progress, resolved, verified, rejected)
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: closeout progress
+    - canonical_field: assigned_to
+      source_field: assigned_to
+      source_description: Procore assigned company or user
+      transform_rule: trim_string
+      type_cast_rule: string
+      null_handling: default_to_null
+      default_rule: null
+      validation_rule: optional
+      required_for_load: false
+      required_for_kpi: false
+      provenance_note: responsibility attribution
+    - canonical_field: target_complete_date
+      source_field: target_complete_date
+      source_description: Procore target complete date
+      transform_rule: to_iso_date
+      type_cast_rule: date
+      null_handling: default_to_null
+      default_rule: null
+      validation_rule: target_complete_date IS NULL OR target_complete_date >= today - backfill_window
+      required_for_load: false
+      required_for_kpi: true
+      provenance_note: closeout SLA
+
+vendor:
+  fields:
+    - canonical_field: vendor_id
+      source_field: company_id
+      source_description: Procore directory company id
+      transform_rule: resolve_via_vendor_master_crosswalk
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: vendor_id canonical exists
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: vendor anchor
+    - canonical_field: vendor_name
+      source_field: company_name
+      source_description: Procore company name
+      transform_rule: trim_string
+      type_cast_rule: string
+      null_handling: default_to_null
+      default_rule: null
+      validation_rule: optional; AP vendor master wins on survivorship
+      required_for_load: false
+      required_for_kpi: false
+      provenance_note: display; authoritative source is AP
+    - canonical_field: services
+      source_field: trade
+      source_description: Procore trade classification
+      transform_rule: parse_trade_to_services_array
+      type_cast_rule: array
+      null_handling: default_to_null
+      default_rule: null
+      validation_rule: services is array of strings when non-null
+      required_for_load: false
+      required_for_kpi: true
+      provenance_note: Procore authoritative for trade classification
+
+approval_request:
+  fields:
+    - canonical_field: approval_request_id
+      source_field: derived
+      source_description: Synthetic id per Procore approval event (CO approval or pay-app approval)
+      transform_rule: generate_procore_approval_id
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: approval_request_id unique
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: approval audit trail
+    - canonical_field: subject_object_type
+      source_field: derived
+      source_description: change_order or draw_request depending on Procore record type
+      transform_rule: derive_from_record_type
+      type_cast_rule: enum
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: subject_object_type IN (change_order, draw_request)
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: approval polymorphism
+    - canonical_field: subject_object_id
+      source_field: derived
+      source_description: Canonical id of the linked change_order or draw_request
+      transform_rule: resolve_via_change_order_or_draw_request_crosswalk
+      type_cast_rule: string
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: subject_object_id resolves
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: linkage
+    - canonical_field: status
+      source_field: derived
+      source_description: Procore approval state mapped to canonical approval status
+      transform_rule: map_procore_approval_state
+      type_cast_rule: enum
+      null_handling: reject_record
+      default_rule: none
+      validation_rule: status IN (pending, approved, approved_with_conditions, denied, expired, withdrawn)
+      required_for_load: true
+      required_for_kpi: true
+      provenance_note: approval state
+    - canonical_field: decisions
+      source_field: derived
+      source_description: Array with {approver, decision, decided_at} derived from Procore approval event
+      transform_rule: build_procore_decisions_array
+      type_cast_rule: array
+      null_handling: default_to_null
+      default_rule: null
+      validation_rule: decisions array follows approval_request schema
+      required_for_load: false
+      required_for_kpi: true
+      provenance_note: approver audit

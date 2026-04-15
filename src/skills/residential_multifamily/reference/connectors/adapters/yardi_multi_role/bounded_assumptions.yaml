@@ -1,0 +1,218 @@
+# Bounded assumptions under which the Yardi multi-role adapter operates
+# until classification_worksheet.md closes. No assumption is allowed to
+# silently become load-bearing; each carries lift-conditions and a
+# documented default behavior.
+#
+# Until Dimensions 1, 2, and 3 of classification_worksheet.md close, the
+# adapter defaults to `historical-only` posture for every canonical
+# object. Workflows that would otherwise rely on Yardi as primary run in
+# `partial_mode_behavior` or block per
+# `../../_core/stack_wave4/source_of_truth_matrix.md::pending_classification_blocks`.
+
+status_tag: sample
+
+assumptions:
+
+  - id: yardi_role_unknown
+    assumption: |
+      Until classification_worksheet.md Dimension 1 closes, Yardi is
+      presumed to play NO primary role for any canonical object.
+    lifts_when: |
+      classification_worksheet.md Dimension 1 is closed with at least one
+      role selected, and Dimension 2 access-path declared for each
+      sub-system implied by the role.
+    default_behavior_until_lifted: |
+      Adapter output is ingested into landing with provenance intact, but
+      marked `historical_only = true`. Workflows that would otherwise
+      accept Yardi as primary (per source_of_truth_matrix.md) degrade to
+      their fallback source or block per workflow_activation_map.yaml.
+
+  - id: yardi_property_code_unmatched
+    assumption: |
+      When a Yardi propid or scode cannot be resolved via
+      property_master_crosswalk, it is routed to the fuzzy match queue
+      rather than silently auto-created.
+    lifts_when: |
+      property_master_crosswalk carries a row for every Voyager propid in
+      scope, OR the operator signs off on a bulk-crosswalk seed file
+      under runbooks/yardi_onboarding.md.
+    default_behavior_until_lifted: |
+      Record is retained in raw landing with provenance; a companion row
+      is written to crosswalk_fuzzy_match_queue with the Voyager propid,
+      scode, property_name, and market. Downstream workflows do not
+      aggregate the record.
+
+  - id: rentcafe_lead_data_access
+    assumption: |
+      RentCafe leasing / applicant data is presumed BLOCKED until the
+      operator confirms RentCafe API scope and data-sensitivity posture
+      (Dimension 2c + Dimension 4).
+    lifts_when: |
+      Dimension 2c declares a non-`no_extraction` access path AND
+      Dimension 4 closes with applicant PII posture declared.
+    default_behavior_until_lifted: |
+      lead / tour / application / approval_outcome rows are not
+      surfaced. Existing rows in landing are quarantined. Lead-funnel
+      workflows fall back to AppFolio CRM where available or run in
+      `partial_mode_behavior`.
+
+  - id: voyager_t_code_decode_required
+    assumption: |
+      Voyager t-code overloading is known; mapping without t_code_decode
+      is NOT allowed.
+    lifts_when: |
+      Adapter-local `t_code_decode` implementation is registered and
+      passes its canonical test suite (per runbooks/yardi_common_issues.md::
+      t_code_mapping).
+    default_behavior_until_lifted: |
+      Any charge, payment, or lease record whose t-code lineage cannot be
+      decoded is held in an `unresolved_t_code` exception bucket. Rule
+      `yd_conformance_tcode_decoded` blocks the record.
+
+  - id: charge_code_decode_scope_property
+    assumption: |
+      Yardi chargecode -> canonical charge_type mapping is PROPERTY
+      SCOPED, not global. Global decode is incorrect and must fail
+      closed.
+    lifts_when: |
+      Per-property chargecode table is loaded into master_data under
+      charge_code_crosswalk_by_property.
+    default_behavior_until_lifted: |
+      Chargecode values for properties without a loaded decode table are
+      retained as raw strings; canonical charge_type is set to
+      `unresolved_chargecode`. Revenue / concession math on affected
+      records is suppressed.
+
+  - id: data_connect_lag_tolerated
+    assumption: |
+      Data Connect warehouse is presumed to lag Voyager by up to the
+      `data_connect_lag_band` from reconciliation_tolerance_band.yaml.
+    lifts_when: |
+      Operator confirms warehouse refresh schedule and the schedule is
+      encoded in source_registry_entry.expected_latency_minutes.
+    default_behavior_until_lifted: |
+      Freshness rule yd_freshness_data_connect warns but does not block
+      within the declared band. Month-close workflows that depend on
+      Data Connect actuals block if the lag exceeds the band.
+
+  - id: posting_vs_accrual_month_divergence
+    assumption: |
+      Voyager posts charges with BOTH a post_date and an accrual month.
+      GL reconciliation uses accrual month unless operator declares
+      otherwise.
+    lifts_when: |
+      Operator confirms the book and period-convention via Dimension 2b
+      and the declaration lands in source_registry_entry.book_id.
+    default_behavior_until_lifted: |
+      Actuals reconciliation treats accrual_month as canonical; post_date
+      is preserved for audit but not used for period attribution. Rule
+      yd_consistency_post_vs_accrual fires when the two disagree.
+
+  - id: recovery_fee_handling_residential_suppressed
+    assumption: |
+      Recovery fees are commercial / mixed-portfolio concepts and are
+      presumed not in scope for residential-only Yardi setups.
+    lifts_when: |
+      Operator declares mixed-use or commercial scope in Dimension 3;
+      mapping_template adds recovery_code handling block.
+    default_behavior_until_lifted: |
+      Rows with non-null recovery_code are diverted to an audit bucket;
+      residential canonical objects do not receive them.
+
+  - id: historical_lease_unit_structure_drift
+    assumption: |
+      Historical leases may reference unit structures that no longer
+      exist (post-renovation splits, combines, or reclass). These rows
+      are preserved but not joined to current units.
+    lifts_when: |
+      Operator supplies a unit_crosswalk_effective_date table linking
+      historical unit ids to current unit ids.
+    default_behavior_until_lifted: |
+      Historical lease record is retained with its original unit_id; a
+      companion warning is logged; current-period workflows (occupancy,
+      leasing funnel) ignore the record.
+
+  - id: dual_run_with_appfolio_detected
+    assumption: |
+      If both Yardi and AppFolio are observed to carry live feeds for
+      the same property, a cutover dual-run is in progress.
+    lifts_when: |
+      operator confirms cutover window in Dimension 3 and declares a
+      cutover_effective_date per property in
+      runbooks/yardi_migration_to_appfolio.md.
+    default_behavior_until_lifted: |
+      Rule yd_consistency_overlap_with_appfolio raises warning per
+      property-period, and reconciliation_checks.yaml::
+      yd_recon_yardi_vs_appfolio_overlap enforces tie-out. Post-cutover
+      writes from Yardi are blocked.
+
+  - id: no_canonical_extension_by_this_adapter
+    assumption: |
+      Canonical _core/ontology.md is NOT extended by this adapter. Any
+      Yardi-native concept that lacks a canonical home (e.g., some lease
+      charge subtypes, recovery-fee post sequences, construction-support
+      job cost entries) is flagged as `requires_canonical_extension` and
+      left in raw landing only.
+    lifts_when: |
+      Canonical change-control flow under _core/BOUNDARIES.md approves a
+      new canonical object; adapter then maps.
+    default_behavior_until_lifted: |
+      Out-of-scope records are retained with full provenance in raw
+      landing; no canonical entity is emitted. See
+      runbooks/yardi_common_issues.md::canonical_gap for the escalation
+      path.
+
+  - id: pii_posture_restricted_until_declared
+    assumption: |
+      Yardi content is treated at the highest PII / financial sensitivity
+      tier (resident_pii_high, financial_high, legal_high) until
+      Dimension 4 closes.
+    lifts_when: |
+      Dimension 4 sections 4a, 4b, 4c, 4d, and 4e close; compliance_risk
+      signs off on the declared posture.
+    default_behavior_until_lifted: |
+      Downstream output is redacted at the strongest level available;
+      resident_account, lease, and application rows are hashed or
+      suppressed per security/pii_classification policy. No raw
+      applicant screening data reaches downstream consumers.
+
+  - id: rentcafe_voyager_drift_defaults
+    assumption: |
+      When RentCafe and Voyager disagree on lead / resident state,
+      Voyager wins for resident state; RentCafe wins for pre-resident
+      lead state.
+    lifts_when: |
+      Operator codifies a different precedence in Dimension 1 or in
+      source_of_truth_matrix.md.
+    default_behavior_until_lifted: |
+      Rule yd_consistency_rentcafe_vs_voyager fires when the two
+      disagree; reconciliation tolerance cited from
+      reconciliation_tolerance_band.yaml::rentcafe_vs_voyager_band.
+
+  - id: report_export_column_label_drift
+    assumption: |
+      Yardi report exports bind to column labels that change with
+      template edits. Adapter binds to labels only via a declared
+      column_map per report template.
+    lifts_when: |
+      Per-report-template column_map is registered under
+      master_data/report_export_templates.
+    default_behavior_until_lifted: |
+      Unmapped columns are dropped with a warning; unmapped required
+      columns block the record per rule yd_conformance_report_columns.
+
+  - id: rollout_wave_gate
+    assumption: |
+      Yardi rollout remains in wave_2 until classification closes. Wave
+      0-1 consumers must not depend on Yardi output.
+    lifts_when: |
+      Classification closed AND source_registry_entry.status advances
+      from stubbed to active.
+    default_behavior_until_lifted: |
+      Wave 3 and later consumers may reference Yardi data via the
+      historical-only posture; wave 0-1 workflows ignore Yardi.
+
+review_cadence: quarterly
+next_review_at: "2026-07-15"
+owner_role: data_platform_team
+accountability_chain: [data_platform_team, finance_reporting, compliance_risk, executive]

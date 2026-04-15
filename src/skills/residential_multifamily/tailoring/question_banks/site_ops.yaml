@@ -1,0 +1,107 @@
+# Site Ops question bank
+# Audience: site_ops
+# Depth: 10 questions covering site staffing model default, leasing agent compensation
+# model, maintenance SLA commitments, after-hours coverage, unit turn scope policy
+# (classic vs value-add), make-ready target days, PM reporting-up cadence, vendor
+# dispatch authority, and amenity program policy.
+#
+# site_ops is read-only at the site level: site teams answer, but any posture captured
+# here is surfaced to regional_ops and asset_mgmt for endorsement before it becomes
+# policy. The DIFF_APPROVAL_PREVIEW.md flow treats site_ops answers as provisional
+# until a regional_manager or COO sign-off lands.
+#
+# Each question conforms to:
+#   id, question_text, purpose, answer_type, choices, target_overlay_ref,
+#   follow_up_ids, missing_doc_triggers
+#
+# No hardcoded dollar / percent / market figures. Target days / counts are prompted
+# without pre-filled values.
+
+bank_slug: site_ops
+audience: site_ops
+version: "0.1.0"
+questions:
+
+  - id: site_001
+    question_text: What is the default site staffing model for a stabilized property by form factor? (garden, walk-up, mid-rise, high-rise). Free text is fine.
+    purpose: Captures site-level staffing baseline; feeds staffing_ratios overlay by form_factor.
+    answer_type: free_text
+    target_overlay_ref: overlay.yaml#site_ops.staffing_model_by_form_factor
+    follow_up_ids: []
+    missing_doc_triggers: [staffing_schedule_template]
+
+  - id: site_002
+    question_text: What is the leasing agent compensation model?
+    purpose: Captures leasing incentive structure; feeds leasing_operations_engine workflow.
+    answer_type: single_choice
+    choices: [salary_only, salary_plus_commission_per_lease, salary_plus_renewal_bonus, commission_heavy, hourly, unknown]
+    target_overlay_ref: overlay.yaml#site_ops.leasing_agent_comp_model
+    follow_up_ids: []
+    missing_doc_triggers: []
+
+  - id: site_003
+    question_text: What is the maintenance SLA commitment for emergency work orders? (Provide a target response time in hours.)
+    purpose: Sets work order SLA for emergency tier; feeds work_order_triage.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#site_ops.work_order_sla.emergency_response_hours
+    follow_up_ids: []
+    missing_doc_triggers: [work_order_sop]
+
+  - id: site_004
+    question_text: What is the maintenance SLA commitment for routine work orders? (Provide a target response time in hours or days.)
+    purpose: Sets work order SLA for routine tier; feeds work_order_triage.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#site_ops.work_order_sla.routine_response_hours
+    follow_up_ids: []
+    missing_doc_triggers: [work_order_sop]
+
+  - id: site_005
+    question_text: What is the after-hours coverage model?
+    purpose: Sets after-hours coverage overlay; feeds emergency-response and work-order routing.
+    answer_type: single_choice
+    choices: [in_house_on_call_rotation, third_party_answering_service, hybrid, none, unknown]
+    target_overlay_ref: overlay.yaml#site_ops.after_hours_coverage_model
+    follow_up_ids: []
+    missing_doc_triggers: []
+
+  - id: site_006
+    question_text: What is the default unit-turn scope policy?
+    purpose: Sets unit turn posture; feeds unit_turn_sop overlay and turn-cost planning.
+    answer_type: single_choice
+    choices: [classic_turn_paint_clean_repair, light_value_add_incremental, full_value_add_per_business_plan, renovation_only_per_approved_scope, unknown]
+    target_overlay_ref: overlay.yaml#site_ops.unit_turn_scope_policy
+    follow_up_ids: []
+    missing_doc_triggers: [unit_turn_sop]
+
+  - id: site_007
+    question_text: What is the make-ready target number of days from move-out to rent-ready? (Provide a number of days; leave blank if no target is set.)
+    purpose: Sets make-ready target for turn-speed tracking.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#site_ops.make_ready_target_days
+    follow_up_ids: []
+    missing_doc_triggers: [unit_turn_sop]
+
+  - id: site_008
+    question_text: What is the PM reporting-up cadence to the regional manager?
+    purpose: Sets PM-to-RM cadence; feeds regional_ops rollup.
+    answer_type: single_choice
+    choices: [weekly, bi_weekly, monthly, ad_hoc, unknown]
+    target_overlay_ref: overlay.yaml#site_ops.pm_to_rm_cadence
+    follow_up_ids: []
+    missing_doc_triggers: []
+
+  - id: site_009
+    question_text: What is the PM's authority to dispatch vendors without prior approval? (for example, an unwritten ceiling in dollars, or a category limit)
+    purpose: Captures site-level vendor dispatch authority; cross-checked against overlay.yaml#approval_matrix tier 1.
+    answer_type: free_text
+    target_overlay_ref: overlay.yaml#site_ops.vendor_dispatch_authority
+    follow_up_ids: []
+    missing_doc_triggers: [site_operating_manual]
+
+  - id: site_010
+    question_text: Describe the amenity program policy in plain language (programming cadence, budget ownership, vendor choices). Free text.
+    purpose: Captures amenity programming posture; feeds tenant_event_planner and operational administration workflows.
+    answer_type: free_text
+    target_overlay_ref: overlay.yaml#site_ops.amenity_program_policy
+    follow_up_ids: []
+    missing_doc_triggers: [site_operating_manual]

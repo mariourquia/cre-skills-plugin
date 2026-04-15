@@ -1,0 +1,5 @@
+property_id,account_code,budget_year,budget_version,annual_amount_usd,period_split,notes
+sample_property_one,4100_gross_potential_rent,2026,approved,2400000.00,even,illustrative budget line for template purposes
+sample_property_one,5100_payroll,2026,approved,360000.00,even,illustrative payroll budget line
+# status: template
+# schema: reference/connectors/manual_uploads/schema.yaml entities.budget_file

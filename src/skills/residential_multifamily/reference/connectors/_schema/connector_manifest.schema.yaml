@@ -1,0 +1,113 @@
+# Connector Manifest Schema
+# Applies to every file at reference/connectors/<domain>/manifest.yaml.
+# Tests fail if a connector's manifest does not conform.
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: ConnectorManifest
+type: object
+required:
+  - connector_id
+  - connector_kind
+  - version
+  - status
+  - owner
+  - vendor_neutral
+  - entities
+  - provenance_fields_required
+  - handshake
+properties:
+  connector_id:
+    type: string
+    pattern: "^[a-z][a-z0-9_]*$"
+    description: Stable slug. Matches the directory name under reference/connectors/.
+  connector_kind:
+    type: string
+    enum:
+      - pms
+      - gl
+      - crm
+      - ap
+      - market_data
+      - construction
+      - hr_payroll
+      - manual_uploads
+      - deal_pipeline
+  version:
+    type: string
+    description: Semver of this connector definition (e.g., 0.1.0).
+    pattern: "^[0-9]+\\.[0-9]+\\.[0-9]+(-[a-z0-9.]+)?$"
+  status:
+    type: string
+    enum:
+      - draft
+      - stub
+      - stable
+      - deprecated
+    description: Lifecycle stage. `stub` = schema only, no live adapter.
+  owner:
+    type: string
+    description: Agent or human responsible for the connector definition.
+  vendor_neutral:
+    type: boolean
+    description: |
+      True = this definition carries no vendor code / credentials / URLs. Every
+      connector in this directory must be vendor_neutral: true.
+  entities:
+    type: array
+    minItems: 1
+    description: List of entity slugs this connector emits. Each entity must
+      have a matching declaration in schema.yaml.
+    items:
+      type: string
+      pattern: "^[a-z][a-z0-9_]*$"
+  provenance_fields_required:
+    type: array
+    minItems: 1
+    description: Provenance fields every record MUST carry at raw landing.
+    items:
+      type: string
+      enum:
+        - source_name
+        - source_type
+        - source_date
+        - extracted_at
+        - extractor_version
+        - source_row_id
+  handshake:
+    type: object
+    description: Auth kind and access pattern placeholders. No URLs, no tokens.
+    required:
+      - auth_kind
+      - access_pattern
+    properties:
+      auth_kind:
+        type: string
+        enum:
+          - api_key
+          - oauth2
+          - basic_auth
+          - sftp
+          - file_drop
+          - manual_upload
+          - none
+      access_pattern:
+        type: string
+        enum:
+          - pull_scheduled
+          - pull_on_demand
+          - push_webhook
+          - push_batch
+          - manual_upload
+      notes:
+        type: string
+        description: Free-form operator notes (e.g., cadence guidance).
+    additionalProperties: false
+  description:
+    type: string
+  contact:
+    type: string
+    description: Operator contact placeholder. Not a live email in stubs.
+  deprecated_reason:
+    type: string
+    description: Required if status=deprecated.
+additionalProperties: false

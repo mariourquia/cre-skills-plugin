@@ -181,6 +181,8 @@ STATUS_MAP = {
     "planned": "stable",  # all planned items actually have SKILL.md files deployed
     "stub": "stub",
     "deprecated": "deprecated",
+    "draft": "experimental",  # SKILL.md draft-status skills surface as experimental
+    "experimental": "experimental",
 }
 
 AGENT_DOMAIN_MAP = {

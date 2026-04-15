@@ -115,6 +115,56 @@ rules:
         The tailoring pack bypasses segment/form/stage/mode overlays during interview
         and collects them as outputs. It still loads the canonical core.
 
+  - id: r011_regulatory_workflow_explicit
+    description: |
+      Explicit regulatory workflow invocation. Only matches when the user explicitly
+      sets regulatory_program to a non-`none` value AND the workflow is a compliance
+      workflow. Loads the regulatory overlay family plus the program-specific overlay.
+    conditions:
+      regulatory_program:
+        any_of: [lihtc, hud_section_8, hud_202_811, usda_rd, state_program, mixed_income]
+      workflow:
+        any_of:
+          - compliance_calendar_review
+          - income_certification_cycle
+          - rent_limit_test
+          - agency_reporting_prep
+          - file_audit_prep
+          - recertification_batch
+    selects:
+      workflow_pack: "workflows/{workflow}"
+      regulatory_overlay: overlays/regulatory/affordable
+      program_overlay: "overlays/regulatory/affordable/programs/{regulatory_program}"
+    reference_policy:
+      - require: reference/normalized/rent_limits__{regulatory_program}_{market}.csv
+        fallback: refuse
+      - require: reference/normalized/income_limits__{regulatory_program}_{market}.csv
+        fallback: refuse
+    note: |
+      Phase 1 scaffolding. The compliance workflow packs referenced here are
+      architectural placeholders under overlays/regulatory/ and do not yet exist as
+      workflows/*/SKILL.md. When populated, the reference_policy paths above must
+      resolve to real reference files before the rule will match.
+
+  - id: r012_regulatory_overlay_never_auto_for_conventional
+    description: |
+      Defensive rule. If segment is middle_market or luxury AND regulatory_program
+      is `none` (default) or unresolved, overlays under overlays/regulatory/ MUST
+      NOT load even if other rules would otherwise select them. The router asks
+      for regulatory_program explicitly before loading any regulatory content.
+
+      This rule does not select any pack; it asserts a negative invariant that the
+      loader honors. Tests (test_regulatory_isolation.py) enforce that no rule
+      above quietly loads regulatory content for conventional contexts.
+    conditions:
+      segment:
+        any_of: [middle_market, luxury]
+      regulatory_program:
+        any_of: [none, null]
+    selects:
+      regulatory_overlay: null
+      program_overlay: null
+
 fallback:
   id: r_fallback_unmatched
   description: |

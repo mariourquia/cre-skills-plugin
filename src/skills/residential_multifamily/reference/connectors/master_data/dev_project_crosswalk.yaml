@@ -1,0 +1,157 @@
+# Development Project Crosswalk (starter set).
+# Conforms to crosswalk.schema.yaml.
+# Development (ground-up or major renovation) projects are an extension of
+# capex_project in the ontology; see _core/ontology.md DevelopmentProject /
+# ConstructionProject sections. They warrant their own crosswalk because
+# they commonly span multiple GL parent codes (land, hard cost, soft cost,
+# ffe, carry) and one construction tracker project.
+
+status_tag: sample
+
+rows:
+
+  # -----------------------------------------------------------------------
+  # Ground-up development. Canonical id dev_chs_010_gu_2024.
+  # Single tracker project; three GL parent codes (hard, soft, land).
+  # -----------------------------------------------------------------------
+
+  - canonical_id: dev_chs_010_gu_2024
+    source_system: construction_tracker_primary
+    source_id: P-GU-CHS-010
+    match_confidence: high
+    match_method: exact
+    effective_start: "2024-04-01"
+    survivorship_rule: dev_project_default
+    manual_override: false
+    reviewer: development_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      Tracker row. Entitlements approved 2024-03-15; ground-breaking
+      2024-04-01. Baseline schedule anchored here.
+
+  - canonical_id: dev_chs_010_gu_2024
+    source_system: corporate_gl
+    source_id: "22-1000-CHS"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2023-11-01"
+    survivorship_rule: dev_project_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      GL land parent code. Land closing 2023-11-01.
+
+  - canonical_id: dev_chs_010_gu_2024
+    source_system: corporate_gl
+    source_id: "22-2000-CHS"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2024-04-01"
+    survivorship_rule: dev_project_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      GL hard cost parent code. Opened on ground-break.
+
+  - canonical_id: dev_chs_010_gu_2024
+    source_system: corporate_gl
+    source_id: "22-3000-CHS"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2023-06-01"
+    survivorship_rule: dev_project_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      GL soft cost parent code. Design / entitlements soft costs posted
+      here. Predates tracker start by approximately ten months.
+
+  # -----------------------------------------------------------------------
+  # Major renovation development. Single tracker project, single GL
+  # capex parent. Canonical id dev_cta_002_major_reno_2024.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: dev_cta_002_major_reno_2024
+    source_system: construction_tracker_primary
+    source_id: P-MR-CTA-002
+    match_confidence: high
+    match_method: exact
+    effective_start: "2024-09-15"
+    survivorship_rule: dev_project_default
+    manual_override: false
+    reviewer: development_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      Tracker row. Full-property reposition program spanning approximately
+      twenty-four months.
+
+  - canonical_id: dev_cta_002_major_reno_2024
+    source_system: corporate_gl
+    source_id: "22-4501-CTA002"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2024-09-15"
+    survivorship_rule: dev_project_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      GL capex parent code for the reposition program. Account slug per
+      account_crosswalk is capex_value_add.
+
+  # -----------------------------------------------------------------------
+  # Wave 5 — Yardi multi-role adapter integration. Mixed-use development
+  # at YP_50003 (Lantern Flats). Dealpath carries the pre-close deal;
+  # Procore carries construction; Yardi owns post-delivery operating.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: dev_yd_50003
+    source_system: yardi_voyager_pms_stub
+    source_id: YP_50003
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: dev_project_default
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Voyager propid row for the
+      delivered development asset. Yardi is post-delivery operating
+      system of record per yardi_multi_role survivorship rule.
+      Provisional until classification_worksheet.md closes.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Mixed-use development at Lantern
+      Flats (delivered 2021-02-15). Dealpath pre-close; Procore during
+      construction; Yardi post-delivery operating.
+
+  - canonical_id: dev_yd_50003
+    source_system: dealpath_prod
+    source_id: DEAL_LTFT_2021
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: dev_project_default
+    manual_override: false
+    reviewer: investments_lead
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Dealpath pre-close deal row.
+      Dealpath wins pre-close per yardi_multi_role survivorship rule.
+
+  - canonical_id: dev_yd_50003
+    source_system: procore_prod
+    source_id: PROC_PROJ_LTFT
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: dev_project_default
+    manual_override: false
+    reviewer: construction_manager
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Procore construction row. Procore
+      wins during construction window per yardi_multi_role survivorship.

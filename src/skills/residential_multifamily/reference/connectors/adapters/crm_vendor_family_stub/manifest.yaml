@@ -1,0 +1,54 @@
+# Adapter manifest for the generic leasing CRM vendor family stub.
+# Conforms to reference/connectors/adapters/adapter_manifest.schema.yaml.
+
+adapter_id: crm_vendor_family_stub
+adapter_name: Generic CRM Vendor Family Stub
+vendor_family: generic_crm_stub
+connector_domain: crm
+status: stub
+rollout_wave: wave_0
+description: |
+  Placeholder adapter over the canonical crm connector. Seeds operator
+  onboarding with common lead-source taxonomies, campaign id shapes,
+  tour-outcome enums, and follow-up task types. Canonical schema in
+  ../../crm/ wins on any conflict.
+
+supported_source_systems:
+  - crm_generic_stub
+
+mapping_hints:
+  - { source_field_pattern: "lead*id|prospect*id|inquiry*id",              canonical_field: lead_id,               transform_hint: trim_string }
+  - { source_field_pattern: "prop*code|property*id|community*id",          canonical_field: property_id,           transform_hint: trim_string }
+  - { source_field_pattern: "lead*source|source*channel|channel",          canonical_field: source_channel,        transform_hint: map_lead_source }
+  - { source_field_pattern: "campaign|campaign*id|utm*campaign",           canonical_field: campaign_id,           transform_hint: trim_string }
+  - { source_field_pattern: "inquiry*date|created*at|first*touch",         canonical_field: inquiry_date,          transform_hint: to_iso_date }
+  - { source_field_pattern: "stage|pipeline*stage|funnel*stage",           canonical_field: pipeline_stage,        transform_hint: map_pipeline_stage }
+  - { source_field_pattern: "tour*id|showing*id|visit*id",                 canonical_field: tour_id,               transform_hint: trim_string }
+  - { source_field_pattern: "tour*date|showing*date|scheduled*at",         canonical_field: scheduled_date,        transform_hint: to_iso_date }
+  - { source_field_pattern: "tour*type|visit*type",                        canonical_field: tour_type,             transform_hint: map_tour_type }
+  - { source_field_pattern: "tour*outcome|visit*outcome|result",           canonical_field: outcome,               transform_hint: map_tour_outcome }
+  - { source_field_pattern: "task*type|activity*type|touch*type",          canonical_field: follow_up_task_type,   transform_hint: map_task_type }
+  - { source_field_pattern: "application*id|app*id",                       canonical_field: application_id,        transform_hint: trim_string }
+  - { source_field_pattern: "applied*date|app*date",                       canonical_field: applied_date,          transform_hint: to_iso_date }
+  - { source_field_pattern: "approval*status|app*status",                  canonical_field: approval_status,       transform_hint: map_approval_status }
+  - { source_field_pattern: "timezone|tz",                                 canonical_field: event_timezone,        transform_hint: trim_string }
+  - { source_field_pattern: "email|contact_email",                         canonical_field: contact_email_hash,    transform_hint: hash_email_minimized }
+
+known_gotchas:
+  - duplicate leads from channel cross-posting are common; dedup on composite keys rather than lead_id alone
+  - merged leads lose source attribution silently; preserve both source channels when merging
+  - offline touches (walk-ins, phone calls recorded manually) frequently missing from pipeline stage transitions
+  - lead-source taxonomies vary between operator and vendor; always map through map_lead_source
+  - timestamp timezone ambiguity on tour scheduling; preserve original tz field before converting to UTC
+  - fair-housing-sensitive preference notes may appear in free-form text fields; screen before storage
+  - resident-vs-CRM-account dedup requires phone-and-email match because CRM and PMS issue distinct ids
+
+reference_documentation:
+  - placeholder_link_to_internal_pipeline_stage_taxonomy
+  - placeholder_link_to_fair_housing_guardrail
+
+author_metadata:
+  authored_by: residential_multifamily_subsystem
+  authored_role: data_platform_team
+
+last_updated: "2026-04-15"

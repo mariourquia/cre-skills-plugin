@@ -1,0 +1,135 @@
+{
+  "rent_comp": [
+    {
+      "obs_id": "obs_sample_001",
+      "comp_prop": "comp_sample_001",
+      "mkt": "sample_market",
+      "as_of": "2026-03-31",
+      "ut_label": "A1",
+      "asking_usd": 1295,
+      "submkt": "sample_submarket",
+      "nrsf": 750,
+      "conc_wk": 2.0,
+      "source_name": "sample_feed",
+      "source_type": "market_data",
+      "source_date": "2026-03-31",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "obs_sample_001"
+    },
+    {
+      "obs_id": "obs_sample_002",
+      "comp_prop": "comp_sample_002",
+      "mkt": "sample_market",
+      "as_of": "2026-03-31",
+      "ut_label": "B1",
+      "asking_usd": 1595,
+      "submkt": "sample_submarket",
+      "nrsf": 1050,
+      "conc_wk": 4.0,
+      "source_name": "sample_feed",
+      "source_type": "market_data",
+      "source_date": "2026-03-31",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "obs_sample_002"
+    }
+  ],
+  "concession_observation": [
+    {
+      "concession_observation_id": "conc_sample_001",
+      "comp_property_id": "comp_sample_001",
+      "market": "sample_market",
+      "as_of_date": "2026-03-31",
+      "concession_type": "weeks_free",
+      "concession_magnitude": 2.0,
+      "submarket": "sample_submarket",
+      "lease_term_required_months": 12,
+      "source_name": "sample_feed",
+      "source_type": "market_data",
+      "source_date": "2026-03-31",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "conc_sample_001"
+    }
+  ],
+  "occupancy_benchmark": [
+    {
+      "mkt": "sample_market",
+      "submkt": "sample_submarket",
+      "as_of": "2026-03-31",
+      "phys_occ": 94.5,
+      "leas_occ": 95.2,
+      "econ_occ": 93.8,
+      "source_name": "sample_feed",
+      "source_type": "market_data",
+      "source_date": "2026-03-31",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "occ_sample_market_submkt_20260331"
+    }
+  ],
+  "payroll_reference": [
+    {
+      "role_slug": "property_manager",
+      "market": "sample_market",
+      "as_of_date": "2026-01-01",
+      "base_salary_annual_cents": 7500000,
+      "bonus_target_annual_cents": 500000,
+      "burden_rate_percent": 28.0,
+      "source_name": "sample_feed",
+      "source_type": "market_data",
+      "source_date": "2026-01-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "pay_pm_sample_market_20260101"
+    }
+  ],
+  "labor_reference": [
+    {
+      "trade": "plumber",
+      "market": "sample_market",
+      "as_of_date": "2026-01-01",
+      "hourly_rate_cents": 12500,
+      "rate_type": "blended",
+      "source_name": "sample_feed",
+      "source_type": "market_data",
+      "source_date": "2026-01-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "lab_plumber_sample_market_20260101"
+    }
+  ],
+  "material_reference": [
+    {
+      "material_slug": "flooring_lvp",
+      "region": "sample_region",
+      "as_of_date": "2026-01-01",
+      "unit": "sf",
+      "unit_cost_cents": 450,
+      "notes": "sample",
+      "source_name": "sample_feed",
+      "source_type": "market_data",
+      "source_date": "2026-01-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "mat_lvp_sample_region_20260101"
+    }
+  ],
+  "utility_reference": [
+    {
+      "market": "sample_market",
+      "form_factor": "garden",
+      "utility_type": "electric",
+      "as_of_date": "2026-01-01",
+      "cost_per_unit_per_month_cents": 4500,
+      "net_of_rubs": true,
+      "source_name": "sample_feed",
+      "source_type": "market_data",
+      "source_date": "2026-01-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "util_electric_sample_market_garden_20260101"
+    }
+  ]
+}

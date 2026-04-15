@@ -1,0 +1,12 @@
+# status: template
+# schema: reference/connectors/manual_uploads/schema.yaml entities.capex_request_upload
+request_id: capex_req_sample_001
+property_id: sample_property_one
+request_date: 2026-04-01
+category: hvac
+requested_amount_usd: 75000.00
+justification: |
+  Illustrative capex request. Replace with real narrative before landing.
+  Explains the scope, the expected useful life, and why the request is
+  needed this period.
+approval_status: submitted

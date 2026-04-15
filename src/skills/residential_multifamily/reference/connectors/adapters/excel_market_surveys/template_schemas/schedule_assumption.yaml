@@ -1,0 +1,62 @@
+# Template schema for schedule_assumption_sheet Excel drops.
+# Aligns with canonical normalized schema at
+# ../../../../normalized/schemas/construction_duration_assumption.yaml.
+
+status_tag: template
+template_slug: schedule_assumption
+canonical_reference_schema: reference/normalized/schemas/construction_duration_assumption.yaml
+canonical_ontology_object: schedule_duration_assumption
+source_format: xlsx
+csv_sibling_format: csv
+expected_sheets:
+  - schedule_durations
+  - weather_contingency
+  - cover_metadata
+header_rows: 1
+filename_pattern: "^schedule_assumption__\\d{4}\\.(xlsx|csv)$"
+
+sheet_schemas:
+
+  schedule_durations:
+    columns:
+      - { name: project_type,           required: true, type: string, enum: [ground_up_development, major_renovation, unit_turn_program, amenity_refresh, envelope_restoration, mep_retrofit, site_work] }
+      - { name: milestone_type,         required: true, type: string, description: milestone_slug (e.g., foundation, framing, mep_rough, punch) }
+      - { name: milestone_category,     required: true, type: string, enum: [predev, site, structure, envelope, mep, interior, close_out, lease_up] }
+      - { name: market,                 required: true, type: string }
+      - { name: region,                 required: false, type: string }
+      - { name: property_form,          required: true, type: string, enum: [garden, walk_up, wrap, suburban_mid_rise, urban_mid_rise, high_rise] }
+      - { name: project_size_band,      required: true, type: string, enum: [under_100_units, 100_to_199_units, 200_to_299_units, 300_plus_units] }
+      - { name: baseline_duration_days, required: true, type: integer, description: baseline working days }
+      - { name: contingency_pct,        required: true, type: number, description: contingency buffer percent (decimal) applied to baseline }
+      - { name: weather_assumption,     required: true, type: string, enum: [none, minimal, seasonal_adjustment, heavy_seasonal], description: weather buffer regime }
+      - { name: unit,                   required: true, type: string, enum: [days, weeks, months] }
+      - { name: as_of,                  required: true, type: date }
+      - { name: source,                 required: true, type: string, description: derivation basis (internal history, procore baseline, GC averages) }
+      - { name: source_basis,           required: true, type: string, enum: [historical_project_data, gc_benchmark, industry_publication, engineered_estimate, extrapolated] }
+      - { name: row_id,                 required: true, type: string }
+
+  weather_contingency:
+    columns:
+      - { name: market,              required: true, type: string }
+      - { name: months_impacted,     required: true, type: string, description: comma-separated month labels (e.g., 12,1,2) }
+      - { name: buffer_days_typical, required: true, type: integer }
+
+  cover_metadata:
+    columns:
+      - { name: sheet_version,     required: true, type: string }
+      - { name: analyst_name,      required: true, type: string }
+      - { name: reviewer,          required: true, type: string }
+      - { name: signed_off_date,   required: true, type: date }
+
+validation_rules:
+  - rule_id: sas_milestone_category_enum
+    severity: blocker
+    description: milestone_category in enum
+  - rule_id: sas_contingency_reasonable
+    severity: warning
+    description: contingency_pct between 0 and 0.5
+  - rule_id: sas_reviewer_signoff
+    severity: blocker
+    description: cover_metadata.reviewer and signed_off_date non-null
+
+allowed_markets_reference: reference/connectors/master_data/market_crosswalk.yaml

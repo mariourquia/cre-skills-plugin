@@ -1,0 +1,155 @@
+{
+  "dev_budget": [
+    {
+      "project_id": "proj_sample_001",
+      "budget_line_slug": "hard_cost",
+      "scenario": "baseline",
+      "as_of_date": "2026-01-15",
+      "amount_cents": 2500000000,
+      "contingency_applied_percent": 5.0,
+      "source_name": "sample_feed",
+      "source_type": "construction",
+      "source_date": "2026-01-15",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "db_proj_sample_001_hard_cost_baseline_20260115"
+    },
+    {
+      "project_id": "proj_sample_001",
+      "budget_line_slug": "soft_cost",
+      "scenario": "baseline",
+      "as_of_date": "2026-01-15",
+      "amount_cents": 450000000,
+      "contingency_applied_percent": 3.0,
+      "source_name": "sample_feed",
+      "source_type": "construction",
+      "source_date": "2026-01-15",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "db_proj_sample_001_soft_cost_baseline_20260115"
+    }
+  ],
+  "estimate_line_item": [
+    {
+      "line_item_id": "li_sample_001",
+      "project_id": "proj_sample_001",
+      "line_label": "LVP flooring",
+      "unit": "sf",
+      "quantity": 100000,
+      "unit_cost_cents": 500,
+      "extended_cost_cents": 50000000,
+      "csi_division": "09",
+      "source_basis": "bid",
+      "source_name": "sample_feed",
+      "source_type": "construction",
+      "source_date": "2026-02-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "li_sample_001"
+    }
+  ],
+  "bid_package": [
+    {
+      "bid_package_id": "bp_sample_001",
+      "project_id": "proj_sample_001",
+      "scope_description": "Division 09 Finishes",
+      "bid_due_date": "2026-02-15",
+      "bidders_invited": [
+        "vend_sample_001"
+      ],
+      "status": "leveled",
+      "source_name": "sample_feed",
+      "source_type": "construction",
+      "source_date": "2026-01-20",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "bp_sample_001"
+    }
+  ],
+  "commitment": [
+    {
+      "commitment_id": "cx_cmt_sample_001",
+      "project_id": "proj_sample_001",
+      "vendor_id": "vend_sample_001",
+      "scope_description": "Division 09 Finishes",
+      "contract_total_cents": 50000000,
+      "status": "signed",
+      "retention_percent": 10.0,
+      "source_name": "sample_feed",
+      "source_type": "construction",
+      "source_date": "2026-03-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "cx_cmt_sample_001"
+    }
+  ],
+  "change_order": [
+    {
+      "change_order_id": "co_sample_001",
+      "project_id": "proj_sample_001",
+      "commitment_id": "cx_cmt_sample_001",
+      "co_number": "001",
+      "cost_delta_cents": 1500000,
+      "status": "approved",
+      "time_delta_days": 5,
+      "category": "site_condition",
+      "source_name": "sample_feed",
+      "source_type": "construction",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "co_sample_001"
+    }
+  ],
+  "draw_request": [
+    {
+      "draw_request_id": "dr_sample_001",
+      "project_id": "proj_sample_001",
+      "period": "2026-03",
+      "amount_requested_cents": 2500000,
+      "approval_status": "approved",
+      "cost_to_date_cents": 10000000,
+      "percent_complete_physical": 20.0,
+      "percent_complete_cost": 22.5,
+      "source_name": "sample_feed",
+      "source_type": "construction",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "dr_sample_001"
+    }
+  ],
+  "schedule_milestone": [
+    {
+      "milestone_id": "ms_sample_001",
+      "project_id": "proj_sample_001",
+      "milestone_name": "Foundation Complete",
+      "baseline_date": "2026-06-01",
+      "current_forecast_date": "2026-06-15",
+      "actual_date": null,
+      "critical_path_flag": true,
+      "source_name": "sample_feed",
+      "source_type": "construction",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "ms_sample_001"
+    }
+  ],
+  "punch_item": [
+    {
+      "punch_item_id": "pi_sample_001",
+      "project_id": "proj_sample_001",
+      "description": "Paint touch-up unit 101",
+      "status": "open",
+      "assigned_to": "vend_sample_001",
+      "target_complete_date": "2026-05-01",
+      "source_name": "sample_feed",
+      "source_type": "construction",
+      "source_date": "2026-04-10",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "pi_sample_001"
+    }
+  ]
+}

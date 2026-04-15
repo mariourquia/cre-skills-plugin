@@ -1,0 +1,63 @@
+pack_slug: development_pipeline_tracking
+reads:
+  - path: reference/connectors/_core/stack_wave4/source_of_truth_matrix.md
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/connectors/adapters/dealpath_deal_pipeline/normalized_contract.yaml
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/connectors/adapters/dealpath_deal_pipeline/reconciliation_rules.md
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/connectors/adapters/procore_construction/reconciliation_checks.yaml
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/connectors/adapters/procore_construction/runbooks/procore_common_issues.md
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/connectors/adapters/sage_intacct_gl/reconciliation_rules.md
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/connectors/master_data/dev_project_crosswalk.yaml
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/connectors/master_data/capex_project_crosswalk.yaml
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/construction_duration_assumptions__{region}.csv
+    category: material_cost_reference
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: use_prior_period
+  - path: reference/normalized/schemas/reconciliation_tolerance_band.yaml
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/approval_threshold_defaults.csv
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/derived/contingency_assumptions__{org}.csv
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+writes: []

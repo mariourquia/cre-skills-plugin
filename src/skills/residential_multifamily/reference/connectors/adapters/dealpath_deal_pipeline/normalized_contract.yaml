@@ -1,0 +1,279 @@
+# Dealpath -> canonical normalized contract.
+# Maps Dealpath raw entities (source_contract.yaml) to canonical deal_pipeline
+# objects. The canonical base under _core/ontology.md wins on any conflict;
+# this file documents how Dealpath-sourced records populate canonical shape.
+#
+# Source precedence summary (cf. _core/stack_wave4/source_of_truth_matrix.md):
+#   - Dealpath: primary for deal, asset (until close), development_project
+#     (seed until gc_award), approval_request where subject is IC decision.
+#   - AppFolio: primary post-close for operating property/unit/lease state.
+#   - Intacct: primary for legal_entity_id and posted GL actuals.
+#   - Procore: primary post-gc_award for construction execution.
+#
+# Canonical extension notes:
+#   Several of the objects here are introduced by the deal_pipeline domain
+#   in wave 4 and are not yet present in _core/ontology.md. They are
+#   marked `requires_canonical_extension: true`. Tests flag this flag; a
+#   follow-up ontology amendment lifts these into canonical.
+
+status_tag: sample
+
+mappings:
+
+  deal:
+    canonical_object: Deal
+    requires_canonical_extension: true
+    canonical_extension_notes: |
+      Deal is introduced by the wave-4 deal_pipeline domain. Fields shown
+      here propose the canonical shape; ontology amendment pending.
+    precedence: primary
+    primary_authority: dealpath
+    primary_key:
+      dealpath_field: deal_id
+      canonical_field: deal_id
+      transform: passthrough_with_namespace(dealpath_prod)
+    required_canonical_fields:
+      - deal_id
+      - deal_name
+      - asset_id
+      - deal_type
+      - pipeline_stage
+      - market
+      - status
+    null_handling:
+      - { field: asset_id,            behavior: reject_record,    notes: every deal must reference an asset_master row }
+      - { field: ic_approval_date,    behavior: escalate_missing, notes: required when pipeline_stage = ic_approved }
+      - { field: market,              behavior: escalate_missing, notes: downstream market_crosswalk must resolve }
+      - { field: submarket,           behavior: default_to_null,  notes: operator often omits at sourcing }
+      - { field: deal_close_date_actual, behavior: default_to_null, notes: only present after close transition }
+    derived_from_source:
+      - deal_id, deal_name, asset_id
+      - deal_type (mapped from Dealpath deal_type via map_dealpath_deal_type)
+      - pipeline_stage (mapped via map_dealpath_stage)
+      - loi_signed_date, psa_signed_date, expected_close_date, deal_close_date_actual (from deal + milestones)
+    requires_computation:
+      - ic_status (derived from ic_decision feed; latest decision wins)
+      - confidence (legacy sparse records downgraded to medium per dp_legacy_sparse_field)
+
+  asset:
+    canonical_object: Asset
+    requires_canonical_extension: false
+    canonical_extension_notes: |
+      Asset is represented through canonical Property post-close; the
+      pre-close asset master is a placeholder that resolves to property_id
+      via asset_crosswalk once an AppFolio property is set up.
+    precedence: primary
+    primary_authority: dealpath
+    precedence_transition:
+      trigger: deal close (pipeline_stage = closed AND actual_close_date is not null)
+      transitions_to: appfolio + intacct co-define operating asset
+    primary_key:
+      dealpath_field: asset_id
+      canonical_field: canonical_asset_id
+      transform: crosswalk_lookup(asset_crosswalk, source_system=dealpath_prod)
+    required_canonical_fields:
+      - canonical_asset_id
+      - asset_name
+      - market
+      - asset_type
+    null_handling:
+      - { field: address,       behavior: default_to_null,  notes: redacted-partial preserves city/state }
+      - { field: year_built,    behavior: default_to_null,  notes: null on ground-up development }
+      - { field: unit_count,    behavior: default_to_null,  notes: planned count only pre-delivery }
+    derived_from_source:
+      - canonical_asset_id (via crosswalk on asset_id)
+      - asset_name, market, submarket
+    requires_computation:
+      - property_id (populated post-close via property_master_crosswalk; null until setup)
+      - legal_entity_id (resolved at close via Intacct entity setup)
+
+  deal_milestone:
+    canonical_object: DealMilestone
+    requires_canonical_extension: true
+    canonical_extension_notes: |
+      DealMilestone is new in wave 4. Canonical enum covers sourcing
+      through funded/gc_award. Operator-tunable enum in Dealpath resolves
+      via map_dealpath_milestone.
+    precedence: primary
+    primary_authority: dealpath
+    primary_key:
+      dealpath_field: milestone_id
+      canonical_field: deal_milestone_id
+      transform: passthrough_with_namespace(dealpath_prod)
+    required_canonical_fields:
+      - deal_milestone_id
+      - deal_id
+      - milestone_type
+      - status
+    null_handling:
+      - { field: target_date, behavior: default_to_null,  notes: not every milestone has a baseline target }
+      - { field: actual_date, behavior: default_to_null,  notes: null until milestone achieved }
+      - { field: owner,       behavior: escalate_missing, notes: required for ic_approved; default_to_null allowed at sourcing }
+    derived_from_source:
+      - milestone_type (mapped via map_dealpath_milestone)
+      - status (mapped via map_dealpath_milestone_status)
+    requires_computation:
+      - slipped_days (computed when target_date < now and status != achieved)
+
+  deal_key_date:
+    canonical_object: DealKeyDate
+    requires_canonical_extension: true
+    canonical_extension_notes: |
+      DealKeyDate is new in wave 4. Separates contract / DD anchor dates
+      from milestones; downstream handoff sequencing relies on the split.
+    precedence: primary
+    primary_authority: dealpath
+    primary_key:
+      dealpath_field: key_date_id
+      canonical_field: deal_key_date_id
+      transform: passthrough_with_namespace(dealpath_prod)
+    required_canonical_fields:
+      - deal_key_date_id
+      - deal_id
+      - date_type
+      - date_value
+    null_handling:
+      - { field: source_doc_ref,   behavior: default_to_null,  notes: legacy deals lack linked docs }
+      - { field: extended_from,    behavior: default_to_null,  notes: only populated on extensions }
+      - { field: extension_reason, behavior: escalate_missing, notes: required when extended_from is not null }
+    derived_from_source:
+      - date_type (mapped via map_dealpath_key_date_type)
+    requires_computation:
+      - days_until (computed as date_value - now)
+
+  deal_team_member:
+    canonical_object: DealTeamMember
+    requires_canonical_extension: true
+    canonical_extension_notes: |
+      DealTeamMember captures deal team attribution. Canonical employee
+      resolution via employee_crosswalk is required for attribution
+      reporting but lives outside the adapter.
+    precedence: primary
+    primary_authority: dealpath
+    primary_key:
+      dealpath_field: deal_id + member_id
+      canonical_field: deal_team_member_id
+      transform: deterministic_hash(deal_id, member_id)
+    required_canonical_fields:
+      - deal_team_member_id
+      - deal_id
+      - member_id_ref
+      - role
+    null_handling:
+      - { field: allocation_pct, behavior: default_to_null, notes: not all operators track allocation }
+      - { field: removed_at,     behavior: default_to_null, notes: null while member active }
+    derived_from_source:
+      - member_id_ref (via employee_crosswalk lookup; null-tolerated until resolved)
+      - role (mapped via map_dealpath_team_role)
+
+  ic_decision:
+    canonical_object: ApprovalRequest
+    requires_canonical_extension: true
+    canonical_extension_notes: |
+      Dealpath IC decision normalizes to canonical ApprovalRequest with
+      subject_object_type = deal. Canonical ApprovalRequest exists in
+      _core/ontology.md but IC-specific fields (ic_members_present,
+      vote_record_summary, tier) are appended via deal_pipeline extension.
+    precedence: primary
+    primary_authority: dealpath
+    primary_key:
+      dealpath_field: ic_decision_id
+      canonical_field: approval_request_id
+      transform: passthrough_with_namespace(dealpath_prod)
+    required_canonical_fields:
+      - approval_request_id
+      - subject_object_type
+      - subject_object_id
+      - decision
+      - decided_date
+    null_handling:
+      - { field: conditions,       behavior: escalate_missing, notes: required when decision = conditional }
+      - { field: resolution_deadline, behavior: escalate_missing, notes: required when conditions is not null }
+      - { field: memo_doc_ref,     behavior: default_to_null,  notes: legacy decisions may lack linked memo }
+    derived_from_source:
+      - decision (mapped via map_dealpath_ic_decision)
+      - subject_object_type (constant: deal)
+      - subject_object_id (from deal_id)
+    requires_computation:
+      - status (approved|conditional|declined|deferred mapped to canonical approval status)
+      - condition_resolution_status (open|resolved|breached tracked off conditions list)
+
+  deal_document:
+    canonical_object: DealDocumentRef
+    requires_canonical_extension: true
+    canonical_extension_notes: |
+      DealDocumentRef is a lightweight reference — adapter does not ingest
+      payloads. Canonical shape carries url_ref and doc_type only.
+    precedence: primary
+    primary_authority: dealpath
+    primary_key:
+      dealpath_field: deal_document_id
+      canonical_field: deal_document_id
+      transform: passthrough_with_namespace(dealpath_prod)
+    required_canonical_fields:
+      - deal_document_id
+      - deal_id
+      - doc_type
+      - uploaded_at
+    null_handling:
+      - { field: url_ref,    behavior: default_to_null, notes: reference may be restricted; do not fetch }
+      - { field: uploaded_by, behavior: default_to_null, notes: resolve via employee_crosswalk when present }
+    derived_from_source:
+      - doc_type (mapped via map_dealpath_doc_type)
+
+  deal_status_history:
+    canonical_object: SourceRecordAudit
+    requires_canonical_extension: false
+    canonical_extension_notes: |
+      Dealpath status history feeds the canonical source_record_audit
+      stream for change tracking (stage change, rename, resurrection,
+      asset_id reassignment, deal_type change). No separate canonical
+      object.
+    precedence: primary
+    primary_authority: dealpath
+    primary_key:
+      dealpath_field: status_history_id
+      canonical_field: source_record_audit_id
+      transform: passthrough_with_namespace(dealpath_prod)
+    required_canonical_fields:
+      - source_record_audit_id
+      - source_object_id
+      - transition_type
+      - occurred_at
+    derived_from_source:
+      - transition_type (mapped via map_dealpath_transition_type)
+      - source_object_id (from deal_id)
+
+null_handling_global:
+  - do not default null required fields to zero or portfolio average
+  - surface missing required fields as dq_blocker exceptions (cite dp_completeness_required_fields)
+  - record-level rejects carry the raw source_row_id for operator remediation
+  - legacy deals with sparse fields tagged confidence = medium via dp_legacy_sparse_field
+
+sample_file_serialization_note: |
+  Several canonical objects carry a `status` field (deal, deal_milestone,
+  approval_request). JSONL sample files in sample_raw/ and sample_normalized/
+  carry a provenance-envelope `status` tag ("sample" / "stub" / "template")
+  on every row. To avoid JSON key collisions when both are serialized, the
+  entity-level `status` field is written as:
+    - deal.status            -> deal_status
+    - deal_milestone.status  -> milestone_status
+    - approval_request.status -> approval_status
+  This rename is a sample-file serialization convention only. The canonical
+  contract names the concept `status`; downstream schemas and mapping.yaml
+  should use `status` on the canonical side. The raw-side rename is
+  documented at source_contract.yaml (fields `deal_status`, `milestone_status`).
+
+canonical_extension_summary:
+  description: |
+    Objects flagged `requires_canonical_extension: true` are proposed for
+    formal addition to _core/ontology.md. Until the amendment lands, the
+    deal_pipeline domain carries these shapes in its own schema and tests
+    validate structural consistency only.
+  objects:
+    - Deal
+    - DealMilestone
+    - DealKeyDate
+    - DealTeamMember
+    - ApprovalRequest (IC-specific extension fields only; base object already canonical)
+    - DealDocumentRef

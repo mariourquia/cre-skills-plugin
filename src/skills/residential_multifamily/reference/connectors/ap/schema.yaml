@@ -1,0 +1,319 @@
+entities:
+  vendor:
+    entity_name: vendor
+    grain: one row per vendor in the master
+    time_basis: state
+    primary_key:
+    - vendor_id
+    required_fields:
+    - name: vendor_id
+      type: string
+      description: Operator vendor id
+      is_key: true
+    - name: vendor_name
+      type: string
+      description: Legal or DBA name
+      is_key: false
+    - name: w9_on_file
+      type: boolean
+      description: W9 status flag
+      is_key: false
+    optional_fields:
+    - name: services
+      type: array
+      description: Service categories list
+    - name: insurance_expiry_date
+      type: date
+      description: COI expiry
+    - name: preferred_flag
+      type: boolean
+      description: Preferred-vendor designation
+    foreign_keys: []
+    null_handling:
+    - field: insurance_expiry_date
+      behavior: escalate_missing
+      notes: safety-critical work requires active COI
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - vendor-invoice-validator; coi-compliance-checker
+  invoice:
+    entity_name: invoice
+    grain: one row per vendor invoice received
+    time_basis: event
+    primary_key:
+    - invoice_id
+    required_fields:
+    - name: invoice_id
+      type: string
+      description: Stable invoice id
+      is_key: true
+    - name: vendor_id
+      type: string
+      description: FK to vendor
+      is_key: false
+    - name: property_id
+      type: string
+      description: Property scope
+      is_key: false
+    - name: invoice_date
+      type: date
+      description: Invoice date
+      is_key: false
+    - name: amount_cents
+      type: money_cents
+      description: Invoice amount in cents
+      is_key: false
+      unit: cents_usd
+    - name: status
+      type: enum
+      description: Invoice workflow status
+      is_key: false
+      enum_values:
+      - received
+      - in_review
+      - approved
+      - on_hold
+      - paid
+      - voided
+      - disputed
+    optional_fields:
+    - name: po_id
+      type: string
+      description: FK to purchase_order if matched
+    - name: contract_id
+      type: string
+      description: FK to contract if matched
+    - name: due_date
+      type: date
+      description: Payment due date
+    foreign_keys:
+    - field: vendor_id
+      references: vendor.vendor_id
+      on_missing: reject
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - vendor-invoice-validator; aging
+  contract:
+    entity_name: contract
+    grain: one row per active vendor contract
+    time_basis: state
+    primary_key:
+    - contract_id
+    required_fields:
+    - name: contract_id
+      type: string
+      description: Stable contract id
+      is_key: true
+    - name: vendor_id
+      type: string
+      description: FK to vendor
+      is_key: false
+    - name: pricing_model
+      type: enum
+      description: Pricing model
+      is_key: false
+      enum_values:
+      - time_materials
+      - unit_rate
+      - lump_sum
+      - retainer
+    - name: term_start
+      type: date
+      description: Contract start
+      is_key: false
+    - name: term_end
+      type: date
+      description: Contract end
+      is_key: false
+    optional_fields:
+    - name: property_id
+      type: string
+      description: Property scope (null = org-wide)
+    - name: scope_summary
+      type: string
+      description: Scope summary
+    - name: contract_total_cents
+      type: money_cents
+      description: Contract total in cents
+      unit: cents_usd
+    foreign_keys:
+    - field: vendor_id
+      references: vendor.vendor_id
+      on_missing: reject
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - CAM reconciliation; construction commitment tracking
+  commitment:
+    entity_name: commitment
+    grain: one row per open AP commitment (tracks invoice-match status)
+    time_basis: state
+    primary_key:
+    - commitment_id
+    required_fields:
+    - name: commitment_id
+      type: string
+      description: Stable commitment id
+      is_key: true
+    - name: vendor_id
+      type: string
+      description: FK to vendor
+      is_key: false
+    - name: contract_id
+      type: string
+      description: FK to contract
+      is_key: false
+    - name: committed_amount_cents
+      type: money_cents
+      description: Committed amount in cents
+      is_key: false
+      unit: cents_usd
+    - name: invoiced_to_date_cents
+      type: money_cents
+      description: Invoiced to date in cents
+      is_key: false
+      unit: cents_usd
+    - name: paid_to_date_cents
+      type: money_cents
+      description: Paid to date in cents
+      is_key: false
+      unit: cents_usd
+    optional_fields:
+    - name: status
+      type: enum
+      description: Commitment status
+      enum_values:
+      - open
+      - partial
+      - closed
+      - cancelled
+    foreign_keys:
+    - field: vendor_id
+      references: vendor.vendor_id
+      on_missing: reject
+    - field: contract_id
+      references: contract.contract_id
+      on_missing: reject
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - construction commitment reconciliation; vendor management
+  purchase_order:
+    entity_name: purchase_order
+    grain: one row per PO issued to a vendor
+    time_basis: state
+    primary_key:
+    - po_id
+    required_fields:
+    - name: po_id
+      type: string
+      description: Stable PO id
+      is_key: true
+    - name: vendor_id
+      type: string
+      description: FK to vendor
+      is_key: false
+    - name: po_date
+      type: date
+      description: PO issue date
+      is_key: false
+    - name: amount_cents
+      type: money_cents
+      description: PO amount in cents
+      is_key: false
+      unit: cents_usd
+    - name: status
+      type: enum
+      description: PO status
+      is_key: false
+      enum_values:
+      - issued
+      - partial
+      - received
+      - closed
+      - cancelled
+    optional_fields:
+    - name: property_id
+      type: string
+      description: Property scope
+    foreign_keys:
+    - field: vendor_id
+      references: vendor.vendor_id
+      on_missing: reject
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - three-way match for invoice approvals
+  payment_status:
+    entity_name: payment_status
+    grain: one row per invoice payment state
+    time_basis: state
+    primary_key:
+    - invoice_id
+    required_fields:
+    - name: invoice_id
+      type: string
+      description: FK to invoice
+      is_key: true
+    - name: payment_status
+      type: enum
+      description: Current payment state
+      is_key: false
+      enum_values:
+      - unpaid
+      - scheduled
+      - paid
+      - failed
+      - disputed
+    - name: status_date
+      type: date
+      description: Status effective date
+      is_key: false
+    optional_fields:
+    - name: check_number
+      type: string
+      description: Check or ACH reference
+    - name: paid_amount_cents
+      type: money_cents
+      description: Paid amount in cents
+      unit: cents_usd
+    foreign_keys:
+    - field: invoice_id
+      references: invoice.invoice_id
+      on_missing: reject
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - cash-flow dashboards; aging

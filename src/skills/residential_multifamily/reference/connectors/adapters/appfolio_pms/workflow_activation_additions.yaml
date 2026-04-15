@@ -1,0 +1,188 @@
+# Workflow activation fragment for AppFolio.
+# Merged into _core/workflow_activation_map.yaml for the listed workflows.
+# AppFolio is primary for the site-level operating domain; blocking issues
+# map to the af_* rule_ids declared in dq_rules.yaml.
+
+appfolio_role: primary_for_pms_domain
+
+activates_existing_workflows:
+
+  - workflow: monthly_property_operating_review
+    role: primary
+    objects_supplied: [property, unit, lease, charge, payment, delinquency_case, work_order]
+    blocking_issues:
+      - af_completeness_property_required
+      - af_completeness_unit_required
+      - af_completeness_lease_required
+      - af_referential_lease_unit_present
+      - af_consistency_ledger_sum_matches_balance
+      - af_recon_property_list_vs_gl_entity_dim
+    partial_mode_behavior: |
+      If a single property fails af_recon_collections_vs_gl_revenue within
+      the confidence_reduced band, the workflow runs with that property
+      flagged low_confidence. If the ledger tie-out is outside the blocker
+      band, the property is held out of the report entirely and surfaces in
+      the exception queue.
+    human_approvals_required:
+      - regional_ops_director (per-property narrative sign-off)
+
+  - workflow: quarterly_portfolio_review
+    role: contributing
+    objects_supplied: [property, lease, work_order, turn_project, vendor]
+    notes: AppFolio feeds operational rollup for the asset-management quarterly.
+
+  - workflow: executive_operating_summary_generation
+    role: contributing
+    objects_supplied: [property, lease, charge, payment]
+    notes: |
+      Contributing alongside Intacct (post-close actuals). AppFolio carries
+      site-level narrative facts; Intacct carries authoritative financials.
+
+proposes_new_workflows:
+
+  - workflow: lead_to_lease_funnel_review
+    role: primary
+    objects_supplied: [lead, tour, application, approval_outcome, lease]
+    cadence: weekly
+    audience: [leasing_director, regional_ops_director]
+    blocking_issues:
+      - af_guardrail_lead_notes_no_protected_class
+      - af_guardrail_application_decided_requires_policy_ref
+      - af_completeness_application_decided_policy_ref
+    partial_mode_behavior: |
+      Protected-class or missing-policy-ref flags block the workflow entirely
+      for the affected property. No partial output; this is a fair-housing
+      gate, not a data-quality gate.
+    human_approvals_required:
+      - leasing_director (funnel review)
+      - compliance_analyst (fair-housing guardrail escalation)
+
+  - workflow: delinquency_collections
+    role: primary
+    objects_supplied: [delinquency_case, lease, charge, payment]
+    cadence: weekly
+    audience: [regional_ops_director, collections_analyst]
+    blocking_issues:
+      - af_consistency_ledger_sum_matches_balance
+      - af_referential_charge_lease_present
+    partial_mode_behavior: |
+      Per-resident ledger tie-out failures hold that case from auto-escalation
+      but do not block the workflow. Legal-stage cases require approval_request
+      before any eviction action is filed.
+    human_approvals_required:
+      - regional_ops_director
+      - legal_counsel (legal_notice and eviction stages)
+
+  - workflow: work_order_triage
+    role: primary
+    objects_supplied: [work_order, unit, vendor]
+    cadence: daily (p1_safety continuous)
+    audience: [maintenance_supervisor, regional_ops_director]
+    blocking_issues:
+      - af_completeness_work_order_required
+      - af_conformance_work_order_priority_enum
+      - af_consistency_p1_safety_assignment_sla
+    partial_mode_behavior: |
+      Missing optional fields (unit_id for common areas, cost estimates)
+      flow through as-is. Priority-enum failures block the ticket from
+      auto-assignment.
+    human_approvals_required:
+      - maintenance_supervisor (vendor dispatch)
+
+  - workflow: vendor_dispatch_sla_review
+    role: primary
+    objects_supplied: [work_order, vendor]
+    cadence: weekly
+    audience: [maintenance_supervisor, regional_ops_director, ap_manager]
+    blocking_issues:
+      - af_referential_work_order_vendor_present
+      - af_consistency_vendor_insurance_not_stale
+      - af_recon_vendor_master_three_way
+    partial_mode_behavior: |
+      Vendor insurance staleness warnings allow non-safety work to proceed
+      with an operator acknowledgement; safety-critical dispatch is blocked
+      per the ontology guardrail.
+    human_approvals_required:
+      - ap_manager (stale-COI escalation)
+
+  - workflow: unit_turn_make_ready
+    role: primary
+    objects_supplied: [turn_project, unit, work_order, vendor]
+    cadence: daily (turns in progress)
+    audience: [maintenance_supervisor, regional_ops_director]
+    blocking_issues:
+      - af_completeness_unit_required
+      - af_referential_work_order_vendor_present
+    partial_mode_behavior: |
+      Turns are derived from event sequences; incomplete derivation is
+      surfaced as a warning, not a blocker. The turn remains in the
+      workflow and the gap is logged.
+    human_approvals_required:
+      - maintenance_supervisor
+
+  - workflow: move_in_administration
+    role: primary
+    objects_supplied: [lease, lease_event, resident_account, unit]
+    cadence: event-driven
+    audience: [leasing_director, maintenance_supervisor]
+    blocking_issues:
+      - af_completeness_lease_required
+      - af_referential_lease_unit_present
+    partial_mode_behavior: |
+      Missing inspection artifacts hold the final step but the lease
+      activates in AppFolio regardless; adapter preserves the as-posted state.
+    human_approvals_required:
+      - leasing_director
+
+  - workflow: move_out_administration
+    role: primary
+    objects_supplied: [lease, lease_event, resident_account, charge]
+    cadence: event-driven
+    audience: [leasing_director, regional_ops_director]
+    blocking_issues:
+      - af_completeness_lease_required
+      - af_consistency_ledger_sum_matches_balance
+    partial_mode_behavior: |
+      Security deposit disposition waits on ledger tie-out. Incomplete
+      inspection records are warnings, not blockers.
+    human_approvals_required:
+      - leasing_director
+
+  - workflow: renewal_retention
+    role: primary
+    objects_supplied: [lease, lease_event, resident_account]
+    cadence: monthly
+    audience: [leasing_director, regional_ops_director]
+    blocking_issues:
+      - af_completeness_lease_required
+      - af_guardrail_lead_notes_no_protected_class
+    partial_mode_behavior: |
+      Rent comp drift and concession benchmark drift warnings degrade
+      confidence but do not block the retention plan.
+    human_approvals_required:
+      - leasing_director
+
+  - workflow: market_rent_refresh
+    role: contributing
+    objects_supplied: [unit, lease]
+    cadence: weekly
+    audience: [leasing_director, asset_mgmt_director]
+    notes: |
+      Primary source is Excel market surveys; AppFolio contributes the
+      internal rent benchmark via executed leases.
+
+  - workflow: third_party_manager_scorecard_review
+    role: primary
+    objects_supplied: [property, unit, lease, charge, work_order]
+    cadence: monthly
+    audience: [asset_mgmt_director, regional_portfolio_lead]
+    blocking_issues:
+      - af_completeness_property_required
+      - af_consistency_ledger_sum_matches_balance
+      - af_recon_collections_vs_gl_revenue
+    partial_mode_behavior: |
+      TPM properties running in AppFolio are scored identically to owned
+      properties. Missing TPM file submissions (manual domain) may hold
+      the scorecard per manual_sources dq rules.
+    human_approvals_required:
+      - asset_mgmt_director

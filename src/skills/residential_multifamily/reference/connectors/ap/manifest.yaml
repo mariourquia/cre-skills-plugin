@@ -1,0 +1,30 @@
+# AP connector manifest (vendor-neutral stub).
+connector_id: ap
+connector_kind: ap
+version: 0.1.0
+status: stub
+owner: residential_multifamily_subsystem
+vendor_neutral: true
+description: |
+  Accounts-payable feed. Vendor master, invoices, contracts, commitments,
+  purchase orders, and payment status.
+entities:
+  - vendor
+  - invoice
+  - contract
+  - commitment
+  - purchase_order
+  - payment_status
+provenance_fields_required:
+  - source_name
+  - source_type
+  - source_date
+  - extracted_at
+  - extractor_version
+  - source_row_id
+handshake:
+  auth_kind: file_drop
+  access_pattern: pull_scheduled
+  notes: |
+    Stub. Vendor adapter replaces with vendor-native auth.
+contact: operator_placeholder

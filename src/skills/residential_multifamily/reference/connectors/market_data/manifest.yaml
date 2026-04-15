@@ -1,0 +1,31 @@
+# Market data connector manifest (vendor-neutral stub).
+connector_id: market_data
+connector_kind: market_data
+version: 0.1.0
+status: stub
+owner: residential_multifamily_subsystem
+vendor_neutral: true
+description: |
+  External market-intelligence feeds - rent comps, concessions, occupancy,
+  payroll, labor, material, and utility references.
+entities:
+  - rent_comp
+  - concession_observation
+  - occupancy_benchmark
+  - payroll_reference
+  - labor_reference
+  - material_reference
+  - utility_reference
+provenance_fields_required:
+  - source_name
+  - source_type
+  - source_date
+  - extracted_at
+  - extractor_version
+  - source_row_id
+handshake:
+  auth_kind: api_key
+  access_pattern: pull_scheduled
+  notes: |
+    Stub. External-data vendors typically require API keys; no credentials here.
+contact: operator_placeholder

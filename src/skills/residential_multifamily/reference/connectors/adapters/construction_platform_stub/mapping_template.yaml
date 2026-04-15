@@ -1,0 +1,65 @@
+# Mapping template for the generic construction platform stub.
+# Applied on top of reference/connectors/construction/mapping.yaml.
+
+status_tag: template
+
+capex_project:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [capex_project_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: project_id,      normalized_column: capex_project_id, transform: trim_string, required: true }
+    - { source_column: project_name,    normalized_column: project_name,     transform: trim_string, required: true }
+    - { source_column: prop_code,       normalized_column: property_id,      transform: trim_string, required: true }
+    - { source_column: budget_version,  normalized_column: budget_version,   transform: trim_string, required: true }
+
+estimate_line_item:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [capex_project_id, cost_code, budget_version]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: project_id,      normalized_column: capex_project_id, transform: trim_string,      required: true }
+    - { source_column: cost_code,       normalized_column: cost_code,        transform: trim_string,      required: true }
+    - { source_column: csi_code,        normalized_column: csi_code,         transform: trim_string,      required: false }
+    - { source_column: line_amount,     normalized_column: line_amount_cents, transform: dollars_to_cents, required: true }
+    - { source_column: budget_version,  normalized_column: budget_version,   transform: trim_string,      required: true }
+
+vendor_agreement:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [commitment_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: commitment_id,        normalized_column: commitment_id,          transform: trim_string,      required: true }
+    - { source_column: project_id,           normalized_column: capex_project_id,       transform: trim_string,      required: true }
+    - { source_column: vendor_id,            normalized_column: vendor_id,              transform: trim_string,      required: true }
+    - { source_column: commitment_amount,    normalized_column: commitment_amount_cents, transform: dollars_to_cents, required: true }
+
+change_order:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [change_order_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: change_order_id,  normalized_column: change_order_id,          transform: trim_string,              required: true }
+    - { source_column: commitment_id,    normalized_column: commitment_id,            transform: trim_string,              required: true }
+    - { source_column: co_amount,        normalized_column: change_order_amount_cents, transform: dollars_to_cents,         required: true }
+    - { source_column: co_status,        normalized_column: change_order_status,      transform: map_change_order_status,  required: true }
+    - { source_column: contingency_owner, normalized_column: contingency_type,        transform: map_contingency_type,     required: false }
+
+draw_request:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [draw_request_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: draw_id,          normalized_column: draw_request_id,      transform: trim_string,      required: true }
+    - { source_column: project_id,       normalized_column: capex_project_id,     transform: trim_string,      required: true }
+    - { source_column: draw_amount,      normalized_column: draw_amount_cents,    transform: dollars_to_cents, required: true }
+    - { source_column: retention_amount, normalized_column: retention_amount_cents, transform: dollars_to_cents, required: false }
+    - { source_column: milestone_date,   normalized_column: milestone_date,       transform: to_iso_date,      required: false }
+
+bid_package:         { status: TODO, note: "map per vendor" }
+schedule_milestone:  { status: TODO, note: "map per vendor" }

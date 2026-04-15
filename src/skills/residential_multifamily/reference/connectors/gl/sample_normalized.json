@@ -1,0 +1,146 @@
+{
+  "chart_of_accounts": [
+    {
+      "account_id": "4000",
+      "account_label": "Rental Income",
+      "account_type": "revenue",
+      "normal_balance": "credit",
+      "parent_account_id": null,
+      "inactive": false,
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "acct_4000"
+    },
+    {
+      "account_id": "5100",
+      "account_label": "Utilities - Electric",
+      "account_type": "expense",
+      "normal_balance": "debit",
+      "parent_account_id": "5000",
+      "inactive": false,
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "acct_5100"
+    }
+  ],
+  "account_mapping": [
+    {
+      "source_account_id": "4000",
+      "canonical_account_slug": "revenue_base_rent",
+      "effective_start": "2026-01-01",
+      "effective_end": null,
+      "notes": "sample",
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "map_4000"
+    }
+  ],
+  "actual": [
+    {
+      "property_id": "prop_demo_001",
+      "account_id": "4000",
+      "period": "2026-03",
+      "amount_cents": 1234500,
+      "memo": "sample",
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "act_prop_demo_001_4000_202603"
+    }
+  ],
+  "budget": [
+    {
+      "property_id": "prop_demo_001",
+      "account_id": "4000",
+      "period": "2026-03",
+      "scenario": "approved",
+      "amount_cents": 1234500,
+      "build_basis": "per_unit_month",
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-01-15",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "bud_prop_demo_001_4000_202603"
+    }
+  ],
+  "forecast": [
+    {
+      "property_id": "prop_demo_001",
+      "account_id": "4000",
+      "period": "2026-06",
+      "as_of_date": "2026-04-01",
+      "amount_cents": 1267800,
+      "prior_forecast_amount_cents": 1250000,
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "fcst_prop_demo_001_4000_202606_20260401"
+    }
+  ],
+  "variance_line": [
+    {
+      "property_id": "prop_demo_001",
+      "account_id": "4000",
+      "period": "2026-03",
+      "budget_amount_cents": 1234500,
+      "actual_amount_cents": 1250000,
+      "variance_cents": 15500,
+      "driver_category": "rate",
+      "narrative": "sample narrative",
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "var_prop_demo_001_4000_202603"
+    }
+  ],
+  "capex_actual": [
+    {
+      "capex_posting_id": "cx_sample_001",
+      "property_id": "prop_demo_001",
+      "capex_project_id": "proj_sample_001",
+      "posting_date": "2026-04-10",
+      "amount_cents": 500000,
+      "account_id": "1800",
+      "vendor_id": "vend_sample_001",
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-04-10",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "cx_sample_001"
+    }
+  ],
+  "commitment": [
+    {
+      "commitment_id": "cmt_sample_001",
+      "property_id": "prop_demo_001",
+      "commitment_type": "contract",
+      "vendor_id": "vend_sample_001",
+      "amount_cents": 5000000,
+      "status": "open",
+      "period_opened": "2026-03",
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "cmt_sample_001"
+    }
+  ]
+}

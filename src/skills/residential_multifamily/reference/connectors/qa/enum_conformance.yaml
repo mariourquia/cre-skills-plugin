@@ -1,0 +1,36 @@
+# Generic enum-value conformance check template.
+# Per-connector reconciliation_checks.yaml references this pattern when an
+# entity field carries an enum type. Unmapped source values MUST be rejected,
+# never silently bucketed to "other".
+check_id: enum_conformance
+check_kind: null_critical
+severity: blocker
+description: |
+  Every enum-typed field in a normalized record must carry a value that is
+  in the canonical enum declared in schema.yaml. Unmapped source enum values
+  fail closed at the mapping step and land in reference/raw/<domain>/_rejected/.
+parameters:
+  - name: entity
+    description: Entity slug carrying the enum field
+  - name: field
+    description: Field name with enum type
+  - name: enum_source
+    description: Pointer to enum_values list in schema.yaml or to an overlay-extended enum
+  - name: on_missing
+    description: Behavior when source value is not in canonical enum (always reject for enum)
+inputs:
+  - reference/normalized/<entity>__<scope>.csv
+  - reference/connectors/<domain>/schema.yaml
+  - reference/connectors/<domain>/mapping.yaml
+expected_invariant: |
+  for each row in <entity>:
+    <field> IS NULL OR <field> IN canonical_enum(<entity>.<field>)
+severity_default: blocker
+remediation_pattern: |
+  Operator extends the mapping.yaml enum-transform rule to map the new source
+  value to a canonical enum value, or rejects the record at landing with a
+  documented reason. Never silently bucket to "other".
+remediation: |
+  See remediation_pattern. Each unmapped value is listed in the rejected-row
+  file with the source value and the target entity.field; operator updates
+  mapping.yaml and re-lands.

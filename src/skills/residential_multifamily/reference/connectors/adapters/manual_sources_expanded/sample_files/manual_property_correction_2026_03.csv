@@ -1,0 +1,6 @@
+object_type,object_id,field_changed,prior_value,new_value,rationale,requested_by,approver,approved_date
+property,prop_cta_001,unit_count_rentable,220,219,"Unit 3204 reclassified as model unit per April marketing plan; removed from rentable inventory.",J. Osei,regional_ops_director,2026-03-14
+lease,lease_cta_2025_09_104,base_rent_monthly_cents,189500,187500,"Rent correction: original lease signed with 2000-cent error (typed 1895 vs 1875 in source doc); corrected per addendum A-2026-03-08.",R. Foley,regional_manager,2026-03-19
+vendor,vendor_v_00217,vendor_name,"Concrete Solutions of the Carolinas LLC","Concrete Solutions Carolinas LLC","Vendor legal name update per updated W-9 dated 2026-02-28.",ap_manager,controller,2026-03-22
+budget_line,bl_2026_oak_atl_011_6200,amount,51200,52400,"Budget amendment: added 1 leasing consultant FTE approved via apr_2026_0198 on 2026-02-24.",A. Strand,asset_manager,2026-03-05
+work_order,wo_pin_nas_007_2026_01_1182,priority,p3,p2,"Priority escalation: on-site inspection revealed active water intrusion; promoted per work_order_priority_playbook.",M. Caldera,regional_ops_director,2026-03-11

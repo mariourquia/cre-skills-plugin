@@ -1,0 +1,41 @@
+# Source registry FRAGMENT for Dealpath.
+# Will be merged into source_registry/source_registry.yaml.
+
+records:
+
+  - source_id: dealpath_prod
+    source_name: Dealpath Deal Pipeline Production
+    source_domain: deal_pipeline
+    vendor_family: dealpath_family
+    ingestion_mode: api
+    environment: prod
+    cadence: daily
+    data_owner: investments_lead
+    business_owner: chief_investment_officer
+    technical_owner: data_platform_team
+    credential_method: api_key_placeholder
+    object_coverage:
+      - deal
+      - asset
+      - development_project
+      - capex_project
+      - approval_request
+    expected_latency_minutes: 240
+    known_limitations:
+      - deal renamed after approval; change tracking required
+      - one deal may spawn multiple projects or properties
+      - development deal may later be split into phases
+      - financing record timing mismatch with deal stage
+      - closed deal may lack downstream property/project setup
+      - duplicate asset names in same market possible
+      - legacy deals carry sparse fields
+      - asset_crosswalk file does not yet exist; flagged as wave-4 dependency
+    pii_classification: low
+    financial_sensitivity: high
+    legal_sensitivity: moderate
+    status: stubbed
+    rollout_wave: wave_4
+    notes: |
+      Primary deal-pipeline source. New `deal_pipeline` connector domain
+      added in wave 4 (canonical base unchanged). Seeds downstream AppFolio
+      property and Procore project at acquisition / development handoff.

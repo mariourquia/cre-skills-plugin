@@ -1,0 +1,16 @@
+# Duplicate primary-key detection.
+check_id: duplicate_id
+check_kind: duplicate_id
+severity: blocker
+description: |
+  No two normalized records may share the same primary key. Dedup rules
+  in mapping.yaml should have collapsed duplicates before this check runs.
+inputs:
+  - reference/normalized/<entity>__<scope>.csv
+expected_invariant: |
+  count(distinct primary_key_tuple) == count(records)
+remediation: |
+  Review the entity's dedup rule in mapping.yaml. If the source routinely
+  emits duplicates, set dedup_rule.tie_breaker to latest_extracted_at_wins
+  and re-land. If duplicates reflect a source-system bug, open a ticket
+  with the operator and reject the landing.

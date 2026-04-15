@@ -1,0 +1,6 @@
+project_type,milestone_type,milestone_category,market,region,property_form,project_size_band,baseline_duration_days,contingency_pct,weather_assumption,unit,as_of,source,source_basis,row_id
+ground_up_development,site_work,site,Charlotte,southeast,garden,200_to_299_units,85,0.15,seasonal_adjustment,days,2026-01-15,historical_avg_2022-2025,historical_project_data,sas_0001
+ground_up_development,foundation,structure,Charlotte,southeast,garden,200_to_299_units,55,0.10,minimal,days,2026-01-15,historical_avg_2022-2025,historical_project_data,sas_0002
+ground_up_development,framing,structure,Charlotte,southeast,garden,200_to_299_units,95,0.12,seasonal_adjustment,days,2026-01-15,historical_avg_2022-2025,historical_project_data,sas_0003
+ground_up_development,mep_rough,mep,Charlotte,southeast,garden,200_to_299_units,65,0.10,minimal,days,2026-01-15,historical_avg_2022-2025,historical_project_data,sas_0004
+major_renovation,interior_finish,interior,Charlotte,southeast,garden,200_to_299_units,120,0.20,minimal,days,2026-01-15,gc_benchmark_2025,gc_benchmark,sas_0005

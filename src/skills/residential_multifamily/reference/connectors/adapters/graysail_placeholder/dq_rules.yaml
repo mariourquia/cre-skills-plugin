@@ -1,0 +1,278 @@
+# GraySail placeholder data quality rules.
+# DEFERRED UNTIL CLASSIFICATION CLOSES per runbooks/graysail_classification_path.md.
+#
+# Every rule below is deferred-mode: severity is pinned to `warning` until the
+# adapter is forked into a classified slug and advanced out of `stub`. Each
+# rule describes what WOULD be checked once GraySail's role, access path,
+# operating pattern, and sensitivity tier are confirmed. Until then, the rule
+# enforces nothing in production; it surfaces the fact that the check is
+# pending so operators see the classification gap in the monitoring surface
+# rather than mistaking silence for cleanliness.
+#
+# Tolerance bands cite reference/normalized/schemas/reconciliation_tolerance_band.yaml
+# and never hardcode numeric thresholds here (consistent with the pattern in
+# adapters/dealpath_deal_pipeline/dq_rules.yaml).
+#
+# Per-adapter rule_id prefix: gs_
+# Every rule carries:
+#   - rule_id: gs_<kebab-or-snake>_pending
+#   - dimension: freshness | completeness | conformance | uniqueness | consistency | provenance
+#   - severity: warning (pinned; promotion requires classification_path closure)
+#   - description: operator-facing summary
+#   - expected: prose of what would be checked post-classification
+#   - remediation: pointer to runbooks/graysail_classification_path.md or related
+#   - classification_dependency: list of checkpoints from the classification path
+#       that must close before this rule can be promoted beyond warning.
+
+status_tag: stub
+
+rules:
+
+  - rule_id: gs_classification_pending_blocker
+    dimension: provenance
+    severity: warning
+    description: |
+      Master gate rule. Warns whenever any downstream surface observes
+      GraySail content while classification remains open. No GraySail row
+      may flow into reconciliation, derived metrics, workflow activation,
+      or operator-visible narrative surfaces while this rule is firing.
+    expected: |
+      graysail_classified == true AND classification_path_runbook_closed == true.
+      While either side is false, any GraySail-touching workflow must run
+      in partial_mode_behavior: blocked_pending_classification.
+    remediation: |
+      Advance runbooks/graysail_classification_path.md through all eight
+      checkpoints (C1-C8); fork the adapter into the classified slug; then
+      retire this rule in favor of role-specific rules under the forked
+      adapter.
+    classification_dependency: [C1, C2, C3, C4, C5, C6, C7, C8]
+    promotion_rule: |
+      Promote to severity: blocker only after the forked adapter advances to
+      starter and replaces this rule with a concrete per-object gate.
+
+  - rule_id: gs_freshness_pending
+    dimension: freshness
+    severity: warning
+    description: |
+      Placeholder freshness check. Warns that no freshness SLA is defined
+      for GraySail content because ingestion mode and cadence are unknown
+      until classification Step 2 closes.
+    expected: |
+      max(graysail_row.extracted_at) >= now - source_registry.expected_latency_minutes
+      with expected_latency_minutes declared only after classification Step 2
+      (access path) resolves the ingestion mode. Tolerance band cites
+      reference/normalized/schemas/reconciliation_tolerance_band.yaml once
+      the adapter forks.
+    remediation: |
+      Close Checkpoint C2 in runbooks/graysail_classification_path.md;
+      declare cadence and expected_latency_minutes in the forked adapter's
+      source_registry_entry.yaml; then promote this rule to a concrete
+      freshness blocker per the standard pattern in
+      adapters/dealpath_deal_pipeline/dq_rules.yaml::dp_freshness_deals.
+    classification_dependency: [C2, C3]
+
+  - rule_id: gs_completeness_pending
+    dimension: completeness
+    severity: warning
+    description: |
+      Placeholder completeness check. Warns that required-field declarations
+      are pending because the provisional source contract in
+      provisional_source_contract.yaml ships with every field flagged
+      classification_pending.
+    expected: |
+      Every record carries the full set of fields declared required on
+      the forked source_contract.yaml. Today, no such declaration exists;
+      every field is optional pending classification.
+    remediation: |
+      Close Checkpoint C3 in runbooks/graysail_classification_path.md;
+      replace provisional_source_contract.yaml with a real source contract
+      against sanitized samples; declare required fields explicitly; then
+      promote this rule to a concrete completeness blocker per the pattern
+      in adapters/dealpath_deal_pipeline/dq_rules.yaml::dp_completeness_required_fields.
+    classification_dependency: [C3]
+
+  - rule_id: gs_conformance_pending
+    dimension: conformance
+    severity: warning
+    description: |
+      Placeholder conformance check. Warns that no enum or type conformance
+      rules exist because GraySail content type (document vs. structured)
+      and field shape are undetermined until classification Step 3 closes.
+    expected: |
+      Every enumerated field value maps to a canonical enum (e.g., deal_type,
+      pipeline_stage, work_order_priority) declared in the canonical
+      mapping.yaml of the connector domain the classified adapter falls
+      under. Today, no mapping exists.
+    remediation: |
+      Close Checkpoint C3 in runbooks/graysail_classification_path.md;
+      declare canonical mappings for every enumerated field in the forked
+      adapter's field_mapping.yaml; then promote this rule to one concrete
+      conformance rule per field.
+    classification_dependency: [C1, C3]
+
+  - rule_id: gs_uniqueness_pending
+    dimension: uniqueness
+    severity: warning
+    description: |
+      Placeholder uniqueness check. Warns that no primary-key / natural-key
+      uniqueness invariant is declared because identity hypothesis in
+      provisional_source_contract.yaml is marked classification_pending on
+      every placeholder entity.
+    expected: |
+      For every entity in the forked source contract, natural key is unique
+      within an active snapshot (count(distinct natural_key) == count(rows)
+      for non-deleted records). Today, identity is hypothesis-only.
+    remediation: |
+      Close Checkpoint C3 in runbooks/graysail_classification_path.md;
+      finalize identity_hypothesis on every entity; then promote this rule
+      to a concrete uniqueness blocker per the pattern in
+      adapters/dealpath_deal_pipeline/dq_rules.yaml::dp_uniqueness_deal_id.
+    classification_dependency: [C3]
+
+  - rule_id: gs_referential_pending
+    dimension: consistency
+    severity: warning
+    description: |
+      Placeholder referential-integrity check. Warns that no referential
+      invariant is declared because GraySail's ability to reference
+      canonical operating objects (property, lease, vendor, capex_project,
+      workflow) is not yet characterized. classification_worksheet.md
+      Section 3 question 11 gates this rule.
+    expected: |
+      Every GraySail record that claims a reference to a canonical object
+      resolves to an active record in the primary source for that object
+      per the source-of-truth matrix. Today, references are free-form prose
+      at best.
+    remediation: |
+      Close Checkpoints C1, C3, C6 in runbooks/graysail_classification_path.md;
+      declare the reference encoding (property_id, vendor_id, workflow_slug,
+      role_slug, or free-form); route free-form prose through a reference
+      resolver or reject the rows; then promote this rule per the pattern
+      in adapters/dealpath_deal_pipeline/dq_rules.yaml::dp_referential_asset_present.
+    classification_dependency: [C1, C3, C6]
+
+  - rule_id: gs_consistency_pending
+    dimension: consistency
+    severity: warning
+    description: |
+      Placeholder cross-source consistency check. Warns that no disagreement
+      resolution rule exists between GraySail and the five confirmed systems
+      of record (AppFolio, Sage Intacct, Procore, Dealpath, Excel surveys).
+      When GraySail is classified, conflicts with confirmed primaries must
+      resolve per the source-of-truth matrix's disagreement column.
+    expected: |
+      For every canonical object GraySail touches, disagreement between
+      GraySail and the declared primary falls within the tolerance band
+      per reference/normalized/schemas/reconciliation_tolerance_band.yaml.
+      Within band: silent_audit. Outside band: blocker. Today, no comparison
+      exists because GraySail writes nothing to canonical.
+    remediation: |
+      Close Checkpoint C6 in runbooks/graysail_classification_path.md;
+      update ../../../../_core/stack_wave4/source_of_truth_matrix.md with
+      GraySail rows and disagreement-resolution rules; declare tolerance
+      bands per object citing reference/normalized/schemas/reconciliation_tolerance_band.yaml;
+      then promote this rule per object.
+    classification_dependency: [C1, C6]
+
+  - rule_id: gs_provenance_pending
+    dimension: provenance
+    severity: warning
+    description: |
+      Placeholder provenance-envelope check. Warns that provenance fields
+      (source_name, source_type, source_date, extracted_at, extractor_version,
+      source_row_id) on GraySail payload envelopes are declared but carry
+      stub values (source_name: graysail_placeholder_stub,
+      extractor_version: "0.0.0-stub"). Real provenance cannot exist until
+      a real extraction path is declared (Checkpoint C2).
+    expected: |
+      Every GraySail row carries a six-field provenance envelope with
+      non-stub values. source_name matches the forked adapter's registered
+      source_id. extractor_version matches the deployed extractor's semver.
+      Today, every envelope value is placeholder.
+    remediation: |
+      Close Checkpoint C2 in runbooks/graysail_classification_path.md;
+      declare the real extraction path; update the forked adapter's
+      provisional_source_contract.yaml::provenance_envelope_required with
+      concrete values; then promote this rule to a blocker on malformed
+      envelopes.
+    classification_dependency: [C2, C8]
+
+  - rule_id: gs_workflow_dependency_blocked
+    dimension: consistency
+    severity: warning
+    description: |
+      Placeholder workflow-dependency assertion. Warns when any workflow
+      referenced in workflow_relevance_map.yaml candidate_dependencies
+      attempts to treat GraySail as primary or secondary while the
+      classification is open. Ensures no silent dependency activation.
+    expected: |
+      For each workflow in workflow_relevance_map.yaml, role on the
+      workflow activation map remains pending_classification until
+      Checkpoint C5 closes. No workflow advances beyond
+      partial_mode_behavior: blocked_pending_classification.
+    remediation: |
+      Close Checkpoint C5 in runbooks/graysail_classification_path.md;
+      confirm or retire each candidate workflow; update
+      workflow_activation_additions.yaml with the confirmed role; then
+      retire this rule in favor of per-workflow gating.
+    classification_dependency: [C5, C8]
+
+  - rule_id: gs_overlap_with_other_sources_unmonitored
+    dimension: consistency
+    severity: warning
+    description: |
+      Placeholder overlap-check. Warns that GraySail's potential overlap
+      with AppFolio (PMS), Sage Intacct (GL), Procore (construction),
+      Dealpath (deal pipeline), and operator Excel packs is not monitored
+      because classification Step 1 (role) has not closed. If GraySail
+      silently duplicates an operating object already owned by a confirmed
+      primary, reconciliation is missing and the duplicate is invisible.
+    expected: |
+      For every canonical object declared by the forked adapter,
+      the source-of-truth matrix names GraySail in exactly one of
+      {primary, secondary, fallback, audit_only} relative to the other
+      four systems. Today, no row exists for GraySail in the matrix
+      (see ../../../../_core/stack_wave4/source_of_truth_matrix.md, open
+      item: "GraySail row deferred").
+    remediation: |
+      Close Checkpoints C1, C5, C6 in runbooks/graysail_classification_path.md;
+      add the GraySail row to source_of_truth_matrix.md; declare
+      overlap-resolution rule per canonical object; then promote this
+      rule per object with a tolerance band citing
+      reference/normalized/schemas/reconciliation_tolerance_band.yaml.
+    classification_dependency: [C1, C5, C6]
+
+# Promotion policy
+# ----------------
+# No rule above may be promoted beyond `warning` severity until the matching
+# classification_dependency checkpoints close per
+# runbooks/graysail_classification_path.md. Promotion is done in the FORKED
+# adapter (graysail_<role>_<pattern>/dq_rules.yaml), not here. The placeholder
+# preserves the deferred-mode rule set as the classification trail.
+
+promotion_policy:
+  default_severity_until_classified: warning
+  promotion_gate: runbooks/graysail_classification_path.md
+  promotion_target_file: adapters/graysail_<role>_<pattern>/dq_rules.yaml
+  notes: |
+    The placeholder dq_rules.yaml is intentionally inert at the enforcement
+    layer. Promotion requires a forked adapter directory; no in-place
+    severity escalation is permitted.
+
+# Monitoring posture
+# ------------------
+# Deferred-mode rules still emit observability events so the classification
+# gap is visible in the operator's monitoring surface. Consistency with
+# monitoring/observability_events.yaml and monitoring/exception_routing.yaml
+# is declared below so the routing layer can discover this rule set.
+
+monitoring:
+  event_class: placeholder_deferred_dq
+  event_severity: info
+  route_to: data_platform_team
+  narrative_template: |
+    GraySail placeholder adapter is reporting rule_id={rule_id}
+    at severity=warning pending classification closure. This is EXPECTED
+    behavior until runbooks/graysail_classification_path.md closes every
+    checkpoint. No operator action is required beyond advancing the
+    classification path.

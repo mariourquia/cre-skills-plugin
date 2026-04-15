@@ -1,0 +1,1024 @@
+# Concrete source registry (starter set).
+# Conforms to source_registry.schema.yaml.
+# Every record in this file carries status in {stubbed, planned}; no live
+# production feeds are declared from this repo. See README.md for lifecycle.
+
+status_tag: sample
+
+records:
+
+  - source_id: east_region_pms
+    source_name: East Region Property Management System
+    source_domain: pms
+    vendor_family: yardi_family
+    ingestion_mode: api
+    environment: stage
+    cadence: hourly
+    data_owner: regional_ops_director
+    business_owner: regional_portfolio_lead
+    technical_owner: data_platform_team
+    credential_method: api_key_placeholder
+    object_coverage:
+      - property
+      - building
+      - unit
+      - unit_type
+      - lease
+      - lease_event
+      - charge
+      - payment
+      - delinquency_case
+      - lead
+      - tour
+      - application
+      - renewal_offer
+      - work_order
+      - turn_project
+    expected_latency_minutes: 60
+    known_limitations:
+      - unit renumbering after renovation requires manual master-data update
+      - lease_event enum mapping loses edge events such as legal_notice_served
+        when source records them as generic notes
+    pii_classification: high
+    financial_sensitivity: high
+    legal_sensitivity: high
+    status: stubbed
+    rollout_wave: wave_0
+    notes: |
+      Primary PMS stub for the east-region portfolio. Pairs with the `pms`
+      connector under `../pms/`. Live adapter not yet running.
+
+  - source_id: west_region_pms
+    source_name: West Region Property Management System
+    source_domain: pms
+    vendor_family: realpage_family
+    ingestion_mode: sftp
+    environment: stage
+    cadence: daily
+    data_owner: regional_ops_director
+    business_owner: regional_portfolio_lead
+    technical_owner: data_platform_team
+    credential_method: sftp_key_placeholder
+    object_coverage:
+      - property
+      - unit
+      - lease
+      - charge
+      - payment
+      - work_order
+      - turn_project
+    expected_latency_minutes: 1440
+    known_limitations:
+      - nightly export loses intra-day resident ledger adjustments
+      - lead and tour data not exported in this feed
+    pii_classification: high
+    financial_sensitivity: high
+    legal_sensitivity: high
+    status: stubbed
+    rollout_wave: wave_0
+    notes: |
+      Secondary PMS stub. CRM data is pulled separately from the
+      `marketing_crm` source in the crm domain.
+
+  - source_id: corporate_gl
+    source_name: Corporate General Ledger
+    source_domain: gl
+    vendor_family: generic_erp
+    ingestion_mode: scheduled_export
+    environment: stage
+    cadence: daily
+    data_owner: corporate_controller
+    business_owner: finance_director
+    technical_owner: finance_systems_team
+    credential_method: api_key_placeholder
+    object_coverage:
+      - budget_line
+      - forecast_line
+      - variance_explanation
+      - capex_project
+      - change_order
+      - draw_request
+    expected_latency_minutes: 1440
+    known_limitations:
+      - chart of accounts mapping requires the account_crosswalk table to
+        produce canonical account slugs
+      - capex actuals posted at parent project level; child project splits
+        require the capex_project_crosswalk resolution
+    pii_classification: none
+    financial_sensitivity: high
+    legal_sensitivity: moderate
+    status: stubbed
+    rollout_wave: wave_0
+    notes: |
+      Primary GL stub. Pairs with the `gl` connector under `../gl/`.
+
+  - source_id: marketing_crm
+    source_name: Marketing and Leasing CRM
+    source_domain: crm
+    vendor_family: entrata_family
+    ingestion_mode: api
+    environment: stage
+    cadence: hourly
+    data_owner: marketing_lead
+    business_owner: leasing_director
+    technical_owner: data_platform_team
+    credential_method: oauth_placeholder
+    object_coverage:
+      - lead
+      - tour
+      - application
+    expected_latency_minutes: 60
+    known_limitations:
+      - resident account dedup across CRM and PMS must rely on phone and email
+        match because CRM issues its own internal id
+      - preference notes occasionally contain free-form text that must be
+        screened before storage (fair housing guardrail)
+    pii_classification: high
+    financial_sensitivity: low
+    legal_sensitivity: high
+    status: stubbed
+    rollout_wave: wave_0
+    notes: |
+      CRM stub. Feeds the lead / tour / application slice for the leasing
+      funnel and coordinates with PMS sources for resident-account dedup.
+
+  - source_id: accounts_payable_primary
+    source_name: Primary Accounts Payable System
+    source_domain: ap
+    vendor_family: appfolio_family
+    ingestion_mode: api
+    environment: stage
+    cadence: daily
+    data_owner: ap_manager
+    business_owner: finance_director
+    technical_owner: finance_systems_team
+    credential_method: api_key_placeholder
+    object_coverage:
+      - vendor
+      - vendor_agreement
+      - charge
+      - payment
+    expected_latency_minutes: 1440
+    known_limitations:
+      - vendor duplicates across legacy and current systems require the
+        vendor_master_crosswalk to consolidate
+      - concession reversal postings occasionally lag the PMS lease by one day
+    pii_classification: moderate
+    financial_sensitivity: high
+    legal_sensitivity: moderate
+    status: stubbed
+    rollout_wave: wave_0
+    notes: |
+      AP stub. Pairs with the `ap` connector under `../ap/`.
+
+  - source_id: market_rent_comps_primary
+    source_name: Primary Market Rent Comp Subscription
+    source_domain: market_data
+    vendor_family: costar_family
+    ingestion_mode: api
+    environment: stage
+    cadence: weekly
+    data_owner: research_analyst
+    business_owner: investments_director
+    technical_owner: data_platform_team
+    credential_method: api_key_placeholder
+    object_coverage:
+      - market_comp
+    expected_latency_minutes: 10080
+    known_limitations:
+      - submarket labels do not align with internal submarket taxonomy; requires
+        mapping in market_data connector
+      - concession observations are estimates, not audited lease data
+    pii_classification: none
+    financial_sensitivity: low
+    legal_sensitivity: low
+    status: stubbed
+    rollout_wave: wave_1
+    notes: |
+      Market data stub for comps. Pairs with the `market_data` connector under
+      `../market_data/`.
+
+  - source_id: construction_tracker_primary
+    source_name: Primary Construction and Capex Tracking System
+    source_domain: construction
+    vendor_family: procore_family
+    ingestion_mode: api
+    environment: stage
+    cadence: daily
+    data_owner: construction_manager
+    business_owner: development_director
+    technical_owner: capital_projects_team
+    credential_method: oauth_placeholder
+    object_coverage:
+      - capex_project
+      - estimate_line_item
+      - bid_package
+      - change_order
+      - draw_request
+      - schedule_milestone
+      - vendor
+      - vendor_agreement
+    expected_latency_minutes: 1440
+    known_limitations:
+      - same capex project may appear under different ids in the GL; requires
+        capex_project_crosswalk to resolve
+      - change orders recorded in this system without matching GL posting until
+        owner approval lands
+    pii_classification: none
+    financial_sensitivity: high
+    legal_sensitivity: moderate
+    status: stubbed
+    rollout_wave: wave_1
+    notes: |
+      Construction and major-renovation stub. Pairs with the `construction`
+      connector under `../construction/`.
+
+  - source_id: hr_payroll_primary
+    source_name: Primary HR and Payroll System
+    source_domain: hr_payroll
+    vendor_family: generic_hr_payroll
+    ingestion_mode: scheduled_export
+    environment: stage
+    cadence: weekly
+    data_owner: hr_director
+    business_owner: operations_director
+    technical_owner: hr_systems_team
+    credential_method: sftp_key_placeholder
+    object_coverage:
+      - staffing_plan
+    expected_latency_minutes: 10080
+    known_limitations:
+      - contractor pay records comingled with employee records; requires the
+        employee_crosswalk to flag contractors
+      - same employee can cover multiple properties; assignment split must be
+        maintained manually
+    pii_classification: restricted
+    financial_sensitivity: high
+    legal_sensitivity: high
+    status: stubbed
+    rollout_wave: wave_1
+    notes: |
+      HR / payroll stub. The hr_payroll domain has no dedicated connector
+      directory yet; the `gl` and `construction` connectors consume payroll
+      aggregates via the account_crosswalk until a dedicated connector ships.
+
+  - source_id: budget_shared_drive_dropbox
+    source_name: Annual Budget Shared Drive Drop
+    source_domain: manual_upload
+    vendor_family: spreadsheet_workflow
+    ingestion_mode: shared_drive
+    environment: stage
+    cadence: quarterly
+    data_owner: corporate_controller
+    business_owner: finance_director
+    technical_owner: finance_systems_team
+    credential_method: shared_drive_placeholder
+    object_coverage:
+      - budget_line
+      - forecast_line
+    expected_latency_minutes: 0
+    known_limitations:
+      - file format varies across properties despite template guidance
+      - property names in spreadsheets do not always match PMS property_ids
+    pii_classification: none
+    financial_sensitivity: high
+    legal_sensitivity: low
+    status: stubbed
+    rollout_wave: wave_1
+    notes: |
+      Manual upload fallback for budgets that are not yet authored inside the
+      corporate_gl source. Resolves via the property_master_crosswalk.
+
+  - source_id: operator_owner_portal_sftp
+    source_name: Third-Party Operator Owner Portal SFTP
+    source_domain: manual_upload
+    vendor_family: operator_owner_portal
+    ingestion_mode: sftp
+    environment: dev
+    cadence: monthly
+    data_owner: asset_manager
+    business_owner: investments_director
+    technical_owner: data_platform_team
+    credential_method: sftp_key_placeholder
+    object_coverage:
+      - property
+      - unit
+      - lease
+      - charge
+      - payment
+      - work_order
+      - budget_line
+      - variance_explanation
+    expected_latency_minutes: 43200
+    known_limitations:
+      - file names and internal schemas vary across third-party operators
+      - delayed month-end close can push cadence by several days
+    pii_classification: high
+    financial_sensitivity: high
+    legal_sensitivity: moderate
+    status: planned
+    rollout_wave: wave_2
+    notes: |
+      Planned integration for assets managed by third-party operators. Serves
+      as a fallback source when direct PMS integration is not available.
+
+  - source_id: utility_expense_intake
+    source_name: Utility Expense Intake (Email Drop)
+    source_domain: manual_upload
+    vendor_family: utility_billing_intake
+    ingestion_mode: email_drop
+    environment: dev
+    cadence: monthly
+    data_owner: utilities_analyst
+    business_owner: operations_director
+    technical_owner: data_platform_team
+    credential_method: email_inbox_placeholder
+    object_coverage:
+      - charge
+    expected_latency_minutes: 43200
+    known_limitations:
+      - utility provider invoice formats are non-standard; requires OCR
+        workflow before mapping
+      - allocation rules between owner-paid and resident-paid utilities are
+        operator-specific
+    pii_classification: low
+    financial_sensitivity: moderate
+    legal_sensitivity: low
+    status: planned
+    rollout_wave: wave_2
+    notes: |
+      Planned inbound for utility expense reconciliation.
+
+  - source_id: insurance_coi_intake
+    source_name: Vendor Insurance Certificate Intake
+    source_domain: manual_upload
+    vendor_family: compliance_intake
+    ingestion_mode: email_drop
+    environment: dev
+    cadence: on_demand
+    data_owner: compliance_analyst
+    business_owner: risk_director
+    technical_owner: data_platform_team
+    credential_method: email_inbox_placeholder
+    object_coverage:
+      - vendor
+      - vendor_agreement
+    expected_latency_minutes: 43200
+    known_limitations:
+      - vendors submit COIs on ad-hoc schedules
+      - expired COI detection requires active monitoring; stale records block
+        safety-critical dispatch per the vendor insurance guardrail
+    pii_classification: low
+    financial_sensitivity: low
+    legal_sensitivity: high
+    status: planned
+    rollout_wave: wave_2
+    notes: |
+      Planned compliance intake. Flows into the vendor master for
+      insurance_expiry_date enforcement.
+
+  - source_id: regulatory_program_intake
+    source_name: Regulatory Program Reporting Intake
+    source_domain: manual_upload
+    vendor_family: compliance_intake
+    ingestion_mode: shared_drive
+    environment: dev
+    cadence: quarterly
+    data_owner: compliance_director
+    business_owner: asset_manager
+    technical_owner: data_platform_team
+    credential_method: shared_drive_placeholder
+    object_coverage:
+      - lease
+      - resident_account
+    expected_latency_minutes: 129600
+    known_limitations:
+      - regulatory program reporting formats vary by program and jurisdiction
+      - income-recertification cycles are program-specific and must be joined
+        with the regulatory overlay schedule
+    pii_classification: restricted
+    financial_sensitivity: high
+    legal_sensitivity: restricted
+    status: planned
+    rollout_wave: wave_deferred
+    notes: |
+      Planned intake for affordable / LIHTC / HUD / HOME reporting artifacts.
+      Isolated in this registry so it can be enabled or disabled per overlay;
+      carries restricted sensitivity across all three axes.
+
+  # ------------------------------------------------------------
+  # WAVE 4 — Stack-specific source entries.
+  # Each entry was authored as a fragment under
+  # adapters/<vendor>/source_registry_entry.yaml and merged here.
+  # ------------------------------------------------------------
+
+  - source_id: appfolio_prod
+    source_name: AppFolio Property Management Production
+    source_domain: pms
+    vendor_family: appfolio_family
+    ingestion_mode: api
+    environment: prod
+    cadence: hourly
+    data_owner: regional_ops_director
+    business_owner: regional_portfolio_lead
+    technical_owner: data_platform_team
+    credential_method: api_key_placeholder
+    object_coverage:
+      - property
+      - building
+      - unit
+      - unit_type
+      - lease
+      - lease_event
+      - resident_account
+      - charge
+      - payment
+      - delinquency_case
+      - lead
+      - tour
+      - application
+      - approval_outcome
+      - work_order
+      - turn_project
+      - vendor
+    expected_latency_minutes: 60
+    known_limitations:
+      - turns derived from event sequences (move_out + make_ready work_orders + move_in)
+      - concession tracking informal; sums via ChargeType=Credit/Concession
+      - eviction status not distinct from delinquency stage; derived
+      - GL Partner splits create multiple GL views of one operating property
+      - vendor directory contains duplicates across GL partners; dedupe via vendor_master_crosswalk
+    pii_classification: high
+    financial_sensitivity: high
+    legal_sensitivity: high
+    status: stubbed
+    rollout_wave: wave_4
+    notes: |
+      Primary AppFolio PMS source for wave 4. Resolves to canonical pms domain.
+      See adapters/appfolio_pms/ for mapping, dq, edge cases, runbooks.
+
+  - source_id: sage_intacct_prod
+    source_name: Sage Intacct General Ledger Production
+    source_domain: gl
+    vendor_family: sage_intacct_family
+    ingestion_mode: api
+    environment: prod
+    cadence: daily
+    data_owner: corporate_controller
+    business_owner: finance_director
+    technical_owner: finance_systems_team
+    credential_method: oauth_placeholder
+    object_coverage:
+      - chart_of_account
+      - dimension
+      - journal_entry
+      - actual_line
+      - budget_line
+      - forecast_line
+      - variance_explanation
+      - vendor
+      - capex_project
+    expected_latency_minutes: 240
+    known_limitations:
+      - properties may roll to shared legal entities; multi-dim resolution required
+      - one property may use multiple dimensions across periods
+      - account names change over time; account_crosswalk effective-dating required
+      - manual journals may have incomplete property attribution
+      - capex coded to opex (and vice versa) requires periodic recon
+      - inter-entity postings and eliminations need separate treatment
+    pii_classification: low
+    financial_sensitivity: restricted
+    legal_sensitivity: high
+    status: stubbed
+    rollout_wave: wave_4
+    notes: |
+      Primary GL source. Survives conflicts with AppFolio for posted actuals
+      after close period. See adapters/sage_intacct_gl/ for COA crosswalk
+      build, dimension mapping, and reconciliation rules.
+
+  - source_id: procore_prod
+    source_name: Procore Construction Production
+    source_domain: construction
+    vendor_family: procore_family
+    ingestion_mode: api
+    environment: prod
+    cadence: daily
+    data_owner: construction_lead
+    business_owner: development_lead
+    technical_owner: data_platform_team
+    credential_method: oauth_placeholder
+    object_coverage:
+      - construction_project
+      - capex_project
+      - estimate_line_item
+      - bid_package
+      - change_order
+      - draw_request
+      - schedule_milestone
+      - vendor
+      - approval_request
+    expected_latency_minutes: 240
+    known_limitations:
+      - commitment is not yet a canonical object; tracked as placeholder
+      - multiple budget versions exist; active version flag must be honored
+      - pending vs approved COs tracked separately
+      - project name may not match property name; crosswalk required
+      - vendor duplicates across Procore + Intacct + AppFolio
+      - project closeout incomplete while units already leasing
+      - draw timing may diverge from Intacct posting cycle
+    pii_classification: low
+    financial_sensitivity: high
+    legal_sensitivity: moderate
+    status: stubbed
+    rollout_wave: wave_4
+    notes: |
+      Primary construction source. Reconciles to Intacct via capex_project_crosswalk
+      and account_crosswalk. Handoff to AppFolio at temp_co_received milestone.
+
+  - source_id: dealpath_prod
+    source_name: Dealpath Deal Pipeline Production
+    source_domain: deal_pipeline
+    vendor_family: dealpath_family
+    ingestion_mode: api
+    environment: prod
+    cadence: daily
+    data_owner: investments_lead
+    business_owner: chief_investment_officer
+    technical_owner: data_platform_team
+    credential_method: api_key_placeholder
+    object_coverage:
+      - deal
+      - asset
+      - development_project
+      - capex_project
+      - approval_request
+    expected_latency_minutes: 240
+    known_limitations:
+      - deal renamed after approval; change tracking required
+      - one deal may spawn multiple projects or properties
+      - development deal may later be split into phases
+      - financing record timing mismatch with deal stage
+      - closed deal may lack downstream property/project setup
+      - duplicate asset names in same market possible
+      - legacy deals carry sparse fields
+      - asset_crosswalk file does not yet exist; flagged as wave-4 dependency
+    pii_classification: low
+    financial_sensitivity: high
+    legal_sensitivity: moderate
+    status: stubbed
+    rollout_wave: wave_4
+    notes: |
+      Primary deal-pipeline source. New deal_pipeline connector domain added
+      in wave 4. Seeds downstream AppFolio property and Procore project at
+      acquisition / development handoff.
+
+  - source_id: excel_rent_comp_weekly
+    source_name: Excel Weekly Rent Comp Survey
+    source_domain: market_data
+    vendor_family: excel_benchmark_family
+    ingestion_mode: shared_drive
+    environment: prod
+    cadence: weekly
+    data_owner: asset_mgmt_analyst_team
+    business_owner: asset_mgmt_director
+    technical_owner: data_platform_team
+    credential_method: shared_drive_placeholder
+    object_coverage:
+      - rent_comp
+      - market_rent_benchmark
+    expected_latency_minutes: 10080
+    known_limitations:
+      - hidden tabs may carry working data not for ingest
+      - merged cells require pre-processing
+      - analyst formulas must be value-resolved before extract
+      - missing as_of_date triggers blocker
+      - duplicate comp rows possible
+      - luxury comps may contaminate middle_market sheets
+    pii_classification: low
+    financial_sensitivity: moderate
+    legal_sensitivity: low
+    status: active
+    rollout_wave: wave_4
+    last_validated_at: "2026-04-15"
+    notes: |
+      File-based intake under adapters/excel_market_surveys/. First-class
+      production input. Analyst sign-off required.
+
+  - source_id: excel_concession_tracker_monthly
+    source_name: Excel Monthly Concession Tracker
+    source_domain: market_data
+    vendor_family: excel_benchmark_family
+    ingestion_mode: shared_drive
+    environment: prod
+    cadence: monthly
+    data_owner: asset_mgmt_analyst_team
+    business_owner: asset_mgmt_director
+    technical_owner: data_platform_team
+    credential_method: shared_drive_placeholder
+    object_coverage:
+      - concession_benchmark
+    expected_latency_minutes: 43200
+    known_limitations:
+      - submarket naming may use broker convention
+      - concessions sometimes booked as percent, sometimes as months free
+    pii_classification: low
+    financial_sensitivity: moderate
+    legal_sensitivity: low
+    status: active
+    rollout_wave: wave_4
+
+  - source_id: excel_capex_cost_library
+    source_name: Excel Quarterly Capex Cost Library
+    source_domain: market_data
+    vendor_family: excel_benchmark_family
+    ingestion_mode: shared_drive
+    environment: prod
+    cadence: quarterly
+    data_owner: construction_lead
+    business_owner: development_lead
+    technical_owner: data_platform_team
+    credential_method: shared_drive_placeholder
+    object_coverage:
+      - material_cost_reference
+      - turn_cost_reference
+    expected_latency_minutes: 129600
+    known_limitations:
+      - reviewer sign-off required (high-impact file)
+      - vendor rate cards may need separate sheet
+    pii_classification: low
+    financial_sensitivity: moderate
+    legal_sensitivity: low
+    status: active
+    rollout_wave: wave_4
+
+  - source_id: excel_staffing_benchmark_quarterly
+    source_name: Excel Quarterly Staffing Benchmark
+    source_domain: market_data
+    vendor_family: excel_benchmark_family
+    ingestion_mode: shared_drive
+    environment: prod
+    cadence: quarterly
+    data_owner: regional_ops_director
+    business_owner: vp_property_management
+    technical_owner: data_platform_team
+    credential_method: shared_drive_placeholder
+    object_coverage:
+      - staffing_position
+    expected_latency_minutes: 129600
+    known_limitations:
+      - role definitions vary across markets
+      - salary bands sometimes stored as range strings
+    pii_classification: low
+    financial_sensitivity: moderate
+    legal_sensitivity: low
+    status: active
+    rollout_wave: wave_4
+
+  - source_id: excel_labor_rate_quarterly
+    source_name: Excel Quarterly Labor Rate Sheet
+    source_domain: market_data
+    vendor_family: excel_benchmark_family
+    ingestion_mode: shared_drive
+    environment: prod
+    cadence: quarterly
+    data_owner: construction_lead
+    business_owner: development_lead
+    technical_owner: data_platform_team
+    credential_method: shared_drive_placeholder
+    object_coverage:
+      - labor_rate_reference
+    expected_latency_minutes: 129600
+    known_limitations:
+      - market-level granularity sometimes coarser than canonical
+      - trades may not align 1:1 with internal taxonomy
+    pii_classification: low
+    financial_sensitivity: moderate
+    legal_sensitivity: low
+    status: active
+    rollout_wave: wave_4
+
+  - source_id: operator_monthly_report_inbox
+    source_name: Operator Monthly Report Email Inbox
+    source_domain: manual_upload
+    vendor_family: manual_file_family
+    ingestion_mode: email_drop
+    environment: prod
+    cadence: monthly
+    data_owner: regional_ops_director
+    business_owner: regional_portfolio_lead
+    technical_owner: data_platform_team
+    credential_method: email_inbox_placeholder
+    object_coverage:
+      - approval_request
+      - staffing_position
+      - work_order
+    expected_latency_minutes: 43200
+    known_limitations:
+      - file naming inconsistent across operators
+      - missing sheet in workbook common
+      - partial-period coverage
+      - attestation sometimes missing
+    pii_classification: moderate
+    financial_sensitivity: moderate
+    legal_sensitivity: low
+    status: active
+    rollout_wave: wave_4
+
+  - source_id: tpm_data_submission_drive
+    source_name: Third-Party Manager Data Submission Shared Drive
+    source_domain: manual_upload
+    vendor_family: manual_file_family
+    ingestion_mode: shared_drive
+    environment: prod
+    cadence: weekly
+    data_owner: asset_mgmt_director
+    business_owner: asset_mgmt_director
+    technical_owner: data_platform_team
+    credential_method: shared_drive_placeholder
+    object_coverage:
+      - lease
+      - charge
+      - payment
+      - delinquency_case
+      - work_order
+      - staffing_position
+    expected_latency_minutes: 10080
+    known_limitations:
+      - submission lag common
+      - exception aging requires manual reconciliation
+      - confidence flag tpm_data_confidence required on derived outputs
+    pii_classification: high
+    financial_sensitivity: high
+    legal_sensitivity: moderate
+    status: active
+    rollout_wave: wave_4
+
+  - source_id: bid_tab_workbook_drive
+    source_name: Bid Tab Workbook Shared Drive
+    source_domain: manual_upload
+    vendor_family: manual_file_family
+    ingestion_mode: shared_drive
+    environment: prod
+    cadence: on_demand
+    data_owner: construction_lead
+    business_owner: development_lead
+    technical_owner: data_platform_team
+    credential_method: shared_drive_placeholder
+    object_coverage:
+      - bid_package
+      - estimate_line_item
+    expected_latency_minutes: 1440
+    known_limitations:
+      - bid leveling logic varies by analyst
+      - vendor naming inconsistent vs vendor_master_crosswalk
+    pii_classification: low
+    financial_sensitivity: moderate
+    legal_sensitivity: moderate
+    status: active
+    rollout_wave: wave_4
+
+  - source_id: approval_matrix_workbook
+    source_name: Approval Matrix Workbook
+    source_domain: manual_upload
+    vendor_family: manual_file_family
+    ingestion_mode: shared_drive
+    environment: prod
+    cadence: quarterly
+    data_owner: cffo
+    business_owner: cffo
+    technical_owner: data_platform_team
+    credential_method: shared_drive_placeholder
+    object_coverage:
+      - approval_request
+    expected_latency_minutes: 129600
+    known_limitations:
+      - approval thresholds change quarterly; effective-dating required
+      - approver assignments vary by deal type
+    pii_classification: low
+    financial_sensitivity: high
+    legal_sensitivity: high
+    status: active
+    rollout_wave: wave_4
+
+  # ------------------------------------------------------------
+  # WAVE 5 — Yardi multi-role adapter source entries.
+  # Yardi is the most flexible vendor family in the stack. Five sub-system
+  # stubs are declared here; an additional Yardi-family source
+  # `east_region_pms` was seeded in wave 0 and continues to carry the PMS
+  # footprint in that region. Classification posture is enforced at
+  # adapters/yardi_multi_role/classification_worksheet.md; status stays at
+  # stubbed until the operator closes Dimensions 1 and 2.
+  # ------------------------------------------------------------
+
+  - source_id: yardi_voyager_pms_stub
+    source_name: Yardi Voyager PMS (Classification-Pending Stub)
+    source_domain: pms
+    vendor_family: yardi_family
+    ingestion_mode: api
+    environment: stage
+    cadence: hourly
+    data_owner: regional_ops_director
+    business_owner: regional_portfolio_lead
+    technical_owner: data_platform_team
+    credential_method: api_key_placeholder
+    object_coverage:
+      - property
+      - building
+      - unit
+      - unit_type
+      - lease
+      - lease_event
+      - resident_account
+      - charge
+      - payment
+      - delinquency_case
+      - work_order
+      - turn_project
+      - vendor
+    expected_latency_minutes: 60
+    known_limitations:
+      - voyager t-code lineage overloaded across applicant / resident / past-resident / collections; requires t_code_decode before mapping
+      - chargecode decode is property-scoped (not global); per-property chargecode table required
+      - recovery-fee posting deviates from standard charge flow on commercial / mixed portfolios; residential-only suppresses
+      - posting-month vs accrual-month drift on actuals; accrual_month treated as canonical until operator declares post_date primary
+      - soft-deleted records surface in full extracts unless filtered
+      - classification must close before any workflow accepts Voyager as primary PMS
+    pii_classification: high
+    financial_sensitivity: high
+    legal_sensitivity: high
+    status: stubbed
+    rollout_wave: wave_2
+    notes: |
+      Voyager residential sub-system stub. Paired with
+      adapters/yardi_multi_role/. Historical-only posture until
+      classification_worksheet.md Dimensions 1 and 2 close. See
+      bounded_assumptions.yaml::yardi_role_unknown.
+
+  - source_id: yardi_voyager_gl_stub
+    source_name: Yardi Voyager GL (Classification-Pending Stub)
+    source_domain: gl
+    vendor_family: yardi_family
+    ingestion_mode: api
+    environment: stage
+    cadence: daily
+    data_owner: corporate_controller
+    business_owner: finance_director
+    technical_owner: finance_systems_team
+    credential_method: api_key_placeholder
+    object_coverage:
+      - chart_of_account
+      - dimension
+      - journal_entry
+      - actual_line
+      - budget_line
+      - forecast_line
+      - variance_explanation
+    expected_latency_minutes: 240
+    known_limitations:
+      - operator-defined chart of accounts; account_crosswalk required per deployment
+      - multiple books (accrual / cash / tax / budget) on the same property; book_id must be declared at extract time
+      - posting-month vs operating-month drift common; accrual period treated as canonical unless operator declares post_date primary
+      - prepay vs receivable account attribution varies by operator config
+      - inter-entity postings and eliminations require separate treatment downstream
+    pii_classification: low
+    financial_sensitivity: high
+    legal_sensitivity: high
+    status: stubbed
+    rollout_wave: wave_2
+    notes: |
+      Voyager financial sub-system stub. Multi-role overlap with
+      sage_intacct_prod: when both live, survivorship per
+      source_of_truth_matrix.md and classification_worksheet.md Dimension 1
+      role declaration. Historical-only posture until classification closes.
+
+  - source_id: yardi_rentcafe_stub
+    source_name: Yardi RentCafe CRM (Classification-Pending Stub)
+    source_domain: crm
+    vendor_family: yardi_family
+    ingestion_mode: api
+    environment: stage
+    cadence: hourly
+    data_owner: marketing_lead
+    business_owner: leasing_director
+    technical_owner: data_platform_team
+    credential_method: oauth_placeholder
+    object_coverage:
+      - lead
+      - tour
+      - application
+      - approval_outcome
+      - portal_activity
+    expected_latency_minutes: 60
+    known_limitations:
+      - rentcafe api scope limited; exposes a subset of voyager resident and leasing state
+      - balance detail and lease document artifacts live only in voyager, not rentcafe
+      - rentcafe and voyager occasionally disagree on lead stage or resident status (voyager wins for resident; rentcafe wins for pre-resident lead)
+      - lead and applicant rows require rentcafe_pii_posture_declared (Dimension 4) before downstream surfacing
+    pii_classification: high
+    financial_sensitivity: low
+    legal_sensitivity: high
+    status: stubbed
+    rollout_wave: wave_2
+    notes: |
+      RentCafe leasing sub-system stub. Blocked until Dimension 2c and
+      Dimension 4 close per bounded_assumptions.yaml::rentcafe_lead_data_access.
+      Fair-housing guardrail applies to any free-form preference text.
+
+  - source_id: yardi_data_connect_stub
+    source_name: Yardi Data Connect Warehouse (Classification-Pending Stub)
+    source_domain: pms
+    vendor_family: yardi_family
+    ingestion_mode: scheduled_export
+    environment: stage
+    cadence: daily
+    data_owner: regional_ops_director
+    business_owner: finance_director
+    technical_owner: data_platform_team
+    credential_method: api_key_placeholder
+    object_coverage:
+      - property
+      - unit
+      - lease
+      - charge
+      - payment
+      - actual_line
+      - budget_line
+    expected_latency_minutes: 1440
+    known_limitations:
+      - data connect warehouse lags voyager by 60 to 240 minutes typically; replication lag surfaces at period-end
+      - posting-month reports pulled too early miss late voyager entries
+      - limited write-back support; warehouse treats voyager as upstream truth
+      - tolerance band cites reconciliation_tolerance_band.yaml::data_connect_lag_band
+    pii_classification: high
+    financial_sensitivity: high
+    legal_sensitivity: high
+    status: stubbed
+    rollout_wave: wave_2
+    notes: |
+      Data Connect warehouse sub-system stub. Typical replication feed;
+      downstream consumers treat as derived from voyager. Replication lag
+      is tolerated within band per bounded_assumptions.yaml::data_connect_lag_tolerated.
+
+  - source_id: yardi_legacy_export_stub
+    source_name: Yardi Legacy Export Archive (Historical-Only Stub)
+    source_domain: manual_upload
+    vendor_family: yardi_family
+    ingestion_mode: shared_drive
+    environment: stage
+    cadence: monthly
+    data_owner: regional_ops_director
+    business_owner: finance_director
+    technical_owner: data_platform_team
+    credential_method: shared_drive_placeholder
+    object_coverage:
+      - property
+      - lease
+      - charge
+      - payment
+      - actual_line
+    expected_latency_minutes: 43200
+    known_limitations:
+      - historical-only posture; never trusted as live primary for any canonical object
+      - resident pii restricted on downstream output; redaction required before any analyst-facing surface
+      - report-export column labels drift with template edits; column_map per template required (cite reconciliation_tolerance_band.yaml::sample_export_staleness_band)
+      - internal as_of_date must be read from the file, not file_received_at
+      - export files can land days to months after true as_of
+    pii_classification: restricted
+    financial_sensitivity: high
+    legal_sensitivity: high
+    status: stubbed
+    rollout_wave: wave_2
+    notes: |
+      Legacy Yardi export archive used during Yardi-to-AppFolio cutover
+      and for pre-cutover historical lookback. Historical-only; no
+      downstream workflow may treat as primary. See
+      runbooks/yardi_migration_to_appfolio.md.
+
+  - source_id: graysail_pending_classification
+    source_name: GraySail (Pending Classification)
+    source_domain: other
+    vendor_family: graysail_family
+    ingestion_mode: manual_upload
+    environment: stage
+    cadence: on_demand
+    data_owner: asset_mgmt_director
+    business_owner: asset_mgmt_director
+    technical_owner: data_platform_team
+    credential_method: none
+    object_coverage:
+      - source_record_audit
+    expected_latency_minutes: 0
+    known_limitations:
+      - role unresolved; classification_worksheet.md must be completed
+      - no canonical workflow may treat GraySail as primary while status is placeholder
+      - bounded_assumptions.yaml documents what the placeholder assumes
+      - blocked_workflows.md lists workflows that cannot rely on GraySail
+    pii_classification: none
+    financial_sensitivity: none
+    legal_sensitivity: none
+    status: planned
+    rollout_wave: wave_4
+    notes: |
+      Non-destructive integration stub. No data ingest occurs. Classification
+      must be confirmed via runbooks/graysail_classification_path.md before
+      this source can be promoted to stubbed or active.

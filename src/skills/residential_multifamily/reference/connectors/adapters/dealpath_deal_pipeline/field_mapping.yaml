@@ -1,0 +1,119 @@
+# Dealpath field-by-field mapping to canonical deal_pipeline entities.
+# Applied on top of ../../deal_pipeline/mapping.yaml (canonical). Canonical
+# mapping wins on any conflict. Transforms reference named functions
+# documented in _core/normalization_patterns.md (crosswalk_lookup,
+# dollars_to_cents, to_iso_date, trim_string, pii_redact_partial, etc.).
+
+status_tag: sample
+
+global_provenance:
+  - { source_field: source_name,       target_field: source_name,       transform: passthrough, required: true }
+  - { source_field: source_type,       target_field: source_type,       transform: passthrough, required: true }
+  - { source_field: source_date,       target_field: source_date,       transform: passthrough, required: true }
+  - { source_field: extracted_at,      target_field: extracted_at,      transform: passthrough, required: true }
+  - { source_field: extractor_version, target_field: extractor_version, transform: passthrough, required: true }
+  - { source_field: source_row_id,     target_field: source_row_id,     transform: passthrough, required: true }
+
+entities:
+
+  deal:
+    mappings:
+      - { source_field: deal_id,              target_field: deal_id,                 transform: passthrough_with_namespace, required: true }
+      - { source_field: deal_name,            target_field: deal_name,               transform: trim_string,                required: true }
+      - { source_field: asset_id,             target_field: canonical_asset_id,      transform: crosswalk_lookup,           required: true, crosswalk: asset_crosswalk }
+      - { source_field: deal_type,            target_field: deal_type,               transform: map_dealpath_deal_type,     required: true }
+      - { source_field: pipeline_stage,       target_field: pipeline_stage,          transform: map_dealpath_stage,         required: true }
+      - { source_field: market,               target_field: market,                  transform: crosswalk_lookup,           required: true, crosswalk: market_crosswalk }
+      - { source_field: submarket,            target_field: submarket,               transform: crosswalk_lookup,           required: false, crosswalk: market_crosswalk }
+      - { source_field: deal_status,          target_field: status,                  transform: map_dealpath_deal_status,   required: true, notes: "Source field renamed from `status` at landing to avoid collision with envelope status tag." }
+      - { source_field: target_close_date,    target_field: expected_close_date,     transform: to_iso_date,                required: false }
+      - { source_field: actual_close_date,    target_field: deal_close_date_actual,  transform: to_iso_date,                required: false }
+      - { source_field: ic_decision_date,     target_field: ic_approval_date,        transform: to_iso_date,                required: false }
+      - { source_field: deal_lead,            target_field: deal_lead_ref,           transform: crosswalk_lookup,           required: false, crosswalk: employee_crosswalk }
+      - { source_field: total_purchase_price, target_field: total_purchase_price_cents, transform: dollars_to_cents,        required: false }
+      - { source_field: equity_required,      target_field: equity_required_cents,   transform: dollars_to_cents,           required: false }
+      - { source_field: debt_target,          target_field: debt_target_cents,       transform: dollars_to_cents,           required: false }
+      - { source_field: sponsor_entity_id,    target_field: sponsor_entity_ref,      transform: crosswalk_lookup,           required: false, crosswalk: legal_entity_crosswalk }
+      - { source_field: created_at,           target_field: created_at,              transform: to_iso_datetime,            required: false }
+      - { source_field: updated_at,           target_field: updated_at,              transform: to_iso_datetime,            required: false }
+
+  asset:
+    mappings:
+      - { source_field: asset_id,    target_field: canonical_asset_id, transform: crosswalk_lookup,     required: true, crosswalk: asset_crosswalk }
+      - { source_field: asset_name,  target_field: asset_name,         transform: trim_string,          required: true }
+      - { source_field: market,      target_field: market,             transform: crosswalk_lookup,     required: true, crosswalk: market_crosswalk }
+      - { source_field: submarket,   target_field: submarket,          transform: crosswalk_lookup,     required: false, crosswalk: market_crosswalk }
+      - { source_field: asset_type,  target_field: asset_type,         transform: map_dealpath_asset_type, required: true }
+      - { source_field: address,     target_field: address_ref,        transform: pii_redact_partial,   required: false }
+      - { source_field: city,        target_field: city,               transform: trim_string,          required: false }
+      - { source_field: state,       target_field: state,              transform: trim_string,          required: false }
+      - { source_field: zip,         target_field: postal_code,        transform: trim_string,          required: false }
+      - { source_field: unit_count,  target_field: unit_count_planned, transform: to_integer,           required: false }
+      - { source_field: year_built,  target_field: year_built,         transform: to_integer,           required: false }
+      - { source_field: parcel_acres, target_field: parcel_acres,      transform: to_number,            required: false }
+
+  deal_milestone:
+    mappings:
+      - { source_field: milestone_id,   target_field: deal_milestone_id, transform: passthrough_with_namespace, required: true }
+      - { source_field: deal_id,        target_field: deal_id,           transform: passthrough_with_namespace, required: true }
+      - { source_field: milestone_type, target_field: milestone_type,    transform: map_dealpath_milestone,     required: true }
+      - { source_field: milestone_status, target_field: status,          transform: map_dealpath_milestone_status, required: true, notes: "Source field renamed from `status` at landing to avoid envelope collision." }
+      - { source_field: target_date,    target_field: target_date,       transform: to_iso_date,                required: false }
+      - { source_field: actual_date,    target_field: actual_date,       transform: to_iso_date,                required: false }
+      - { source_field: owner,          target_field: owner_ref,         transform: crosswalk_lookup,           required: false, crosswalk: employee_crosswalk }
+      - { source_field: notes,          target_field: notes,             transform: pii_redact_partial,         required: false }
+
+  deal_key_date:
+    mappings:
+      - { source_field: key_date_id,      target_field: deal_key_date_id, transform: passthrough_with_namespace, required: true }
+      - { source_field: deal_id,          target_field: deal_id,          transform: passthrough_with_namespace, required: true }
+      - { source_field: date_type,        target_field: date_type,        transform: map_dealpath_key_date_type, required: true }
+      - { source_field: date_value,       target_field: date_value,       transform: to_iso_date,                required: true }
+      - { source_field: source_doc_ref,   target_field: source_doc_ref,   transform: passthrough,                required: false }
+      - { source_field: extended_from,    target_field: extended_from,    transform: to_iso_date,                required: false }
+      - { source_field: extension_reason, target_field: extension_reason, transform: trim_string,                required: false }
+
+  deal_team_member:
+    mappings:
+      - { source_field: deal_id,        target_field: deal_id,              transform: passthrough_with_namespace, required: true }
+      - { source_field: member_id,      target_field: member_id_ref,        transform: crosswalk_lookup,           required: true, crosswalk: employee_crosswalk }
+      - { source_field: role,           target_field: role,                 transform: map_dealpath_team_role,     required: true }
+      - { source_field: allocation_pct, target_field: allocation_pct,       transform: to_number,                  required: false }
+      - { source_field: assigned_at,    target_field: assigned_at,          transform: to_iso_datetime,            required: false }
+      - { source_field: removed_at,     target_field: removed_at,           transform: to_iso_datetime,            required: false }
+      - { source_field: email_hash,     target_field: email_hash,           transform: passthrough,                required: false }
+
+  ic_decision:
+    mappings:
+      - { source_field: ic_decision_id,      target_field: approval_request_id,    transform: passthrough_with_namespace, required: true }
+      - { source_field: deal_id,             target_field: subject_object_id,      transform: passthrough_with_namespace, required: true }
+      - { source_field: decision,            target_field: decision,               transform: map_dealpath_ic_decision,   required: true }
+      - { source_field: decided_date,        target_field: decided_date,           transform: to_iso_date,                required: true }
+      - { source_field: conditions,          target_field: conditions,             transform: passthrough,                required: false }
+      - { source_field: ic_members_present,  target_field: approvers_notified,     transform: crosswalk_lookup,           required: false, crosswalk: employee_crosswalk }
+      - { source_field: vote_record_summary, target_field: vote_record_summary,    transform: pii_redact_partial,         required: false }
+      - { source_field: tier,                target_field: approval_tier,          transform: map_dealpath_ic_tier,       required: false }
+      - { source_field: memo_doc_ref,        target_field: memo_doc_ref,           transform: passthrough,                required: false }
+      - { source_field: resolution_deadline, target_field: expires_at,             transform: to_iso_date,                required: false }
+
+  deal_document:
+    mappings:
+      - { source_field: deal_document_id, target_field: deal_document_id, transform: passthrough_with_namespace, required: true }
+      - { source_field: deal_id,          target_field: deal_id,          transform: passthrough_with_namespace, required: true }
+      - { source_field: doc_type,         target_field: doc_type,         transform: map_dealpath_doc_type,      required: true }
+      - { source_field: uploaded_at,      target_field: uploaded_at,      transform: to_iso_datetime,            required: true }
+      - { source_field: url_ref,          target_field: url_ref,          transform: passthrough,                required: false }
+      - { source_field: version,          target_field: version,          transform: trim_string,                required: false }
+      - { source_field: uploaded_by,      target_field: uploaded_by_ref,  transform: crosswalk_lookup,           required: false, crosswalk: employee_crosswalk }
+      - { source_field: supersedes,       target_field: supersedes,       transform: passthrough_with_namespace, required: false }
+
+  deal_status_history:
+    mappings:
+      - { source_field: status_history_id, target_field: source_record_audit_id, transform: passthrough_with_namespace, required: true }
+      - { source_field: deal_id,           target_field: source_object_id,       transform: passthrough_with_namespace, required: true }
+      - { source_field: transition_type,   target_field: transition_type,        transform: map_dealpath_transition_type, required: true }
+      - { source_field: occurred_at,       target_field: occurred_at,            transform: to_iso_datetime,            required: true }
+      - { source_field: from_value,        target_field: from_value,             transform: trim_string,                required: false }
+      - { source_field: to_value,          target_field: to_value,               transform: trim_string,                required: false }
+      - { source_field: changed_by,        target_field: changed_by_ref,         transform: crosswalk_lookup,           required: false, crosswalk: employee_crosswalk }
+      - { source_field: reason,            target_field: reason,                 transform: trim_string,                required: false }

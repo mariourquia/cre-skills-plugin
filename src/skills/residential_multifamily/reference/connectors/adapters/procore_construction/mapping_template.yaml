@@ -1,0 +1,126 @@
+# Mapping template for the Procore construction adapter.
+# Applied on top of reference/connectors/construction/mapping.yaml. The
+# canonical mapping is authoritative; entries here are per-entity
+# shortcuts for the Procore API payload shape.
+#
+# See source_contract.yaml for the raw payload, normalized_contract.yaml
+# for canonical mapping semantics, and field_mapping.yaml for the full
+# per-entity field-by-field mapping.
+
+status_tag: template
+
+capex_project:
+  source_format: [json, jsonl]
+  dedup_rule:
+    keys: [capex_project_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: id,               normalized_column: source_primary_key,       transform: trim_string,          required: true }
+    - { source_column: project_id,       normalized_column: capex_project_id,         transform: resolve_via_capex_project_crosswalk, required: true }
+    - { source_column: name,             normalized_column: project_name,             transform: trim_string,          required: true }
+    - { source_column: project_type,     normalized_column: project_type,             transform: map_procore_project_type, required: false }
+    - { source_column: stage,            normalized_column: status,                   transform: map_procore_stage,     required: true }
+    - { source_column: start_date,       normalized_column: target_start,             transform: to_iso_date,           required: false }
+    - { source_column: completion_date,  normalized_column: target_completion,        transform: to_iso_date,           required: false }
+
+estimate_line_item:
+  source_format: [json, jsonl]
+  dedup_rule:
+    keys: [line_item_id, budget_version]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: id,                     normalized_column: line_item_id,            transform: trim_string,          required: true }
+    - { source_column: project_id,             normalized_column: capex_project_id,        transform: resolve_via_capex_project_crosswalk, required: true }
+    - { source_column: description,            normalized_column: line_label,              transform: trim_string,          required: true }
+    - { source_column: cost_code,              normalized_column: csi_division,            transform: trim_string,          required: false }
+    - { source_column: unit,                   normalized_column: unit,                    transform: map_uom,              required: true }
+    - { source_column: quantity,               normalized_column: quantity,                transform: to_number,            required: true }
+    - { source_column: unit_cost,              normalized_column: unit_cost_cents,         transform: dollars_to_cents,     required: true }
+    - { source_column: original_budget_amount, normalized_column: extended_cost_cents,     transform: dollars_to_cents,     required: true }
+    - { source_column: budget_version,         normalized_column: budget_version,          transform: trim_string,          required: true }
+
+commitment:
+  source_format: [json, jsonl]
+  dedup_rule:
+    keys: [commitment_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: id,                              normalized_column: commitment_id,           transform: trim_string,                   required: true }
+    - { source_column: project_id,                      normalized_column: capex_project_id,        transform: resolve_via_capex_project_crosswalk, required: true }
+    - { source_column: vendor_id,                       normalized_column: vendor_id,               transform: resolve_via_vendor_master_crosswalk, required: true }
+    - { source_column: contract_type,                   normalized_column: commitment_type,         transform: map_procore_commitment_type,   required: false }
+    - { source_column: title,                           normalized_column: scope_description,       transform: trim_string,                   required: true }
+    - { source_column: original_commitment_amount,      normalized_column: contract_total_cents,    transform: dollars_to_cents,              required: true }
+    - { source_column: revised_commitment_amount,       normalized_column: revised_contract_total_cents, transform: dollars_to_cents,         required: false }
+    - { source_column: billed_to_date,                  normalized_column: billed_to_date_cents,    transform: dollars_to_cents,              required: false }
+    - { source_column: paid_to_date,                    normalized_column: paid_to_date_cents,      transform: dollars_to_cents,              required: false }
+    - { source_column: retainage_percent,               normalized_column: retention_percent,       transform: to_number,                     required: false }
+    - { source_column: status,                          normalized_column: status,                  transform: map_procore_commitment_status, required: true }
+
+change_order:
+  source_format: [json, jsonl]
+  dedup_rule:
+    keys: [change_order_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: id,             normalized_column: change_order_id,           transform: trim_string,          required: true }
+    - { source_column: project_id,     normalized_column: capex_project_id,          transform: resolve_via_capex_project_crosswalk, required: true }
+    - { source_column: commitment_id,  normalized_column: commitment_id,             transform: trim_string,          required: true }
+    - { source_column: number,         normalized_column: co_number,                 transform: trim_string,          required: true }
+    - { source_column: amount,         normalized_column: cost_delta_cents,          transform: dollars_to_cents,     required: true }
+    - { source_column: status,         normalized_column: status,                    transform: map_procore_co_status, required: true }
+    - { source_column: time_delta_days,normalized_column: time_delta_days,           transform: to_integer,           required: false }
+    - { source_column: reason_code,    normalized_column: category,                  transform: map_procore_co_category, required: false }
+
+draw_request:
+  source_format: [json, jsonl]
+  dedup_rule:
+    keys: [draw_request_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: id,                         normalized_column: draw_request_id,        transform: trim_string,            required: true }
+    - { source_column: project_id,                 normalized_column: capex_project_id,       transform: resolve_via_capex_project_crosswalk, required: true }
+    - { source_column: period_end,                 normalized_column: period,                 transform: to_year_month,          required: true }
+    - { source_column: current_payment_due,        normalized_column: amount_requested_cents, transform: dollars_to_cents,       required: true }
+    - { source_column: status,                     normalized_column: approval_status,        transform: map_procore_pay_app_status, required: true }
+    - { source_column: work_completed_to_date,     normalized_column: cost_to_date_cents,     transform: dollars_to_cents,       required: false }
+    - { source_column: percent_complete_cost,      normalized_column: percent_complete_cost,  transform: to_number,              required: false }
+
+schedule_milestone:
+  source_format: [json, jsonl]
+  dedup_rule:
+    keys: [milestone_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: id,                normalized_column: milestone_id,           transform: trim_string,    required: true }
+    - { source_column: project_id,        normalized_column: capex_project_id,       transform: resolve_via_capex_project_crosswalk, required: true }
+    - { source_column: name,              normalized_column: milestone_name,         transform: trim_string,    required: true }
+    - { source_column: baseline_finish,   normalized_column: baseline_date,          transform: to_iso_date,    required: true }
+    - { source_column: forecast_finish,   normalized_column: current_forecast_date,  transform: to_iso_date,    required: true }
+    - { source_column: actual_finish,     normalized_column: actual_date,            transform: to_iso_date,    required: false }
+    - { source_column: on_critical_path,  normalized_column: critical_path_flag,     transform: to_boolean,     required: false }
+
+punch_item:
+  source_format: [json, jsonl]
+  dedup_rule:
+    keys: [punch_item_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: id,                 normalized_column: punch_item_id,         transform: trim_string,         required: true }
+    - { source_column: project_id,         normalized_column: capex_project_id,      transform: resolve_via_capex_project_crosswalk, required: true }
+    - { source_column: title,              normalized_column: description,           transform: trim_string,         required: true }
+    - { source_column: status,             normalized_column: status,                transform: map_procore_punch_status, required: true }
+    - { source_column: assigned_to,        normalized_column: assigned_to,           transform: trim_string,         required: false }
+    - { source_column: target_complete_date, normalized_column: target_complete_date, transform: to_iso_date,         required: false }
+
+vendor:
+  source_format: [json, jsonl]
+  dedup_rule:
+    keys: [vendor_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: company_id,   normalized_column: vendor_id,     transform: resolve_via_vendor_master_crosswalk, required: true }
+    - { source_column: company_name, normalized_column: vendor_name,   transform: trim_string,          required: true }
+    - { source_column: trade,        normalized_column: services,      transform: parse_trade_to_services_array, required: false }
+
+bid_package:       { status: TODO, note: "Procore bid package ingestion is a follow-on; current stub covers commitments and COs only." }

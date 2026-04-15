@@ -1,0 +1,55 @@
+# Adapter manifest for the manual Excel ingestion stub.
+# Conforms to reference/connectors/adapters/adapter_manifest.schema.yaml.
+
+adapter_id: manual_excel_ingestion_stub
+adapter_name: Manual Excel Ingestion Stub
+vendor_family: excel_file_stub
+connector_domain: manual_uploads
+status: stub
+rollout_wave: wave_1
+description: |
+  Placeholder adapter over the canonical manual_uploads connector,
+  specialized for spreadsheet-based inbound. Seeds operator onboarding
+  with budget-sheet, variance-report, and owner-report page conventions.
+  Canonical schema in ../../manual_uploads/ wins on any conflict.
+
+supported_source_systems:
+  - manual_upload_generic_stub
+
+mapping_hints:
+  - { source_field_pattern: "sheet*name|tab*name",                         canonical_field: source_sheet_name,       transform_hint: trim_string }
+  - { source_field_pattern: "prop*code|property*id|property*label",        canonical_field: property_id,             transform_hint: trim_string }
+  - { source_field_pattern: "account*name|line*item|row*label",            canonical_field: account_slug,            transform_hint: map_account_slug }
+  - { source_field_pattern: "month*1|jan|feb|mar|period*1",                canonical_field: period_amount_cents,     transform_hint: dollars_to_cents }
+  - { source_field_pattern: "budget|plan|budgeted",                        canonical_field: budget_amount_cents,     transform_hint: dollars_to_cents }
+  - { source_field_pattern: "actual|ytd*actual",                           canonical_field: actual_amount_cents,     transform_hint: dollars_to_cents }
+  - { source_field_pattern: "variance|var|var_dollars",                    canonical_field: variance_amount_cents,   transform_hint: dollars_to_cents }
+  - { source_field_pattern: "variance*note|explanation|comment",           canonical_field: variance_explanation,    transform_hint: trim_string }
+  - { source_field_pattern: "scenario|version|revision",                   canonical_field: budget_version,          transform_hint: trim_string }
+  - { source_field_pattern: "report*section|section*header",               canonical_field: report_section,          transform_hint: trim_string }
+  - { source_field_pattern: "operating*month|period",                      canonical_field: operating_month,         transform_hint: to_iso_month }
+  - { source_field_pattern: "fiscal*year|fy",                              canonical_field: fiscal_year,             transform_hint: to_integer }
+  - { source_field_pattern: "asset*name|property*name",                    canonical_field: property_name,           transform_hint: trim_string }
+  - { source_field_pattern: "preparer|prepared*by",                        canonical_field: preparer_role,           transform_hint: trim_string }
+
+known_gotchas:
+  - merged cells break row-oriented parsers; unmerge before parse and carry the anchor value down
+  - blank rows separating sections are not empty; preserve section boundaries via the report_section anchor
+  - inconsistent column headers across properties (e.g., "Jan" vs "January" vs "Period 1"); normalize via header alias table
+  - embedded charts and images skip rows silently; use sheet-level bounds instead of cell-level walks
+  - macros that transform values at open-time; parse the values-only snapshot, not the formula snapshot
+  - multi-sheet references and external links; resolve before ingest or flag
+  - template drift between properties; the central template version must be tracked in budget_version
+  - row categories nested via indentation not hierarchy columns; infer hierarchy from indentation depth
+  - owner-report page sections (portfolio roll-up, property detail, variance narrative) have distinct row layouts
+  - negative numbers written with trailing minus, parentheses, or red font only; normalize sign early
+
+reference_documentation:
+  - placeholder_link_to_internal_excel_parsing_guide
+  - placeholder_link_to_canonical_manual_uploads_connector
+
+author_metadata:
+  authored_by: residential_multifamily_subsystem
+  authored_role: finance_systems_team
+
+last_updated: "2026-04-15"

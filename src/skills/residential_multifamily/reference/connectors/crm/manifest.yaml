@@ -1,0 +1,29 @@
+# CRM connector manifest (vendor-neutral stub).
+connector_id: crm
+connector_kind: crm
+version: 0.1.0
+status: stub
+owner: residential_multifamily_subsystem
+vendor_neutral: true
+description: |
+  Prospect and resident CRM feed. Interactions, campaign sources,
+  resident communications, service requests, follow-up tasks.
+entities:
+  - lead_interaction
+  - campaign_source
+  - resident_communication
+  - service_request
+  - follow_up_task
+provenance_fields_required:
+  - source_name
+  - source_type
+  - source_date
+  - extracted_at
+  - extractor_version
+  - source_row_id
+handshake:
+  auth_kind: api_key
+  access_pattern: pull_scheduled
+  notes: |
+    Stub. Placeholder for vendor-neutral adapter. No live credentials.
+contact: operator_placeholder

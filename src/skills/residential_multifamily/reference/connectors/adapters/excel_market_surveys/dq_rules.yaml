@@ -1,0 +1,164 @@
+# Excel market surveys data quality rules.
+# Per-adapter rule_id prefix: ex_.
+# Severity: blocker | warning | info.
+# Tolerance bands cite reference/normalized/schemas/reconciliation_tolerance_band.yaml; no hardcoded values.
+# Staleness thresholds cite intake_manifest.yaml per file family.
+
+rules:
+
+  - rule_id: ex_freshness_per_family
+    dimension: freshness
+    severity: blocker
+    description: Every Excel drop must land with as_of within staleness_threshold_days of now per intake_manifest.yaml file family entry.
+    expected: as_of_date >= now - intake_manifest.file_families[family].staleness_threshold_days
+    applies_to_families: [rent_comp_weekly, concession_tracker_monthly, market_survey_workbook, analyst_benchmark_pack, staffing_benchmark, labor_rate_quarterly, material_price_sheet, vendor_rate_card, turn_cost_library, capex_cost_library, schedule_assumption_sheet, market_commentary_file, asset_specific_comp_pack]
+    remediation: runbooks/excel_common_issues.md::stale_export
+
+  - rule_id: ex_freshness_future_as_of
+    dimension: freshness
+    severity: blocker
+    description: as_of date must not be in the future. Future-dated as_of blocks intake.
+    expected: as_of_date <= now
+    remediation: runbooks/excel_common_issues.md::future_as_of
+
+  - rule_id: ex_completeness_required_fields_per_schema
+    dimension: completeness
+    severity: blocker
+    description: Every required column in the matching template_schemas entry must be non-null on every row.
+    expected: no nulls in columns where template_schemas[family].columns[*].required = true
+    remediation: runbooks/excel_common_issues.md::missing_required_fields
+
+  - rule_id: ex_completeness_as_of_present
+    dimension: completeness
+    severity: blocker
+    description: as_of column populated on every row even if the workbook filename implies the date.
+    expected: as_of_date is not null
+    remediation: runbooks/excel_common_issues.md::missing_as_of
+
+  - rule_id: ex_completeness_reviewer_for_highimpact
+    dimension: completeness
+    severity: blocker
+    description: Reviewer and signed_off_date mandatory for capex_cost_library, labor_rate_quarterly, turn_cost_library, vendor_rate_card, analyst_benchmark_pack, market_survey_workbook.
+    expected: cover_metadata.reviewer is not null and cover_metadata.signed_off_date is not null for high-impact families
+    remediation: runbooks/excel_common_issues.md::reviewer_signoff_missing
+
+  - rule_id: ex_conformance_column_headers_match_schema
+    dimension: conformance
+    severity: blocker
+    description: Observed column headers in the drop exactly match template_schemas[family] column names. Header drift blocks intake.
+    expected: set(observed_columns) ⊇ set(required_columns); observed_columns ⊆ set(required_columns ∪ optional_columns)
+    remediation: runbooks/excel_common_issues.md::header_drift
+
+  - rule_id: ex_conformance_source_basis_enum
+    dimension: conformance
+    severity: blocker
+    description: source_basis value lands in the family-scoped enum declared in template_schemas.
+    expected: source_basis IN template_schemas[family].source_basis_enum
+    remediation: runbooks/excel_common_issues.md::unknown_source_basis
+
+  - rule_id: ex_conformance_unit_basis_enum
+    dimension: conformance
+    severity: blocker
+    description: unit_basis / unit value is one of the canonical unit enums per normalized schema.
+    expected: unit IN canonical_unit_enum for category
+    remediation: route to master_data/unresolved_exceptions_queue.md
+
+  - rule_id: ex_uniqueness_vendor_rate_key
+    dimension: uniqueness
+    severity: blocker
+    description: Vendor rate rows unique on (vendor_id, service, market, as_of). Duplicate rows trigger block.
+    expected: count(distinct (vendor_id, service, market, as_of)) = count(*)
+    applies_to_families: [vendor_rate_card]
+    remediation: runbooks/excel_common_issues.md::duplicate_rows
+
+  - rule_id: ex_uniqueness_capex_key
+    dimension: uniqueness
+    severity: blocker
+    description: Capex cost library rows unique on (csi_division, line_item_slug, market, as_of). Duplicate rows trigger block.
+    expected: count(distinct (csi_division, line_item_slug, market, as_of)) = count(*)
+    applies_to_families: [capex_cost_library]
+    remediation: runbooks/excel_common_issues.md::duplicate_rows
+
+  - rule_id: ex_uniqueness_rent_comp_key
+    dimension: uniqueness
+    severity: blocker
+    description: Rent comp rows unique on (comp_property_name, unit_type_label, as_of).
+    expected: count(distinct (comp_property_name, unit_type_label, as_of)) = count(*)
+    applies_to_families: [rent_comp_weekly, asset_specific_comp_pack]
+    remediation: runbooks/excel_common_issues.md::duplicate_rows
+
+  - rule_id: ex_consistency_band_monotonic
+    dimension: consistency
+    severity: blocker
+    description: For rows with low/typical/high or rate_low/rate_typical/rate_high, values satisfy low ≤ typical ≤ high.
+    expected: low <= typical AND typical <= high
+    applies_to_families: [vendor_rate_card, turn_cost_library, capex_cost_library]
+    remediation: runbooks/excel_common_issues.md::rate_band_inversion
+
+  - rule_id: ex_consistency_band_not_collapsed
+    dimension: consistency
+    severity: warning
+    description: Rate band with low = typical = high is suspicious and requires a paired source note.
+    expected: NOT (low = typical AND typical = high) OR row has source_note_ref
+    applies_to_families: [vendor_rate_card, turn_cost_library, capex_cost_library]
+    remediation: runbooks/excel_common_issues.md::rate_band_collapsed
+
+  - rule_id: ex_consistency_outlier_check
+    dimension: consistency
+    severity: warning
+    description: value within plausible band per segment overlay and family. Bands cite reconciliation_tolerance_band.yaml.
+    expected: value within band per reference/normalized/schemas/reconciliation_tolerance_band.yaml
+    remediation: flag for analyst review
+
+  - rule_id: ex_provenance_source_populated
+    dimension: provenance
+    severity: blocker
+    description: source column (citation) non-blank on every row. Blank source blocks intake.
+    expected: source is not null AND source != ''
+    remediation: runbooks/excel_common_issues.md::missing_source_citation
+
+  - rule_id: ex_provenance_commentary_author_named
+    dimension: provenance
+    severity: blocker
+    description: market_commentary author must be a named individual, not a team slug or anonymous.
+    expected: author is not null AND author NOT IN anonymous_author_denylist
+    applies_to_families: [market_commentary_file]
+    remediation: runbooks/excel_common_issues.md::commentary_author_missing
+
+  - rule_id: ex_reference_market_in_crosswalk
+    dimension: reference
+    severity: blocker
+    description: market value resolves to a canonical market_id via market_crosswalk.yaml.
+    expected: market IN master_data/market_crosswalk.yaml
+    remediation: crosswalk_additions.yaml::market_crosswalk + master_data/unresolved_exceptions_queue.md
+
+  - rule_id: ex_reference_submarket_in_crosswalk
+    dimension: reference
+    severity: blocker
+    description: submarket value resolves via submarket_crosswalk.yaml when provided.
+    expected: submarket IN master_data/submarket_crosswalk.yaml (when present)
+    remediation: crosswalk_additions.yaml::submarket_crosswalk
+
+  - rule_id: ex_reference_vendor_in_crosswalk
+    dimension: reference
+    severity: blocker
+    description: vendor_id resolves via vendor_master_crosswalk.yaml.
+    expected: vendor_id IN master_data/vendor_master_crosswalk.yaml
+    applies_to_families: [vendor_rate_card]
+    remediation: runbooks/excel_common_issues.md::vendor_name_typo
+
+  - rule_id: ex_consistency_segment_sheet_declaration
+    dimension: consistency
+    severity: blocker
+    description: Rows tagged segment in body match sheet-level segment declaration. Luxury comps contaminating middle_market sheet blocks.
+    expected: row.segment = sheet.segment for sheets that declare a segment
+    applies_to_families: [rent_comp_weekly, market_survey_workbook, analyst_benchmark_pack, asset_specific_comp_pack]
+    remediation: runbooks/excel_common_issues.md::segment_contamination
+
+  - rule_id: ex_consistency_mid_quarter_refresh
+    dimension: consistency
+    severity: warning
+    description: Mid-quarter refresh overwriting prior quarter version without change_log entry flagged for review.
+    expected: new_version IMPLIES cover_metadata.change_log row referencing delta
+    applies_to_families: [capex_cost_library, labor_rate_quarterly, analyst_benchmark_pack]
+    remediation: runbooks/excel_common_issues.md::midquarter_refresh_no_changelog

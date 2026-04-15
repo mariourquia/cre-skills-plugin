@@ -1,0 +1,161 @@
+# Lease Crosswalk (starter set).
+# Conforms to crosswalk.schema.yaml.
+# Illustrates lease identity across PMS and AP (for concession processing)
+# and the renewal chain via prior_canonical_id. See identity_resolution_framework.md
+# section 7.9.
+
+status_tag: sample
+
+rows:
+
+  # -----------------------------------------------------------------------
+  # Lease appears in both PMS (operational) and AP (concession accrual /
+  # reversal postings). Canonical id is the same.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: lease_cta_001_l00883
+    source_system: east_region_pms
+    source_id: L000883123
+    match_confidence: high
+    match_method: exact
+    effective_start: "2024-03-01"
+    survivorship_rule: lease_default
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      Original lease. Start 2024-03-01, end 2025-02-28 (12-month term).
+
+  - canonical_id: lease_cta_001_l00883
+    source_system: accounts_payable_primary
+    source_id: AP-CONC-L000883123
+    match_confidence: high
+    match_method: exact
+    effective_start: "2024-03-01"
+    survivorship_rule: lease_default
+    manual_override: false
+    reviewer: ap_manager
+    last_validated_at: "2026-03-31"
+    notes: |
+      AP row. Concession accrual and reversal postings against this lease
+      carry the AP id with the PMS lease id embedded in the suffix.
+
+  # -----------------------------------------------------------------------
+  # Renewal chain. The original lease (l00883) renewed into a new lease
+  # (l01104). Canonical ids are different; renewal chain is navigable via
+  # prior_canonical_id on the successor row.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: lease_cta_001_l01104
+    source_system: east_region_pms
+    source_id: L001104887
+    match_confidence: high
+    match_method: exact
+    effective_start: "2025-03-01"
+    survivorship_rule: lease_default
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      Renewal of lease_cta_001_l00883. Same unit and resident. Start
+      2025-03-01, end 2026-02-28.
+    prior_canonical_id: lease_cta_001_l00883
+
+  - canonical_id: lease_cta_001_l01104
+    source_system: accounts_payable_primary
+    source_id: AP-CONC-L001104887
+    match_confidence: high
+    match_method: exact
+    effective_start: "2025-03-01"
+    survivorship_rule: lease_default
+    manual_override: false
+    reviewer: ap_manager
+    last_validated_at: "2026-03-31"
+    notes: |
+      AP row for the renewal lease.
+
+  # -----------------------------------------------------------------------
+  # Early termination case. Tenant vacated before end_date; a new lease
+  # was signed with a different resident for the remaining term. The
+  # broken lease retains its canonical id with effective_end at the
+  # termination date; the replacement lease is a separate canonical id.
+  # No renewal chain pointer; these are not a renewal relationship.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: lease_rdu_004_l00217
+    source_system: east_region_pms
+    source_id: L000217554
+    match_confidence: high
+    match_method: exact
+    effective_start: "2024-06-01"
+    effective_end: "2025-01-31"
+    survivorship_rule: lease_default
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2025-01-31"
+    notes: |
+      Lease broken on 2025-01-31. Canonical id retained for historical
+      ledger records. Status on the normalized lease record is "broken"
+      with a forwarding disposition flag.
+
+  - canonical_id: lease_rdu_004_l00284
+    source_system: east_region_pms
+    source_id: L000284110
+    match_confidence: high
+    match_method: exact
+    effective_start: "2025-03-01"
+    survivorship_rule: lease_default
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      Replacement lease on the same unit as lease_rdu_004_l00217 but a
+      different resident. Not a renewal chain; no prior_canonical_id.
+
+  # -----------------------------------------------------------------------
+  # Wave 5 — Yardi multi-role adapter integration. Voyager hlease with
+  # t_code_decoded lineage; current and historical rows per adapter
+  # classification.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: lease_yd_90001
+    source_system: yardi_voyager_pms_stub
+    source_id: YL_90001
+    match_confidence: high
+    match_method: exact
+    effective_start: "2026-04-15"
+    survivorship_rule: lease_default
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Yardi_primary_pms posture;
+      hlease YL_90001 with tcode_decoded lineage resident_current per
+      yd_conformance_tcode_decoded. Provisional until classification
+      closes.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager hlease YL_90001 at
+      YP_50001 unit YU_70001. All lease attributes survive from
+      yardi_voyager_pms_stub per yardi_primary_pms posture.
+
+  - canonical_id: lease_yd_90201_hist
+    source_system: yardi_legacy_export_stub
+    source_id: YL_90201
+    match_confidence: medium
+    match_method: manual
+    effective_start: "2026-04-15"
+    effective_end: "2024-07-01"
+    survivorship_rule: lease_default
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Historical-only lease at
+      YP_50004 (Briarfield) with tcode_decoded lineage
+      past_resident_historical. Unit (YU_70201) retired post-renovation;
+      lease not joined to current unit structure per
+      bounded_assumptions.yaml::historical_lease_unit_structure_drift.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Preserved for historical charge
+      and payment joins; excluded from current-period occupancy and
+      leasing-funnel workflows.

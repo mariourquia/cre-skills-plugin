@@ -1,0 +1,233 @@
+# GraySail placeholder workflow activation additions.
+# DEFERRED UNTIL CLASSIFICATION CLOSES per runbooks/graysail_classification_path.md.
+#
+# Every workflow listed below is in partial_mode_behavior:
+# blocked_pending_classification. GraySail's role is
+# pending_classification for every entry. The entries mirror the candidate
+# dependencies declared in workflow_relevance_map.yaml; they are lifted here
+# in the activation-map shape (same shape as
+# adapters/dealpath_deal_pipeline/workflow_activation_additions.yaml) so a
+# _core/workflow_activation_map.yaml merge preserves the placeholder posture
+# until the classification runbook closes.
+#
+# Until Checkpoint C5 (workflow dependency confirmation) and Checkpoint C8
+# (adapter fork) close in runbooks/graysail_classification_path.md, no entry
+# in this file may be promoted to an active role. No workflow may treat
+# GraySail as primary, secondary, or contributing while this file is in the
+# placeholder adapter directory.
+
+status_tag: stub
+
+graysail_role: pending_classification
+
+# Workflows that MIGHT consume GraySail once classification closes.
+# Mirrors the candidate_dependencies list in workflow_relevance_map.yaml.
+# Every entry carries:
+#   - workflow: canonical workflow slug
+#   - role: pending_classification (pinned; promotion requires C5 + C8)
+#   - partial_mode_behavior: blocked_pending_classification
+#   - blocking_issues: gs_classification_pending_blocker at minimum
+#   - human_approvals_required: classification_signoff
+#   - objects_supplied_hypothesis: illustrative only, not committed
+#   - fallback_if_graysail_absent: references
+#     workflow_relevance_map.yaml::fallback_if_graysail_absent for each slug
+
+activates_existing_workflows:
+
+  - workflow: monthly_property_operating_review
+    role: pending_classification
+    partial_mode_behavior: blocked_pending_classification
+    objects_supplied_hypothesis: [sop_document_placeholder]
+    blocking_issues: [gs_classification_pending_blocker, gs_workflow_dependency_blocked]
+    human_approvals_required: classification_signoff
+    fallback_if_graysail_absent: |
+      Workflow runs without GraySail today. Narrative follows the canonical
+      metrics contract in _core/metrics.md and the variance-explanation
+      schema in gl/. No degradation. See
+      workflow_relevance_map.yaml::monthly_property_operating_review.
+
+  - workflow: monthly_asset_management_review
+    role: pending_classification
+    partial_mode_behavior: blocked_pending_classification
+    objects_supplied_hypothesis: [sop_document_placeholder, policy_record_placeholder]
+    blocking_issues: [gs_classification_pending_blocker, gs_workflow_dependency_blocked]
+    human_approvals_required: classification_signoff
+    fallback_if_graysail_absent: |
+      Commentary defers to the canonical asset_watchlist_score definition.
+      No degradation. See
+      workflow_relevance_map.yaml::monthly_asset_management_review.
+
+  - workflow: quarterly_portfolio_review
+    role: pending_classification
+    partial_mode_behavior: blocked_pending_classification
+    objects_supplied_hypothesis: [sop_document_placeholder]
+    blocking_issues: [gs_classification_pending_blocker, gs_workflow_dependency_blocked]
+    human_approvals_required: classification_signoff
+    fallback_if_graysail_absent: |
+      Portfolio review composes from same-store cohort + market rollup per
+      canonical contracts. No degradation if GraySail is absent.
+
+  - workflow: executive_operating_summary_generation
+    role: pending_classification
+    partial_mode_behavior: blocked_pending_classification
+    objects_supplied_hypothesis: [sop_document_placeholder]
+    blocking_issues: [gs_classification_pending_blocker, gs_workflow_dependency_blocked]
+    human_approvals_required: classification_signoff
+    fallback_if_graysail_absent: |
+      Summary follows the _core/metrics.md and _core/audience_contracts.md
+      posture today. No degradation.
+
+  - workflow: third_party_manager_scorecard_review
+    role: pending_classification
+    partial_mode_behavior: blocked_pending_classification
+    objects_supplied_hypothesis: [sop_document_placeholder, policy_record_placeholder]
+    blocking_issues: [gs_classification_pending_blocker, gs_workflow_dependency_blocked, gs_overlap_with_other_sources_unmonitored]
+    human_approvals_required: classification_signoff
+    fallback_if_graysail_absent: |
+      Oversight runs off the PMA in overlays/org/ and the
+      third_party_manager_oversight.md spec. No degradation. If GraySail
+      turns out to hold oversight SOPs, those SOPs AUGMENT, not replace,
+      PMA-driven configuration.
+
+  - workflow: vendor_dispatch_sla_review
+    role: pending_classification
+    partial_mode_behavior: blocked_pending_classification
+    objects_supplied_hypothesis: [policy_record_placeholder, knowledge_fragment_placeholder]
+    blocking_issues: [gs_classification_pending_blocker, gs_workflow_dependency_blocked, gs_overlap_with_other_sources_unmonitored, gs_referential_pending]
+    human_approvals_required: classification_signoff
+    fallback_if_graysail_absent: |
+      Workflow runs on canonical VendorAgreement records in ap/. If GraySail
+      is later confirmed as a secondary source for SLA language, ap retains
+      primary authority and GraySail feeds reconciliation commentary only.
+
+  - workflow: delinquency_collections
+    role: pending_classification
+    partial_mode_behavior: blocked_pending_classification
+    objects_supplied_hypothesis: [sop_document_placeholder, knowledge_fragment_placeholder]
+    blocking_issues: [gs_classification_pending_blocker, gs_workflow_dependency_blocked]
+    human_approvals_required: classification_signoff
+    sensitivity_gate: |
+      If sensitivity branch of classification Step 4 fires resident_pii or
+      legal tier, compliance_risk sign-off is required in addition to
+      classification_signoff before this workflow leaves
+      blocked_pending_classification.
+    fallback_if_graysail_absent: |
+      Workflow runs off the delinquency_case schema and the fair-housing
+      controls in _core/security/. No degradation. Compliance posture is
+      a canonical concern and cannot be outsourced to GraySail.
+
+  - workflow: move_in_administration
+    role: pending_classification
+    partial_mode_behavior: blocked_pending_classification
+    objects_supplied_hypothesis: [sop_document_placeholder]
+    blocking_issues: [gs_classification_pending_blocker, gs_workflow_dependency_blocked]
+    human_approvals_required: classification_signoff
+    fallback_if_graysail_absent: |
+      Workflow runs off the move_in_event schema. No degradation.
+
+  - workflow: move_out_administration
+    role: pending_classification
+    partial_mode_behavior: blocked_pending_classification
+    objects_supplied_hypothesis: [sop_document_placeholder]
+    blocking_issues: [gs_classification_pending_blocker, gs_workflow_dependency_blocked]
+    human_approvals_required: classification_signoff
+    fallback_if_graysail_absent: |
+      Workflow runs off the move_out_event schema. No degradation.
+
+  - workflow: owner_approval_routing
+    role: pending_classification
+    partial_mode_behavior: blocked_pending_classification
+    objects_supplied_hypothesis: [policy_record_placeholder]
+    blocking_issues: [gs_classification_pending_blocker, gs_workflow_dependency_blocked, gs_overlap_with_other_sources_unmonitored]
+    human_approvals_required: classification_signoff
+    canonical_conflict_gate: |
+      Approval matrix is already owned by _core/approval_matrix.md and
+      overlays/org/*/approval_matrix. If GraySail claims authority over
+      approval-matrix rows, this is an EC-8 conflict in edge_cases.md; the
+      source-of-truth matrix rewrite requires finance_reporting +
+      compliance_risk + asset_mgmt_director sign-off, not just
+      classification_signoff.
+    fallback_if_graysail_absent: |
+      Canonical approval_matrix.md and overlays/org/*/approval_matrix
+      remain authoritative. If GraySail turns out to hold approval rules,
+      it becomes a SECONDARY source that feeds reconciliation checks
+      against the canonical approval matrix, not an override.
+
+  - workflow: change_order_review
+    role: pending_classification
+    partial_mode_behavior: blocked_pending_classification
+    objects_supplied_hypothesis: [sop_document_placeholder]
+    blocking_issues: [gs_classification_pending_blocker, gs_workflow_dependency_blocked]
+    human_approvals_required: classification_signoff
+    fallback_if_graysail_absent: |
+      Workflow runs off canonical change_order schema in construction/.
+      No degradation.
+
+  - workflow: capital_project_intake_and_prioritization
+    role: pending_classification
+    partial_mode_behavior: blocked_pending_classification
+    objects_supplied_hypothesis: [sop_document_placeholder, policy_record_placeholder]
+    blocking_issues: [gs_classification_pending_blocker, gs_workflow_dependency_blocked]
+    human_approvals_required: classification_signoff
+    fallback_if_graysail_absent: |
+      Workflow runs off canonical capex_project intake schema. No
+      degradation.
+
+# Proposed workflows that would exist ONLY because GraySail exists.
+# None are in the canonical 27 today. Their inclusion is surfaced as an
+# open question in
+# ../../../../_core/stack_wave4/open_questions_and_risks.md.
+# Every proposal is blocked_pending_classification and cannot be
+# promoted without a canonical change-control entry in addition to the
+# classification runbook closure.
+
+proposes_new_workflows:
+
+  - workflow: sop_guidance_lookup
+    role: pending_classification
+    partial_mode_behavior: blocked_pending_classification
+    canonical_status: not_in_canonical_27
+    objects_supplied_hypothesis: [sop_document_placeholder, knowledge_fragment_placeholder]
+    blocking_issues: [gs_classification_pending_blocker, gs_workflow_dependency_blocked]
+    human_approvals_required: classification_signoff
+    additional_gate: canonical_change_control_required
+    gate_reference: ../../../../_core/stack_wave4/open_questions_and_risks.md
+
+  - workflow: policy_exception_review
+    role: pending_classification
+    partial_mode_behavior: blocked_pending_classification
+    canonical_status: not_in_canonical_27
+    objects_supplied_hypothesis: [policy_record_placeholder]
+    blocking_issues: [gs_classification_pending_blocker, gs_workflow_dependency_blocked]
+    human_approvals_required: classification_signoff
+    additional_gate: canonical_change_control_required
+    gate_reference: ../../../../_core/stack_wave4/open_questions_and_risks.md
+
+  - workflow: role_onboarding_playbook
+    role: pending_classification
+    partial_mode_behavior: blocked_pending_classification
+    canonical_status: not_in_canonical_27
+    objects_supplied_hypothesis: [sop_document_placeholder]
+    blocking_issues: [gs_classification_pending_blocker, gs_workflow_dependency_blocked]
+    human_approvals_required: classification_signoff
+    additional_gate: canonical_change_control_required
+    gate_reference: ../../../../_core/stack_wave4/open_questions_and_risks.md
+
+# Merge posture
+# -------------
+# This file, like the placeholder adapter overall, does NOT merge into
+# _core/workflow_activation_map.yaml while the adapter is in stub state.
+# The merge is performed only after the adapter forks into
+# graysail_<role>_<pattern>/ AND every workflow entry above is promoted
+# from pending_classification to a confirmed role (C5).
+
+merge_rule:
+  merge_into: _core/workflow_activation_map.yaml
+  merge_gate: runbooks/graysail_classification_path.md::C5 AND C8
+  default_merge_state_until_gated: advisory_only
+  notes: |
+    Advisory-only means the content is discoverable by downstream tooling
+    that scans adapter directories, but the canonical workflow activation
+    map does NOT treat GraySail as a dependency. Any workflow that attempts
+    to read GraySail through this advisory-only fragment trips
+    gs_classification_pending_blocker per dq_rules.yaml.

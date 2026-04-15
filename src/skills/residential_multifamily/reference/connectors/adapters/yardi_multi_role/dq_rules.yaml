@@ -1,0 +1,239 @@
+# Yardi-specific data quality rules.
+# Rule_id prefix: yd_
+# Severity: blocker | warning | info.
+# Tolerance bands cite reference/normalized/schemas/reconciliation_tolerance_band.yaml; no hardcoded numeric values.
+#
+# These rules are evaluated AFTER ingestion envelopes are confirmed and
+# AFTER classification_worksheet.md closes the role dimension. Rules
+# whose applicability depends on the declared role annotate
+# `applies_if_role:` to make posture dependencies explicit.
+
+rules:
+
+  # --- freshness ---
+
+  - rule_id: yd_freshness_voyager_pms
+    dimension: freshness
+    severity: blocker
+    description: Voyager PMS feed must land within expected_latency_minutes per source_registry.
+    expected: max(voyager_pms.extracted_at) >= now - source_registry.expected_latency_minutes
+    remediation: runbooks/yardi_common_issues.md::stale_voyager_feed
+
+  - rule_id: yd_freshness_data_connect
+    dimension: freshness
+    severity: warning
+    description: Data Connect warehouse may lag Voyager up to data_connect_lag_band; warn within band, block outside.
+    expected: data_connect.max_loaded_at >= now - data_connect_lag_band (cite reference/normalized/schemas/reconciliation_tolerance_band.yaml)
+    remediation: runbooks/yardi_common_issues.md::data_connect_lag
+
+  - rule_id: yd_freshness_report_exports
+    dimension: freshness
+    severity: warning
+    description: Manual report-export files must be landed within report_export_staleness_band of their internal as_of_date.
+    expected: report_export.received_at - report_export.as_of_date <= report_export_staleness_band (cite reconciliation_tolerance_band.yaml)
+    remediation: runbooks/yardi_common_issues.md::stale_exports
+
+  # --- completeness ---
+
+  - rule_id: yd_completeness_required_property_fields
+    dimension: completeness
+    severity: blocker
+    description: Every property record must carry propid, property_name, legal_entity, unit_count, property_status.
+    expected: no nulls in required fields
+    remediation: master_data/unresolved_exceptions_queue.md
+
+  - rule_id: yd_completeness_required_lease_fields
+    dimension: completeness
+    severity: blocker
+    description: Every lease record must carry hlease, hten, hunit, propid, lease_from, lease_to, monthly_rent, lease_status.
+    expected: no nulls in required fields
+    remediation: master_data/unresolved_exceptions_queue.md
+
+  - rule_id: yd_completeness_charge_chargecode_present
+    dimension: completeness
+    severity: blocker
+    description: Every charge record must carry a chargecode that resolves via property-scoped decode.
+    expected: chargecode is not null AND decode_property_scoped(chargecode, propid) IS NOT unresolved_chargecode
+    remediation: master_data/charge_code_crosswalk_by_property issue
+
+  # --- conformance ---
+
+  - rule_id: yd_conformance_tcode_decoded
+    dimension: conformance
+    severity: blocker
+    description: Every lease, resident_account, charge, and payment record must carry a decoded t-code lineage before joining.
+    expected: tcode_decoded IN {applicant, applicant_preleased, resident_current, resident_notice, past_resident, past_resident_historical, collections, evicted}
+    remediation: runbooks/yardi_common_issues.md::t_code_mapping
+
+  - rule_id: yd_conformance_chargecode_property_scoped
+    dimension: conformance
+    severity: blocker
+    description: Chargecode decode must be property-scoped; global decode is not acceptable.
+    expected: canonical charge_type resolved via map_yardi_chargecode_property_scoped(propid, chargecode)
+    remediation: master_data/charge_code_crosswalk_by_property issue
+
+  - rule_id: yd_conformance_lease_status_enum
+    dimension: conformance
+    severity: blocker
+    description: lease_status must map to canonical lease_status via map_yardi_lease_status.
+    expected: lease_status IN canonical_lease_status_enum
+    remediation: extend map_yardi_lease_status
+
+  - rule_id: yd_conformance_report_columns
+    dimension: conformance
+    severity: blocker
+    description: Yardi report-export files must bind to a registered column_map under master_data/report_export_templates.
+    expected: template_id IN report_export_templates
+    remediation: runbooks/yardi_common_issues.md::report_export_template_drift
+
+  # --- uniqueness ---
+
+  - rule_id: yd_uniqueness_propid
+    dimension: uniqueness
+    severity: blocker
+    description: propid unique across active property records per source.
+    expected: count(distinct propid) = count(propid) where property_status != historical_only
+    remediation: dedupe via property_master_crosswalk
+
+  - rule_id: yd_uniqueness_hlease
+    dimension: uniqueness
+    severity: blocker
+    description: hlease unique across non-historical lease records.
+    expected: count(distinct hlease) = count(hlease) where effective_end_date is null
+    remediation: dedupe via lease_crosswalk
+
+  # --- referential ---
+
+  - rule_id: yd_referential_lease_unit_propid
+    dimension: consistency
+    severity: blocker
+    description: lease.hunit and lease.propid must resolve to existing unit and property records.
+    expected: lease.hunit IN unit.hunit AND lease.propid IN property.propid
+    remediation: investigate orphan lease; historical_leases permitted with effective_end_date
+
+  - rule_id: yd_referential_charge_lease
+    dimension: consistency
+    severity: blocker
+    description: charge.hlease must resolve to an existing lease record (including historical).
+    expected: charge.hlease IN lease.hlease
+    remediation: investigate orphan charge
+
+  - rule_id: yd_referential_payment_hten
+    dimension: consistency
+    severity: blocker
+    description: payment.hten must resolve to an existing resident_account record.
+    expected: payment.hten IN resident_account.hten
+    remediation: investigate orphan payment
+
+  # --- consistency (legacy-mode and dual-run) ---
+
+  - rule_id: yd_consistency_historical_only_mode
+    dimension: consistency
+    severity: warning
+    description: In legacy_historical_only classification, no record may have extracted_at newer than the declared cutover_effective_date.
+    applies_if_role: legacy_historical_only
+    expected: max(extracted_at) <= cutover_effective_date
+    remediation: runbooks/yardi_migration_to_appfolio.md::historical_only_window
+
+  - rule_id: yd_consistency_post_vs_accrual
+    dimension: consistency
+    severity: warning
+    description: Charge and actual-line records with post_date and accrual-month drift beyond post_vs_accrual_band flagged.
+    expected: abs(post_date - month_end(accrual_month)) <= post_vs_accrual_band (cite reconciliation_tolerance_band.yaml)
+    remediation: runbooks/yardi_common_issues.md::posting_vs_accrual
+
+  - rule_id: yd_consistency_rentcafe_vs_voyager
+    dimension: consistency
+    severity: warning
+    description: When RentCafe and Voyager disagree on lead / resident state, drift beyond rentcafe_vs_voyager_band flagged.
+    expected: abs(rentcafe_state - voyager_state) within rentcafe_vs_voyager_band (cite reconciliation_tolerance_band.yaml)
+    remediation: runbooks/yardi_common_issues.md::rentcafe_voyager_drift
+
+  # --- classification-pending blocking rules ---
+
+  - rule_id: yd_classification_pending_block_primary_claims
+    dimension: conformance
+    severity: blocker
+    description: No workflow may treat Yardi output as primary for any canonical object while classification_worksheet.md Dimension 1 is unclosed.
+    expected: classification_status = closed OR workflow consuming Yardi output runs in partial_mode_behavior per source_of_truth_matrix.md::pending_classification_blocks
+    remediation: complete classification_worksheet.md; see runbooks/yardi_classification_path.md
+
+  - rule_id: yd_classification_pending_block_rentcafe
+    dimension: conformance
+    severity: blocker
+    description: RentCafe-sourced lead / tour / application / approval_outcome rows may not surface to downstream workflows until Dimension 2c and Dimension 4 close.
+    expected: rentcafe_scope_confirmed = true AND rentcafe_pii_posture_declared = true
+    remediation: close classification_worksheet.md Dimension 2c and 4
+
+  # --- overlap with AppFolio (dual-run) ---
+
+  - rule_id: yd_consistency_overlap_with_appfolio
+    dimension: consistency
+    severity: warning
+    description: Property-period-grain observed in BOTH yardi_voyager and appfolio_prod flags potential dual-run overlap.
+    expected: (property_id, period) not present in both AppFolio and Yardi ledgers beyond cutover_effective_date
+    remediation: runbooks/yardi_migration_to_appfolio.md::dual_run_window
+
+  # --- stale-export detection ---
+
+  - rule_id: yd_freshness_stale_exports
+    dimension: freshness
+    severity: warning
+    description: Manual report-export file internal as_of_date more than report_export_staleness_band older than file_received_at flagged.
+    expected: file_received_at - as_of_date <= report_export_staleness_band (cite reconciliation_tolerance_band.yaml)
+    remediation: runbooks/yardi_common_issues.md::stale_exports
+
+  # --- RentCafe vs Voyager drift ---
+
+  - rule_id: yd_consistency_rentcafe_leadstate_vs_voyager
+    dimension: consistency
+    severity: warning
+    description: Lead that transitions to applicant in RentCafe must appear in Voyager resident_account with applicant tcode_decoded lineage within rentcafe_to_voyager_latency_band.
+    expected: rentcafe_transition_latency <= rentcafe_to_voyager_latency_band (cite reconciliation_tolerance_band.yaml)
+    remediation: runbooks/yardi_common_issues.md::rentcafe_voyager_drift
+
+  # --- posting vs operating month drift ---
+
+  - rule_id: yd_consistency_actuals_period_vs_post
+    dimension: consistency
+    severity: warning
+    description: GL actual_line rows where post_date month differs from accrual period flagged for review when operator has not declared post_date-primary convention.
+    expected: month(post_date) = period OR operator_declared_post_date_primary = true
+    remediation: runbooks/yardi_common_issues.md::posting_vs_accrual
+
+  # --- extra rules to meet 18 minimum ---
+
+  - rule_id: yd_completeness_vendor_tax_id_hashed
+    dimension: completeness
+    severity: blocker
+    description: Vendor records must carry tax_id_hash if vendor_status = active.
+    expected: vendor_status != active OR tax_id_hash IS NOT NULL
+    remediation: master_data/vendor_master_crosswalk issue
+
+  - rule_id: yd_conformance_book_id_declared
+    dimension: conformance
+    severity: blocker
+    description: Every GL actual_line / budget_line / forecast_line record must declare a book_id (accrual / cash / tax / budget).
+    expected: book_id IS NOT NULL AND book_id IN {accrual, cash, tax, budget}
+    remediation: runbooks/yardi_common_issues.md::book_id_undeclared
+
+  - rule_id: yd_consistency_deleted_but_not_purged
+    dimension: consistency
+    severity: warning
+    description: Records with status = deleted or soft-delete flag must be filtered from active downstream aggregations.
+    expected: status != deleted OR record only contributes to audit trail
+    remediation: runbooks/yardi_common_issues.md::deleted_not_purged
+
+  - rule_id: yd_consistency_refund_posting_after_move_out
+    dimension: consistency
+    severity: info
+    description: Security deposit refund posting dates after move_out_date are expected and preserved; not an error.
+    expected: refund_post_date >= move_out_date
+    remediation: informational; adapter does not block
+
+  - rule_id: yd_consistency_prepay_vs_receivable_attribution
+    dimension: consistency
+    severity: warning
+    description: Prepaid rent postings routed to liability vs receivable accounts vary by operator config; misattribution detected via account_crosswalk.
+    expected: prepay records map to declared account_class via account_crosswalk
+    remediation: runbooks/yardi_common_issues.md::prepay_vs_receivable

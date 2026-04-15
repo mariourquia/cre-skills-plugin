@@ -1,0 +1,18 @@
+# Null critical-field detection.
+check_id: null_critical_field
+check_kind: null_critical
+severity: blocker
+description: |
+  Fields declared in schema.yaml as required (is_key or critical) must be
+  non-null in every normalized record.
+inputs:
+  - reference/normalized/<entity>__<scope>.csv
+  - reference/connectors/<domain>/schema.yaml
+expected_invariant: |
+  for every field in entity.required_fields:
+    count(records where field IS NULL) == 0
+remediation: |
+  Null in a required field indicates either a mapping gap or a genuinely
+  missing source value. Check mapping.yaml for a transform that failed
+  silently; if the source value is truly absent, escalate missing per the
+  entity's null_handling rule (reject_record / escalate_missing).

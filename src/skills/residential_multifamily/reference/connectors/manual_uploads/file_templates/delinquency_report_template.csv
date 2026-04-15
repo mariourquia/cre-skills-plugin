@@ -1,0 +1,5 @@
+property_id,report_period,resident_account_id,balance_usd,aging_bucket,notes
+sample_property_one,2026-03,resident_sample_001,1850.00,31_60,illustrative delinquency row
+sample_property_one,2026-03,resident_sample_002,425.00,1_7,illustrative delinquency row
+# status: template
+# schema: reference/connectors/manual_uploads/schema.yaml entities.delinquency_report_upload

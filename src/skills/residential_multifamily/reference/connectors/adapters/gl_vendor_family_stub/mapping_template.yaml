@@ -1,0 +1,65 @@
+# Mapping template for the generic ERP/GL vendor family stub.
+# Applied on top of reference/connectors/gl/mapping.yaml.
+# Canonical mapping wins on conflict. Entries here are non-binding hints.
+
+status_tag: template
+
+budget_line:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [property_id, account_slug, operating_month, budget_version]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: prop_code,        normalized_column: property_id,           transform: trim_string,       required: true }
+    - { source_column: acct,              normalized_column: account_slug,          transform: map_account_slug,  required: true }
+    - { source_column: operating_month,   normalized_column: operating_month,       transform: to_iso_month,      required: true }
+    - { source_column: budget_amount,     normalized_column: budget_amount_cents,   transform: dollars_to_cents,  required: true }
+    - { source_column: budget_version,    normalized_column: budget_version,        transform: trim_string,       required: true }
+
+forecast_line:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [property_id, account_slug, operating_month, budget_version]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: prop_code,        normalized_column: property_id,             transform: trim_string,       required: true }
+    - { source_column: acct,              normalized_column: account_slug,            transform: map_account_slug,  required: true }
+    - { source_column: operating_month,   normalized_column: operating_month,         transform: to_iso_month,      required: true }
+    - { source_column: forecast_amount,   normalized_column: forecast_amount_cents,   transform: dollars_to_cents,  required: true }
+    - { source_column: budget_version,    normalized_column: budget_version,          transform: trim_string,       required: true }
+
+variance_explanation:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [property_id, account_slug, operating_month]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: prop_code,        normalized_column: property_id,        transform: trim_string,       required: true }
+    - { source_column: acct,              normalized_column: account_slug,       transform: map_account_slug,  required: true }
+    - { source_column: operating_month,   normalized_column: operating_month,    transform: to_iso_month,      required: true }
+    - { source_column: memo,              normalized_column: explanation_text,   transform: trim_string,       required: true }
+
+capex_project:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [capex_project_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: capex_proj,       normalized_column: capex_project_id,   transform: trim_string,       required: true }
+    - { source_column: prop_code,         normalized_column: property_id,        transform: trim_string,       required: true }
+    - { source_column: budget_amount,     normalized_column: budget_amount_cents, transform: dollars_to_cents, required: true }
+    - { source_column: cost_code,         normalized_column: cost_code,          transform: trim_string,       required: false }
+
+change_order:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [change_order_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: change_order_id,  normalized_column: change_order_id,    transform: trim_string,       required: true }
+    - { source_column: capex_proj,        normalized_column: capex_project_id,   transform: trim_string,       required: true }
+    - { source_column: amount,            normalized_column: amount_cents,       transform: dollars_to_cents,  required: true }
+    - { source_column: posting_date,      normalized_column: posting_date,       transform: to_iso_date,       required: true }
+    - { source_column: memo,              normalized_column: memo,               transform: trim_string,       required: false }
+
+draw_request: { status: TODO, note: "map per vendor" }

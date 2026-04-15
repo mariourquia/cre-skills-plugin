@@ -1,0 +1,149 @@
+# benchmark_update_log.schema.yaml
+#
+# JSON Schema (draft 2020-12) for a benchmark update log entry. Tracks
+# changes to derived benchmarks and reference assumptions. Append-only.
+# See lineage.md for prose.
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "residential_multifamily/reference/connectors/_core/benchmark_update_log.schema.yaml"
+title: "Benchmark Update Log Entry"
+description: >
+  A record of a change to a derived benchmark file or a reference assumption.
+type: object
+additionalProperties: false
+
+required:
+  - update_id
+  - category
+  - scope
+  - prior_values_path
+  - new_values_path
+  - as_of_date
+  - source
+  - confidence
+  - reason_for_change
+  - proposed_by
+  - approved_by
+  - affected_skills
+  - rollback_path
+
+properties:
+
+  update_id:
+    type: string
+    description: Unique update identifier.
+    pattern: "^bu_[0-9]{4}_[0-9]{2}_[0-9]{2}_[a-z][a-z0-9_]*_[0-9]{5}$"
+
+  category:
+    type: string
+    description: Reference category affected by the update.
+    enum:
+      - rent_comp
+      - market_rent_benchmark
+      - concession_benchmark
+      - occupancy_benchmark
+      - staffing_model
+      - payroll_assumption
+      - labor_rate
+      - material_cost
+      - vendor_rate
+      - unit_turn_cost
+      - capex_line_item
+      - development_budget_assumption
+      - construction_duration_assumption
+      - utility_benchmark
+      - insurance_tax_assumption
+      - approval_threshold_policy
+      - role_kpi_targets
+
+  scope:
+    type: string
+    description: >
+      Scope axis of the update. snake_case identifier describing the
+      aggregation, e.g., "portfolio", "charlotte_mf", "southeast_residential".
+    pattern: "^[a-z][a-z0-9_]*$"
+
+  prior_values_path:
+    type: string
+    description: Repo-relative path of the prior file or snapshot.
+    pattern: "^reference/(normalized|derived|archives)/.+$"
+
+  new_values_path:
+    type: string
+    description: Repo-relative path of the new file.
+    pattern: "^reference/(normalized|derived)/.+$"
+
+  as_of_date:
+    type: string
+    format: date
+
+  source:
+    type: string
+    description: Provenance tag for the new values.
+    minLength: 1
+    maxLength: 500
+
+  confidence:
+    type: string
+    enum: [low, medium, high]
+
+  reason_for_change:
+    type: string
+    description: Short explanation.
+    minLength: 1
+    maxLength: 2000
+
+  proposed_by:
+    type: string
+    description: Slug of the agent or role that proposed the update.
+    pattern: "^[a-z][a-z0-9_]*$"
+
+  approved_by:
+    type: string
+    description: Slug of the human approver.
+    pattern: "^[a-z][a-z0-9_]*$"
+
+  affected_skills:
+    type: array
+    description: Skill pack slugs whose reference_manifest.yaml names the changed paths.
+    items:
+      type: string
+      pattern: "^[a-z][a-z0-9_]*$"
+
+  rollback_path:
+    type: string
+    description: Repo-relative path where to find the prior snapshot for rollback.
+    pattern: "^reference/archives/.+$"
+
+  delta_summary:
+    type: object
+    additionalProperties: false
+    description: >
+      Optional structured summary of the change magnitude. Values live in
+      files, not in prose; this block records signed direction and
+      confidence of the delta without embedding percentages in documents.
+    properties:
+      direction:
+        type: string
+        enum: [up, down, neutral, mixed]
+      delta_exceeds_threshold:
+        type: boolean
+      threshold_path:
+        type: string
+        pattern: "^(overlays/org/[a-z][a-z0-9_]*/approval_matrix\\.yaml|_core/approval_matrix\\.md)$"
+
+  change_type:
+    type: string
+    enum: [update, rollback, deprecation, recomputation]
+    description: Kind of change recorded.
+
+  related_manifest_ids:
+    type: array
+    description: Lineage manifest ids associated with the update.
+    items:
+      type: string
+      pattern: "^lm_[0-9]{4}_[0-9]{2}_[0-9]{2}_[a-z][a-z0-9_]*_[0-9]{5}$"
+
+  status:
+    type: string
+    enum: [proposed, approved, deprecated, rolled_back, sample, illustrative]

@@ -1,0 +1,1077 @@
+# Richer per-entity field mapping template for the PMS connector.
+# Adds required_for_kpi and provenance_note context beyond mapping.yaml.
+# Entities correspond to those declared in pms/schema.yaml.
+property:
+  fields:
+  - canonical_field: property_id
+    source_field: prop_id
+    source_description: PMS-native stable property identifier
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: matches property_crosswalk; alias registration required before landing
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: anchor for every property-scoped metric; changes require property_crosswalk entry
+  - canonical_field: property_name
+    source_field: prop_name
+    source_description: Operating name used in reporting
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: non-empty after trim
+    required_for_load: true
+    required_for_kpi: false
+    provenance_note: displayed name; not used in joins
+  - canonical_field: unit_count_total
+    source_field: total_units
+    source_description: Total units including down, model, employee
+    transform_rule: to_integer
+    type_cast_rule: integer
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: unit_count_total >= unit_count_rentable
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: reconciles against pms.unit count; see pms_unit_count_reconciles
+  - canonical_field: unit_count_rentable
+    source_field: rentable_units
+    source_description: Rentable units excluding model and employee
+    transform_rule: to_integer
+    type_cast_rule: integer
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: unit_count_rentable <= unit_count_total
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: occupancy denominator
+  - canonical_field: market
+    source_field: market_label
+    source_description: Market label as reported by PMS
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: market IN reference market registry
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: required for market-scoped rollups
+  - canonical_field: submarket
+    source_field: submkt
+    source_description: Submarket label if operator reports it
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: submarket IN reference submarket registry when non-null
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: enables submarket rollups; absent when operator does not track
+  - canonical_field: year_built
+    source_field: yr_built
+    source_description: First-placed-in-service year
+    transform_rule: to_integer
+    type_cast_rule: integer
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: year_built IS NULL OR year_built > 1900
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: used in vintage cohort analysis
+  - canonical_field: year_renovated
+    source_field: yr_reno
+    source_description: Last substantial renovation year
+    transform_rule: to_integer
+    type_cast_rule: integer
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: year_renovated IS NULL OR year_renovated >= year_built
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: used in renovation-yield analysis
+unit:
+  fields:
+  - canonical_field: property_id
+    source_field: prop_id
+    source_description: Parent property (FK)
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: property_id IN pms.property.property_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to property; reject on missing parent
+  - canonical_field: unit_id
+    source_field: unit_id
+    source_description: PMS-native unit identifier
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: unit_id unique within property_id; lineage in unit_crosswalk
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: joins to leases and turns; renumbering preserved in crosswalk
+  - canonical_field: bedrooms
+    source_field: bedrooms
+    source_description: Bedroom count, studio = 0
+    transform_rule: to_integer
+    type_cast_rule: integer
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: bedrooms >= 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: unit-mix segmentation
+  - canonical_field: bathrooms
+    source_field: bathrooms
+    source_description: Bathroom count, halves allowed
+    transform_rule: to_number
+    type_cast_rule: number
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: bathrooms > 0
+    required_for_load: true
+    required_for_kpi: false
+    provenance_note: unit-mix display
+  - canonical_field: nrsf
+    source_field: nrsf
+    source_description: Net rentable square feet
+    transform_rule: to_integer
+    type_cast_rule: integer
+    null_handling: escalate_missing
+    default_rule: none
+    validation_rule: nrsf > 0 when non-null
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: rent-per-sf metrics fail closed on null
+  - canonical_field: status
+    source_field: unit_status
+    source_description: Current unit status
+    transform_rule: map_unit_status
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: status IN canonical_enum(pms.unit.status)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: occupancy numerator basis
+  - canonical_field: unit_type_id
+    source_field: unit_type
+    source_description: Unit-type FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: unit_type_id resolves to unit_type registry when non-null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: unit-type-weighted rent metrics require this
+  - canonical_field: floor
+    source_field: floor
+    source_description: Floor number
+    transform_rule: to_integer
+    type_cast_rule: integer
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: floor IS NULL OR floor > 0
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: used in upper-floor premium analysis
+  - canonical_field: classification
+    source_field: finish_class
+    source_description: Renovation classification
+    transform_rule: map_classification
+    type_cast_rule: enum
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: classification IN (classic, renovated, fully_renovated) when
+      non-null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: renovation-yield analysis pivots on this
+lease:
+  fields:
+  - canonical_field: lease_id
+    source_field: lease_id
+    source_description: PMS-native lease identifier
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: lease_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: anchor for lease-level metrics
+  - canonical_field: property_id
+    source_field: prop_id
+    source_description: Property FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: property_id IN pms.property.property_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to property
+  - canonical_field: unit_id
+    source_field: unit_id
+    source_description: Unit FK within property
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: unit_id IN pms.unit.unit_id within property_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to unit
+  - canonical_field: resident_account_id
+    source_field: resident_id
+    source_description: Resident account FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: resident_account_id resolves via resident_crosswalk
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: household and canonical_resident roll-up
+  - canonical_field: start_date
+    source_field: lease_start
+    source_description: Lease start date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: start_date <= end_date
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: anchors occupancy time series
+  - canonical_field: end_date
+    source_field: lease_end
+    source_description: Lease end date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: end_date >= start_date
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: expiry schedule basis
+  - canonical_field: base_rent_monthly_cents
+    source_field: base_rent_usd
+    source_description: Base monthly rent in source dollars
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: base_rent_monthly_cents > 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: revenue math anchor
+  - canonical_field: status
+    source_field: lease_status
+    source_description: Lease workflow status
+    transform_rule: map_lease_status
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: status IN canonical_enum(pms.lease.status)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: leased_occupancy and notice_exposure depend on this
+  - canonical_field: term_months
+    source_field: term_months
+    source_description: Nominal lease term
+    transform_rule: to_integer
+    type_cast_rule: integer
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: term_months IS NULL OR term_months > 0
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: renewal cohort segmentation
+  - canonical_field: concessions_total_cents
+    source_field: concessions_usd
+    source_description: Total lease concessions in source dollars
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: default_to_null
+    default_rule: 0
+    validation_rule: concessions_total_cents IS NULL OR concessions_total_cents >=
+      0
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: effective rent requires this
+  - canonical_field: is_renewal
+    source_field: is_renewal_flag
+    source_description: Renewal flag
+    transform_rule: to_boolean
+    type_cast_rule: boolean
+    null_handling: default_to_null
+    default_rule: false
+    validation_rule: is_renewal IN (true, false)
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: rent_growth_renewal relies on this
+  - canonical_field: prior_lease_id
+    source_field: prior_lease
+    source_description: Prior lease reference when renewal
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: prior_lease_id IN pms.lease.lease_id when is_renewal = true
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: rent delta computation for renewals
+lease_event:
+  fields:
+  - canonical_field: lease_event_id
+    source_field: event_id
+    source_description: Stable event id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: lease_event_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: event timeline anchor
+  - canonical_field: lease_id
+    source_field: lease_id
+    source_description: Lease FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: lease_id IN pms.lease.lease_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to lease
+  - canonical_field: event_type
+    source_field: event_type
+    source_description: Event type
+    transform_rule: map_lease_event_type
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: event_type IN canonical_enum(pms.lease_event.event_type)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: turnover_rate and move_in_conversion pivot on this
+  - canonical_field: event_date
+    source_field: event_date
+    source_description: Effective event date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: event_date <= today + short_forecast_window declared in pms/manifest.yaml
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: used in temporal_monotonic checks
+  - canonical_field: event_payload
+    source_field: payload_json
+    source_description: Event-type-specific payload
+    transform_rule: parse_json
+    type_cast_rule: object
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: event_payload IS NULL OR valid JSON
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: captures move-out reason, NTV target date, eviction docket number
+charge:
+  fields:
+  - canonical_field: charge_id
+    source_field: charge_id
+    source_description: Stable charge id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: charge_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: ledger anchor
+  - canonical_field: lease_id
+    source_field: lease_id
+    source_description: Lease FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: lease_id IN pms.lease.lease_id when non-null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: ties charges to active leases
+  - canonical_field: resident_account_id
+    source_field: resident_id
+    source_description: Resident account FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: resident_account_id resolves via resident_crosswalk
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: delinquency aggregation basis
+  - canonical_field: charge_type
+    source_field: charge_type
+    source_description: Charge type
+    transform_rule: map_charge_type
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: charge_type IN canonical_enum(pms.charge.charge_type)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: segments rent vs concession vs late fee
+  - canonical_field: charge_date
+    source_field: posting_date
+    source_description: Posting date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: charge_date <= today
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: aging calculation basis
+  - canonical_field: amount_cents
+    source_field: amount_usd
+    source_description: Charge amount in source dollars
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: amount_cents != 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: reversal tracking via reversed_charge_id
+  - canonical_field: notes
+    source_field: notes
+    source_description: Free-form posting notes
+    transform_rule: sanitize_text
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: protected_class_scan clean
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: scanned for protected-class language before landing
+payment:
+  fields:
+  - canonical_field: payment_id
+    source_field: payment_id
+    source_description: Stable payment id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: payment_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: cash receipt anchor
+  - canonical_field: resident_account_id
+    source_field: resident_id
+    source_description: Resident account FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: resident_account_id resolves via resident_crosswalk
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: payment aggregation basis
+  - canonical_field: payment_date
+    source_field: payment_date
+    source_description: Payment posting date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: payment_date <= today
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: collections_rate window basis
+  - canonical_field: amount_cents
+    source_field: amount_usd
+    source_description: Payment amount in source dollars
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: amount_cents > 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: ledger totals
+  - canonical_field: tender_type
+    source_field: tender
+    source_description: Tender type
+    transform_rule: map_tender
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: tender_type IN canonical_enum(pms.payment.tender_type)
+    required_for_load: true
+    required_for_kpi: false
+    provenance_note: NSF rate tracking
+  - canonical_field: applied_to_charge_ids
+    source_field: applied_charges_json
+    source_description: List of charges the payment applied against
+    transform_rule: parse_json_array
+    type_cast_rule: array
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: applied_to_charge_ids IS NULL OR every element IN pms.charge.charge_id
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: required for partial-payment traceability
+delinquency_case:
+  fields:
+  - canonical_field: case_id
+    source_field: case_id
+    source_description: Stable case id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: case_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: case-level delinquency reporting
+  - canonical_field: lease_id
+    source_field: lease_id
+    source_description: Lease FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: lease_id IN pms.lease.lease_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to lease
+  - canonical_field: stage
+    source_field: aging_stage
+    source_description: Aging bucket
+    transform_rule: map_delinquency_stage
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: stage IN canonical_enum(pms.delinquency_case.stage)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: stage monotonic check feeds this
+  - canonical_field: current_balance_cents
+    source_field: balance_usd
+    source_description: Outstanding balance
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: current_balance_cents >= 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: delinquency_rate denominator
+  - canonical_field: stage_entered_date
+    source_field: stage_enter_date
+    source_description: Date the case entered the current stage
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: stage_entered_date <= today
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: aging window basis
+  - canonical_field: legal_flag
+    source_field: legal_flag
+    source_description: Legal exposure flag
+    transform_rule: to_boolean
+    type_cast_rule: boolean
+    null_handling: default_to_null
+    default_rule: false
+    validation_rule: legal_flag IN (true, false)
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: triggers legal-track workflow
+  - canonical_field: last_contact_date
+    source_field: last_contact
+    source_description: Last resident contact date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: last_contact_date <= today
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: communication cadence monitoring
+lead:
+  fields:
+  - canonical_field: lead_id
+    source_field: lead_id
+    source_description: PMS-native lead id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: lead_id unique; survivor after merge
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: funnel attribution anchor
+  - canonical_field: property_id
+    source_field: prop_id
+    source_description: Property FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: property_id IN pms.property.property_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to property
+  - canonical_field: source_channel
+    source_field: source
+    source_description: Acquisition channel label
+    transform_rule: map_source_channel
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: source_channel resolves to campaign_source.campaign_id OR canonical
+      medium enum
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: cost-per-lead attribution
+  - canonical_field: inquiry_date
+    source_field: inquiry_date
+    source_description: First-contact date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: inquiry_date <= today
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: funnel cycle time basis
+  - canonical_field: pipeline_stage
+    source_field: stage
+    source_description: Funnel stage
+    transform_rule: map_pipeline_stage
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: pipeline_stage IN canonical_enum(pms.lead.pipeline_stage)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: conversion-rate numerators
+  - canonical_field: move_in_target
+    source_field: move_in_target
+    source_description: Desired move-in date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: move_in_target IS NULL OR move_in_target >= inquiry_date
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: prelease demand planning
+  - canonical_field: bedrooms_desired
+    source_field: bedrooms_pref
+    source_description: Preferred bedroom count
+    transform_rule: to_integer
+    type_cast_rule: integer
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: bedrooms_desired IS NULL OR bedrooms_desired >= 0
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: unit-type fit analysis
+tour:
+  fields:
+  - canonical_field: tour_id
+    source_field: tour_id
+    source_description: Stable tour id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: tour_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: tour funnel anchor
+  - canonical_field: lead_id
+    source_field: lead_id
+    source_description: Lead FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: lead_id IN pms.lead.lead_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to lead
+  - canonical_field: scheduled_date
+    source_field: scheduled_date
+    source_description: Scheduled tour date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: scheduled_date >= lead.inquiry_date
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: tour_conversion denominator
+  - canonical_field: tour_type
+    source_field: tour_type
+    source_description: Tour modality
+    transform_rule: map_tour_type
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: tour_type IN canonical_enum(pms.tour.tour_type)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: modality mix in tour_conversion
+  - canonical_field: conducted_date
+    source_field: conducted_date
+    source_description: Actual conducted date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: conducted_date IS NULL OR conducted_date >= scheduled_date
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: completed-vs-scheduled ratio
+  - canonical_field: outcome
+    source_field: outcome
+    source_description: Tour outcome
+    transform_rule: map_tour_outcome
+    type_cast_rule: enum
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: outcome IN canonical_enum(pms.tour.outcome) when non-null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: tour-to-application conversion
+application:
+  fields:
+  - canonical_field: application_id
+    source_field: application_id
+    source_description: Stable application id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: application_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: application funnel anchor
+  - canonical_field: lead_id
+    source_field: lead_id
+    source_description: Lead FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: lead_id IN pms.lead.lead_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to lead
+  - canonical_field: applied_date
+    source_field: applied_date
+    source_description: Application submit date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: applied_date >= lead.inquiry_date
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: application_conversion denominator
+  - canonical_field: approval_status
+    source_field: approval_status
+    source_description: Approval outcome
+    transform_rule: map_approval_status
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: approval_status IN canonical_enum(pms.application.approval_status)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: approval_rate numerator
+  - canonical_field: unit_id_preferred
+    source_field: unit_preferred
+    source_description: Preferred unit
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: unit_id_preferred IS NULL OR unit_id_preferred IN pms.unit.unit_id
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: matching analysis
+renewal_offer:
+  fields:
+  - canonical_field: renewal_offer_id
+    source_field: offer_id
+    source_description: Stable offer id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: renewal_offer_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: renewal_offer_rate basis
+  - canonical_field: lease_id
+    source_field: lease_id
+    source_description: Lease FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: lease_id IN pms.lease.lease_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to lease
+  - canonical_field: offer_date
+    source_field: offer_date
+    source_description: Date offer issued
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: offer_date <= today
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: offer cadence monitoring
+  - canonical_field: offered_rent_monthly_cents
+    source_field: offered_rent_usd
+    source_description: Offered rent
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: offered_rent_monthly_cents > 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: renewal trade-out calculation
+  - canonical_field: offered_term_months
+    source_field: offered_term
+    source_description: Offered term
+    transform_rule: to_integer
+    type_cast_rule: integer
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: offered_term_months > 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: term cohort segmentation
+  - canonical_field: response
+    source_field: response
+    source_description: Offer response
+    transform_rule: map_offer_response
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: response IN canonical_enum(pms.renewal_offer.response)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: renewal_acceptance_rate numerator
+  - canonical_field: response_date
+    source_field: response_date
+    source_description: Response date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: response_date IS NULL OR response_date >= offer_date
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: response-time analysis
+work_order:
+  fields:
+  - canonical_field: work_order_id
+    source_field: wo_id
+    source_description: Stable WO id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: work_order_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: WO aging anchor
+  - canonical_field: property_id
+    source_field: prop_id
+    source_description: Property FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: property_id IN pms.property.property_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to property
+  - canonical_field: reported_date
+    source_field: reported_date
+    source_description: Date reported
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: reported_date <= today
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: SLA start
+  - canonical_field: priority
+    source_field: priority
+    source_description: Priority class
+    transform_rule: map_priority
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: priority IN canonical_enum(pms.work_order.priority)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: SLA band selection
+  - canonical_field: status
+    source_field: wo_status
+    source_description: WO status
+    transform_rule: map_wo_status
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: status IN canonical_enum(pms.work_order.status)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: open_work_orders basis
+  - canonical_field: unit_id
+    source_field: unit_id
+    source_description: Unit scope
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: unit_id IS NULL OR unit_id IN pms.unit.unit_id
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: unit-scoped WO aging
+  - canonical_field: category
+    source_field: trade
+    source_description: Trade category
+    transform_rule: map_trade
+    type_cast_rule: enum
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: category IN canonical_enum(pms.work_order.category) when non-null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: trade cost analytics
+  - canonical_field: completed_date
+    source_field: completed_date
+    source_description: Date completed
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: completed_date IS NULL OR completed_date >= reported_date
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: cycle-time calculation
+turn:
+  fields:
+  - canonical_field: turn_id
+    source_field: turn_id
+    source_description: Stable turn id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: turn_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: turn cost anchor
+  - canonical_field: property_id
+    source_field: prop_id
+    source_description: Property FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: property_id IN pms.property.property_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to property
+  - canonical_field: unit_id
+    source_field: unit_id
+    source_description: Unit FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: unit_id IN pms.unit.unit_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to unit
+  - canonical_field: move_out_date
+    source_field: move_out_date
+    source_description: Prior move-out date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: move_out_date <= today
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: make_ready_days start
+  - canonical_field: status
+    source_field: turn_status
+    source_description: Turn status
+    transform_rule: map_turn_status
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: status IN canonical_enum(pms.turn.status)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: turn pipeline position
+  - canonical_field: actual_ready_date
+    source_field: ready_date
+    source_description: Unit declared ready
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: actual_ready_date IS NULL OR actual_ready_date >= move_out_date
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: make_ready_days end
+  - canonical_field: budget_total_cents
+    source_field: budget_usd
+    source_description: Turn budget in dollars
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: budget_total_cents IS NULL OR budget_total_cents >= 0
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: turn cost variance
+  - canonical_field: actual_total_cents
+    source_field: actual_usd
+    source_description: Turn actual in dollars
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: actual_total_cents IS NULL OR actual_total_cents >= 0
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: turn cost variance

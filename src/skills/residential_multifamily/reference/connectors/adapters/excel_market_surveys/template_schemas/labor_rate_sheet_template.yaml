@@ -1,0 +1,62 @@
+# Template schema for labor_rate_quarterly.
+# Aligns with canonical normalized schema at
+# ../../../../normalized/schemas/labor_rate.yaml.
+# High-impact file: reviewer sign-off required (blocker).
+
+status_tag: template
+template_slug: labor_rate_sheet
+canonical_reference_schema: reference/normalized/schemas/labor_rate.yaml
+canonical_ontology_object: labor_rate
+source_format: xlsx
+expected_sheets:
+  - labor_rate_by_trade
+  - prevailing_wage_adjuncts
+  - cover_metadata
+
+sheet_schemas:
+
+  labor_rate_by_trade:
+    columns:
+      - { name: market,      required: true, type: string }
+      - { name: region,      required: false, type: string }
+      - { name: segment,     required: false, type: string, enum: [middle_market, affordable, luxury] }
+      - { name: trade_slug,  required: true, type: string }
+      - { name: labor_tier,  required: true, type: string, enum: [apprentice, journeyman, master, helper, foreman, prevailing_wage] }
+      - { name: rate_type,   required: true, type: string, enum: [hourly_straight, hourly_overtime, flat_trip, daily] }
+      - { name: rate_value,  required: true, type: number }
+      - { name: unit,        required: true, type: string, enum: [dollars_per_hour, dollars_per_trip, dollars_per_day] }
+      - { name: as_of_date,  required: true, type: date }
+
+  prevailing_wage_adjuncts:
+    columns:
+      - { name: market,      required: true, type: string }
+      - { name: trade_slug,  required: true, type: string }
+      - { name: base_rate,   required: true, type: number }
+      - { name: fringe_rate, required: true, type: number }
+      - { name: total_rate,  required: true, type: number }
+      - { name: reference_publication, required: false, type: string }
+      - { name: as_of_date,  required: true, type: date }
+
+  cover_metadata:
+    columns:
+      - { name: sheet_version,      required: true, type: string }
+      - { name: quarter,            required: true, type: string }
+      - { name: analyst_name,       required: true, type: string }
+      - { name: reviewer,           required: true, type: string }
+      - { name: signed_off_date,    required: true, type: date }
+
+validation_rules:
+  - rule_id: lrs_reviewer_signoff_blocker
+    severity: blocker
+    description: labor_rate_sheet is high-impact; cover_metadata.reviewer and signed_off_date mandatory
+  - rule_id: lrs_trade_slug_recognized
+    severity: blocker
+    description: trade_slug in the canonical trade catalog
+  - rule_id: lrs_rate_outlier
+    severity: warning
+    description: rate_value within plausible band per market and trade; see dq_rules.yaml
+  - rule_id: lrs_market_recognized
+    severity: blocker
+    description: market resolves to crosswalk_additions.yaml
+
+allowed_submarkets_reference: reference/connectors/master_data/submarket_crosswalk.yaml

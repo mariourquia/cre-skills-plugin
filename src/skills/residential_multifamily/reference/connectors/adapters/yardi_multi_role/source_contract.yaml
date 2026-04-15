@@ -1,0 +1,501 @@
+# Yardi raw payload shapes per entity, organized by Yardi sub-system.
+# Authoritative once classification_worksheet.md closes.
+#
+# Yardi field names are preserved as they arrive from each sub-system
+# (Voyager SOAP/REST uses lowercase snake_case field names like propid,
+# hunit, hlease, tcode; RentCafe REST uses camelCase mixed with legacy;
+# Data Connect warehouse uses SQL-flavored lowercase). Provenance envelope
+# is appended by the ingestion layer at landing; it is not part of the
+# Yardi payload proper.
+#
+# Sub-systems in scope:
+#   voyager_pms             (residential operational)
+#   voyager_gl              (financial accounting)
+#   voyager_construction_support (limited; Procore usually primary)
+#   rentcafe_leasing        (leasing funnel + prospect portal)
+#   rentcafe_resident_portal (post-move-in resident self-service)
+#   data_connect_warehouse  (replicated reporting warehouse)
+#   report_export_files     (manual Excel / CSV exports from Voyager UI)
+
+status_tag: sample
+
+provenance_envelope:
+  description: |
+    Every raw record at landing carries this envelope. Not part of the
+    Yardi payload; set by the extractor. Source_name declares which
+    sub-system the record came from; source_type declares which canonical
+    domain the adapter is routing the record into for this extract.
+  required:
+    - { field: source_name,       type: string,   note: one of yardi_voyager_stub / yardi_rentcafe_stub / yardi_data_connect_stub / yardi_report_export_stub }
+    - { field: source_type,       type: string,   note: pms / gl / crm / reporting / manual_uploads — determined by classification }
+    - { field: source_sub_system, type: string,   note: voyager_pms / voyager_gl / voyager_construction_support / rentcafe_leasing / rentcafe_resident_portal / data_connect_warehouse / report_export_files }
+    - { field: source_date,       type: date,     note: extract-window as-of date }
+    - { field: extracted_at,      type: datetime, note: extractor run timestamp }
+    - { field: extractor_version, type: string,   note: adapter version }
+    - { field: source_row_id,     type: string,   note: Voyager primary key (propid/hunit/hlease/etc.) preserved as-is }
+
+entities:
+
+  # --- voyager_pms ---
+
+  property:
+    sub_system: voyager_pms
+    endpoint: GET /Voyager/Properties or Data Connect dim_property
+    grain: one record per Voyager propid
+    required_fields:
+      - { name: propid,          type: string,   note: Voyager numeric id, authoritative within Yardi }
+      - { name: scode,           type: string,   note: short property code; operator-meaningful }
+      - { name: property_name,   type: string }
+      - { name: property_type,   type: enum,     values: [residential, commercial, affordable, mixed_use, student, senior] }
+      - { name: legal_entity,    type: string,   note: Yardi entity id; resolves to canonical legal_entity_id via crosswalk }
+      - { name: book_id,         type: string,   note: accrual / cash / tax / budget — declare at extract time }
+      - { name: unit_count,      type: integer }
+      - { name: property_status, type: enum,     values: [active, inactive, historical_only] }
+    optional_fields:
+      - { name: address_line,    type: string,   note: redact before landing per pii policy }
+      - { name: city,            type: string }
+      - { name: state,           type: string }
+      - { name: zip,             type: string }
+      - { name: market_label,    type: string }
+      - { name: submarket_label, type: string }
+      - { name: year_built,      type: integer }
+      - { name: year_renovated,  type: integer }
+      - { name: date_created,    type: datetime }
+      - { name: date_updated,    type: datetime }
+      - { name: t_code,          type: string,   note: property-level t-code reference; overloaded; t_code_decode required }
+
+  building:
+    sub_system: voyager_pms
+    endpoint: GET /Voyager/Buildings or Data Connect dim_building
+    grain: one record per Voyager building
+    required_fields:
+      - { name: propid,          type: string }
+      - { name: building_code,   type: string }
+      - { name: building_label,  type: string }
+      - { name: stories,         type: integer }
+    optional_fields:
+      - { name: unit_count,      type: integer }
+      - { name: nrsf,            type: integer }
+      - { name: year_built,      type: integer }
+
+  unit:
+    sub_system: voyager_pms
+    endpoint: GET /Voyager/Units or Data Connect dim_unit
+    grain: one record per Voyager hunit
+    required_fields:
+      - { name: hunit,           type: string }
+      - { name: propid,          type: string }
+      - { name: unit_code,       type: string,   note: operator-facing unit number }
+      - { name: floorplan,       type: string,   note: fpcode; resolves via unit_type_crosswalk }
+      - { name: bedrooms,        type: integer }
+      - { name: bathrooms,       type: number }
+      - { name: sqft,            type: integer }
+      - { name: unit_status,     type: enum,     values: [occupied, vacant, notice, on_hold, offline, down, model, employee, admin, historical] }
+    optional_fields:
+      - { name: floor,           type: integer }
+      - { name: market_rent,     type: number,   note: USD dollars }
+      - { name: current_lease,   type: string,   note: hlease of current lease }
+      - { name: make_ready_status, type: enum,   values: [not_started, in_progress, punchlist, ready] }
+      - { name: offline_reason,  type: string }
+      - { name: expected_return_date, type: date }
+      - { name: effective_end_date, type: date,  note: null for current unit; set when unit retired post-renovation }
+
+  floor_plan:
+    sub_system: voyager_pms
+    endpoint: GET /Voyager/FloorPlans or Data Connect dim_floorplan
+    grain: one record per (propid, fpcode)
+    required_fields:
+      - { name: fpcode,          type: string }
+      - { name: propid,          type: string }
+      - { name: plan_name,       type: string }
+      - { name: bedrooms,        type: integer }
+      - { name: bathrooms,       type: number }
+      - { name: typical_sqft,    type: integer }
+      - { name: unit_count,      type: integer }
+
+  lease:
+    sub_system: voyager_pms
+    endpoint: GET /Voyager/Leases or Data Connect fact_lease
+    grain: one record per hlease
+    required_fields:
+      - { name: hlease,          type: string }
+      - { name: hten,            type: string,   note: Voyager hten; stable across lease lifecycle }
+      - { name: hunit,           type: string }
+      - { name: propid,          type: string }
+      - { name: tcode,           type: string,   note: t-code lineage; t_code_decode required; same hten may carry multiple t-code generations (applicant -> resident -> past-resident -> collections) }
+      - { name: lease_from,      type: date }
+      - { name: lease_to,        type: date }
+      - { name: monthly_rent,    type: number }
+      - { name: lease_status,    type: enum,     values: [draft, pending, current, future, notice, past, evicted, cancelled, transferred] }
+      - { name: is_renewal,      type: boolean }
+    optional_fields:
+      - { name: term_months,         type: integer }
+      - { name: move_in_date,        type: date }
+      - { name: move_out_date,       type: date }
+      - { name: notice_date,         type: date,   note: NTV receipt date }
+      - { name: security_deposit,    type: number }
+      - { name: prior_hlease,        type: string, note: required when is_renewal = true }
+      - { name: transfer_from_hlease, type: string }
+      - { name: concessions_total,   type: number, note: aggregated from concession-coded charges }
+      - { name: is_corporate_lease,  type: boolean }
+      - { name: effective_end_date,  type: date,   note: used when historical lease references a retired unit structure }
+
+  lease_event:
+    sub_system: voyager_pms
+    endpoint: GET /Voyager/LeaseEvents or derived
+    grain: one record per lifecycle event
+    note: |
+      Voyager surfaces lease_signed, move_in, move_out, renewal_offered,
+      renewal_accepted, renewal_declined, notice_to_vacate, transfer_in,
+      transfer_out, eviction_filed, eviction_judgment, lease_broken,
+      lease_terminated. Legal-notice events are sometimes derived from
+      delinquency stage transitions.
+    required_fields:
+      - { name: event_id,     type: string }
+      - { name: hlease,       type: string }
+      - { name: event_type,   type: enum,     values: [lease_signed, move_in, renewal_offered, renewal_accepted, renewal_declined, notice_to_vacate, late_payment, legal_notice_served, eviction_filed, eviction_judgment, move_out, lease_broken, lease_terminated, skip, transfer_out, transfer_in] }
+      - { name: event_date,   type: date }
+    optional_fields:
+      - { name: event_payload, type: object,   note: event-type-specific fields }
+      - { name: agent_user_id, type: string }
+
+  notice:
+    sub_system: voyager_pms
+    endpoint: GET /Voyager/Notices
+    grain: one record per operator notice (NTV, legal, eviction)
+    required_fields:
+      - { name: notice_id,     type: string }
+      - { name: hlease,        type: string }
+      - { name: notice_type,   type: enum,    values: [ntv_resident, ntv_operator, legal_notice, eviction_filed, eviction_judgment] }
+      - { name: notice_date,   type: date }
+    optional_fields:
+      - { name: notice_reason, type: string }
+      - { name: posted_by,     type: string }
+
+  move_in:
+    sub_system: voyager_pms
+    endpoint: derived from lease_event.move_in
+    grain: one record per move_in occurrence
+    required_fields:
+      - { name: hlease,        type: string }
+      - { name: move_in_date,  type: date }
+    optional_fields:
+      - { name: occupant_count, type: integer }
+      - { name: initial_charges_applied, type: array }
+
+  move_out:
+    sub_system: voyager_pms
+    endpoint: derived from lease_event.move_out
+    grain: one record per move_out occurrence
+    required_fields:
+      - { name: hlease,        type: string }
+      - { name: move_out_date, type: date }
+    optional_fields:
+      - { name: reason_code,   type: string }
+      - { name: final_ledger_balance, type: number }
+
+  resident_account:
+    sub_system: voyager_pms
+    endpoint: GET /Voyager/Tenants
+    grain: one record per hten
+    required_fields:
+      - { name: hten,              type: string }
+      - { name: tcode,             type: string,   note: overloaded — can represent applicant, resident, past-resident, collections; t_code_decode required }
+      - { name: primary_name,      type: string,   note: PII; hash or redact at landing }
+      - { name: resident_status,   type: enum,     values: [applicant, current, notice, past, collections, evicted] }
+      - { name: current_balance,   type: number }
+    optional_fields:
+      - { name: email,             type: string,   note: PII; hash at landing }
+      - { name: phone,             type: string,   note: PII; hash at landing }
+      - { name: move_in_date,      type: date }
+      - { name: move_out_date,     type: date }
+      - { name: current_hlease,    type: string }
+
+  charge:
+    sub_system: voyager_pms
+    endpoint: GET /Voyager/Charges or Data Connect fact_charge
+    grain: one record per posted charge
+    required_fields:
+      - { name: charge_id,     type: string }
+      - { name: hlease,        type: string }
+      - { name: hten,          type: string }
+      - { name: charge_code,   type: string,   note: PROPERTY-SCOPED decode to canonical charge_type; global decode is incorrect }
+      - { name: post_date,     type: date,     note: system post date }
+      - { name: month,         type: string,   note: accrual month (YYYY-MM); primary period attribution }
+      - { name: amount,        type: number }
+    optional_fields:
+      - { name: description,         type: string }
+      - { name: recovery_code,       type: string,   note: commercial / mixed-use recovery fee; residential portfolios usually null }
+      - { name: reversed_charge_id,  type: string,   note: populated on reversals / adjustments }
+      - { name: adjustment_source,   type: enum,    values: [system, manual, concession, reversal_of_posting] }
+      - { name: posted_by_user_id,   type: string }
+
+  payment:
+    sub_system: voyager_pms
+    endpoint: GET /Voyager/Receipts or Data Connect fact_receipt
+    grain: one record per receipt
+    required_fields:
+      - { name: receipt_id,    type: string }
+      - { name: hten,          type: string }
+      - { name: receipt_date,  type: date }
+      - { name: amount,        type: number }
+      - { name: tender,        type: enum,     values: [ach, card, cash, check, money_order, portal, other] }
+    optional_fields:
+      - { name: hlease,             type: string }
+      - { name: applied_to_charges, type: array }
+      - { name: bank_account_id,    type: string }
+      - { name: payment_status,     type: enum,    values: [posted, reversed, nsf, pending] }
+      - { name: post_month,         type: string,   note: accrual month (YYYY-MM); may differ from receipt_date }
+
+  delinquency_case:
+    sub_system: voyager_pms
+    endpoint: GET /Voyager/DelinquencyCases or derived
+    grain: one record per (hten, stage_entered_date)
+    required_fields:
+      - { name: hten,                 type: string }
+      - { name: hlease,               type: string }
+      - { name: stage,                type: enum,     values: [current, one_to_seven, eight_to_thirty, thirty_one_to_sixty, sixty_one_to_ninety, ninety_one_plus, payment_plan, legal_notice, eviction_filed, judgment, write_off] }
+      - { name: stage_entered_date,   type: date }
+      - { name: current_balance,      type: number }
+    optional_fields:
+      - { name: payment_plan_id,      type: string }
+      - { name: last_contact_date,    type: date }
+
+  vendor:
+    sub_system: voyager_pms
+    endpoint: GET /Voyager/Vendors
+    grain: one record per hvendor
+    required_fields:
+      - { name: hvendor,        type: string }
+      - { name: vendor_code,    type: string }
+      - { name: vendor_name,    type: string }
+      - { name: vendor_status,  type: enum,    values: [active, inactive] }
+    optional_fields:
+      - { name: services,             type: array,  note: service category strings }
+      - { name: phone,                type: string, note: redact to hash }
+      - { name: email,                type: string, note: redact to hash }
+      - { name: insurance_expiry_date, type: date }
+      - { name: w9_on_file,           type: boolean }
+      - { name: tax_id_hash,          type: string, note: EIN/SSN hashed at landing; plaintext never persisted }
+      - { name: preferred_flag,       type: boolean }
+
+  work_order:
+    sub_system: voyager_pms
+    endpoint: GET /Voyager/WorkOrders
+    grain: one record per workorder
+    required_fields:
+      - { name: workorder_id,   type: string }
+      - { name: propid,         type: string }
+      - { name: date_created,   type: datetime }
+      - { name: priority,       type: enum,    values: [emergency, high, normal, low, cosmetic] }
+      - { name: wo_status,      type: enum,    values: [new, assigned, in_progress, awaiting_parts, awaiting_vendor, scheduled, completed, closed, deferred, cancelled] }
+    optional_fields:
+      - { name: hunit,          type: string }
+      - { name: category,       type: enum,    values: [plumbing, hvac, electrical, appliance, doors_locks, pest, landscape, general, other] }
+      - { name: date_completed, type: datetime }
+      - { name: assigned_vendor, type: string,  note: hvendor }
+      - { name: assigned_user,   type: string }
+      - { name: description,     type: string, note: free-text; PII redaction on landing }
+      - { name: reported_by,     type: enum,    values: [resident, staff, inspection, preventive_maintenance, system] }
+
+  # --- voyager_gl ---
+
+  account:
+    sub_system: voyager_gl
+    endpoint: GET /Voyager/ChartOfAccounts
+    grain: one record per account_code
+    required_fields:
+      - { name: account_code,   type: string }
+      - { name: account_name,   type: string }
+      - { name: account_type,   type: enum,    values: [asset, liability, equity, revenue, expense] }
+    optional_fields:
+      - { name: is_operating,   type: boolean }
+      - { name: is_capex,       type: boolean }
+      - { name: parent_account, type: string }
+      - { name: roll_up_code,   type: string }
+
+  budget_line:
+    sub_system: voyager_gl
+    endpoint: GET /Voyager/Budgets
+    grain: one record per (propid, account_code, period, budget_version)
+    required_fields:
+      - { name: propid,         type: string }
+      - { name: account_code,   type: string }
+      - { name: period,         type: string,   note: YYYY-MM }
+      - { name: budget_version, type: string,   note: e.g., 2026_v1 }
+      - { name: amount,         type: number }
+
+  actual_line:
+    sub_system: voyager_gl
+    endpoint: GET /Voyager/GLActuals or Data Connect fact_gl_actual
+    grain: one record per (propid, account_code, period, book_id)
+    required_fields:
+      - { name: propid,         type: string }
+      - { name: account_code,   type: string }
+      - { name: period,         type: string,   note: accrual YYYY-MM }
+      - { name: book_id,        type: string,   note: accrual / cash / tax }
+      - { name: amount,         type: number }
+    optional_fields:
+      - { name: post_date,      type: date,     note: system post date; may differ from period }
+      - { name: journal_ref,    type: string }
+
+  forecast_line:
+    sub_system: voyager_gl
+    endpoint: GET /Voyager/Forecasts
+    grain: one record per (propid, account_code, period, forecast_version)
+    required_fields:
+      - { name: propid,           type: string }
+      - { name: account_code,     type: string }
+      - { name: period,           type: string }
+      - { name: forecast_version, type: string }
+      - { name: amount,           type: number }
+
+  # --- voyager_construction_support ---
+
+  job_cost:
+    sub_system: voyager_construction_support
+    endpoint: GET /Voyager/JobCost
+    grain: one record per (propid, job_id, account_code, period)
+    note: |
+      Optional module. Procore is typically primary for capex project
+      scope and commitments; Voyager job cost carries posted job-cost
+      entries only when operator runs Procore-free.
+    required_fields:
+      - { name: propid,         type: string }
+      - { name: job_id,         type: string }
+      - { name: account_code,   type: string }
+      - { name: period,         type: string }
+      - { name: amount,         type: number }
+
+  # --- rentcafe_leasing ---
+
+  lead:
+    sub_system: rentcafe_leasing
+    endpoint: GET /RentCafe/Prospects
+    grain: one record per RentCafe guest
+    required_fields:
+      - { name: guest_id,       type: string }
+      - { name: propid,         type: string }
+      - { name: source_channel, type: string,   note: Zillow, Apartments, Referral, WalkIn, Google, Direct }
+      - { name: inquiry_date,   type: datetime }
+      - { name: pipeline_stage, type: enum,    values: [new, contacted, tour_scheduled, toured, applied, approved, leased, lost, waitlist] }
+    optional_fields:
+      - { name: preferred_bedrooms, type: integer }
+      - { name: move_in_target,     type: date }
+      - { name: assigned_agent,     type: string }
+
+  tour:
+    sub_system: rentcafe_leasing
+    endpoint: GET /RentCafe/Showings
+    grain: one record per scheduled or completed showing
+    required_fields:
+      - { name: tour_id,            type: string }
+      - { name: guest_id,           type: string }
+      - { name: scheduled_at,       type: datetime }
+      - { name: tour_type,          type: enum,    values: [in_person, self_guided, virtual] }
+    optional_fields:
+      - { name: conducted_at,       type: datetime }
+      - { name: outcome,            type: enum,    values: [applied, follow_up, lost, no_show, rescheduled] }
+      - { name: conducted_by,       type: string }
+      - { name: units_shown,        type: array }
+
+  application:
+    sub_system: rentcafe_leasing
+    endpoint: GET /RentCafe/Applications
+    grain: one record per rental application
+    required_fields:
+      - { name: application_id,   type: string }
+      - { name: guest_id,         type: string }
+      - { name: propid,           type: string }
+      - { name: applied_date,     type: date }
+      - { name: app_status,       type: enum,    values: [pending, in_review, approved, approved_with_conditions, declined, withdrawn],  note: field is named `status` in some RentCafe payloads; adapter uses app_status to avoid landing-envelope status key collision }
+    optional_fields:
+      - { name: preferred_hunit,  type: string }
+      - { name: co_applicants,    type: array }
+      - { name: screening_result, type: enum,    values: [pass, conditional, fail, pending] }
+      - { name: decided_date,     type: date }
+      - { name: decided_by,       type: string }
+
+  # --- rentcafe_resident_portal ---
+
+  resident_portal_activity:
+    sub_system: rentcafe_resident_portal
+    endpoint: GET /RentCafe/ResidentActivity
+    grain: one record per portal event
+    note: |
+      Not mapped to a canonical object in this wave. Retained in raw
+      landing for future ontology extension; flagged as
+      requires_canonical_extension.
+    required_fields:
+      - { name: event_id,       type: string }
+      - { name: hten,           type: string }
+      - { name: event_type,     type: enum,    values: [login, payment_posted, work_order_submitted, message_sent, document_viewed] }
+      - { name: event_at,       type: datetime }
+
+  # --- data_connect_warehouse ---
+
+  dc_fact_charge:
+    sub_system: data_connect_warehouse
+    endpoint: SELECT FROM dc.fact_charge
+    grain: one record per posted charge (replicated)
+    note: |
+      Same grain as voyager_pms.charge but replicated through Data
+      Connect. Latency per source_registry. Use for reporting-domain
+      reconciliation.
+    required_fields:
+      - { name: charge_id,      type: string }
+      - { name: propid,         type: string }
+      - { name: hlease,         type: string }
+      - { name: hten,           type: string }
+      - { name: charge_code,    type: string }
+      - { name: post_date,      type: date }
+      - { name: month,          type: string }
+      - { name: amount,         type: number }
+
+  dc_fact_gl_actual:
+    sub_system: data_connect_warehouse
+    endpoint: SELECT FROM dc.fact_gl_actual
+    grain: one record per posted GL entry (replicated)
+    required_fields:
+      - { name: propid,         type: string }
+      - { name: account_code,   type: string }
+      - { name: period,         type: string }
+      - { name: book_id,        type: string }
+      - { name: amount,         type: number }
+
+  dc_dim_unit_effective:
+    sub_system: data_connect_warehouse
+    endpoint: SELECT FROM dc.dim_unit_effective
+    grain: one record per (hunit, effective_start_date)
+    note: |
+      Effective-dated unit structure. Resolves historical-lease to
+      current-unit joins when unit structure changes (split, combine,
+      reclass).
+    required_fields:
+      - { name: hunit,                type: string }
+      - { name: propid,               type: string }
+      - { name: effective_start_date, type: date }
+      - { name: effective_end_date,   type: date }
+      - { name: unit_code,            type: string }
+      - { name: sqft,                 type: integer }
+
+  # --- report_export_files ---
+
+  report_export_record:
+    sub_system: report_export_files
+    endpoint: manual upload (Excel / CSV)
+    grain: one row per report-template record
+    note: |
+      Yardi report exports bind to column labels that change with
+      template edits. Adapter reads via a registered column_map per
+      report template under master_data/report_export_templates. Records
+      without a registered template map are rejected per rule
+      yd_conformance_report_columns.
+    required_fields:
+      - { name: template_id,      type: string,   note: must resolve in master_data/report_export_templates }
+      - { name: as_of_date,       type: date,     note: from inside the file, not file_received_at }
+      - { name: propid,           type: string }
+      - { name: record_payload,   type: object,   note: column_map decoded shape }
+    optional_fields:
+      - { name: report_run_id,    type: string }
+      - { name: submitted_by,     type: string }

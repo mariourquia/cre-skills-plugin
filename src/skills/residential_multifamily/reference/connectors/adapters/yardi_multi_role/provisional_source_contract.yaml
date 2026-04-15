@@ -1,0 +1,297 @@
+# Provisional source contract for Yardi.
+# Non-destructive placeholder. Every field is marked `provisional: true`
+# and every object carries `requires_classification: true`. Until
+# classification_worksheet.md closes, no shape is committed to. The
+# authoritative contract lives in source_contract.yaml (populated once
+# Dimension 1+2 of the worksheet close).
+#
+# This file exists so the adapter directory is never empty and downstream
+# harnesses can reason about a placeholder target. It does NOT claim
+# source-of-truth for any canonical object.
+
+status_tag: stub
+schema_version: "0.0.1-provisional"
+classification_status: pending
+
+provenance_envelope_required:
+  - source_name: yardi_multi_role_stub
+  - source_type: pms            # provisional; may become gl / crm / reporting post-classification
+  - source_date: iso_date_required
+  - extracted_at: iso_datetime_required
+  - extractor_version: "0.0.0-stub"
+  - source_row_id: string_required
+
+entities:
+
+  property:
+    requires_classification: true
+    description: placeholder; resolves to canonical Property once classification closes
+    grain_hypothesis: one_record_per_voyager_propid
+    identity_hypothesis: propid
+    field_placeholders:
+      - { name: propid,         type_hypothesis: string,   provisional: true, description: voyager propid }
+      - { name: scode,          type_hypothesis: string,   provisional: true, description: voyager short property code }
+      - { name: property_name,  type_hypothesis: string,   provisional: true
+                                                           }
+      - { name: legal_entity,   type_hypothesis: string,   provisional: true, description: Yardi entity id; resolves to canonical legal_entity_id via crosswalk }
+      - { name: book_id,        type_hypothesis: string,   provisional: true, description: accrual / cash / tax / budget book label }
+    source_of_truth_claim: none_until_classified
+    reconciliation_with_other_sources: deferred_until_classified
+
+  building:
+    requires_classification: true
+    grain_hypothesis: one_record_per_voyager_building
+    identity_hypothesis: (propid, building_code)
+    field_placeholders:
+      - { name: propid,         type_hypothesis: string,   provisional: true }
+      - { name: building_code,  type_hypothesis: string,   provisional: true }
+      - { name: building_label, type_hypothesis: string,   provisional: true }
+    source_of_truth_claim: none_until_classified
+
+  unit:
+    requires_classification: true
+    grain_hypothesis: one_record_per_voyager_unit
+    identity_hypothesis: hunit
+    field_placeholders:
+      - { name: hunit,          type_hypothesis: string,   provisional: true }
+      - { name: propid,         type_hypothesis: string,   provisional: true }
+      - { name: unit_code,      type_hypothesis: string,   provisional: true }
+      - { name: floorplan,      type_hypothesis: string,   provisional: true }
+      - { name: bedrooms,       type_hypothesis: integer,  provisional: true }
+      - { name: bathrooms,      type_hypothesis: number,   provisional: true }
+      - { name: sqft,           type_hypothesis: integer,  provisional: true }
+      - { name: unit_status,    type_hypothesis: enum,     provisional: true }
+    source_of_truth_claim: none_until_classified
+
+  floor_plan:
+    requires_classification: true
+    grain_hypothesis: one_record_per_voyager_floorplan
+    identity_hypothesis: (propid, fpcode)
+    field_placeholders:
+      - { name: fpcode,         type_hypothesis: string,   provisional: true }
+      - { name: propid,         type_hypothesis: string,   provisional: true }
+      - { name: bedrooms,       type_hypothesis: integer,  provisional: true }
+      - { name: bathrooms,      type_hypothesis: number,   provisional: true }
+      - { name: typical_sqft,   type_hypothesis: integer,  provisional: true }
+    source_of_truth_claim: none_until_classified
+
+  lead:
+    requires_classification: true
+    access_blocked_until_rentcafe_scope_confirmed: true
+    grain_hypothesis: one_record_per_rentcafe_guest
+    identity_hypothesis: guest_id
+    field_placeholders:
+      - { name: guest_id,       type_hypothesis: string,   provisional: true }
+      - { name: propid,         type_hypothesis: string,   provisional: true }
+      - { name: source_channel, type_hypothesis: string,   provisional: true }
+      - { name: inquiry_date,   type_hypothesis: iso_date, provisional: true }
+      - { name: pipeline_stage, type_hypothesis: enum,     provisional: true }
+    source_of_truth_claim: none_until_classified
+
+  tour:
+    requires_classification: true
+    access_blocked_until_rentcafe_scope_confirmed: true
+    grain_hypothesis: one_record_per_rentcafe_showing
+    identity_hypothesis: tour_id
+    field_placeholders:
+      - { name: tour_id,        type_hypothesis: string,   provisional: true }
+      - { name: guest_id,       type_hypothesis: string,   provisional: true }
+      - { name: scheduled_at,   type_hypothesis: iso_datetime, provisional: true }
+      - { name: tour_type,      type_hypothesis: enum,     provisional: true }
+    source_of_truth_claim: none_until_classified
+
+  application:
+    requires_classification: true
+    access_blocked_until_rentcafe_scope_confirmed: true
+    grain_hypothesis: one_record_per_rentcafe_application
+    identity_hypothesis: application_id
+    field_placeholders:
+      - { name: application_id, type_hypothesis: string,   provisional: true }
+      - { name: guest_id,       type_hypothesis: string,   provisional: true }
+      - { name: propid,         type_hypothesis: string,   provisional: true }
+      - { name: applied_date,   type_hypothesis: iso_date, provisional: true }
+      - { name: status,         type_hypothesis: enum,     provisional: true }
+    source_of_truth_claim: none_until_classified
+
+  approval_outcome:
+    requires_classification: true
+    access_blocked_until_rentcafe_scope_confirmed: true
+    grain_hypothesis: one_record_per_application_decision
+    identity_hypothesis: application_id + decision_date
+    field_placeholders:
+      - { name: application_id, type_hypothesis: string,   provisional: true }
+      - { name: decision,       type_hypothesis: enum,     provisional: true }
+      - { name: decision_date,  type_hypothesis: iso_date, provisional: true }
+      - { name: policy_ref,     type_hypothesis: string,   provisional: true }
+    source_of_truth_claim: none_until_classified
+
+  resident_account:
+    requires_classification: true
+    grain_hypothesis: one_record_per_voyager_tcode_lineage
+    identity_hypothesis: hten + tcode_decoded
+    field_placeholders:
+      - { name: hten,              type_hypothesis: string,   provisional: true }
+      - { name: tcode,             type_hypothesis: string,   provisional: true, description: overloaded; always t_code_decode before use }
+      - { name: resident_status,   type_hypothesis: enum,     provisional: true }
+      - { name: current_balance,   type_hypothesis: number,   provisional: true }
+    source_of_truth_claim: none_until_classified
+
+  lease:
+    requires_classification: true
+    grain_hypothesis: one_record_per_voyager_lease
+    identity_hypothesis: hlease
+    field_placeholders:
+      - { name: hlease,         type_hypothesis: string,   provisional: true }
+      - { name: hten,           type_hypothesis: string,   provisional: true }
+      - { name: hunit,          type_hypothesis: string,   provisional: true }
+      - { name: lease_from,     type_hypothesis: iso_date, provisional: true }
+      - { name: lease_to,       type_hypothesis: iso_date, provisional: true }
+      - { name: monthly_rent,   type_hypothesis: number,   provisional: true }
+      - { name: status,         type_hypothesis: enum,     provisional: true }
+    source_of_truth_claim: none_until_classified
+
+  lease_event:
+    requires_classification: true
+    grain_hypothesis: one_record_per_lifecycle_event
+    identity_hypothesis: event_id
+    field_placeholders:
+      - { name: event_id,       type_hypothesis: string,   provisional: true }
+      - { name: hlease,         type_hypothesis: string,   provisional: true }
+      - { name: event_type,     type_hypothesis: enum,     provisional: true }
+      - { name: event_date,     type_hypothesis: iso_date, provisional: true }
+    source_of_truth_claim: none_until_classified
+
+  notice:
+    requires_classification: true
+    grain_hypothesis: one_record_per_ntv_or_legal_notice
+    identity_hypothesis: notice_id
+    field_placeholders:
+      - { name: notice_id,      type_hypothesis: string,   provisional: true }
+      - { name: hlease,         type_hypothesis: string,   provisional: true }
+      - { name: notice_type,    type_hypothesis: enum,     provisional: true }
+      - { name: notice_date,    type_hypothesis: iso_date, provisional: true }
+    source_of_truth_claim: none_until_classified
+
+  move_in:
+    requires_classification: true
+    grain_hypothesis: one_record_per_move_in_event
+    identity_hypothesis: hlease + move_in_date
+    field_placeholders:
+      - { name: hlease,         type_hypothesis: string,   provisional: true }
+      - { name: move_in_date,   type_hypothesis: iso_date, provisional: true }
+    source_of_truth_claim: none_until_classified
+
+  move_out:
+    requires_classification: true
+    grain_hypothesis: one_record_per_move_out_event
+    identity_hypothesis: hlease + move_out_date
+    field_placeholders:
+      - { name: hlease,         type_hypothesis: string,   provisional: true }
+      - { name: move_out_date,  type_hypothesis: iso_date, provisional: true }
+      - { name: reason_code,    type_hypothesis: string,   provisional: true }
+    source_of_truth_claim: none_until_classified
+
+  charge:
+    requires_classification: true
+    grain_hypothesis: one_record_per_ledger_charge
+    identity_hypothesis: charge_id
+    field_placeholders:
+      - { name: charge_id,      type_hypothesis: string,   provisional: true }
+      - { name: hlease,         type_hypothesis: string,   provisional: true }
+      - { name: hten,           type_hypothesis: string,   provisional: true }
+      - { name: charge_code,    type_hypothesis: string,   provisional: true, description: property-scoped decode required }
+      - { name: post_date,      type_hypothesis: iso_date, provisional: true }
+      - { name: month,          type_hypothesis: iso_month, provisional: true, description: accrual-month }
+      - { name: amount,         type_hypothesis: number,   provisional: true }
+    source_of_truth_claim: none_until_classified
+
+  payment:
+    requires_classification: true
+    grain_hypothesis: one_record_per_ledger_receipt
+    identity_hypothesis: receipt_id
+    field_placeholders:
+      - { name: receipt_id,     type_hypothesis: string,   provisional: true }
+      - { name: hten,           type_hypothesis: string,   provisional: true }
+      - { name: receipt_date,   type_hypothesis: iso_date, provisional: true }
+      - { name: amount,         type_hypothesis: number,   provisional: true }
+      - { name: tender,         type_hypothesis: enum,     provisional: true }
+    source_of_truth_claim: none_until_classified
+
+  delinquency_case:
+    requires_classification: true
+    grain_hypothesis: one_record_per_delinquency_stage_entry
+    identity_hypothesis: hten + stage_entered_date
+    field_placeholders:
+      - { name: hten,                  type_hypothesis: string,   provisional: true }
+      - { name: stage,                 type_hypothesis: enum,     provisional: true }
+      - { name: stage_entered_date,    type_hypothesis: iso_date, provisional: true }
+    source_of_truth_claim: none_until_classified
+
+  vendor:
+    requires_classification: true
+    grain_hypothesis: one_record_per_voyager_vendor
+    identity_hypothesis: hvendor
+    field_placeholders:
+      - { name: hvendor,        type_hypothesis: string,   provisional: true }
+      - { name: vendor_code,    type_hypothesis: string,   provisional: true }
+      - { name: vendor_name,    type_hypothesis: string,   provisional: true }
+    source_of_truth_claim: none_until_classified
+
+  work_order:
+    requires_classification: true
+    grain_hypothesis: one_record_per_voyager_workorder
+    identity_hypothesis: workorder_id
+    field_placeholders:
+      - { name: workorder_id,   type_hypothesis: string,   provisional: true }
+      - { name: propid,         type_hypothesis: string,   provisional: true }
+      - { name: priority,       type_hypothesis: enum,     provisional: true }
+      - { name: status,         type_hypothesis: enum,     provisional: true }
+    source_of_truth_claim: none_until_classified
+
+  budget_line:
+    requires_classification: true
+    grain_hypothesis: one_record_per_budget_account_per_period
+    identity_hypothesis: (propid, account_code, period, budget_version)
+    field_placeholders:
+      - { name: propid,         type_hypothesis: string,   provisional: true }
+      - { name: account_code,   type_hypothesis: string,   provisional: true }
+      - { name: period,         type_hypothesis: iso_month, provisional: true }
+      - { name: budget_version, type_hypothesis: string,   provisional: true }
+      - { name: amount,         type_hypothesis: number,   provisional: true }
+    source_of_truth_claim: none_until_classified
+
+  actual_line:
+    requires_classification: true
+    grain_hypothesis: one_record_per_gl_posted_amount_per_period
+    identity_hypothesis: (propid, account_code, period, book_id)
+    field_placeholders:
+      - { name: propid,         type_hypothesis: string,   provisional: true }
+      - { name: account_code,   type_hypothesis: string,   provisional: true }
+      - { name: period,         type_hypothesis: iso_month, provisional: true }
+      - { name: book_id,        type_hypothesis: string,   provisional: true }
+      - { name: amount,         type_hypothesis: number,   provisional: true }
+    source_of_truth_claim: none_until_classified
+
+  forecast_line:
+    requires_classification: true
+    grain_hypothesis: one_record_per_forecast_account_per_period
+    identity_hypothesis: (propid, account_code, period, forecast_version)
+    field_placeholders:
+      - { name: propid,           type_hypothesis: string,   provisional: true }
+      - { name: account_code,     type_hypothesis: string,   provisional: true }
+      - { name: period,           type_hypothesis: iso_month, provisional: true }
+      - { name: forecast_version, type_hypothesis: string,   provisional: true }
+      - { name: amount,           type_hypothesis: number,   provisional: true }
+    source_of_truth_claim: none_until_classified
+
+non_contract_notes:
+  - This file is a placeholder, not a source contract in the canonical
+    sense of reference/connectors/<domain>/sample_input.json. It is a
+    sketch held in place so the adapter directory is not empty.
+  - The authoritative contract lives in source_contract.yaml once
+    classification_worksheet.md closes. Fields in this file may be
+    renamed or removed without a schema change to the canonical
+    subsystem; none are canonical.
+  - Object families flagged `access_blocked_until_rentcafe_scope_confirmed`
+    are held in quarantine until Dimension 2c closes. Existing rows are
+    not surfaced to downstream workflows.

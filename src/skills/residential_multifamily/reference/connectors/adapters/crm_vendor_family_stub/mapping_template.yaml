@@ -1,0 +1,42 @@
+# Mapping template for the generic CRM vendor family stub.
+# Applied on top of reference/connectors/crm/mapping.yaml.
+
+status_tag: template
+
+lead:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [property_id, contact_email_hash, inquiry_date]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: lead_id,         normalized_column: lead_id,          transform: trim_string,          required: true }
+    - { source_column: prop_code,        normalized_column: property_id,      transform: trim_string,          required: true }
+    - { source_column: source_channel,   normalized_column: source_channel,   transform: map_lead_source,      required: true }
+    - { source_column: campaign,         normalized_column: campaign_id,      transform: trim_string,          required: false }
+    - { source_column: inquiry_date,     normalized_column: inquiry_date,     transform: to_iso_date,          required: true }
+    - { source_column: stage,            normalized_column: pipeline_stage,   transform: map_pipeline_stage,   required: true }
+    - { source_column: tz,               normalized_column: event_timezone,   transform: trim_string,          required: false }
+
+tour:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [tour_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: tour_id,         normalized_column: tour_id,          transform: trim_string,         required: true }
+    - { source_column: lead_id,         normalized_column: lead_id,          transform: trim_string,         required: true }
+    - { source_column: tour_date,       normalized_column: scheduled_date,   transform: to_iso_date,         required: true }
+    - { source_column: tour_type,       normalized_column: tour_type,        transform: map_tour_type,       required: true }
+    - { source_column: tour_outcome,    normalized_column: outcome,          transform: map_tour_outcome,    required: true }
+    - { source_column: tz,              normalized_column: event_timezone,   transform: trim_string,         required: false }
+
+application:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [application_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: application_id,  normalized_column: application_id,   transform: trim_string,       required: true }
+    - { source_column: lead_id,         normalized_column: lead_id,          transform: trim_string,       required: true }
+    - { source_column: applied_date,    normalized_column: applied_date,     transform: to_iso_date,       required: true }
+    - { source_column: approval_status, normalized_column: approval_status,  transform: map_approval_status, required: true }

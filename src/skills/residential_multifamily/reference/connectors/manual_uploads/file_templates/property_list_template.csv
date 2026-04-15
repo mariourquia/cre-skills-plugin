@@ -1,0 +1,5 @@
+property_id,property_name,market,unit_count,submarket,entity_id,status
+sample_property_one,Sample Property One,sample_market,200,sample_submarket,entity_sample_001,active
+sample_property_two,Sample Property Two,sample_market,150,sample_submarket,entity_sample_002,active
+# status: template
+# schema: reference/connectors/manual_uploads/schema.yaml entities.property_list

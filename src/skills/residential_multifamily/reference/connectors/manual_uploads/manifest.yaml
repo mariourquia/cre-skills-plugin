@@ -1,0 +1,60 @@
+# Manual Uploads connector manifest (vendor-neutral stub).
+# Conforms to reference/connectors/_schema/connector_manifest.schema.yaml.
+#
+# Authoring notes (kept inside description because manifest schema forbids
+# additional top-level properties):
+#   - rollout_wave: 2. First-class citizen connector, not an afterthought.
+#   - connector_kind is constrained to the enum
+#     [pms, gl, crm, ap, market_data, construction]. The dominant template
+#     family in this connector is financial (budget, forecast, owner report,
+#     property list, staffing model, monthly review pack), so `gl` is the
+#     closest semantic fit. Flag: if a future schema revision adds a
+#     `manual_uploads` or `intake` kind, update this manifest.
+#   - auth_kind: none because this connector runs on operator-dropped
+#     files; access_pattern: manual_upload.
+#   - vendor_neutral: no vendor code, no credentials, no live hostnames.
+connector_id: manual_uploads
+connector_kind: manual_uploads
+version: 0.1.0
+status: stub
+owner: residential_multifamily_subsystem
+vendor_neutral: true
+description: |
+  Manual / document / file-drop connector. First-class intake for operators
+  that lack full API access to a PMS, GL, or AP system, or for artifacts
+  that simply do not exist as system feeds (bid tabs, rent surveys, draw
+  packages, approval matrices, monthly review packs). Every supported
+  template has a schema, a field mapping, and a placeholder template file
+  under file_templates/. Rollout wave 2.
+entities:
+  - budget_file
+  - forecast_file
+  - owner_report
+  - vendor_bid_tab
+  - rent_survey
+  - market_comp_sheet
+  - approval_matrix_upload
+  - property_list
+  - staffing_model_upload
+  - capex_request_upload
+  - draw_package_upload
+  - monthly_review_pack
+  - delinquency_report_upload
+  - work_order_backlog_upload
+  - pm_scorecard_upload
+provenance_fields_required:
+  - source_name
+  - source_type
+  - source_date
+  - extracted_at
+  - extractor_version
+  - source_row_id
+handshake:
+  auth_kind: none
+  access_pattern: manual_upload
+  notes: |
+    Stub. Operator-driven file drops. Cadence is on-demand per template
+    (monthly for owner_report, monthly_review_pack, pm_scorecard_upload;
+    annual for budget_file; per-event for vendor_bid_tab, capex_request_upload,
+    draw_package_upload). Rollout wave 2.
+contact: operator_placeholder

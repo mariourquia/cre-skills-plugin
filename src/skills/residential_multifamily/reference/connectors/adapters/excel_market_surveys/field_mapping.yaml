@@ -1,0 +1,210 @@
+# Per-template-schema field map from Excel column labels to canonical
+# normalized fields. Applied on top of ../../market_data/mapping.yaml (and,
+# for manual-upload provenance, ../../manual_uploads/mapping.yaml). Canonical
+# mapping wins on any conflict. Every row carries transform_hint and
+# as_of_required.
+
+status_tag: template
+
+global_provenance:
+  - { source_field: source_file,   target_field: source_name,       transform: passthrough,           required: true,  as_of_required: false }
+  - { source_field: sheet_tab,     target_field: source_tab,        transform: passthrough,           required: true,  as_of_required: false }
+  - { source_field: as_of,         target_field: as_of_date,        transform: to_iso_date,           required: true,  as_of_required: true }
+  - { source_field: as_of_date,    target_field: as_of_date,        transform: to_iso_date,           required: true,  as_of_required: true }
+  - { source_field: analyst_name,  target_field: proposed_by,       transform: trim_string,           required: true,  as_of_required: false }
+  - { source_field: reviewer,      target_field: reviewed_by,       transform: trim_string,           required: false, as_of_required: false }
+  - { source_field: row_id,        target_field: source_row_id,     transform: passthrough,           required: true,  as_of_required: false }
+  - { source_field: source,        target_field: source_citation,   transform: trim_string,           required: true,  as_of_required: false }
+  - { source_field: source_basis,  target_field: source_basis,      transform: map_source_basis,      required: true,  as_of_required: false }
+
+template_schemas:
+
+  rent_comp_template:
+    canonical_object: MarketComp
+    mappings:
+      - { source_field: comp_id,                     target_field: reference_id,         transform_hint: passthrough_with_namespace, required: true,  as_of_required: true }
+      - { source_field: comp_property_name,          target_field: comp_property_name,   transform_hint: trim_string,                required: true,  as_of_required: true }
+      - { source_field: market,                      target_field: scope.market,         transform_hint: crosswalk_lookup,           required: true,  as_of_required: true }
+      - { source_field: submarket,                   target_field: scope.submarket,      transform_hint: crosswalk_lookup,           required: true,  as_of_required: true }
+      - { source_field: segment,                     target_field: scope.segment,        transform_hint: map_segment,                required: true,  as_of_required: true }
+      - { source_field: property_form,               target_field: scope.property_form,  transform_hint: map_property_form,          required: true,  as_of_required: true }
+      - { source_field: unit_type_label,             target_field: unit_type_label,      transform_hint: trim_string,                required: true,  as_of_required: true }
+      - { source_field: unit_beds,                   target_field: unit_beds,            transform_hint: to_integer,                 required: true,  as_of_required: true }
+      - { source_field: unit_baths,                  target_field: unit_baths,           transform_hint: to_number,                  required: false, as_of_required: true }
+      - { source_field: unit_sf,                     target_field: unit_sf,              transform_hint: to_integer,                 required: false, as_of_required: true }
+      - { source_field: asking_rent,                 target_field: asking_rent,          transform_hint: to_number,                  required: true,  as_of_required: true }
+      - { source_field: effective_rent,              target_field: effective_rent,       transform_hint: to_number,                  required: false, as_of_required: true }
+      - { source_field: concession_months_equivalent, target_field: concession_months,   transform_hint: to_number,                  required: false, as_of_required: true }
+      - { source_field: occupancy_reported,          target_field: occupancy_reported,   transform_hint: percent_to_decimal,         required: false, as_of_required: true }
+      - { source_field: distance_miles,              target_field: distance_miles,       transform_hint: to_number,                  required: false, as_of_required: true }
+
+  concession_tracker_template:
+    canonical_object: ConcessionBenchmark
+    mappings:
+      - { source_field: row_id,                     target_field: reference_id,                transform_hint: passthrough_with_namespace, required: true,  as_of_required: true }
+      - { source_field: market,                     target_field: scope.market,                transform_hint: crosswalk_lookup,           required: true,  as_of_required: true }
+      - { source_field: submarket,                  target_field: scope.submarket,             transform_hint: crosswalk_lookup,           required: true,  as_of_required: true }
+      - { source_field: segment,                    target_field: scope.segment,               transform_hint: map_segment,                required: true,  as_of_required: true }
+      - { source_field: property_form,              target_field: scope.property_form,         transform_hint: map_property_form,          required: true,  as_of_required: true }
+      - { source_field: lifecycle_stage,            target_field: scope.lifecycle_stage,       transform_hint: map_lifecycle_stage,        required: false, as_of_required: true }
+      - { source_field: lease_term_months,          target_field: lease_term_months,           transform_hint: to_integer,                 required: true,  as_of_required: true }
+      - { source_field: concession_months_offered,  target_field: concession_months_offered,   transform_hint: to_number,                  required: true,  as_of_required: true }
+      - { source_field: pct_comps_offering,         target_field: pct_comps_offering,          transform_hint: percent_to_decimal,         required: false, as_of_required: true }
+      - { source_field: avg_concession_dollars,     target_field: avg_concession_dollars,      transform_hint: to_number,                  required: false, as_of_required: true }
+      - { source_field: new_lease_trade_out_avg,    target_field: new_lease_trade_out_avg,     transform_hint: percent_to_decimal,         required: false, as_of_required: true }
+
+  market_survey_workbook_template:
+    canonical_object: RentBenchmark_plus_OccupancyBenchmark_plus_ConcessionBenchmark
+    mappings:
+      - { source_field: market,                     target_field: scope.market,                transform_hint: crosswalk_lookup,           required: true,  as_of_required: true }
+      - { source_field: submarket,                  target_field: scope.submarket,             transform_hint: crosswalk_lookup,           required: true,  as_of_required: true }
+      - { source_field: segment,                    target_field: scope.segment,               transform_hint: map_segment,                required: true,  as_of_required: true }
+      - { source_field: property_form,              target_field: scope.property_form,         transform_hint: map_property_form,          required: true,  as_of_required: true }
+      - { source_field: unit_type_label,            target_field: unit_type_label,             transform_hint: trim_string,                required: true,  as_of_required: true }
+      - { source_field: unit_beds,                  target_field: unit_beds,                   transform_hint: to_integer,                 required: true,  as_of_required: true }
+      - { source_field: avg_asking_rent,            target_field: value,                       transform_hint: to_number,                  required: true,  as_of_required: true }
+      - { source_field: rent_per_sf,                target_field: rent_per_sf,                 transform_hint: to_number,                  required: false, as_of_required: true }
+      - { source_field: metric_slug,                target_field: metric_slug,                 transform_hint: map_metric_slug,            required: true,  as_of_required: true }
+      - { source_field: value,                      target_field: value,                       transform_hint: to_number,                  required: true,  as_of_required: true }
+      - { source_field: band_low,                   target_field: band_low,                    transform_hint: to_number,                  required: false, as_of_required: true }
+      - { source_field: band_high,                  target_field: band_high,                   transform_hint: to_number,                  required: false, as_of_required: true }
+      - { source_field: peer_median,                target_field: peer_median,                 transform_hint: to_number,                  required: false, as_of_required: true }
+
+  analyst_benchmark_pack_template:
+    canonical_object: RentBenchmark_plus_OccupancyBenchmark_plus_ConcessionBenchmark
+    mappings:
+      - { source_field: market,                     target_field: scope.market,                transform_hint: crosswalk_lookup,           required: true,  as_of_required: true }
+      - { source_field: submarket,                  target_field: scope.submarket,             transform_hint: crosswalk_lookup,           required: false, as_of_required: true }
+      - { source_field: segment,                    target_field: scope.segment,               transform_hint: map_segment,                required: true,  as_of_required: true }
+      - { source_field: property_form,              target_field: scope.property_form,         transform_hint: map_property_form,          required: true,  as_of_required: true }
+      - { source_field: property_class,             target_field: scope.property_class,        transform_hint: map_property_class,         required: false, as_of_required: true }
+      - { source_field: unit_type_label,            target_field: unit_type_label,             transform_hint: trim_string,                required: true,  as_of_required: true }
+      - { source_field: unit_beds,                  target_field: unit_beds,                   transform_hint: to_integer,                 required: true,  as_of_required: true }
+      - { source_field: unit_baths,                 target_field: unit_baths,                  transform_hint: to_number,                  required: false, as_of_required: true }
+      - { source_field: unit_sf_avg,                target_field: unit_sf_avg,                 transform_hint: to_integer,                 required: false, as_of_required: true }
+      - { source_field: avg_rent,                   target_field: value,                       transform_hint: to_number,                  required: true,  as_of_required: true }
+      - { source_field: rent_per_sf,                target_field: rent_per_sf,                 transform_hint: to_number,                  required: false, as_of_required: true }
+      - { source_field: sample_size_properties,     target_field: sample_size_properties,      transform_hint: to_integer,                 required: false, as_of_required: true }
+      - { source_field: trailing_3mo_change_pct,    target_field: trailing_3mo_change_pct,     transform_hint: percent_to_decimal,         required: false, as_of_required: true }
+      - { source_field: confidence,                 target_field: confidence,                  transform_hint: map_confidence,             required: true,  as_of_required: true }
+
+  staffing_benchmark_template:
+    canonical_object: StaffingBenchmark
+    mappings:
+      - { source_field: market,             target_field: scope.market,            transform_hint: crosswalk_lookup,    required: false, as_of_required: true }
+      - { source_field: segment,            target_field: scope.segment,           transform_hint: map_segment,         required: true,  as_of_required: true }
+      - { source_field: property_form,      target_field: scope.property_form,     transform_hint: map_property_form,   required: true,  as_of_required: true }
+      - { source_field: management_mode,    target_field: scope.management_mode,   transform_hint: map_management_mode, required: true,  as_of_required: true }
+      - { source_field: role_slug,          target_field: role_slug,               transform_hint: map_role_slug,       required: true,  as_of_required: true }
+      - { source_field: property_size_band, target_field: scope.property_size_band, transform_hint: map_size_band,      required: true,  as_of_required: true }
+      - { source_field: fte_count,          target_field: value,                   transform_hint: to_number,           required: true,  as_of_required: true }
+      - { source_field: units_per_fte,      target_field: units_per_fte,           transform_hint: to_number,           required: false, as_of_required: true }
+      - { source_field: unit,               target_field: unit,                    transform_hint: trim_string,         required: true,  as_of_required: true }
+
+  labor_rate_sheet_template:
+    canonical_object: LaborRateReference
+    mappings:
+      - { source_field: market,        target_field: scope.market,       transform_hint: crosswalk_lookup, required: true,  as_of_required: true }
+      - { source_field: region,        target_field: scope.region,       transform_hint: crosswalk_lookup, required: false, as_of_required: true }
+      - { source_field: segment,       target_field: scope.segment,      transform_hint: map_segment,      required: false, as_of_required: true }
+      - { source_field: trade_slug,    target_field: trade_slug,         transform_hint: map_trade_slug,   required: true,  as_of_required: true }
+      - { source_field: labor_tier,    target_field: labor_tier,         transform_hint: map_labor_tier,   required: true,  as_of_required: true }
+      - { source_field: rate_type,     target_field: rate_type,          transform_hint: map_rate_type,    required: true,  as_of_required: true }
+      - { source_field: rate_value,    target_field: value,              transform_hint: to_number,        required: true,  as_of_required: true }
+      - { source_field: unit,          target_field: unit,               transform_hint: trim_string,      required: true,  as_of_required: true }
+
+  material_price_sheet_template:
+    canonical_object: MaterialCostReference
+    mappings:
+      - { source_field: region,             target_field: scope.region,        transform_hint: crosswalk_lookup,   required: true,  as_of_required: true }
+      - { source_field: market,             target_field: scope.market,        transform_hint: crosswalk_lookup,   required: false, as_of_required: true }
+      - { source_field: segment,            target_field: scope.segment,       transform_hint: map_segment,        required: false, as_of_required: true }
+      - { source_field: sku_tier,           target_field: scope.sku_tier,      transform_hint: map_sku_tier,       required: false, as_of_required: true }
+      - { source_field: material_slug,      target_field: material_slug,       transform_hint: map_material_slug,  required: true,  as_of_required: true }
+      - { source_field: material_category,  target_field: material_category,   transform_hint: map_material_cat,   required: true,  as_of_required: true }
+      - { source_field: unit,               target_field: unit,                transform_hint: trim_string,        required: true,  as_of_required: true }
+      - { source_field: value,              target_field: value,               transform_hint: to_number,          required: true,  as_of_required: true }
+      - { source_field: trailing_12mo_change_pct, target_field: trailing_12mo_change_pct, transform_hint: percent_to_decimal, required: false, as_of_required: true }
+
+  vendor_rate_card:
+    canonical_object: VendorRate
+    mappings:
+      - { source_field: vendor_id,         target_field: vendor_id,            transform_hint: crosswalk_lookup,     required: true,  as_of_required: true }
+      - { source_field: vendor_name,       target_field: vendor_name,          transform_hint: trim_string,          required: true,  as_of_required: true }
+      - { source_field: service,           target_field: service_slug,         transform_hint: map_service_slug,     required: true,  as_of_required: true }
+      - { source_field: service_category,  target_field: service_category,     transform_hint: map_service_category, required: true,  as_of_required: true }
+      - { source_field: unit_basis,        target_field: unit,                 transform_hint: map_unit_basis,       required: true,  as_of_required: true }
+      - { source_field: market,            target_field: scope.market,         transform_hint: crosswalk_lookup,     required: true,  as_of_required: true }
+      - { source_field: region,            target_field: scope.region,         transform_hint: crosswalk_lookup,     required: false, as_of_required: true }
+      - { source_field: segment,           target_field: scope.segment,        transform_hint: map_segment,          required: false, as_of_required: true }
+      - { source_field: rate_low,          target_field: rate_low,             transform_hint: to_number,            required: true,  as_of_required: true }
+      - { source_field: rate_typical,      target_field: value,                transform_hint: to_number,            required: true,  as_of_required: true }
+      - { source_field: rate_high,         target_field: rate_high,            transform_hint: to_number,            required: true,  as_of_required: true }
+      - { source_field: currency,          target_field: currency,             transform_hint: trim_string,          required: true,  as_of_required: true }
+      - { source_field: escalation,        target_field: escalation_annual_pct, transform_hint: percent_to_decimal,  required: false, as_of_required: true }
+      - { source_field: contract_term_months, target_field: contract_term_months, transform_hint: to_integer,        required: false, as_of_required: true }
+
+  turn_cost_library:
+    canonical_object: UnitTurnCostReference
+    mappings:
+      - { source_field: scope_template,         target_field: turn_scope,                transform_hint: map_turn_scope,      required: true,  as_of_required: true }
+      - { source_field: classic_to_renovated,   target_field: renovation_transition,     transform_hint: map_renovation_mode, required: true,  as_of_required: true }
+      - { source_field: market,                 target_field: scope.market,              transform_hint: crosswalk_lookup,    required: true,  as_of_required: true }
+      - { source_field: region,                 target_field: scope.region,              transform_hint: crosswalk_lookup,    required: false, as_of_required: true }
+      - { source_field: segment,                target_field: scope.segment,             transform_hint: map_segment,         required: true,  as_of_required: true }
+      - { source_field: property_form,          target_field: scope.property_form,       transform_hint: map_property_form,   required: false, as_of_required: true }
+      - { source_field: unit_type_label,        target_field: unit_type_label,           transform_hint: trim_string,         required: true,  as_of_required: true }
+      - { source_field: category,               target_field: cost_category,             transform_hint: map_turn_cost_cat,   required: true,  as_of_required: true }
+      - { source_field: low,                    target_field: band_low,                  transform_hint: to_number,           required: true,  as_of_required: true }
+      - { source_field: typical,                target_field: value,                     transform_hint: to_number,           required: true,  as_of_required: true }
+      - { source_field: high,                   target_field: band_high,                 transform_hint: to_number,           required: true,  as_of_required: true }
+      - { source_field: target_make_ready_days, target_field: target_make_ready_days,    transform_hint: to_integer,          required: false, as_of_required: true }
+
+  capex_cost_library:
+    canonical_object: CapexLineItemAssumption
+    mappings:
+      - { source_field: csi_division,           target_field: csi_division,              transform_hint: crosswalk_lookup,      required: true,  as_of_required: true }
+      - { source_field: csi_section,            target_field: csi_section,               transform_hint: trim_string,           required: true,  as_of_required: true }
+      - { source_field: line_item,              target_field: line_item_label,           transform_hint: trim_string,           required: true,  as_of_required: true }
+      - { source_field: line_item_slug,         target_field: line_item_slug,            transform_hint: map_line_item_slug,    required: true,  as_of_required: true }
+      - { source_field: capex_category,         target_field: capex_category,            transform_hint: map_capex_category,    required: true,  as_of_required: true }
+      - { source_field: unit_basis,             target_field: unit,                      transform_hint: map_unit_basis,        required: true,  as_of_required: true }
+      - { source_field: market,                 target_field: scope.market,              transform_hint: crosswalk_lookup,      required: true,  as_of_required: true }
+      - { source_field: region,                 target_field: scope.region,              transform_hint: crosswalk_lookup,      required: false, as_of_required: true }
+      - { source_field: segment,                target_field: scope.segment,             transform_hint: map_segment,           required: true,  as_of_required: true }
+      - { source_field: property_form,          target_field: scope.property_form,       transform_hint: map_property_form,     required: false, as_of_required: true }
+      - { source_field: low,                    target_field: band_low,                  transform_hint: to_number,             required: true,  as_of_required: true }
+      - { source_field: typical,                target_field: value,                     transform_hint: to_number,             required: true,  as_of_required: true }
+      - { source_field: high,                   target_field: band_high,                 transform_hint: to_number,             required: true,  as_of_required: true }
+      - { source_field: currency,               target_field: currency,                  transform_hint: trim_string,           required: true,  as_of_required: true }
+      - { source_field: escalation_assumption,  target_field: escalation_annual_pct,     transform_hint: percent_to_decimal,    required: false, as_of_required: true }
+      - { source_field: typical_useful_life_years, target_field: typical_useful_life_years, transform_hint: to_integer,         required: false, as_of_required: true }
+
+  schedule_assumption:
+    canonical_object: ConstructionDurationAssumption
+    mappings:
+      - { source_field: project_type,            target_field: project_type,             transform_hint: map_project_type,    required: true,  as_of_required: true }
+      - { source_field: milestone_type,          target_field: milestone_slug,           transform_hint: map_milestone_slug,  required: true,  as_of_required: true }
+      - { source_field: milestone_category,      target_field: milestone_category,       transform_hint: map_milestone_cat,   required: true,  as_of_required: true }
+      - { source_field: market,                  target_field: scope.market,             transform_hint: crosswalk_lookup,    required: true,  as_of_required: true }
+      - { source_field: region,                  target_field: scope.region,             transform_hint: crosswalk_lookup,    required: false, as_of_required: true }
+      - { source_field: property_form,           target_field: scope.property_form,      transform_hint: map_property_form,   required: true,  as_of_required: true }
+      - { source_field: project_size_band,       target_field: scope.project_size_band,  transform_hint: map_size_band,       required: true,  as_of_required: true }
+      - { source_field: baseline_duration_days,  target_field: value,                    transform_hint: to_integer,          required: true,  as_of_required: true }
+      - { source_field: contingency_pct,         target_field: contingency_pct,          transform_hint: percent_to_decimal,  required: true,  as_of_required: true }
+      - { source_field: weather_assumption,      target_field: weather_assumption,       transform_hint: map_weather_mode,    required: true,  as_of_required: true }
+      - { source_field: unit,                    target_field: unit,                     transform_hint: trim_string,         required: true,  as_of_required: true }
+
+  market_commentary:
+    canonical_object: MarketCommentaryAnnotation
+    mappings:
+      - { source_field: market,                target_field: scope.market,           transform_hint: crosswalk_lookup,    required: true,  as_of_required: true }
+      - { source_field: submarket,             target_field: scope.submarket,        transform_hint: crosswalk_lookup,    required: false, as_of_required: true }
+      - { source_field: region,                target_field: scope.region,           transform_hint: crosswalk_lookup,    required: false, as_of_required: true }
+      - { source_field: period,                target_field: period,                 transform_hint: trim_string,         required: true,  as_of_required: true }
+      - { source_field: headline_topic,        target_field: headline_topic,         transform_hint: map_headline_topic,  required: true,  as_of_required: true }
+      - { source_field: narrative,             target_field: narrative,              transform_hint: trim_string,         required: true,  as_of_required: true }
+      - { source_field: supporting_data_refs,  target_field: supporting_data_refs,   transform_hint: parse_ref_list,      required: false, as_of_required: true }
+      - { source_field: author,                target_field: author,                 transform_hint: trim_string,         required: true,  as_of_required: true }
+      - { source_field: confidence_band,       target_field: confidence,             transform_hint: map_confidence,      required: true,  as_of_required: true }
+      - { source_field: directional_call,      target_field: directional_call,       transform_hint: map_directional,     required: false, as_of_required: true }

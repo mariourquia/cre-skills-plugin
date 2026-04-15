@@ -1,0 +1,34 @@
+# Generic freshness-SLA template.
+# Per-connector reconciliation_checks.yaml references this as a pattern.
+# Parameters below are supplied by the connector manifest or an overlay.
+check_id: freshness_sla
+check_kind: date_coverage
+severity: warning
+description: |
+  Every landed entity category must respect the per-category max-age SLA
+  declared in connector manifest. The SLA is parameterized per category and
+  per domain; no hardcoded windows live in this template.
+parameters:
+  - name: entity_category
+    description: Entity slug or category grouping (e.g., rent_comp, labor_reference, invoice)
+  - name: max_age_days
+    description: Max days between today and the most recent as_of_date, per category
+  - name: cadence
+    description: Expected publication cadence (daily, weekly, monthly, quarterly)
+  - name: manifest_ref
+    description: Pointer to the manifest path carrying the SLA values
+inputs:
+  - reference/normalized/<domain>_<entity>__<scope>.csv
+  - reference/connectors/<domain>/manifest.yaml
+expected_invariant: |
+  for each entity_category:
+    today - max(as_of_date) <= max_age_days resolved from <manifest_ref>
+severity_default: warning
+remediation_pattern: |
+  Operator refreshes the feed per the category cadence declared in the
+  connector manifest. If the source is known to lag, raise the max_age_days
+  in the manifest and log the reason.
+remediation: |
+  See remediation_pattern. Each per-connector invocation of this template
+  fills in entity_category, max_age_days, cadence, and manifest_ref from
+  that connector's manifest.

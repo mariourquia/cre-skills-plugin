@@ -89,17 +89,20 @@ A request is resolved through the routing hierarchy before packs load. Skills an
 Hierarchy:
 
 1. Asset class: `residential_multifamily` (this subsystem).
-2. Segment: `middle_market`, `affordable`, `luxury`.
-3. Form factor: `garden`, `walk_up`, `wrap`, `suburban_mid_rise`, `urban_mid_rise`, `high_rise`.
-4. Lifecycle stage: `development`, `construction`, `lease_up`, `stabilized`, `renovation`, `recap_support`.
-5. Management mode: `self_managed`, `third_party_managed`, `owner_oversight`.
-6. Role: (see `taxonomy.md`).
-7. Task or workflow: (see `workflows/`).
-8. Geography: market, submarket (via `reference/normalized/markets/`).
-9. Output type: `memo`, `kpi_review`, `checklist`, `estimate`, `operating_review`, `scorecard`, `dashboard`, `email_draft`.
-10. Decision severity: `informational`, `recommendation`, `action_routable`, `action_requires_approval`.
+2. Segment (market-positioning, conventional only): `middle_market`, `luxury`.
+3. Regulatory program: `none` (default), `lihtc`, `hud_section_8`, `hud_202_811`, `usda_rd`, `state_program`, `mixed_income`. Composes additively with segment.
+4. Form factor: `garden`, `walk_up`, `wrap`, `suburban_mid_rise`, `urban_mid_rise`, `high_rise`.
+5. Lifecycle stage: `development`, `construction`, `lease_up`, `stabilized`, `renovation`, `recap_support`.
+6. Management mode: `self_managed`, `third_party_managed`, `owner_oversight`.
+7. Role: (see `taxonomy.md`).
+8. Task or workflow: (see `workflows/`).
+9. Geography: market, submarket (via `reference/normalized/markets/`).
+10. Output type: `memo`, `kpi_review`, `checklist`, `estimate`, `operating_review`, `scorecard`, `dashboard`, `email_draft`.
+11. Decision severity: `informational`, `recommendation`, `action_routable`, `action_requires_approval`.
 
 Routing rules live in `routing/`. A request that cannot resolve a required axis must ask the user or fail gracefully with a clear prompt for the missing axis.
+
+Boundary rules that govern what content may live in each layer (core, segment, regulatory, market, org) are defined in `_core/BOUNDARIES.md` and enforced by `tests/test_boundary_rules.py`.
 
 ## Rule 7 — Auditability and update history
 

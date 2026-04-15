@@ -1,0 +1,362 @@
+# Property Master Crosswalk (starter set).
+# Conforms to crosswalk.schema.yaml.
+# Illustrates four common edge cases across the pms, gl, ap, and construction
+# domains. See identity_resolution_framework.md section 7.1 - 7.7.
+
+status_tag: sample
+
+rows:
+
+  # -----------------------------------------------------------------------
+  # Case 7.1: same property named differently across PMS and GL.
+  # Charlotte South End garden property. PMS calls it "Ashford Park"; GL
+  # calls it "Ashford Park Holdings LLC - Ops Account".
+  # -----------------------------------------------------------------------
+
+  - canonical_id: prop_cta_001
+    source_system: east_region_pms
+    source_id: P1038
+    match_confidence: high
+    match_method: exact
+    effective_start: "2021-06-15"
+    survivorship_rule: property_default
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      PMS row. Operating name "Ashford Park" survives from this row per
+      survivorship rule property_default.
+
+  - canonical_id: prop_cta_001
+    source_system: corporate_gl
+    source_id: GL-CTA-001
+    match_confidence: high
+    match_method: manual
+    effective_start: "2021-06-15"
+    survivorship_rule: property_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      GL row. Legal entity id "ENT_ASH_PARK_LLC" survives from this row.
+      Operating name in GL is "Ashford Park Holdings LLC - Ops Account"
+      which is not surfaced to downstream skills.
+
+  - canonical_id: prop_cta_001
+    source_system: accounts_payable_primary
+    source_id: AP-CTA-001
+    match_confidence: high
+    match_method: exact
+    effective_start: "2021-06-15"
+    survivorship_rule: property_default
+    manual_override: false
+    reviewer: ap_manager
+    last_validated_at: "2026-03-31"
+    notes: |
+      AP row. AP property code shares the suffix with the GL code per
+      operator convention.
+
+  # -----------------------------------------------------------------------
+  # Case 7.2: legal entity spans multiple operating properties. One LLC
+  # owns three assets. Each property has its own canonical id; GL carries
+  # the legal entity at the property level (not at the legal-entity level).
+  # -----------------------------------------------------------------------
+
+  - canonical_id: prop_rdu_004
+    source_system: east_region_pms
+    source_id: P1102
+    match_confidence: high
+    match_method: exact
+    effective_start: "2023-02-01"
+    survivorship_rule: property_default
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      Raleigh mid-rise. One of three properties owned by
+      TRIAD_HOLDINGS_LLC. Linked via related_canonical_ids.
+    related_canonical_ids:
+      - prop_rdu_005
+      - prop_grn_002
+
+  - canonical_id: prop_rdu_004
+    source_system: corporate_gl
+    source_id: GL-TRIAD-RDU1
+    match_confidence: high
+    match_method: manual
+    effective_start: "2023-02-01"
+    survivorship_rule: property_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      GL row. legal_entity_id "ENT_TRIAD_HOLDINGS_LLC". The same
+      legal_entity_id applies to prop_rdu_005 and prop_grn_002. This does
+      not change the canonical id assignment; each property is canonical
+      at the property level.
+
+  # -----------------------------------------------------------------------
+  # Case 7.3: property split. A single assemblage was underwritten as one
+  # asset at acquisition and was operationally split into two properties
+  # after phase-2 delivery. Both halves retain their canonical ids as new
+  # rows; the original canonical id is retired with effective_end.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: prop_atl_007_legacy
+    source_system: east_region_pms
+    source_id: P0884
+    match_confidence: high
+    match_method: exact
+    effective_start: "2022-08-15"
+    effective_end: "2024-11-30"
+    survivorship_rule: property_default
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2024-11-30"
+    notes: |
+      Original combined-asset row. Retired on split date 2024-11-30. Split
+      into prop_atl_007a and prop_atl_007b.
+
+  - canonical_id: prop_atl_007a
+    source_system: east_region_pms
+    source_id: P0884A
+    match_confidence: high
+    match_method: exact
+    effective_start: "2024-12-01"
+    survivorship_rule: property_default
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      Post-split phase-1 property. prior_canonical_id references
+      prop_atl_007_legacy.
+    prior_canonical_id: prop_atl_007_legacy
+
+  - canonical_id: prop_atl_007b
+    source_system: east_region_pms
+    source_id: P0884B
+    match_confidence: high
+    match_method: exact
+    effective_start: "2024-12-01"
+    survivorship_rule: property_default
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      Post-split phase-2 property. prior_canonical_id references
+      prop_atl_007_legacy.
+    prior_canonical_id: prop_atl_007_legacy
+
+  # -----------------------------------------------------------------------
+  # Case 7.7: property code migration. Property was managed by a prior
+  # PMS until 2025-02-28, then migrated to east_region_pms. The canonical
+  # id did not change; the prior PMS row is closed; the new row carries a
+  # new source_primary_key.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: prop_cta_002
+    source_system: west_region_pms
+    source_id: WR-1099
+    match_confidence: high
+    match_method: exact
+    effective_start: "2020-05-01"
+    effective_end: "2025-02-28"
+    survivorship_rule: property_default
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2025-02-28"
+    notes: |
+      Historical PMS row. Property migrated to east_region_pms on 2025-03-01.
+
+  - canonical_id: prop_cta_002
+    source_system: east_region_pms
+    source_id: P1184
+    match_confidence: high
+    match_method: manual
+    effective_start: "2025-03-01"
+    survivorship_rule: property_default
+    manual_override: true
+    override_reason: |
+      Property code assignment after migration was done by hand against the
+      legacy PMS extract; automated match cannot verify stability until the
+      first full reconciliation window completes.
+    reviewer: regional_ops_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      Current row. Same canonical_id as the migrated row. Historical GL
+      reports from before 2025-03-01 still join against the west_region_pms
+      row.
+
+  - canonical_id: prop_cta_002
+    source_system: corporate_gl
+    source_id: GL-CTA-002
+    match_confidence: high
+    match_method: exact
+    effective_start: "2020-05-01"
+    survivorship_rule: property_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      GL row is stable across the PMS migration.
+
+  # -----------------------------------------------------------------------
+  # Wave 5 — Yardi multi-role adapter integration (provenance:
+  # wave_5_yardi_adapter). Classification-pending posture: rows are
+  # provisional until classification_worksheet.md Dimensions 1 and 2 close.
+  # Survivorship follows adapters/yardi_multi_role/crosswalk_additions.yaml;
+  # when intacct carries legal entity, intacct wins; when appfolio carries
+  # current operating identity, appfolio wins; yardi wins for historical
+  # periods per property cutover date.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: prop_yd_50001
+    source_system: yardi_voyager_pms_stub
+    source_id: YP_50001
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: property_default
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Provisional row; survivorship
+      follows yardi_multi_role multi-role posture (intacct wins on legal
+      entity; appfolio wins on operating identity; yardi wins on historical
+      periods). Confirmed when classification_worksheet.md closes.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager propid YP_50001 (scode
+      mvst, "Maple Vista"). Paired with appfolio_property_id 10481 and
+      intacct entity ENT_MAPLE_VISTA_LLC.
+    related_canonical_ids:
+      - prop_yd_50001
+
+  - canonical_id: prop_yd_50001
+    source_system: appfolio_prod
+    source_id: "10481"
+    match_confidence: high
+    match_method: exact
+    effective_start: "2026-04-15"
+    survivorship_rule: property_default
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. AppFolio row for Maple Vista.
+      Operating identity (current property_name, unit_count_total, market
+      label) survives from this row per yardi_multi_role survivorship rule.
+
+  - canonical_id: prop_yd_50001
+    source_system: sage_intacct_prod
+    source_id: ENT_MAPLE_VISTA_LLC
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: property_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Intacct legal entity row. Legal
+      entity id survives from this row per yardi_multi_role survivorship rule.
+
+  - canonical_id: prop_yd_50002
+    source_system: yardi_voyager_pms_stub
+    source_id: YP_50002
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: property_default
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Yardi_primary_pms_and_gl posture
+      (no AppFolio footprint); yardi_voyager_pms_stub is primary for
+      property identity and operating metadata. Provisional until
+      classification_worksheet.md closes.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager propid YP_50002 (scode
+      hrcr, "Harbor Crest"). No AppFolio pairing; yardi_primary_pms_and_gl.
+
+  - canonical_id: prop_yd_50002
+    source_system: yardi_voyager_gl_stub
+    source_id: YP_50002
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: property_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager GL row for Harbor Crest.
+      GL actuals survive from this row per yardi_primary_pms_and_gl posture.
+
+  - canonical_id: prop_yd_50003
+    source_system: yardi_voyager_pms_stub
+    source_id: YP_50003
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: property_default
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Yardi_primary_pms posture;
+      intacct carries the legal entity; Dealpath carries the pre-close
+      development deal. Provisional until classification closes.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager propid YP_50003 (scode
+      ltft, "Lantern Flats"). Mixed-use; development delivered 2021-02-15.
+
+  - canonical_id: prop_yd_50003
+    source_system: sage_intacct_prod
+    source_id: ENT_LANTERN_FLATS_LLC
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: property_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Intacct legal entity row. Legal
+      entity survives from this row per yardi_multi_role survivorship rule.
+
+  - canonical_id: prop_yd_50004
+    source_system: yardi_legacy_export_stub
+    source_id: YP_50004
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    effective_end: "2025-11-30"
+    survivorship_rule: property_default
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Cutover-completed archival;
+      AppFolio is primary post-2025-11-30. Historical-only posture for
+      yardi_legacy_export_stub rows beyond cutover_effective_date.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager propid YP_50004 (scode
+      brfd, "Briarfield"). Post-cutover ownership transferred to AppFolio
+      + Intacct; Yardi export is historical-only per
+      bounded_assumptions.yaml::dual_run_with_appfolio_detected.
+
+  - canonical_id: prop_yd_50004
+    source_system: appfolio_prod
+    source_id: "10484"
+    match_confidence: high
+    match_method: exact
+    effective_start: "2025-12-01"
+    survivorship_rule: property_default
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. AppFolio row for Briarfield.
+      Post-cutover primary operating identity.

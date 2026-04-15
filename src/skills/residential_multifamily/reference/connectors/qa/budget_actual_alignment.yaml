@@ -1,0 +1,22 @@
+# GL budget/actual alignment check.
+check_id: budget_actual_alignment
+check_kind: budget_actual
+severity: blocker
+description: |
+  GL budget totals per property per period must equal the sum of budget
+  line items; actuals must reconcile to the GL source trial balance.
+inputs:
+  - reference/normalized/gl_budget__<scope>.csv
+  - reference/normalized/gl_actual__<scope>.csv
+  - reference/normalized/gl_chart_of_accounts__<scope>.csv
+expected_invariant: |
+  for each (property_id, period):
+    sum(gl_budget.amount) == header_total(source) AND
+    sum(gl_actual.amount) == trial_balance_total(source)
+tolerance:
+  absolute: 0
+  relative_percent: 0.01
+remediation: |
+  A penny-level mismatch usually reflects rounding between source-system
+  units (dollars) and normalized units (cents). A larger delta suggests
+  a missing account mapping or a period-boundary issue (accruals vs cash).

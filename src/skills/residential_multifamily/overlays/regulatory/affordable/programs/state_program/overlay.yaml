@@ -1,0 +1,50 @@
+overlay_id: regulatory.affordable.state_program
+overlay_kind: regulatory.program
+parent_overlay: regulatory.affordable
+status: stub
+scope:
+  regulatory_program: state_program
+authoring_notes: |
+  Generic overlay for state- and local-HFA programs (state tax credits,
+  density-bonus covenants, inclusionary-zoning units, CDBG- and HOME-funded
+  restrictions, workforce-housing covenants). Acts as a sub-in target until
+  state-specific overlays are registered under `overlays/regulatory/jurisdictions/`.
+
+  Phase 1 ships architecture only. State-specific rent and income schedules
+  are held in reference tables scoped by jurisdiction and populated alongside
+  the jurisdiction overlay in Phase 2:
+  `reference/normalized/rent_limits__state_program__{jurisdiction}.csv`.
+
+overrides:
+  - target_kind: reporting_emphasis
+    target_ref: overlays/regulatory/_shared/agency_reporting.md
+    override_value:
+      reporting_emphasis_ref: overlays/regulatory/affordable/programs/state_program/overlay.yaml
+    reason: |
+      State HFA compliance reporting cadence varies by jurisdiction;
+      the overlay anchors the concept and defers the concrete cadence to
+      the jurisdiction overlay.
+  - target_kind: reporting_emphasis
+    target_ref: overlays/regulatory/_shared/rent_limits.md
+    override_value:
+      reporting_emphasis_ref: overlays/regulatory/affordable/programs/state_program/overlay.yaml
+    reason: |
+      State programs may stack with LIHTC, HUD, or USDA. Rent-limit testing
+      applies the most restrictive binding limit across stacked programs.
+  - target_kind: reporting_emphasis
+    target_ref: overlays/regulatory/_shared/file_audit_preparedness.md
+    override_value:
+      reporting_emphasis_ref: overlays/regulatory/affordable/programs/state_program/overlay.yaml
+    reason: |
+      Audit cadence and file checklists vary by jurisdiction; the concrete
+      lists move to the jurisdiction overlay.
+
+adds:
+  - added_kind: metric
+    slug: state_program_stacking_compliance
+    definition_ref: overlays/regulatory/affordable/programs/state_program/overlay.yaml
+
+approvers:
+  - director_of_operations
+  - compliance_lead
+  - legal_counsel
