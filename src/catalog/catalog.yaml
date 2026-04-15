@@ -1,5 +1,5 @@
 version: 1.0.0
-generated_at: '2026-04-15T04:34:38.506735+00:00'
+generated_at: '2026-04-15T05:19:13.409437+00:00'
 plugin_version: 4.1.2
 items:
 - id: 1031-exchange-executor
@@ -5655,3 +5655,53 @@ items:
   calculator_file: null
   priority: null
   version: null
+mcp_tools:
+- name: cre_route
+  description: Route a CRE query to the right specialist skill. Returns the best match with confidence score and alternatives.
+- name: cre_list_skills
+  description: List available CRE skills with optional filtering by name, phase, or type.
+- name: cre_skill_detail
+  description: Get the full SKILL.md content for a specific skill, including its process, inputs, outputs, and chain connections.
+- name: cre_workspace_create
+  description: Create a persistent workspace for tracking a deal, asset, fund, or project across sessions.
+- name: cre_workspace_get
+  description: Get the current state of a workspace by ID.
+- name: cre_workspace_list
+  description: List all active workspaces, optionally filtered by type.
+- name: cre_workspace_update
+  description: Update a workspace with new stage, facts, decisions, or next actions.
+- name: cre_send_feedback
+  description: Submit feedback or a bug report about a CRE skill.
+- name: cre_customize_skill
+  description: Initialize a local customization of a CRE skill. Creates an editable override copy without modifying the base
+    skill. Returns the customization record.
+- name: cre_save_customization
+  description: Save updated content and metadata for an existing skill customization.
+- name: cre_list_customizations
+  description: List all active local skill customizations with their status and timestamps.
+- name: cre_customization_detail
+  description: Get detailed information about a skill customization including metadata, diff summary, and optionally the full
+    diff or content.
+- name: cre_revert_customization
+  description: Remove a local skill customization, restoring the base skill as the active version.
+- name: cre_submit_customization_feedback
+  description: Build and submit structured feedback about a skill customization. Respects privacy config. Use dry_run to preview
+    without sending.
+- name: cre_export_customization
+  description: Export a skill customization as a portable JSON bundle for sharing with teammates or backup.
+- name: cre_import_customization
+  description: Import a skill customization from a JSON bundle previously created by cre_export_customization.
+- name: cre_customization_health_check
+  description: Check if base skills have been updated since customizations were created. Detects drift between your customization
+    and the current plugin version.
+- name: cre_list_templates
+  description: List available customization templates -- pre-built starting points for common enterprise needs.
+- name: cre_apply_template
+  description: Create a customization from a pre-built template. Templates provide common adaptations for specific markets,
+    property types, or regulatory regimes.
+- name: cre_upstream_suggestion
+  description: Generate a structured upstream improvement suggestion from a customization, suitable for filing as a GitHub
+    issue.
+- name: cre_customization_analytics
+  description: Analyze local customization feedback patterns -- which skills are customized most, what categories of changes
+    are common, upstream request rate.

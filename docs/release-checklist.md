@@ -4,7 +4,7 @@ Use this checklist before publishing a new version.
 
 ## Pre-Release
 
-- [ ] Update version in `src/plugin/plugin.json`
+- [ ] Update version in `.claude-plugin/plugin.json` (single source of truth)
 - [ ] Run `python scripts/catalog-build.py` to rebuild catalog from repo state
 - [ ] Run `python scripts/catalog-generate.py` to regenerate all public surfaces
 - [ ] Run `python scripts/catalog-generate.py --check` to verify zero drift
@@ -23,7 +23,7 @@ These are NOT updated by the generator and must be verified manually:
 
 - [ ] GitHub repo "About" description
 - [ ] GitHub release title and notes
-- [ ] DMG/EXE installer version strings (in `scripts/create-dmg.sh` and `scripts/create-exe.iss`)
+- [ ] DMG/EXE installer version strings — `scripts/create-dmg.sh` and `scripts/create-exe.iss` now read `APP_VERSION` injected by `release.yml`; verify the workflow tag matches `.claude-plugin/plugin.json`
 - [ ] Any blog posts, tweets, or external references
 
 ## Release

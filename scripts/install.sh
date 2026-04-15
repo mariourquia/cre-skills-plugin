@@ -202,14 +202,14 @@ INSTALL_DIR=""
 
 locate_repo() {
   # If we are already inside the repo (local install), use that.
-  if [ -f "src/plugin/plugin.json" ]; then
+  if [ -f ".claude-plugin/plugin.json" ]; then
     INSTALL_DIR="$(pwd)"
     info "Running from inside the repo: $INSTALL_DIR"
     return
   fi
 
   # Check one level up (in case cwd is scripts/)
-  if [ -f "../src/plugin/plugin.json" ]; then
+  if [ -f "../.claude-plugin/plugin.json" ]; then
     INSTALL_DIR="$(cd .. && pwd)"
     info "Running from scripts/ directory. Repo root: $INSTALL_DIR"
     return
@@ -255,7 +255,7 @@ make_calculators_executable() {
 validate_plugin() {
   local errors=0
 
-  [ -f "$INSTALL_DIR/src/plugin/plugin.json" ] || { warn "Missing src/plugin/plugin.json"; errors=$((errors + 1)); }
+  [ -f "$INSTALL_DIR/.claude-plugin/plugin.json" ] || { warn "Missing .claude-plugin/plugin.json"; errors=$((errors + 1)); }
   [ -d "$INSTALL_DIR/src/skills" ]              || { warn "Missing src/skills/ directory"; errors=$((errors + 1)); }
   [ -d "$INSTALL_DIR/src/agents" ]              || { warn "Missing src/agents/ directory"; errors=$((errors + 1)); }
   [ -d "$INSTALL_DIR/src/routing" ]             || { warn "Missing src/routing/ directory"; errors=$((errors + 1)); }
@@ -282,7 +282,7 @@ install_plugin() {
 
   local claude_home="$HOME/.claude"
   local plugin_version
-  plugin_version="$(python3 -c "import json; print(json.load(open('$INSTALL_DIR/src/plugin/plugin.json'))['version'])" 2>/dev/null || echo "4.1.2")"
+  plugin_version="$(python3 -c "import json; print(json.load(open('$INSTALL_DIR/.claude-plugin/plugin.json'))['version'])" 2>/dev/null || echo "4.1.2")"
   local plugins_cache="$claude_home/plugins/cache/local/cre-skills-plugin/$plugin_version"
   local installed_file="$claude_home/plugins/installed_plugins.json"
   local settings_file="$claude_home/settings.json"
@@ -303,9 +303,13 @@ install_plugin() {
     --exclude 'docs/design' --exclude 'tests/golden' \
     --exclude 'tests/snapshots' --exclude 'tests/fixtures' \
     "$INSTALL_DIR/" "$plugins_cache/"
-  # Create .claude-plugin/ layout expected by Claude Code
+  # rsync's second pass already copied $INSTALL_DIR/.claude-plugin/plugin.json into
+  # the cache root. Defensively ensure the directory exists in case the user's rsync
+  # excludes hidden directories.
   mkdir -p "$plugins_cache/.claude-plugin"
-  cp "$plugins_cache/plugin/plugin.json" "$plugins_cache/.claude-plugin/plugin.json" 2>/dev/null || true
+  if [ ! -f "$plugins_cache/.claude-plugin/plugin.json" ] && [ -f "$INSTALL_DIR/.claude-plugin/plugin.json" ]; then
+    cp "$INSTALL_DIR/.claude-plugin/plugin.json" "$plugins_cache/.claude-plugin/plugin.json"
+  fi
   success "Plugin files copied to $plugins_cache"
 
   # 2. Register in installed_plugins.json

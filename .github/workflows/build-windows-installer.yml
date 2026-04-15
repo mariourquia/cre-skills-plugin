@@ -66,7 +66,8 @@ jobs:
             "src\orchestrators",
             "src\routing",
             "src\mcp-server.mjs",
-            "src\plugin\plugin.json",
+            ".claude-plugin\plugin.json",
+            ".mcp.json",
             "scripts\Install.ps1",
             "LICENSE"
           )

@@ -89,7 +89,8 @@ import json, os
 p = json.load(open('$REPO_ROOT/.claude-plugin/plugin.json'))
 mcp_path = p.get('mcpServers', '.mcp.json')
 if isinstance(mcp_path, str):
-    full = os.path.join('$REPO_ROOT', mcp_path.lstrip('./'))
+    rel = mcp_path[2:] if mcp_path.startswith('./') else mcp_path
+    full = os.path.join('$REPO_ROOT', rel)
     assert os.path.exists(full), f'MCP config not found at {full}'
 " 2>/dev/null
 check $? "MCP server config resolves"
@@ -98,9 +99,9 @@ check $? "MCP server config resolves"
 test -f "$REPO_ROOT/src/mcp-server.mjs"
 check $? "mcp-server.mjs exists"
 
-# 11. plugin.json copies are in sync
-diff "$REPO_ROOT/.claude-plugin/plugin.json" "$REPO_ROOT/src/plugin/plugin.json" > /dev/null 2>&1
-check $? "plugin.json copies are in sync (.claude-plugin/ vs src/plugin/)"
+# 11. plugin.json is single-sourced (no stray src/plugin/ duplicate)
+test ! -f "$REPO_ROOT/src/plugin/plugin.json"
+check $? "no duplicate plugin.json under src/plugin/ (.claude-plugin/ is canonical)"
 
 # 12. Version consistency
 MKT_VER=$(python3 -c "import json; print(json.load(open('$REPO_ROOT/.claude-plugin/marketplace.json'))['plugins'][0].get('version',''))" 2>/dev/null)

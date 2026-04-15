@@ -5,7 +5,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { parse as parseYaml } from "yaml";
-import { type TargetName, type TargetProfile, SRC_DIR, buildDir, CONFIG_DIR } from "../lib.js";
+import { type TargetName, type TargetProfile, REPO_ROOT, buildDir, CONFIG_DIR } from "../lib.js";
 
 export interface NormalizeResult {
   stripped: string[];
@@ -13,7 +13,7 @@ export interface NormalizeResult {
 }
 
 export function normalizeManifest(target: TargetName, profile: TargetProfile): NormalizeResult {
-  const srcManifest = resolve(SRC_DIR, "plugin", "plugin.json");
+  const srcManifest = resolve(REPO_ROOT, ".claude-plugin", "plugin.json");
   const outDir = resolve(buildDir(target), ".claude-plugin");
   mkdirSync(outDir, { recursive: true });
 
@@ -21,7 +21,6 @@ export function normalizeManifest(target: TargetName, profile: TargetProfile): N
   const stripped: string[] = [];
   const warnings: string[] = [];
 
-  // Strip forbidden fields
   for (const field of profile.manifest.strip_fields) {
     if (field in manifest) {
       delete manifest[field];
@@ -29,14 +28,17 @@ export function normalizeManifest(target: TargetName, profile: TargetProfile): N
     }
   }
 
-  // Apply overrides from defaults file
   if (profile.manifest.overrides_file) {
     const overridesPath = resolve(CONFIG_DIR, "targets", profile.manifest.overrides_file);
     try {
       const overrides = parseYaml(readFileSync(overridesPath, "utf-8"));
       const targetOverrides = overrides?.[target];
       if (targetOverrides && typeof targetOverrides === "object") {
-        Object.assign(manifest, targetOverrides);
+        for (const [key, value] of Object.entries(targetOverrides)) {
+          if (Object.prototype.hasOwnProperty.call(targetOverrides, key)) {
+            manifest[key] = value;
+          }
+        }
       }
     } catch {
       warnings.push(`Could not load overrides from ${profile.manifest.overrides_file}`);

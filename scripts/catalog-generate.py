@@ -232,7 +232,7 @@ def update_hooks(counts: dict, dry_run: bool = False) -> bool:
 
 def update_plugin_json(counts: dict, dry_run: bool = False) -> bool:
     """Update plugin.json description with accurate counts."""
-    pj_path = SRC_DIR / "plugin" / "plugin.json"
+    pj_path = REPO_ROOT / ".claude-plugin" / "plugin.json"
     data = json.loads(pj_path.read_text(encoding="utf-8"))
     original = json.dumps(data, indent=2)
 

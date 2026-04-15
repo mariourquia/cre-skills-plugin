@@ -445,3 +445,42 @@ jobs:
             "final-assets/cre-skills-plugin-${TAG_NAME}.sha256.cert" \
             --title "$TAG_NAME" \
             --notes-file /tmp/release-notes.md
+
+  verify-checksums:
+    name: Verify published artifact checksums
+    needs: [create-release]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Download published assets and verify SHA256SUMS
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          mkdir -p verify
+          cd verify
+
+          echo "Downloading published assets for $TAG_NAME..."
+          gh release download "$TAG_NAME" --repo "$REPO" \
+            --pattern "cre-skills-plugin-${TAG_NAME}.tar.gz" \
+            --pattern "cre-skills-plugin-${TAG_NAME}.zip" \
+            --pattern "cre-skills-claude-code.zip" \
+            --pattern "cre-skills-cowork.zip" \
+            --pattern "cre-skills-desktop.zip" \
+            --pattern "cre-skills-portable.zip" \
+            --pattern "cre-skills-plugin-${TAG_NAME}.dmg" \
+            --pattern "cre-skills-plugin-${TAG_NAME}-setup.exe" \
+            --pattern "cre-skills-plugin-${TAG_NAME}.sha256"
+
+          ls -lah
+
+          # The published .sha256 file lists "<hex>  <filename>" for each artifact.
+          # `sha256sum -c` recomputes each file's hash and compares.
+          echo ""
+          echo "Verifying checksums against published cre-skills-plugin-${TAG_NAME}.sha256..."
+          sha256sum -c "cre-skills-plugin-${TAG_NAME}.sha256"
+          echo ""
+          echo "All published artifacts match their declared SHA256 sums."

@@ -65,6 +65,21 @@ function Write-Red    { param([string]$Text) Write-Host $Text -ForegroundColor R
 function Write-Bold   { param([string]$Text) Write-Host $Text -ForegroundColor White }
 function Write-Dim    { param([string]$Text) Write-Host $Text -ForegroundColor DarkGray }
 
+# ── File I/O helpers ──────────────────────────────────────────────
+#
+# Write UTF-8 *without* BOM. Windows PowerShell 5.1's `Set-Content -Encoding UTF8`
+# writes a BOM (EF BB BF) which Python's json.load() cannot parse. PS 7+ defaults
+# to no BOM for `UTF8`, but we cannot rely on which shell the user invokes.
+# Always go through this helper for files that downstream tools must parse.
+function Write-Utf8NoBom {
+    param(
+        [Parameter(Mandatory)][string]$Path,
+        [Parameter(Mandatory)][string]$Content
+    )
+    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllText($Path, $Content, $utf8NoBom)
+}
+
 # ── Timing and structured telemetry tracking ──────────────────────
 
 $InstallStart = Get-Date
@@ -429,12 +444,12 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
     # Plugin cache location: ~/.claude/plugins/cache/local/cre-skills-plugin/<version>
     $ClaudeHome = Join-Path $env:USERPROFILE ".claude"
 
-    # Find plugin.json (flat layout: plugin\plugin.json, src layout: src\plugin\plugin.json)
+    # Find plugin.json. Canonical location is .claude-plugin\plugin.json.
+    # Inno Setup flat layouts are checked as fallbacks for older builds.
     $pjPath = $null
     foreach ($candidate in @(
-        (Join-Path $InstallDir "plugin\plugin.json"),
-        (Join-Path $InstallDir "src\plugin\plugin.json"),
-        (Join-Path $InstallDir ".claude-plugin\plugin.json")
+        (Join-Path $InstallDir ".claude-plugin\plugin.json"),
+        (Join-Path $InstallDir "plugin\plugin.json")
     )) {
         if (Test-Path $candidate) { $pjPath = $candidate; break }
     }
@@ -501,15 +516,19 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
             }
         }
 
-        # Create .claude-plugin/ layout expected by Claude Code
+        # Ensure .claude-plugin\plugin.json exists in cache. Robocopy's second pass
+        # already copied $InstallDir\.claude-plugin\plugin.json into the cache root.
+        # Recover from $InstallDir if a robocopy filter dropped the directory.
         $claudePluginDir = Join-Path $PluginCachePath ".claude-plugin"
         if (-not (Test-Path $claudePluginDir)) {
             New-Item -ItemType Directory -Path $claudePluginDir -Force | Out-Null
         }
-        $srcPluginJson = Join-Path (Join-Path $PluginCachePath "plugin") "plugin.json"
         $dstPluginJson = Join-Path $claudePluginDir "plugin.json"
-        if (Test-Path $srcPluginJson) {
-            Copy-Item -Path $srcPluginJson -Destination $dstPluginJson -Force
+        if (-not (Test-Path $dstPluginJson)) {
+            $srcPluginJson = Join-Path $InstallDir ".claude-plugin\plugin.json"
+            if (Test-Path $srcPluginJson) {
+                Copy-Item -Path $srcPluginJson -Destination $dstPluginJson -Force
+            }
         }
 
         Write-Green "  Plugin files copied to cache"
@@ -542,7 +561,7 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
             $ipData.plugins | Add-Member -NotePropertyName $pluginKey -NotePropertyValue $entry
         }
 
-        $ipData | ConvertTo-Json -Depth 10 | Set-Content $InstalledPluginsFile -Encoding UTF8
+        Write-Utf8NoBom -Path $InstalledPluginsFile -Content ($ipData | ConvertTo-Json -Depth 10)
         Write-Green "  Plugin registered in installed_plugins.json"
 
         # 3. Enable in settings.json
@@ -562,7 +581,7 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
             $settings.enabledPlugins | Add-Member -NotePropertyName $pluginKey -NotePropertyValue $true
         }
 
-        $settings | ConvertTo-Json -Depth 10 | Set-Content $SettingsFile -Encoding UTF8
+        Write-Utf8NoBom -Path $SettingsFile -Content ($settings | ConvertTo-Json -Depth 10)
         Write-Green "  Plugin enabled in settings.json"
         Add-StepResult "register" "ok"
 
@@ -598,7 +617,7 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
                 New-Item -ItemType Directory -Path $DesktopConfigDir -Force | Out-Null
             }
             if (-not (Test-Path $DesktopConfigFile)) {
-                '{"mcpServers":{}}' | Set-Content $DesktopConfigFile -Encoding UTF8
+                Write-Utf8NoBom -Path $DesktopConfigFile -Content '{"mcpServers":{}}'
             }
 
             # Backup before modifying
@@ -608,19 +627,27 @@ if ($HasClaudeCode -or $HasClaudeDesktop -or $HasClaudeHome) {
             Write-Dim "  Config: $DesktopConfigFile"
             Write-Dim "  MCP server: $mcpServerPath"
 
-            # Use Node.js for JSON (no Python dependency)
+            # Use Node.js for JSON (no Python dependency).
+            # process.argv[0]=node, [1]=this script, [2]+=user args.
+            # Strip a leading BOM defensively in case a previous installer or hand-edit
+            # left one — JSON.parse cannot tolerate U+FEFF.
             $tempJs = Join-Path $env:TEMP "cre_skills_mcp_config.js"
-            @"
+            $nodeScript = @"
 const fs = require('fs');
-const cp = process.argv[1];
-const sp = process.argv[2];
+const cp = process.argv[2];
+const sp = process.argv[3];
 let d = {};
-try { d = JSON.parse(fs.readFileSync(cp, 'utf8')); } catch {}
+try {
+  let raw = fs.readFileSync(cp, 'utf8');
+  if (raw.charCodeAt(0) === 0xFEFF) raw = raw.slice(1);
+  d = raw.trim() ? JSON.parse(raw) : {};
+} catch {}
 d.mcpServers = d.mcpServers || {};
 d.mcpServers['cre-skills'] = { command: 'cmd', args: ['/c', 'node', sp] };
 fs.writeFileSync(cp, JSON.stringify(d, null, 2));
 console.log('OK');
-"@ | Set-Content $tempJs -Encoding UTF8
+"@
+            Write-Utf8NoBom -Path $tempJs -Content $nodeScript
 
             $result = & node $tempJs $DesktopConfigFile $mcpServerPath 2>&1
             Remove-Item $tempJs -ErrorAction SilentlyContinue
@@ -723,13 +750,13 @@ if (Test-Path $cachePluginJson) {
     Write-Green "  .claude-plugin/plugin.json: OK"
 } else {
     Write-Yellow "  .claude-plugin/plugin.json missing -- skills won't load in Desktop Code tab"
-    # Attempt recovery from plugin\ directory
-    $srcPj = Join-Path $PluginCachePath "plugin\plugin.json"
+    # Attempt recovery from $InstallDir (canonical source).
+    $srcPj = Join-Path $InstallDir ".claude-plugin\plugin.json"
     if (Test-Path $srcPj) {
         $cpDir = Join-Path $PluginCachePath ".claude-plugin"
         New-Item -ItemType Directory -Path $cpDir -Force | Out-Null
         Copy-Item $srcPj (Join-Path $cpDir "plugin.json") -Force
-        Write-Green "  Recovered .claude-plugin/plugin.json from plugin\ directory"
+        Write-Green "  Recovered .claude-plugin/plugin.json from `$InstallDir"
         Add-Remediation "claude_plugin_json_recovery"
     } else {
         $verifyFails++
