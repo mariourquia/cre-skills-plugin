@@ -121,5 +121,47 @@ class TestCatalogIntegrity(unittest.TestCase):
         self.assertEqual(missing, [], f"Catalog source_paths missing: {missing[:5]}")
 
 
+class TestMcpToolsCatalog(unittest.TestCase):
+    """The MCP tools section of the catalog must match the live mcp-server.mjs."""
+
+    @unittest.skipUnless(HAS_YAML, 'PyYAML not installed')
+    def test_catalog_mcp_tools_match_implementation(self):
+        catalog = load_catalog()
+        self.assertIsNotNone(catalog, 'catalog.yaml missing')
+
+        catalog_tools = catalog.get('mcp_tools', [])
+        self.assertGreater(
+            len(catalog_tools), 0,
+            "catalog.yaml must include an mcp_tools section "
+            "(rebuild with: python scripts/catalog-build.py)"
+        )
+
+        mcp_path = os.path.join(SRC_DIR, 'mcp-server.mjs')
+        src = open(mcp_path, encoding='utf-8').read()
+        impl_names = re.findall(r'name:\s*"(cre_[a-z_]+)"', src)
+
+        catalog_names = [t['name'] for t in catalog_tools]
+        self.assertEqual(
+            sorted(catalog_names), sorted(impl_names),
+            "catalog.yaml mcp_tools list does not match src/mcp-server.mjs. "
+            "Rebuild with: python scripts/catalog-build.py"
+        )
+
+    @unittest.skipUnless(HAS_YAML, 'PyYAML not installed')
+    def test_readme_mcp_tool_count_matches_catalog(self):
+        catalog = load_catalog()
+        catalog_count = len(catalog.get('mcp_tools', []))
+        readme = open(os.path.join(PLUGIN_ROOT, 'README.md'), encoding='utf-8').read()
+        # README should reference the count somewhere; capture any "<N> MCP tool" claim.
+        claims = [int(m) for m in re.findall(r'(\d+)\s+MCP\s+tools?\b', readme)]
+        if not claims:
+            self.skipTest("README does not advertise an MCP tool count yet")
+        for claim in claims:
+            self.assertEqual(
+                claim, catalog_count,
+                f"README claims {claim} MCP tools but catalog.yaml has {catalog_count}"
+            )
+
+
 if __name__ == '__main__':
     unittest.main()

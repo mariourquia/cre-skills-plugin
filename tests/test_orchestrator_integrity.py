@@ -101,6 +101,38 @@ class TestOrchestratorConfigReferences(unittest.TestCase):
         self.assertEqual(broken, {}, f"Orchestrator configs reference missing skills: {broken}")
 
 
+class TestPromptConfigConsistency(unittest.TestCase):
+    """Every wired prompt must have a matching config; no orphans allowed.
+
+    Design references that do not have a config live in
+    docs/orchestrator-references/, not src/orchestrators/prompts/.
+    """
+
+    PROMPTS_DIR = os.path.join(ORCH_DIR, 'prompts')
+
+    def _prompt_basenames(self):
+        # Strip "-orchestrator.md" so the basename matches the config filename.
+        return {
+            f[:-len('-orchestrator.md')]
+            for f in os.listdir(self.PROMPTS_DIR)
+            if f.endswith('-orchestrator.md')
+        }
+
+    def _config_basenames(self):
+        return {f[:-len('.json')] for f in os.listdir(CONFIG_DIR) if f.endswith('.json')}
+
+    def test_no_orphan_prompt_files(self):
+        prompt_names = self._prompt_basenames()
+        config_names = self._config_basenames()
+        orphans = sorted(prompt_names - config_names)
+        self.assertEqual(
+            orphans, [],
+            "Orchestrator prompts must have a matching config under "
+            "src/orchestrators/configs/. Move design references to "
+            f"docs/orchestrator-references/. Orphans: {orphans}"
+        )
+
+
 class TestOrchestratorCountMatchesCatalog(unittest.TestCase):
     """Claimed 10 orchestrators = 10 configs = 10 catalog entries."""
 

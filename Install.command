@@ -317,7 +317,7 @@ echo ""
 # ── Step 2: Register plugin ──────────────────────────────────────────
 
 INSTALL_DIR="$SCRIPT_DIR"
-PLUGIN_VERSION="$(python3 -c "import json; print(json.load(open('$SCRIPT_DIR/src/plugin/plugin.json'))['version'])" 2>/dev/null || echo "4.1.2")"
+PLUGIN_VERSION="$(python3 -c "import json; print(json.load(open('$SCRIPT_DIR/.claude-plugin/plugin.json'))['version'])" 2>/dev/null || echo "4.1.2")"
 CLAUDE_HOME="$HOME/.claude"
 PLUGINS_CACHE="$CLAUDE_HOME/plugins/cache/local/cre-skills-plugin/$PLUGIN_VERSION"
 INSTALLED_PLUGINS="$CLAUDE_HOME/plugins/installed_plugins.json"
@@ -357,9 +357,13 @@ rsync -a \
     --exclude 'tests/snapshots' --exclude 'tests/fixtures' \
     "$INSTALL_DIR/" "$PLUGINS_CACHE/"
 
-# Create .claude-plugin/ layout expected by Claude Code
+# rsync's second pass already copied $INSTALL_DIR/.claude-plugin/plugin.json into
+# the cache root. Defensively ensure the dir exists and recover from $INSTALL_DIR
+# if a custom rsync filter dropped the dotdir.
 mkdir -p "$PLUGINS_CACHE/.claude-plugin"
-cp "$PLUGINS_CACHE/plugin/plugin.json" "$PLUGINS_CACHE/.claude-plugin/plugin.json" 2>/dev/null || true
+if [ ! -f "$PLUGINS_CACHE/.claude-plugin/plugin.json" ] && [ -f "$INSTALL_DIR/.claude-plugin/plugin.json" ]; then
+    cp "$INSTALL_DIR/.claude-plugin/plugin.json" "$PLUGINS_CACHE/.claude-plugin/plugin.json"
+fi
 green "  Plugin files copied to cache"
 add_step_result "copy_files" "ok"
 

@@ -29,7 +29,7 @@ class TestPluginStructure(unittest.TestCase):
     """Structural integrity tests."""
 
     def test_plugin_json_valid(self):
-        with open(os.path.join(SRC_DIR, 'plugin/plugin.json')) as f:
+        with open(os.path.join(PLUGIN_ROOT, '.claude-plugin', 'plugin.json')) as f:
             data = json.load(f)
         self.assertEqual(data['license'], 'Apache-2.0')
         self.assertIn('version', data)
@@ -352,11 +352,22 @@ class TestDocReferences(unittest.TestCase):
         self.assertTrue(os.path.exists(os.path.join(SRC_DIR, 'mcp-server.mjs')))
 
     def test_mcp_json_exists(self):
-        self.assertTrue(os.path.exists(os.path.join(SRC_DIR, 'plugin', '.mcp.json')))
-        with open(os.path.join(SRC_DIR, 'plugin', '.mcp.json')) as f:
+        mcp_path = os.path.join(PLUGIN_ROOT, '.mcp.json')
+        self.assertTrue(os.path.exists(mcp_path),
+                        ".mcp.json must live at repo root (referenced by .claude-plugin/plugin.json)")
+        with open(mcp_path) as f:
             data = json.load(f)
         self.assertIn('mcpServers', data)
         self.assertIn('cre-skills', data['mcpServers'])
+
+    def test_no_legacy_src_plugin_directory(self):
+        # src/plugin/ was the second copy of the manifest. After consolidation
+        # there must be exactly one plugin.json (under .claude-plugin/).
+        self.assertFalse(
+            os.path.isdir(os.path.join(SRC_DIR, 'plugin')),
+            "src/plugin/ has been consolidated into .claude-plugin/. "
+            "Do not reintroduce the directory."
+        )
 
 
 class TestMcpServer(unittest.TestCase):

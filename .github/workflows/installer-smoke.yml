@@ -6,7 +6,8 @@ on:
       - 'scripts/Install.ps1'
       - 'Install.command'
       - 'scripts/install.sh'
-      - 'src/plugin/**'
+      - '.claude-plugin/**'
+      - '.mcp.json'
       - 'src/mcp-server.mjs'
       - 'src/hooks/**'
   workflow_dispatch:
@@ -94,7 +95,7 @@ jobs:
           set -euo pipefail
 
           INSTALL_DIR="$(pwd)"
-          PLUGIN_VERSION="$(python3 -c "import json; print(json.load(open('src/plugin/plugin.json'))['version'])")"
+          PLUGIN_VERSION="$(python3 -c "import json; print(json.load(open('.claude-plugin/plugin.json'))['version'])")"
           CLAUDE_HOME="$HOME/.claude"
           PLUGINS_CACHE="$CLAUDE_HOME/plugins/cache/local/cre-skills-plugin/$PLUGIN_VERSION"
           INSTALLED_PLUGINS="$CLAUDE_HOME/plugins/installed_plugins.json"
@@ -115,9 +116,12 @@ jobs:
             --exclude 'dist' --exclude '.venv' --exclude '.local' \
             --exclude 'src' --exclude 'builds' --exclude 'tools' --exclude 'config' \
             "$INSTALL_DIR/" "$PLUGINS_CACHE/"
-          # Create .claude-plugin/ layout expected by Claude Code
+          # rsync's second pass already copies $INSTALL_DIR/.claude-plugin/plugin.json
+          # into the cache root. Defensively recover from $INSTALL_DIR if missing.
           mkdir -p "$PLUGINS_CACHE/.claude-plugin"
-          cp "$PLUGINS_CACHE/plugin/plugin.json" "$PLUGINS_CACHE/.claude-plugin/plugin.json"
+          if [ ! -f "$PLUGINS_CACHE/.claude-plugin/plugin.json" ]; then
+            cp "$INSTALL_DIR/.claude-plugin/plugin.json" "$PLUGINS_CACHE/.claude-plugin/plugin.json"
+          fi
           echo "Plugin files copied to cache"
 
           # 2. Register in installed_plugins.json

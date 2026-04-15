@@ -15,7 +15,14 @@ const CONFIG_DIR = join(homedir(), '.cre-skills');
 const CONFIG_PATH = join(CONFIG_DIR, 'config.json');
 const TELEMETRY_PATH = join(CONFIG_DIR, 'telemetry.jsonl');
 
-// Matches skills/<slug>/SKILL.md pattern in any string field
+// Matches skills/<slug>/SKILL.md pattern in any string field.
+//
+// Note on hook firing:
+// hooks.json uses `matcher: "Read"`, which is the most specific tool-name
+// match Claude Code's hook config supports. Path-level filtering must happen
+// here in the hook body. Every Read call still spawns this Node process,
+// which is why the script short-circuits as early as possible (config first,
+// then stdin, then path regex).
 const SKILL_PATH_RE = /skills\/([^/]+)\/SKILL\.md/;
 
 function readConfig() {

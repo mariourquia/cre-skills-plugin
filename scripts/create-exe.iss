@@ -69,9 +69,10 @@ Source: "{#SourceDir}\src\lib\*"; DestDir: "{app}\lib"; Flags: ignoreversion rec
 Source: "{#SourceDir}\src\schemas\*"; DestDir: "{app}\schemas"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#SourceDir}\src\templates\*"; DestDir: "{app}\templates"; Flags: ignoreversion recursesubdirs createallsubdirs
 
-; Plugin manifest (from src/plugin/ -> .claude-plugin/)
-Source: "{#SourceDir}\src\plugin\plugin.json"; DestDir: "{app}\plugin"; Flags: ignoreversion
-Source: "{#SourceDir}\src\plugin\.mcp.json"; DestDir: "{app}\plugin"; Flags: ignoreversion
+; Plugin manifest (canonical source: .claude-plugin/plugin.json) and root MCP config.
+; The Install.ps1 verify step expects .claude-plugin\plugin.json in the cache.
+Source: "{#SourceDir}\.claude-plugin\plugin.json"; DestDir: "{app}\.claude-plugin"; Flags: ignoreversion
+Source: "{#SourceDir}\.mcp.json"; DestDir: "{app}"; Flags: ignoreversion
 
 ; Calculator scripts (from src/calculators/)
 Source: "{#SourceDir}\src\calculators\*"; DestDir: "{app}\calculators"; Flags: ignoreversion recursesubdirs createallsubdirs

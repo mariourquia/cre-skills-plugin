@@ -60,24 +60,23 @@ def _skip(msg: str) -> None:
 # ---------------------------------------------------------------------------
 
 def load_json(path: Path) -> dict | None:
-    """Load a JSON file, return None on any error."""
+    """Load a JSON file, return None on any error.
+
+    Uses utf-8-sig so a leading BOM written by Windows PowerShell 5.1's
+    Set-Content -Encoding UTF8 does not register as a parse failure.
+    """
     try:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, "r", encoding="utf-8-sig") as f:
             return json.load(f)
     except (OSError, json.JSONDecodeError, ValueError):
         return None
 
 
 def get_plugin_version(install_dir: Path) -> str:
-    """Read version from plugin.json (src/plugin/ or .claude-plugin/)."""
-    # Prefer src/plugin/ (canonical), fall back to .claude-plugin/ (symlink/cache)
-    for pj_path in [
-        install_dir / "src" / "plugin" / "plugin.json",
-        install_dir / ".claude-plugin" / "plugin.json",
-    ]:
-        data = load_json(pj_path)
-        if data and "version" in data:
-            return data["version"]
+    """Read version from .claude-plugin/plugin.json (canonical source)."""
+    data = load_json(install_dir / ".claude-plugin" / "plugin.json")
+    if data and "version" in data:
+        return data["version"]
     return ""
 
 
@@ -356,7 +355,7 @@ def main() -> int:
     version = get_plugin_version(install_dir)
     if not version:
         print()
-        _fail(f"Cannot read version from {install_dir / 'src' / 'plugin' / 'plugin.json'}")
+        _fail(f"Cannot read version from {install_dir / '.claude-plugin' / 'plugin.json'}")
         print()
         print(f"  Results: 0 passed, 1 failed, 0 skipped")
         return 1
