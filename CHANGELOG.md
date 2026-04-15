@@ -1,5 +1,41 @@
 # Changelog
 
+## [4.1.2] - 2026-04-13
+
+### Added
+- Install docs for Codex, Gemini, Grok, Manus targets
+- Cosign verification steps per target
+- Non-technical quickstart section in `docs/INSTALL.md`
+
+### Changed
+- Collapsed checksum/signing details into developer-only details blocks
+
+### Notes
+- Doc-only release; no plugin behavior changes
+
+## [4.1.1] - 2026-04-02
+
+### Added
+- Desktop and portable zip build targets in `release.yml`
+- Source archives attached to each release
+- Cosign signing for all release artifacts
+- Consolidated `SHA256SUMS` across targets
+
+### Changed
+- Release workflow produces 4 platform targets per tag (macOS DMG, Windows EXE, desktop zip, portable zip)
+
+## [4.1.0] - 2026-04-02
+
+### Added
+- Same-repo marketplace install path
+- Cowork install guidance (Desktop zip upload flow)
+- Structured installer telemetry (install start, success, failure, edge cases)
+
+### Fixed
+- `/doctor` now recognizes the plugin (`plugin.json` moved to repo root)
+- Windows installer verification and plugin cache layout
+- PS1 installer: step-by-step progress and structured error reporting
+
 ## [4.0.0] - 2026-04-02
 
 ### Added

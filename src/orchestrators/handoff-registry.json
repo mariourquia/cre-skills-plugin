@@ -517,11 +517,11 @@
     {
       "id": "research-to-strategy",
       "from": {
-        "orchestratorId": "market-research-intelligence",
+        "orchestratorId": "research-intelligence-orchestrator",
         "phase": "research-memo-production"
       },
       "to": {
-        "orchestratorId": "investment-strategy-formulator",
+        "orchestratorId": "investment-strategy-orchestrator",
         "phase": "market-cycle-positioning"
       },
       "trigger": "research.verdict == 'INVEST' OR research.verdict == 'MONITOR'",
@@ -571,7 +571,7 @@
     {
       "id": "strategy-to-acquisition",
       "from": {
-        "orchestratorId": "investment-strategy-formulator",
+        "orchestratorId": "investment-strategy-orchestrator",
         "phase": "strategy-memo-production"
       },
       "to": {
@@ -625,7 +625,7 @@
     {
       "id": "research-to-acquisition",
       "from": {
-        "orchestratorId": "market-research-intelligence",
+        "orchestratorId": "research-intelligence-orchestrator",
         "phase": "opportunity-identification"
       },
       "to": {
@@ -665,128 +665,6 @@
             "description": "Market cap rate ranges by submarket, asset class, and vintage from the submarket deep-dive phase. Provides the acquisition underwriting agent with market-validated cap rate benchmarks for valuation.",
             "sourcePhase": "submarket-deep-dive",
             "sourcePath": "capRateContext"
-          }
-        }
-      }
-    },
-    {
-      "id": "hold-period-to-pm",
-      "from": {
-        "orchestratorId": "hold-period-orchestrator",
-        "phase": "monitoring"
-      },
-      "to": {
-        "orchestratorId": "pm-operations-orchestrator",
-        "phase": "request-intake"
-      },
-      "trigger": "Any hold-period agent issues a PM request",
-      "description": "Routes operational requests from hold-period monitoring agents to the property management sub-pipeline. Hold-period agents (e.g., noi-intervention-planner, tenant-health-monitor, capex-execution-manager) may identify operational actions that require PM execution. This handoff packages the request with property context so the PM orchestrator can dispatch the appropriate PM specialist agent.",
-      "dataContract": {
-        "required": {
-          "request_type": {
-            "type": "string",
-            "required": true,
-            "description": "Classification of the PM request. Enum: maintenance, leasing, collections, vendor-procurement, tenant-communication, compliance-check, unit-turn, emergency-response. Determines which PM specialist agent receives the request.",
-            "sourcePhase": "monitoring",
-            "sourcePath": "pmRequest.requestType"
-          },
-          "property_id": {
-            "type": "string",
-            "required": true,
-            "description": "Unique property identifier linking the request to the correct asset in the PM system. Used for routing, threshold lookup, and reporting rollup.",
-            "sourcePhase": "monitoring",
-            "sourcePath": "pmRequest.propertyId"
-          },
-          "payload": {
-            "type": "object",
-            "required": true,
-            "description": "Request-type-specific payload. For maintenance: unit_id, issue_description, priority (P1-P4), reported_by. For leasing: unit_id, vacancy_date, target_rent, concession_authority. For collections: tenant_name, amount_due_usd, days_delinquent, prior_notices. For vendor-procurement: scope_of_work, budget_usd, bid_requirement. Shape varies by request_type.",
-            "sourcePhase": "monitoring",
-            "sourcePath": "pmRequest.payload"
-          },
-          "requesting_agent": {
-            "type": "string",
-            "required": true,
-            "description": "Agent ID of the hold-period agent originating the PM request. Used for audit trail and response routing back to the correct hold-period agent.",
-            "sourcePhase": "monitoring",
-            "sourcePath": "pmRequest.requestingAgent"
-          }
-        },
-        "optional": {
-          "urgency": {
-            "type": "string",
-            "required": false,
-            "description": "Urgency classification for PM dispatch prioritization. Enum: critical (same-day), high (48h), standard (1 week), low (next scheduled cycle). Defaults to standard if omitted.",
-            "sourcePhase": "monitoring",
-            "sourcePath": "pmRequest.urgency"
-          },
-          "budget_authority": {
-            "type": "number",
-            "required": false,
-            "description": "Pre-approved budget in USD that the PM agent may spend without requiring hold-period escalation. Derived from the asset manager's delegation of authority matrix.",
-            "sourcePhase": "monitoring",
-            "sourcePath": "pmRequest.budgetAuthority"
-          }
-        }
-      }
-    },
-    {
-      "id": "pm-to-hold-period",
-      "from": {
-        "orchestratorId": "pm-operations-orchestrator",
-        "phase": "request-completion"
-      },
-      "to": {
-        "orchestratorId": "hold-period-orchestrator",
-        "phase": "monitoring"
-      },
-      "trigger": "PM module completes a request",
-      "description": "Returns PM execution results to the hold-period monitor so it can update property performance metrics, close open action items, and incorporate operational outcomes into the next monitoring cycle. Each PM response includes status, payload, and data quality indicators.",
-      "dataContract": {
-        "required": {
-          "request_id": {
-            "type": "string",
-            "required": true,
-            "description": "Unique identifier of the original PM request being fulfilled. Links the response to the originating hold-period action item for status tracking and audit trail.",
-            "sourcePhase": "request-completion",
-            "sourcePath": "pmResponse.requestId"
-          },
-          "status": {
-            "type": "string",
-            "required": true,
-            "description": "Completion status of the PM request. Enum: completed, in-progress, escalated, failed, deferred. Determines whether the hold-period monitor closes the action item or escalates.",
-            "sourcePhase": "request-completion",
-            "sourcePath": "pmResponse.status"
-          },
-          "payload": {
-            "type": "object",
-            "required": true,
-            "description": "Response payload specific to the request type. For maintenance: work_order_id, resolution_description, cost_actual_usd, completion_date. For leasing: lease_executed (boolean), tenant_name, effective_rent, lease_term_months. For collections: amount_collected_usd, payment_plan (object or null), legal_action_initiated (boolean). Shape varies by original request_type.",
-            "sourcePhase": "request-completion",
-            "sourcePath": "pmResponse.payload"
-          },
-          "data_quality": {
-            "type": "object",
-            "required": true,
-            "description": "Data quality indicators for the response. Fields: completeness (decimal 0-1), source_system (string, e.g. yardi/appfolio/manual), last_updated (ISO 8601), confidence (high/medium/low). Enables the hold-period monitor to weight PM data appropriately in performance calculations.",
-            "sourcePhase": "request-completion",
-            "sourcePath": "pmResponse.dataQuality"
-          }
-        },
-        "optional": {
-          "financial_impact": {
-            "type": "object",
-            "required": false,
-            "description": "Quantified financial impact of the PM action on property economics. Fields: noi_impact_monthly_usd (number, positive for improvement), capex_spent_usd (number), budget_line_item (string), variance_from_budget_pct (decimal). Feeds directly into the hold-period performance analyst's next variance calculation.",
-            "sourcePhase": "request-completion",
-            "sourcePath": "pmResponse.financialImpact"
-          },
-          "follow_up_required": {
-            "type": "object",
-            "required": false,
-            "description": "Any follow-up actions needed from the hold-period side. Fields: action_description (string), due_date (ISO 8601), responsible_agent (string), escalation_required (boolean). Creates a new action item in the hold-period monitor's queue.",
-            "sourcePhase": "request-completion",
-            "sourcePath": "pmResponse.followUp"
           }
         }
       }
@@ -974,7 +852,7 @@
         "phase": "rebalancing"
       },
       "to": {
-        "orchestratorId": "investment-strategy-formulator",
+        "orchestratorId": "investment-strategy-orchestrator",
         "phase": "allocation-review"
       },
       "trigger": "Portfolio management produces rebalancing recommendations",
