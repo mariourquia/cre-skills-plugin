@@ -350,11 +350,45 @@ jobs:
           TAG_NAME: ${{ github.ref_name }}
           REPO: ${{ github.repository }}
         run: |
-          gh api "repos/${REPO}/releases/generate-notes" \
-            -f tag_name="$TAG_NAME" \
-            --jq '.body' > /tmp/auto-notes.md 2>/dev/null || echo "" > /tmp/auto-notes.md
+          CLEAN_VERSION="${TAG_NAME#v}"
 
-          cat > /tmp/release-notes.md << 'HEADER'
+          # Look for pre-written release-engineer notes
+          RE_NOTES=""
+          for candidate in \
+            "docs/releases/${TAG_NAME}-release-notes.md" \
+            "docs/releases/v${CLEAN_VERSION}-release-notes.md" \
+            "docs/generated/RELEASE_NOTES_${TAG_NAME}.md" \
+            "docs/generated/RELEASE_NOTES_v${CLEAN_VERSION}.md"; do
+            if [ -f "$candidate" ]; then
+              RE_NOTES="$candidate"
+              break
+            fi
+          done
+
+          if [ -z "$RE_NOTES" ]; then
+            echo "::error::No /release-engineer notes found for ${TAG_NAME}. Run /release-engineer and commit the notes before tagging. Searched: docs/releases/ and docs/generated/"
+            exit 1
+          fi
+
+          # Start with ASCII art banner
+          ASCII_FILE="docs/assets/cre-skills-ascii.txt"
+          {
+            echo '```'
+            if [ -f "$ASCII_FILE" ]; then
+              cat "$ASCII_FILE"
+            fi
+            echo ""
+            echo "                              ${TAG_NAME}"
+            echo '```'
+            echo ""
+          } > /tmp/release-notes.md
+
+          # Append release-engineer notes (strip YAML frontmatter if present)
+          sed '/^---$/,/^---$/d' "$RE_NOTES" >> /tmp/release-notes.md
+          echo "" >> /tmp/release-notes.md
+
+          # Append install section
+          cat >> /tmp/release-notes.md << 'INSTALL'
           ## Install
 
           **Marketplace (recommended):**
@@ -367,11 +401,14 @@ jobs:
 
           **Cowork:** Download `cre-skills-cowork.zip` and upload via Customize > Browse plugins.
 
-          See [README](https://github.com/mariourquia/cre-skills-plugin#install) for all install methods.
+          See [docs/INSTALL.md](https://github.com/mariourquia/cre-skills-plugin/blob/main/docs/INSTALL.md) for all install methods.
 
-          HEADER
+          INSTALL
 
-          cat /tmp/auto-notes.md >> /tmp/release-notes.md
+          # Append auto-generated changelog
+          gh api "repos/${REPO}/releases/generate-notes" \
+            -f tag_name="$TAG_NAME" \
+            --jq '.body' >> /tmp/release-notes.md 2>/dev/null || true
 
       - name: Create release and upload assets
         env:

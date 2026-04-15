@@ -52,14 +52,14 @@
     },
     "feedback_mode": {
       "type": "string",
-      "description": "Feedback submission mode",
+      "description": "Feedback submission mode. Default ask_each_time prompts for consent per submission; local_only suppresses all remote sends; anonymous_remote and remote_with_contact enable telemetry with or without contact info.",
       "enum": [
         "local_only",
         "ask_each_time",
         "anonymous_remote",
         "remote_with_contact"
       ],
-      "default": "local_only"
+      "default": "ask_each_time"
     },
     "brand_name": {
       "type": "string",
