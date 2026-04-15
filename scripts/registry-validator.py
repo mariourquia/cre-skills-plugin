@@ -344,7 +344,7 @@ def validate_stale_versions() -> list[str]:
 
     # Files to scan (exclude history files and files with legitimate prior-version context)
     exempt = {"CHANGELOG.md", "NOTICE", "LICENSE"}
-    exempt_dirs = {"docs/releases", "docs/plans"}
+    exempt_dirs = {"docs/releases", "docs/plans", "docs/adr", "session_state"}
     # Files that legitimately reference prior versions (migration tables, examples)
     exempt_contextual = {
         "scripts/create-dmg.sh",   # example command in header comment

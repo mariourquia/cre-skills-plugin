@@ -47,7 +47,7 @@ A Claude plugin delivering **112 institutional-grade commercial real estate skil
 
 ---
 
-## What's New in v4.0.0
+## What's New in v4.1.2
 
 **Catalog-driven architecture**: Single source of truth (`src/catalog/catalog.yaml`, 203 items). Every public surface -- README stats, plugin.json, hooks prompt, routing table, registry -- is generated from the catalog. CI catches drift.
 

@@ -1,12 +1,12 @@
 version: 1.0.0
-generated_at: '2026-04-02T16:24:36.181305+00:00'
-plugin_version: 4.0.0
+generated_at: '2026-04-15T04:34:38.506735+00:00'
+plugin_version: 4.1.2
 items:
 - id: 1031-exchange-executor
   display_name: 1031 Exchange Executor
   type: skill
   status: stable
-  source_path: skills/1031-exchange-executor/SKILL.md
+  source_path: src/skills/1031-exchange-executor/SKILL.md
   domain: 03-deal-structuring
   persona: Designs and executes comprehensive 1031 tax-deferred exchange strategies. Manages 45-day identification and 180-day
     exchange deadlines, evaluates replacement property candidates, prevents common excha
@@ -36,7 +36,7 @@ items:
   display_name: 1031 Pipeline Manager
   type: skill
   status: stable
-  source_path: skills/1031-pipeline-manager/SKILL.md
+  source_path: src/skills/1031-pipeline-manager/SKILL.md
   domain: 03-deal-structuring
   persona: 'Manages active 1031 exchange pipelines: 45-day identification tracking, 180-day close deadline management, replacement
     property candidate evaluation, boot minimization, reverse exchange mechanics, QI '
@@ -68,7 +68,7 @@ items:
   display_name: Acquisition Underwriting Engine
   type: skill
   status: stable
-  source_path: skills/acquisition-underwriting-engine/SKILL.md
+  source_path: src/skills/acquisition-underwriting-engine/SKILL.md
   domain: 02-underwriting-analysis
   persona: 'Full-cycle acquisition underwriting engine. Takes a deal package (rent roll, T-12, OM, financing terms) and produces
     institutional-quality output: T-12 normalization, 10-year proforma, Linneman cap ra'
@@ -108,7 +108,7 @@ items:
   display_name: Annual Budget Engine
   type: skill
   status: stable
-  source_path: skills/annual-budget-engine/SKILL.md
+  source_path: src/skills/annual-budget-engine/SKILL.md
   domain: 07-asset-management
   persona: Produces institutional-quality annual operating budgets with IREM/BOMA benchmarking, component-specific escalators,
     NOI sensitivity grids, budget-to-value linkage, reserve adequacy testing, and IC cha
@@ -140,7 +140,7 @@ items:
   display_name: Asset Operations Cockpit
   type: skill
   status: stable
-  source_path: skills/asset-ops-cockpit/SKILL.md
+  source_path: src/skills/asset-ops-cockpit/SKILL.md
   domain: cross-cutting
   persona: Top-level workspace for ongoing asset management and property operations. Routes through budgeting, performance
     monitoring, capex, NOI optimization, compliance, maintenance, and vendor management. Man
@@ -165,7 +165,7 @@ items:
   display_name: Building Systems Maintenance Manager
   type: skill
   status: stable
-  source_path: skills/building-systems-maintenance-manager/SKILL.md
+  source_path: src/skills/building-systems-maintenance-manager/SKILL.md
   domain: 16-daily-operations
   persona: Building systems monitoring, preventive maintenance program management, equipment lifecycle tracking, inspection
     coordination, and compliance documentation. Covers HVAC, elevator, fire/life safety, ro
@@ -195,7 +195,7 @@ items:
   display_name: CAM Reconciliation Calculator
   type: skill
   status: stable
-  source_path: skills/cam-reconciliation-calculator/SKILL.md
+  source_path: src/skills/cam-reconciliation-calculator/SKILL.md
   domain: 16-daily-operations
   persona: Calculates annual CAM reconciliation for multi-tenant commercial properties. Applies per-tenant lease rules (base
     years, caps, excluded categories, admin fees), handles gross-up logic, flags edge case
@@ -229,7 +229,7 @@ items:
   display_name: CapEx Prioritizer
   type: skill
   status: stable
-  source_path: skills/capex-prioritizer/SKILL.md
+  source_path: src/skills/capex-prioritizer/SKILL.md
   domain: 07-asset-management
   persona: Evaluates competing capital expenditure projects using IRR/NPV, interaction effects, residual value at disposition,
     covenant impact, replacement cost benchmarking, and 'do nothing' deferral cost analy
@@ -262,7 +262,7 @@ items:
   display_name: Capital Projects & Development
   type: skill
   status: stable
-  source_path: skills/capital-projects-development/SKILL.md
+  source_path: src/skills/capital-projects-development/SKILL.md
   domain: cross-cutting
   persona: 'Top-level workspace for development and construction projects. Routes through land analysis, pro forma modeling,
     entitlements, budgeting, cost estimation, project management, and procurement. Manages '
@@ -286,7 +286,7 @@ items:
   display_name: Capital Raise Machine
   type: skill
   status: stable
-  source_path: skills/capital-raise-machine/SKILL.md
+  source_path: src/skills/capital-raise-machine/SKILL.md
   domain: 09-investor-relations
   persona: 'Produces the full operational infrastructure for an active capital raise: data room structure, investor tracking,
     capital call notices, LP onboarding workflow, waterfall explainer, and crisis communic'
@@ -316,7 +316,7 @@ items:
   display_name: Capital Stack Optimizer
   type: skill
   status: stable
-  source_path: skills/capital-stack-optimizer/SKILL.md
+  source_path: src/skills/capital-stack-optimizer/SKILL.md
   domain: 05-capital-markets
   persona: Synthesizes outputs from loan-sizing-engine, mezz-pref-structurer, and JV waterfall to determine the optimal capital
     mix for a CRE deal. Evaluates 3-5 alternatives across WACC, equity IRR, leverage se
@@ -348,7 +348,7 @@ items:
   display_name: Carbon Audit & BPS Compliance
   type: skill
   status: stable
-  source_path: skills/carbon-audit-compliance/SKILL.md
+  source_path: src/skills/carbon-audit-compliance/SKILL.md
   domain: 14-esg-climate
   persona: Conducts building-level carbon audit, benchmarks against local Building Performance Standards (NYC LL97, DC BEPS,
     Boston BERDO 2.0, Denver, Colorado, Maryland, St. Louis), calculates penalty exposure,
@@ -380,7 +380,7 @@ items:
   display_name: Climate Risk Assessment
   type: skill
   status: stable
-  source_path: skills/climate-risk-assessment/SKILL.md
+  source_path: src/skills/climate-risk-assessment/SKILL.md
   domain: 14-esg-climate
   persona: Assesses physical and transition climate risk for CRE properties and portfolios. Translates hazard exposure (flood,
     wind, wildfire, extreme heat, sea level rise) and regulatory/market shifts into fina
@@ -413,7 +413,7 @@ items:
   display_name: Closing Checklist Tracker
   type: skill
   status: stable
-  source_path: skills/closing-checklist-tracker/SKILL.md
+  source_path: src/skills/closing-checklist-tracker/SKILL.md
   domain: 16-daily-operations
   persona: Generates and tracks comprehensive closing checklists for CRE transactions (acquisitions, dispositions, refinancings).
     Backward-schedules deadlines from closing date, assigns responsibilities, identif
@@ -436,14 +436,14 @@ items:
   owner: Mario Urquia
   last_reviewed_at: null
   notes: ''
-  calculator_file: scripts/calculators/proration_calculator.py
+  calculator_file: src/calculators/proration_calculator.py
   priority: P1
   version: 0.1.0
 - id: coi-compliance-checker
   display_name: COI Compliance Checker
   type: skill
   status: stable
-  source_path: skills/coi-compliance-checker/SKILL.md
+  source_path: src/skills/coi-compliance-checker/SKILL.md
   domain: 16-daily-operations
   persona: 'Validates certificates of insurance against lease and contract requirements. Compares coverage types, limits,
     endorsements, and expiration dates field-by-field, flags deficiencies, and generates cure '
@@ -474,7 +474,7 @@ items:
   display_name: Comp Snapshot
   type: skill
   status: stable
-  source_path: skills/comp-snapshot/SKILL.md
+  source_path: src/skills/comp-snapshot/SKILL.md
   domain: 06-market-research
   persona: Produces a fast, credible comparable analysis (rent comps and sales comps) for active deals, appraisal reviews,
     or pricing validation. Includes adjustment grids, confidence scoring, effective rent cal
@@ -507,7 +507,7 @@ items:
   display_name: Compliance & Regulatory Response Kit
   type: skill
   status: stable
-  source_path: skills/compliance-regulatory-response-kit/SKILL.md
+  source_path: src/skills/compliance-regulatory-response-kit/SKILL.md
   domain: 16-daily-operations
   persona: 'Building code violations, OSHA responses, ADA compliance, fire safety, environmental compliance during construction,
     entitlement tracking, community stakeholder communication. Triggers: code violation'
@@ -536,7 +536,7 @@ items:
   display_name: Construction Budget & GC Contract Analyzer
   type: skill
   status: stable
-  source_path: skills/construction-budget-gc-analyzer/SKILL.md
+  source_path: src/skills/construction-budget-gc-analyzer/SKILL.md
   domain: 10-development
   persona: 'Benchmarks a GC''s construction budget against market costs by CSI division, evaluates contract structure (GMP
     vs. cost-plus vs. stipulated sum), reviews GC fee and general conditions, and establishes '
@@ -566,7 +566,7 @@ items:
   display_name: Construction Cost Estimator
   type: skill
   status: stable
-  source_path: skills/construction-cost-estimator/SKILL.md
+  source_path: src/skills/construction-cost-estimator/SKILL.md
   domain: 10-development
   persona: Produces ground-up construction cost estimates by CSI MasterFormat division with regional adjustments, soft cost
     layering, contingency framework, and sensitivity analysis. Accepts floor plans, buildin
@@ -596,14 +596,14 @@ items:
   owner: Mario Urquia
   last_reviewed_at: null
   notes: ''
-  calculator_file: scripts/calculators/construction_estimator.py
+  calculator_file: src/calculators/construction_estimator.py
   priority: P1
   version: 0.1.0
 - id: construction-procurement-contracts-engine
   display_name: Construction Procurement & Contracts Engine
   type: skill
   status: stable
-  source_path: skills/construction-procurement-contracts-engine/SKILL.md
+  source_path: src/skills/construction-procurement-contracts-engine/SKILL.md
   domain: 10-development
   persona: GC selection, bid leveling, GMP/lump sum negotiation, CO compliance, punch list management, and design team evaluation
     for Development Managers.
@@ -633,7 +633,7 @@ items:
   display_name: Construction Project Command Center
   type: skill
   status: stable
-  source_path: skills/construction-project-command-center/SKILL.md
+  source_path: src/skills/construction-project-command-center/SKILL.md
   domain: 10-development
   persona: Central command for ground-up development and major renovation projects. Manages RFIs, submittals, change orders,
     draw requests, schedule tracking, safety compliance, and lender reporting. Triggers on
@@ -665,7 +665,7 @@ items:
   display_name: Cost Segregation Analyzer
   type: skill
   status: stable
-  source_path: skills/cost-segregation-analyzer/SKILL.md
+  source_path: src/skills/cost-segregation-analyzer/SKILL.md
   domain: 13-tax-entity
   persona: 'Evaluates whether a cost segregation study is worth pursuing for a CRE property by estimating reclassifiable components,
     quantifying PV of accelerated depreciation, modeling recapture at disposition, '
@@ -696,7 +696,7 @@ items:
   display_name: CPI Rent Escalation Calculator
   type: skill
   status: stable
-  source_path: skills/cpi-escalation-calculator/SKILL.md
+  source_path: src/skills/cpi-escalation-calculator/SKILL.md
   domain: 16-daily-operations
   persona: 'Calculates CPI rent escalations per lease-specific clause definitions, handles year-over-year, cumulative-from-base,
     and compounded methods, applies floor/ceiling logic, generates tenant notification '
@@ -729,7 +729,7 @@ items:
   display_name: Creative Seller Financing
   type: skill
   status: stable
-  source_path: skills/creative-seller-financing/SKILL.md
+  source_path: src/skills/creative-seller-financing/SKILL.md
   domain: 03-deal-structuring
   persona: Structures non-traditional acquisition financing using seller participation (carryback notes, master leases, earnouts,
     JV contributions) and analyzes loan assumption vs. new financing decisions. Quant
@@ -759,7 +759,7 @@ items:
   display_name: Crisis & Special Situations Playbook
   type: skill
   status: stable
-  source_path: skills/crisis-special-situations-playbook/SKILL.md
+  source_path: src/skills/crisis-special-situations-playbook/SKILL.md
   domain: 16-daily-operations
   persona: 'Emergency response for CRE special situations: environmental remediation, condemnation, tenant bankruptcy, partnership
     disputes, fund wind-down, side letter negotiation. Triggers: crisis, remediation,'
@@ -788,7 +788,7 @@ items:
   display_name: DD Command Center
   type: skill
   status: stable
-  source_path: skills/dd-command-center/SKILL.md
+  source_path: src/skills/dd-command-center/SKILL.md
   domain: 04-due-diligence
   persona: Generates a comprehensive, timeline-driven due diligence plan for commercial property acquisitions with 6 workstream
     checklists, risk matrix, third-party report ordering guide, decision gates, closing
@@ -822,7 +822,7 @@ items:
   display_name: Deal Attribution Tracker
   type: skill
   status: stable
-  source_path: skills/deal-attribution-tracker/SKILL.md
+  source_path: src/skills/deal-attribution-tracker/SKILL.md
   domain: 15-portfolio-strategy
   persona: 'Tracks deal-level performance attribution and GP carry across a multi-deal fund: realized vs unrealized returns,
     carry waterfall across full fund, clawback exposure, deal team attribution, and GP co-i'
@@ -855,7 +855,7 @@ items:
   display_name: Deal Intake
   type: skill
   status: stable
-  source_path: skills/deal-intake/SKILL.md
+  source_path: src/skills/deal-intake/SKILL.md
   domain: cross-cutting
   persona: Top-level workspace for deal evaluation. Routes through screening, underwriting, structuring, and IC presentation.
     Manages persistent deal context across sessions.
@@ -878,7 +878,7 @@ items:
   display_name: Deal QuickScreen
   type: skill
   status: stable
-  source_path: skills/deal-quick-screen/SKILL.md
+  source_path: src/skills/deal-quick-screen/SKILL.md
   domain: 01-deal-screening
   persona: Fast go/no-go screening tool for inbound CRE deals. Takes a raw OM, broker email, or listing and returns a KEEP/KILL
     verdict with back-of-napkin returns, key assumptions, and a diligence checklist. Tr
@@ -903,14 +903,14 @@ items:
   owner: Mario Urquia
   last_reviewed_at: null
   notes: ''
-  calculator_file: scripts/calculators/quick_screen.py
+  calculator_file: src/calculators/quick_screen.py
   priority: P0
   version: 0.1.0
 - id: deal-underwriting-assistant
   display_name: Deal Underwriting Assistant
   type: skill
   status: stable
-  source_path: skills/deal-underwriting-assistant/SKILL.md
+  source_path: src/skills/deal-underwriting-assistant/SKILL.md
   domain: existing-deployed
   persona: Lightweight deal underwriting for single-asset CRE transactions. Computes going-in cap rate, stabilized cap, CoC
     return, DSCR, levered/unlevered IRR, equity multiple, and breakeven occupancy. Runs 2-w
@@ -940,7 +940,7 @@ items:
   display_name: Debt Covenant Compliance Monitor
   type: skill
   status: stable
-  source_path: skills/debt-covenant-monitor/SKILL.md
+  source_path: src/skills/debt-covenant-monitor/SKILL.md
   domain: 16-daily-operations
   persona: Calculates DSCR, LTV, occupancy, and debt yield per loan-specific definitions, projects forward to catch breaches
     before they happen, and generates lender compliance certificates.
@@ -967,14 +967,14 @@ items:
   owner: Mario Urquia
   last_reviewed_at: null
   notes: ''
-  calculator_file: scripts/calculators/covenant_tester.py
+  calculator_file: src/calculators/covenant_tester.py
   priority: P0
   version: 0.1.0
 - id: debt-portfolio-monitor
   display_name: Debt Portfolio Monitor
   type: skill
   status: stable
-  source_path: skills/debt-portfolio-monitor/SKILL.md
+  source_path: src/skills/debt-portfolio-monitor/SKILL.md
   domain: 05-capital-markets
   persona: Builds and maintains an institutional-quality CRE debt fund portfolio monitoring framework. Produces traffic-light
     dashboard, watchlist with objective triggers, maturity wall analysis, concentration t
@@ -1004,7 +1004,7 @@ items:
   display_name: Development Pro Forma Engine
   type: skill
   status: stable
-  source_path: skills/dev-proforma-engine/SKILL.md
+  source_path: src/skills/dev-proforma-engine/SKILL.md
   domain: 10-development
   persona: Builds a full ground-up development pro forma at monthly granularity from land closing through construction, lease-up,
     and stabilization. Produces TDC budget, monthly draw schedule with compounding in
@@ -1039,7 +1039,7 @@ items:
   display_name: Disposition Prep Kit
   type: skill
   status: stable
-  source_path: skills/disposition-prep-kit/SKILL.md
+  source_path: src/skills/disposition-prep-kit/SKILL.md
   domain: 11-disposition
   persona: 'Produces a complete disposition preparation package: T-12 normalization, rent roll scrub, data room index, buyer
     Q&A, retrade defense, broker selection, marketing timeline, value story, and buyer targ'
@@ -1072,7 +1072,7 @@ items:
   display_name: Disposition Strategy Engine
   type: skill
   status: stable
-  source_path: skills/disposition-strategy-engine/SKILL.md
+  source_path: src/skills/disposition-strategy-engine/SKILL.md
   domain: 11-disposition
   persona: Produces a comprehensive sell/hold/refinance analysis with market cycle positioning, tax impact quantification,
     marginal return on equity, buyer universe assessment, and 15 selectable disposition scen
@@ -1112,7 +1112,7 @@ items:
   display_name: Distressed Acquisition Playbook
   type: skill
   status: stable
-  source_path: skills/distressed-acquisition-playbook/SKILL.md
+  source_path: src/skills/distressed-acquisition-playbook/SKILL.md
   domain: 04-due-diligence
   persona: Generates a comprehensive acquisition strategy for distressed CRE assets acquired through REO, note purchase, special
     servicing, receivership, or bankruptcy. Covers compressed DD, valuation waterfall,
@@ -1144,7 +1144,7 @@ items:
   display_name: Distribution Notice Generator
   type: skill
   status: stable
-  source_path: skills/distribution-notice-generator/SKILL.md
+  source_path: src/skills/distribution-notice-generator/SKILL.md
   domain: 09-investor-relations
   persona: Generates individual LP distribution notices with per-investor share calculations, tax characterization, waterfall
     tier explanation, and batch processing for 50-200+ investors.
@@ -1173,7 +1173,7 @@ items:
   display_name: Emerging Manager Evaluator
   type: skill
   status: stable
-  source_path: skills/emerging-manager-evaluator/SKILL.md
+  source_path: src/skills/emerging-manager-evaluator/SKILL.md
   domain: 09-investor-relations
   persona: Evaluates first-time and second-time CRE fund managers for institutional LP allocation. Different benchmarks, operational
     DD emphasis, team pedigree assessment, and track record reconstruction from pr
@@ -1205,7 +1205,7 @@ items:
   display_name: Entitlement & Zoning Feasibility Assessment
   type: skill
   status: stable
-  source_path: skills/entitlement-feasibility/SKILL.md
+  source_path: src/skills/entitlement-feasibility/SKILL.md
   domain: 10-development
   persona: Assesses whether a proposed development is achievable under current zoning or requires discretionary approvals,
     quantifies entitlement risk (timeline, cost, probability), and calculates entitlement va
@@ -1236,7 +1236,7 @@ items:
   display_name: Estoppel Certificate Generator
   type: skill
   status: stable
-  source_path: skills/estoppel-certificate-generator/SKILL.md
+  source_path: src/skills/estoppel-certificate-generator/SKILL.md
   domain: 16-daily-operations
   persona: Automates estoppel certificate population for CRE transactions. Performs three-way cross-reference (lease vs. rent
     roll vs. GL), flags every discrepancy before certificates reach tenants, generates co
@@ -1269,7 +1269,7 @@ items:
   display_name: Fund Formation Toolkit
   type: skill
   status: stable
-  source_path: skills/fund-formation-toolkit/SKILL.md
+  source_path: src/skills/fund-formation-toolkit/SKILL.md
   domain: 09-investor-relations
   persona: End-to-end fund formation toolkit covering entity structuring (syndication vs. fund vs. REIT), PPM drafting guidance
     with Reg D compliance, GP economics and key terms, and K-1/tax coordination includi
@@ -1302,7 +1302,7 @@ items:
   display_name: Fund & LP Reporting
   type: skill
   status: stable
-  source_path: skills/fund-lp-reporting/SKILL.md
+  source_path: src/skills/fund-lp-reporting/SKILL.md
   domain: cross-cutting
   persona: 'Top-level workspace for fund management and LP communications. Routes through fund formation, investor updates,
     pitch decks, capital raises, lifecycle management, compliance, performance attribution, '
@@ -1326,7 +1326,7 @@ items:
   display_name: Fund Operations Compliance Dashboard
   type: skill
   status: stable
-  source_path: skills/fund-operations-compliance-dashboard/SKILL.md
+  source_path: src/skills/fund-operations-compliance-dashboard/SKILL.md
   domain: 09-investor-relations
   persona: 'Institutional fund management operations: regulatory compliance monitoring, fee calculations, capital account
     statements, subscription processing, AML/KYC, Form D filings, LPAC governance, and fund ex'
@@ -1357,7 +1357,7 @@ items:
   display_name: Fund Raise Negotiation Engine
   type: skill
   status: stable
-  source_path: skills/fund-raise-negotiation-engine/SKILL.md
+  source_path: src/skills/fund-raise-negotiation-engine/SKILL.md
   domain: 09-investor-relations
   persona: Tracks LP-by-LP capital raise negotiations with persistent state, models fee concession impact in real-time including
     MFN cascade analysis, and maintains a live ledger of blended fund economics as com
@@ -1385,14 +1385,14 @@ items:
   owner: Mario Urquia
   last_reviewed_at: null
   notes: ''
-  calculator_file: scripts/calculators/fund_fee_modeler.py
+  calculator_file: src/calculators/fund_fee_modeler.py
   priority: P0
   version: 0.1.0
 - id: fund-terms-comparator
   display_name: Fund Terms Comparator
   type: skill
   status: stable
-  source_path: skills/fund-terms-comparator/SKILL.md
+  source_path: src/skills/fund-terms-comparator/SKILL.md
   domain: investor-relations
   persona: Compare fund terms against market norms and produce a terms comparison matrix with fee load analysis and negotiation
     recommendations. Benchmarks management fee, carried interest, preferred return, cla
@@ -1422,7 +1422,7 @@ items:
   display_name: Funds Flow Calculator
   type: skill
   status: stable
-  source_path: skills/funds-flow-calculator/SKILL.md
+  source_path: src/skills/funds-flow-calculator/SKILL.md
   domain: closing
   persona: Calculate and verify funds flow, prorations, wire instructions, and the settlement statement for CRE acquisition
     closings. Branches by all-cash vs. financed (single tranche vs. multiple), 1031 exchang
@@ -1452,7 +1452,7 @@ items:
   display_name: GP Performance Evaluator
   type: skill
   status: stable
-  source_path: skills/gp-performance-evaluator/SKILL.md
+  source_path: src/skills/gp-performance-evaluator/SKILL.md
   domain: investor-relations
   persona: 'Analyze General Partner performance against vintage peer benchmarks. Computes fee drag (gross-to-net spread),
     DPI/TVPI/IRR vs vintage peers, deal-level return dispersion, key person risk, style drift '
@@ -1483,7 +1483,7 @@ items:
   display_name: IC Memo Generator
   type: skill
   status: stable
-  source_path: skills/ic-memo-generator/SKILL.md
+  source_path: src/skills/ic-memo-generator/SKILL.md
   domain: 09-investor-relations
   persona: 'Produces a complete investment committee memo from underwriting outputs: 1-page executive summary with risk-adjusted
     return framing, full 6-section IC memo body, sensitivity grids, and property-type v'
@@ -1522,7 +1522,7 @@ items:
   display_name: Insurance & Risk Manager
   type: skill
   status: stable
-  source_path: skills/insurance-risk-manager/SKILL.md
+  source_path: src/skills/insurance-risk-manager/SKILL.md
   domain: 16-daily-operations
   persona: Insurance program review, coverage adequacy testing, contractor insurance verification, builder's risk/OCIP/CCIP
     evaluation, and property tax escrow management for AM, PM, and Development.
@@ -1551,7 +1551,7 @@ items:
   display_name: Investor Lifecycle Manager
   type: skill
   status: stable
-  source_path: skills/investor-lifecycle-manager/SKILL.md
+  source_path: src/skills/investor-lifecycle-manager/SKILL.md
   domain: 09-investor-relations
   persona: 'LP lifecycle management: investor meetings, benchmark comparison, cash management, audit coordination, re-up solicitation,
     GIPS composites, satisfaction tracking. Triggers: investor meeting, LP relati'
@@ -1581,7 +1581,7 @@ items:
   display_name: JV Waterfall Architect
   type: skill
   status: stable
-  source_path: skills/jv-waterfall-architect/SKILL.md
+  source_path: src/skills/jv-waterfall-architect/SKILL.md
   domain: 03-deal-structuring
   persona: 'Designs, calculates, and explains joint venture equity waterfall structures for GP/LP partnerships. Three modes:
     Structure (term sheet from scratch), Calculate (distributions under specific scenarios)'
@@ -1609,14 +1609,14 @@ items:
   owner: Mario Urquia
   last_reviewed_at: null
   notes: ''
-  calculator_file: scripts/calculators/waterfall_calculator.py
+  calculator_file: src/calculators/waterfall_calculator.py
   priority: P1
   version: 0.1.0
 - id: land-residual-hbu-analyzer
   display_name: Land Residual & HBU Analyzer
   type: skill
   status: stable
-  source_path: skills/land-residual-hbu-analyzer/SKILL.md
+  source_path: src/skills/land-residual-hbu-analyzer/SKILL.md
   domain: 10-development
   persona: Determines the maximum supportable land price by computing residual land value across multiple use types and selecting
     highest-and-best-use (HBU). Applies entitlement probability discounts, Linneman l
@@ -1646,7 +1646,7 @@ items:
   display_name: Lease Abstract Extractor
   type: skill
   status: stable
-  source_path: skills/lease-abstract-extractor/SKILL.md
+  source_path: src/skills/lease-abstract-extractor/SKILL.md
   domain: 16-daily-operations
   persona: Extracts structured data from commercial lease documents (30+ fields), flags ambiguous provisions for legal review,
     cross-references amendments, and builds the critical dates calendar. The single most
@@ -1679,7 +1679,7 @@ items:
   display_name: Lease Compliance Auditor
   type: skill
   status: stable
-  source_path: skills/lease-compliance-auditor/SKILL.md
+  source_path: src/skills/lease-compliance-auditor/SKILL.md
   domain: 07-asset-management
   persona: Unified lease administration compliance audit covering CAM reconciliation, percentage rent verification, insurance
     tracking, escalation audits, and environmental compliance. Quantifies revenue recover
@@ -1711,7 +1711,7 @@ items:
   display_name: Lease Document Factory
   type: skill
   status: stable
-  source_path: skills/lease-document-factory/SKILL.md
+  source_path: src/skills/lease-document-factory/SKILL.md
   domain: 08-leasing
   persona: Lease amendment drafting, standard lease template refresh, expansion/contraction option analysis, and build-to-suit
     proposal evaluation for Leasing and Asset Management.
@@ -1742,7 +1742,7 @@ items:
   display_name: Lease Negotiation Analyzer
   type: skill
   status: stable
-  source_path: skills/lease-negotiation-analyzer/SKILL.md
+  source_path: src/skills/lease-negotiation-analyzer/SKILL.md
   domain: 08-leasing
   persona: 'Consolidates 8 complex lease negotiation scenarios into a single skill with scenario selector: (a) anchor replacement
     with co-tenancy cascade, (b) trophy tower backfill, (c) naming rights valuation, ('
@@ -1776,7 +1776,7 @@ items:
   display_name: Lease Option Structurer
   type: skill
   status: stable
-  source_path: skills/lease-option-structurer/SKILL.md
+  source_path: src/skills/lease-option-structurer/SKILL.md
   domain: 08-leasing
   persona: Designs optimal lease option packages (renewal, expansion, contraction, termination, ROFO/ROFR, purchase) for asset
     managers negotiating with tenants. Models what different option packages look like b
@@ -1803,14 +1803,14 @@ items:
   owner: Mario Urquia
   last_reviewed_at: null
   notes: ''
-  calculator_file: scripts/calculators/option_valuation.py
+  calculator_file: src/calculators/option_valuation.py
   priority: P1
   version: 0.1.0
 - id: lease-strategy-papering
   display_name: Lease Strategy & Papering
   type: skill
   status: stable
-  source_path: skills/lease-strategy-papering/SKILL.md
+  source_path: src/skills/lease-strategy-papering/SKILL.md
   domain: cross-cutting
   persona: Top-level workspace for leasing workflows. Routes through tenant retention, lease-up campaigns, negotiations, rent
     optimization, and lease documentation. Manages persistent leasing context across sess
@@ -1834,7 +1834,7 @@ items:
   display_name: Lease Trade-Out Analyzer
   type: skill
   status: stable
-  source_path: skills/lease-trade-out-analyzer/SKILL.md
+  source_path: src/skills/lease-trade-out-analyzer/SKILL.md
   domain: 08-leasing
   persona: Analyzes whether to renew an existing tenant or trade out for a new one with full financial comparison. Models
     renewal economics (lower TI, no downtime, known credit) vs trade-out economics (market re
@@ -1859,14 +1859,14 @@ items:
   owner: Mario Urquia
   last_reviewed_at: null
   notes: ''
-  calculator_file: scripts/calculators/npv_trade_out.py
+  calculator_file: src/calculators/npv_trade_out.py
   priority: P1
   version: 0.1.0
 - id: lease-up-war-room
   display_name: Lease-Up War Room
   type: skill
   status: stable
-  source_path: skills/lease-up-war-room/SKILL.md
+  source_path: src/skills/lease-up-war-room/SKILL.md
   domain: 08-leasing
   persona: Generates a full-stack lease-up operations plan for new developments, major vacancies, or acquisitions requiring
     rapid absorption. Covers funnel diagnostics, pricing/concession strategy, broker commis
@@ -1897,7 +1897,7 @@ items:
   display_name: Leasing Operations Engine
   type: skill
   status: stable
-  source_path: skills/leasing-operations-engine/SKILL.md
+  source_path: src/skills/leasing-operations-engine/SKILL.md
   domain: 08-leasing
   persona: 'Front-of-house leasing operations: inquiry response, tour preparation, pipeline CRM management, space readiness
     coordination, listing management, commission tracking, and marketing ROI analysis. Trigg'
@@ -1927,7 +1927,7 @@ items:
   display_name: Leasing Strategy & Marketing Planner
   type: skill
   status: stable
-  source_path: skills/leasing-strategy-marketing-planner/SKILL.md
+  source_path: src/skills/leasing-strategy-marketing-planner/SKILL.md
   domain: 08-leasing
   persona: Marketing material creation, broker event planning, TI cost benchmarking, marketing plan development, and commission
     structure benchmarking for Leasing Directors.
@@ -1958,7 +1958,7 @@ items:
   display_name: Lender Compliance Certificate
   type: skill
   status: stable
-  source_path: skills/lender-compliance-certificate/SKILL.md
+  source_path: src/skills/lender-compliance-certificate/SKILL.md
   domain: 16-daily-operations
   persona: Prepares quarterly lender compliance certificates using loan-specific financial metric definitions. Calculates
     NOI, DSCR, debt yield, and occupancy per lender docs, populates certificate forms, genera
@@ -1989,7 +1989,7 @@ items:
   display_name: Loan Document Reviewer
   type: skill
   status: stable
-  source_path: skills/loan-document-reviewer/SKILL.md
+  source_path: src/skills/loan-document-reviewer/SKILL.md
   domain: legal
   persona: Review CRE loan documents for covenant compliance, carve-out exposure, cash management tripwires, and borrower
     obligations. Branch by loan type (agency, CMBS, bank, bridge, construction, mezzanine), r
@@ -2020,7 +2020,7 @@ items:
   display_name: Loan Sizing Engine
   type: skill
   status: stable
-  source_path: skills/loan-sizing-engine/SKILL.md
+  source_path: src/skills/loan-sizing-engine/SKILL.md
   domain: 05-capital-markets
   persona: Sizes CMBS and balance sheet CRE loans from raw property financials. Normalizes T-12 to lender-underwritten NCF,
     sizes against simultaneous DSCR/LTV/debt yield constraints, identifies the binding cons
@@ -2046,14 +2046,14 @@ items:
   owner: Mario Urquia
   last_reviewed_at: null
   notes: ''
-  calculator_file: scripts/calculators/debt_sizing.py
+  calculator_file: src/calculators/debt_sizing.py
   priority: P0
   version: 0.1.0
 - id: loi-offer-builder
   display_name: LOI & Offer Builder
   type: skill
   status: stable
-  source_path: skills/loi-offer-builder/SKILL.md
+  source_path: src/skills/loi-offer-builder/SKILL.md
   domain: 03-deal-structuring
   persona: Generates a complete, copy-paste-ready Letter of Intent with negotiation strategy memo, three-tier pricing table,
     ten non-price levers, seller psychology brief, and broker cover email. Triggers on 'dr
@@ -2086,7 +2086,7 @@ items:
   display_name: LP Data Request Generator
   type: skill
   status: stable
-  source_path: skills/lp-data-request-generator/SKILL.md
+  source_path: src/skills/lp-data-request-generator/SKILL.md
   domain: investor-relations
   persona: Generate structured data requests for Limited Partners to send to General Partners across all stages of the LP-GP
     relationship. Produces request templates for initial due diligence, quarterly monitori
@@ -2116,7 +2116,7 @@ items:
   display_name: LP Pitch Deck Builder
   type: skill
   status: stable
-  source_path: skills/lp-pitch-deck-builder/SKILL.md
+  source_path: src/skills/lp-pitch-deck-builder/SKILL.md
   domain: 09-investor-relations
   persona: Generates a complete LP pitch deck with slide-by-slide content, institutional-grade track record presentation,
     fee disclosure with worked waterfall examples, cycle positioning, and an investor objecti
@@ -2149,7 +2149,7 @@ items:
   display_name: Market Cycle Positioner
   type: skill
   status: stable
-  source_path: skills/market-cycle-positioner/SKILL.md
+  source_path: src/skills/market-cycle-positioner/SKILL.md
   domain: 06-market-research
   persona: Produces a comprehensive market cycle positioning report using the Mueller Real Estate Cycle model. Combines cycle
     timing analysis with capital markets intelligence (transaction volume, cap rate decom
@@ -2181,7 +2181,7 @@ items:
   display_name: Market Memo Generator
   type: skill
   status: stable
-  source_path: skills/market-memo-generator/SKILL.md
+  source_path: src/skills/market-memo-generator/SKILL.md
   domain: existing-deployed
   persona: Generates structured CRE market research memos covering MSA, submarket, and sector-level conditions. Synthesizes
     supply/demand fundamentals, rent trends, cap rate movements, capital markets conditions
@@ -2210,7 +2210,7 @@ items:
   display_name: Mezz / Pref Equity Structurer
   type: skill
   status: stable
-  source_path: skills/mezz-pref-structurer/SKILL.md
+  source_path: src/skills/mezz-pref-structurer/SKILL.md
   domain: 05-capital-markets
   persona: Structures mezzanine debt and preferred equity positions in the CRE capital stack. Sizes and prices subordinate
     tranches, drafts intercreditor frameworks, models downside recovery, builds cash managem
@@ -2241,7 +2241,7 @@ items:
   display_name: Monte Carlo Return Simulator
   type: skill
   status: stable
-  source_path: skills/monte-carlo-return-simulator/SKILL.md
+  source_path: src/skills/monte-carlo-return-simulator/SKILL.md
   domain: 02-underwriting-analysis
   persona: Stochastic simulation engine for CRE returns. Distributional inputs (not just point estimates), correlation matrices,
     1000+ trial simulation, percentile return reporting, probability of loss, and valu
@@ -2265,14 +2265,14 @@ items:
   owner: Mario Urquia
   last_reviewed_at: null
   notes: ''
-  calculator_file: scripts/calculators/monte_carlo_simulator.py
+  calculator_file: src/calculators/monte_carlo_simulator.py
   priority: P1
   version: 0.1.0
 - id: navigator
   display_name: Navigator
   type: skill
   status: stable
-  source_path: skills/navigator/SKILL.md
+  source_path: src/skills/navigator/SKILL.md
   domain: cross-cutting
   persona: Meta workspace that helps users find the right workspace or specialist skill. Runs the catalog-driven router and
     presents options. Acts as the default entry point for any CRE request that does not cle
@@ -2295,7 +2295,7 @@ items:
   display_name: NOI Sprint Plan
   type: skill
   status: stable
-  source_path: skills/noi-sprint-plan/SKILL.md
+  source_path: src/skills/noi-sprint-plan/SKILL.md
   domain: 07-asset-management
   persona: 'Generates a 90-day operational sprint plan to stabilize property operations and raise NOI through collections
     discipline, turnover acceleration, leasing velocity, and resident retention. Includes NOI '
@@ -2326,7 +2326,7 @@ items:
   display_name: OM Reverse Pricing
   type: skill
   status: stable
-  source_path: skills/om-reverse-pricing/SKILL.md
+  source_path: src/skills/om-reverse-pricing/SKILL.md
   domain: 01-deal-screening
   persona: Deconstructs an offering memorandum to expose the broker's embedded assumptions, reverse-engineers the purchase
     price needed to hit target returns, and produces a defensible bid range. Triggers on 're
@@ -2356,7 +2356,7 @@ items:
   display_name: Opportunity Zone Underwriter
   type: skill
   status: stable
-  source_path: skills/opportunity-zone-underwriter/SKILL.md
+  source_path: src/skills/opportunity-zone-underwriter/SKILL.md
   domain: 13-tax-entity
   persona: Evaluates whether investing capital gains into a Qualified Opportunity Zone Fund produces superior after-tax returns
     vs. a non-OZ alternative. Quantifies deferral, 10-year exclusion, compliance requir
@@ -2385,7 +2385,7 @@ items:
   display_name: Partnership Allocation Engine
   type: skill
   status: stable
-  source_path: skills/partnership-allocation-engine/SKILL.md
+  source_path: src/skills/partnership-allocation-engine/SKILL.md
   domain: 13-tax-entity
   persona: Structures and models Section 704(b) tax allocation provisions for real estate partnerships. Covers capital account
     maintenance, operating income/loss allocation, depreciation allocation, minimum gain
@@ -2418,7 +2418,7 @@ items:
   display_name: Performance Attribution
   type: skill
   status: stable
-  source_path: skills/performance-attribution/SKILL.md
+  source_path: src/skills/performance-attribution/SKILL.md
   domain: 15-portfolio-strategy
   persona: Decomposes fund or portfolio returns into income, appreciation, leverage, and alpha components. Attributes performance
     by vintage year, property type, and manager skill vs. market movement. Includes g
@@ -2451,7 +2451,7 @@ items:
   display_name: Plugin Admin
   type: skill
   status: stable
-  source_path: skills/plugin-admin/SKILL.md
+  source_path: src/skills/plugin-admin/SKILL.md
   domain: cross-cutting
   persona: Administrative workspace for plugin configuration, diagnostics, and maintenance. Routes to brand configuration,
     usage stats, feedback, problem reporting, catalog validation, router diagnostics, and wo
@@ -2474,7 +2474,7 @@ items:
   display_name: Portfolio Allocator
   type: skill
   status: stable
-  source_path: skills/portfolio-allocator/SKILL.md
+  source_path: src/skills/portfolio-allocator/SKILL.md
   domain: 15-portfolio-strategy
   persona: Portfolio-level allocation engine that maps current holdings by property type, geography, risk profile, and vintage
     year against institutional targets, identifies over/under-weights, runs concentratio
@@ -2511,7 +2511,7 @@ items:
   display_name: Post-Close Onboarding & Transition
   type: skill
   status: stable
-  source_path: skills/post-close-onboarding-transition/SKILL.md
+  source_path: src/skills/post-close-onboarding-transition/SKILL.md
   domain: 10-development
   persona: Post-acquisition asset onboarding to property management, TI project coordination, and development-to-stabilization
     transition bridging Acquisitions, PM, and Development.
@@ -2541,7 +2541,7 @@ items:
   display_name: Property Management Orchestrator
   type: skill
   status: stable
-  source_path: skills/property-management-orchestrator/SKILL.md
+  source_path: src/skills/property-management-orchestrator/SKILL.md
   domain: 07-asset-management
   persona: Deep property management command center that orchestrates all PM workflows across any asset type. Single entry
     point for tenant relations, maintenance operations, financial operations, vendor manageme
@@ -2575,7 +2575,7 @@ items:
   display_name: Property Operations & Admin Toolkit
   type: skill
   status: stable
-  source_path: skills/property-operations-admin-toolkit/SKILL.md
+  source_path: src/skills/property-operations-admin-toolkit/SKILL.md
   domain: 16-daily-operations
   persona: 'Operational administration for CRE properties: parking, common area inspections, landscaping, janitorial, work
     orders, tenant surveys, after-hours calls, directory management. Triggers: property opera'
@@ -2605,7 +2605,7 @@ items:
   display_name: Property Performance Dashboard
   type: skill
   status: stable
-  source_path: skills/property-performance-dashboard/SKILL.md
+  source_path: src/skills/property-performance-dashboard/SKILL.md
   domain: 07-asset-management
   persona: Produces monthly or quarterly property performance reports with T-12 trend analysis, budget variance escalation
     triggers, tenant health indicators, delinquency aging, same-store NOI tracking, and a ho
@@ -2638,7 +2638,7 @@ items:
   display_name: Property Tax Appeal Analyzer
   type: skill
   status: stable
-  source_path: skills/property-tax-appeal-analyzer/SKILL.md
+  source_path: src/skills/property-tax-appeal-analyzer/SKILL.md
   domain: 16-daily-operations
   persona: Evaluates whether a property tax assessment should be appealed, quantifies overassessment using income and sales
     comparison approaches, calculates tax savings and ROI, and drafts the appeal brief with
@@ -2666,7 +2666,7 @@ items:
   display_name: PSA Redline Strategy
   type: skill
   status: stable
-  source_path: skills/psa-redline-strategy/SKILL.md
+  source_path: src/skills/psa-redline-strategy/SKILL.md
   domain: 03-deal-structuring
   persona: 'Analyzes a Purchase & Sale Agreement draft, identifies problematic provisions, and produces a risk-tiered redline
     strategy with specific markup language, negotiation talking points, and a battle plan '
@@ -2695,7 +2695,7 @@ items:
   display_name: Quarterly Investor Update
   type: skill
   status: stable
-  source_path: skills/quarterly-investor-update/SKILL.md
+  source_path: src/skills/quarterly-investor-update/SKILL.md
   domain: 09-investor-relations
   persona: Generates professional, LP-ready quarterly investor update letters with portfolio-level attribution, per-asset
     performance summaries, NAV methodology disclosure, distribution reconciliation, market ou
@@ -2726,7 +2726,7 @@ items:
   display_name: Refinancing Decision Analyzer
   type: skill
   status: stable
-  source_path: skills/refi-decision-analyzer/SKILL.md
+  source_path: src/skills/refi-decision-analyzer/SKILL.md
   domain: 05-capital-markets
   persona: Comprehensive refinancing and maturity risk analysis combining borrower-side decision-making (hold vs. refi vs.
     sell vs. extend vs. walk away) with lender-side gap analysis, extension feasibility test
@@ -2758,7 +2758,7 @@ items:
   display_name: REIT Profile Builder
   type: skill
   status: stable
-  source_path: skills/reit-profile-builder/SKILL.md
+  source_path: src/skills/reit-profile-builder/SKILL.md
   domain: existing-deployed
   persona: Extracts and structures comprehensive REIT profiles from 10-K filings, supplemental data packages, earnings call
     transcripts, and investor presentations. Produces standardized property-type profiles c
@@ -2785,7 +2785,7 @@ items:
   display_name: Rent Optimization Planner
   type: skill
   status: stable
-  source_path: skills/rent-optimization-planner/SKILL.md
+  source_path: src/skills/rent-optimization-planner/SKILL.md
   domain: 08-leasing
   persona: Quantitative rent optimization framework with loss-to-lease waterfall analysis, renewal probability modeling, effective
     rent NPV comparison across aggressive/moderate/retention strategies, valuation i
@@ -2819,7 +2819,7 @@ items:
   display_name: Rent Roll Analyzer
   type: skill
   status: stable
-  source_path: skills/rent-roll-analyzer/SKILL.md
+  source_path: src/skills/rent-roll-analyzer/SKILL.md
   domain: 02-underwriting-analysis
   persona: 'Ingests raw rent rolls (pasted table, CSV, or PDF extract) and produces a clean dataset with layered analytics:
     rollover schedule, mark-to-market waterfall, tenant concentration risk, WALT, rent bench'
@@ -2849,7 +2849,7 @@ items:
   display_name: Rent Roll Formatter
   type: skill
   status: stable
-  source_path: skills/rent-roll-formatter/SKILL.md
+  source_path: src/skills/rent-roll-formatter/SKILL.md
   domain: 16-daily-operations
   persona: Standardizes rent roll data from any source format into a consistent underwriting template, validates data integrity
     (SF reconciliation, revenue reconciliation, date consistency, rent reasonableness),
@@ -2882,7 +2882,7 @@ items:
   display_name: SEC Regulation D Compliance
   type: skill
   status: stable
-  source_path: skills/sec-reg-d-compliance/SKILL.md
+  source_path: src/skills/sec-reg-d-compliance/SKILL.md
   domain: 09-investor-relations
   persona: 'SEC Regulation D compliance for CRE syndications: 506(b) vs 506(c) offering selection, accredited investor verification,
     Form D filing, state blue sky compliance, general solicitation rules, and subst'
@@ -2915,7 +2915,7 @@ items:
   display_name: Sensitivity & Stress Test Engine
   type: skill
   status: stable
-  source_path: skills/sensitivity-stress-test/SKILL.md
+  source_path: src/skills/sensitivity-stress-test/SKILL.md
   domain: 02-underwriting-analysis
   persona: 'Takes a completed base case underwriting and produces comprehensive sensitivity analysis, stress testing, and
     breakeven analysis. Generates tornado charts, multi-dimensional sensitivity grids, lender '
@@ -2946,7 +2946,7 @@ items:
   display_name: Small Operator PM
   type: skill
   status: stable
-  source_path: skills/small-operator-pm/SKILL.md
+  source_path: src/skills/small-operator-pm/SKILL.md
   domain: 07-asset-management
   persona: Daily property management operations for self-managing landlords and small operators (1-50 units). Tenant screening,
     rent collection, move-in/move-out inspections, maintenance scheduling, unit turnove
@@ -2978,7 +2978,7 @@ items:
   display_name: Sourcing & Outreach System
   type: skill
   status: stable
-  source_path: skills/sourcing-outreach-system/SKILL.md
+  source_path: src/skills/sourcing-outreach-system/SKILL.md
   domain: 12-deal-sourcing
   persona: 'Full-lifecycle CRE deal sourcing engine: target identification, lead scoring (0-100), multi-channel outreach (mail,
     call, email, LinkedIn), broker relationship cultivation, CRM pipeline schema, and KP'
@@ -3012,7 +3012,7 @@ items:
   display_name: Space Planning & Redesign Orchestrator
   type: skill
   status: stub
-  source_path: skills/space-planning-redesign-orchestrator/SKILL.md
+  source_path: src/skills/space-planning-redesign-orchestrator/SKILL.md
   domain: 07-asset-management
   persona: Multi-agent orchestrator for property managers planning space redesigns, repositioning, and amenity additions.
     Spawns specialist subagents for space programming, cost estimation, design mockups, tenan
@@ -3045,7 +3045,7 @@ items:
   display_name: Stacking Plan Builder
   type: skill
   status: stable
-  source_path: skills/stacking-plan-builder/SKILL.md
+  source_path: src/skills/stacking-plan-builder/SKILL.md
   domain: 16-daily-operations
   persona: Generates text-based stacking plans from rent rolls, providing floor-by-floor visual layout of tenant occupancy,
     lease expiration, contiguous availability analysis, rollover concentration, and prospec
@@ -3075,7 +3075,7 @@ items:
   display_name: Submarket Truth Serum
   type: skill
   status: stable
-  source_path: skills/submarket-truth-serum/SKILL.md
+  source_path: src/skills/submarket-truth-serum/SKILL.md
   domain: 06-market-research
   persona: Produces a decision-grade submarket brief that strips broker narratives to reveal what is actually happening in
     a market. IC-memo-ready output with no-fluff mandate, range-based forecasting, supply pi
@@ -3107,7 +3107,7 @@ items:
   display_name: Supply-Demand Forecast
   type: skill
   status: stable
-  source_path: skills/supply-demand-forecast/SKILL.md
+  source_path: src/skills/supply-demand-forecast/SKILL.md
   domain: 06-market-research
   persona: Produces a forward-looking supply/demand analysis for a specific submarket and property type. Combines quantitative
     pipeline tracking with disruption overlays (PropTech, ESG/climate, insurance hardeni
@@ -3137,7 +3137,7 @@ items:
   display_name: T-12 Operating Statement Normalizer
   type: skill
   status: stable
-  source_path: skills/t12-normalizer/SKILL.md
+  source_path: src/skills/t12-normalizer/SKILL.md
   domain: 16-daily-operations
   persona: Normalizes trailing 12-month operating statements for CRE acquisition underwriting. Removes one-time items, reprices
     below-market contracts, adjusts for tax reassessment, grosses up for vacancy, recla
@@ -3168,7 +3168,7 @@ items:
   display_name: Tenant Credit Analyzer
   type: skill
   status: stable
-  source_path: skills/tenant-credit-analyzer/SKILL.md
+  source_path: src/skills/tenant-credit-analyzer/SKILL.md
   domain: 04-due-diligence
   persona: Evaluate tenant creditworthiness and concentration risk across retail, office, and industrial assets. Produces
     WALT-weighted credit ratings, default probability tables, concentration HHI, co-tenancy t
@@ -3192,14 +3192,14 @@ items:
   owner: Mario Urquia
   last_reviewed_at: null
   notes: ''
-  calculator_file: scripts/calculators/tenant_credit_scorer.py
+  calculator_file: src/calculators/tenant_credit_scorer.py
   priority: P1
   version: 0.2.0
 - id: tenant-delinquency-workout
   display_name: Tenant Delinquency Workout
   type: skill
   status: stable
-  source_path: skills/tenant-delinquency-workout/SKILL.md
+  source_path: src/skills/tenant-delinquency-workout/SKILL.md
   domain: 07-asset-management
   persona: Structured financial and legal workout framework for delinquent tenants. Forces three-scenario NPV analysis (workout,
     eviction + re-lease, cash-for-keys), integrates loan covenant impact, applies stat
@@ -3231,7 +3231,7 @@ items:
   display_name: Tenant Event Planner
   type: skill
   status: stable
-  source_path: skills/tenant-event-planner/SKILL.md
+  source_path: src/skills/tenant-event-planner/SKILL.md
   domain: 16-daily-operations
   persona: Plans, budgets, and executes tenant appreciation events, seasonal programming, and community engagement for CRE
     properties. Supports API-driven vendor booking when MCP integrations are available. Trig
@@ -3261,7 +3261,7 @@ items:
   display_name: Tenant Retention Engine
   type: skill
   status: stable
-  source_path: skills/tenant-retention-engine/SKILL.md
+  source_path: src/skills/tenant-retention-engine/SKILL.md
   domain: 08-leasing
   persona: Generates comprehensive tenant retention strategies with per-tenant renewal probability scoring, retention NPV
     analysis, WALT impact quantification, DSCR covenant monitoring, competitive intelligence,
@@ -3294,7 +3294,7 @@ items:
   display_name: Term Sheet Builder
   type: skill
   status: stable
-  source_path: skills/term-sheet-builder/SKILL.md
+  source_path: src/skills/term-sheet-builder/SKILL.md
   domain: 05-capital-markets
   persona: Draft and negotiate CRE financing term sheets from lender quotes. Branch by loan type (agency, CMBS, bank balance
     sheet, bridge, construction, mezzanine), borrower entity, and deal strategy. Interroga
@@ -3326,7 +3326,7 @@ items:
   display_name: Title Commitment Reviewer
   type: skill
   status: stable
-  source_path: skills/title-commitment-reviewer/SKILL.md
+  source_path: src/skills/title-commitment-reviewer/SKILL.md
   domain: 04-due-diligence
   persona: 'Analyze ALTA title commitments, surveys, and Schedule B exceptions for CRE acquisitions. Identifies title defects,
     chain breaks, lien conflicts, and cure requirements. Triggers on ''title commitment'', '
@@ -3357,7 +3357,7 @@ items:
   display_name: Transfer Document Preparer
   type: skill
   status: stable
-  source_path: skills/transfer-document-preparer/SKILL.md
+  source_path: src/skills/transfer-document-preparer/SKILL.md
   domain: legal
   persona: Prepare entity transfer documents, closing document packages, and assignment agreements for CRE acquisitions. Branches
     by entity type (LLC, LP, DST, UPREIT, C-Corp, S-Corp, trust), ownership chain dep
@@ -3381,14 +3381,14 @@ items:
   owner: Mario Urquia
   last_reviewed_at: null
   notes: ''
-  calculator_file: scripts/calculators/transfer_tax.py
+  calculator_file: src/calculators/transfer_tax.py
   priority: P1
   version: 0.2.0
 - id: variance-narrative-generator
   display_name: Variance Narrative Generator
   type: skill
   status: stable
-  source_path: skills/variance-narrative-generator/SKILL.md
+  source_path: src/skills/variance-narrative-generator/SKILL.md
   domain: 16-daily-operations
   persona: Generates ownership-ready variance narratives from budget-vs-actual reports. Screens for materiality, classifies
     variances as timing/permanent/one-time/trend, projects full-year NOI impact, and drafts
@@ -3420,7 +3420,7 @@ items:
   display_name: Vendor Invoice Validator
   type: skill
   status: stable
-  source_path: skills/vendor-invoice-validator/SKILL.md
+  source_path: src/skills/vendor-invoice-validator/SKILL.md
   domain: 16-daily-operations
   persona: 'Validates vendor invoices against contract terms, scope of work, and market rates. Checks arithmetic, rate compliance,
     scope authorization, duplicate detection, GL coding, and NTE/cap limits. Assigns '
@@ -3449,7 +3449,7 @@ items:
   display_name: Work Order Triage and Priority Scorer
   type: skill
   status: stable
-  source_path: skills/work-order-triage/SKILL.md
+  source_path: src/skills/work-order-triage/SKILL.md
   domain: 16-daily-operations
   persona: Classifies work order urgency from free-text descriptions, assigns priority (P1-P4) with SLA deadlines, estimates
     cost, checks lease responsibility, and routes to the correct approval path.
@@ -3481,7 +3481,7 @@ items:
   display_name: Workout Playbook
   type: skill
   status: stable
-  source_path: skills/workout-playbook/SKILL.md
+  source_path: src/skills/workout-playbook/SKILL.md
   domain: 05-capital-markets
   persona: Produces a lender-side workout and restructuring playbook for distressed CRE loans. Maps all resolution paths (forbearance,
     A/B note split, DPO, deed-in-lieu, foreclosure, note sale), models NPV of ea
@@ -3514,7 +3514,7 @@ items:
   display_name: Acquisitions Analyst
   type: agent
   status: stable
-  source_path: agents/acquisitions-analyst.md
+  source_path: src/agents/acquisitions-analyst.md
   domain: cross-cutting
   persona: Senior acquisitions analyst at an institutional CRE shop with 10+ years sourcing and underwriting deals across
     multifamily, office, industrial, and retail. Deploys a ruthless screening framework -- 95
@@ -3537,7 +3537,7 @@ items:
   display_name: Aggressive GP
   type: agent
   status: stable
-  source_path: agents/aggressive-gp.md
+  source_path: src/agents/aggressive-gp.md
   domain: cross-cutting
   persona: Promote-driven GP who has syndicated 50+ CRE deals totaling $3B+ in asset value. Sees upside everywhere and challenges
     conservative underwriting as leaving money on the table. Pushes for higher levera
@@ -3560,7 +3560,7 @@ items:
   display_name: Allocation Committee Member
   type: agent
   status: stable
-  source_path: agents/allocation-committee-member.md
+  source_path: src/agents/allocation-committee-member.md
   domain: cross-cutting
   persona: Allocation Committee Member agent for CRE institutional analysis and decision support.
   lifecycle_phase: cross-cutting
@@ -3582,7 +3582,7 @@ items:
   display_name: Asset Manager Lead Agent
   type: agent
   status: stable
-  source_path: agents/asset-manager-lead.md
+  source_path: src/agents/asset-manager-lead.md
   domain: cross-cutting
   persona: Asset Manager Lead Agent agent for CRE institutional analysis and decision support.
   lifecycle_phase: cross-cutting
@@ -3604,7 +3604,7 @@ items:
   display_name: Asset Manager
   type: agent
   status: stable
-  source_path: agents/asset-manager.md
+  source_path: src/agents/asset-manager.md
   domain: cross-cutting
   persona: Institutional asset manager overseeing a $500M+ CRE portfolio across multifamily, office, and industrial. Focused
     on NOI maximization, capital deployment timing, tenant retention, and hold/sell/refi d
@@ -3627,7 +3627,7 @@ items:
   display_name: Family Office Investor
   type: agent
   status: stable
-  source_path: agents/buyer-family-office.md
+  source_path: src/agents/buyer-family-office.md
   domain: cross-cutting
   persona: Ultra-high-net-worth family office with a generational wealth perspective and 10-30 year hold horizon. Prioritizes
     after-tax cash flow, operational simplicity, and estate planning over headline return
@@ -3650,7 +3650,7 @@ items:
   display_name: Pension Fund Allocator
   type: agent
   status: stable
-  source_path: agents/buyer-pension-fund.md
+  source_path: src/agents/buyer-pension-fund.md
   domain: cross-cutting
   persona: Public pension fund allocator managing $50B+ in real assets. ODCE-mandate core investor focused on income stability,
     low leverage, and institutional-quality assets in top-25 MSAs. Deploy when analyzin
@@ -3673,7 +3673,7 @@ items:
   display_name: Private Equity Fund
   type: agent
   status: stable
-  source_path: agents/buyer-private-equity.md
+  source_path: src/agents/buyer-private-equity.md
   domain: cross-cutting
   persona: Private equity real estate fund with $5B in dry powder pursuing opportunistic and value-add strategies. Targets
     15-20% net IRR over 3-5 year holds with 65-75% leverage. Deploy when analyzing how aggre
@@ -3696,7 +3696,7 @@ items:
   display_name: Public REIT Acquisitions
   type: agent
   status: stable
-  source_path: agents/buyer-reit.md
+  source_path: src/agents/buyer-reit.md
   domain: cross-cutting
   persona: Public REIT acquisitions team evaluating deals through FFO/AFFO accretion, NAV impact, portfolio fit, and equity
     analyst reaction. Disciplined to NAV methodology, pays with equity or cash from 1031 pr
@@ -3719,7 +3719,7 @@ items:
   display_name: Multifamily Syndicator
   type: agent
   status: stable
-  source_path: agents/buyer-syndicator.md
+  source_path: src/agents/buyer-syndicator.md
   domain: cross-cutting
   persona: Multifamily syndicator raising capital deal-by-deal from 50-200 accredited investors. Fee-driven economics where
     acquisition fees, asset management fees, and promote create GP incentive to close deals
@@ -3742,7 +3742,7 @@ items:
   display_name: Capital Markets Specialist
   type: agent
   status: stable
-  source_path: agents/capital-markets-specialist.md
+  source_path: src/agents/capital-markets-specialist.md
   domain: cross-cutting
   persona: Debt capital markets professional with deep experience across CMBS, agency (Fannie/Freddie), bank, life company,
     and debt fund lending. Sizes loans across DSCR, LTV, and debt yield constraints simulta
@@ -3765,7 +3765,7 @@ items:
   display_name: Chief Investment Officer Agent
   type: agent
   status: stable
-  source_path: agents/chief-investment-officer.md
+  source_path: src/agents/chief-investment-officer.md
   domain: cross-cutting
   persona: Chief Investment Officer Agent agent for CRE institutional analysis and decision support.
   lifecycle_phase: cross-cutting
@@ -3787,7 +3787,7 @@ items:
   display_name: Conservative Lender
   type: agent
   status: stable
-  source_path: agents/conservative-lender.md
+  source_path: src/agents/conservative-lender.md
   domain: cross-cutting
   persona: Chief credit officer at a commercial bank with 25 years of lending experience through three full CRE cycles including
     the S&L crisis aftermath, GFC, and post-COVID distress. Sees risk in everything. D
@@ -3810,7 +3810,7 @@ items:
   display_name: CRE Veteran
   type: agent
   status: stable
-  source_path: agents/cre-veteran.md
+  source_path: src/agents/cre-veteran.md
   domain: cross-cutting
   persona: General-purpose CRE domain expert with 30 years across acquisitions, asset management, development, capital markets,
     and dispositions. Not specialized in any one function -- provides broad institution
@@ -3833,7 +3833,7 @@ items:
   display_name: Deal Team Lead
   type: agent
   status: stable
-  source_path: agents/deal-team-lead.md
+  source_path: src/agents/deal-team-lead.md
   domain: cross-cutting
   persona: Orchestrator agent that assembles and manages multi-agent teams for complex CRE tasks. Reads the agent roster index,
     selects 3-5 agents based on the task, defines roles and sequence, collects outputs,
@@ -3856,7 +3856,7 @@ items:
   display_name: Development Manager
   type: agent
   status: stable
-  source_path: agents/development-manager.md
+  source_path: src/agents/development-manager.md
   domain: cross-cutting
   persona: Ground-up development expert with 20+ projects delivered across multifamily, mixed-use, and industrial totaling
     $1.5B+ in total development cost. Thinks in TDC per unit, development spread, monthly dr
@@ -3879,7 +3879,7 @@ items:
   display_name: Disposition Manager
   type: agent
   status: stable
-  source_path: agents/disposition-manager.md
+  source_path: src/agents/disposition-manager.md
   domain: cross-cutting
   persona: Disposition Manager agent for CRE institutional analysis and decision support.
   lifecycle_phase: cross-cutting
@@ -3901,7 +3901,7 @@ items:
   display_name: Disposition Strategist
   type: agent
   status: stable
-  source_path: agents/disposition-strategist.md
+  source_path: src/agents/disposition-strategist.md
   domain: cross-cutting
   persona: Exit specialist who has sold $2B+ in CRE assets across all property types and market conditions. Expert in timing,
     buyer psychology, marketing strategy, and tax-efficient exits including 1031 exchange
@@ -3924,7 +3924,7 @@ items:
   display_name: Distressed Specialist
   type: agent
   status: stable
-  source_path: agents/distressed-specialist.md
+  source_path: src/agents/distressed-specialist.md
   domain: cross-cutting
   persona: Former special servicer who has worked out $5B+ in distressed CRE debt across CMBS, bank, and life company portfolios.
     Sees opportunity where others see problems. Expert in note purchases, REO acquisi
@@ -3947,7 +3947,7 @@ items:
   display_name: Fund Analyst
   type: agent
   status: stable
-  source_path: agents/fund-analyst.md
+  source_path: src/agents/fund-analyst.md
   domain: cross-cutting
   persona: Fund Analyst agent for CRE institutional analysis and decision support.
   lifecycle_phase: cross-cutting
@@ -3969,7 +3969,7 @@ items:
   display_name: Fund Controller
   type: agent
   status: stable
-  source_path: agents/fund-controller.md
+  source_path: src/agents/fund-controller.md
   domain: cross-cutting
   persona: Fund Controller agent for CRE institutional analysis and decision support.
   lifecycle_phase: cross-cutting
@@ -3991,7 +3991,7 @@ items:
   display_name: IC Challenger
   type: agent
   status: stable
-  source_path: agents/ic-challenger.md
+  source_path: src/agents/ic-challenger.md
   domain: cross-cutting
   persona: The toughest person on the investment committee with 30 years of CRE experience spanning three full cycles. Challenges
     every assumption with data and forces analysts to defend their work to the highes
@@ -4014,7 +4014,7 @@ items:
   display_name: Investor Relations Associate
   type: agent
   status: stable
-  source_path: agents/investor-relations-associate.md
+  source_path: src/agents/investor-relations-associate.md
   domain: cross-cutting
   persona: Investor Relations Associate agent for CRE institutional analysis and decision support.
   lifecycle_phase: cross-cutting
@@ -4036,7 +4036,7 @@ items:
   display_name: Investor Relations Director
   type: agent
   status: stable
-  source_path: agents/investor-relations-director.md
+  source_path: src/agents/investor-relations-director.md
   domain: cross-cutting
   persona: IR director at a $1B+ CRE fund managing 50+ LP relationships across pension funds, endowments, family offices,
     and sovereign wealth. Expert in fundraising, quarterly reporting, NAV calculation, fee st
@@ -4059,7 +4059,7 @@ items:
   display_name: Leasing Director
   type: agent
   status: stable
-  source_path: agents/leasing-director.md
+  source_path: src/agents/leasing-director.md
   domain: cross-cutting
   persona: Commercial leasing director with 2M+ SF of deals closed across office, retail, and industrial. Expert in tenant
     negotiations, concession structures, effective rent analysis, and co-tenancy dynamics. T
@@ -4082,7 +4082,7 @@ items:
   display_name: Leasing Manager Agent
   type: agent
   status: stable
-  source_path: agents/leasing-manager.md
+  source_path: src/agents/leasing-manager.md
   domain: cross-cutting
   persona: Leasing Manager Agent agent for CRE institutional analysis and decision support.
   lifecycle_phase: cross-cutting
@@ -4104,7 +4104,7 @@ items:
   display_name: Contrarian Analyst
   type: agent
   status: stable
-  source_path: agents/lens-contrarian.md
+  source_path: src/agents/lens-contrarian.md
   domain: cross-cutting
   persona: Professional contrarian who assumes consensus is wrong. When everyone is bullish, builds the bear case; when everyone
     is bearish, finds the bull case. Looks for crowded trades, consensus assumptions t
@@ -4127,7 +4127,7 @@ items:
   display_name: ESG and Impact Specialist
   type: agent
   status: stable
-  source_path: agents/lens-esg-impact.md
+  source_path: src/agents/lens-esg-impact.md
   domain: cross-cutting
   persona: ESG and impact investing specialist evaluating deals through environmental, social, and governance criteria. Fluent
     in GRESB, TCFD, UN SDGs, and EU Taxonomy frameworks. Focuses on carbon trajectory, c
@@ -4150,7 +4150,7 @@ items:
   display_name: Qualitative Research Analyst
   type: agent
   status: stable
-  source_path: agents/lens-qualitative.md
+  source_path: src/agents/lens-qualitative.md
   domain: cross-cutting
   persona: Market narrative and qualitative research analyst who understands that numbers alone miss the story. Focuses on
     demographic shifts, tenant quality beyond credit ratings, neighborhood trajectory, polit
@@ -4173,7 +4173,7 @@ items:
   display_name: Quantitative Analyst
   type: agent
   status: stable
-  source_path: agents/lens-quantitative.md
+  source_path: src/agents/lens-quantitative.md
   domain: cross-cutting
   persona: Pure quantitative analyst who rejects narrative without mathematical support. Runs DCF, sensitivity analysis, Monte
     Carlo references, regression, and breakeven calculations. Demands explicit assumptio
@@ -4196,7 +4196,7 @@ items:
   display_name: Chief Risk Officer
   type: agent
   status: stable
-  source_path: agents/lens-risk-manager.md
+  source_path: src/agents/lens-risk-manager.md
   domain: cross-cutting
   persona: 'Chief risk officer focused entirely on downside protection, tail risk, and portfolio resilience. Evaluates probability
     of loss, maximum drawdown, correlation risk, concentration risk, liquidity risk, '
@@ -4219,7 +4219,7 @@ items:
   display_name: LP Advisor
   type: agent
   status: stable
-  source_path: agents/lp-advisor.md
+  source_path: src/agents/lp-advisor.md
   domain: cross-cutting
   persona: LP Advisor agent for CRE institutional analysis and decision support.
   lifecycle_phase: cross-cutting
@@ -4241,7 +4241,7 @@ items:
   display_name: Market Research Analyst Agent
   type: agent
   status: stable
-  source_path: agents/market-research-analyst.md
+  source_path: src/agents/market-research-analyst.md
   domain: cross-cutting
   persona: Market Research Analyst Agent agent for CRE institutional analysis and decision support.
   lifecycle_phase: cross-cutting
@@ -4263,7 +4263,7 @@ items:
   display_name: 'Perspective: Commercial Appraiser -- USPAP-Compliant Valuation Framework'
   type: agent
   status: stable
-  source_path: agents/perspective-appraiser.md
+  source_path: src/agents/perspective-appraiser.md
   domain: cross-cutting
   persona: MAI-designated commercial appraiser perspective agent that values CRE assets using USPAP-compliant methodology.
     Deploy when challenging broker opinions of value, validating acquisition pricing, evalua
@@ -4286,7 +4286,7 @@ items:
   display_name: 'Perspective: Construction Manager -- Buildability, Cost, and Schedule Framework'
   type: agent
   status: stable
-  source_path: agents/perspective-construction.md
+  source_path: src/agents/perspective-construction.md
   domain: cross-cutting
   persona: Senior construction manager perspective agent that evaluates buildability, cost reasonableness, schedule feasibility,
     and contractor risk. Deploy when reviewing development budgets, evaluating value-a
@@ -4309,7 +4309,7 @@ items:
   display_name: 'Perspective: Environmental Consultant -- Contamination, Compliance, and Climate Risk Framework'
   type: agent
   status: stable
-  source_path: agents/perspective-environmental.md
+  source_path: src/agents/perspective-environmental.md
   domain: cross-cutting
   persona: Environmental compliance consultant perspective agent that evaluates contamination risk, regulatory liability,
     and climate exposure. Deploy when evaluating brownfield sites, industrial conversions, co
@@ -4332,7 +4332,7 @@ items:
   display_name: 'Perspective: Insurance Underwriter -- Property Risk Classification and Pricing Framework'
   type: agent
   status: stable
-  source_path: agents/perspective-insurance.md
+  source_path: src/agents/perspective-insurance.md
   domain: cross-cutting
   persona: Commercial insurance underwriter perspective agent that classifies and prices property risk. Deploy when evaluating
     property condition, natural hazard exposure, insurance cost assumptions in underwrit
@@ -4355,7 +4355,7 @@ items:
   display_name: 'Perspective: Real Estate Legal -- Contract Risk, Liability, and Entity Structure Framework'
   type: agent
   status: stable
-  source_path: agents/perspective-legal.md
+  source_path: src/agents/perspective-legal.md
   domain: cross-cutting
   persona: 'Real estate partner perspective agent that evaluates contract risk, regulatory exposure, entity structure, and
     liability protection. Deploy when reviewing PSAs, leases, loan documents, JV agreements, '
@@ -4378,7 +4378,7 @@ items:
   display_name: 'Perspective: Senior Lender -- Credit Underwriting and Collateral Protection Framework'
   type: agent
   status: stable
-  source_path: agents/perspective-lender.md
+  source_path: src/agents/perspective-lender.md
   domain: cross-cutting
   persona: Bank credit officer perspective agent that evaluates deals from the lender's viewpoint. Deploy when structuring
     debt, stress-testing loan terms, evaluating refinancing risk, or when the investment the
@@ -4401,7 +4401,7 @@ items:
   display_name: 'Perspective: Municipality -- Planning, Zoning, and Community Impact Framework'
   type: agent
   status: stable
-  source_path: agents/perspective-municipality.md
+  source_path: src/agents/perspective-municipality.md
   domain: cross-cutting
   persona: Municipal planning director perspective agent that evaluates development proposals from the public sector viewpoint.
     Deploy when assessing entitlement feasibility, modeling tax revenue impact, evaluat
@@ -4424,7 +4424,7 @@ items:
   display_name: 'Perspective: Corporate Tenant -- Total Occupancy Cost and Space Decision Framework'
   type: agent
   status: stable
-  source_path: agents/perspective-tenant.md
+  source_path: src/agents/perspective-tenant.md
   domain: cross-cutting
   persona: Corporate tenant perspective agent that evaluates space from the occupier's viewpoint. Deploy when analyzing tenant
     demand drivers, evaluating a building's competitive position for leasing, stress-tes
@@ -4447,7 +4447,7 @@ items:
   display_name: Portfolio Manager Agent
   type: agent
   status: stable
-  source_path: agents/portfolio-manager.md
+  source_path: src/agents/portfolio-manager.md
   domain: cross-cutting
   persona: Portfolio Manager Agent agent for CRE institutional analysis and decision support.
   lifecycle_phase: cross-cutting
@@ -4469,7 +4469,7 @@ items:
   display_name: Portfolio Strategist Agent
   type: agent
   status: stable
-  source_path: agents/portfolio-strategist.md
+  source_path: src/agents/portfolio-strategist.md
   domain: cross-cutting
   persona: Portfolio Strategist Agent agent for CRE institutional analysis and decision support.
   lifecycle_phase: cross-cutting
@@ -4491,7 +4491,7 @@ items:
   display_name: Property Manager
   type: agent
   status: stable
-  source_path: agents/property-manager.md
+  source_path: src/agents/property-manager.md
   domain: cross-cutting
   persona: CPM-certified property manager running 2,000+ multifamily units or 500K+ SF of commercial space. Operationally
     obsessive about cost-per-unit metrics, preventive maintenance, collections, and tenant sa
@@ -4514,7 +4514,7 @@ items:
   display_name: Risk Officer Agent
   type: agent
   status: stable
-  source_path: agents/risk-officer.md
+  source_path: src/agents/risk-officer.md
   domain: cross-cutting
   persona: Risk Officer Agent agent for CRE institutional analysis and decision support.
   lifecycle_phase: cross-cutting
@@ -4536,7 +4536,7 @@ items:
   display_name: Skeptical LP
   type: agent
   status: stable
-  source_path: agents/skeptical-lp.md
+  source_path: src/agents/skeptical-lp.md
   domain: cross-cutting
   persona: Pension fund allocator managing a $2B real assets portfolio who has been burned by every cycle. Questions fees,
     alignment of interest, and track record methodology with forensic precision. Demands GIP
@@ -4559,7 +4559,7 @@ items:
   display_name: Submarket Specialist Agent
   type: agent
   status: stable
-  source_path: agents/submarket-specialist.md
+  source_path: src/agents/submarket-specialist.md
   domain: cross-cutting
   persona: Submarket Specialist Agent agent for CRE institutional analysis and decision support.
   lifecycle_phase: cross-cutting
@@ -4581,7 +4581,7 @@ items:
   display_name: 'Titan: Tom Barrack -- Global Macro, Cycle Timing, and Relationship Framework'
   type: agent
   status: stable
-  source_path: agents/titan-barrack.md
+  source_path: src/agents/titan-barrack.md
   domain: cross-cutting
   persona: Global macro and cycle-timing CRE analyst channeling Tom Barrack's relationship-driven, opportunistic approach.
     Deploy when evaluating distressed assets, cross-border capital flows, cycle positioning,
@@ -4604,7 +4604,7 @@ items:
   display_name: 'Titan: Jonathan Gray -- Institutional Scale and Thematic Conviction Framework'
   type: agent
   status: stable
-  source_path: agents/titan-gray.md
+  source_path: src/agents/titan-gray.md
   domain: cross-cutting
   persona: Institutional-scale CRE analyst channeling Jonathan Gray's Blackstone data-driven, thematic conviction approach.
     Deploy when evaluating portfolio-scale acquisitions, identifying scalable investment th
@@ -4627,7 +4627,7 @@ items:
   display_name: 'Titan: Peter Linneman -- First-Principles Quantitative Framework'
   type: agent
   status: stable
-  source_path: agents/titan-linneman.md
+  source_path: src/agents/titan-linneman.md
   domain: cross-cutting
   persona: Academic-rigor CRE analyst channeling Peter Linneman's first-principles quantitative approach. Deploy when decomposing
     cap rates, stress-testing underwriting assumptions, evaluating market fundamental
@@ -4650,7 +4650,7 @@ items:
   display_name: 'Titan: Stephen Ross -- Development Vision and Placemaking Framework'
   type: agent
   status: stable
-  source_path: agents/titan-ross.md
+  source_path: src/agents/titan-ross.md
   domain: cross-cutting
   persona: Visionary development analyst channeling Stephen Ross's long-horizon placemaking philosophy. Deploy when evaluating
     development sites, mixed-use projects, public-private partnerships, transit-oriented
@@ -4673,7 +4673,7 @@ items:
   display_name: 'Titan: Barry Sternlicht -- Brand, Design, and Experience Framework'
   type: agent
   status: stable
-  source_path: agents/titan-sternlicht.md
+  source_path: src/agents/titan-sternlicht.md
   domain: cross-cutting
   persona: 'Brand and experience-driven CRE analyst channeling Barry Sternlicht''s design-forward investment philosophy. Deploy
     when evaluating hospitality, lifestyle, and experiential real estate, when assessing '
@@ -4696,7 +4696,7 @@ items:
   display_name: 'Titan: Sam Zell -- Contrarian Value Framework'
   type: agent
   status: stable
-  source_path: agents/titan-zell.md
+  source_path: src/agents/titan-zell.md
   domain: cross-cutting
   persona: Contrarian CRE investment analyst channeling Sam Zell's philosophy of buying unloved assets below replacement cost.
     Deploy when evaluating distressed opportunities, challenging market consensus, or st
@@ -4719,7 +4719,7 @@ items:
   display_name: Value-Add Operator
   type: agent
   status: stable
-  source_path: agents/value-add-operator.md
+  source_path: src/agents/value-add-operator.md
   domain: cross-cutting
   persona: Hands-on operator who has renovated 5,000+ multifamily units and repositioned 15+ commercial properties. Sees operational
     and physical upside that financial analysts miss. Knows exact renovation costs
@@ -4742,7 +4742,7 @@ items:
   display_name: Brand Guidelines Configurator
   type: command
   status: stable
-  source_path: commands/brand-config.md
+  source_path: src/commands/brand-config.md
   domain: cross-cutting
   persona: Configure or update your organization's brand guidelines for CRE deliverables (pitch decks, IC memos, investor
     updates, offering packages). Saved locally at ~/.cre-skills/brand-guidelines.json for aut
@@ -4765,7 +4765,7 @@ items:
   display_name: CRE Expert Agents
   type: command
   status: stable
-  source_path: commands/cre-agents.md
+  source_path: src/commands/cre-agents.md
   domain: cross-cutting
   persona: List available CRE expert agents and pre-built team compositions for multi-agent analysis. Works across all 105
     CRE skills.
@@ -4788,7 +4788,7 @@ items:
   display_name: CRE Skill Router
   type: command
   status: stable
-  source_path: commands/cre-route.md
+  source_path: src/commands/cre-route.md
   domain: cross-cutting
   persona: Find the right CRE skill for your task. Catalog-driven router with intent matching, artifact awareness, and confidence
     scoring.
@@ -4811,10 +4811,55 @@ items:
   display_name: CRE Workflow Chains
   type: command
   status: stable
-  source_path: commands/cre-workflows.md
+  source_path: src/commands/cre-workflows.md
   domain: cross-cutting
   persona: Show available CRE multi-skill workflow chains (acquisition pipeline, capital stack, hold period, disposition,
     development, fund management).
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers: []
+  input_artifacts: []
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
+  version: null
+- id: customization-analytics
+  display_name: Customization Analytics
+  type: command
+  status: stable
+  source_path: src/commands/customization-analytics.md
+  domain: cross-cutting
+  persona: View aggregated analytics about local skill customizations -- which skills are adapted most, common change patterns,
+    and upstream suggestion rate
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers: []
+  input_artifacts: []
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
+  version: null
+- id: customize-skill
+  display_name: Customize a CRE Skill
+  type: command
+  status: stable
+  source_path: src/commands/customize-skill.md
+  domain: cross-cutting
+  persona: Adapt a CRE skill to your workplace workflow -- creates a local override without modifying base skill files
   lifecycle_phase: cross-cutting
   aliases: []
   intent_triggers: []
@@ -4834,7 +4879,7 @@ items:
   display_name: CRE Skill Feedback Summary
   type: command
   status: stable
-  source_path: commands/feedback-summary.md
+  source_path: src/commands/feedback-summary.md
   domain: cross-cutting
   persona: View aggregated feedback ratings and comments from CRE skill sessions
   lifecycle_phase: cross-cutting
@@ -4856,7 +4901,7 @@ items:
   display_name: CRE Orchestrator
   type: command
   status: stable
-  source_path: commands/orchestrate.md
+  source_path: src/commands/orchestrate.md
   domain: cross-cutting
   persona: 'Run a CRE workflow orchestrator -- coordinates multiple skills and agents into a multi-phase pipeline with checkpoints,
     verdicts, and challenge layers. Available orchestrators: acquisition, capital-st'
@@ -4879,7 +4924,7 @@ items:
   display_name: Report a Problem
   type: command
   status: stable
-  source_path: commands/report-problem.md
+  source_path: src/commands/report-problem.md
   domain: cross-cutting
   persona: Report a bug or problem with a CRE skill, workflow, or orchestrator
   lifecycle_phase: cross-cutting
@@ -4901,7 +4946,7 @@ items:
   display_name: Share Feedback About CRE Skills
   type: command
   status: stable
-  source_path: commands/send-feedback.md
+  source_path: src/commands/send-feedback.md
   domain: cross-cutting
   persona: Share feedback about CRE Skills -- quality, suggestions, or general comments
   lifecycle_phase: cross-cutting
@@ -4919,66 +4964,11 @@ items:
   calculator_file: null
   priority: null
   version: null
-- id: customize-skill
-  display_name: Customize a CRE Skill
-  type: command
-  status: stable
-  source_path: commands/customize-skill.md
-  domain: cross-cutting
-  persona: Adapt a CRE skill to your workplace workflow -- creates a local override without
-    modifying base skill files
-  lifecycle_phase: cross-cutting
-  aliases: []
-  intent_triggers:
-  - customize
-  - adapt skill
-  - modify skill
-  - change skill
-  - override skill
-  - local skill
-  input_artifacts: []
-  outputs: []
-  downstream_items: []
-  upstream_items: []
-  hidden_from_default_catalog: false
-  legacy_wrapper_for: null
-  owner: Mario Urquia
-  last_reviewed_at: null
-  notes: ''
-  calculator_file: null
-  priority: null
-  version: null
-- id: customization-analytics
-  display_name: Customization Analytics
-  type: command
-  status: stable
-  source_path: commands/customization-analytics.md
-  domain: cross-cutting
-  persona: View aggregated analytics about local skill customizations -- which skills
-    are adapted most, common change patterns, and upstream suggestion rate
-  lifecycle_phase: cross-cutting
-  aliases: []
-  intent_triggers:
-  - customization patterns
-  - customization stats
-  - customization analytics
-  input_artifacts: []
-  outputs: []
-  downstream_items: []
-  upstream_items: []
-  hidden_from_default_catalog: false
-  legacy_wrapper_for: null
-  owner: Mario Urquia
-  last_reviewed_at: null
-  notes: ''
-  calculator_file: null
-  priority: null
-  version: null
 - id: usage-stats
   display_name: CRE Skill Usage Stats
   type: command
   status: stable
-  source_path: commands/usage-stats.md
+  source_path: src/commands/usage-stats.md
   domain: cross-cutting
   persona: View aggregated CRE skill usage statistics from local telemetry data
   lifecycle_phase: cross-cutting
@@ -5000,7 +4990,7 @@ items:
   display_name: Construction Estimator
   type: calculator
   status: stable
-  source_path: scripts/calculators/construction_estimator.py
+  source_path: src/calculators/construction_estimator.py
   domain: cross-cutting
   persona: Construction Cost Estimator
   lifecycle_phase: cross-cutting
@@ -5022,7 +5012,7 @@ items:
   display_name: Covenant Tester
   type: calculator
   status: stable
-  source_path: scripts/calculators/covenant_tester.py
+  source_path: src/calculators/covenant_tester.py
   domain: cross-cutting
   persona: Loan Covenant Tester
   lifecycle_phase: cross-cutting
@@ -5044,7 +5034,7 @@ items:
   display_name: Debt Sizing
   type: calculator
   status: stable
-  source_path: scripts/calculators/debt_sizing.py
+  source_path: src/calculators/debt_sizing.py
   domain: cross-cutting
   persona: Debt Sizing Engine
   lifecycle_phase: cross-cutting
@@ -5066,7 +5056,7 @@ items:
   display_name: Fund Fee Modeler
   type: calculator
   status: stable
-  source_path: scripts/calculators/fund_fee_modeler.py
+  source_path: src/calculators/fund_fee_modeler.py
   domain: cross-cutting
   persona: Fund Fee Modeler
   lifecycle_phase: cross-cutting
@@ -5088,7 +5078,7 @@ items:
   display_name: Monte Carlo Simulator
   type: calculator
   status: stable
-  source_path: scripts/calculators/monte_carlo_simulator.py
+  source_path: src/calculators/monte_carlo_simulator.py
   domain: cross-cutting
   persona: Monte Carlo Return Simulator
   lifecycle_phase: cross-cutting
@@ -5110,7 +5100,7 @@ items:
   display_name: Npv Trade Out
   type: calculator
   status: stable
-  source_path: scripts/calculators/npv_trade_out.py
+  source_path: src/calculators/npv_trade_out.py
   domain: cross-cutting
   persona: NPV Trade-Out Analyzer
   lifecycle_phase: cross-cutting
@@ -5132,7 +5122,7 @@ items:
   display_name: Option Valuation
   type: calculator
   status: stable
-  source_path: scripts/calculators/option_valuation.py
+  source_path: src/calculators/option_valuation.py
   domain: cross-cutting
   persona: Lease Option Valuation
   lifecycle_phase: cross-cutting
@@ -5154,7 +5144,7 @@ items:
   display_name: Proration Calculator
   type: calculator
   status: stable
-  source_path: scripts/calculators/proration_calculator.py
+  source_path: src/calculators/proration_calculator.py
   domain: cross-cutting
   persona: CRE Proration Calculator
   lifecycle_phase: cross-cutting
@@ -5176,7 +5166,7 @@ items:
   display_name: Quick Screen
   type: calculator
   status: stable
-  source_path: scripts/calculators/quick_screen.py
+  source_path: src/calculators/quick_screen.py
   domain: cross-cutting
   persona: Deal Quick Screen Calculator
   lifecycle_phase: cross-cutting
@@ -5198,7 +5188,7 @@ items:
   display_name: Tenant Credit Scorer
   type: calculator
   status: stable
-  source_path: scripts/calculators/tenant_credit_scorer.py
+  source_path: src/calculators/tenant_credit_scorer.py
   domain: cross-cutting
   persona: Tenant Credit Scorer
   lifecycle_phase: cross-cutting
@@ -5220,7 +5210,7 @@ items:
   display_name: Transfer Tax
   type: calculator
   status: stable
-  source_path: scripts/calculators/transfer_tax.py
+  source_path: src/calculators/transfer_tax.py
   domain: cross-cutting
   persona: Transfer Tax Calculator
   lifecycle_phase: cross-cutting
@@ -5242,7 +5232,7 @@ items:
   display_name: Waterfall Calculator
   type: calculator
   status: stable
-  source_path: scripts/calculators/waterfall_calculator.py
+  source_path: src/calculators/waterfall_calculator.py
   domain: cross-cutting
   persona: JV Waterfall Calculator
   lifecycle_phase: cross-cutting
@@ -5264,7 +5254,7 @@ items:
   display_name: Acquisition
   type: orchestrator
   status: stable
-  source_path: orchestrators/configs/acquisition.json
+  source_path: src/orchestrators/configs/acquisition.json
   domain: acquisition
   persona: 'Five-phase commercial real estate acquisition pipeline: due diligence, underwriting, financing, legal, and closing.
     Coordinates 21 specialist agents across all phases to produce an IC memo, funded ter'
@@ -5287,7 +5277,7 @@ items:
   display_name: Capital Stack
   type: orchestrator
   status: stable
-  source_path: orchestrators/configs/capital-stack.json
+  source_path: src/orchestrators/configs/capital-stack.json
   domain: capital-stack
   persona: Six-phase capital stack pipeline for CRE debt sizing, lender sourcing, quote analysis, subordinate capital structuring,
     WACC optimization, and term sheet execution. Cross-cutting pipeline invoked by a
@@ -5310,7 +5300,7 @@ items:
   display_name: Development
   type: orchestrator
   status: stable
-  source_path: orchestrators/configs/development.json
+  source_path: src/orchestrators/configs/development.json
   domain: development
   persona: Seven-phase ground-up development lifecycle pipeline covering land acquisition & entitlement, design & pre-construction,
     construction financing, construction execution, lease-up/stabilization, permane
@@ -5333,7 +5323,7 @@ items:
   display_name: Disposition
   type: orchestrator
   status: stable
-  source_path: orchestrators/configs/disposition.json
+  source_path: src/orchestrators/configs/disposition.json
   domain: disposition
   persona: Seven-phase disposition pipeline for CRE property exits. Covers hold-sell-refi analysis, pricing strategy, marketing
     preparation, buyer targeting, offer management, due diligence management, and closi
@@ -5356,7 +5346,7 @@ items:
   display_name: Fund Management
   type: orchestrator
   status: stable
-  source_path: orchestrators/configs/fund-management.json
+  source_path: src/orchestrators/configs/fund-management.json
   domain: fund-management
   persona: Six-phase fund lifecycle pipeline covering formation, capital raise, deployment, monitoring, distributions, and
     exit/wind-down. Coordinates 22 specialist agents across sequential and cyclical phases t
@@ -5379,7 +5369,7 @@ items:
   display_name: Hold Period
   type: orchestrator
   status: stable
-  source_path: orchestrators/configs/hold-period.json
+  source_path: src/orchestrators/configs/hold-period.json
   domain: hold-period
   persona: Seven-phase asset management pipeline for post-acquisition hold period monitoring. Covers onboarding, annual budgeting,
     quarterly performance monitoring, leasing strategy, capital planning, tenant man
@@ -5402,7 +5392,7 @@ items:
   display_name: Investment Strategy
   type: orchestrator
   status: stable
-  source_path: orchestrators/configs/investment-strategy.json
+  source_path: src/orchestrators/configs/investment-strategy.json
   domain: investment-strategy
   persona: Five-phase investment strategy pipeline covering market selection, strategy definition, target identification,
     pipeline management, and semi-annual strategy review. Coordinates 10 specialist agents pl
@@ -5425,7 +5415,7 @@ items:
   display_name: Lp Intelligence
   type: orchestrator
   status: stable
-  source_path: orchestrators/configs/lp-intelligence.json
+  source_path: src/orchestrators/configs/lp-intelligence.json
   domain: lp-intelligence
   persona: Five-phase LP intelligence pipeline covering GP evaluation, fund terms analysis, portfolio monitoring (LP lens),
     manager due diligence, and re-up decision. Coordinates 11 specialist agents plus 3 gene
@@ -5448,7 +5438,7 @@ items:
   display_name: Portfolio Management
   type: orchestrator
   status: stable
-  source_path: orchestrators/configs/portfolio-management.json
+  source_path: src/orchestrators/configs/portfolio-management.json
   domain: portfolio-management
   persona: Five-phase portfolio management pipeline covering construction, attribution, risk monitoring, rebalancing, and
     reporting. Coordinates 11 specialist agents across sequential and cyclical phases to prod
@@ -5471,7 +5461,7 @@ items:
   display_name: Research Intelligence
   type: orchestrator
   status: stable
-  source_path: orchestrators/configs/research-intelligence.json
+  source_path: src/orchestrators/configs/research-intelligence.json
   domain: research-intelligence
   persona: Five-phase research intelligence pipeline for CRE market analysis and opportunity identification. Covers macroeconomic
     assessment, sector research, submarket deep dives, policy and regulatory monitori
@@ -5494,7 +5484,7 @@ items:
   display_name: Acquisition Pipeline
   type: workflow
   status: stable
-  source_path: routing/CRE-ROUTING.md
+  source_path: src/routing/CRE-ROUTING.md
   domain: cross-cutting
   persona: 'Workflow chain: sourcing -> quick-screen -> KEEP -> om-reverse -> rent-roll-analyzer'
   lifecycle_phase: cross-cutting
@@ -5528,7 +5518,7 @@ items:
   display_name: Capital Stack
   type: workflow
   status: stable
-  source_path: routing/CRE-ROUTING.md
+  source_path: src/routing/CRE-ROUTING.md
   domain: cross-cutting
   persona: 'Workflow chain: underwriting-engine -> loan-sizing -> mezz-pref -> jv-waterfall -> capital-stack-optimizer'
   lifecycle_phase: cross-cutting
@@ -5556,7 +5546,7 @@ items:
   display_name: Hold Period
   type: workflow
   status: stable
-  source_path: routing/CRE-ROUTING.md
+  source_path: src/routing/CRE-ROUTING.md
   domain: cross-cutting
   persona: 'Workflow chain: annual-budget -> performance-dashboard -> capex/lease-compliance/delinquency-workout/retention-engine
     -> noi-sprint (if needed)'
@@ -5583,7 +5573,7 @@ items:
   display_name: Disposition
   type: workflow
   status: stable
-  source_path: routing/CRE-ROUTING.md
+  source_path: src/routing/CRE-ROUTING.md
   domain: cross-cutting
   persona: 'Workflow chain: performance-dashboard -> disposition-strategy -> SELL] disposition-prep -> 1031-exchange | [HOLD]
     refi-decision | [REFI] loan-sizing'
@@ -5610,7 +5600,7 @@ items:
   display_name: Development
   type: workflow
   status: stable
-  source_path: routing/CRE-ROUTING.md
+  source_path: src/routing/CRE-ROUTING.md
   domain: cross-cutting
   persona: 'Workflow chain: land-residual + entitlement -> dev-proforma -> construction-budget -> loan-sizing -> capital-stack'
   lifecycle_phase: cross-cutting
@@ -5640,7 +5630,7 @@ items:
   display_name: Fund Management
   type: workflow
   status: stable
-  source_path: routing/CRE-ROUTING.md
+  source_path: src/routing/CRE-ROUTING.md
   domain: cross-cutting
   persona: 'Workflow chain: fund-formation -> pitch-deck -> capital-raise -> portfolio-allocator -> deploy via acquisition
     pipeline'
