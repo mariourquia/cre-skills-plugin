@@ -1,0 +1,59 @@
+# Category Schema: staffing_model
+# Staffing headcount ratios by property size / segment / form.
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: StaffingModelReferenceRecord
+description: |
+  Staffing ratio benchmark. Expressed as units_per_fte, or as a dedicated headcount for a role
+  (e.g., 1 property_manager per property at any size; 2 leasing agents for 200-300 units).
+extends: _core/schemas/reference_record.yaml
+required:
+  - reference_id
+  - category
+  - scope
+  - value
+  - unit
+  - scenario
+  - source_name
+  - source_type
+  - source_date
+  - as_of_date
+  - confidence
+  - status
+  - proposed_by
+  - role_slug
+  - property_size_band
+properties:
+  category:
+    const: staffing_model
+  scope:
+    type: object
+    required:
+      - segment
+    properties:
+      market:
+        type: string
+      segment:
+        type: string
+        enum: [middle_market, affordable, luxury]
+      property_form:
+        type: string
+        enum: [garden, walk_up, wrap, suburban_mid_rise, urban_mid_rise, high_rise]
+      management_mode:
+        type: string
+        enum: [self_managed, third_party_managed, owner_oversight]
+  role_slug:
+    type: string
+    description: e.g., property_manager, assistant_property_manager, leasing_agent, maintenance_tech, maintenance_supervisor, groundskeeper, make_ready_tech.
+  property_size_band:
+    type: string
+    enum: [under_100, 100_to_199, 200_to_299, 300_to_399, 400_plus]
+  fte_count:
+    type: number
+    description: FTE headcount for the role at the property_size_band. Use fractional for shared resources.
+  units_per_fte:
+    type: number
+    description: Derived ratio; useful for cross-comparison.
+  unit:
+    type: string
+    enum: [fte, units_per_fte]

@@ -1,0 +1,136 @@
+# Regional Operations question bank
+# Audience: regional_manager, director_of_operations (regional slice)
+# Depth: 15 questions covering span of control, site roster norms, meeting cadence,
+# vendor policy, compliance training cadence, escalation preferences.
+
+bank_slug: regional_ops
+audience: regional_manager
+version: "0.1.0"
+questions:
+
+  - id: reg_001
+    question_text: What is the typical region size in properties?
+    purpose: Sets region_size overlay for regional oversight staffing.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#regional.properties_per_region
+    follow_up_ids: []
+
+  - id: reg_002
+    question_text: What is the typical region size in units?
+    purpose: Sets regional_units overlay for workload normalization.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#regional.units_per_region
+    follow_up_ids: []
+
+  - id: reg_003
+    question_text: Does each region have a dedicated regional maintenance lead?
+    purpose: Informs regional staffing structure.
+    answer_type: boolean
+    target_overlay_ref: overlay.yaml#regional.dedicated_maintenance_lead
+    follow_up_ids: []
+
+  - id: reg_004
+    question_text: What is the standard property-level staffing plan for a middle-market property of typical size? (free text or upload)
+    purpose: Sets site roster norms overlay.
+    answer_type: free_text
+    target_overlay_ref: overlay.yaml#regional.site_roster_norm
+    follow_up_ids: []
+
+  - id: reg_005
+    question_text: What is the cadence of the regional manager / property manager one-on-ones?
+    purpose: Sets regional cadence overlay.
+    answer_type: single_choice
+    choices: [daily_standup, three_times_weekly, twice_weekly, weekly, biweekly]
+    target_overlay_ref: overlay.yaml#regional.pm_1on1_cadence
+    follow_up_ids: []
+
+  - id: reg_006
+    question_text: What is the cadence of the regional operating review with the full site team?
+    purpose: Sets regional review cadence overlay.
+    answer_type: single_choice
+    choices: [weekly, biweekly, monthly]
+    target_overlay_ref: overlay.yaml#regional.team_review_cadence
+    follow_up_ids: []
+
+  - id: reg_007
+    question_text: Does the region require attendance at a monthly all-region leadership meeting with the COO?
+    purpose: Sets regional-to-coo cadence overlay.
+    answer_type: boolean
+    target_overlay_ref: overlay.yaml#regional.coo_meeting_required
+    follow_up_ids: []
+
+  - id: reg_008
+    question_text: What is the preferred vendor dispatch model? (single_choice)
+    purpose: Sets vendor_preference overlay for regional dispatch.
+    answer_type: single_choice
+    choices:
+      - property_level_chooses_from_approved_list
+      - regional_approves_each_dispatch
+      - central_vendor_management_dispatches
+      - hybrid
+    target_overlay_ref: overlay.yaml#vendor_policy.dispatch_model
+    follow_up_ids: []
+
+  - id: reg_009
+    question_text: What is the fair-housing training cadence for site staff?
+    purpose: Sets compliance training overlay.
+    answer_type: single_choice
+    choices: [monthly, quarterly, semi_annual, annual, on_hire_only]
+    target_overlay_ref: overlay.yaml#training_compliance.fair_housing_site_cadence
+    follow_up_ids: []
+
+  - id: reg_010
+    question_text: What is the safety / OSHA training cadence for maintenance staff?
+    purpose: Sets safety training overlay.
+    answer_type: single_choice
+    choices: [monthly, quarterly, semi_annual, annual]
+    target_overlay_ref: overlay.yaml#training_compliance.safety_cadence
+    follow_up_ids: []
+
+  - id: reg_011
+    question_text: What is the regional's escalation preference for a concession-beyond-policy request from a property?
+    purpose: Sets concession_policy_escalation overlay.
+    answer_type: single_choice
+    choices:
+      - regional_decides_up_to_threshold
+      - regional_must_route_to_asset_manager_always
+      - regional_decides_but_weekly_report_to_am
+    target_overlay_ref: overlay.yaml#concession_policy.escalation_model
+    follow_up_ids: []
+
+  - id: reg_012
+    question_text: How does the regional handle a fair-housing complaint intake?
+    purpose: Sets fair_housing escalation overlay.
+    answer_type: single_choice
+    choices:
+      - escalate_to_legal_immediately
+      - regional_investigates_then_legal
+      - regional_and_hr_together
+    target_overlay_ref: overlay.yaml#escalation_paths.fair_housing_intake
+    follow_up_ids: []
+
+  - id: reg_013
+    question_text: Please upload the current regional operations playbook or dashboard template.
+    purpose: Sets regional reporting template overlay.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#regional.playbook_ref
+    missing_doc_triggers: [existing_sops]
+
+  - id: reg_014
+    question_text: What is the regional's preferred weekly KPI dashboard layout?
+    purpose: Sets weekly_dashboard_layout overlay.
+    answer_type: single_choice
+    choices:
+      - one_table_per_property_comparative
+      - one_row_per_property_comparative
+      - scorecard_style_with_targets
+      - narrative_plus_table
+    target_overlay_ref: overlay.yaml#regional.weekly_dashboard_layout
+    follow_up_ids: []
+
+  - id: reg_015
+    question_text: Does the regional need a leasing-funnel dashboard rolled up across the region?
+    purpose: Gates regional leasing_funnel aggregation output.
+    answer_type: boolean
+    target_overlay_ref: overlay.yaml#regional.leasing_funnel_rollup
+    follow_up_ids: []

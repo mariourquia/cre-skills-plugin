@@ -1,0 +1,43 @@
+pack_slug: regional_manager
+reads:
+  - path: reference/normalized/market_rents__{market}_mf.csv
+    category: market_rent_benchmark
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: ask_user
+  - path: reference/normalized/concession_benchmarks__{market}_mf.csv
+    category: concession_benchmark
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: use_prior_period
+  - path: reference/normalized/collections_benchmarks__{region}_mf.csv
+    category: occupancy_benchmark
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: use_portfolio_average
+  - path: reference/normalized/staffing_ratios__middle_market.csv
+    category: staffing_model
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/approval_threshold_defaults.csv
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/delinquency_playbook_middle_market.csv
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/derived/role_kpi_targets.csv
+    category: occupancy_benchmark
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/derived/same_store_set.csv
+    category: portfolio_cohort
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: ask_user
+writes: []

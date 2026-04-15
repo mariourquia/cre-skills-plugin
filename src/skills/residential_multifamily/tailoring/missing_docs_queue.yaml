@@ -1,0 +1,24 @@
+# Missing Docs Queue
+# Starter schema and (initially) an empty queue. The tailoring TUI appends entries here
+# when an answer implies a document is needed and the operator cannot produce it in-session.
+#
+# Schema per entry:
+#   doc_slug: <kebab-case slug; must exist in doc_catalog.yaml>
+#   doc_title: <human-readable title; copied from doc_catalog.yaml for redundancy>
+#   requested_from_role: <role slug; who must produce the doc>
+#   requested_at: <ISO-8601 UTC timestamp>
+#   priority: <p1 | p2 | p3>
+#   used_by_overlay_keys: [<overlay.yaml#key>, ...]
+#   substitute_behavior: <refuse | use_defaults | use_prior_period | use_portfolio_average>
+#   status: <open | received | parsed | closed>
+#   org_id: <org slug the request is scoped to>
+#   session_id: <session slug that opened the request>
+#   notes: <optional free text>
+#
+# Priority semantics:
+#   p1  — blocks authoritative output; dependent overlay keys are flagged pending_doc.
+#   p2  — operational; overlay keys default until doc arrives; low_confidence flag set.
+#   p3  — informational; no gating.
+
+schema_version: "0.1.0"
+entries: []

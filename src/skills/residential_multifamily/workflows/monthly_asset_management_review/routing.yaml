@@ -1,0 +1,31 @@
+pack_slug: monthly_asset_management_review
+pack_type: workflow
+priority: 10
+triggers:
+  explicit_phrases:
+    - "monthly AM review"
+    - "asset management review"
+    - "asset plan reality check"
+    - "watchlist update"
+    - "covenant cushion review"
+    - "same-store rollup"
+  implicit_signals:
+    - "month close with property reviews complete"
+    - "covenant cushion approaching warning band"
+    - "watchlist score crossing band"
+    - "capex spend pattern exceeding plan materiality"
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - lifecycle_stage
+  - management_mode
+  - market
+optional_axes:
+  - role
+  - loan_id
+  - output_type
+  - jurisdiction
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

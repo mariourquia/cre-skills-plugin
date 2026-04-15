@@ -57,3 +57,5 @@ jobs:
         run: |
           python scripts/catalog-build.py
           python scripts/catalog-generate.py --check
+      - name: Check prose drift (hardcoded counts outside CATALOG:STATS markers)
+        run: python scripts/prose-drift-check.py

@@ -1,0 +1,73 @@
+overlay_id: lifecycle.lease_up
+overlay_kind: lifecycle
+scope:
+  lifecycle: lease_up
+authoring_notes: |
+  Lease-up overlay. From TCO through stabilized occupancy. The overlay widens the
+  preleased window, tightens lead-response targets, adds stabilization-pace-vs-plan
+  as a primary reporting surface, relaxes concession posture within a defined floor,
+  and intensifies marketing cadence. Staffing shifts to leasing-heavy with a
+  reversion trigger at stabilization.
+
+overrides:
+  - target_kind: metric_filters_default
+    target_ref: _core/metrics.md#preleased_occupancy
+    override_value:
+      filters_default_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_lease_up_preleased_window
+    reason: |
+      Lease-up uses a 60-day preleased window (vs. 30-day stabilized default) to
+      capture the forward-leasing pipeline that matters during lease-up.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#stabilization_pace_vs_plan
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_lease_up_stabilization_pace
+    reason: |
+      Stabilization pace vs. plan is the primary lease-up KPI. Target band is
+      pulled from the lease-up row.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#lease_up_pace_post_delivery
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_lease_up_pace_post_delivery
+    reason: |
+      Units leased per month post-delivery target band; tracks absorption.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#lead_response_time
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_lease_up_lead_response_time
+    reason: |
+      Lease-up tightens lead-response targets because every missed lead is an
+      absorption loss.
+  - target_kind: concession_policy
+    target_ref: _core/metrics.md#concession_rate
+    override_value:
+      concession_policy_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_lease_up_concession_floor
+    reason: |
+      Lease-up carries a concession floor that is more permissive than stabilized
+      operations but still bounded. The floor is referenced; the overlay does not
+      embed a percentage.
+  - target_kind: staffing_ratio
+    target_ref: _core/taxonomy.md#role.leasing_manager
+    override_value:
+      staffing_ratio_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_lease_up_leasing_staffing
+    reason: |
+      Lease-up leasing staffing is heavier than stabilized. A reversion trigger
+      returns the property to segment/form-factor defaults at stabilization.
+  - target_kind: reporting_emphasis
+    target_ref: _core/metrics.md#stabilization_pace_vs_plan
+    override_value:
+      reporting_emphasis_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_lease_up_reporting
+    reason: |
+      Lease-up reporting emphasis is pace-vs-plan, concession-to-absorption, and
+      funnel conversion, not controllable-opex-first.
+
+adds:
+  - added_kind: checklist_item
+    slug: lease_up_war_room_cadence
+    definition_ref: overlays/lifecycle/lease_up/README.md#war_room_cadence
+  - added_kind: checklist_item
+    slug: marketing_intensity_cadence
+    definition_ref: overlays/lifecycle/lease_up/README.md#marketing_intensity
+
+approvers:
+  - director_of_operations
+  - asset_manager

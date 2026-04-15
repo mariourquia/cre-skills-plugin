@@ -1,0 +1,269 @@
+# COO / Operations Leadership question bank
+# Audience: coo_operations_leader, director_of_operations
+# Depth: 30 questions covering org chart, operating model, approval thresholds,
+# reporting cadences, KPI preferences, staffing norms, service standards,
+# risk tolerance, portfolio segmentation.
+#
+# Each question conforms to:
+#   id: <bank_prefix>_<three_digit_index>
+#   question_text: <human-readable question>
+#   purpose: <what this drives in overlay output>
+#   answer_type: single_choice | multi_choice | free_text | numeric | document_request | boolean
+#   choices: [...]              # if applicable (single_choice, multi_choice)
+#   target_overlay_ref: <overlay path>#<key>   # where the answer lands
+#   follow_up_ids: []           # ids that should be shown when a matching answer is given
+#   missing_doc_triggers: []    # doc_slugs to add to missing_docs_queue when triggered
+#
+# Numeric answers carry units described in question_text; the TUI prompts accordingly.
+# No hardcoded market/segment figures live in this bank. Thresholds are operator-set.
+
+bank_slug: coo
+audience: coo_operations_leader
+version: "0.1.0"
+questions:
+
+  - id: coo_001
+    question_text: What is the organization's primary operating model across the portfolio?
+    purpose: Determines whether role packs load self_managed, third_party_managed, or both; gates downstream audiences.
+    answer_type: single_choice
+    choices: [self_managed, third_party_managed, hybrid, unknown]
+    target_overlay_ref: overlay.yaml#operating_model
+    follow_up_ids: [coo_002]
+    missing_doc_triggers: []
+
+  - id: coo_002
+    question_text: If hybrid, what fraction of units are self-managed versus third-party-managed? (free text is fine; "mostly self" or "70/30" both accepted)
+    purpose: Informs per-property mode assignments at onboarding.
+    answer_type: free_text
+    target_overlay_ref: overlay.yaml#operating_model_mix
+    follow_up_ids: []
+
+  - id: coo_003
+    question_text: Please upload or describe the current executive org chart. We need it to map role packs to real people.
+    purpose: Grounds routing so approval requests resolve to named approvers, not just role slugs.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#org_chart_ref
+    missing_doc_triggers: [org_chart]
+
+  - id: coo_004
+    question_text: What is the regional manager's typical span of control in units? (numeric)
+    purpose: Sets staffing ratio overlay for regional oversight.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#staffing_ratios.regional_span_of_control_units
+    follow_up_ids: []
+
+  - id: coo_005
+    question_text: Do any regions span multiple states or federal districts that trigger different landlord-tenant regimes?
+    purpose: Triggers per-market overlay loading and legal-notice template branching.
+    answer_type: boolean
+    target_overlay_ref: overlay.yaml#multi_jurisdiction_flag
+    follow_up_ids: []
+
+  - id: coo_006
+    question_text: Please upload the organization's current approval matrix covering financial disbursements, procurement, and contract signatures.
+    purpose: The org overlay's approval_matrix.yaml cannot be finalized without this document or an equivalent set of answers.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#approval_matrix_ref
+    missing_doc_triggers: [approval_matrix]
+
+  - id: coo_007
+    question_text: What is the property manager's autonomous disbursement threshold in dollars? (numeric, dollars, per transaction)
+    purpose: Populates approval_matrix row 6 threshold_disbursement_1 for the org.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#approval_matrix.threshold_disbursement_1
+    follow_up_ids: [coo_008]
+
+  - id: coo_008
+    question_text: What is the regional manager's autonomous disbursement threshold in dollars? (numeric, dollars, per transaction)
+    purpose: Populates approval_matrix row 7 threshold_disbursement_2.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#approval_matrix.threshold_disbursement_2
+    follow_up_ids: [coo_009]
+
+  - id: coo_009
+    question_text: Above what dollar amount must an asset manager or executive approve a vendor contract?
+    purpose: Populates approval_matrix row 19 threshold for vendor contract signature.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#approval_matrix.threshold_vendor_contract
+    follow_up_ids: []
+
+  - id: coo_010
+    question_text: What is the org's service standard for lead response? (single_choice of target response windows)
+    purpose: Sets service_standards overlay for lead_response_time target band.
+    answer_type: single_choice
+    choices: [within_15_minutes, within_1_hour, same_business_day, next_business_day, no_standard]
+    target_overlay_ref: overlay.yaml#service_standards.lead_response_target
+    follow_up_ids: []
+
+  - id: coo_011
+    question_text: What is the org's service standard for P1 life-safety work order acknowledgment?
+    purpose: Sets work_order_aging overlay band for P1 items.
+    answer_type: single_choice
+    choices: [within_15_minutes, within_1_hour, within_4_hours, within_8_hours, same_business_day]
+    target_overlay_ref: overlay.yaml#service_standards.p1_ack_target
+    follow_up_ids: []
+
+  - id: coo_012
+    question_text: What is the org's target make-ready cycle time for a standard turn? (numeric, days)
+    purpose: Sets make_ready_days target band overlay.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#service_standards.make_ready_days_target
+    follow_up_ids: []
+
+  - id: coo_013
+    question_text: What is the maximum concession (in weeks of rent equivalent) a property manager may offer without escalation?
+    purpose: Sets concession_policy overlay; above this is an approval_matrix row 13 gate.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#concession_policy.pm_max_weeks
+    follow_up_ids: []
+
+  - id: coo_014
+    question_text: What is the renewal-offer lead time in days before lease expiration? (numeric, days)
+    purpose: Sets renewal_strategy.renewal_offer_lead_time in the org overlay.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#renewal_strategy.renewal_offer_lead_time_days
+    follow_up_ids: []
+
+  - id: coo_015
+    question_text: Which KPIs does the COO review weekly? (multi_choice)
+    purpose: Sets reporting_emphasis.weekly_kpi_set for the org.
+    answer_type: multi_choice
+    choices:
+      - physical_occupancy
+      - leased_occupancy
+      - notice_exposure
+      - lead_response_time
+      - tour_conversion
+      - renewal_offer_rate
+      - delinquency_rate_30plus
+      - work_order_aging
+      - make_ready_days
+      - repeat_work_order_rate
+    target_overlay_ref: overlay.yaml#reporting_emphasis.weekly_kpi_set
+    follow_up_ids: []
+
+  - id: coo_016
+    question_text: Which KPIs does the COO review monthly?
+    purpose: Sets reporting_emphasis.monthly_kpi_set.
+    answer_type: multi_choice
+    choices:
+      - economic_occupancy
+      - blended_lease_trade_out
+      - renewal_acceptance_rate
+      - turnover_rate
+      - collections_rate
+      - bad_debt_rate
+      - concession_rate
+      - controllable_opex_per_unit
+      - payroll_per_unit
+      - utilities_per_unit
+    target_overlay_ref: overlay.yaml#reporting_emphasis.monthly_kpi_set
+    follow_up_ids: []
+
+  - id: coo_017
+    question_text: What is the org's risk tolerance on delinquency? (single_choice)
+    purpose: Sets delinquency_playbook_stage overlay aggressiveness.
+    answer_type: single_choice
+    choices: [conservative_early_action, balanced, tolerant_late_action]
+    target_overlay_ref: overlay.yaml#delinquency_playbook.risk_tolerance
+    follow_up_ids: []
+
+  - id: coo_018
+    question_text: What is the org's resident communication tone?
+    purpose: Sets resident_comm_tone overlay for comms drafts.
+    answer_type: single_choice
+    choices: [formal_corporate, professional_warm, conversational_community, mixed_by_segment]
+    target_overlay_ref: overlay.yaml#resident_comm_tone
+    follow_up_ids: []
+
+  - id: coo_019
+    question_text: Please upload the current property list with segment, form factor, lifecycle stage, and market per property.
+    purpose: Required for per-property overlays and segmentation in reporting.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#property_list_ref
+    missing_doc_triggers: [property_list]
+
+  - id: coo_020
+    question_text: How does the org segment the portfolio for operating reviews? (multi_choice)
+    purpose: Sets portfolio segmentation axes for operating_review outputs.
+    answer_type: multi_choice
+    choices: [by_region, by_segment, by_vintage, by_fund_vehicle, by_management_mode, by_asset_manager]
+    target_overlay_ref: overlay.yaml#portfolio_segmentation.review_axes
+    follow_up_ids: []
+
+  - id: coo_021
+    question_text: What is the standard staffing ratio for leasing agents per units? (numeric, units per agent)
+    purpose: Sets staffing_ratios overlay for the leasing role.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#staffing_ratios.leasing_units_per_agent
+    follow_up_ids: []
+
+  - id: coo_022
+    question_text: What is the standard staffing ratio for maintenance technicians per units?
+    purpose: Sets staffing_ratios overlay for maintenance.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#staffing_ratios.maintenance_units_per_tech
+    follow_up_ids: []
+
+  - id: coo_023
+    question_text: Does the org require a preventive maintenance schedule across the portfolio?
+    purpose: Gates PM-plan templates for site and regional packs.
+    answer_type: boolean
+    target_overlay_ref: overlay.yaml#service_standards.preventive_maintenance_required
+    follow_up_ids: []
+
+  - id: coo_024
+    question_text: What vendors or vendor categories are on an approved-vendor list the org enforces centrally?
+    purpose: Sets vendor_preference overlay for dispatch; triggers doc request if uploaded.
+    answer_type: free_text
+    target_overlay_ref: overlay.yaml#vendor_policy.centrally_approved_categories
+    follow_up_ids: [coo_025]
+
+  - id: coo_025
+    question_text: Please upload the current vendor policy document, including approval process and rate cards if centralized.
+    purpose: Required to set vendor_policy overlay in detail.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#vendor_policy_ref
+    missing_doc_triggers: [vendor_policy]
+
+  - id: coo_026
+    question_text: What is the org's escalation preference when a P1 life-safety event occurs at a site?
+    purpose: Sets escalation_paths.safety_p1 chain in the org overlay.
+    answer_type: single_choice
+    choices:
+      - pm_to_regional_to_coo
+      - pm_to_regional_only
+      - pm_to_regional_to_asset_manager
+      - pm_to_regional_to_coo_and_ceo
+    target_overlay_ref: overlay.yaml#escalation_paths.safety_p1
+    follow_up_ids: []
+
+  - id: coo_027
+    question_text: What is the org's preferred cadence for the COO operating review with regionals?
+    purpose: Sets reporting_emphasis.coo_operating_review_cadence.
+    answer_type: single_choice
+    choices: [weekly, biweekly, monthly, quarterly]
+    target_overlay_ref: overlay.yaml#reporting_emphasis.coo_operating_review_cadence
+    follow_up_ids: []
+
+  - id: coo_028
+    question_text: Please upload the org's current standard operating procedures library (SOPs).
+    purpose: Required to link role packs to existing operator SOPs rather than canonical starter templates.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#sop_library_ref
+    missing_doc_triggers: [existing_sops]
+
+  - id: coo_029
+    question_text: Does the org have a fair-housing training cadence and auditor-of-record?
+    purpose: Gates fair_housing escalation paths and training checklists.
+    answer_type: single_choice
+    choices: [annual_with_auditor, annual_internal, ad_hoc, none]
+    target_overlay_ref: overlay.yaml#training_compliance.fair_housing_cadence
+    follow_up_ids: []
+
+  - id: coo_030
+    question_text: Are there resident communication templates the org wants preserved rather than generated fresh?
+    purpose: Populates templates/ alias references in the org overlay.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#resident_comm_templates_ref
+    missing_doc_triggers: [resident_comm_templates]

@@ -98,7 +98,7 @@ export function serializeFrontmatter(
 ): string {
   const yaml = Object.entries(frontmatter)
     .map(([k, v]) => {
-      if (typeof v === "string" && (v.includes(":") || v.includes('"') || v.includes("'"))) {
+      if (typeof v === "string" && (v.includes(":") || v.includes('"') || v.includes("'") || v.includes("\n"))) {
         return `${k}: ${JSON.stringify(v)}`;
       }
       if (Array.isArray(v)) {

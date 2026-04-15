@@ -1,0 +1,33 @@
+pack_slug: reporting_finance_ops_lead
+pack_type: role
+priority: 55
+triggers:
+  explicit_phrases:
+    - "reporting lead"
+    - "finance ops"
+    - "month-end close"
+    - "variance reporting"
+    - "covenant cushion"
+    - "lender compliance package"
+    - "investor reporting"
+    - "reforecast"
+    - "forecast accuracy"
+    - "budget attainment"
+    - "close binder"
+    - "same-store cohort"
+    - "reference update finance"
+  implicit_signals:
+    - "asker is tagged role=reporting_finance_ops_lead in session context"
+    - "request concerns month-end close, covenant calculation, lender/investor packages, or finance-domain reference updates"
+required_axes:
+  - asset_class
+  - segment
+  - role
+optional_axes:
+  - management_mode
+  - market
+  - output_type
+  - decision_severity
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

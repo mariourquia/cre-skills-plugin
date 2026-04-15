@@ -1,0 +1,57 @@
+# Category Schema: vendor_rate
+# Rate cards for contracted vendors (cleaners, carpet installers, painters, HVAC service).
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: VendorRateReferenceRecord
+description: |
+  Vendor rate card entries. A vendor may quote a bundled turn service, a per-unit flat rate,
+  or a time-and-materials rate. Each row is one line item on the rate card.
+extends: _core/schemas/reference_record.yaml
+required:
+  - reference_id
+  - category
+  - scope
+  - value
+  - unit
+  - scenario
+  - source_name
+  - source_type
+  - source_date
+  - as_of_date
+  - confidence
+  - status
+  - proposed_by
+  - vendor_name
+  - service_slug
+properties:
+  category:
+    const: vendor_rate
+  scope:
+    type: object
+    required:
+      - market
+    properties:
+      market:
+        type: string
+      region:
+        type: string
+      segment:
+        type: string
+        enum: [middle_market, affordable, luxury]
+      property_id:
+        type: string
+        description: Optional - some rate cards are property-specific under an MSA.
+  vendor_name:
+    type: string
+    description: Made-up vendor name for sample data.
+  service_slug:
+    type: string
+    description: e.g., turn_clean_light, turn_clean_heavy, carpet_replace_per_unit, paint_full_unit, hvac_pm_biannual, pest_control_monthly, landscape_monthly.
+  service_category:
+    type: string
+    enum: [turn_clean, turn_paint, turn_flooring, turn_punch, hvac, plumbing, electrical, pest, landscape, pool, fitness, general_r_and_m, security, trash, other]
+  contract_term_months:
+    type: integer
+  unit:
+    type: string
+    enum: [dollars_per_unit, dollars_per_trip, dollars_per_month, dollars_per_hour, dollars_per_sf, dollars_per_lump_sum]

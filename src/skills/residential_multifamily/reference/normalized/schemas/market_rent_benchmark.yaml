@@ -1,0 +1,68 @@
+# Category Schema: market_rent_benchmark
+# Aggregated market rents by market / submarket / unit type. Downstream of rent_comp but
+# also directly ingestible from third-party vendor aggregates (CoStar submarket report, etc.).
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: MarketRentBenchmarkReferenceRecord
+description: |
+  Aggregated market rent benchmark at the (market, submarket, segment, property_form, unit_type)
+  grain. One row per (scope, unit_type) for a given as_of_date.
+extends: _core/schemas/reference_record.yaml
+required:
+  - reference_id
+  - category
+  - scope
+  - value
+  - unit
+  - scenario
+  - source_name
+  - source_type
+  - source_date
+  - as_of_date
+  - confidence
+  - status
+  - proposed_by
+  - unit_type_label
+  - unit_beds
+properties:
+  category:
+    const: market_rent_benchmark
+  scope:
+    type: object
+    required:
+      - market
+      - segment
+      - property_form
+    properties:
+      market:
+        type: string
+      submarket:
+        type: string
+      segment:
+        type: string
+        enum: [middle_market, affordable, luxury]
+      property_form:
+        type: string
+        enum: [garden, walk_up, wrap, suburban_mid_rise, urban_mid_rise, high_rise]
+      property_class:
+        type: string
+        enum: [A, B, C, D]
+  unit_type_label:
+    type: string
+  unit_beds:
+    type: integer
+  unit_baths:
+    type: number
+  unit_sf_avg:
+    type: integer
+  rent_per_sf:
+    type: number
+    description: Implied dollars per SF for cross-market comparison.
+  sample_size_properties:
+    type: integer
+    description: Number of properties in the benchmark sample.
+  trailing_3mo_change_pct:
+    type: number
+    description: 3-month trailing change in the benchmark, as a percent.
+  unit:
+    const: dollars_per_unit_per_month

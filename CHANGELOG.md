@@ -1,5 +1,29 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- `residential_multifamily` skill — institutional-grade operating system for U.S. residential multifamily property management (534 files, 35,920 lines). Covers the full operating stack:
+  - `_core/`: ontology (30+ objects), 72 metric contracts, routing framework with 3 worked examples, 20-action approval matrix, fair-housing + safety guardrails, alias registry
+  - `roles/`: 15 role packs (property manager flagship; asset manager, TPM-oversight-lead, reporting/finance-ops at same depth; COO/CFO/CEO as rollup consumers)
+  - `workflows/`: 26 workflows with 6 flagships (delinquency_collections, monthly_asset_management_review, bid_leveling_procurement_review, draw_package_review, TPM_scorecard_review, executive_operating_summary_generation)
+  - `overlays/`: segment (middle_market deep + affordable/luxury/high_rise stubs), form_factor x6, lifecycle x6, management_mode x3
+  - `reference/`: 16 category schemas, ~250 starter CSV rows (all tagged sample/starter/placeholder), 16 update-flow walk-throughs
+  - `templates/`: 40 templates with legal-review banners on statutory-notice templates
+  - `tailoring/`: interactive TUI (stdlib + PyYAML, ANSI, session persistence, resume), 7 audience question banks with 124 questions, 23 unit tests
+  - `tests/`: 12 pytest modules, 40/40 pass — enforces no-hardcoded-figures, metric-contract uniqueness, approval gating, fair-housing banners, naming collisions
+- Skill ships with `status: draft` and self-declared stale-data notice — all reference files are tagged `sample | starter | illustrative | placeholder`, update before operational use
+
+### Changed
+- Skills count: 112 -> 113 (propagated via `scripts/catalog-build.py` and `scripts/catalog-generate.py` to README stats table, plugin.json description, registry.yaml, hooks SessionStart prompt, routing table)
+- Prose counts in README, docs/INSTALL.md, docs/install-cowork.md, docs/install-desktop.md, docs/WHAT-TO-USE-WHEN.md, docs/install-guide.md updated to 113 (historical release notes under docs/releases/ left unchanged)
+
+### Added (CI)
+- `scripts/prose-drift-check.py` — grep-based CI guard that flags hardcoded skill/agent/calculator/reference-file counts in prose outside the `CATALOG:STATS` markers. Wired into `.github/workflows/ci.yml` so future skill additions fail CI until every current-state doc is updated or explicitly wrapped in `<!-- PROSE-DRIFT:IGNORE-START -->` / `<!-- PROSE-DRIFT:IGNORE-END -->` markers. Closes the gap the generator never covered (14 stale "112" references in prose surfaced during this merge).
+
+### Notes
+- No version bump in this entry — the skill status is `draft`, version should bump when the subsystem moves to `deployed`
+
 ## [4.1.2] - 2026-04-13
 
 ### Added

@@ -1,0 +1,126 @@
+# Skill Manifest Schema
+# Applies to the `applies_to`, `references`, `metrics_used`, and related frontmatter blocks
+# that every pack's SKILL.md must declare.
+# Also the schema for the pack's routing.yaml file.
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: SkillManifest
+type: object
+required:
+  - name
+  - slug
+  - version
+  - status
+  - category
+  - subsystem
+  - pack_type
+  - targets
+  - applies_to
+  - references
+  - metrics_used
+  - description
+properties:
+  name:
+    type: string
+  slug:
+    type: string
+    pattern: "^[a-z][a-z0-9_]*$"
+  version:
+    type: string
+    pattern: "^\\d+\\.\\d+\\.\\d+$"
+  status:
+    type: string
+    enum: [draft, deployed, deprecated]
+  category:
+    type: string
+    const: residential_multifamily
+  subsystem:
+    type: string
+    const: residential_multifamily
+  pack_type:
+    type: string
+    enum: [role, workflow, overlay, tailoring, router]
+  targets:
+    type: array
+    items:
+      type: string
+      enum: [claude_code]
+    minItems: 1
+  stale_data:
+    type: string
+  applies_to:
+    type: object
+    required:
+      - segment
+      - form_factor
+      - lifecycle
+      - management_mode
+      - role
+      - output_types
+      - decision_severity_max
+    properties:
+      segment:
+        type: array
+        items:
+          type: string
+          enum: [middle_market, affordable, luxury]
+      form_factor:
+        type: array
+        items:
+          type: string
+          enum: [garden, walk_up, wrap, suburban_mid_rise, urban_mid_rise, high_rise]
+      lifecycle:
+        type: array
+        items:
+          type: string
+          enum: [development, construction, lease_up, stabilized, renovation, recap_support]
+      management_mode:
+        type: array
+        items:
+          type: string
+          enum: [self_managed, third_party_managed, owner_oversight]
+      role:
+        type: array
+        items:
+          type: string
+      output_types:
+        type: array
+        items:
+          type: string
+          enum: [memo, kpi_review, checklist, estimate, operating_review, scorecard, dashboard, email_draft]
+      decision_severity_max:
+        type: string
+        enum: [informational, recommendation, action_routable, action_requires_approval]
+  references:
+    type: object
+    required: [reads, writes]
+    properties:
+      reads:
+        type: array
+        items:
+          type: string
+      writes:
+        type: array
+        items:
+          type: string
+  metrics_used:
+    type: array
+    items:
+      type: string
+  escalation_paths:
+    type: array
+    items:
+      type: object
+      required: [kind, to]
+      properties:
+        kind:
+          type: string
+        to:
+          type: string
+  approvals_required:
+    type: array
+    items:
+      type: string
+  description:
+    type: string
+additionalProperties: false

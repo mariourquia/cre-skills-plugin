@@ -1,0 +1,7 @@
+source_row_id,property_name,submarket,market,segment,property_form,property_class,vintage_year,unit_type_label,unit_beds,unit_baths,unit_sf,asking_rent,effective_rent,concession_weeks,occupancy_pct,source_file,source_date,as_of_date,notes
+CS-2026Q1-000412,Ashford Park,South End,Charlotte,middle_market,garden,B,2006,A1,1,1,715,1635,1595,1,94.5,CoStar_Charlotte_Q1_2026.xlsx,2026-04-05,2026-03-31,Q1 refresh.
+CS-2026Q1-000413,Ashford Park,South End,Charlotte,middle_market,garden,B,2006,B1,2,2,1045,1945,1895,1,94.5,CoStar_Charlotte_Q1_2026.xlsx,2026-04-05,2026-03-31,Q1 refresh.
+CS-2026Q1-000428,Greenbriar Flats,South End,Charlotte,middle_market,garden,B,2009,A1,1,1,720,1615,1585,1,93.5,CoStar_Charlotte_Q1_2026.xlsx,2026-04-05,2026-03-31,Q1 refresh.
+CS-2026Q1-000429,Greenbriar Flats,South End,Charlotte,middle_market,garden,B,2009,B1,2,2,1055,1925,1885,1,93.5,CoStar_Charlotte_Q1_2026.xlsx,2026-04-05,2026-03-31,Q1 refresh.
+CS-2026Q1-000455,Liberty Crossing,Ballantyne,Charlotte,middle_market,garden,B,2011,A1,1,1,730,1595,1560,1,95.0,CoStar_Charlotte_Q1_2026.xlsx,2026-04-05,2026-03-31,Q1 refresh.
+CS-2026Q1-000456,Liberty Crossing,Ballantyne,Charlotte,middle_market,garden,B,2011,B1,2,2,1060,1895,1855,1,95.0,CoStar_Charlotte_Q1_2026.xlsx,2026-04-05,2026-03-31,Q1 refresh.

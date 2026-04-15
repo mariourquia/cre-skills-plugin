@@ -1,0 +1,5 @@
+source_row_id,segment,property_form,project_size_band,milestone_slug,milestone_category,duration,unit,source_file,source_date,as_of_date,notes
+CDA-2026Q1-MM-GARDEN-200-ENT,middle_market,garden,200_to_299_units,entitlements_to_permit,predev,9,months,schedule_norms_2026Q1.xlsx,2026-03-24,2026-02-28,Starter.
+CDA-2026Q1-MM-GARDEN-200-FRAME,middle_market,garden,200_to_299_units,framing,structure,6,months,schedule_norms_2026Q1.xlsx,2026-03-24,2026-02-28,Starter.
+CDA-2026Q1-MM-GARDEN-200-MEP,middle_market,garden,200_to_299_units,mep_rough,mep,4,months,schedule_norms_2026Q1.xlsx,2026-03-24,2026-02-28,Starter.
+CDA-2026Q1-MM-GARDEN-200-LU,middle_market,garden,200_to_299_units,lease_up_start,lease_up,15,months,schedule_norms_2026Q1.xlsx,2026-03-24,2026-02-28,Starter.

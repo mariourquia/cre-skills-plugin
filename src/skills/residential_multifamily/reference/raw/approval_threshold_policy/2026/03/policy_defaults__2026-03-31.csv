@@ -1,0 +1,6 @@
+source_row_id,segment,management_mode,threshold_slug,threshold_category,policy_owner_role,amount,unit,source_file,source_date,as_of_date,notes
+ATD-2026Q1-MM-3PM-DISB1,middle_market,third_party_managed,threshold_disbursement_1,disbursement,property_manager,5000,dollars,policy_defaults_2026Q1.xlsx,2026-04-01,2026-03-31,Starter.
+ATD-2026Q1-MM-3PM-DISB2,middle_market,third_party_managed,threshold_disbursement_2,disbursement,regional_manager,25000,dollars,policy_defaults_2026Q1.xlsx,2026-04-01,2026-03-31,Starter.
+ATD-2026Q1-MM-3PM-BIDMAJOR,middle_market,third_party_managed,threshold_bid_major,bid_award,asset_manager,100000,dollars,policy_defaults_2026Q1.xlsx,2026-04-01,2026-03-31,Starter.
+ATD-2026Q1-MM-3PM-COMAJOR,middle_market,third_party_managed,threshold_co_major,change_order,asset_manager,100000,dollars,policy_defaults_2026Q1.xlsx,2026-04-01,2026-03-31,Starter.
+ATD-2026Q1-MM-3PM-CONCMAX,middle_market,third_party_managed,concession_policy_max,concession,regional_manager,1.0,months,policy_defaults_2026Q1.xlsx,2026-04-01,2026-03-31,Starter.

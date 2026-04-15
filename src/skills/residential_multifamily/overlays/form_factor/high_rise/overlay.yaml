@@ -1,0 +1,26 @@
+overlay_id: form_factor.high_rise
+overlay_kind: form_factor
+status: stub
+scope:
+  form_factor: high_rise
+authoring_notes: |
+  Stub overlay for high-rise (9+ stories). Phase 1 does not deepen this overlay; it
+  exists so the form factor can diverge from suburban or urban mid-rise without
+  touching canonical core. High-rise introduces fire-life-safety systems at scale,
+  multiple elevator banks, facade maintenance, window washing, and concierge-tier
+  operations that warrant their own depth.
+
+overrides:
+  - target_kind: service_standard
+    target_ref: _core/metrics.md#average_days_vacant
+    override_value:
+      service_standard_ref: overlays/form_factor/high_rise/README.md#divergence
+    reason: |
+      High-rise common-area maintenance (facade, window washing, elevator banks,
+      fire-life-safety) adds cadence surfaces not present in mid-rise. Placeholder
+      pointer until the full overlay is built.
+
+adds: []
+
+approvers:
+  - director_of_operations

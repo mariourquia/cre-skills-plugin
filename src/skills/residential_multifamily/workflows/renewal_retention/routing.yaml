@@ -1,0 +1,30 @@
+pack_slug: renewal_retention
+pack_type: workflow
+priority: 20
+triggers:
+  explicit_phrases:
+    - "renewal plan"
+    - "renewal strategy"
+    - "price renewals"
+    - "retention plan"
+    - "renewal offers"
+    - "renewal tiering"
+  implicit_signals:
+    - "lease end_date within renewal_offer_lead_time with no renewal_offered event"
+    - "renewal_offer_rate below target band"
+    - "renewal_acceptance_rate declining trend over trailing 90 days"
+    - "request scope names a property and mentions renewals or expirations"
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - lifecycle_stage
+  - management_mode
+  - market
+optional_axes:
+  - role
+  - submarket
+  - output_type
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

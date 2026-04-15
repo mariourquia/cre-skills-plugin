@@ -1,0 +1,57 @@
+# Category Schema: material_cost
+# Material cost history for items used in unit turns, capex, and ground-up development.
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: MaterialCostReferenceRecord
+description: |
+  Material cost per unit of measure. Covers flooring, paint, appliances, fixtures, roofing,
+  HVAC components, sheetrock, lumber, countertops, and other consumables. Regionally scoped
+  because distribution and delivery costs vary.
+extends: _core/schemas/reference_record.yaml
+required:
+  - reference_id
+  - category
+  - scope
+  - value
+  - unit
+  - scenario
+  - source_name
+  - source_type
+  - source_date
+  - as_of_date
+  - confidence
+  - status
+  - proposed_by
+  - material_slug
+  - material_category
+properties:
+  category:
+    const: material_cost
+  scope:
+    type: object
+    required:
+      - region
+    properties:
+      market:
+        type: string
+      region:
+        type: string
+        description: e.g., southeast, west, midwest, northeast.
+      segment:
+        type: string
+        enum: [middle_market, affordable, luxury]
+      sku_tier:
+        type: string
+        enum: [builder_grade, middle_market, premium]
+  material_slug:
+    type: string
+    description: e.g., lvp_flooring_6mm, carpet_polyester_med, interior_paint_eggshell, appliance_range_electric_30, appliance_refrigerator_18cf, toilet_1_28gpf, faucet_kitchen_std, roof_shingle_30yr, lumber_2x4x8_spf.
+  material_category:
+    type: string
+    enum: [flooring, paint, appliances, plumbing_fixtures, lighting, hardware, roofing, lumber, drywall, hvac_components, countertops, cabinetry, other]
+  unit:
+    type: string
+    enum: [dollars_per_sf, dollars_per_each, dollars_per_gallon, dollars_per_board_foot, dollars_per_square_roofing, dollars_per_yard, dollars_per_linear_foot]
+  trailing_12mo_change_pct:
+    type: number
+    description: Trailing 12-month price change, percent.

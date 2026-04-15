@@ -1,0 +1,90 @@
+# Tailoring interview status for the org overlay.
+# The tailoring skill writes to this file as the interview proceeds.
+# An org overlay transitions from `template` to `active` only when `status: complete`
+# and every required field is filled.
+
+overlay_id: org._defaults
+status: template
+
+required_fields:
+  approval_thresholds:
+    threshold_disbursement_1:
+      collected: false
+      source_artifact: null
+      notes: Ask for the owner's operating-disbursement first-tier gate.
+    threshold_disbursement_2:
+      collected: false
+      source_artifact: null
+      notes: Second-tier operating-disbursement gate (higher dollar).
+    threshold_procurement:
+      collected: false
+      source_artifact: null
+      notes: Contract award / material procurement gate.
+    threshold_bid_major:
+      collected: false
+      source_artifact: null
+      notes: Major bid-award gate (construction or capex).
+    threshold_co_minor:
+      collected: false
+      source_artifact: null
+      notes: Minor change-order gate.
+    threshold_co_major:
+      collected: false
+      source_artifact: null
+      notes: Major change-order gate.
+    threshold_tpm_disbursement_owner_signoff:
+      collected: false
+      source_artifact: null
+      notes: Only required if any property is third_party_managed.
+    threshold_tpm_procurement_owner_signoff:
+      collected: false
+      source_artifact: null
+      notes: Only required if any property is third_party_managed.
+
+  policy_artifacts:
+    screening_policy:
+      collected: false
+      source_artifact: null
+      notes: Documented screening policy including individualized-assessment process.
+    concession_policy:
+      collected: false
+      source_artifact: null
+      notes: Max free months, max marketing gift card cap, renewal concession policy.
+    vendor_preference_list:
+      collected: false
+      source_artifact: null
+      notes: Preferred vendors by trade with license and insurance status.
+    brand_voice_guide:
+      collected: false
+      source_artifact: null
+      notes: Optional. Defaults to segment tone profile if not provided.
+    pma_document:
+      collected: false
+      source_artifact: null
+      notes: Required if any property is third_party_managed.
+    fair_housing_training_record:
+      collected: false
+      source_artifact: null
+      notes: Most recent training and disclosure materials.
+
+  governance:
+    executive_approver_title:
+      collected: false
+      source_artifact: null
+      notes: Who signs on major bid and major change-order approvals.
+    owner_rep_for_legal_notices:
+      collected: false
+      source_artifact: null
+      notes: Who the PM contacts before a legal-notice approval request is drafted.
+    legal_counsel:
+      collected: false
+      source_artifact: null
+      notes: External or internal counsel that signs off on eviction filings.
+
+missing_docs_queue: []
+notes: |
+  This file is written by the tailoring skill. Fields transition to collected: true
+  once the source_artifact path is populated and verified. The overlay.yaml in this
+  directory binds its tokens to the collected values; until every required field is
+  collected, the overlay is not authoritative and approval matrices fall back to
+  the subsystem's canonical floor.

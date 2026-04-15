@@ -1,0 +1,33 @@
+pack_slug: third_party_manager_scorecard_review
+reads:
+  - path: reference/derived/role_kpi_targets.csv
+    category: occupancy_benchmark
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/collections_benchmarks__{region}_mf.csv
+    category: occupancy_benchmark
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: use_portfolio_average
+  - path: reference/normalized/turn_benchmarks__{market}.csv
+    category: occupancy_benchmark
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: use_portfolio_average
+  - path: reference/normalized/tpm_scorecard_rubric__{org}.yaml
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/pma_terms__{pma_id}.yaml
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/approval_threshold_defaults.csv
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+writes: []

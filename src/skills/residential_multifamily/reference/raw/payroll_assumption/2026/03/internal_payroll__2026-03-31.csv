@@ -1,0 +1,5 @@
+source_row_id,market,region,segment,management_mode,role_slug,band_type,amount,unit,source_file,source_date,as_of_date,notes
+PA-2026Q1-SE-MM-3PM-PM-MID,,southeast,middle_market,third_party_managed,property_manager,base_salary_mid,72000,dollars_per_year,payroll_survey_2026Q1.xlsx,2026-03-05,2026-02-28,Starter.
+PA-2026Q1-SE-MM-3PM-APM-MID,,southeast,middle_market,third_party_managed,assistant_property_manager,base_salary_mid,56000,dollars_per_year,payroll_survey_2026Q1.xlsx,2026-03-05,2026-02-28,Starter.
+PA-2026Q1-SE-MM-3PM-LEAS-MID,,southeast,middle_market,third_party_managed,leasing_agent,hourly_mid,22,dollars_per_hour,payroll_survey_2026Q1.xlsx,2026-03-05,2026-02-28,Starter.
+PA-2026Q1-SE-MM-3PM-BURDEN,,southeast,middle_market,third_party_managed,all_roles,burden_pct,0.18,percent,payroll_survey_2026Q1.xlsx,2026-03-05,2026-02-28,Starter.

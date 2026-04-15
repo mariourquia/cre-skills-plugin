@@ -14,7 +14,7 @@ After installing, open Claude Desktop or Claude Code and type:
 /cre-skills:deal-quick-screen
 ```
 
-Then paste your deal details. The 112 CRE skills are ready to use.
+Then paste your deal details. The 113 CRE skills are ready to use.
 
 > **Important:** On Windows, update Claude Code to the latest version first.
 > Open PowerShell and run: `npm i -g @anthropic-ai/claude-code@latest`

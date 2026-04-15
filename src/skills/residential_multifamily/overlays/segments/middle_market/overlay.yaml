@@ -1,0 +1,350 @@
+overlay_id: segment.middle_market
+overlay_kind: segment
+status: deep
+scope:
+  segment: middle_market
+authoring_notes: |
+  Deep-depth overlay for the middle-market / workforce / attainable conventional rental segment.
+  This overlay constrains canonical target bands, approval postures, staffing ratios, service
+  standards, finish standards, concession and renewal strategy, delinquency playbook staging,
+  resident communication tone, reporting emphasis, screening policy posture, and vendor
+  preferences for this segment. No dollar amounts, percentage targets, or fixed ratios are
+  embedded in this file; every numeric target points to a row in the reference layer.
+
+  Merging order: segment loads first, then form factor, lifecycle, management mode, market,
+  and org. Org always wins. See overlays/README.md for merge rules.
+
+overrides:
+  # --- Metric target bands: Property Operations family ---
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#physical_occupancy
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_physical_occupancy
+    reason: |
+      Middle-market targets physical occupancy at the workforce-housing band defined in the
+      segment's role KPI target row, tighter than the portfolio default.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#leased_occupancy
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_leased_occupancy
+    reason: |
+      Leased occupancy band for middle-market is narrower than the all-segment default and
+      differs based on lease-up vs. stabilized; stage overrides may tighten further.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#economic_occupancy
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_economic_occupancy
+    reason: |
+      Middle-market economic-occupancy band reflects expected collections discipline and
+      concessions posture documented in renewal_strategy.md and concession_policy.md.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#notice_exposure
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_notice_exposure
+    reason: |
+      Notice exposure ceiling for middle-market workforce housing; above-band values escalate
+      per delinquency_playbook.md and trigger a rollover-schedule review.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#preleased_occupancy
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_preleased_occupancy
+    reason: |
+      Preleased-window target for a stabilized middle-market property. Lease-up overlay may
+      widen the preleased_window and retarget this band.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#lead_response_time
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_lead_response_time
+    reason: |
+      Middle-market leads expect a same-business-day reply; see service_standards.md for the
+      full response-time cadence referenced in this row.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#tour_conversion
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_tour_conversion
+    reason: |
+      Tour-to-application conversion band calibrated to middle-market pricing-to-market posture.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#application_conversion
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_application_conversion
+    reason: |
+      Application-to-approval conversion expectation consistent with the segment's
+      documented screening_policy.md posture.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#renewal_offer_rate
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_renewal_offer_rate
+    reason: |
+      Middle-market renewal offers are generated well ahead of expiry to allow differentiated
+      offers by in-place-to-market gap; see renewal_strategy.md.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#renewal_acceptance_rate
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_renewal_acceptance_rate
+    reason: |
+      Renewal acceptance target band for middle-market; shortfalls trigger retention playbook.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#turnover_rate
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_turnover_rate
+    reason: |
+      Turnover expectation for workforce-housing middle-market; above-band triggers
+      root-cause review (pricing, service, or property-condition driven).
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#average_days_vacant
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_average_days_vacant
+    reason: |
+      Days vacant band consistent with middle-market make-ready cadence and leasing velocity.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#make_ready_days
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_make_ready_days
+    reason: |
+      Make-ready duration target reflects the middle-market turn scope documented in
+      finish_standards.md (durable, repeatable finish package, no custom work).
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#work_order_aging
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_work_order_aging
+    reason: |
+      Work-order aging target band; tied to service_standards.md priority tiers and SLAs.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#delinquency_rate_30plus
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_delinquency_rate_30plus
+    reason: |
+      Delinquency ceiling for middle-market; breach triggers delinquency_playbook.md
+      stage-by-stage actions.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#collections_rate
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_collections_rate
+    reason: |
+      Collections discipline is a primary reporting emphasis for this segment; see
+      reporting_emphasis.md.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#bad_debt_rate
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_bad_debt_rate
+    reason: |
+      Bad-debt ceiling for middle-market properties; sustained breach is a watchlist trigger.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#concession_rate
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_concession_rate
+    reason: |
+      Concession ceiling reflects concession_policy.md posture (concessions preferred only
+      to close a documented gap vs. market).
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#blended_lease_trade_out
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_blended_trade_out
+    reason: |
+      Blended trade-out target for middle-market; divergence between new-lease and renewal
+      trade-out is a renewal_strategy.md review trigger.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#controllable_opex_per_unit
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_controllable_opex_per_unit
+    reason: |
+      Controllable opex per unit target for middle-market; over-band triggers line-item
+      variance review.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#payroll_per_unit
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_payroll_per_unit
+    reason: |
+      Site payroll per unit target for middle-market; see staffing.md for the implied
+      staffing ratio.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#rm_per_unit
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_rm_per_unit
+    reason: |
+      R&M per unit target consistent with middle-market finish durability and
+      vendor_preference below.
+
+  # --- Metric filters_default overrides ---
+  - target_kind: metric_filters_default
+    target_ref: _core/metrics.md#concession_rate
+    override_value:
+      filters_default_ref: reference/derived/role_kpi_targets.csv#row_mm_concession_rate_filters
+    reason: |
+      Middle-market concession tracking separates new-lease from renewal concessions and
+      further splits by whether the concession closed a market-gap vs. a velocity push.
+  - target_kind: metric_filters_default
+    target_ref: _core/metrics.md#rent_growth_new_lease
+    override_value:
+      filters_default_ref: reference/derived/role_kpi_targets.csv#row_mm_rent_growth_new_lease_filters
+    reason: |
+      New-lease trade-out excludes unit-type conversions and renovated-to-classic transitions
+      by default; middle-market additionally excludes below-market employer partnership leases.
+
+  # --- Approval thresholds (references org defaults; segment does not set dollars) ---
+  - target_kind: approval_threshold
+    target_ref: _core/approval_matrix.md#row_6_financial_disbursement_tier1
+    override_value:
+      threshold_ref: overlays/org/_defaults/approval_matrix.yaml#threshold_disbursement_1
+    reason: |
+      Segment does not hardcode thresholds. It anchors the disbursement-tier-1 gate to the
+      org-defaults threshold token; the org overlay fills the actual value during tailoring.
+  - target_kind: approval_threshold
+    target_ref: _core/approval_matrix.md#row_8_contract_award_procurement
+    override_value:
+      threshold_ref: overlays/org/_defaults/approval_matrix.yaml#threshold_procurement
+    reason: |
+      Procurement gate anchored to org default; middle-market does not loosen the floor.
+  - target_kind: approval_threshold
+    target_ref: _core/approval_matrix.md#row_13_concession_over_policy
+    override_value:
+      threshold_ref: overlays/segments/middle_market/concession_policy.md#escalation_token
+    reason: |
+      Concessions above the segment's concession_policy.md max-free-months and
+      max-marketing-gift-card cap escalate to regional-plus-owner-rep approval.
+
+  # --- Staffing ratios ---
+  - target_kind: staffing_ratio
+    target_ref: _core/taxonomy.md#role.leasing_manager
+    override_value:
+      staffing_ratio_ref: reference/derived/role_kpi_targets.csv#row_mm_leasing_staffing_ratio
+    reason: |
+      Leasing-staff-to-units ratio for middle-market properties; see staffing.md for how
+      ratios shift in lease-up (handled via lifecycle overlay).
+  - target_kind: staffing_ratio
+    target_ref: _core/taxonomy.md#role.maintenance_supervisor
+    override_value:
+      staffing_ratio_ref: reference/derived/role_kpi_targets.csv#row_mm_maintenance_staffing_ratio
+    reason: |
+      Maintenance-tech-to-units ratio for middle-market; staffing.md documents triggers to
+      flex up for seasonal turns.
+
+  # --- Service standards ---
+  - target_kind: service_standard
+    target_ref: _core/metrics.md#lead_response_time
+    override_value:
+      service_standard_ref: overlays/segments/middle_market/service_standards.md#lead_response_cadence
+    reason: |
+      Middle-market leads expect a same-business-day human reply; see service_standards.md
+      for hour-by-hour cadence without embedding specific minutes here.
+  - target_kind: service_standard
+    target_ref: _core/metrics.md#work_order_aging
+    override_value:
+      service_standard_ref: overlays/segments/middle_market/service_standards.md#work_order_sla_tiers
+    reason: |
+      Work-order SLAs by P1/P2/P3/P4 priority are defined in service_standards.md; values in
+      reference/derived/role_kpi_targets.csv.
+  - target_kind: service_standard
+    target_ref: _core/metrics.md#average_days_vacant
+    override_value:
+      service_standard_ref: overlays/segments/middle_market/service_standards.md#amenity_cleanliness_cadence
+    reason: |
+      Amenity cleanliness and common-area cadence standards are stricter than portfolio
+      defaults for this segment's resident expectations.
+
+  # --- Finish standards ---
+  - target_kind: finish_standard
+    target_ref: _core/metrics.md#make_ready_days
+    override_value:
+      finish_standard_ref: overlays/segments/middle_market/finish_standards.md#classic_finish_package
+    reason: |
+      Classic middle-market finish package: resilient flooring, painted cabinets, durable
+      appliance set. See finish_standards.md; costs live in reference/normalized/turn_library.
+  - target_kind: finish_standard
+    target_ref: _core/metrics.md#renovation_yield_on_cost
+    override_value:
+      finish_standard_ref: overlays/segments/middle_market/finish_standards.md#value_add_finish_package
+    reason: |
+      Value-add finish package introduces quartz-look countertops and upgraded flooring;
+      renovation overlay invokes this for in-place value-add turns.
+
+  # --- Concession policy ---
+  - target_kind: concession_policy
+    target_ref: _core/metrics.md#concession_rate
+    override_value:
+      concession_policy_ref: overlays/segments/middle_market/concession_policy.md#policy_posture
+    reason: |
+      Middle-market concession posture: close documented market gaps before discounting;
+      max-free-months and max-marketing-gift-card caps live in the reference layer and are
+      enforced via this policy document.
+
+  # --- Renewal strategy ---
+  - target_kind: renewal_strategy
+    target_ref: _core/metrics.md#renewal_offer_rate
+    override_value:
+      renewal_strategy_ref: overlays/segments/middle_market/renewal_strategy.md#policy_posture
+    reason: |
+      Renewal offers are differentiated by the in-place-to-market gap per renewal_strategy.md;
+      no blanket percentage is applied across the book.
+
+  # --- Delinquency playbook (stage-by-stage) ---
+  - target_kind: delinquency_playbook_stage
+    target_ref: _core/approval_matrix.md#row_1_legal_notice
+    override_value:
+      delinquency_playbook_ref: overlays/segments/middle_market/delinquency_playbook.md#stage_day_1_to_5
+    reason: |
+      Day 1-5 stage: plain-language reminders, resident outreach, ledger validation. No
+      legal notice without approval.
+  - target_kind: delinquency_playbook_stage
+    target_ref: _core/approval_matrix.md#row_1_legal_notice
+    override_value:
+      delinquency_playbook_ref: overlays/segments/middle_market/delinquency_playbook.md#stage_day_6_to_15
+    reason: |
+      Day 6-15 stage: documented payment plan option, escalation to PM review, approval
+      package assembled for a pay-or-quit notice.
+  - target_kind: delinquency_playbook_stage
+    target_ref: _core/approval_matrix.md#row_2_eviction
+    override_value:
+      delinquency_playbook_ref: overlays/segments/middle_market/delinquency_playbook.md#stage_day_16_plus
+    reason: |
+      Day 16+ stage: eviction-track review with counsel; gated per approval matrix.
+
+  # --- Resident communication tone ---
+  - target_kind: resident_comm_tone
+    target_ref: _core/guardrails.md#fair_housing
+    override_value:
+      tone_ref: overlays/segments/middle_market/resident_comm_tone.md#tone_profile
+    reason: |
+      Friendly, professional, plain-language voice. Reading level and register defined in
+      resident_comm_tone.md; fair-housing scans enforced per guardrails.
+
+  # --- Reporting emphasis ---
+  - target_kind: reporting_emphasis
+    target_ref: _core/metrics.md#collections_rate
+    override_value:
+      reporting_emphasis_ref: overlays/segments/middle_market/reporting_emphasis.md#primary_emphases
+    reason: |
+      Collections, controllable opex, and blended trade-out are the headline reporting
+      emphases for middle-market; ownership-side reporting surfaces these first.
+
+  # --- Screening policy reference ---
+  - target_kind: screening_policy
+    target_ref: _core/guardrails.md#screening
+    override_value:
+      screening_policy_ref: overlays/segments/middle_market/screening_policy.md#policy_posture
+    reason: |
+      Screening-policy posture references the canonical guardrails and the org's documented
+      individualized-assessment process; no ad-hoc criteria.
+
+  # --- Vendor preferences ---
+  - target_kind: vendor_preference
+    target_ref: _core/metrics.md#rm_per_unit
+    override_value:
+      vendor_preference_ref: reference/normalized/vendor_preferences.csv#row_mm_rm_vendors
+    reason: |
+      Durable, repeat-work vendors preferred for middle-market R&M; preferred list lives in
+      the reference layer, not in skill prose.
+  - target_kind: vendor_preference
+    target_ref: _core/metrics.md#make_ready_days
+    override_value:
+      vendor_preference_ref: reference/normalized/vendor_preferences.csv#row_mm_turn_vendors
+    reason: |
+      Turn vendors preferred for repeatable, scope-standardized work; marketplace vendors
+      gated by insurance/license verification per guardrails.
+
+adds: []
+
+approvers:
+  - director_of_operations
+  - coo_operations_leader

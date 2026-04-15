@@ -1,0 +1,110 @@
+# Reporting question bank
+# Audience: reporting_finance_ops_lead
+# Depth: 12 questions covering report inventory, audiences, formats, automation
+# current state, data sources.
+
+bank_slug: reporting
+audience: reporting_finance_ops_lead
+version: "0.1.0"
+questions:
+
+  - id: rpt_001
+    question_text: Please upload the current report inventory (a list of named reports the org produces).
+    purpose: Needed to align reporting workflows to operator inventory.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#reporting.report_inventory_ref
+    missing_doc_triggers: [reporting_calendar]
+
+  - id: rpt_002
+    question_text: What is the primary reporting platform?
+    purpose: Sets reporting_platform overlay.
+    answer_type: single_choice
+    choices: [yardi, entrata, realpage, appfolio, mri_software, custom_bi, spreadsheets_only]
+    target_overlay_ref: overlay.yaml#reporting.primary_platform
+    follow_up_ids: []
+
+  - id: rpt_003
+    question_text: What is the secondary BI layer?
+    purpose: Sets BI layer overlay.
+    answer_type: single_choice
+    choices: [power_bi, tableau, looker, metabase, spreadsheets_only, none]
+    target_overlay_ref: overlay.yaml#reporting.bi_layer
+    follow_up_ids: []
+
+  - id: rpt_004
+    question_text: What is the current state of automation for monthly property reporting?
+    purpose: Sets automation current-state baseline for reporting workflows.
+    answer_type: single_choice
+    choices:
+      - manual_spreadsheets
+      - semi_automated_with_manual_review
+      - automated_with_exception_review
+      - fully_automated
+    target_overlay_ref: overlay.yaml#reporting.monthly_automation_state
+    follow_up_ids: []
+
+  - id: rpt_005
+    question_text: Who are the audiences for the monthly property report? (multi_choice)
+    purpose: Sets audience list for monthly_property_operating_review workflow.
+    answer_type: multi_choice
+    choices:
+      - asset_manager
+      - portfolio_manager
+      - cfo_finance_leader
+      - coo_operations_leader
+      - ceo_executive_leader
+      - external_owner
+      - lp_investor
+      - lender
+    target_overlay_ref: overlay.yaml#reporting.monthly_property_report_audiences
+    follow_up_ids: []
+
+  - id: rpt_006
+    question_text: What format is required for external-audience monthly reports?
+    purpose: Sets external report format overlay.
+    answer_type: single_choice
+    choices: [pdf_only, pdf_plus_xlsx, xlsx_only, portal_link_only]
+    target_overlay_ref: overlay.yaml#reporting.external_monthly_format
+    follow_up_ids: []
+
+  - id: rpt_007
+    question_text: What data source is the canonical rent roll?
+    purpose: Sets canonical rent roll source for KPI derivation.
+    answer_type: free_text
+    target_overlay_ref: overlay.yaml#reporting.canonical_rent_roll_source
+    follow_up_ids: []
+
+  - id: rpt_008
+    question_text: What data source is the canonical T-12?
+    purpose: Sets canonical T-12 source.
+    answer_type: free_text
+    target_overlay_ref: overlay.yaml#reporting.canonical_t12_source
+    follow_up_ids: []
+
+  - id: rpt_009
+    question_text: Does the reporting lead have a documented data dictionary or metric definition registry?
+    purpose: Sets alias_registry coordination.
+    answer_type: boolean
+    target_overlay_ref: overlay.yaml#reporting.has_data_dictionary
+    follow_up_ids: [rpt_010]
+
+  - id: rpt_010
+    question_text: Please upload the current data dictionary or metric registry.
+    purpose: Needed to reconcile against _core/alias_registry.yaml.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#reporting.data_dictionary_ref
+    missing_doc_triggers: [existing_sops]
+
+  - id: rpt_011
+    question_text: Is there a standard market survey template the reporting lead expects?
+    purpose: Gates market_rent_refresh workflow template alignment.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#reporting.market_survey_template_ref
+    missing_doc_triggers: [market_survey_template]
+
+  - id: rpt_012
+    question_text: Is there a standard delinquency report format the reporting lead expects?
+    purpose: Gates delinquency reporting workflow.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#reporting.delinquency_policy_ref
+    missing_doc_triggers: [delinquency_policy]

@@ -1,0 +1,27 @@
+pack_slug: capex_estimate_generation
+pack_type: workflow
+priority: 30
+triggers:
+  explicit_phrases:
+    - "capex estimate"
+    - "line-item estimate"
+    - "roof estimate"
+    - "renovation estimate"
+    - "amenity refresh estimate"
+    - "estimate scope"
+  implicit_signals:
+    - "capital_project_intake_and_prioritization requested estimate"
+    - "bid package prep"
+    - "draw-review estimate scrub"
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - market
+optional_axes:
+  - role
+  - lifecycle_stage
+  - output_type
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

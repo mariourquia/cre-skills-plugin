@@ -1,6 +1,6 @@
 # CRE Skill Routing Index
 
-> 112 CRE skills across 16 subcategories. Use this index to find the right skill -- do NOT load all SKILL.md files.
+> 113 CRE skills across 16 subcategories. Use this index to find the right skill -- do NOT load all SKILL.md files.
 > When a CRE task comes in, match the user's request to a category below, then invoke the specific skill via `/skill-slug`.
 > Only read the full SKILL.md + references when you need the detailed process.
 
