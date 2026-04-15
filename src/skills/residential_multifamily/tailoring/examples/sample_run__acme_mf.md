@@ -56,7 +56,7 @@ Operator answers `1` (self_managed). The session is persisted.
 The operator answers through coo_002 (hybrid mix — skipped with `:s` because Acme is fully self-managed), coo_003 (org chart — operator uploads org_chart.pdf). The TUI confirms:
 
 ```
-answer [document_request] > /Users/acme/Documents/org_chart_apr2026.pdf
+answer [document_request] > ~/example-docs/org_chart_apr2026.pdf
 ```
 
 On coo_004 the operator enters `35` (regional manager span of control in units times ten? no, they mean 35 properties — operator corrects; the question actually asks units, so they enter `900`).
@@ -112,7 +112,7 @@ answer [numeric] > 95
 On coo_028 the operator uploads the SOPs library:
 
 ```
-answer [document_request] > /Users/acme/Documents/sops_library_2026.zip
+answer [document_request] > ~/example-docs/sops_library_2026.zip
 ```
 
 ## Final screen — diff preview
