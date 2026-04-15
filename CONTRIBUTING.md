@@ -230,7 +230,7 @@ Release artifacts are published to GitHub Releases when a version tag is pushed.
 
 ### Release Process
 
-1. Tag the release: `git tag v4.0.0 && git push origin v4.0.0`
+1. Tag the release: `git tag v4.1.2 && git push origin v4.1.2`
 2. Build the DMG: `./scripts/create-dmg.sh`
 3. Create a GitHub release from the tag and attach the DMG as a release asset alongside the auto-generated source archives.
 
