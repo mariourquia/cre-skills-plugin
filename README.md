@@ -28,14 +28,14 @@
 
 # CRE Skills Plugin
 
-A Claude plugin delivering **112 institutional-grade commercial real estate skills** covering the full investment lifecycle -- deal sourcing, screening, underwriting, structuring, due diligence, capital markets, market research, asset management, leasing, investor relations, development, disposition, tax planning, ESG, portfolio strategy, and daily property operations. Each skill includes structured process logic, reference documents, chain connections to other skills, and Python calculators for precise quantitative output. Deploy as a plugin in Claude Code, Claude Desktop, or Claude.ai and get an entire CRE PE shop in your terminal.
+A Claude plugin delivering **113 institutional-grade commercial real estate skills** covering the full investment lifecycle -- deal sourcing, screening, underwriting, structuring, due diligence, capital markets, market research, asset management, leasing, investor relations, development, disposition, tax planning, ESG, portfolio strategy, and daily property operations. Each skill includes structured process logic, reference documents, chain connections to other skills, and Python calculators for precise quantitative output. Deploy as a plugin in Claude Code, Claude Desktop, or Claude.ai and get an entire CRE PE shop in your terminal.
 
 ## Key Stats
 
 <!-- CATALOG:STATS:START -->
 | Metric | Count |
 |--------|-------|
-| Skills | **112** |
+| Skills | **113** |
 | Expert Agents | **54** |
 | Reference Files | **247** |
 | Python Calculators | **12** |
@@ -71,7 +71,7 @@ This repo is a self-contained Claude marketplace. Choose the install method that
 
 | Method | Best for | What you get |
 |--------|----------|-------------|
-| **Marketplace install** | Claude Code users (CLI or Desktop Code tab) | Full: 112 skills, 54 agents, 11 commands, hooks, 21 MCP tools |
+| **Marketplace install** | Claude Code users (CLI or Desktop Code tab) | Full: 113 skills, 54 agents, 11 commands, hooks, 21 MCP tools |
 | **macOS DMG** | Non-technical macOS users | Full plugin + Claude Desktop MCP registration |
 | **Windows EXE** | Non-technical Windows users | Full plugin + Claude Desktop MCP registration |
 | **Cowork upload** | Cowork tab users | Skills, agents, commands (no hooks/orchestrators) |
@@ -88,7 +88,7 @@ claude plugin install cre-skills@cre-skills
 
 Or interactively: type `/plugin` in Claude Code, select **Add plugin**, and search for `cre-skills`.
 
-This gives you 112 skills, 54 agents, 11 commands, hooks, and 21 MCP tools.
+This gives you 113 skills, 54 agents, 11 commands, hooks, and 21 MCP tools.
 
 ### Installer (macOS DMG / Windows EXE)
 
@@ -121,7 +121,7 @@ Claude Desktop has three tabs. Each provides different capabilities:
 | | Code Tab | Chat Tab | Cowork Tab |
 |---|---|---|---|
 | **Install method** | Marketplace or installer | Installer (MCP config) | Cowork plugin import |
-| **112 skills** | Yes, via `/cre-skills:*` | No (21 MCP tools instead) | Yes, via `/` commands |
+| **113 skills** | Yes, via `/cre-skills:*` | No (21 MCP tools instead) | Yes, via `/` commands |
 | **54 agents** | Yes, auto-invoked | No | Yes, as sub-agents |
 | **Skill routing** | `/cre-skills:cre-route` | `cre_route` MCP tool | Manual |
 | **Orchestrators** | `/cre-skills:orchestrate` | Not available | Not available |
@@ -245,7 +245,7 @@ Raleigh NC, $42M asking, 2018 vintage, 93% occupied, $2.6M NOI, rents 12% below 
 
 ## Skill Categories
 
-### By Category (16 subcategories, 112 skills)
+### By Category (16 subcategories, 113 skills)
 
 | # | Category | Count | Key Skills |
 |---|----------|-------|------------|

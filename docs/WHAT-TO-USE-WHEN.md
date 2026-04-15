@@ -2,7 +2,7 @@
 
 ## What is this project?
 
-CRE Skills Plugin is a structured knowledge base of 112 institutional-grade commercial real estate skills, 54 expert agents, 12 Python calculators, and 10 orchestrator pipelines. It plugs into Claude Code (CLI) via the plugin system and into Claude Desktop via a local MCP server. It is NOT a Claude Desktop marketplace plugin. Install it with the DMG/EXE installer or the Claude Code CLI -- not by pasting a URL into "Add marketplace."
+CRE Skills Plugin is a structured knowledge base of 113 institutional-grade commercial real estate skills, 54 expert agents, 12 Python calculators, and 10 orchestrator pipelines. It plugs into Claude Code (CLI) via the plugin system and into Claude Desktop via a local MCP server. It is NOT a Claude Desktop marketplace plugin. Install it with the DMG/EXE installer or the Claude Code CLI -- not by pasting a URL into "Add marketplace."
 
 ---
 
@@ -10,7 +10,7 @@ CRE Skills Plugin is a structured knowledge base of 112 institutional-grade comm
 
 | If you use... | Install via... | What you get |
 |---|---|---|
-| **Claude Code (CLI)** | `claude plugin install` or DMG/EXE installer | Full plugin: 112 skills, 54 agents, 6 workflow chains, 10 orchestrators, 11 slash commands, SessionStart hook, telemetry |
+| **Claude Code (CLI)** | `claude plugin install` or DMG/EXE installer | Full plugin: 113 skills, 54 agents, 6 workflow chains, 10 orchestrators, 11 slash commands, SessionStart hook, telemetry |
 | **Claude Desktop (app)** | DMG (macOS) or EXE (Windows) installer | MCP server with 21 tools for routing, skill detail, workspace management, feedback |
 | **Cowork** | Download `cre-skills-cowork.zip` from the latest [GitHub Release](https://github.com/mariourquia/cre-skills-plugin/releases/latest) | Stripped plugin: skills + agents + commands (no MCP server, no orchestrators, no calculators). Uses the same SKILL.md format recognized by Claude Code and Cowork. |
 
@@ -49,7 +49,7 @@ You will NOT see slash commands (like `/cre-skills:cre-route`) in Claude Desktop
 | Tool | Purpose |
 |------|---------|
 | `cre_route` | Routes your prompt to the matching CRE skill |
-| `cre_list_skills` | Browse and filter the 112 skills |
+| `cre_list_skills` | Browse and filter the 113 skills |
 | `cre_skill_detail` | Read the full structured process for any skill |
 | `cre_workspace_create` | Start a persistent workspace for a deal or asset |
 | `cre_workspace_get` | Resume a workspace from a prior session |
