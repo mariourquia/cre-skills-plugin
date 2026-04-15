@@ -2,12 +2,12 @@
 # GENERATED from catalog/catalog.yaml — do not edit manually
 # Run: python scripts/catalog-generate.py
 # Generated: 2026-04-15
-# Total Skills: 112
+# Total Skills: 113
 
 metadata:
   version: "2.0"
   generated: "2026-04-15"
-  total_skills: 112
+  total_skills: 113
   source: catalog/catalog.yaml
 
 skills:
@@ -1040,6 +1040,13 @@ skills:
   - closing-checklist-tracker
   - acquisition-underwriting-engine
   - variance-narrative-generator
+  chains_from: []
+- slug: residential_multifamily
+  name: Residential Multifamily Operating System
+  category: cross-cutting
+  priority: P1
+  status: deployed
+  chains_to: []
   chains_from: []
 - slug: sec-reg-d-compliance
   name: SEC Regulation D Compliance

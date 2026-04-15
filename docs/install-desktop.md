@@ -39,7 +39,7 @@ Restart Claude Desktop, then start a new conversation. The plugin's MCP server g
 | Tool | What it does | Example prompt |
 |------|-------------|----------------|
 | `cre_route` | Routes your request to the right CRE skill | "Screen this deal -- 240-unit multifamily, Raleigh, $42M" |
-| `cre_list_skills` | Browse and filter the 112 skills | "What leasing skills do you have?" |
+| `cre_list_skills` | Browse and filter the 113 skills | "What leasing skills do you have?" |
 | `cre_skill_detail` | Read the full process for a skill | "Show me the full deal-quick-screen process" |
 | `cre_workspace_create` | Start tracking a deal or asset | "Create a workspace for the Raleigh deal" |
 | `cre_workspace_get` | Resume a workspace from a prior session | "Load my Raleigh deal workspace" |
@@ -80,7 +80,7 @@ When you ask Claude a CRE question in Desktop:
 3. Claude follows the structured steps to produce institutional-grade output
 4. If you create a workspace, state persists at `~/.cre-skills/workspaces/` for future sessions
 
-The plugin itself is a structured knowledge base (112 process documents, 247 reference files, 54 expert agent definitions). Claude reads these docs to guide its analysis -- no external services or AI models beyond Claude itself.
+The plugin itself is a structured knowledge base (113 process documents, 247 reference files, 54 expert agent definitions). Claude reads these docs to guide its analysis -- no external services or AI models beyond Claude itself.
 
 ---
 
@@ -88,7 +88,7 @@ The plugin itself is a structured knowledge base (112 process documents, 247 ref
 
 | Feature | Desktop | Code |
 |---------|---------|------|
-| Skills available | 112 (via MCP routing) | 112 (via slash commands) |
+| Skills available | 113 (via MCP routing) | 113 (via slash commands) |
 | How you invoke skills | Plain language prompts | `/cre-skills:cre-route` or slash commands |
 | Auto-routing on session start | No -- ask Claude directly | Yes -- SessionStart hook loads router |
 | Persistent workspaces | Yes | Yes |
@@ -97,7 +97,7 @@ The plugin itself is a structured knowledge base (112 process documents, 247 ref
 | Python calculators | Requires Node.js | Requires Node.js + Python 3.10+ |
 | Output styles | Not yet supported | 5 styles (exec-brief, ic-memo, etc.) |
 
-Both platforms access the same 112 skills. Desktop users just interact through natural conversation instead of slash commands.
+Both platforms access the same 113 skills. Desktop users just interact through natural conversation instead of slash commands.
 
 ---
 

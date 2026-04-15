@@ -317,7 +317,7 @@ Run the health check:
 Expected output (healthy):
 
 ```
-  PASS  112 skill directories all have SKILL.md
+  PASS  113 skill directories all have SKILL.md
   PASS  247 reference files all non-empty
   PASS  12 Python calculators are syntactically valid
   PASS  src/hooks/hooks.json is valid JSON
