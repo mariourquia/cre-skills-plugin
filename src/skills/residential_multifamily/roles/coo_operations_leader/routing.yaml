@@ -1,0 +1,28 @@
+pack_slug: coo_operations_leader
+pack_type: role
+priority: 80
+triggers:
+  explicit_phrases:
+    - "COO"
+    - "chief operating officer"
+    - "operations leader"
+    - "exec ops brief"
+    - "exec brief"
+    - "monthly operating decision"
+    - "quarterly operating review exec"
+    - "enterprise policy decision"
+  implicit_signals:
+    - "asker is tagged role=coo_operations_leader in session context"
+    - "request is an executive-level operating decision or rollup consumption"
+required_axes:
+  - asset_class
+  - segment
+  - role
+optional_axes:
+  - management_mode
+  - market
+  - output_type
+  - decision_severity
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

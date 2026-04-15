@@ -1,0 +1,35 @@
+pack_slug: development_manager
+pack_type: role
+priority: 50
+triggers:
+  explicit_phrases:
+    - "development manager"
+    - "development status"
+    - "GMP negotiation"
+    - "bid leveling"
+    - "bid award recommendation"
+    - "entitlement tracker"
+    - "cost-to-complete"
+    - "contingency burn"
+    - "change order"
+    - "draw request"
+    - "turnover to operations"
+    - "value engineering"
+  implicit_signals:
+    - "asker is tagged role=development_manager in session context"
+    - "request concerns a ground-up project in development or construction stage"
+    - "lifecycle_stage axis resolves to development or construction"
+required_axes:
+  - asset_class
+  - segment
+  - lifecycle_stage
+  - role
+optional_axes:
+  - form_factor
+  - management_mode
+  - market
+  - output_type
+  - decision_severity
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

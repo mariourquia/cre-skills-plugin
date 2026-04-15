@@ -1,0 +1,82 @@
+overlay_id: management_mode.owner_oversight
+overlay_kind: management_mode
+scope:
+  management_mode: owner_oversight
+authoring_notes: |
+  Owner-oversight overlay. Loads alongside third_party_managed when the asker is
+  owner-side. Emphasizes the TPM-scorecard surfaces defined in the TPM Oversight
+  metric family: report timeliness, KPI completeness, variance explanation
+  completeness, budget adherence, staffing vacancy, TPM collections performance,
+  TPM turn performance, service-level adherence, approval response time, and audit
+  issue count and severity.
+
+overrides:
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#report_timeliness
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_mode_owner_oversight_report_timeliness
+    reason: |
+      Owner-facing reporting timeliness target band.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#kpi_completeness
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_mode_owner_oversight_kpi_completeness
+    reason: |
+      Completeness of TPM-delivered KPI package target band.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#variance_explanation_completeness
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_mode_owner_oversight_variance_completeness
+    reason: |
+      Variance-explanation quality target; narratives must tie to a specific cause
+      and remediation step.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#budget_adherence_tpm
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_mode_owner_oversight_budget_adherence
+    reason: |
+      TPM budget-adherence target band (variance tolerance to approved budget).
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#staffing_vacancy_rate_tpm
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_mode_owner_oversight_staffing_vacancy
+    reason: |
+      TPM staffing-vacancy ceiling; sustained breach triggers scorecard action.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#service_level_adherence
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_mode_owner_oversight_service_level
+    reason: |
+      Service-level adherence target (work-order SLA, resident-response SLA).
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#approval_response_time_tpm
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_mode_owner_oversight_approval_response
+    reason: |
+      TPM response time on owner-initiated approval requests.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#audit_issue_count_and_severity
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_mm_mode_owner_oversight_audit_issues
+    reason: |
+      Audit-issue count-and-severity thresholds and remediation timeline.
+  - target_kind: reporting_emphasis
+    target_ref: _core/metrics.md#report_timeliness
+    override_value:
+      reporting_emphasis_ref: reference/derived/role_kpi_targets.csv#row_mm_mode_owner_oversight_reporting
+    reason: |
+      Owner-oversight reporting emphasizes the TPM-scorecard surfaces above plus
+      variance narrative quality and audit-issue tracking.
+
+adds:
+  - added_kind: checklist_item
+    slug: tpm_scorecard_cadence
+    definition_ref: overlays/management_mode/owner_oversight/README.md#scorecard_cadence
+  - added_kind: checklist_item
+    slug: audit_issue_tracking
+    definition_ref: overlays/management_mode/owner_oversight/README.md#audit_tracking
+
+approvers:
+  - asset_manager
+  - portfolio_manager
+  - coo_operations_leader

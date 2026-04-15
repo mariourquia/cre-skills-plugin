@@ -1,0 +1,35 @@
+pack_slug: assistant_property_manager
+pack_type: role
+priority: 30
+triggers:
+  explicit_phrases:
+    - "assistant property manager"
+    - "APM"
+    - "ledger reconciliation"
+    - "move-in packet"
+    - "move-out packet"
+    - "SODA"
+    - "security deposit accounting"
+    - "delinquency tracker"
+    - "first-touch delinquency"
+    - "screening exception"
+    - "rent roll hygiene"
+    - "vendor invoice coding"
+  implicit_signals:
+    - "asker is tagged role=assistant_property_manager in session context"
+    - "request is a single-property transaction-hygiene task"
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - lifecycle_stage
+  - management_mode
+  - role
+optional_axes:
+  - market
+  - submarket
+  - output_type
+  - decision_severity
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

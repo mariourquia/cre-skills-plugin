@@ -1,0 +1,85 @@
+pack_slug: tailoring
+reads:
+  - path: overlays/org/_defaults/
+    category: overlay_template
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: _core/schemas/overlay_manifest.yaml
+    category: schema
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: _core/schemas/skill_manifest.yaml
+    category: schema
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: _core/approval_matrix.md
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: _core/taxonomy.md
+    category: taxonomy_reference
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: _core/metrics.md
+    category: metric_catalog
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: tailoring/question_banks/coo.yaml
+    category: interview_question_bank
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: tailoring/question_banks/cfo.yaml
+    category: interview_question_bank
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: tailoring/question_banks/regional_ops.yaml
+    category: interview_question_bank
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: tailoring/question_banks/asset_mgmt.yaml
+    category: interview_question_bank
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: tailoring/question_banks/development.yaml
+    category: interview_question_bank
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: tailoring/question_banks/construction.yaml
+    category: interview_question_bank
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: tailoring/question_banks/reporting.yaml
+    category: interview_question_bank
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: tailoring/doc_catalog.yaml
+    category: document_catalog
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+writes:
+  - path: tailoring/sessions/{org_id}/{session_id}.yaml
+    category: tailoring_session_state
+    expected_schema_version: "0.1.0"
+  - path: tailoring/sessions/{org_id}/{session_id}__summary.md
+    category: tailoring_session_summary
+    expected_schema_version: "0.1.0"
+  - path: tailoring/missing_docs_queue.yaml
+    category: tailoring_queue
+    expected_schema_version: "0.1.0"
+  - path: tailoring/sign_off_queue.yaml
+    category: tailoring_queue
+    expected_schema_version: "0.1.0"

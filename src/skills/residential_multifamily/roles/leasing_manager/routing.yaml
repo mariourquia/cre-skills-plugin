@@ -1,0 +1,34 @@
+pack_slug: leasing_manager
+pack_type: role
+priority: 30
+triggers:
+  explicit_phrases:
+    - "leasing manager"
+    - "leasing director"
+    - "leasing funnel"
+    - "lead-to-lease"
+    - "weekly funnel review"
+    - "pricing memo"
+    - "renewal offer pipeline"
+    - "tour conversion"
+    - "concession utilization"
+    - "marketing channel mix"
+    - "comp tour-through"
+  implicit_signals:
+    - "asker is tagged role=leasing_manager in session context"
+    - "request focuses on lead, tour, application, or renewal conversion"
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - lifecycle_stage
+  - management_mode
+  - role
+optional_axes:
+  - market
+  - submarket
+  - output_type
+  - decision_severity
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

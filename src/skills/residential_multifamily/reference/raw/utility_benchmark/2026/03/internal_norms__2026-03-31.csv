@@ -1,0 +1,5 @@
+source_row_id,region,segment,property_form,utility_slug,metering_basis,rubs_recovery_pct,gross_owner_paid,net_owner_paid,unit,source_file,source_date,as_of_date,notes
+UB-2026Q1-SE-MM-GARDEN-WATER,southeast,middle_market,garden,water_sewer,rubs,0.80,62,12,dollars_per_unit_per_month,utility_norms_2026Q1.xlsx,2026-03-25,2026-02-28,Starter.
+UB-2026Q1-SE-MM-GARDEN-GAS,southeast,middle_market,garden,gas,rubs,0.70,18,5,dollars_per_unit_per_month,utility_norms_2026Q1.xlsx,2026-03-25,2026-02-28,Starter.
+UB-2026Q1-SE-MM-GARDEN-ELEC-COMMON,southeast,middle_market,garden,electric_common,master_metered,0.00,14,14,dollars_per_unit_per_month,utility_norms_2026Q1.xlsx,2026-03-25,2026-02-28,Starter.
+UB-2026Q1-SE-MM-MIDRISE-WATER,southeast,middle_market,urban_mid_rise,water_sewer,rubs,0.85,78,12,dollars_per_unit_per_month,utility_norms_2026Q1.xlsx,2026-03-25,2026-02-28,Starter.

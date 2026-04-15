@@ -1,0 +1,38 @@
+overlay_id: segment.luxury
+overlay_kind: segment
+status: stub
+scope:
+  segment: luxury
+authoring_notes: |
+  Stub overlay for luxury / Class-A / lifestyle segments. Phase 1 does not deepen this
+  overlay; it exists so the segment can diverge from middle_market without touching
+  canonical core. See DIVERGENCE.md for the narrative enumeration of how this segment
+  is expected to differ. Do not add depth here in Phase 1.
+
+overrides:
+  - target_kind: service_standard
+    target_ref: _core/metrics.md#lead_response_time
+    override_value:
+      service_standard_ref: overlays/segments/luxury/DIVERGENCE.md#service_divergence
+    reason: |
+      Luxury expectations compress lead-response, tour, and work-order SLAs relative to
+      middle-market. Placeholder pointer until the full overlay is built.
+  - target_kind: finish_standard
+    target_ref: _core/metrics.md#make_ready_days
+    override_value:
+      finish_standard_ref: overlays/segments/luxury/DIVERGENCE.md#finish_divergence
+    reason: |
+      Luxury finish packages and turn scope exceed middle-market; brand-standard finish
+      specs live at the org level rather than in this stub.
+  - target_kind: concession_policy
+    target_ref: _core/metrics.md#concession_rate
+    override_value:
+      concession_policy_ref: overlays/segments/luxury/DIVERGENCE.md#concession_divergence
+    reason: |
+      Luxury concession posture differs materially (brand-protection concerns, move-in
+      credit framing, lifestyle amenities); full posture TBD.
+
+adds: []
+
+approvers:
+  - director_of_operations

@@ -1,5 +1,5 @@
 version: 1.0.0
-generated_at: '2026-04-15T05:19:13.409437+00:00'
+generated_at: '2026-04-15T06:21:44.974785+00:00'
 plugin_version: 4.1.2
 items:
 - id: 1031-exchange-executor
@@ -2877,6 +2877,33 @@ items:
   notes: ''
   calculator_file: null
   priority: P0
+  version: 0.1.0
+- id: residential_multifamily
+  display_name: Residential Multifamily Operating System
+  type: skill
+  status: stable
+  source_path: src/skills/residential_multifamily/SKILL.md
+  domain: cross-cutting
+  persona: 'Entry point and router for the U.S. residential multifamily operating subsystem.
+
+    Classifies a request along 10 taxonomy axes and dispatches to the appropriate role,
+
+    workflow, overlay, and reference st'
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers: []
+  input_artifacts:
+  - OM
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
   version: 0.1.0
 - id: sec-reg-d-compliance
   display_name: SEC Regulation D Compliance

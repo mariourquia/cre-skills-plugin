@@ -1,0 +1,39 @@
+overlay_id: form_factor.garden
+overlay_kind: form_factor
+scope:
+  form_factor: garden
+authoring_notes: |
+  Garden-style overlay. Typically 2-3 story walk-up buildings with surface parking,
+  limited or no elevators, and extensive grounds. The overlay adjusts make-ready
+  cadence (landscape/exterior common areas carry a larger share of routine work),
+  amenity program (typically a pool plus leasing office plus modest fitness), and
+  staffing (heavier porter/grounds, no elevator-vendor surface). No dollar amounts or
+  fixed ratios are embedded; targets point to reference rows.
+
+overrides:
+  - target_kind: service_standard
+    target_ref: _core/metrics.md#average_days_vacant
+    override_value:
+      service_standard_ref: reference/derived/role_kpi_targets.csv#row_ff_garden_common_area_cadence
+    reason: |
+      Garden-style grounds, exterior hallways, and breezeways carry a heavier
+      routine-maintenance share; cadence row adjusts the default.
+  - target_kind: staffing_ratio
+    target_ref: _core/taxonomy.md#role.maintenance_supervisor
+    override_value:
+      staffing_ratio_ref: reference/derived/role_kpi_targets.csv#row_ff_garden_porter_grounds_ratio
+    reason: |
+      Porter and grounds coverage is higher for garden than for mid-rise; row
+      reflects the shift.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#make_ready_days
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_ff_garden_make_ready_days
+    reason: |
+      Make-ready duration in a garden typically aligns with the segment default; row
+      ties the form factor to the segment-adjusted default.
+
+adds: []
+
+approvers:
+  - director_of_operations

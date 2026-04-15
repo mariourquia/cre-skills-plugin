@@ -1,0 +1,47 @@
+# Reference Manifest Schema
+# Applies to every pack's reference_manifest.yaml.
+# Tests fail if a pack reads a reference not listed in its manifest.
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: ReferenceManifest
+type: object
+required:
+  - pack_slug
+  - reads
+  - writes
+properties:
+  pack_slug:
+    type: string
+  reads:
+    type: array
+    items:
+      type: object
+      required: [path, category]
+      properties:
+        path:
+          type: string
+          description: Path relative to src/skills/residential_multifamily/.
+        category:
+          type: string
+        expected_schema_version:
+          type: string
+        required:
+          type: boolean
+          default: true
+        fallback_behavior:
+          type: string
+          enum: [ask_user, use_portfolio_average, use_prior_period, refuse, escalate]
+  writes:
+    type: array
+    items:
+      type: object
+      required: [path, category]
+      properties:
+        path:
+          type: string
+        category:
+          type: string
+        write_mode:
+          type: string
+          enum: [append, upsert, replace]
+additionalProperties: false

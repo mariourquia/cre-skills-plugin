@@ -1,0 +1,83 @@
+# Change Log Entry Schema
+# Every reference update, canonical metric edit, and threshold change produces an entry
+# conforming to this shape.
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: ChangeLogEntry
+type: object
+required:
+  - change_log_id
+  - change_type
+  - target_kind
+  - target_ref
+  - old_value
+  - new_value
+  - proposed_by
+  - confidence
+  - reason_for_change
+  - proposed_at
+properties:
+  change_log_id:
+    type: string
+  change_type:
+    type: string
+    enum: [add, update, supersede, deprecate, correct, rollback]
+  target_kind:
+    type: string
+    enum:
+      - reference_record
+      - metric_contract
+      - approval_threshold
+      - routing_rule
+      - overlay
+      - ontology_object
+      - schema
+  target_ref:
+    type: string
+    description: Pointer to the target (reference_id, metric slug, overlay path, etc.).
+  old_value:
+    description: Prior value. May be null for 'add'.
+  new_value:
+    description: New value. May be null for 'deprecate'.
+  source_name:
+    type: string
+  source_type:
+    type: string
+  source_date:
+    type: string
+    format: date
+  as_of_date:
+    type: string
+    format: date
+  effective_start:
+    type: string
+    format: date
+  effective_end:
+    type: string
+    format: date
+  proposed_by:
+    type: string
+  approved_by:
+    type: string
+  proposed_at:
+    type: string
+    format: date-time
+  approved_at:
+    type: string
+    format: date-time
+  confidence:
+    type: string
+    enum: [low, medium, high, verified]
+  reason_for_change:
+    type: string
+  affected_skills:
+    type: array
+    items:
+      type: string
+  affected_overlays:
+    type: array
+    items:
+      type: string
+  rollback_of_change_log_id:
+    type: string
+additionalProperties: false

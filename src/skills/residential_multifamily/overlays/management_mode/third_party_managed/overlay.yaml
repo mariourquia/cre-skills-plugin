@@ -1,0 +1,53 @@
+overlay_id: management_mode.third_party_managed
+overlay_kind: management_mode
+scope:
+  management_mode: third_party_managed
+authoring_notes: |
+  Third-party-managed overlay. A TPM operates on behalf of the owner. Adds PMA
+  (property-management-agreement) reference as the contract surface, extends
+  approval routing to include owner-side sign-offs, and introduces the TPM-to-owner
+  reporting cadence. Loads alongside owner_oversight when the asker is owner-side.
+
+overrides:
+  - target_kind: approval_threshold
+    target_ref: _core/approval_matrix.md#row_6_financial_disbursement_tier1
+    override_value:
+      threshold_ref: overlays/org/_defaults/approval_matrix.yaml#threshold_tpm_disbursement_owner_signoff
+    reason: |
+      Disbursement thresholds in TPM mode route site-PM-plus-regional through the
+      TPM and then to owner AM for sign-off. The PMA typically sets the owner-
+      signoff threshold.
+  - target_kind: approval_threshold
+    target_ref: _core/approval_matrix.md#row_8_contract_award_procurement
+    override_value:
+      threshold_ref: overlays/org/_defaults/approval_matrix.yaml#threshold_tpm_procurement_owner_signoff
+    reason: |
+      Contract awards and procurement in TPM mode route to owner-side AM per the
+      PMA. This overlay anchors that escalation.
+  - target_kind: reporting_emphasis
+    target_ref: _core/metrics.md#collections_rate
+    override_value:
+      reporting_emphasis_ref: reference/derived/role_kpi_targets.csv#row_mm_mode_tpm_reporting
+    reason: |
+      TPM-mode reporting adds explicit owner-facing monthly package cadence plus
+      TPM scorecard inputs (see owner_oversight overlay).
+  - target_kind: service_standard
+    target_ref: _core/metrics.md#work_order_aging
+    override_value:
+      service_standard_ref: reference/derived/role_kpi_targets.csv#row_mm_mode_tpm_owner_escalation
+    reason: |
+      Owner-side escalation paths in TPM mode: site PM to TPM regional to TPM
+      executive to owner AM. The row specifies escalation cadences without
+      hardcoding hours in prose.
+
+adds:
+  - added_kind: checklist_item
+    slug: pma_reference_load
+    definition_ref: overlays/management_mode/third_party_managed/README.md#pma_reference
+  - added_kind: checklist_item
+    slug: owner_side_signoff_paths
+    definition_ref: overlays/management_mode/third_party_managed/README.md#owner_signoff_paths
+
+approvers:
+  - director_of_operations
+  - asset_manager

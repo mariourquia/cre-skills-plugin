@@ -1,0 +1,123 @@
+# Routing Rules
+# Applied in declared order. Each rule maps conditions to pack selection + overlay stacks.
+
+rules:
+
+  - id: r001_property_manager_stabilized_middle_market
+    conditions:
+      role: property_manager
+      lifecycle_stage: stabilized
+      segment: middle_market
+    selects:
+      role_pack: roles/property_manager
+      segment_overlay: overlays/segments/middle_market
+      form_factor_overlay: "overlays/form_factor/{form_factor}"
+      lifecycle_overlay: overlays/lifecycle/stabilized
+      management_mode_overlay: "overlays/management_mode/{management_mode}"
+    reference_policy:
+      - require: reference/normalized/market_rents__{market}_*.csv
+        fallback: ask_user
+      - require: reference/normalized/concession_benchmarks__{market}_*.csv
+        fallback: use_portfolio_average_with_warning
+
+  - id: r002_asset_manager_monthly_review
+    conditions:
+      role: asset_manager
+      output_type: operating_review
+    selects:
+      role_pack: roles/asset_manager
+      workflow_pack: workflows/monthly_asset_management_review
+      segment_overlay: "overlays/segments/{segment}"
+      form_factor_overlay: "overlays/form_factor/{form_factor}"
+      lifecycle_overlay: "overlays/lifecycle/{lifecycle_stage}"
+      management_mode_overlay: "overlays/management_mode/{management_mode}"
+
+  - id: r003_tpm_oversight_weekly
+    conditions:
+      role: third_party_manager_oversight_lead
+    selects:
+      role_pack: roles/third_party_manager_oversight_lead
+      management_mode_overlay: overlays/management_mode/owner_oversight
+      segment_overlay: "overlays/segments/{segment}"
+      workflow_hint:
+        - workflows/third_party_manager_scorecard_review
+        - workflows/owner_approval_routing
+
+  - id: r004_development_manager
+    conditions:
+      role: development_manager
+    selects:
+      role_pack: roles/development_manager
+      lifecycle_overlay: overlays/lifecycle/development
+      workflow_hint:
+        - workflows/capital_project_intake_and_prioritization
+        - workflows/schedule_risk_review
+        - workflows/cost_to_complete_review
+
+  - id: r005_construction_manager
+    conditions:
+      role: construction_manager
+    selects:
+      role_pack: roles/construction_manager
+      lifecycle_overlay: overlays/lifecycle/construction
+      workflow_hint:
+        - workflows/bid_leveling_procurement_review
+        - workflows/change_order_review
+        - workflows/draw_package_review
+        - workflows/construction_meeting_prep
+
+  - id: r006_estimator_preconstruction
+    conditions:
+      role: estimator_preconstruction_lead
+    selects:
+      role_pack: roles/estimator_preconstruction_lead
+      workflow_hint:
+        - workflows/capex_estimate_generation
+        - workflows/bid_leveling_procurement_review
+
+  - id: r007_reporting_finance_ops
+    conditions:
+      role: reporting_finance_ops_lead
+    selects:
+      role_pack: roles/reporting_finance_ops_lead
+      workflow_hint:
+        - workflows/budget_build
+        - workflows/reforecast
+        - workflows/monthly_property_operating_review
+        - workflows/quarterly_portfolio_review
+
+  - id: r008_executive
+    conditions:
+      role: [coo_operations_leader, cfo_finance_leader, ceo_executive_leader]
+    selects:
+      role_pack: "roles/{role}"
+      workflow_hint:
+        - workflows/executive_operating_summary_generation
+        - workflows/quarterly_portfolio_review
+
+  - id: r009_direct_workflow
+    conditions:
+      workflow_present: true
+    selects:
+      workflow_pack: "workflows/{workflow}"
+      role_overlay: "roles/{role}"            # loaded if a role is also specified
+      segment_overlay: "overlays/segments/{segment}"
+      form_factor_overlay: "overlays/form_factor/{form_factor}"
+      lifecycle_overlay: "overlays/lifecycle/{lifecycle_stage}"
+      management_mode_overlay: "overlays/management_mode/{management_mode}"
+
+  - id: r010_tailoring_interview
+    conditions:
+      workflow: tailoring_interview
+    selects:
+      workflow_pack: tailoring
+      note: |
+        The tailoring pack bypasses segment/form/stage/mode overlays during interview
+        and collects them as outputs. It still loads the canonical core.
+
+fallback:
+  id: r_fallback_unmatched
+  description: |
+    When no rule matches, the router surfaces the matched axes and suggests
+    the 3 closest packs by axis overlap. It does not load any pack without match.
+  action: ask_user_and_suggest

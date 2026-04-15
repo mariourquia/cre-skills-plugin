@@ -1,0 +1,25 @@
+pack_slug: rent_comp_intake
+pack_type: workflow
+priority: 30
+triggers:
+  explicit_phrases:
+    - "rent comp"
+    - "comp intake"
+    - "log comps"
+    - "market survey"
+    - "shopped comps"
+    - "ingest comps"
+  implicit_signals:
+    - "market_rent_refresh finds comp bundle"
+    - "PM drops raw data into reference/raw/rent_comp"
+required_axes:
+  - asset_class
+  - segment
+  - market
+optional_axes:
+  - submarket
+  - role
+  - output_type
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

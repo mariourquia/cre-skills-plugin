@@ -1,0 +1,30 @@
+pack_slug: cfo_finance_leader
+pack_type: role
+priority: 80
+triggers:
+  explicit_phrases:
+    - "CFO"
+    - "chief financial officer"
+    - "finance leader"
+    - "exec finance brief"
+    - "monthly finance decision"
+    - "quarterly finance review"
+    - "covenant cushion posture"
+    - "treasury posture"
+    - "refi recap decision"
+    - "accounting policy change"
+  implicit_signals:
+    - "asker is tagged role=cfo_finance_leader in session context"
+    - "request is an executive-level finance decision or finance rollup consumption"
+required_axes:
+  - asset_class
+  - segment
+  - role
+optional_axes:
+  - management_mode
+  - market
+  - output_type
+  - decision_severity
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

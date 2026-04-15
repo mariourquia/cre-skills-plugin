@@ -1,0 +1,20 @@
+# Router Defaults
+# Applied when a user does not supply an axis and a safe default exists.
+
+defaults:
+  asset_class: residential_multifamily
+  segment: null                 # ask; no safe default
+  form_factor: null             # ask; no safe default
+  lifecycle_stage: stabilized   # safe default for "what do you want to do"
+  management_mode: null         # ask; critical for routing
+  role: null                    # ask if no workflow
+  workflow: null                # ask if no role
+  market: null                  # ask if any loaded reference is market-scoped
+  output_type: recommendation
+  decision_severity: recommendation
+
+notes: |
+  Defaults are conservative. "stabilized" for lifecycle is chosen because the overwhelming
+  majority of ongoing operator questions apply to stabilized assets. If the user is in
+  development/construction/lease_up, they almost always say so explicitly; the router still
+  confirms when the asker did not clarify.

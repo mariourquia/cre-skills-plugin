@@ -1,0 +1,5 @@
+source_row_id,market,region,segment,property_form,budget_line_slug,budget_line_category,amount,unit,source_file,source_date,as_of_date,notes
+DBA-2026Q1-SE-MM-GARDEN-HC-SHELL,,southeast,middle_market,garden,hard_cost_shell,hard_cost,125,dollars_per_gsf,dev_budget_norms_2026Q1.xlsx,2026-03-22,2026-02-28,Starter.
+DBA-2026Q1-SE-MM-GARDEN-HC-INT,,southeast,middle_market,garden,hard_cost_interior,hard_cost,68,dollars_per_gsf,dev_budget_norms_2026Q1.xlsx,2026-03-22,2026-02-28,Starter.
+DBA-2026Q1-SE-MM-GARDEN-DEV,,southeast,middle_market,garden,developer_fee,developer_fee,0.04,percent_of_total,dev_budget_norms_2026Q1.xlsx,2026-03-22,2026-02-28,Starter.
+DBA-2026Q1-SE-MM-GARDEN-CONT,,southeast,middle_market,garden,hard_cost_contingency,contingency,0.05,percent_of_hard,dev_budget_norms_2026Q1.xlsx,2026-03-22,2026-02-28,Starter.

@@ -1,0 +1,33 @@
+pack_slug: delinquency_collections
+reads:
+  - path: reference/normalized/collections_benchmarks__{region}_mf.csv
+    category: occupancy_benchmark
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: use_portfolio_average
+  - path: reference/normalized/delinquency_playbook_middle_market.csv
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/approval_threshold_defaults.csv
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/derived/role_kpi_targets.csv
+    category: occupancy_benchmark
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/jurisdiction_legal_notice_rules__{jurisdiction}.yaml
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/payment_plan_policy__{org}.yaml
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+writes: []

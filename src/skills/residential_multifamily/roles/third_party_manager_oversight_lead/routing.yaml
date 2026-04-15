@@ -1,0 +1,32 @@
+pack_slug: third_party_manager_oversight_lead
+pack_type: role
+priority: 60
+triggers:
+  explicit_phrases:
+    - "TPM oversight"
+    - "third-party manager oversight"
+    - "TPM scorecard"
+    - "PMA remedy"
+    - "PMA amendment"
+    - "PMA termination"
+    - "management fee reconciliation"
+    - "TPM audit"
+    - "owner approval SLA"
+    - "TPM monthly review"
+  implicit_signals:
+    - "asker is tagged role=third_party_manager_oversight_lead in session context"
+    - "request concerns performance, audit, or PMA status of a third-party manager"
+    - "management_mode axis resolves to third_party_managed or owner_oversight"
+required_axes:
+  - asset_class
+  - segment
+  - management_mode
+  - role
+optional_axes:
+  - market
+  - submarket
+  - output_type
+  - decision_severity
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

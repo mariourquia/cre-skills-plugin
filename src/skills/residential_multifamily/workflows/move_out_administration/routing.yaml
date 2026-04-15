@@ -1,0 +1,29 @@
+pack_slug: move_out_administration
+pack_type: workflow
+priority: 20
+triggers:
+  explicit_phrases:
+    - "move-out"
+    - "final ledger"
+    - "security deposit"
+    - "move-out inspection"
+    - "damage charges"
+    - "notice to vacate"
+  implicit_signals:
+    - "NoticeEvent filed"
+    - "lease approaching end_date without renewal"
+    - "judgment-ordered move-out handoff from delinquency_collections"
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - lifecycle_stage
+  - management_mode
+  - market
+  - jurisdiction
+optional_axes:
+  - role
+  - submarket
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

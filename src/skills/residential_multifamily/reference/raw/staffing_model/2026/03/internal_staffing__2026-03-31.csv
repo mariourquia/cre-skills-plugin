@@ -1,0 +1,5 @@
+source_row_id,segment,property_form,management_mode,role_slug,property_size_band,fte_count,units_per_fte,source_file,source_date,as_of_date,notes
+SM-2026Q1-MM-GARDEN-3PM-PM-200,middle_market,garden,third_party_managed,property_manager,200_to_299,1,250,staffing_norms_2026Q1.xlsx,2026-03-05,2026-02-28,Starter norm.
+SM-2026Q1-MM-GARDEN-3PM-APM-200,middle_market,garden,third_party_managed,assistant_property_manager,200_to_299,1,250,staffing_norms_2026Q1.xlsx,2026-03-05,2026-02-28,Starter norm.
+SM-2026Q1-MM-GARDEN-3PM-LEAS-200,middle_market,garden,third_party_managed,leasing_agent,200_to_299,2,125,staffing_norms_2026Q1.xlsx,2026-03-05,2026-02-28,Starter norm.
+SM-2026Q1-MM-GARDEN-3PM-MTECH-200,middle_market,garden,third_party_managed,maintenance_tech,200_to_299,2,125,staffing_norms_2026Q1.xlsx,2026-03-05,2026-02-28,Starter norm.

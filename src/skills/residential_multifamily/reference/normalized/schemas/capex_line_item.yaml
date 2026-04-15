@@ -1,0 +1,75 @@
+# Category Schema: capex_line_item
+# Line items in the capex library (cost per unit, cost per SF, assembly cost).
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: CapexLineItemReferenceRecord
+description: |
+  Capex library line item. Covers property-level capex (roof replace, parking lot resurface,
+  clubhouse renovation) and unit-level value-add capex (kitchen package, flooring package).
+extends: _core/schemas/reference_record.yaml
+required:
+  - reference_id
+  - category
+  - scope
+  - value
+  - unit
+  - scenario
+  - source_name
+  - source_type
+  - source_date
+  - as_of_date
+  - confidence
+  - status
+  - proposed_by
+  - line_item_slug
+  - capex_category
+properties:
+  category:
+    const: capex_line_item
+  scope:
+    type: object
+    required:
+      - segment
+    properties:
+      market:
+        type: string
+      region:
+        type: string
+      segment:
+        type: string
+        enum: [middle_market, affordable, luxury]
+      property_form:
+        type: string
+        enum: [garden, walk_up, wrap, suburban_mid_rise, urban_mid_rise, high_rise]
+      lifecycle_stage:
+        type: string
+        enum: [stabilized, renovation, recap_support]
+  line_item_slug:
+    type: string
+    description: e.g., roof_replace_shingle, parking_lot_mill_overlay, pool_resurface, clubhouse_refresh, unit_kitchen_package_classic, unit_bath_package_classic, amenity_fitness_refresh.
+  capex_category:
+    type: string
+    enum:
+      - life_safety
+      - building_envelope
+      - mep_systems
+      - site_hardscape
+      - site_landscape
+      - amenity
+      - common_area
+      - unit_interior_classic
+      - unit_interior_premium
+      - technology
+      - sustainability
+      - other
+  assembly_basis:
+    type: string
+    enum: [per_unit, per_sf, per_each, per_lump_sum]
+  typical_useful_life_years:
+    type: integer
+  yield_on_cost_assumption:
+    type: number
+    description: For unit-interior items, assumed yield on cost; 0-1 range. Optional.
+  unit:
+    type: string
+    enum: [dollars_per_unit, dollars_per_sf, dollars_per_each, dollars_per_lump_sum]

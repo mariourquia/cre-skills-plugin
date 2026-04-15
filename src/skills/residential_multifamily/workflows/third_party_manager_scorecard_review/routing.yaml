@@ -1,0 +1,30 @@
+pack_slug: third_party_manager_scorecard_review
+pack_type: workflow
+priority: 10
+triggers:
+  explicit_phrases:
+    - "TPM scorecard"
+    - "third-party manager review"
+    - "PMA performance review"
+    - "owner oversight review"
+    - "TPM quarterly scorecard"
+  implicit_signals:
+    - "month close with TPM-submitted report"
+    - "audit finding opened"
+    - "TPM requests approval beyond overlay band"
+    - "PMA anniversary approaching"
+    - "TPM reporting lapse"
+required_axes:
+  - asset_class
+  - segment
+  - management_mode
+  - market
+  - pma_id
+optional_axes:
+  - role
+  - form_factor
+  - lifecycle_stage
+  - output_type
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

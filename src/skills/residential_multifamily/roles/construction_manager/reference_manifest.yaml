@@ -1,0 +1,43 @@
+pack_slug: construction_manager
+reads:
+  - path: reference/normalized/material_costs__{region}_residential.csv
+    category: material_cost
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: ask_user
+  - path: reference/normalized/labor_rates__{market}_residential.csv
+    category: labor_rate
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: ask_user
+  - path: reference/normalized/productivity_norms__{region}_residential.csv
+    category: productivity_norm
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: ask_user
+  - path: reference/normalized/weather_loss_reserves__{region}.csv
+    category: weather_reserve
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: ask_user
+  - path: reference/normalized/contingency_policy__middle_market.csv
+    category: contingency_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/punchlist_sla__middle_market.csv
+    category: punchlist_sla
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: ask_user
+  - path: reference/normalized/approval_threshold_defaults.csv
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/derived/role_kpi_targets.csv
+    category: occupancy_benchmark
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+writes: []

@@ -1,0 +1,84 @@
+overlay_id: org._defaults
+overlay_kind: org
+status: template
+scope:
+  org_id: _defaults
+authoring_notes: |
+  Skeleton org overlay. This is the template the tailoring skill uses when onboarding
+  a new organization. Every threshold, screening-policy artifact, concession-policy
+  artifact, vendor-preference artifact, and PMA reference starts as a placeholder
+  token that the tailoring interview replaces. The org overlay always merges last;
+  the operator's values win.
+
+  The tailoring skill reads `interview_status.yaml` in this directory to know what
+  must be collected before the overlay is production-ready. Until every required
+  field is collected, the overlay's `status` remains `template`.
+
+overrides:
+  - target_kind: approval_threshold
+    target_ref: _core/approval_matrix.md#row_6_financial_disbursement_tier1
+    override_value:
+      threshold_token: $TBD_THRESHOLD_DISBURSEMENT_1
+    reason: |
+      Tier-1 disbursement threshold. Collected during tailoring interview.
+  - target_kind: approval_threshold
+    target_ref: _core/approval_matrix.md#row_7_financial_disbursement_tier2
+    override_value:
+      threshold_token: $TBD_THRESHOLD_DISBURSEMENT_2
+    reason: |
+      Tier-2 disbursement threshold. Collected during tailoring interview.
+  - target_kind: approval_threshold
+    target_ref: _core/approval_matrix.md#row_8_contract_award_procurement
+    override_value:
+      threshold_token: $TBD_THRESHOLD_PROCUREMENT
+    reason: |
+      Procurement / contract-award threshold. Collected during tailoring interview.
+  - target_kind: approval_threshold
+    target_ref: _core/approval_matrix.md#row_9_bid_award_major
+    override_value:
+      threshold_token: $TBD_THRESHOLD_BID_MAJOR
+    reason: |
+      Major bid-award threshold. Collected during tailoring interview.
+  - target_kind: approval_threshold
+    target_ref: _core/approval_matrix.md#row_10_change_order_minor
+    override_value:
+      threshold_token: $TBD_THRESHOLD_CO_MINOR
+    reason: |
+      Minor change-order threshold. Collected during tailoring interview.
+  - target_kind: approval_threshold
+    target_ref: _core/approval_matrix.md#row_11_change_order_major
+    override_value:
+      threshold_token: $TBD_THRESHOLD_CO_MAJOR
+    reason: |
+      Major change-order threshold. Collected during tailoring interview.
+  - target_kind: screening_policy
+    target_ref: _core/guardrails.md#screening
+    override_value:
+      screening_policy_ref: $TBD_SCREENING_POLICY_ARTIFACT
+    reason: |
+      Org-specific screening policy document. Collected during tailoring interview.
+  - target_kind: concession_policy
+    target_ref: _core/metrics.md#concession_rate
+    override_value:
+      concession_policy_ref: $TBD_CONCESSION_POLICY_ARTIFACT
+    reason: |
+      Org-specific concession policy. Collected during tailoring interview.
+  - target_kind: vendor_preference
+    target_ref: _core/metrics.md#rm_per_unit
+    override_value:
+      vendor_preference_ref: $TBD_VENDOR_PREFERENCE_LIST
+    reason: |
+      Org-specific preferred vendor list. Collected during tailoring interview.
+  - target_kind: resident_comm_tone
+    target_ref: _core/guardrails.md#fair_housing
+    override_value:
+      tone_ref: $TBD_BRAND_VOICE_GUIDE
+    reason: |
+      Org brand-voice guide. Collected during tailoring interview; defaults to the
+      segment's tone profile if none provided.
+
+adds: []
+
+approvers:
+  - director_of_operations
+  - asset_manager

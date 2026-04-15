@@ -1,0 +1,67 @@
+overlay_id: lifecycle.renovation
+overlay_kind: lifecycle
+scope:
+  lifecycle: renovation
+authoring_notes: |
+  Renovation overlay. Covers active in-place value-add: classic-to-renovated unit
+  program, common-area renovation, amenity upgrade. Adds renovation-specific
+  reporting (yield on cost, turn-to-renovation conversion rate, scope-cost
+  variance), shifts resident-experience posture during renovation (noise,
+  dust, temporary access), and loads the value-add finish package from the
+  segment's finish_standards.
+
+overrides:
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#renovation_yield_on_cost
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_renovation_yield_on_cost
+    reason: |
+      Yield-on-cost target band for value-add renovation. Breach triggers a scope
+      or cost review.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#capex_spend_vs_plan
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_renovation_capex_spend_vs_plan
+    reason: |
+      Capex pacing band for active renovation programs.
+  - target_kind: finish_standard
+    target_ref: _core/metrics.md#renovation_yield_on_cost
+    override_value:
+      finish_standard_ref: overlays/segments/middle_market/finish_standards.md#value_add_finish_package
+    reason: |
+      Invoke the segment's value-add finish package during active renovation.
+  - target_kind: service_standard
+    target_ref: _core/metrics.md#work_order_aging
+    override_value:
+      service_standard_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_renovation_resident_experience
+    reason: |
+      Resident-experience posture during renovation: proactive communication about
+      noise, dust, common-area staging, temporary amenity closures. Target SLAs tilt
+      toward faster response during disruption windows.
+  - target_kind: reporting_emphasis
+    target_ref: _core/metrics.md#renovation_yield_on_cost
+    override_value:
+      reporting_emphasis_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_renovation_reporting
+    reason: |
+      Renovation reporting adds yield-on-cost, scope-cost variance, classic-to-
+      renovated conversion cadence, and turn-to-renovation throughput.
+  - target_kind: vendor_preference
+    target_ref: _core/metrics.md#rm_per_unit
+    override_value:
+      vendor_preference_ref: reference/normalized/vendor_preferences.csv#row_lifecycle_renovation_vendors
+    reason: |
+      Renovation-qualified vendors required; must clear scope, insurance, license,
+      and scheduling verification.
+
+adds:
+  - added_kind: checklist_item
+    slug: renovation_resident_comm_package
+    definition_ref: overlays/lifecycle/renovation/README.md#resident_comm_package
+  - added_kind: checklist_item
+    slug: scope_cost_variance_review
+    definition_ref: overlays/lifecycle/renovation/README.md#scope_cost_review
+
+approvers:
+  - director_of_operations
+  - asset_manager
+  - construction_manager

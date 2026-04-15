@@ -1,0 +1,30 @@
+overlay_id: lifecycle.stabilized
+overlay_kind: lifecycle
+scope:
+  lifecycle: stabilized
+authoring_notes: |
+  Stabilized overlay. Steady-state operations. This is the default lifecycle posture
+  a property inherits if no other lifecycle overlay loads. The overlay applies the
+  stabilized preleased window and the default target bands from the segment and
+  form-factor overlays; it does not add lifecycle-specific overrides beyond that.
+
+overrides:
+  - target_kind: metric_filters_default
+    target_ref: _core/metrics.md#preleased_occupancy
+    override_value:
+      filters_default_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_stabilized_preleased_window
+    reason: |
+      Stabilized operations use the 30-day default preleased window. This overlay
+      makes the default explicit in the merge order.
+  - target_kind: reporting_emphasis
+    target_ref: _core/metrics.md#collections_rate
+    override_value:
+      reporting_emphasis_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_stabilized_reporting
+    reason: |
+      Stabilized reporting defers to the segment's primary emphases (collections,
+      controllable opex, trade-out). This row asserts that behavior.
+
+adds: []
+
+approvers:
+  - director_of_operations

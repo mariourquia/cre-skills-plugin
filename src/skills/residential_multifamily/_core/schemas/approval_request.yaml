@@ -1,0 +1,94 @@
+# Approval Request Schema
+# Every gated action requires a linked approval_request in approved status.
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: ApprovalRequest
+type: object
+required:
+  - approval_request_id
+  - created_at
+  - created_by
+  - subject_object_type
+  - subject_object_id
+  - action_proposed
+  - rationale
+  - approvers_required
+  - status
+properties:
+  approval_request_id:
+    type: string
+  created_at:
+    type: string
+    format: date-time
+  created_by:
+    type: string
+  subject_object_type:
+    type: string
+    enum:
+      - capex_project
+      - change_order
+      - lease_deviation
+      - eviction_filing
+      - vendor_award
+      - bid_award
+      - concession_above_policy
+      - draw_request
+      - final_report_submission
+      - legal_notice
+      - payment_plan_non_standard
+      - policy_exception
+      - other
+  subject_object_id:
+    type: string
+  action_proposed:
+    type: string
+  rationale:
+    type: string
+  dollar_impact:
+    type: number
+  risk_flags:
+    type: array
+    items:
+      type: string
+  approvers_required:
+    type: array
+    items:
+      type: object
+      required: [role, count]
+      properties:
+        role:
+          type: string
+        count:
+          type: integer
+          minimum: 1
+  approvers_notified:
+    type: array
+    items:
+      type: string
+  decisions:
+    type: array
+    items:
+      type: object
+      required: [approver, decision, decided_at]
+      properties:
+        approver:
+          type: string
+        decision:
+          type: string
+          enum: [approve, approve_with_conditions, deny, defer]
+        notes:
+          type: string
+        decided_at:
+          type: string
+          format: date-time
+  status:
+    type: string
+    enum: [pending, approved, approved_with_conditions, denied, expired, withdrawn]
+  expires_at:
+    type: string
+    format: date-time
+  linked_references:
+    type: array
+    items:
+      type: string
+additionalProperties: false

@@ -1,0 +1,55 @@
+# Category Schema: construction_duration_assumption
+# Typical durations by trade / milestone for development and major renovation.
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: ConstructionDurationAssumptionReferenceRecord
+description: |
+  Typical construction schedule durations by milestone or trade. Expressed in working days
+  or calendar months depending on the milestone.
+extends: _core/schemas/reference_record.yaml
+required:
+  - reference_id
+  - category
+  - scope
+  - value
+  - unit
+  - scenario
+  - source_name
+  - source_type
+  - source_date
+  - as_of_date
+  - confidence
+  - status
+  - proposed_by
+  - milestone_slug
+  - milestone_category
+properties:
+  category:
+    const: construction_duration_assumption
+  scope:
+    type: object
+    required:
+      - property_form
+    properties:
+      market:
+        type: string
+      region:
+        type: string
+      segment:
+        type: string
+        enum: [middle_market, affordable, luxury]
+      property_form:
+        type: string
+        enum: [garden, walk_up, wrap, suburban_mid_rise, urban_mid_rise, high_rise]
+      project_size_band:
+        type: string
+        enum: [under_100_units, 100_to_199_units, 200_to_299_units, 300_plus_units]
+  milestone_slug:
+    type: string
+    description: e.g., entitlements_to_permit, site_work, foundation, framing, mep_rough, drywall, exterior_finish, interior_finish, ttco, first_co, full_co, punch, lease_up_start.
+  milestone_category:
+    type: string
+    enum: [predev, site, structure, envelope, mep, interior, close_out, lease_up]
+  unit:
+    type: string
+    enum: [days, weeks, months]

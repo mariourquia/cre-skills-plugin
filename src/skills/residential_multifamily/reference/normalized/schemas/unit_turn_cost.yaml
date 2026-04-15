@@ -1,0 +1,65 @@
+# Category Schema: unit_turn_cost
+# Per-unit turn cost library, by turn scope.
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: UnitTurnCostReferenceRecord
+description: |
+  Cost per unit to turn a vacated apartment, organized by turn scope (light, standard,
+  heavy, classic renovation, premium renovation). Derived from labor_rate + material_cost +
+  vendor_rate but stored here as an approved line-item bundle.
+extends: _core/schemas/reference_record.yaml
+required:
+  - reference_id
+  - category
+  - scope
+  - value
+  - unit
+  - scenario
+  - source_name
+  - source_type
+  - source_date
+  - as_of_date
+  - confidence
+  - status
+  - proposed_by
+  - turn_scope
+  - unit_type_label
+properties:
+  category:
+    const: unit_turn_cost
+  scope:
+    type: object
+    required:
+      - segment
+    properties:
+      market:
+        type: string
+      region:
+        type: string
+      segment:
+        type: string
+        enum: [middle_market, affordable, luxury]
+      property_form:
+        type: string
+        enum: [garden, walk_up, wrap, suburban_mid_rise, urban_mid_rise, high_rise]
+  turn_scope:
+    type: string
+    enum: [light, standard, heavy, classic_reno, premium_reno]
+    description: |
+      light = paint touch-up + clean. standard = paint + clean + minor repairs. heavy = full paint +
+      carpet/LVP replace + punch. classic_reno = LVP + counters + hardware + appliance swap.
+      premium_reno = full kitchen/bath refresh + premium finishes.
+  unit_type_label:
+    type: string
+  included_scope_items:
+    type: array
+    items:
+      type: string
+    description: |
+      List of line items included in this scope. e.g., ['paint_full_unit', 'lvp_replace_living',
+      'carpet_replace_bedrooms', 'appliance_range_swap'].
+  target_make_ready_days:
+    type: integer
+    description: Target days from move-out to ready for this scope.
+  unit:
+    const: dollars_per_unit
