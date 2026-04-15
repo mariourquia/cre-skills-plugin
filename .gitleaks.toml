@@ -35,6 +35,15 @@ keywords = ["/Users/"]
   [rules.allowlist]
   paths = [
     '''\.github/workflows/.*\.yml$''',
+    # Skill demo/example/sample transcripts are didactic by design and
+    # frequently include illustrative filesystem paths (e.g. fake user
+    # names like /Users/acme/) that read as placeholders to a human but
+    # match the generic /Users/<name>/ pattern. Allowlisting these
+    # scoped directories avoids false positives without weakening the
+    # rule for production code paths.
+    '''src/skills/[^/]+/examples/.*\.md$''',
+    '''src/skills/[^/]+/tailoring/examples/.*\.md$''',
+    '''src/skills/[^/]+/_core/routing/examples/.*\.md$''',
   ]
 
 [allowlist]
