@@ -1,0 +1,201 @@
+# Field-by-field mapping for Sage Intacct GL adapter.
+#
+# Applied on top of reference/connectors/gl/mapping.yaml. Canonical
+# mapping wins on conflict. Entries here document the Intacct-specific
+# column names and the transform chain that normalizes them.
+
+status_tag: template
+
+chart_of_accounts:
+  source_format: [json, jsonl]
+  source_object: ACCOUNT
+  dedup_rule:
+    keys: [GLACCOUNTNO]
+    tie_breaker: latest_WHENMODIFIED_wins
+  fields:
+    - { source_column: RECORDNO,         normalized_column: source_row_id,            transform: trim_string,                 required: true }
+    - { source_column: GLACCOUNTNO,       normalized_column: account_id,               transform: trim_string,                 required: true }
+    - { source_column: ACCOUNTTITLE,      normalized_column: account_label,             transform: trim_string,                 required: true }
+    - { source_column: ACCOUNT_TYPE,      normalized_column: account_type,              transform: map_intacct_account_type,    required: true }
+    - { source_column: NORMAL_BALANCE,    normalized_column: normal_balance,            transform: lowercase_string,            required: true }
+    - { source_column: STATUS,            normalized_column: inactive,                  transform: status_to_inactive_flag,     required: false }
+    - { source_column: CATEGORY,          normalized_column: account_category,          transform: trim_string,                 required: false }
+    - { source_column: PARENTACCOUNTNO,   normalized_column: parent_account_id,         transform: trim_string,                 required: false }
+    - { source_column: CAPITALIZATION_FLAG, normalized_column: capitalization_flag,     transform: to_boolean,                  required: false }
+
+dimensions:
+  source_format: [json, jsonl]
+  source_object: DIMENSION
+  dedup_rule:
+    keys: [DIMENSION_TYPE, DIMENSION_ID]
+    tie_breaker: latest_WHENMODIFIED_wins
+  fields:
+    - { source_column: DIMENSION_TYPE,       normalized_column: dimension_type,         transform: uppercase_string,           required: true }
+    - { source_column: DIMENSION_ID,         normalized_column: dimension_id,           transform: trim_string,                required: true }
+    - { source_column: DIMENSION_NAME,       normalized_column: dimension_name,         transform: trim_string,                required: true }
+    - { source_column: STATUS,               normalized_column: status,                 transform: lowercase_string,           required: true }
+    - { source_column: PARENT_DIMENSION_ID,  normalized_column: parent_dimension_id,    transform: trim_string,                required: false }
+    - { source_column: PROJECT_TYPE,         normalized_column: project_type,           transform: lowercase_string,           required: false }
+    - { source_column: PROJECT_STATUS,       normalized_column: project_status,         transform: lowercase_string,           required: false }
+    - { source_column: ENTITY_TYPE,          normalized_column: entity_type,            transform: lowercase_string,           required: false }
+    - { source_column: LOCATION_TYPE,        normalized_column: location_type,          transform: lowercase_string,           required: false }
+    - { source_column: CLASS_TYPE,           normalized_column: class_type,             transform: lowercase_string,           required: false }
+
+journal_entries:
+  source_format: [json, jsonl]
+  source_object: GLBATCH
+  dedup_rule:
+    keys: [RECORDNO]
+    tie_breaker: latest_WHENMODIFIED_wins
+  fields:
+    - { source_column: RECORDNO,      normalized_column: source_row_id,             transform: trim_string,                required: true }
+    - { source_column: BATCHNO,       normalized_column: journal_id,                transform: trim_string,                required: true }
+    - { source_column: JOURNAL,       normalized_column: journal_code,              transform: trim_string,                required: true }
+    - { source_column: BATCH_DATE,    normalized_column: posting_date,              transform: to_iso_date,                required: true }
+    - { source_column: PERIOD,        normalized_column: period,                    transform: intacct_period_to_iso_month, required: true }
+    - { source_column: STATE,         normalized_column: state,                     transform: map_intacct_posting_state,  required: true }
+    - { source_column: CREATED_BY,    normalized_column: created_by,                transform: trim_string,                required: true }
+    - { source_column: BATCH_TITLE,   normalized_column: batch_title,               transform: trim_string,                required: false }
+    - { source_column: REVERSED,      normalized_column: reversed_flag,             transform: to_boolean,                 required: false }
+    - { source_column: REVERSAL_OF,   normalized_column: reversal_of_journal_id,    transform: trim_string,                required: false }
+    - { source_column: SOURCE_MODULE, normalized_column: source_module,             transform: lowercase_string,           required: false }
+
+actual_lines:
+  source_format: [json, jsonl]
+  source_object: GLENTRY
+  dedup_rule:
+    keys: [RECORDNO]
+    tie_breaker: latest_WHENMODIFIED_wins
+  fields:
+    - { source_column: RECORDNO,       normalized_column: source_row_id,            transform: trim_string,                   required: true }
+    - { source_column: BATCHNO,        normalized_column: journal_id,               transform: trim_string,                   required: true }
+    - { source_column: LINE_NO,        normalized_column: journal_line_no,          transform: to_integer,                    required: true }
+    - { source_column: GLACCOUNTNO,    normalized_column: account_id,               transform: trim_string,                   required: true }
+    - { source_column: AMOUNT,         normalized_column: amount_cents,             transform: dollars_to_cents_with_sign,    required: true }
+    - { source_column: POSTING_TYPE,   normalized_column: posting_side,             transform: lowercase_string,              required: true }
+    - { source_column: BATCH_DATE,     normalized_column: posting_date,             transform: to_iso_date,                   required: true }
+    - { source_column: PERIOD,         normalized_column: period,                   transform: intacct_period_to_iso_month,   required: true }
+    - { source_column: CURRENCY,       normalized_column: source_currency,          transform: uppercase_string,              required: true }
+    - { source_column: STATE,          normalized_column: close_status,             transform: map_intacct_posting_state,     required: true }
+    - { source_column: ENTITYID,       normalized_column: source_entity_id,         transform: trim_string,                   required: false }
+    - { source_column: LOCATIONID,     normalized_column: source_location_id,       transform: trim_string,                   required: false }
+    - { source_column: DEPARTMENTID,   normalized_column: department_id,            transform: trim_string,                   required: false }
+    - { source_column: PROJECTID,      normalized_column: source_project_id,        transform: trim_string,                   required: false }
+    - { source_column: CLASSID,        normalized_column: class_id,                 transform: trim_string,                   required: false }
+    - { source_column: VENDORID,       normalized_column: source_vendor_id,         transform: trim_string,                   required: false }
+    - { source_column: CUSTOMERID,     normalized_column: source_customer_id,       transform: trim_string,                   required: false }
+    - { source_column: SERVICE_FROM,   normalized_column: service_period_start,     transform: to_iso_date,                   required: false }
+    - { source_column: SERVICE_TO,     normalized_column: service_period_end,       transform: to_iso_date,                   required: false }
+    - { source_column: MEMO,           normalized_column: memo,                     transform: trim_string,                   required: false }
+    - { source_column: REFERENCE,      normalized_column: external_reference,       transform: trim_string,                   required: false }
+    - { source_column: REVERSAL,       normalized_column: reversal_flag,            transform: to_boolean,                    required: false }
+    - { source_column: REVERSAL_OF,    normalized_column: reversal_of_entry_id,     transform: trim_string,                   required: false }
+    - { source_column: APPROVAL_STATUS, normalized_column: approval_status,         transform: lowercase_string,              required: false }
+  crosswalk_lookups:
+    - { canonical_field: property_id,            crosswalk: property_master_crosswalk, key_priority: [LOCATIONID, ENTITYID] }
+    - { canonical_field: canonical_account_slug, crosswalk: account_crosswalk,         key: GLACCOUNTNO }
+    - { canonical_field: capex_project_id,       crosswalk: capex_project_crosswalk,   key: PROJECTID, when_key_present: true }
+    - { canonical_field: vendor_id,              crosswalk: vendor_master_crosswalk,   key: VENDORID,  when_key_present: true }
+
+budget_lines:
+  source_format: [json, jsonl]
+  source_object: BUDGETDETAIL
+  dedup_rule:
+    keys: [BUDGETID, GLACCOUNTNO, PERIOD, LOCATIONID, PROJECTID]
+    tie_breaker: latest_WHENMODIFIED_wins
+  fields:
+    - { source_column: RECORDNO,       normalized_column: source_row_id,          transform: trim_string,                   required: true }
+    - { source_column: BUDGETID,       normalized_column: scenario,               transform: map_intacct_budget_version,    required: true }
+    - { source_column: BUDGETNAME,     normalized_column: scenario_label,         transform: trim_string,                   required: true }
+    - { source_column: GLACCOUNTNO,    normalized_column: account_id,             transform: trim_string,                   required: true }
+    - { source_column: PERIOD,         normalized_column: period,                 transform: intacct_period_to_iso_month,   required: true }
+    - { source_column: AMOUNT,         normalized_column: amount_cents,           transform: dollars_to_cents,              required: true }
+    - { source_column: CURRENCY,       normalized_column: source_currency,        transform: uppercase_string,              required: true }
+    - { source_column: STATE,          normalized_column: publication_state,      transform: lowercase_string,              required: true }
+    - { source_column: FISCAL_YEAR,    normalized_column: fiscal_year,            transform: trim_string,                   required: false }
+    - { source_column: ENTITYID,       normalized_column: source_entity_id,       transform: trim_string,                   required: false }
+    - { source_column: LOCATIONID,     normalized_column: source_location_id,     transform: trim_string,                   required: false }
+    - { source_column: DEPARTMENTID,   normalized_column: department_id,          transform: trim_string,                   required: false }
+    - { source_column: PROJECTID,      normalized_column: source_project_id,      transform: trim_string,                   required: false }
+    - { source_column: CLASSID,        normalized_column: class_id,               transform: trim_string,                   required: false }
+    - { source_column: BUILD_BASIS,    normalized_column: build_basis,            transform: lowercase_string,              required: false }
+    - { source_column: APPROVAL_STATE, normalized_column: approval_state,         transform: lowercase_string,              required: false }
+    - { source_column: APPROVED_BY,    normalized_column: approver_user_id,       transform: trim_string,                   required: false }
+    - { source_column: APPROVED_AT,    normalized_column: approval_timestamp,     transform: to_iso_datetime,               required: false }
+  crosswalk_lookups:
+    - { canonical_field: property_id,            crosswalk: property_master_crosswalk, key_priority: [LOCATIONID, ENTITYID] }
+    - { canonical_field: canonical_account_slug, crosswalk: account_crosswalk,         key: GLACCOUNTNO }
+    - { canonical_field: capex_project_id,       crosswalk: capex_project_crosswalk,   key: PROJECTID, when_key_present: true }
+
+forecast_lines:
+  source_format: [json, jsonl]
+  source_object: FORECASTDETAIL
+  dedup_rule:
+    keys: [FORECASTID, GLACCOUNTNO, PERIOD, LOCATIONID, PROJECTID, AS_OF_DATE]
+    tie_breaker: latest_WHENMODIFIED_wins
+  fields:
+    - { source_column: RECORDNO,         normalized_column: source_row_id,          transform: trim_string,                   required: true }
+    - { source_column: FORECASTID,       normalized_column: forecast_version,       transform: map_intacct_forecast_version,  required: true }
+    - { source_column: FORECASTNAME,     normalized_column: forecast_version_label, transform: trim_string,                   required: true }
+    - { source_column: GLACCOUNTNO,      normalized_column: account_id,             transform: trim_string,                   required: true }
+    - { source_column: PERIOD,           normalized_column: period,                 transform: intacct_period_to_iso_month,   required: true }
+    - { source_column: AS_OF_DATE,       normalized_column: as_of_date,             transform: to_iso_date,                   required: true }
+    - { source_column: AMOUNT,           normalized_column: amount_cents,           transform: dollars_to_cents,              required: true }
+    - { source_column: CURRENCY,         normalized_column: source_currency,        transform: uppercase_string,              required: true }
+    - { source_column: STATE,            normalized_column: publication_state,      transform: lowercase_string,              required: true }
+    - { source_column: FISCAL_YEAR,      normalized_column: fiscal_year,            transform: trim_string,                   required: false }
+    - { source_column: ENTITYID,         normalized_column: source_entity_id,       transform: trim_string,                   required: false }
+    - { source_column: LOCATIONID,       normalized_column: source_location_id,     transform: trim_string,                   required: false }
+    - { source_column: DEPARTMENTID,     normalized_column: department_id,          transform: trim_string,                   required: false }
+    - { source_column: PROJECTID,        normalized_column: source_project_id,      transform: trim_string,                   required: false }
+    - { source_column: CLASSID,          normalized_column: class_id,               transform: trim_string,                   required: false }
+    - { source_column: PRIOR_FORECASTID, normalized_column: prior_forecast_ref,     transform: trim_string,                   required: false }
+    - { source_column: BUILD_BASIS,      normalized_column: build_basis,            transform: lowercase_string,              required: false }
+  crosswalk_lookups:
+    - { canonical_field: property_id,            crosswalk: property_master_crosswalk, key_priority: [LOCATIONID, ENTITYID] }
+    - { canonical_field: canonical_account_slug, crosswalk: account_crosswalk,         key: GLACCOUNTNO }
+
+vendors:
+  source_format: [json, jsonl]
+  source_object: VENDOR
+  dedup_rule:
+    keys: [VENDORID]
+    tie_breaker: latest_WHENMODIFIED_wins
+  fields:
+    - { source_column: RECORDNO,              normalized_column: source_row_id,              transform: trim_string,        required: true }
+    - { source_column: VENDORID,              normalized_column: source_vendor_id,           transform: trim_string,        required: true }
+    - { source_column: VENDORNAME,            normalized_column: vendor_name,                transform: trim_string,        required: true }
+    - { source_column: STATUS,                normalized_column: status,                     transform: lowercase_string,   required: true }
+    - { source_column: TAXID,                 normalized_column: tax_id,                     transform: redact_in_logs,     required: false }
+    - { source_column: W9_ON_FILE,            normalized_column: w9_on_file,                 transform: to_boolean,         required: false }
+    - { source_column: INSURANCE_EXPIRY_DATE, normalized_column: insurance_expiry_date,      transform: to_iso_date,        required: false }
+    - { source_column: TERMNAME,              normalized_column: payment_terms_label,        transform: trim_string,        required: false }
+    - { source_column: CURRENCY,              normalized_column: source_currency,            transform: uppercase_string,   required: false }
+    - { source_column: ENTITYID,              normalized_column: scoping_entity_id,          transform: trim_string,        required: false }
+  crosswalk_lookups:
+    - { canonical_field: vendor_id, crosswalk: vendor_master_crosswalk, key: VENDORID }
+
+projects:
+  source_format: [json, jsonl]
+  source_object: PROJECT
+  dedup_rule:
+    keys: [PROJECTID]
+    tie_breaker: latest_WHENMODIFIED_wins
+  fields:
+    - { source_column: RECORDNO,         normalized_column: source_row_id,              transform: trim_string,        required: true }
+    - { source_column: PROJECTID,        normalized_column: source_project_id,          transform: trim_string,        required: true }
+    - { source_column: PROJECTNAME,      normalized_column: project_name,               transform: trim_string,        required: true }
+    - { source_column: PROJECT_TYPE,     normalized_column: project_type,               transform: lowercase_string,   required: true }
+    - { source_column: STATUS,           normalized_column: status,                     transform: lowercase_string,   required: true }
+    - { source_column: ENTITYID,         normalized_column: source_entity_id,           transform: trim_string,        required: false }
+    - { source_column: LOCATIONID,       normalized_column: source_location_id,         transform: trim_string,        required: false }
+    - { source_column: CATEGORY,         normalized_column: category,                   transform: lowercase_string,   required: false }
+    - { source_column: FUNDING_SOURCE,   normalized_column: funding_source,             transform: lowercase_string,   required: false }
+    - { source_column: BUDGET_AMOUNT,    normalized_column: total_budget_cents,         transform: dollars_to_cents,   required: false }
+    - { source_column: CONTINGENCY_PCT,  normalized_column: contingency_pct,            transform: to_number,          required: false }
+    - { source_column: START_DATE,       normalized_column: target_start,               transform: to_iso_date,        required: false }
+    - { source_column: COMPLETION_DATE,  normalized_column: target_completion,          transform: to_iso_date,        required: false }
+    - { source_column: PARENT_PROJECTID, normalized_column: parent_source_project_id,   transform: trim_string,        required: false }
+  crosswalk_lookups:
+    - { canonical_field: capex_project_id, crosswalk: capex_project_crosswalk,   key: PROJECTID }
+    - { canonical_field: property_id,      crosswalk: property_master_crosswalk, key: LOCATIONID, when_key_present: true }

@@ -1,0 +1,47 @@
+pack_slug: investment_committee_prep
+pack_type: workflow
+priority: 10
+triggers:
+  explicit_phrases:
+    - "IC prep"
+    - "ic prep"
+    - "IC packet"
+    - "investment committee prep"
+    - "investment committee packet"
+    - "IC pre-read"
+    - "IC agenda"
+    - "IC docket"
+    - "condition tracking"
+    - "condition rollup"
+    - "minute-ready condition log"
+    - "LP capital coverage"
+  implicit_signals:
+    - "IC meeting within overlay prep window"
+    - "deal enters ic_review stage in Dealpath"
+    - "pipeline_review flags IC load approaching capacity band"
+    - "IC condition approaches resolution_deadline"
+    - "sensitivity_stress_test requested by investments_lead"
+    - "investment_committee_review scheduled_date within prep window"
+required_axes:
+  - asset_class
+  - segment
+  - lifecycle_stage
+  - management_mode
+  - org_id
+  - ic_meeting_date
+optional_axes:
+  - form_factor
+  - market
+  - submarket
+  - role
+  - output_type
+  - fund_id
+  - deal_id
+axes_match:
+  segment: [middle_market, luxury, affordable]
+  lifecycle: [development, construction, lease_up, stabilized, renovation, recap_support]
+  management_mode: [self_managed, third_party_managed, owner_oversight]
+  output_types: [memo, kpi_review, dashboard, checklist]
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

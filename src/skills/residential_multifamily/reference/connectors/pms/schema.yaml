@@ -1,0 +1,784 @@
+entities:
+  property:
+    entity_name: property
+    grain: one row per property per source feed
+    time_basis: state
+    primary_key:
+    - property_id
+    required_fields:
+    - name: property_id
+      type: string
+      description: Stable PMS property identifier
+      is_key: true
+    - name: property_name
+      type: string
+      description: Operating name
+      is_key: false
+    - name: unit_count_total
+      type: integer
+      description: Total units including down/model/employee
+      is_key: false
+    - name: unit_count_rentable
+      type: integer
+      description: Rentable unit count
+      is_key: false
+    - name: market
+      type: string
+      description: Market label (FK to reference market registry)
+      is_key: false
+    optional_fields:
+    - name: submarket
+      type: string
+      description: Submarket label
+    - name: year_built
+      type: integer
+      description: Year first placed in service
+    - name: year_renovated
+      type: integer
+      description: Year of last substantial renovation
+    foreign_keys: []
+    null_handling:
+    - field: unit_count_rentable
+      behavior: reject_record
+      notes: must be <= unit_count_total
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - all property-scoped metrics
+    - property master reconciliation
+  unit:
+    entity_name: unit
+    grain: one row per unit per property
+    time_basis: state
+    primary_key:
+    - property_id
+    - unit_id
+    required_fields:
+    - name: property_id
+      type: string
+      description: FK to property
+      is_key: true
+    - name: unit_id
+      type: string
+      description: PMS unit identifier
+      is_key: true
+    - name: bedrooms
+      type: integer
+      description: Bedroom count (0 = studio)
+      is_key: false
+    - name: bathrooms
+      type: number
+      description: Bathroom count, halves allowed
+      is_key: false
+    - name: nrsf
+      type: integer
+      description: Net rentable square feet
+      is_key: false
+    - name: status
+      type: enum
+      description: Current unit status
+      is_key: false
+      enum_values:
+      - occupied
+      - vacant_rented
+      - vacant_unrented
+      - notice_occupied
+      - notice_unrented
+      - model
+      - employee
+      - down
+      - admin
+    optional_fields:
+    - name: unit_type_id
+      type: string
+      description: FK to unit type
+    - name: floor
+      type: integer
+      description: Floor number
+    - name: classification
+      type: enum
+      description: Renovation classification
+      enum_values:
+      - classic
+      - renovated
+      - fully_renovated
+    foreign_keys:
+    - field: property_id
+      references: property.property_id
+      on_missing: reject
+    null_handling:
+    - field: status
+      behavior: reject_record
+      notes: must be in enum
+    - field: nrsf
+      behavior: escalate_missing
+      notes: downstream rent-per-sf metrics fail closed
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - occupancy rollup; unit-type weighted rents; turn planning
+  lease:
+    entity_name: lease
+    grain: one row per executed lease
+    time_basis: state
+    primary_key:
+    - lease_id
+    required_fields:
+    - name: lease_id
+      type: string
+      description: PMS lease identifier
+      is_key: true
+    - name: property_id
+      type: string
+      description: FK to property
+      is_key: false
+    - name: unit_id
+      type: string
+      description: FK to unit within property
+      is_key: false
+    - name: resident_account_id
+      type: string
+      description: FK to resident account
+      is_key: false
+    - name: start_date
+      type: date
+      description: Lease start
+      is_key: false
+    - name: end_date
+      type: date
+      description: Lease end
+      is_key: false
+    - name: base_rent_monthly_cents
+      type: money_cents
+      description: Base monthly rent in cents
+      is_key: false
+      unit: cents_usd
+    - name: status
+      type: enum
+      description: Lease status
+      is_key: false
+      enum_values:
+      - draft
+      - approved
+      - executed
+      - in_effect
+      - renewing
+      - expired
+      - terminated
+      - broken
+    optional_fields:
+    - name: term_months
+      type: integer
+      description: Nominal lease term
+    - name: concessions_total_cents
+      type: money_cents
+      description: Total concessions on the lease
+      unit: cents_usd
+    - name: is_renewal
+      type: boolean
+      description: True if renewal of a prior lease
+    - name: prior_lease_id
+      type: string
+      description: Required if is_renewal
+    foreign_keys:
+    - field: property_id
+      references: property.property_id
+      on_missing: reject
+    - field: unit_id
+      references: unit.unit_id
+      on_missing: reject
+    null_handling:
+    - field: base_rent_monthly_cents
+      behavior: reject_record
+      notes: revenue math requires this
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - lease expiry schedule; renewal metrics; delinquency workflow
+  lease_event:
+    entity_name: lease_event
+    grain: one row per lease lifecycle event
+    time_basis: event
+    primary_key:
+    - lease_event_id
+    required_fields:
+    - name: lease_event_id
+      type: string
+      description: Stable event id
+      is_key: true
+    - name: lease_id
+      type: string
+      description: FK to lease
+      is_key: false
+    - name: event_type
+      type: enum
+      description: Event type
+      is_key: false
+      enum_values:
+      - lease_signed
+      - move_in
+      - renewal_offered
+      - renewal_accepted
+      - renewal_declined
+      - notice_to_vacate
+      - late_payment
+      - legal_notice_served
+      - eviction_filed
+      - eviction_judgment
+      - move_out
+      - lease_broken
+      - lease_terminated
+      - skip
+    - name: event_date
+      type: date
+      description: Event effective date
+      is_key: false
+    optional_fields:
+    - name: event_payload
+      type: object
+      description: Event-specific JSON payload
+    foreign_keys:
+    - field: lease_id
+      references: lease.lease_id
+      on_missing: reject
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - lease status reconciliation; NTV funnel; eviction pipeline
+  charge:
+    entity_name: charge
+    grain: one row per resident charge posting
+    time_basis: event
+    primary_key:
+    - charge_id
+    required_fields:
+    - name: charge_id
+      type: string
+      description: PMS charge id
+      is_key: true
+    - name: lease_id
+      type: string
+      description: FK to lease
+      is_key: false
+    - name: resident_account_id
+      type: string
+      description: FK to resident account
+      is_key: false
+    - name: charge_type
+      type: enum
+      description: Charge type
+      is_key: false
+      enum_values:
+      - rent
+      - base_rent
+      - pet_fee
+      - concession_reversal
+      - late_fee
+      - nsf_fee
+      - damage
+      - utility
+      - other
+    - name: charge_date
+      type: date
+      description: Posting date
+      is_key: false
+    - name: amount_cents
+      type: money_cents
+      description: Charge amount in cents
+      is_key: false
+      unit: cents_usd
+    optional_fields:
+    - name: notes
+      type: string
+      description: Free-form posting notes
+    foreign_keys:
+    - field: lease_id
+      references: lease.lease_id
+      on_missing: warn
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - aging; collections metrics; delinquency workflow
+  payment:
+    entity_name: payment
+    grain: one row per resident payment receipt
+    time_basis: event
+    primary_key:
+    - payment_id
+    required_fields:
+    - name: payment_id
+      type: string
+      description: PMS payment id
+      is_key: true
+    - name: resident_account_id
+      type: string
+      description: FK to resident account
+      is_key: false
+    - name: payment_date
+      type: date
+      description: Payment posting date
+      is_key: false
+    - name: amount_cents
+      type: money_cents
+      description: Payment amount in cents
+      is_key: false
+      unit: cents_usd
+    - name: tender_type
+      type: enum
+      description: Payment tender
+      is_key: false
+      enum_values:
+      - ach
+      - card
+      - cash
+      - money_order
+      - check
+      - portal
+      - other
+    optional_fields:
+    - name: applied_to_charge_ids
+      type: array
+      description: Charge ids this payment is applied to
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - aging; collections metrics
+  delinquency_case:
+    entity_name: delinquency_case
+    grain: one row per active delinquency case
+    time_basis: state
+    primary_key:
+    - case_id
+    required_fields:
+    - name: case_id
+      type: string
+      description: PMS case id
+      is_key: true
+    - name: lease_id
+      type: string
+      description: FK to lease
+      is_key: false
+    - name: stage
+      type: enum
+      description: Aging stage
+      is_key: false
+      enum_values:
+      - current
+      - '1_7'
+      - '8_30'
+      - '31_60'
+      - '61_90'
+      - 91_plus
+      - legal_notice
+      - eviction_filed
+      - judgment
+      - write_off
+    - name: current_balance_cents
+      type: money_cents
+      description: Balance in cents
+      is_key: false
+      unit: cents_usd
+    - name: stage_entered_date
+      type: date
+      description: Date stage entered
+      is_key: false
+    optional_fields:
+    - name: legal_flag
+      type: boolean
+      description: True if legal exposure
+    - name: last_contact_date
+      type: date
+      description: Last resident contact
+    foreign_keys:
+    - field: lease_id
+      references: lease.lease_id
+      on_missing: reject
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - delinquency playbook; tenant-delinquency-workout skill
+  lead:
+    entity_name: lead
+    grain: one row per prospect inquiry
+    time_basis: state
+    primary_key:
+    - lead_id
+    required_fields:
+    - name: lead_id
+      type: string
+      description: PMS lead id
+      is_key: true
+    - name: property_id
+      type: string
+      description: FK to property
+      is_key: false
+    - name: source_channel
+      type: string
+      description: Acquisition channel
+      is_key: false
+    - name: inquiry_date
+      type: date
+      description: First-contact date
+      is_key: false
+    - name: pipeline_stage
+      type: enum
+      description: Funnel stage
+      is_key: false
+      enum_values:
+      - inquiry
+      - contacted
+      - tour_scheduled
+      - toured
+      - applied
+      - approved
+      - leased
+      - lost
+    optional_fields:
+    - name: move_in_target
+      type: date
+      description: Desired move-in date
+    - name: bedrooms_desired
+      type: integer
+      description: Preference
+    foreign_keys:
+    - field: property_id
+      references: property.property_id
+      on_missing: reject
+    null_handling:
+    - field: source_channel
+      behavior: default_to_null
+      notes: unknown channel allowed
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - lease-up war room; leasing roles
+  tour:
+    entity_name: tour
+    grain: one row per tour scheduled or conducted
+    time_basis: event
+    primary_key:
+    - tour_id
+    required_fields:
+    - name: tour_id
+      type: string
+      description: PMS tour id
+      is_key: true
+    - name: lead_id
+      type: string
+      description: FK to lead
+      is_key: false
+    - name: scheduled_date
+      type: date
+      description: Scheduled date
+      is_key: false
+    - name: tour_type
+      type: enum
+      description: Tour modality
+      is_key: false
+      enum_values:
+      - in_person
+      - self_guided
+      - virtual
+    optional_fields:
+    - name: conducted_date
+      type: date
+      description: Actual tour date
+    - name: outcome
+      type: enum
+      description: Tour outcome
+      enum_values:
+      - applied
+      - follow_up
+      - lost
+      - no_show
+    foreign_keys:
+    - field: lead_id
+      references: lead.lead_id
+      on_missing: reject
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - tour-to-lease conversion; leasing funnel metrics
+  application:
+    entity_name: application
+    grain: one row per rental application
+    time_basis: state
+    primary_key:
+    - application_id
+    required_fields:
+    - name: application_id
+      type: string
+      description: PMS application id
+      is_key: true
+    - name: lead_id
+      type: string
+      description: FK to lead
+      is_key: false
+    - name: applied_date
+      type: date
+      description: Application submit date
+      is_key: false
+    - name: approval_status
+      type: enum
+      description: Outcome
+      is_key: false
+      enum_values:
+      - pending
+      - approved
+      - approved_with_conditions
+      - declined
+      - withdrawn
+    optional_fields:
+    - name: unit_id_preferred
+      type: string
+      description: Preferred unit
+    foreign_keys:
+    - field: lead_id
+      references: lead.lead_id
+      on_missing: reject
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - approval-outcome auditing; application-to-lease conversion
+  renewal_offer:
+    entity_name: renewal_offer
+    grain: one row per renewal offer issued on a lease
+    time_basis: event
+    primary_key:
+    - renewal_offer_id
+    required_fields:
+    - name: renewal_offer_id
+      type: string
+      description: PMS offer id
+      is_key: true
+    - name: lease_id
+      type: string
+      description: FK to lease
+      is_key: false
+    - name: offer_date
+      type: date
+      description: Date offer issued
+      is_key: false
+    - name: offered_rent_monthly_cents
+      type: money_cents
+      description: Offered rent in cents
+      is_key: false
+      unit: cents_usd
+    - name: offered_term_months
+      type: integer
+      description: Offered term
+      is_key: false
+    - name: response
+      type: enum
+      description: Offer response
+      is_key: false
+      enum_values:
+      - pending
+      - accepted
+      - declined
+      - expired
+      - withdrawn
+    optional_fields:
+    - name: response_date
+      type: date
+      description: Response date
+    foreign_keys:
+    - field: lease_id
+      references: lease.lease_id
+      on_missing: reject
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - renewal retention metrics; tenant-retention-engine skill
+  work_order:
+    entity_name: work_order
+    grain: one row per maintenance work order
+    time_basis: state
+    primary_key:
+    - work_order_id
+    required_fields:
+    - name: work_order_id
+      type: string
+      description: PMS work order id
+      is_key: true
+    - name: property_id
+      type: string
+      description: FK to property
+      is_key: false
+    - name: reported_date
+      type: date
+      description: Date reported
+      is_key: false
+    - name: priority
+      type: enum
+      description: Priority
+      is_key: false
+      enum_values:
+      - p1_safety
+      - p2_habitability
+      - p3_standard
+      - p4_cosmetic
+    - name: status
+      type: enum
+      description: WO status
+      is_key: false
+      enum_values:
+      - open
+      - assigned
+      - in_progress
+      - awaiting_parts
+      - awaiting_vendor
+      - scheduled
+      - completed
+      - closed
+      - deferred
+    optional_fields:
+    - name: unit_id
+      type: string
+      description: Unit scope (null = common area)
+    - name: category
+      type: enum
+      description: Trade category
+      enum_values:
+      - plumbing
+      - hvac
+      - electrical
+      - appliance
+      - doors_locks
+      - pest
+      - general
+      - other
+    - name: completed_date
+      type: date
+      description: Date completed
+    foreign_keys:
+    - field: property_id
+      references: property.property_id
+      on_missing: reject
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - work-order-triage skill; SLA dashboards; building-systems-maintenance-manager
+  turn:
+    entity_name: turn
+    grain: one row per unit turn project
+    time_basis: state
+    primary_key:
+    - turn_id
+    required_fields:
+    - name: turn_id
+      type: string
+      description: PMS turn id
+      is_key: true
+    - name: property_id
+      type: string
+      description: FK to property
+      is_key: false
+    - name: unit_id
+      type: string
+      description: FK to unit
+      is_key: false
+    - name: move_out_date
+      type: date
+      description: Prior resident move-out
+      is_key: false
+    - name: status
+      type: enum
+      description: Turn status
+      is_key: false
+      enum_values:
+      - planned
+      - in_progress
+      - awaiting_parts
+      - punchlist
+      - ready
+      - leased
+    optional_fields:
+    - name: actual_ready_date
+      type: date
+      description: Date unit declared ready
+    - name: budget_total_cents
+      type: money_cents
+      description: Turn budget in cents
+      unit: cents_usd
+    - name: actual_total_cents
+      type: money_cents
+      description: Turn actual in cents
+      unit: cents_usd
+    foreign_keys:
+    - field: property_id
+      references: property.property_id
+      on_missing: reject
+    - field: unit_id
+      references: unit.unit_id
+      on_missing: reject
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - unit-turn-cost reference category; capex-prioritizer skill

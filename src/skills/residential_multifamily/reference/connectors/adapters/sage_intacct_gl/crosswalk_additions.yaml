@@ -1,0 +1,332 @@
+# Sage Intacct crosswalk additions.
+#
+# Fragments that extend master_data/ crosswalks with Intacct-specific rows.
+# These fragments will be merged into:
+#   - master_data/account_crosswalk.yaml
+#   - master_data/vendor_master_crosswalk.yaml
+#   - master_data/property_master_crosswalk.yaml
+#   - master_data/capex_project_crosswalk.yaml
+#   - master_data/employee_crosswalk.yaml
+#
+# Each row conforms to master_data/crosswalk.schema.yaml.
+# intacct_id = Intacct-facing key (RECORDNO, GLACCOUNTNO, DIMENSION_ID,
+# VENDORID, PROJECTID, or HRIS id as appropriate).
+# canonical_id = the canonical slug downstream consumers see.
+# Survivorship rules reference master_data/survivorship_rules.md.
+
+status_tag: template
+
+# -----------------------------------------------------------------------------
+# account_crosswalk additions (Intacct chart <-> canonical chart)
+# -----------------------------------------------------------------------------
+
+account_crosswalk_additions:
+
+  - intacct_id: "4000"
+    canonical_id: revenue_base_rent
+    source_system: sage_intacct_prod
+    source_id: "4000"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2020-01-01"
+    survivorship_rule: account_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      Intacct GLACCOUNTNO 4000 "Rental Income - Base". Matches corporate_gl
+      account 4000 via account_crosswalk.yaml; Intacct row documents the
+      equivalent source within the sage_intacct_prod registry entry.
+
+  - intacct_id: "4100"
+    canonical_id: revenue_other_rental
+    source_system: sage_intacct_prod
+    source_id: "4100"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2020-01-01"
+    survivorship_rule: account_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      "Rental Income - Other Fees" (parking, storage, pet, tech).
+
+  - intacct_id: "5100"
+    canonical_id: expense_repairs_maintenance
+    source_system: sage_intacct_prod
+    source_id: "5100"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2020-01-01"
+    survivorship_rule: account_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      "Repairs and Maintenance". Posted at entity or location grain; feeds
+      work_order rollups after property attribution resolves.
+
+  - intacct_id: "5500"
+    canonical_id: expense_real_estate_tax
+    source_system: sage_intacct_prod
+    source_id: "5500"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2020-01-01"
+    survivorship_rule: account_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      "Real Estate Taxes". Monthly accrual via GJ; cash payment via CDJ.
+
+  - intacct_id: "6000"
+    canonical_id: capex_roof_replacement
+    source_system: sage_intacct_prod
+    source_id: "6000"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2020-01-01"
+    survivorship_rule: account_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      "Capex - Roof Replacement". Tie via PROJECTID required; opex-coded
+      postings fire ic_consistency_capex_opex_misclass.
+
+  - intacct_id: "6100"
+    canonical_id: capex_value_add
+    source_system: sage_intacct_prod
+    source_id: "6100"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2020-01-01"
+    survivorship_rule: account_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      "Capex - Unit Renovation". Value-add program family.
+
+# -----------------------------------------------------------------------------
+# vendor_master_crosswalk additions (Intacct vendor <-> AppFolio + Procore)
+# -----------------------------------------------------------------------------
+
+vendor_master_crosswalk_additions:
+
+  - intacct_id: VND_0101
+    canonical_id: vendor_v_00217
+    source_system: sage_intacct_prod
+    source_id: VND_0101
+    match_confidence: high
+    match_method: composite
+    effective_start: "2022-06-01"
+    survivorship_rule: vendor_master_default
+    manual_override: false
+    reviewer: ap_manager
+    last_validated_at: "2026-03-31"
+    notes: |
+      Intacct row for vendor canonical_id vendor_v_00217 (Tri-State HVAC).
+      Matches AP row AP-HVAC-2310 and Procore row V00217. Tax id and
+      payment terms survive from the Intacct row.
+
+  - intacct_id: VND_0312
+    canonical_id: vendor_v_00412
+    source_system: sage_intacct_prod
+    source_id: VND_0312
+    match_confidence: high
+    match_method: manual
+    effective_start: "2025-01-01"
+    survivorship_rule: vendor_master_default
+    manual_override: true
+    override_reason: |
+      Intacct carries the rename from Ridge Electric Services Inc to Ridge
+      Power Systems LLC effective 2025-01-01; tax id continuity confirmed.
+    reviewer: ap_manager
+    last_validated_at: "2026-03-31"
+    notes: |
+      Same canonical id as the AP row; Intacct provides current legal name
+      and payment terms.
+
+  - intacct_id: VND_0207
+    canonical_id: vendor_v_00702
+    source_system: sage_intacct_prod
+    source_id: VND_0207
+    match_confidence: high
+    match_method: exact
+    effective_start: "2023-06-20"
+    survivorship_rule: vendor_master_default
+    manual_override: false
+    reviewer: ap_manager
+    last_validated_at: "2026-03-31"
+    notes: |
+      Bluefield Digital Marketing LLC. New canonical id vendor_v_00702
+      (non-construction vendor; not present in Procore); AppFolio AP
+      dispatch row expected.
+
+# -----------------------------------------------------------------------------
+# property_master_crosswalk additions (Intacct dim_property <-> canonical)
+# -----------------------------------------------------------------------------
+
+property_master_crosswalk_additions:
+
+  - intacct_id: LOC_ASH_PARK
+    canonical_id: prop_cta_001
+    source_system: sage_intacct_prod
+    source_id: LOC_ASH_PARK
+    match_confidence: high
+    match_method: exact
+    effective_start: "2021-06-15"
+    survivorship_rule: property_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      Intacct LOCATIONID for Ashford Park (roll-up-entity pattern; the
+      Entity ENT_ASH_LLC is single-property and LOC_ASH_PARK is redundant
+      but retained for dim consistency). Legal_entity_id = ENT_ASH_LLC
+      survives from this row.
+
+  - intacct_id: LOC_NORTH_RIDGE
+    canonical_id: prop_rdu_004
+    source_system: sage_intacct_prod
+    source_id: LOC_NORTH_RIDGE
+    match_confidence: high
+    match_method: exact
+    effective_start: "2022-09-01"
+    survivorship_rule: property_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      Intacct LOCATIONID for Northridge Commons under the ENT_SOUTH_HOLDCO
+      roll-up entity. LOCATIONID is the primary property disambiguator.
+
+  - intacct_id: LOC_MAGNOLIA
+    canonical_id: prop_atl_007a
+    source_system: sage_intacct_prod
+    source_id: LOC_MAGNOLIA
+    match_confidence: high
+    match_method: exact
+    effective_start: "2022-09-01"
+    survivorship_rule: property_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      Intacct LOCATIONID for Magnolia Midrise under ENT_SOUTH_HOLDCO.
+
+# -----------------------------------------------------------------------------
+# capex_project_crosswalk additions (Intacct project_id <-> Procore project)
+# -----------------------------------------------------------------------------
+
+capex_project_crosswalk_additions:
+
+  - intacct_id: PRJ_ASH_ROOF_2026
+    canonical_id: capex_cta_001_roof_2026
+    source_system: sage_intacct_prod
+    source_id: PRJ_ASH_ROOF_2026
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-03-01"
+    survivorship_rule: capex_project_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      Intacct PROJECTID for roof replacement at prop_cta_001. Matches
+      Procore project id P-ROOF-CTA-2026 (construction_tracker_primary).
+      Scope and schedule survive from Procore; budget and posted spend
+      from Intacct.
+
+  - intacct_id: PRJ_NR_AMENITY_2026
+    canonical_id: capex_rdu_004_amenity_2026
+    source_system: sage_intacct_prod
+    source_id: PRJ_NR_AMENITY_2026
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-01"
+    survivorship_rule: capex_project_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      Intacct PROJECTID for Northridge amenity upgrade. Procore id
+      P-AMEN-NR-2026 is the scope/schedule side.
+
+  - intacct_id: PRJ_MAG_UNIT_RENO_2026
+    canonical_id: capex_mag_unit_reno_2026
+    source_system: sage_intacct_prod
+    source_id: PRJ_MAG_UNIT_RENO_2026
+    match_confidence: high
+    match_method: exact
+    effective_start: "2026-01-10"
+    survivorship_rule: capex_project_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      Magnolia unit renovation program 2026. Tied to Procore project
+      P-REN-MAG-2026.
+
+  - intacct_id: PRJ_PLACEHOLDER_NEW_ACQ
+    canonical_id: null
+    source_system: sage_intacct_prod
+    source_id: PRJ_PLACEHOLDER_NEW_ACQ
+    match_confidence: unresolved
+    match_method: manual
+    effective_start: "2026-04-01"
+    survivorship_rule: capex_project_default
+    manual_override: true
+    override_reason: |
+      Placeholder project opened during acquisition diligence; awaits
+      post-close entity setup. Resolution required per
+      ic_guardrail_placeholder_project_must_resolve.
+    reviewer: finance_systems_team
+    last_validated_at: "2026-04-01"
+    notes: |
+      Not persisted in master_data/capex_project_crosswalk.yaml until
+      resolved. Tracked in master_data/unresolved_exceptions_queue.md
+      until a concrete canonical_id is assigned at close.
+
+# -----------------------------------------------------------------------------
+# employee_crosswalk additions (Intacct dim_employee <-> HR/Payroll)
+# -----------------------------------------------------------------------------
+
+employee_crosswalk_additions:
+
+  - intacct_id: EMP_HRIS_00218
+    canonical_id: employee_e_00218
+    source_system: sage_intacct_prod
+    source_id: EMP_HRIS_00218
+    match_confidence: high
+    match_method: exact
+    effective_start: "2022-03-14"
+    survivorship_rule: employee_default
+    manual_override: false
+    reviewer: hr_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      Intacct employee dim row for regional maintenance lead. Matches
+      HR/Payroll HRIS-00218. Employment type: employee. Property fte_share
+      maintained on HR/Payroll side per employee_crosswalk.yaml.
+
+  - intacct_id: EMP_HRIS_C_00441
+    canonical_id: employee_e_00441
+    source_system: sage_intacct_prod
+    source_id: EMP_HRIS_C_00441
+    match_confidence: high
+    match_method: manual
+    effective_start: "2024-08-01"
+    survivorship_rule: employee_default
+    manual_override: true
+    override_reason: |
+      1099 contractor; Intacct posts to expense_contract_labor rather than
+      expense_payroll. Flagging preserved across crosswalks.
+    reviewer: hr_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      Contractor record; account posting routing enforced by
+      ic_recon_labor_classification.

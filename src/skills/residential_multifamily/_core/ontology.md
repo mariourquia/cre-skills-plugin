@@ -459,6 +459,82 @@ Reference pointer: `reference/normalized/staffing_ratios.csv` plus `reference/no
 
 ---
 
+## Commitment / PurchaseCommitment
+
+**Description.** A buy-side contractual obligation from owner (or owner's GC) to a vendor or subcontractor for defined scope at defined price. The first-class object that change orders, draw requests, and posted invoices reconcile against. Distinct from `VendorAgreement`: a VendorAgreement is the umbrella relationship; a Commitment is a specific contracted dollar obligation within or alongside it.
+
+**Keys.** `commitment_id` (org-scoped).
+
+**Key fields.**
+
+| Field | Type | Req | Notes |
+|---|---|---|---|
+| `commitment_id` | string | required | canonical ID. |
+| `project_id` | string | required | FK to `CapexProject`, `ConstructionProject`, or `DevelopmentProject`. |
+| `vendor_id` | string | required | FK to `Vendor`. |
+| `vendor_agreement_id` | string | optional | FK when commitment is a release against a master agreement. |
+| `commitment_type` | enum | required | `subcontract, purchase_order, services_agreement, change_order_release, allowance, contingency_release, retainage_release`. |
+| `title` | string | required | short label. |
+| `scope_summary` | string | required | one-paragraph scope. |
+| `csi_division` | string | optional | when applicable. |
+| `cost_code_id` | string | optional | FK to project cost code. |
+| `executed_date` | date | optional | null until executed. |
+| `effective_start` | date | required | when scope/payment may begin. |
+| `effective_end` | date | optional | substantial completion target. |
+| `original_amount` | decimal | required | initial committed dollars. |
+| `approved_change_orders_amount` | decimal | required | net of approved COs (default 0). |
+| `revised_amount` | decimal | required | original + approved COs. |
+| `paid_to_date` | decimal | required | sum of approved draw applications. |
+| `retainage_held` | decimal | required | dollars held back per contract. |
+| `balance_to_complete` | decimal | required | revised - paid - retainage held. |
+| `status` | enum | required | `draft, out_for_signature, executed, in_progress, complete, terminated, cancelled`. |
+| `funding_source` | enum | optional | `reserves, owner_capital_call, loan_draw, insurance_proceeds, mixed`. |
+| `bonded` | bool | optional | performance/payment bond required. |
+| `insurance_certificate_ref` | string | optional | pointer to COI. |
+| `payment_terms` | string | optional | e.g., net 30, monthly progress, milestone-based. |
+| `lien_waiver_required` | bool | required | true if jurisdiction or owner policy requires. |
+
+**Parents.** `Vendor`, `CapexProject` (or `ConstructionProject` / `DevelopmentProject`). **Children.** `ChangeOrder[]`, `DrawRequest[]` (via project), invoice postings (via Intacct). 
+
+**Time basis.** Event-sourced. Status transitions logged via change log; financial state (paid_to_date, retainage_held, balance_to_complete) is derivable from `DrawRequest` + posted invoices but cached on the commitment for fast reporting.
+
+**Grain.** One row per executed (or in-flight) commitment per project per vendor.
+
+**Typical sources.** Procore (primary, scope and approval state), Sage Intacct (posted spend reconciliation), manual contracts (legacy or non-Procore projects).
+
+**Validation.** `revised_amount = original_amount + approved_change_orders_amount`. `paid_to_date <= revised_amount`. `balance_to_complete = revised_amount - paid_to_date - retainage_held`. `status = complete IMPLIES balance_to_complete = 0 AND retainage_held = 0`.
+
+**Null handling.** `executed_date` null permitted while `status in {draft, out_for_signature}`. `vendor_agreement_id` null permitted when commitment is a one-off PO without a master agreement.
+
+**Guardrail.** A commitment cannot transition to `executed` without a vendor with non-expired insurance (per `Vendor.insurance_expiry_date`) and, where required, a current bond. Tests enforce.
+
+**Example.**
+
+```yaml
+commitment_id: COMMIT_12450
+project_id: PROJ_ASHFORD_RENOV_2026
+vendor_id: VEN_VISTA_MECH
+commitment_type: subcontract
+title: HVAC Rooftop Replacement
+scope_summary: Replace 4 RTUs on Building A; includes crane, controls integration, 1-year service warranty.
+csi_division: "23"
+executed_date: 2026-03-12
+effective_start: 2026-04-01
+effective_end: 2026-06-30
+original_amount: 412000.00
+approved_change_orders_amount: 18500.00
+revised_amount: 430500.00
+paid_to_date: 215250.00
+retainage_held: 21525.00
+balance_to_complete: 193725.00
+status: in_progress
+funding_source: reserves
+bonded: true
+lien_waiver_required: true
+```
+
+---
+
 ## DevelopmentProject / ConstructionProject
 
 Extensions of `CapexProject` for ground-up or major renovation. Add:

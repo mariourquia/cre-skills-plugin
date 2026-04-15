@@ -1,0 +1,39 @@
+# PMS connector manifest (vendor-neutral stub).
+# Conforms to reference/connectors/_schema/connector_manifest.schema.yaml.
+connector_id: pms
+connector_kind: pms
+version: 0.1.0
+status: stub
+owner: residential_multifamily_subsystem
+vendor_neutral: true
+description: |
+  Property-management-system feed. Operational system of record for
+  properties, units, leases, ledgers, prospects, maintenance, and turns.
+entities:
+  - property
+  - unit
+  - lease
+  - lease_event
+  - charge
+  - payment
+  - delinquency_case
+  - lead
+  - tour
+  - application
+  - renewal_offer
+  - work_order
+  - turn
+provenance_fields_required:
+  - source_name
+  - source_type
+  - source_date
+  - extracted_at
+  - extractor_version
+  - source_row_id
+handshake:
+  auth_kind: file_drop
+  access_pattern: pull_scheduled
+  notes: |
+    Stub. Future vendor adapter replaces file_drop with the vendor's native
+    auth kind (api_key / oauth2) and access_pattern (pull_scheduled / push_webhook).
+contact: operator_placeholder

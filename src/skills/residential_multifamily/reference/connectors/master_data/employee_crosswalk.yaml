@@ -1,0 +1,140 @@
+# Employee Crosswalk (starter set).
+# Conforms to crosswalk.schema.yaml.
+# Illustrates employees shared across multiple properties, contractors
+# embedded in payroll exports, and a rehire case. See
+# identity_resolution_framework.md section 7.10.
+#
+# Protected-class attributes MUST NEVER be used as match keys, tiebreakers,
+# or survivorship fields. Match uses employment_id + work_email + last_name
+# normalized; fallback is manual.
+
+status_tag: sample
+
+rows:
+
+  # -----------------------------------------------------------------------
+  # Shared-across-properties case. Regional maintenance lead covers three
+  # properties on a rotation. Payroll export carries one employee record
+  # with no property field. The crosswalk row carries an employment_type of
+  # employee; a separate note records the property assignment and FTE
+  # share, resolved downstream via the staffing_plan normalized record.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: employee_e_00218
+    source_system: hr_payroll_primary
+    source_id: HRIS-00218
+    match_confidence: high
+    match_method: exact
+    effective_start: "2022-03-14"
+    survivorship_rule: employee_default
+    manual_override: false
+    reviewer: hr_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      Regional maintenance lead. Employment type: employee. Covers
+      prop_cta_001 (fte_share 0.5), prop_rdu_004 (fte_share 0.25),
+      prop_grn_002 (fte_share 0.25). Assignment list is carried on the
+      staffing_plan normalized record. Restricted PII classification.
+
+  # -----------------------------------------------------------------------
+  # Contractor embedded in payroll export. Payroll system carries a
+  # mixture of W-2 and 1099 records. The crosswalk row flags the record
+  # as employment_type=contractor via its notes (no dedicated field to
+  # avoid schema drift across crosswalks). Downstream payroll rollup
+  # treats contractors as expense_contract_labor, not expense_payroll.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: employee_e_00441
+    source_system: hr_payroll_primary
+    source_id: HRIS-C-00441
+    match_confidence: high
+    match_method: manual
+    effective_start: "2024-08-01"
+    survivorship_rule: employee_default
+    manual_override: true
+    override_reason: |
+      Record is a 1099 contractor embedded in the HRIS export. Manual
+      flagging to ensure downstream payroll rollup routes through
+      expense_contract_labor, not expense_payroll.
+    reviewer: hr_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      Employment type: contractor. Property assignment: prop_cta_001
+      (fte_share not applicable, contracted by project). Restricted PII.
+
+  # -----------------------------------------------------------------------
+  # Rehire case. Employee separated in 2023, rehired in 2025. Canonical
+  # id is reopened (not a new canonical id). The prior row is closed with
+  # effective_end; the new row carries a new effective_start.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: employee_e_00112
+    source_system: hr_payroll_primary
+    source_id: HRIS-00112
+    match_confidence: high
+    match_method: exact
+    effective_start: "2020-06-01"
+    effective_end: "2023-04-15"
+    survivorship_rule: employee_default
+    manual_override: false
+    reviewer: hr_director
+    last_validated_at: "2023-04-15"
+    notes: |
+      Original tenure. Separated 2023-04-15. Canonical id retained for
+      historical payroll attribution.
+
+  - canonical_id: employee_e_00112
+    source_system: hr_payroll_primary
+    source_id: HRIS-00112
+    match_confidence: high
+    match_method: manual
+    effective_start: "2025-02-03"
+    survivorship_rule: employee_default
+    manual_override: true
+    override_reason: |
+      Rehire. Same HRIS id reused by the operator's payroll system; same
+      canonical id preserved to keep historical and current payroll
+      attribution continuous. Separation gap retained in notes.
+    reviewer: hr_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      Rehire tenure. Gap 2023-04-16 to 2025-02-02. Employment type on
+      return: employee. Property assignment: prop_rdu_004 (fte_share 1.0).
+
+  # -----------------------------------------------------------------------
+  # HRIS-to-construction-tracker match. A site superintendent appears
+  # both as a payrolled employee in HRIS and as a tracked participant
+  # in construction_tracker_primary. One canonical id; two rows.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: employee_e_00337
+    source_system: hr_payroll_primary
+    source_id: HRIS-00337
+    match_confidence: high
+    match_method: exact
+    effective_start: "2023-09-01"
+    survivorship_rule: employee_default
+    manual_override: false
+    reviewer: hr_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      Site superintendent on prop_atl_007a construction. Employment
+      type: employee. Restricted PII.
+
+  - canonical_id: employee_e_00337
+    source_system: construction_tracker_primary
+    source_id: CT-USER-00337
+    match_confidence: medium
+    match_method: manual
+    effective_start: "2023-09-01"
+    survivorship_rule: employee_default
+    manual_override: true
+    override_reason: |
+      Construction tracker user id was assigned independently by the
+      tracker admin; manual match against HRIS record to link superintendent
+      activity to payroll attribution.
+    reviewer: construction_manager
+    last_validated_at: "2026-03-31"
+    notes: |
+      Tracker row. Non-restricted data on this side (tracker does not
+      carry payroll detail); restricted PII survives only on the HRIS row.

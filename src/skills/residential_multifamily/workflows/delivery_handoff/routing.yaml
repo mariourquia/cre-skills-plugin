@@ -1,0 +1,48 @@
+pack_slug: delivery_handoff
+pack_type: workflow
+priority: 10
+triggers:
+  event_driven: true
+  explicit_phrases:
+    - "delivery handoff"
+    - "open delivery handoff package"
+    - "close the delivery handoff"
+    - "delivery status"
+    - "handoff status for dev_project"
+    - "tco handoff"
+    - "co handoff"
+  implicit_signals:
+    - "procore schedule_milestone temp_co_received with units_ready_for_lease >= 1"
+    - "procore schedule_milestone final_co_received"
+    - "appfolio certificate_of_occupancy recorded on pre_takeover property"
+    - "lifecycle_handoffs.md Handoff 8 trigger"
+  event_sources:
+    - procore:schedule_milestone.temp_co_received
+    - procore:schedule_milestone.final_co_received
+    - appfolio:property.certificate_of_occupancy_recorded
+    - lifecycle_handoffs.md:handoff_8
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - lifecycle_stage
+  - management_mode
+  - market
+  - org_id
+  - property_id
+  - construction_project_id
+  - dev_project_id
+optional_axes:
+  - jurisdiction
+  - submarket
+  - role
+  - output_type
+axes_match:
+  segment: all
+  lifecycle_stage_transition:
+    from: [development, construction, pre_takeover]
+    to: [lease_up]
+  management_mode: all
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

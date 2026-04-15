@@ -1,0 +1,5 @@
+property_id,report_period,work_order_id,priority,age_days,assigned_role
+sample_property_one,2026-03,wo_sample_001,p3_standard,12,maintenance_tech
+sample_property_one,2026-03,wo_sample_002,p2_habitability,3,maintenance_tech
+# status: template
+# schema: reference/connectors/manual_uploads/schema.yaml entities.work_order_backlog_upload

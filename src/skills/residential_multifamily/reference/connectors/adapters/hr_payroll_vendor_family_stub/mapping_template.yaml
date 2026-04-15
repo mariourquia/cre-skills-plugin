@@ -1,0 +1,60 @@
+# Mapping template for the generic HR/payroll vendor family stub.
+# Applied on top of reference/connectors/hr_payroll/ canonical references.
+# Canonical contract wins on conflict. PII minimization is explicit:
+# names and tax identifiers are excluded from this template.
+
+status_tag: template
+
+employee:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [employee_number]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: emp_id,         normalized_column: employee_id,     transform: trim_string,  required: true }
+    - { source_column: emp_number,     normalized_column: employee_number, transform: trim_string,  required: true }
+    - { source_column: job_title,      normalized_column: job_title,       transform: trim_string,  required: true }
+    - { source_column: role_code,      normalized_column: role_code,       transform: map_role_code, required: true }
+    - { source_column: is_contractor,  normalized_column: is_contractor,   transform: to_boolean,   required: true }
+    - { source_column: is_temp,        normalized_column: is_temp_staff,   transform: to_boolean,   required: false }
+
+staffing_position:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [position_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: position_id,     normalized_column: staffing_position_id, transform: trim_string,         required: true }
+    - { source_column: prop_code,        normalized_column: property_id,          transform: trim_string,         required: true }
+    - { source_column: role_code,        normalized_column: role_code,            transform: map_role_code,       required: true }
+    - { source_column: position_status,  normalized_column: vacancy_status,       transform: map_vacancy_status,  required: true }
+
+property_assignment:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [employee_number, property_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: emp_id,         normalized_column: employee_id,             transform: trim_string, required: true }
+    - { source_column: prop_code,      normalized_column: property_id,             transform: trim_string, required: true }
+    - { source_column: allocation_pct, normalized_column: property_allocation_pct, transform: to_number,   required: true }
+
+payroll_line:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [employee_number, property_id, pay_period_end]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: emp_id,         normalized_column: employee_id,      transform: trim_string,      required: true }
+    - { source_column: prop_code,      normalized_column: property_id,      transform: trim_string,      required: true }
+    - { source_column: pay_period_end, normalized_column: pay_period_end,   transform: to_iso_date,      required: true }
+    - { source_column: reg_hours,      normalized_column: regular_hours,    transform: to_number,        required: true }
+    - { source_column: reg_pay,        normalized_column: regular_pay_cents, transform: dollars_to_cents, required: true }
+    - { source_column: ot_hours,       normalized_column: ot_hours,         transform: to_number,        required: false }
+    - { source_column: ot_pay,         normalized_column: ot_pay_cents,     transform: dollars_to_cents, required: false }
+    - { source_column: gross_pay,      normalized_column: gross_pay_cents,  transform: dollars_to_cents, required: true }
+
+overtime_line:                { status: TODO, note: "derive from payroll_line if vendor does not emit separately" }
+role_assignment:              { status: TODO, note: "map per vendor" }
+vacancy_status:               { status: TODO, note: "derive from staffing_position" }
+employee_vs_contractor_flag:  { status: TODO, note: "derive from employee.is_contractor" }

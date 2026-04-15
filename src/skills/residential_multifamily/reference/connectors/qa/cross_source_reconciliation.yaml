@@ -1,0 +1,50 @@
+# Generic two-source reconciliation template.
+# Used when a quantity computed from one source must agree with the same
+# quantity computed from another source within a declared tolerance.
+# Examples: PMS unit count vs property master; AP invoice totals vs GL payable;
+# construction commitments vs GL capex commitments; payroll vs GL salaries.
+check_id: cross_source_reconciliation
+check_kind: budget_actual
+severity: blocker
+description: |
+  The quantity computed from source A matches the quantity computed from
+  source B within the declared tolerance. When sources disagree, the landing
+  either fails closed (blocker) or flags the variance for operator review
+  (warning), depending on the parameter's configured severity.
+parameters:
+  - name: quantity_name
+    description: What is being reconciled (e.g., unit_count, open_ap_balance, committed_capex)
+  - name: source_a_entity
+    description: Entity slug from source A
+  - name: source_a_aggregation
+    description: Aggregation expression over source A (e.g., count, sum of amount_cents)
+  - name: source_b_entity
+    description: Entity slug from source B
+  - name: source_b_aggregation
+    description: Aggregation expression over source B
+  - name: grouping_keys
+    description: Keys over which the aggregation is grouped (e.g., property_id, period)
+  - name: tolerance_absolute
+    description: Absolute tolerance (in the natural unit; default 0)
+  - name: tolerance_relative_percent
+    description: Relative tolerance percent of the source-A aggregation
+inputs:
+  - reference/normalized/<source_a_entity>__<scope>.csv
+  - reference/normalized/<source_b_entity>__<scope>.csv
+expected_invariant: |
+  for each grouping_keys:
+    abs(<source_a_aggregation> - <source_b_aggregation>) <= tolerance_absolute
+    OR abs((<source_a_aggregation> - <source_b_aggregation>) / <source_a_aggregation>) <= tolerance_relative_percent
+severity_default: blocker
+tolerance:
+  absolute: 0
+  relative_percent: 0.01
+remediation_pattern: |
+  Variances between two sources are the richest signal of upstream data
+  quality. Operator runs the mapping chain backward: is the canonical
+  account mapping current, is a source feed missing a period, is a
+  corporate-overhead row misallocated, is the grouping key joinable?
+  Reject until reconciled.
+remediation: |
+  See remediation_pattern. The reconciliation_report.json names the grouping
+  keys that fail and the signed delta for each.

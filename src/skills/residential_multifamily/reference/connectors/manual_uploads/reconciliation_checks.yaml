@@ -1,0 +1,104 @@
+checks:
+- check_id: mu_record_count
+  check_kind: record_count
+  severity: blocker
+  description: Raw row count minus rejects equals normalized row count per template.
+  inputs:
+  - reference/raw/manual_uploads/<template>/<YYYY>/<MM>/<source>__<as_of>.*
+  - reference/normalized/manual_uploads_<template>__<scope>.csv
+  expected_invariant: count(raw) - count(rejected) == count(normalized)
+  remediation: See qa/record_count.yaml.
+- check_id: mu_duplicate_primary_key
+  check_kind: duplicate_id
+  severity: blocker
+  description: No duplicate primary keys across any manual-upload template.
+  inputs:
+  - reference/normalized/manual_uploads_*.csv
+  expected_invariant: count(distinct pk) == count(records) per template
+  remediation: See qa/duplicate_id.yaml.
+- check_id: mu_null_critical_field
+  check_kind: null_critical
+  severity: blocker
+  description: Required fields per template are non-null in normalized output.
+  inputs:
+  - reference/normalized/manual_uploads_*.csv
+  - reference/connectors/manual_uploads/schema.yaml
+  expected_invariant: 'for each required field: count(null) == 0'
+  remediation: See qa/null_critical_field.yaml.
+- check_id: mu_valid_file_accepted
+  check_kind: null_critical
+  severity: blocker
+  description: A well-formed file matching the template header pattern and declared file format is accepted at landing.
+  inputs:
+  - reference/raw/manual_uploads/<template>/<YYYY>/<MM>/*
+  - reference/connectors/manual_uploads/schema.yaml (templates block)
+  expected_invariant: for every landed file, expected_file_format matches file extension AND header row matches expected_header_pattern
+  remediation: |
+    Landing rejected when the file extension and the declared template format
+    do not match, or when the header row drifts from the canonical pattern.
+    Operator uses file_templates/ as the starting point.
+- check_id: mu_invalid_file_rejected_with_readable_error
+  check_kind: null_critical
+  severity: blocker
+  description: A malformed file (wrong extension, missing header columns, corrupted structure) is rejected with an operator-readable error naming the template, the expected pattern, and the observed deviation.
+  inputs:
+  - reference/raw/manual_uploads/_rejected/<YYYY>/<MM>/*.log
+  expected_invariant: every rejected file has a matching entry in the rejection log with template_slug, expected_pattern, observed_deviation
+  remediation: |
+    Operator reviews the rejection log, fixes the file, and re-lands.
+- check_id: mu_partial_file_flagged
+  check_kind: null_critical
+  severity: warning
+  description: A file that parses successfully but has fewer rows than the minimum per template or is missing optional-but-expected sections is flagged.
+  inputs:
+  - reference/raw/manual_uploads/<template>/<YYYY>/<MM>/*
+  expected_invariant: row_count per landing >= declared minimum per template; no missing required sections in multi-section templates
+  remediation: |
+    Partial landings promote but emit a warning; operator confirms whether
+    the partial file is intentional (e.g., mid-month interim delinquency
+    report) or a gap (missing sections in monthly_review_pack).
+- check_id: mu_provenance_preserved
+  check_kind: null_critical
+  severity: blocker
+  description: Every normalized record carries the full provenance tuple (source_name, source_type, source_date, extracted_at, extractor_version, source_row_id).
+  inputs:
+  - reference/normalized/manual_uploads_*.csv
+  expected_invariant: for every record, all six provenance fields are non-null
+  remediation: |
+    Missing provenance means the landing stage dropped required metadata.
+    Replay the landing with the canonical landing helper.
+- check_id: mu_approval_status_present_if_applicable
+  check_kind: null_critical
+  severity: warning
+  description: For templates with an approval_status field (owner_report, monthly_review_pack, capex_request_upload, draw_package_upload), every row has an approval_status value.
+  inputs:
+  - reference/normalized/manual_uploads_owner_report__<scope>.csv
+  - reference/normalized/manual_uploads_monthly_review_pack__<scope>.csv
+  - reference/normalized/manual_uploads_capex_request_upload__<scope>.csv
+  - reference/normalized/manual_uploads_draw_package_upload__<scope>.csv
+  expected_invariant: for applicable templates, count(null approval_status) == 0
+  remediation: |
+    Unapproved rows promote but cannot feed downstream workflows that
+    require approval gating (investor updates, draw disbursement, capex prioritization).
+- check_id: mu_template_version_recognized
+  check_kind: null_critical
+  severity: blocker
+  description: Every landed file's template version matches a known template definition in the templates block of schema.yaml.
+  inputs:
+  - reference/raw/manual_uploads/<template>/<YYYY>/<MM>/*
+  - reference/connectors/manual_uploads/schema.yaml
+  expected_invariant: template_slug in declared templates set
+  remediation: |
+    Unknown template_slug either means the operator dropped a file in the
+    wrong folder or used an outdated template. Operator confirms and re-lands.
+- check_id: mu_sensitive_fields_masked_if_flagged
+  check_kind: null_critical
+  severity: warning
+  description: Any template row flagged as containing sensitive content (resident names, staff names) must have the sensitive fields masked or dropped before promotion.
+  inputs:
+  - reference/normalized/manual_uploads_*.csv
+  expected_invariant: for rows where sensitive_flag = true, the sensitive columns declared in field_mapping.yaml are masked or null
+  remediation: |
+    Operator confirms masking at landing. Templates generally do not carry
+    PII; delinquency_report_upload and pm_scorecard_upload are the highest
+    risk and should use opaque resident and employee identifiers.

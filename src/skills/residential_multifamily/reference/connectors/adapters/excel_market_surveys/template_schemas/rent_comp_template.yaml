@@ -1,0 +1,148 @@
+# Template schema for rent_comp_weekly and asset_specific_comp_pack.
+# Aligns with canonical normalized schema at
+# ../../../../normalized/schemas/rent_comp.yaml.
+
+status_tag: template
+template_slug: rent_comp
+canonical_reference_schema: reference/normalized/schemas/rent_comp.yaml
+canonical_ontology_object: market_comp
+source_format: xlsx
+expected_sheets:
+  - rent_comp_detail
+  - submarket_summary
+  - adjustment_grid
+
+columns:
+
+  - name: comp_id
+    required: true
+    type: string
+    description: Stable analyst-assigned id for the comp row.
+
+  - name: comp_property_name
+    required: true
+    type: string
+    description: Illustrative property name. Never a real operating property in samples.
+
+  - name: market
+    required: true
+    type: string
+    description: MSA / metro label. Cross-reference crosswalk_additions.yaml.
+
+  - name: submarket
+    required: true
+    type: string
+    description: |
+      Submarket label. Broker/analyst labels differ from internal taxonomy.
+      Resolve via crosswalk_additions.yaml to map to internal submarket slug.
+
+  - name: segment
+    required: true
+    type: string
+    enum: [middle_market, affordable, luxury]
+
+  - name: property_form
+    required: true
+    type: string
+    enum: [garden, walk_up, wrap, suburban_mid_rise, urban_mid_rise, high_rise]
+
+  - name: unit_type_label
+    required: true
+    type: string
+    description: Free-form label. Use unit_type_harmonization for downstream join.
+
+  - name: unit_beds
+    required: true
+    type: integer
+    range: { min: 0, max: 5 }
+
+  - name: unit_baths
+    required: false
+    type: number
+
+  - name: unit_sf
+    required: false
+    type: integer
+    range: { min: 200, max: 3500 }
+
+  - name: asking_rent
+    required: true
+    type: number
+    unit: dollars_per_unit_per_month
+    outlier_check: z_score_by_submarket_segment_unit_type
+
+  - name: effective_rent
+    required: false
+    type: number
+    unit: dollars_per_unit_per_month
+
+  - name: concession_months_equivalent
+    required: false
+    type: number
+    unit: months
+    description: Weeks-off divided by 4.33 or months-off directly.
+
+  - name: occupancy_reported
+    required: false
+    type: number
+    range: { min: 0.0, max: 1.0 }
+
+  - name: distance_miles
+    required: false
+    type: number
+
+  - name: as_of_date
+    required: true
+    type: date
+    format: iso_8601
+
+  - name: analyst_name
+    required: true
+    type: string
+
+  - name: sheet_tab
+    required: true
+    type: string
+
+  - name: source_file
+    required: true
+    type: string
+
+  - name: row_id
+    required: true
+    type: string
+
+validation_rules:
+  - rule_id: comp_submarket_in_market
+    severity: blocker
+    description: submarket belongs to declared market per crosswalk_additions.yaml
+  - rule_id: comp_segment_consistency
+    severity: blocker
+    description: segment matches the sheet-level segment declaration; luxury-in-middle_market contamination blocks landing
+  - rule_id: comp_unit_type_harmonized
+    severity: blocker
+    description: unit_type_label resolves to a canonical unit_type via unit_type_harmonization
+  - rule_id: comp_asking_rent_outlier
+    severity: warning
+    description: asking_rent within plausible rent band per segment overlay; see dq_rules.yaml
+  - rule_id: comp_provenance_complete
+    severity: blocker
+    description: source_file, sheet_tab, as_of_date, analyst_name, row_id are all non-null
+  - rule_id: comp_duplicate_check
+    severity: blocker
+    description: (comp_property_name, unit_type_label, as_of_date) unique within submission
+
+permitted_unit_types:
+  - studio
+  - "1BR-1BA"
+  - "2BR-1BA"
+  - "2BR-2BA"
+  - "3BR-2BA"
+  - "4BR-2BA"
+  - A1
+  - A2
+  - B1
+  - B2
+  - C1
+
+allowed_submarkets_reference: reference/connectors/master_data/submarket_crosswalk.yaml

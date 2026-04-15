@@ -1,0 +1,398 @@
+# Crosswalk additions for the AppFolio adapter.
+# Merged into the master crosswalks under
+# reference/connectors/master_data/. Each fragment names the destination
+# file, the survivorship rule that applies, and the per-attribute
+# source-of-record assignment. These are synthetic illustrative rows
+# matching the sample_raw fixture set (Ashford Park, Willow Creek,
+# Maple Vista, Cedar Grove). Conforms to crosswalk.schema.yaml.
+#
+# Schema per row (reminder):
+#   canonical_id, source_system, source_id (= appfolio_id),
+#   match_confidence, match_method, effective_start, survivorship_rule,
+#   manual_override, reviewer, last_validated_at, notes,
+#   source_of_record_per_attribute (per-attribute survivorship).
+
+status_tag: stub
+
+destination_crosswalks:
+
+  # -------------------------------------------------------------------------
+  # property_master_crosswalk additions
+  # Merge target: reference/connectors/master_data/property_master_crosswalk.yaml
+  # -------------------------------------------------------------------------
+
+  property_master_crosswalk:
+    file: reference/connectors/master_data/property_master_crosswalk.yaml
+    survivorship_rule: property_default
+    notes: |
+      AppFolio is secondary for property (Intacct carries legal_entity_id).
+      AppFolio survives for operating attributes; Intacct survives for
+      legal_entity_id, GL hierarchy, and tax.
+    rows:
+
+      - canonical_id: prop_ashford_park
+        source_system: appfolio_prod
+        appfolio_id: "10481"
+        match_confidence: high
+        match_method: exact
+        effective_start: "2021-06-15"
+        survivorship_rule: property_default
+        manual_override: false
+        reviewer: regional_ops_director
+        last_validated_at: "2026-03-31"
+        confidence: high
+        source_of_record_per_attribute:
+          property_name: appfolio_prod
+          unit_count_total: appfolio_prod
+          market: appfolio_prod
+          submarket: appfolio_prod
+          year_built: appfolio_prod
+          legal_entity_id: sage_intacct_prod
+          owner_hierarchy: sage_intacct_prod
+        notes: |
+          Ashford Park. AppFolio PropertyId 10481, GL Partner
+          GLP_SAMPLE_ALPHA. GL legal entity resolved via the
+          corresponding Intacct row (ENT_ASH_PARK_LLC).
+
+      - canonical_id: prop_willow_creek
+        source_system: appfolio_prod
+        appfolio_id: "10482"
+        match_confidence: high
+        match_method: exact
+        effective_start: "2019-03-01"
+        survivorship_rule: property_default
+        manual_override: false
+        reviewer: regional_ops_director
+        last_validated_at: "2026-03-31"
+        confidence: high
+        source_of_record_per_attribute:
+          property_name: appfolio_prod
+          unit_count_total: appfolio_prod
+          market: appfolio_prod
+          submarket: appfolio_prod
+          legal_entity_id: sage_intacct_prod
+        notes: Willow Creek garden community. GL Partner GLP_SAMPLE_BETA.
+
+      - canonical_id: prop_maple_vista
+        source_system: appfolio_prod
+        appfolio_id: "10483"
+        match_confidence: high
+        match_method: manual
+        effective_start: "2024-09-01"
+        survivorship_rule: property_default
+        manual_override: true
+        override_reason: |
+          Post-IC setup landed in AppFolio before the Intacct entity dim
+          was fully provisioned; manual override preserves the canonical
+          id across the handoff lag.
+        reviewer: regional_ops_director
+        last_validated_at: "2026-03-31"
+        confidence: medium
+        source_of_record_per_attribute:
+          property_name: appfolio_prod
+          unit_count_total: appfolio_prod
+          market: appfolio_prod
+          legal_entity_id: sage_intacct_prod
+        notes: Maple Vista lease-up. GL Partner GLP_SAMPLE_GAMMA.
+
+      - canonical_id: prop_cedar_grove
+        source_system: appfolio_prod
+        appfolio_id: "10484"
+        match_confidence: high
+        match_method: exact
+        effective_start: "2018-07-20"
+        survivorship_rule: property_default
+        manual_override: false
+        reviewer: regional_ops_director
+        last_validated_at: "2026-03-31"
+        confidence: high
+        source_of_record_per_attribute:
+          property_name: appfolio_prod
+          unit_count_total: appfolio_prod
+          market: appfolio_prod
+          legal_entity_id: sage_intacct_prod
+        notes: Cedar Grove townhome portfolio. GL Partner GLP_SAMPLE_ALPHA.
+
+  # -------------------------------------------------------------------------
+  # unit_crosswalk additions
+  # Merge target: reference/connectors/master_data/unit_crosswalk.yaml
+  # -------------------------------------------------------------------------
+
+  unit_crosswalk:
+    file: reference/connectors/master_data/unit_crosswalk.yaml
+    survivorship_rule: unit_default
+    notes: |
+      AppFolio is primary source of truth for unit roster. These rows
+      anchor the sample_raw unit ids to canonical unit ids.
+    rows:
+
+      - canonical_id: unit_ashford_park_101
+        source_system: appfolio_prod
+        appfolio_id: U20011
+        match_confidence: high
+        match_method: composite
+        effective_start: "2021-06-15"
+        survivorship_rule: unit_default
+        manual_override: false
+        reviewer: regional_ops_director
+        last_validated_at: "2026-03-31"
+        confidence: high
+        source_of_record_per_attribute:
+          unit_label: appfolio_prod
+          bedrooms: appfolio_prod
+          bathrooms: appfolio_prod
+          nrsf: appfolio_prod
+          status: appfolio_prod
+        notes: Ashford Park unit 101, one-bedroom.
+
+      - canonical_id: unit_ashford_park_202
+        source_system: appfolio_prod
+        appfolio_id: U20016
+        match_confidence: high
+        match_method: composite
+        effective_start: "2021-06-15"
+        survivorship_rule: unit_default
+        manual_override: false
+        reviewer: regional_ops_director
+        last_validated_at: "2026-03-31"
+        confidence: high
+        source_of_record_per_attribute:
+          unit_label: appfolio_prod
+          bedrooms: appfolio_prod
+          bathrooms: appfolio_prod
+          nrsf: appfolio_prod
+          status: appfolio_prod
+        notes: Ashford Park unit 202 currently offline for water-damage restoration.
+
+      - canonical_id: unit_willow_creek_b201
+        source_system: appfolio_prod
+        appfolio_id: U30003
+        match_confidence: high
+        match_method: composite
+        effective_start: "2019-03-01"
+        survivorship_rule: unit_default
+        manual_override: false
+        reviewer: regional_ops_director
+        last_validated_at: "2026-03-31"
+        confidence: high
+        source_of_record_per_attribute:
+          unit_label: appfolio_prod
+          bedrooms: appfolio_prod
+          bathrooms: appfolio_prod
+          nrsf: appfolio_prod
+          status: appfolio_prod
+        notes: Willow Creek B-201 turn in punchlist.
+
+      - canonical_id: unit_maple_vista_0102
+        source_system: appfolio_prod
+        appfolio_id: U40002
+        match_confidence: high
+        match_method: composite
+        effective_start: "2024-09-01"
+        survivorship_rule: unit_default
+        manual_override: false
+        reviewer: regional_ops_director
+        last_validated_at: "2026-03-31"
+        confidence: high
+        source_of_record_per_attribute:
+          unit_label: appfolio_prod
+          bedrooms: appfolio_prod
+          bathrooms: appfolio_prod
+          nrsf: appfolio_prod
+          status: appfolio_prod
+        notes: Maple Vista lease-up unit 0102.
+
+  # -------------------------------------------------------------------------
+  # lease_crosswalk additions
+  # Merge target: reference/connectors/master_data/lease_crosswalk.yaml
+  # -------------------------------------------------------------------------
+
+  lease_crosswalk:
+    file: reference/connectors/master_data/lease_crosswalk.yaml
+    survivorship_rule: lease_default
+    notes: |
+      AppFolio is primary for lease lifecycle. AP carries concession
+      accrual postings; survivorship defers to AP on AP-scoped fields only.
+    rows:
+
+      - canonical_id: lease_ashford_park_l500001
+        source_system: appfolio_prod
+        appfolio_id: L500001
+        match_confidence: high
+        match_method: exact
+        effective_start: "2025-08-01"
+        survivorship_rule: lease_default
+        manual_override: false
+        reviewer: regional_ops_director
+        last_validated_at: "2026-03-31"
+        confidence: high
+        source_of_record_per_attribute:
+          start_date: appfolio_prod
+          end_date: appfolio_prod
+          base_rent_monthly_cents: appfolio_prod
+          status: appfolio_prod
+          is_renewal: appfolio_prod
+          concessions_total_cents: appfolio_prod
+          concession_accrual_posting: sage_intacct_prod
+        notes: Ashford Park unit 101, 12-month lease, new resident.
+
+      - canonical_id: lease_ashford_park_l500004
+        source_system: appfolio_prod
+        appfolio_id: L500004
+        match_confidence: high
+        match_method: exact
+        effective_start: "2025-09-01"
+        survivorship_rule: lease_default
+        manual_override: false
+        reviewer: regional_ops_director
+        last_validated_at: "2026-03-31"
+        confidence: high
+        source_of_record_per_attribute:
+          start_date: appfolio_prod
+          end_date: appfolio_prod
+          base_rent_monthly_cents: appfolio_prod
+          status: appfolio_prod
+          is_renewal: appfolio_prod
+          prior_lease_id: appfolio_prod
+        notes: Ashford Park unit 301 studio, renewal from L400112.
+
+      - canonical_id: lease_maple_vista_l500008
+        source_system: appfolio_prod
+        appfolio_id: L500008
+        match_confidence: high
+        match_method: exact
+        effective_start: "2026-05-01"
+        survivorship_rule: lease_default
+        manual_override: false
+        reviewer: regional_ops_director
+        last_validated_at: "2026-03-31"
+        confidence: high
+        source_of_record_per_attribute:
+          start_date: appfolio_prod
+          end_date: appfolio_prod
+          base_rent_monthly_cents: appfolio_prod
+          status: appfolio_prod
+        notes: Maple Vista lease-up FutureActive lease.
+
+  # -------------------------------------------------------------------------
+  # resident_account_crosswalk additions
+  # Merge target: reference/connectors/master_data/resident_account_crosswalk.yaml
+  # -------------------------------------------------------------------------
+
+  resident_account_crosswalk:
+    file: reference/connectors/master_data/resident_account_crosswalk.yaml
+    survivorship_rule: resident_account_default
+    notes: |
+      GUARDRAIL: no protected-class attributes in match keys or
+      survivorship. AppFolio TenantId is the primary operational id; CRM
+      LeadId is merged via composite match on phone / email / normalized
+      last name.
+    rows:
+
+      - canonical_id: resident_ashford_park_t800001
+        source_system: appfolio_prod
+        appfolio_id: T800001
+        match_confidence: high
+        match_method: composite
+        effective_start: "2025-08-01"
+        survivorship_rule: resident_account_default
+        manual_override: false
+        reviewer: regional_ops_director
+        last_validated_at: "2026-03-31"
+        confidence: high
+        source_of_record_per_attribute:
+          primary_resident_name_ref: appfolio_prod
+          ledger_balance_cents: appfolio_prod
+          email_hash: appfolio_prod
+          phone_hash: appfolio_prod
+        notes: Ashford Park resident 101.
+
+      - canonical_id: resident_willow_creek_t800005
+        source_system: appfolio_prod
+        appfolio_id: T800005
+        match_confidence: high
+        match_method: composite
+        effective_start: "2024-11-01"
+        effective_end: "2025-10-31"
+        survivorship_rule: resident_account_default
+        manual_override: false
+        reviewer: regional_ops_director
+        last_validated_at: "2025-10-31"
+        confidence: high
+        source_of_record_per_attribute:
+          primary_resident_name_ref: appfolio_prod
+          ledger_balance_cents: appfolio_prod
+        notes: Willow Creek resident who declined renewal; row closed at move-out.
+
+  # -------------------------------------------------------------------------
+  # vendor_master_crosswalk additions
+  # Merge target: reference/connectors/master_data/vendor_master_crosswalk.yaml
+  # -------------------------------------------------------------------------
+
+  vendor_master_crosswalk:
+    file: reference/connectors/master_data/vendor_master_crosswalk.yaml
+    survivorship_rule: vendor_master_default
+    notes: |
+      AppFolio is secondary for vendor (Intacct carries tax_id, W-9).
+      AppFolio survives for dispatch availability, services, and
+      insurance_expiry_date. Intacct survives for legal name and tax id.
+      Procore survives for trade classification.
+    rows:
+
+      - canonical_id: vendor_plumbing_co
+        source_system: appfolio_prod
+        appfolio_id: V00217
+        match_confidence: high
+        match_method: composite
+        effective_start: "2022-06-01"
+        survivorship_rule: vendor_master_default
+        manual_override: false
+        reviewer: ap_manager
+        last_validated_at: "2026-03-31"
+        confidence: high
+        source_of_record_per_attribute:
+          vendor_name: sage_intacct_prod
+          tax_id: sage_intacct_prod
+          services: appfolio_prod
+          insurance_expiry_date: appfolio_prod
+          trade_classification: procore_construction
+        notes: Plumbing subcontractor shared with Procore.
+
+      - canonical_id: vendor_electric_co
+        source_system: appfolio_prod
+        appfolio_id: V00412
+        match_confidence: high
+        match_method: composite
+        effective_start: "2020-01-01"
+        survivorship_rule: vendor_master_default
+        manual_override: false
+        reviewer: ap_manager
+        last_validated_at: "2026-03-31"
+        confidence: high
+        source_of_record_per_attribute:
+          vendor_name: sage_intacct_prod
+          tax_id: sage_intacct_prod
+          services: appfolio_prod
+          insurance_expiry_date: appfolio_prod
+        notes: Electric vendor. Rename history tracked in vendor_master_crosswalk.
+
+      - canonical_id: vendor_hvac_appliance_co
+        source_system: appfolio_prod
+        appfolio_id: V00554
+        match_confidence: medium
+        match_method: fuzzy
+        effective_start: "2022-01-01"
+        survivorship_rule: vendor_master_default
+        manual_override: true
+        override_reason: |
+          Alias consolidation across multiple AppFolio duplicates driven
+          by GL Partner splits.
+        reviewer: ap_manager
+        last_validated_at: "2026-03-31"
+        confidence: medium
+        source_of_record_per_attribute:
+          vendor_name: sage_intacct_prod
+          tax_id: sage_intacct_prod
+          services: appfolio_prod
+          insurance_expiry_date: appfolio_prod
+        notes: HVAC and appliance. Insurance expiry currently stale in the sample.

@@ -1,0 +1,144 @@
+{
+  "employee": [
+    {
+      "employee_id": "emp_0001",
+      "employment_status": "active",
+      "hire_date": "2023-05-01",
+      "ft_pt_flag": "full_time",
+      "term_date": null,
+      "display_code": "emp_0001",
+      "source_name": "sample_feed",
+      "source_type": "ap",
+      "source_date": "2026-04-10",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "emp_0001"
+    }
+  ],
+  "staffing_position": [
+    {
+      "property_id": "prop_demo_001",
+      "position_id": "pos_pm_001",
+      "role_code": "property_manager",
+      "budgeted_fte": 1.0,
+      "position_status": "filled",
+      "position_title": "property manager",
+      "pay_band": "band_c",
+      "source_name": "sample_feed",
+      "source_type": "ap",
+      "source_date": "2026-04-10",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "pos_pm_001__prop_demo_001"
+    }
+  ],
+  "role_assignment": [
+    {
+      "assignment_id": "assign_0001",
+      "employee_id": "emp_0001",
+      "position_id": "pos_pm_001",
+      "effective_date": "2023-05-01",
+      "assignment_status": "active",
+      "end_date": null,
+      "allocation_pct": 100,
+      "source_name": "sample_feed",
+      "source_type": "ap",
+      "source_date": "2026-04-10",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "assign_0001"
+    }
+  ],
+  "property_assignment": [
+    {
+      "employee_id": "emp_0001",
+      "property_id": "prop_demo_001",
+      "assignment_kind": "primary",
+      "allocation_pct": 100,
+      "effective_date": "2023-05-01",
+      "source_name": "sample_feed",
+      "source_type": "ap",
+      "source_date": "2026-04-10",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "pa_emp_0001__prop_demo_001"
+    }
+  ],
+  "vacancy_status": [
+    {
+      "position_id": "pos_maint_002",
+      "as_of_date": "2026-04-12",
+      "vacancy_state": "open_posted",
+      "days_vacant": 21,
+      "requisition_id": "req_0003",
+      "source_name": "sample_feed",
+      "source_type": "ap",
+      "source_date": "2026-04-12",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "vac_pos_maint_002__2026-04-12"
+    }
+  ],
+  "payroll_line": [
+    {
+      "payroll_line_id": "pr_line_0001",
+      "employee_id": "emp_0001",
+      "property_id": "prop_demo_001",
+      "pay_period_end": "2026-04-05",
+      "earnings_type": "regular",
+      "regular_hours": 80.0,
+      "gross_pay_cents": 240000,
+      "gl_account_code": "6100_payroll",
+      "cost_center_code": "cc_prop_demo_001",
+      "source_name": "sample_feed",
+      "source_type": "ap",
+      "source_date": "2026-04-06",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "pr_line_0001"
+    }
+  ],
+  "overtime_line": [
+    {
+      "overtime_line_id": "ot_line_0001",
+      "employee_id": "emp_0001",
+      "pay_period_end": "2026-04-05",
+      "ot_hours": 4.5,
+      "ot_pay_cents": 20250,
+      "property_id": "prop_demo_001",
+      "work_order_id": null,
+      "source_name": "sample_feed",
+      "source_type": "ap",
+      "source_date": "2026-04-06",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "ot_line_0001"
+    }
+  ],
+  "employee_vs_contractor_flag": [
+    {
+      "employee_id": "emp_0001",
+      "classification": "w2_employee",
+      "classification_effective_date": "2023-05-01",
+      "contractor_vendor_id": null,
+      "source_name": "sample_feed",
+      "source_type": "ap",
+      "source_date": "2026-04-10",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "evc_emp_0001"
+    },
+    {
+      "employee_id": "emp_0002",
+      "classification": "contractor_1099",
+      "classification_effective_date": "2025-08-01",
+      "contractor_vendor_id": "vendor_demo_002",
+      "source_name": "sample_feed",
+      "source_type": "ap",
+      "source_date": "2026-04-10",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "evc_emp_0002"
+    }
+  ]
+}

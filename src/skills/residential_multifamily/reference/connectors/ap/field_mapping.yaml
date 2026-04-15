@@ -1,0 +1,465 @@
+# Richer per-entity field mapping template for the AP connector.
+vendor:
+  fields:
+  - canonical_field: vendor_id
+    source_field: vendor_id
+    source_description: AP-native vendor id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: vendor_id unique; merge survivor via vendor_crosswalk
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: vendor anchor
+  - canonical_field: vendor_name
+    source_field: vendor_name
+    source_description: Legal or DBA name
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: non-empty after trim
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: display and dedup composite key
+  - canonical_field: w9_on_file
+    source_field: w9_flag
+    source_description: W9 status
+    transform_rule: to_boolean
+    type_cast_rule: boolean
+    null_handling: reject_record
+    default_rule: false
+    validation_rule: w9_on_file IN (true, false)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: 1099 reporting precondition
+  - canonical_field: services
+    source_field: service_categories
+    source_description: Service categories list
+    transform_rule: parse_json_array
+    type_cast_rule: array
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: optional
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: vendor-category analytics
+  - canonical_field: insurance_expiry_date
+    source_field: coi_expiry
+    source_description: COI expiry date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: escalate_missing
+    default_rule: null
+    validation_rule: insurance_expiry_date > today for safety-critical categories
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: COI gate for dispatch
+  - canonical_field: preferred_flag
+    source_field: preferred_vendor
+    source_description: Preferred designation
+    transform_rule: to_boolean
+    type_cast_rule: boolean
+    null_handling: default_to_null
+    default_rule: false
+    validation_rule: preferred_flag IN (true, false)
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: preferred-vendor routing
+invoice:
+  fields:
+  - canonical_field: invoice_id
+    source_field: invoice_id
+    source_description: Stable invoice id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: invoice_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: invoice anchor
+  - canonical_field: vendor_id
+    source_field: vendor_id
+    source_description: Vendor FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: vendor_id IN ap.vendor.vendor_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to vendor
+  - canonical_field: property_id
+    source_field: prop_id
+    source_description: Property scope
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: property_id IN pms.property.property_id OR corporate_overhead
+      = true
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: per-property opex attribution
+  - canonical_field: invoice_date
+    source_field: invoice_date
+    source_description: Invoice date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: invoice_date <= today
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: aging start
+  - canonical_field: amount_cents
+    source_field: amount_usd
+    source_description: Invoice amount in dollars
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: amount_cents != 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: payable total
+  - canonical_field: status
+    source_field: status
+    source_description: Invoice status
+    transform_rule: map_invoice_status
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: status IN canonical_enum(ap.invoice.status)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: open-payable filter
+  - canonical_field: po_id
+    source_field: po_id
+    source_description: PO FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: po_id IS NULL OR po_id IN ap.purchase_order.po_id
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: three-way match
+  - canonical_field: contract_id
+    source_field: contract_id
+    source_description: Contract FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: contract_id IS NULL OR contract_id IN ap.contract.contract_id
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: contract burn-down
+  - canonical_field: due_date
+    source_field: due_date
+    source_description: Payment due date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: due_date IS NULL OR due_date >= invoice_date
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: days-to-pay analytics
+contract:
+  fields:
+  - canonical_field: contract_id
+    source_field: contract_id
+    source_description: Stable contract id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: contract_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: contract anchor
+  - canonical_field: vendor_id
+    source_field: vendor_id
+    source_description: Vendor FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: vendor_id IN ap.vendor.vendor_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to vendor
+  - canonical_field: pricing_model
+    source_field: pricing_model
+    source_description: Pricing model
+    transform_rule: map_pricing_model
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: pricing_model IN (time_materials, unit_rate, lump_sum, retainer)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: burn-down logic pivot
+  - canonical_field: term_start
+    source_field: term_start
+    source_description: Contract start
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: term_start <= term_end
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: attribution window
+  - canonical_field: term_end
+    source_field: term_end
+    source_description: Contract end
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: term_end >= term_start
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: expiry tracking
+  - canonical_field: property_id
+    source_field: prop_id
+    source_description: Property scope; null means org-wide
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: property_id IS NULL OR property_id IN pms.property.property_id
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: multi-property allocation pivot
+  - canonical_field: scope_summary
+    source_field: scope
+    source_description: Scope summary
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: optional
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: display
+  - canonical_field: contract_total_cents
+    source_field: contract_total_usd
+    source_description: Contract total
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: contract_total_cents IS NULL OR contract_total_cents > 0
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: burn-down basis
+commitment:
+  fields:
+  - canonical_field: commitment_id
+    source_field: commitment_id
+    source_description: Stable commitment id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: commitment_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: commitment anchor
+  - canonical_field: vendor_id
+    source_field: vendor_id
+    source_description: Vendor FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: vendor_id IN ap.vendor.vendor_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to vendor
+  - canonical_field: contract_id
+    source_field: contract_id
+    source_description: Contract FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: contract_id IN ap.contract.contract_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to contract
+  - canonical_field: committed_amount_cents
+    source_field: committed_usd
+    source_description: Committed amount
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: committed_amount_cents > 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: commitment ceiling
+  - canonical_field: invoiced_to_date_cents
+    source_field: invoiced_usd
+    source_description: Invoiced to date
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: 0
+    validation_rule: invoiced_to_date_cents >= 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: burn-down numerator
+  - canonical_field: paid_to_date_cents
+    source_field: paid_usd
+    source_description: Paid to date
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: 0
+    validation_rule: paid_to_date_cents >= 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: cash-disbursement tracking
+  - canonical_field: status
+    source_field: status
+    source_description: Commitment status
+    transform_rule: map_commitment_status
+    type_cast_rule: enum
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: status IN (open, partial, closed, cancelled) when non-null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: open-commitment filter
+purchase_order:
+  fields:
+  - canonical_field: po_id
+    source_field: po_id
+    source_description: Stable PO id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: po_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: PO anchor
+  - canonical_field: vendor_id
+    source_field: vendor_id
+    source_description: Vendor FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: vendor_id IN ap.vendor.vendor_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to vendor
+  - canonical_field: po_date
+    source_field: po_date
+    source_description: PO issue date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: po_date <= today
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: PO issue timeline
+  - canonical_field: amount_cents
+    source_field: amount_usd
+    source_description: PO amount
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: amount_cents > 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: PO balance basis
+  - canonical_field: status
+    source_field: status
+    source_description: PO status
+    transform_rule: map_po_status
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: status IN (issued, partial, received, closed, cancelled)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: open-PO filter
+  - canonical_field: property_id
+    source_field: prop_id
+    source_description: Property scope
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: property_id IS NULL OR property_id IN pms.property.property_id
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: PO property attribution
+payment_status:
+  fields:
+  - canonical_field: invoice_id
+    source_field: invoice_id
+    source_description: Invoice FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: invoice_id IN ap.invoice.invoice_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to invoice
+  - canonical_field: payment_status
+    source_field: status
+    source_description: Payment state
+    transform_rule: map_payment_state
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: payment_status IN (unpaid, scheduled, paid, failed, disputed)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: aging bucket pivot
+  - canonical_field: status_date
+    source_field: status_date
+    source_description: Status effective date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: status_date <= today
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: payment-state timeline
+  - canonical_field: check_number
+    source_field: check_ref
+    source_description: Check or ACH reference
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: optional
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: cash reconciliation key
+  - canonical_field: paid_amount_cents
+    source_field: paid_usd
+    source_description: Paid amount
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: paid_amount_cents IS NULL OR paid_amount_cents <= ap.invoice.amount_cents
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: partial-payment tracking

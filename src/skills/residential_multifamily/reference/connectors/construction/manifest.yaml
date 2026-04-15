@@ -1,0 +1,34 @@
+# Construction connector manifest (vendor-neutral stub).
+connector_id: construction
+connector_kind: construction
+version: 0.1.0
+status: stub
+owner: residential_multifamily_subsystem
+vendor_neutral: true
+description: |
+  Ground-up development and major-renovation project data.
+  Dev budget, estimates, bids, commitments, change orders, draws,
+  schedule milestones, and punch items.
+entities:
+  - dev_budget
+  - estimate_line_item
+  - bid_package
+  - commitment
+  - change_order
+  - draw_request
+  - schedule_milestone
+  - punch_item
+provenance_fields_required:
+  - source_name
+  - source_type
+  - source_date
+  - extracted_at
+  - extractor_version
+  - source_row_id
+handshake:
+  auth_kind: file_drop
+  access_pattern: pull_on_demand
+  notes: |
+    Stub. Construction vendors typically expose both API and document-drop
+    surfaces; a future adapter picks one.
+contact: operator_placeholder

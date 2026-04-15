@@ -1,0 +1,309 @@
+# AppFolio -> canonical normalized contract.
+# For every AppFolio raw entity in source_contract.yaml, declare:
+#   - canonical object (from _core/ontology.md)
+#   - primary key mapping (AppFolio id -> canonical id via crosswalk)
+#   - required fields
+#   - null handling
+#   - derived fields supplied by AppFolio vs requiring computation
+#   - source precedence (AppFolio primary vs secondary)
+
+status_tag: sample
+
+mappings:
+
+  property:
+    canonical_object: Property
+    precedence: secondary
+    primary_authority: accounting_stack_intacct
+    notes: |
+      AppFolio carries operating attributes (unit count, status, market
+      labels, build year). Intacct owns legal_entity_id, ownership
+      hierarchy, and GL entity mapping. Canonical property_id is assigned
+      by master_data and resolved via property_master_crosswalk.
+    primary_key:
+      appfolio_field: PropertyId
+      canonical_field: property_id
+      transform: crosswalk_lookup(property_master_crosswalk, source_system=appfolio_prod)
+    required_canonical_fields:
+      - property_id
+      - property_name
+      - legal_entity_id
+      - unit_count_total
+      - unit_count_rentable
+      - market
+    null_handling:
+      - { field: legal_entity_id, behavior: escalate_missing, notes: Intacct is authoritative; if AppFolio row lands without a resolved entity, block and escalate }
+      - { field: market,          behavior: default_to_null,  notes: operator-populated MarketLabel may be blank at onboarding; allow null until market_crosswalk resolves }
+    derived_from_source:
+      - property_id (via crosswalk on PropertyId)
+      - property_name (from PropertyName)
+      - unit_count_total (from UnitCount)
+    requires_computation:
+      - unit_count_rentable (compute by excluding model / employee / down units)
+      - legal_entity_id (resolved via property_master_crosswalk -> Intacct row)
+      - segment, form_factor, lifecycle_stage, management_mode (from property-level overlay)
+
+  unit:
+    canonical_object: Unit
+    precedence: primary
+    primary_key:
+      appfolio_field: UnitId
+      canonical_field: unit_id
+      transform: crosswalk_lookup(unit_crosswalk, source_system=appfolio_prod)
+    required_canonical_fields:
+      - unit_id
+      - property_id
+      - bedrooms
+      - bathrooms
+      - nrsf
+      - status
+    null_handling:
+      - { field: nrsf,        behavior: escalate_missing, notes: rent-per-sf metrics fail closed without NRSF }
+      - { field: status,      behavior: reject_record,    notes: status enum required for occupancy rollup }
+      - { field: unit_type_id, behavior: default_to_null,  notes: UnitTypeId may be null on pre-2020 units; default_to_null tolerated }
+    derived_from_source:
+      - unit_id, property_id, bedrooms, bathrooms, nrsf, unit_type_id
+      - status (mapped from UnitStatus via map_appfolio_unit_status)
+    requires_computation:
+      - classification (from UnitTypeId -> renovation program overlay)
+
+  unit_type:
+    canonical_object: UnitType
+    precedence: primary
+    primary_key:
+      appfolio_field: UnitTypeId
+      canonical_field: unit_type_id
+      transform: crosswalk_lookup(unit_type_crosswalk, source_system=appfolio_prod)
+    required_canonical_fields:
+      - unit_type_id
+      - property_id
+      - label
+      - bedrooms
+      - bathrooms
+      - nrsf_typical
+      - unit_count
+
+  lease:
+    canonical_object: Lease
+    precedence: primary
+    primary_key:
+      appfolio_field: LeaseId
+      canonical_field: lease_id
+      transform: crosswalk_lookup(lease_crosswalk, source_system=appfolio_prod)
+    required_canonical_fields:
+      - lease_id
+      - property_id
+      - unit_id
+      - resident_account_id
+      - start_date
+      - end_date
+      - base_rent_monthly_cents
+      - status
+      - is_renewal
+    null_handling:
+      - { field: base_rent_monthly_cents, behavior: reject_record,    notes: revenue math requires }
+      - { field: concessions_total_cents, behavior: default_to_null,  notes: concessions informal in AppFolio; zero-default allowed }
+      - { field: prior_lease_id,          behavior: escalate_missing, notes: required if is_renewal = true }
+    derived_from_source:
+      - start_date, end_date, MonthlyRent
+      - is_renewal (from LeaseRenewalStatus enum map)
+    requires_computation:
+      - term_months (compute from start_date/end_date)
+      - concessions_total_cents (sum charges where ChargeType in {Credit, Concession})
+      - status (mapped from AppFolio Status via map_appfolio_lease_status; FutureActive becomes executed + preleased_flag)
+
+  lease_event:
+    canonical_object: LeaseEvent
+    precedence: primary
+    primary_key:
+      appfolio_field: EventId
+      canonical_field: lease_event_id
+      transform: passthrough_with_namespace(appfolio_prod)
+    required_canonical_fields:
+      - lease_event_id
+      - lease_id
+      - event_type
+      - event_date
+    derived_from_source:
+      - move_in, move_out, renewal_offered, renewal_accepted, renewal_declined, notice_to_vacate
+    requires_computation:
+      - legal_notice_served, eviction_filed, eviction_judgment (derived from DelinquencyStage transitions)
+      - transfer_out / transfer_in (derived from TransferFromLeaseId crossing unit boundaries)
+
+  resident_account:
+    canonical_object: ResidentAccount
+    precedence: primary
+    primary_key:
+      appfolio_field: TenantId
+      canonical_field: resident_account_id
+      transform: crosswalk_lookup(resident_account_crosswalk, source_system=appfolio_prod)
+    required_canonical_fields:
+      - resident_account_id
+      - primary_resident_name_ref
+      - ledger_balance
+    null_handling:
+      - { field: primary_resident_name_ref, behavior: reject_record, notes: cannot post ledger without a named resident }
+    derived_from_source:
+      - ledger_balance (from CurrentBalance or AsOfDate balance in ledger feed)
+    requires_computation:
+      - risk_flags (derived from repeat_late pattern and skip_risk pattern; never includes protected-class attributes)
+
+  charge:
+    canonical_object: Charge
+    precedence: primary
+    primary_key:
+      appfolio_field: TenantChargeId
+      canonical_field: charge_id
+      transform: passthrough_with_namespace(appfolio_prod)
+    required_canonical_fields:
+      - charge_id
+      - lease_id
+      - resident_account_id
+      - charge_type
+      - charge_date
+      - amount_cents
+    null_handling:
+      - { field: lease_id, behavior: escalate_missing, notes: historical charges allowed to warn; recent charges must resolve }
+      - { field: reversed_charge_id, behavior: escalate_missing, notes: required when Amount < 0 or ChargeType = ConcessionReversal }
+    derived_from_source:
+      - charge_type (mapped from ChargeType via map_appfolio_charge_type)
+
+  payment:
+    canonical_object: Payment
+    precedence: primary
+    primary_key:
+      appfolio_field: TenantPaymentId
+      canonical_field: payment_id
+      transform: passthrough_with_namespace(appfolio_prod)
+    required_canonical_fields:
+      - payment_id
+      - resident_account_id
+      - payment_date
+      - amount_cents
+      - tender_type
+    derived_from_source:
+      - tender_type (mapped via map_appfolio_tender_type)
+
+  delinquency_case:
+    canonical_object: DelinquencyCase
+    precedence: primary
+    primary_key:
+      appfolio_field: TenantId + AsOfDate
+      canonical_field: case_id
+      transform: deterministic_hash(resident_account_id, stage_entered_date)
+    required_canonical_fields:
+      - case_id
+      - lease_id
+      - stage
+      - current_balance_cents
+      - stage_entered_date
+    derived_from_source:
+      - stage (mapped from DelinquencyStage via map_appfolio_delinquency_stage)
+    requires_computation:
+      - legal_flag (true when stage IN {legal_notice, eviction_filed, judgment})
+      - stage_entered_date (earliest observation of the stage for the resident)
+
+  lead:
+    canonical_object: Lead
+    precedence: primary
+    primary_key:
+      appfolio_field: GuestCardId
+      canonical_field: lead_id
+      transform: passthrough_with_namespace(appfolio_prod)
+    required_canonical_fields:
+      - lead_id
+      - property_id
+      - source_channel
+      - inquiry_date
+      - pipeline_stage
+
+  tour:
+    canonical_object: Tour
+    precedence: primary
+    primary_key:
+      appfolio_field: ShowingId
+      canonical_field: tour_id
+      transform: passthrough_with_namespace(appfolio_prod)
+    required_canonical_fields:
+      - tour_id
+      - lead_id
+      - scheduled_date
+      - tour_type
+
+  application:
+    canonical_object: Application
+    precedence: primary
+    primary_key:
+      appfolio_field: ApplicationId
+      canonical_field: application_id
+      transform: passthrough_with_namespace(appfolio_prod)
+    required_canonical_fields:
+      - application_id
+      - lead_id
+      - applied_date
+      - approval_status
+    derived_from_source:
+      - approval_status (mapped from ApplicationStatus)
+    requires_computation:
+      - approval_outcome.outcome (derived from ApplicationStatus, ScreeningResult)
+      - approval_outcome.policy_ref (must resolve to documented screening policy overlay)
+
+  work_order:
+    canonical_object: WorkOrder
+    precedence: primary
+    primary_key:
+      appfolio_field: ServiceRequestId
+      canonical_field: work_order_id
+      transform: passthrough_with_namespace(appfolio_prod)
+    required_canonical_fields:
+      - work_order_id
+      - property_id
+      - reported_date
+      - priority
+      - status
+    derived_from_source:
+      - priority (mapped from AppFolio Priority via map_appfolio_priority)
+      - status (mapped from WorkOrderStatus via map_appfolio_wo_status)
+
+  turn_project:
+    canonical_object: TurnProject
+    precedence: derived
+    primary_key:
+      appfolio_field: derived
+      canonical_field: turn_id
+      transform: deterministic_hash(unit_id, move_out_date)
+    required_canonical_fields:
+      - turn_id
+      - property_id
+      - unit_id
+      - move_out_date
+      - status
+    note: |
+      AppFolio has no native TurnProject. The adapter computes one turn
+      per (unit, vacancy cycle) using the move_out -> make_ready -> move_in
+      sequence. See unit_turn_inferred in source_contract.yaml.
+    requires_computation:
+      - move_out_date (from move_out lease_event)
+      - actual_ready_date (from MakeReadyStatus -> Ready transition)
+      - status (planned / in_progress / punchlist / ready / leased mapped from make_ready work_order aggregate)
+
+  vendor:
+    canonical_object: Vendor
+    precedence: secondary
+    primary_authority: ap_system
+    primary_key:
+      appfolio_field: VendorId
+      canonical_field: vendor_id
+      transform: crosswalk_lookup(vendor_master_crosswalk, source_system=appfolio_prod)
+    required_canonical_fields:
+      - vendor_id
+      - vendor_name
+    note: |
+      AppFolio vendor directory is dispatch-facing only. Authoritative
+      vendor master is the AP system. Dedup across GL Partners via
+      vendor_master_crosswalk.
+
+null_handling_global:
+  - do not default null required fields to zero or portfolio average
+  - surface missing required fields as dq_blocker exceptions
+  - record-level rejects carry the raw source_row_id for operator remediation

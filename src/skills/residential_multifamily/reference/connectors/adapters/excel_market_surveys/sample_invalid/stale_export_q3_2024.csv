@@ -1,0 +1,4 @@
+csi_division,csi_section,line_item,line_item_slug,capex_category,unit_basis,market,region,segment,property_form,low,typical,high,currency,escalation_assumption,typical_useful_life_years,source_basis,source,as_of,row_id
+07,07 31 13,Shingle roof replacement 30yr,roof_replace_shingle,building_envelope,dollars_per_sf,Charlotte,southeast,middle_market,garden,3.85,4.65,5.80,USD,0.030,25,engineered_estimate,GC_bid_ATL_Q3_2024,2024-09-30,cci_0001
+09,09 65 19,Luxury vinyl plank flooring 6mm,lvp_flooring_6mm,unit_interior_classic,dollars_per_sf,Charlotte,southeast,middle_market,garden,2.75,3.40,4.20,USD,0.025,12,vendor_bid,PO-CLT-2024-07,2024-09-30,cci_0002
+11,11 30 00,Kitchen appliance package classic,unit_kitchen_package_classic,unit_interior_classic,dollars_per_unit,Charlotte,southeast,middle_market,garden,1950,2300,2800,USD,0.035,15,contracted_unit_price,MSA-appliances-2024,2024-09-30,cci_0003

@@ -1,0 +1,126 @@
+# Compliance & Risk question bank
+# Audience: compliance_risk
+# Depth: 12 questions covering fair-housing training cadence, screening policy
+# documentation, VAWA compliance, regulatory-program participation (per program),
+# compliance lead role, REAC / NSPIRE-prep posture, agency-reporting cadence,
+# emergency-response playbook existence, insurance broker, and OSHA / accessibility
+# posture.
+#
+# Every question targets overlay.yaml#compliance_* keys so that compliance posture
+# stays isolated from market-positioning (segments) and can be layered under a
+# regulatory overlay without collision. Conventional-only operators still answer the
+# fair-housing / screening / VAWA / insurance / emergency-response questions; the
+# regulatory-program question gates the program-specific branches.
+#
+# Each question conforms to:
+#   id, question_text, purpose, answer_type, choices, target_overlay_ref,
+#   follow_up_ids, missing_doc_triggers
+#
+# No hardcoded dollar / percent / market figures. Cadences captured as enumerated
+# choices; anything numeric is prompted without a pre-filled value.
+
+bank_slug: compliance_risk
+audience: compliance_risk
+version: "0.1.0"
+questions:
+
+  - id: comp_001
+    question_text: What regulatory programs does the organization operate across any of its properties? Select all that apply. If none, select "none".
+    purpose: Canonical regulatory-program gate; answers feed overlays/regulatory/affordable/programs/{program} loading. This question duplicates exec_005 intentionally so the compliance audience can confirm or correct.
+    answer_type: multi_choice
+    choices: [none, lihtc, hud_section_8, hud_202_811, usda_rd, state_program, mixed_income]
+    target_overlay_ref: overlay.yaml#compliance_regulatory_programs.participation
+    follow_up_ids: [comp_002, comp_003]
+    missing_doc_triggers: [regulatory_program_participation_list]
+
+  - id: comp_002
+    question_text: For each regulatory program selected above, which properties or regions participate? Free text, one line per program if helpful.
+    purpose: Per-property regulatory routing; prevents conventional properties from silently loading regulatory content.
+    answer_type: free_text
+    target_overlay_ref: overlay.yaml#compliance_regulatory_programs.assignments
+    follow_up_ids: []
+    missing_doc_triggers: [regulatory_program_participation_list]
+
+  - id: comp_003
+    question_text: Who is the compliance lead for regulated programs? Is this role in-house or outsourced to a third-party compliance consultant?
+    purpose: Routes agency-facing approvals and file-audit prep to a named role; captures outsourced-vendor handoff.
+    answer_type: single_choice
+    choices: [in_house_compliance_officer, in_house_asset_mgmt_doubles_as_compliance, outsourced_third_party, hybrid, unknown]
+    target_overlay_ref: overlay.yaml#compliance_regulatory_programs.compliance_lead
+    follow_up_ids: []
+    missing_doc_triggers: []
+
+  - id: comp_004
+    question_text: What is the fair-housing training cadence for site staff and leasing agents?
+    purpose: Sets fair_housing_training_cadence overlay key.
+    answer_type: single_choice
+    choices: [annual, semi_annual, quarterly, on_hire_only, ad_hoc, unknown]
+    target_overlay_ref: overlay.yaml#compliance_fair_housing.training_cadence
+    follow_up_ids: []
+    missing_doc_triggers: [fair_housing_training_policy]
+
+  - id: comp_005
+    question_text: Please upload or describe the current resident screening policy (criteria, adverse-action process, appeal process).
+    purpose: Screening policy drives the screening_policy_change approval-matrix row (row 13) and gates pattern-detection escalation.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#compliance_screening.policy_ref
+    follow_up_ids: []
+    missing_doc_triggers: [screening_policy_document]
+
+  - id: comp_006
+    question_text: Please upload or describe the VAWA compliance policy (how protected parties request emergency transfers or lease bifurcation).
+    purpose: VAWA policy is required for any property in a regulatory program and strongly recommended otherwise.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#compliance_vawa.policy_ref
+    follow_up_ids: []
+    missing_doc_triggers: [vawa_policy]
+
+  - id: comp_007
+    question_text: What is the organization's REAC / NSPIRE preparation posture? (for HUD-adjacent properties; answer "not_applicable" if no HUD involvement)
+    purpose: Captures inspection readiness posture; feeds inspection-prep workflows.
+    answer_type: single_choice
+    choices: [continuous_ready, scheduled_prep_before_each_inspection, reactive_only, outsourced_prep, not_applicable, unknown]
+    target_overlay_ref: overlay.yaml#compliance_reac_nspire.prep_posture
+    follow_up_ids: []
+    missing_doc_triggers: []
+
+  - id: comp_008
+    question_text: What is the agency-reporting cadence (HFA, HUD, USDA, state) where applicable? Free text is fine; answer "not_applicable" if no regulatory programs.
+    purpose: Sets agency reporting cadence overlay; feeds compliance_calendar_review workflow.
+    answer_type: free_text
+    target_overlay_ref: overlay.yaml#compliance_regulatory_programs.agency_reporting_cadence
+    follow_up_ids: []
+    missing_doc_triggers: []
+
+  - id: comp_009
+    question_text: Is there a current emergency-response / life-safety playbook that covers fire, water, gas, weather, and active-threat scenarios?
+    purpose: Flags emergency-response coverage; feeds safety-critical approval routing.
+    answer_type: boolean
+    target_overlay_ref: overlay.yaml#compliance_emergency_response.playbook_exists
+    follow_up_ids: [comp_010]
+    missing_doc_triggers: [emergency_response_playbook]
+
+  - id: comp_010
+    question_text: Please upload the emergency-response playbook if it exists.
+    purpose: Playbook contents inform compliance_emergency_response.* overlay keys and insurance_risk_manager workflow.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#compliance_emergency_response.playbook_ref
+    follow_up_ids: []
+    missing_doc_triggers: [emergency_response_playbook]
+
+  - id: comp_011
+    question_text: Who is the insurance broker of record, and what is the program structure? (for example, master policy, property-specific placements, captive)
+    purpose: Captures insurance-program structure; feeds insurance_risk_manager and coi_compliance_checker workflows.
+    answer_type: free_text
+    target_overlay_ref: overlay.yaml#compliance_insurance.broker_and_structure
+    follow_up_ids: []
+    missing_doc_triggers: []
+
+  - id: comp_012
+    question_text: Describe the OSHA and accessibility (ADA / Section 504) compliance posture in plain language (active program, reactive-only, outsourced, or unknown).
+    purpose: Captures workplace-safety and accessibility posture; feeds compliance_regulatory_response_kit.
+    answer_type: single_choice
+    choices: [active_program_with_training, reactive_only, outsourced_to_consultant, unknown]
+    target_overlay_ref: overlay.yaml#compliance_osha_accessibility.posture
+    follow_up_ids: []
+    missing_doc_triggers: []

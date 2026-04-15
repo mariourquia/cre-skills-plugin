@@ -1,0 +1,42 @@
+pack_slug: post_ic_property_setup
+pack_type: workflow
+priority: 10
+triggers:
+  event_driven: true
+  explicit_phrases:
+    - "post-ic setup"
+    - "pre-close setup"
+    - "reserve property_id"
+    - "pre-close readiness"
+    - "open pre-close setup"
+  implicit_signals:
+    - "dealpath deal.stage transitions to ic_approved"
+    - "acquisition deal with deal_close_date_actual null"
+    - "lifecycle_handoffs.md Handoff 1 trigger with ic_approved and pre-close"
+  event_sources:
+    - dealpath:deal.ic_approved
+    - lifecycle_handoffs.md:handoff_1
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - lifecycle_stage
+  - management_mode
+  - market
+  - org_id
+  - deal_id
+optional_axes:
+  - jurisdiction
+  - submarket
+  - role
+  - output_type
+axes_match:
+  segment: all
+  lifecycle_stage: [pre_acquisition]
+  lifecycle_stage_transition:
+    from: [null, pre_acquisition]
+    to: [pre_acquisition]
+  management_mode: all
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

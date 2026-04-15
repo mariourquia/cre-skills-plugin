@@ -1,0 +1,161 @@
+# Resident Account Crosswalk (starter set).
+# Conforms to crosswalk.schema.yaml.
+# Illustrates dedup across PMS and CRM using composite match on
+# phone / email / normalized-last-name. See identity_resolution_framework.md
+# section 7.8.
+#
+# GUARDRAIL: protected-class attributes MUST NEVER be used as match keys,
+# tiebreakers, or survivorship fields. This includes race, color, religion,
+# national origin, sex, familial status, disability, and any state or local
+# protected class. See _core/ontology.md ResidentAccount + Lead guardrails
+# and the fair-housing rules referenced by the residential_multifamily skill.
+
+status_tag: sample
+
+rows:
+
+  # -----------------------------------------------------------------------
+  # Lead-to-lease convergence. Prospect registered in the CRM first, then
+  # applied and was approved. Converges on one canonical resident id once
+  # the lease is executed. Composite match on phone + email + last-name-
+  # normalized. None of these are protected-class attributes.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: resident_rac_000412
+    source_system: marketing_crm
+    source_id: LEAD-CRM-553912
+    match_confidence: high
+    match_method: composite
+    effective_start: "2024-01-12"
+    survivorship_rule: resident_account_default
+    manual_override: false
+    reviewer: leasing_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      CRM row. Lead registered 2024-01-12 at prop_cta_001. Contact channels:
+      phone_normalized + email_normalized match the later PMS resident
+      record. name_last_normalized also matches.
+
+  - canonical_id: resident_rac_000412
+    source_system: east_region_pms
+    source_id: R000412
+    match_confidence: high
+    match_method: composite
+    effective_start: "2024-02-28"
+    survivorship_rule: resident_account_default
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      PMS row. Resident created on application approval 2024-02-28.
+      Composite match with the CRM row resolved on first PMS extract.
+
+  # -----------------------------------------------------------------------
+  # Duplicate-lead case. Same prospect submitted two lead inquiries a few
+  # months apart. Both CRM rows resolve to one canonical resident id.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: resident_rac_000677
+    source_system: marketing_crm
+    source_id: LEAD-CRM-601554
+    match_confidence: medium
+    match_method: composite
+    effective_start: "2023-11-05"
+    effective_end: "2024-04-01"
+    survivorship_rule: resident_account_default
+    manual_override: false
+    reviewer: leasing_director
+    last_validated_at: "2024-04-01"
+    notes: |
+      First lead. Lost at tour stage. Later returned (LEAD-CRM-620881) and
+      leased. Composite match stable on phone + email; last_name match
+      degraded due to hyphenated-to-single name change recorded in the
+      second lead row, dropping overall confidence to medium.
+
+  - canonical_id: resident_rac_000677
+    source_system: marketing_crm
+    source_id: LEAD-CRM-620881
+    match_confidence: high
+    match_method: composite
+    effective_start: "2024-04-02"
+    survivorship_rule: resident_account_default
+    manual_override: false
+    reviewer: leasing_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      Returning lead. Same prospect as LEAD-CRM-601554. Composite match on
+      phone + email; last_name variant accepted because the operator policy
+      flags name changes as non-protected-class attribute shifts.
+
+  - canonical_id: resident_rac_000677
+    source_system: east_region_pms
+    source_id: R000677
+    match_confidence: high
+    match_method: composite
+    effective_start: "2024-05-14"
+    survivorship_rule: resident_account_default
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      PMS row. Composite match converged on lease execution.
+
+  # -----------------------------------------------------------------------
+  # Unresolved-edge reference. A PMS record for which CRM dedup could not
+  # be resolved automatically is NOT listed here; it would be parked in
+  # unresolved_exceptions_queue.md. Illustrated in that file.
+  # -----------------------------------------------------------------------
+
+  # -----------------------------------------------------------------------
+  # Wave 5 — Yardi multi-role adapter integration. Voyager t-code lineage
+  # resolves through t_code_decode BEFORE any crosswalk row is written;
+  # rows here carry the decoded lineage (resident_current, past_resident_
+  # historical, etc.) via yardi_tcode_decoded in the adapter additions.
+  # PII posture is restricted until Dimension 4 closes per
+  # bounded_assumptions.yaml::pii_posture_restricted_until_declared;
+  # the rows below reference resident ids only, never PII values.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: resident_yd_90001
+    source_system: yardi_voyager_pms_stub
+    source_id: YT_RESIDENT_90001
+    match_confidence: high
+    match_method: composite
+    effective_start: "2026-04-15"
+    survivorship_rule: resident_account_default
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Voyager t-code decoded lineage
+      resident_current attached to lease_yd_90001 at YP_50001 unit
+      YU_70001. PII redacted downstream until rentcafe_lead_data_access
+      lifts (Dimension 2c + Dimension 4). Provisional until
+      classification_worksheet.md closes.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager resident record joined
+      by composite match on phone_normalized + email_normalized against
+      RentCafe lead record once Dimension 2c lifts; currently
+      RentCafe-side pairing is blocked per
+      bounded_assumptions.yaml::rentcafe_lead_data_access.
+
+  - canonical_id: resident_yd_90201_hist
+    source_system: yardi_legacy_export_stub
+    source_id: YT_RESIDENT_90201
+    match_confidence: medium
+    match_method: manual
+    effective_start: "2026-04-15"
+    effective_end: "2024-07-01"
+    survivorship_rule: resident_account_default
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Voyager legacy-export t-code
+      lineage past_resident_historical; unit (YU_70201) retired post-
+      renovation. Historical-only; PII must remain redacted on downstream
+      output per pii_posture_restricted_until_declared.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Historical resident row linked
+      to lease_yd_90201_hist at YP_50004 (Briarfield). Preserved for
+      ledger / payment joins only; excluded from current-period workflows.

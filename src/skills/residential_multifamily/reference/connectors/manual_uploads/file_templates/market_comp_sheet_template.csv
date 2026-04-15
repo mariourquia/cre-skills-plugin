@@ -1,0 +1,5 @@
+comp_sale_id,property_name,sale_date,sale_price_usd,unit_count,cap_rate_pct,year_built
+sale_sample_001,Sample Sold Property,2026-02-20,48000000.00,200,5.20,2010
+sale_sample_002,Second Sample Sold,2026-03-10,32000000.00,150,5.40,2015
+# status: template
+# schema: reference/connectors/manual_uploads/schema.yaml entities.market_comp_sheet

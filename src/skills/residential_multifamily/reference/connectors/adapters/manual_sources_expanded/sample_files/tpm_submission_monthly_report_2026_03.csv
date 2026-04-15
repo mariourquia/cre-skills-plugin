@@ -1,0 +1,6 @@
+property_code,period,occupancy_physical,occupancy_economic,collections_rate,delinquency_balance,narrative_summary,submitted_by,submitted_date,signed_off
+ASH-CLT-001,2026-03,0.942,0.923,0.981,18420.00,"Occupancy held above 94% through March despite 3 evictions. Two concessions granted on renewals to retain long-tenured residents.",R. Foley,2026-04-05,true
+WAT-RDU-004,2026-03,0.918,0.895,0.966,27380.50,"Collections tracking slightly below plan due to one legal-track case ($9,400) and a resident on approved payment plan ($3,200).",R. Foley,2026-04-05,true
+OAK-ATL-011,2026-03,0.955,0.941,0.992,9820.00,"Strong month. Applied concession policy ceiling was not breached. Two lease buyouts processed to recapture below-market units.",M. Caldera,2026-04-06,true
+PIN-NAS-007,2026-03,0.889,0.862,0.948,41220.75,"Occupancy dipped after 4 unplanned move-outs in February carried into March. Marketing push initiated; tour-to-lease ratio improving.",M. Caldera,2026-04-06,true
+RIV-PHX-002,2026-03,0.933,0.917,0.975,22140.00,"Steady quarter. Renewal retention at 67% against 62% plan. Concessions applied on 2 market-rate leases to close pricing gap.",T. Hensley,2026-04-04,true

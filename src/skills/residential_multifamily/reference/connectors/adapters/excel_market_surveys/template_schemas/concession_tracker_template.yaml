@@ -1,0 +1,46 @@
+# Template schema for concession_tracker_monthly.
+# Aligns with canonical normalized schema at
+# ../../../../normalized/schemas/concession_benchmark.yaml.
+
+status_tag: template
+template_slug: concession_tracker
+canonical_reference_schema: reference/normalized/schemas/concession_benchmark.yaml
+canonical_ontology_object: concession_benchmark
+source_format: xlsx
+expected_sheets:
+  - concession_by_submarket
+  - concession_by_property
+  - trade_out_trend
+
+columns:
+  - { name: row_id,                   required: true,  type: string }
+  - { name: market,                   required: true,  type: string }
+  - { name: submarket,                required: true,  type: string }
+  - { name: segment,                  required: true,  type: string, enum: [middle_market, affordable, luxury] }
+  - { name: property_form,            required: true,  type: string, enum: [garden, walk_up, wrap, suburban_mid_rise, urban_mid_rise, high_rise] }
+  - { name: lifecycle_stage,          required: false, type: string, enum: [development, construction, lease_up, stabilized, renovation, recap_support] }
+  - { name: lease_term_months,        required: true,  type: integer }
+  - { name: concession_months_offered, required: true, type: number, unit: months }
+  - { name: pct_comps_offering,       required: false, type: number, range: { min: 0.0, max: 1.0 } }
+  - { name: avg_concession_dollars,   required: false, type: number, unit: dollars }
+  - { name: new_lease_trade_out_avg,  required: false, type: number, unit: percent }
+  - { name: as_of_date,               required: true,  type: date, format: iso_8601 }
+  - { name: analyst_name,             required: true,  type: string }
+  - { name: sheet_tab,                required: true,  type: string }
+  - { name: source_file,              required: true,  type: string }
+
+validation_rules:
+  - rule_id: conc_submarket_in_market
+    severity: blocker
+    description: submarket belongs to market per crosswalk_additions.yaml
+  - rule_id: conc_segment_consistency
+    severity: blocker
+    description: segment matches the sheet-level segment declaration
+  - rule_id: conc_outlier_check
+    severity: warning
+    description: concession_months_offered within plausible band per segment overlay
+  - rule_id: conc_provenance_complete
+    severity: blocker
+    description: required provenance fields non-null
+
+allowed_submarkets_reference: reference/connectors/master_data/submarket_crosswalk.yaml

@@ -1,0 +1,34 @@
+# Generic provenance-completeness check template.
+# Every normalized row must carry the provenance fields declared in the
+# connector manifest's provenance_fields_required list.
+check_id: provenance_required
+check_kind: null_critical
+severity: blocker
+description: |
+  Every normalized record carries source_name, source_type, source_date,
+  extracted_at, extractor_version, and source_row_id. A record missing any
+  required provenance field is rejected at landing and lands under
+  reference/raw/<domain>/_rejected/ with a reason.
+parameters:
+  - name: required_fields
+    description: List of provenance fields required; resolved from connector manifest.yaml provenance_fields_required
+  - name: entity
+    description: Normalized entity being checked
+  - name: manifest_ref
+    description: Pointer to the connector manifest declaring the required provenance
+inputs:
+  - reference/normalized/<entity>__<scope>.csv
+  - reference/connectors/<domain>/manifest.yaml
+expected_invariant: |
+  for each row in <entity>:
+    for each field in required_fields: field IS NOT NULL AND field != ""
+severity_default: blocker
+remediation_pattern: |
+  Operator extends the landing pipeline so every raw row carries full
+  provenance. A row that cannot be enriched with provenance (e.g., a paste
+  from an ad-hoc file) is rejected; operator captures the source context
+  via manual_uploads connector instead.
+remediation: |
+  See remediation_pattern. Missing provenance is never backfilled silently.
+  The rejected row is written to reference/raw/<domain>/_rejected/ with the
+  missing field name as the reject reason.

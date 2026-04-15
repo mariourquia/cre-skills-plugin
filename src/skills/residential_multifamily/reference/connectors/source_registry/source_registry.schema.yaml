@@ -1,0 +1,169 @@
+# Source Registry Schema
+# Applies to every record inside source_registry.yaml.
+# A registry entry lists one concrete inbound source system and its operational metadata.
+# The schema carries no credential values; credential_method fields are placeholder labels only.
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: SourceRegistryEntry
+type: object
+required:
+  - source_id
+  - source_name
+  - source_domain
+  - vendor_family
+  - ingestion_mode
+  - environment
+  - cadence
+  - data_owner
+  - business_owner
+  - technical_owner
+  - credential_method
+  - object_coverage
+  - expected_latency_minutes
+  - pii_classification
+  - financial_sensitivity
+  - legal_sensitivity
+  - status
+properties:
+  source_id:
+    type: string
+    pattern: "^[a-z][a-z0-9_]*$"
+    description: Stable snake_case slug for the source. Must match the source_name
+      provenance value every record carries at raw landing.
+  source_name:
+    type: string
+    description: Human-readable label for operators.
+  source_domain:
+    type: string
+    enum:
+      - pms
+      - gl
+      - crm
+      - ap
+      - market_data
+      - construction
+      - hr_payroll
+      - manual_upload
+      - deal_pipeline
+      - other
+    description: Which connector kind this source belongs to. `hr_payroll`,
+      `manual_upload`, `deal_pipeline`, and `other` identify the integration
+      layer category. `deal_pipeline` has its own connector directory added in
+      wave 4 to cover pre-close deal tracking and acquisition / development
+      pipeline feeds; canonical base (ontology, metrics, routing axes) is
+      unchanged.
+  vendor_family:
+    type: string
+    description: Non-binding orientation hint. See vendor_family_hints.md for
+      the open list; values are not enforced as an enum so new families can be
+      added without a schema change.
+  ingestion_mode:
+    type: string
+    enum:
+      - api
+      - sftp
+      - scheduled_export
+      - email_drop
+      - shared_drive
+      - spreadsheet
+      - manual_upload
+  environment:
+    type: string
+    enum:
+      - dev
+      - stage
+      - prod
+  cadence:
+    type: string
+    enum:
+      - realtime
+      - hourly
+      - daily
+      - weekly
+      - monthly
+      - quarterly
+      - on_demand
+  data_owner:
+    type: string
+    description: Role or team accountable for data quality from this source.
+  business_owner:
+    type: string
+    description: Role accountable for the business use of the data.
+  technical_owner:
+    type: string
+    description: Role accountable for the adapter and credentials.
+  credential_method:
+    type: string
+    enum:
+      - api_key_placeholder
+      - oauth_placeholder
+      - basic_auth_placeholder
+      - mtls_placeholder
+      - sftp_key_placeholder
+      - email_inbox_placeholder
+      - shared_drive_placeholder
+      - none
+    description: Declares the *kind* of credential used. Never the credential
+      itself. Secrets live in the operator deployment environment.
+  object_coverage:
+    type: array
+    minItems: 1
+    description: Canonical object slugs the source carries. Must be slugs
+      declared in _core/ontology.md.
+    items:
+      type: string
+      pattern: "^[a-z][a-z0-9_]*$"
+  expected_latency_minutes:
+    type: integer
+    minimum: 0
+    description: Expected lag between source-system event and arrival in raw
+      landing. 0 for realtime, larger values for batch.
+  known_limitations:
+    type: array
+    description: Bullet list of known issues or gaps operators should know.
+    items:
+      type: string
+  pii_classification:
+    type: string
+    enum:
+      - none
+      - low
+      - moderate
+      - high
+      - restricted
+  financial_sensitivity:
+    type: string
+    enum:
+      - none
+      - low
+      - moderate
+      - high
+      - restricted
+  legal_sensitivity:
+    type: string
+    enum:
+      - none
+      - low
+      - moderate
+      - high
+      - restricted
+  status:
+    type: string
+    enum:
+      - planned
+      - stubbed
+      - active
+      - degraded
+      - deprecated
+  last_validated_at:
+    type: string
+    description: ISO-8601 date or datetime of the last successful reconciliation
+      window. Null or absent for planned / stubbed entries.
+  rollout_wave:
+    type: string
+    description: Wave tag for rollout planning. Example values used in the
+      starter registry are `wave_0`, `wave_1`, `wave_2`, `wave_deferred`.
+  notes:
+    type: string
+    description: Free-form operator notes.
+additionalProperties: false

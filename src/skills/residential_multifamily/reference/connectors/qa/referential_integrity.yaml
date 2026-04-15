@@ -1,0 +1,38 @@
+# Generic FK-style integrity check template.
+# Per-connector reconciliation_checks.yaml references this as a pattern when
+# declaring foreign-key enforcement for a specific (child_entity, parent_entity) pair.
+check_id: referential_integrity
+check_kind: null_critical
+severity: blocker
+description: |
+  Every foreign-key reference on a child entity resolves to an existing
+  primary-key value on the parent entity within the same landing window.
+  The on_missing behavior declared in the entity contract (reject, warn,
+  allow_null) determines severity at instantiation time.
+parameters:
+  - name: child_entity
+    description: Child entity slug that carries the FK
+  - name: child_fk_field
+    description: FK field name on the child entity
+  - name: parent_entity
+    description: Parent entity slug referenced by the FK
+  - name: parent_pk_field
+    description: PK field on the parent entity
+  - name: on_missing
+    description: "Behavior on unresolved FK (reject, warn, allow_null); maps to severity at instantiation"
+inputs:
+  - reference/normalized/<child_entity>__<scope>.csv
+  - reference/normalized/<parent_entity>__<scope>.csv
+expected_invariant: |
+  for each row in <child_entity> where <child_fk_field> IS NOT NULL:
+    <child_fk_field> IN set(<parent_entity>.<parent_pk_field>)
+severity_default: blocker
+remediation_pattern: |
+  Operator either adds the missing parent record, corrects the child FK,
+  or marks the child FK as allow_null with the entity's null_handling rule.
+  A frequent orphan pattern usually indicates a source-system sync lag; the
+  operator reconciles the source before re-landing.
+remediation: |
+  See remediation_pattern. The specific child/parent pair is named by the
+  connector's invocation of this template; errors are listed in the
+  reconciliation_report.json with the unresolved FK value.

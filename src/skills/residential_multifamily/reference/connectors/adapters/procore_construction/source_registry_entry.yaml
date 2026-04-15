@@ -1,0 +1,44 @@
+# Source registry FRAGMENT for Procore.
+# Will be merged into source_registry/source_registry.yaml.
+
+records:
+
+  - source_id: procore_prod
+    source_name: Procore Construction Production
+    source_domain: construction
+    vendor_family: procore_family
+    ingestion_mode: api
+    environment: prod
+    cadence: daily
+    data_owner: construction_lead
+    business_owner: development_lead
+    technical_owner: data_platform_team
+    credential_method: oauth_placeholder
+    object_coverage:
+      - construction_project
+      - capex_project
+      - estimate_line_item
+      - bid_package
+      - change_order
+      - draw_request
+      - schedule_milestone
+      - vendor
+      - approval_request
+    expected_latency_minutes: 240
+    known_limitations:
+      - commitment is not yet a canonical object; tracked as placeholder
+      - multiple budget versions exist; active version flag must be honored
+      - pending vs approved COs tracked separately
+      - project name may not match property name; crosswalk required
+      - vendor duplicates across Procore + Intacct + AppFolio
+      - project closeout incomplete while units already leasing
+      - draw timing may diverge from Intacct posting cycle
+    pii_classification: low
+    financial_sensitivity: high
+    legal_sensitivity: moderate
+    status: stubbed
+    rollout_wave: wave_4
+    notes: |
+      Primary construction source. Reconciles to Intacct via capex_project_crosswalk
+      and account_crosswalk. Handoff to AppFolio at temp_co_received milestone.
+      See adapters/procore_construction/ for full coverage, dq, runbooks.

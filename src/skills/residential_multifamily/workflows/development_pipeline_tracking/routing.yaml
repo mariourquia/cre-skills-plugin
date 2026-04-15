@@ -1,0 +1,34 @@
+pack_slug: development_pipeline_tracking
+pack_type: workflow
+priority: 25
+triggers:
+  explicit_phrases:
+    - "weekly development pipeline"
+    - "dev pipeline tracker"
+    - "dev pipeline review"
+    - "development dashboard"
+    - "critical-path slip"
+    - "pipeline by region"
+    - "pipeline by deal lead"
+    - "commitment exposure"
+    - "forward commitment exposure"
+  implicit_signals:
+    - "weekly development lead cadence"
+    - "procore critical-path milestone slipped vs baseline"
+    - "dealpath closed deal handoff lag exceeds overlay"
+    - "commitment overdrawn check fires"
+    - "capex spend-to-plan breaches overlay band"
+    - "lease-up readiness deadline approaching"
+required_axes:
+  - asset_class
+  - segment
+optional_axes:
+  - region
+  - deal_lead
+  - project_id
+  - role
+  - lifecycle_stage
+  - output_type
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

@@ -1,0 +1,955 @@
+# Enriched per-template field mapping for manual_uploads.
+# Documentation-grade companion to mapping.yaml. Each row carries:
+# source_description, canonical_field, transform_rule, type_cast,
+# null_handling, default_rule, required_for_load, required_for_kpi,
+# provenance_note.
+
+budget_file:
+  - source_column: property_id
+    source_description: property code as declared in property master
+    canonical_field: budget_file.property_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: crosswalk to property master
+  - source_column: account_code
+    source_description: GL account code
+    canonical_field: budget_file.account_code
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: crosswalk to gl.chart_of_accounts
+  - source_column: budget_year
+    source_description: budget year (YYYY)
+    canonical_field: budget_file.budget_year
+    transform_rule: to_integer
+    type_cast: integer
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: period anchor
+  - source_column: budget_version
+    source_description: draft | approved | reforecast_q1 | reforecast_q2 | reforecast_q3 | final
+    canonical_field: budget_file.budget_version
+    transform_rule: to_enum
+    type_cast: enum
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: disambiguates overlapping budget snapshots
+  - source_column: annual_amount_usd
+    source_description: annual budget amount in dollars
+    canonical_field: budget_file.annual_amount_cents
+    transform_rule: parse_currency
+    type_cast: money_cents
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: core budget figure
+  - source_column: period_split
+    source_description: even | seasonal | custom
+    canonical_field: budget_file.period_split
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: default_to_null
+    default_rule: even
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: drives period allocation downstream
+  - source_column: notes
+    source_description: narrative
+    canonical_field: budget_file.notes
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: optional
+
+forecast_file:
+  - source_column: property_id
+    source_description: property code
+    canonical_field: forecast_file.property_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: crosswalk
+  - source_column: account_code
+    source_description: GL account code
+    canonical_field: forecast_file.account_code
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: crosswalk
+  - source_column: forecast_period
+    source_description: forecast period (YYYY-MM)
+    canonical_field: forecast_file.forecast_period
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: period anchor
+  - source_column: forecast_amount_usd
+    source_description: forecast amount in dollars
+    canonical_field: forecast_file.forecast_amount_cents
+    transform_rule: parse_currency
+    type_cast: money_cents
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: core figure
+  - source_column: forecast_method
+    source_description: trend | straight_line | scenario
+    canonical_field: forecast_file.forecast_method
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: methodology note
+
+owner_report:
+  - source_column: property_id
+    source_description: property code
+    canonical_field: owner_report.property_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: crosswalk
+  - source_column: report_period
+    source_description: report period (YYYY-MM)
+    canonical_field: owner_report.report_period
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: period anchor
+  - source_column: section_key
+    source_description: canonical section identifier
+    canonical_field: owner_report.section_key
+    transform_rule: to_enum
+    type_cast: enum
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: disambiguates multi-section docs
+  - source_column: body_markdown
+    source_description: section body
+    canonical_field: owner_report.body_markdown
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: false
+    provenance_note: body content
+  - source_column: approval_status
+    source_description: draft | in_review | approved | rejected
+    canonical_field: owner_report.approval_status
+    transform_rule: to_enum
+    type_cast: enum
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: gates investor update consumption
+
+vendor_bid_tab:
+  - source_column: solicitation_id
+    source_description: RFP id
+    canonical_field: vendor_bid_tab.solicitation_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: disambiguates bids across multiple RFPs
+  - source_column: vendor_id
+    source_description: bidder id
+    canonical_field: vendor_bid_tab.vendor_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: crosswalk to ap.vendor
+  - source_column: scope_line_id
+    source_description: scope line id within solicitation
+    canonical_field: vendor_bid_tab.scope_line_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: enables line-item bid leveling
+  - source_column: bid_amount_usd
+    source_description: bid amount in dollars
+    canonical_field: vendor_bid_tab.bid_amount_cents
+    transform_rule: parse_currency
+    type_cast: money_cents
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: core figure
+  - source_column: bid_date
+    source_description: submission date
+    canonical_field: vendor_bid_tab.bid_date
+    transform_rule: to_date
+    type_cast: date
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: false
+    provenance_note: audit trail
+  - source_column: property_id
+    source_description: property scope
+    canonical_field: vendor_bid_tab.property_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: null for portfolio-wide RFPs
+  - source_column: leveled_adjustment_usd
+    source_description: bid leveling adjustment in dollars
+    canonical_field: vendor_bid_tab.leveled_adjustment_cents
+    transform_rule: parse_currency
+    type_cast: money_cents
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: apples-to-apples comparison
+  - source_column: recommendation_flag
+    source_description: recommended awardee flag
+    canonical_field: vendor_bid_tab.recommendation_flag
+    transform_rule: to_boolean
+    type_cast: boolean
+    null_handling: default_to_null
+    default_rule: false
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: bid-leveling recommendation
+
+rent_survey:
+  - source_column: comp_id
+    source_description: comp property id
+    canonical_field: rent_survey.comp_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: stable comp identity
+  - source_column: survey_date
+    source_description: survey date
+    canonical_field: rent_survey.survey_date
+    transform_rule: to_date
+    type_cast: date
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: time anchor
+  - source_column: comp_name
+    source_description: comp property name
+    canonical_field: rent_survey.comp_name
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: false
+    provenance_note: human-readable reference
+  - source_column: unit_type
+    source_description: unit type label
+    canonical_field: rent_survey.unit_type
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: grain anchor
+  - source_column: asking_rent_usd
+    source_description: asking rent in dollars
+    canonical_field: rent_survey.asking_rent_cents
+    transform_rule: parse_currency
+    type_cast: money_cents
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: core figure
+  - source_column: concession_summary
+    source_description: concession description
+    canonical_field: rent_survey.concession_summary
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: effective rent context
+  - source_column: occupancy_reported_pct
+    source_description: reported occupancy percent
+    canonical_field: rent_survey.occupancy_reported_pct
+    transform_rule: to_number
+    type_cast: number
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: informational
+
+market_comp_sheet:
+  - source_column: comp_sale_id
+    source_description: comp sale id
+    canonical_field: market_comp_sheet.comp_sale_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: stable id
+  - source_column: property_name
+    source_description: sold property name
+    canonical_field: market_comp_sheet.property_name
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: false
+    provenance_note: reference
+  - source_column: sale_date
+    source_description: sale date
+    canonical_field: market_comp_sheet.sale_date
+    transform_rule: to_date
+    type_cast: date
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: time anchor
+  - source_column: sale_price_usd
+    source_description: sale price in dollars
+    canonical_field: market_comp_sheet.sale_price_cents
+    transform_rule: parse_currency
+    type_cast: money_cents
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: core figure
+  - source_column: unit_count
+    source_description: unit count at sale
+    canonical_field: market_comp_sheet.unit_count
+    transform_rule: to_integer
+    type_cast: integer
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: enables per-unit math
+  - source_column: cap_rate_pct
+    source_description: reported cap rate percent
+    canonical_field: market_comp_sheet.cap_rate_bps
+    transform_rule: to_integer
+    type_cast: integer
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: note unit conversion pct -> bps
+  - source_column: year_built
+    source_description: year built
+    canonical_field: market_comp_sheet.year_built
+    transform_rule: to_integer
+    type_cast: integer
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: vintage filter
+
+approval_matrix_upload:
+  - source_column: matrix_id
+    source_description: matrix identifier
+    canonical_field: approval_matrix_upload.matrix_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: pk
+  - source_column: row_id
+    source_description: row identifier
+    canonical_field: approval_matrix_upload.row_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: pk
+  - source_column: scope
+    source_description: scope label (capex, AP, leasing, etc.)
+    canonical_field: approval_matrix_upload.scope
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: gates workflow consumption
+  - source_column: threshold_usd
+    source_description: threshold amount in dollars
+    canonical_field: approval_matrix_upload.threshold_cents
+    transform_rule: parse_currency
+    type_cast: money_cents
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: core figure
+  - source_column: approver_role
+    source_description: approver role code
+    canonical_field: approval_matrix_upload.approver_role
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: crosswalk to role catalog
+  - source_column: notes
+    source_description: narrative
+    canonical_field: approval_matrix_upload.notes
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: optional
+
+property_list:
+  - source_column: property_id
+    source_description: property code
+    canonical_field: property_list.property_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: master pk
+  - source_column: property_name
+    source_description: operating name
+    canonical_field: property_list.property_name
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: false
+    provenance_note: reference
+  - source_column: market
+    source_description: market label
+    canonical_field: property_list.market
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: crosswalk to market registry
+  - source_column: unit_count
+    source_description: total unit count
+    canonical_field: property_list.unit_count
+    transform_rule: to_integer
+    type_cast: integer
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: reconciliation anchor
+  - source_column: submarket
+    source_description: submarket label
+    canonical_field: property_list.submarket
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: sub-level
+  - source_column: entity_id
+    source_description: legal entity id
+    canonical_field: property_list.entity_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: entity master crosswalk
+  - source_column: status
+    source_description: portfolio status
+    canonical_field: property_list.status
+    transform_rule: to_enum
+    type_cast: enum
+    null_handling: default_to_null
+    default_rule: active
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: disposition filter
+
+staffing_model_upload:
+  - source_column: property_id
+    source_description: property code
+    canonical_field: staffing_model_upload.property_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: crosswalk
+  - source_column: role_code
+    source_description: canonical role code
+    canonical_field: staffing_model_upload.role_code
+    transform_rule: lowercase
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: crosswalk to role_catalog
+  - source_column: budgeted_fte
+    source_description: budgeted FTE
+    canonical_field: staffing_model_upload.budgeted_fte
+    transform_rule: to_number
+    type_cast: number
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: StaffingPlan key metric
+  - source_column: notes
+    source_description: narrative
+    canonical_field: staffing_model_upload.notes
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: optional
+
+capex_request_upload:
+  - source_column: request_id
+    source_description: request id
+    canonical_field: capex_request_upload.request_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: pk
+  - source_column: property_id
+    source_description: property code
+    canonical_field: capex_request_upload.property_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: crosswalk
+  - source_column: request_date
+    source_description: request date
+    canonical_field: capex_request_upload.request_date
+    transform_rule: to_date
+    type_cast: date
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: false
+    provenance_note: audit
+  - source_column: category
+    source_description: capex category enum
+    canonical_field: capex_request_upload.category
+    transform_rule: to_enum
+    type_cast: enum
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: drives prioritization
+  - source_column: requested_amount_usd
+    source_description: requested amount in dollars
+    canonical_field: capex_request_upload.requested_amount_cents
+    transform_rule: parse_currency
+    type_cast: money_cents
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: core figure
+  - source_column: justification
+    source_description: narrative justification
+    canonical_field: capex_request_upload.justification
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: context
+  - source_column: approval_status
+    source_description: draft | submitted | approved | deferred | rejected
+    canonical_field: capex_request_upload.approval_status
+    transform_rule: to_enum
+    type_cast: enum
+    null_handling: default_to_null
+    default_rule: draft
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: gate flag
+
+draw_package_upload:
+  - source_column: project_id
+    source_description: project id
+    canonical_field: draw_package_upload.project_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: crosswalk to project master
+  - source_column: draw_number
+    source_description: sequential draw number
+    canonical_field: draw_package_upload.draw_number
+    transform_rule: to_integer
+    type_cast: integer
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: sequence
+  - source_column: draw_date
+    source_description: draw request date
+    canonical_field: draw_package_upload.draw_date
+    transform_rule: to_date
+    type_cast: date
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: false
+    provenance_note: audit
+  - source_column: draw_amount_usd
+    source_description: draw amount in dollars
+    canonical_field: draw_package_upload.draw_amount_cents
+    transform_rule: parse_currency
+    type_cast: money_cents
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: core figure
+  - source_column: review_status
+    source_description: submitted | under_review | approved | disbursed | rejected
+    canonical_field: draw_package_upload.review_status
+    transform_rule: to_enum
+    type_cast: enum
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: gate flag
+  - source_column: supporting_docs_count
+    source_description: count of supporting documents
+    canonical_field: draw_package_upload.supporting_docs_count
+    transform_rule: to_integer
+    type_cast: integer
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: completeness heuristic
+  - source_column: property_id
+    source_description: property scope
+    canonical_field: draw_package_upload.property_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: crosswalk
+
+monthly_review_pack:
+  - source_column: property_id
+    source_description: property code
+    canonical_field: monthly_review_pack.property_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: crosswalk
+  - source_column: report_period
+    source_description: month (YYYY-MM)
+    canonical_field: monthly_review_pack.report_period
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: period anchor
+  - source_column: pack_section_key
+    source_description: canonical section identifier
+    canonical_field: monthly_review_pack.pack_section_key
+    transform_rule: to_enum
+    type_cast: enum
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: disambiguates sections
+  - source_column: body_markdown
+    source_description: section body
+    canonical_field: monthly_review_pack.body_markdown
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: false
+    provenance_note: body content
+  - source_column: approval_status
+    source_description: draft | in_review | approved
+    canonical_field: monthly_review_pack.approval_status
+    transform_rule: to_enum
+    type_cast: enum
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: gates consumption
+
+delinquency_report_upload:
+  - source_column: property_id
+    source_description: property code
+    canonical_field: delinquency_report_upload.property_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: crosswalk
+  - source_column: report_period
+    source_description: month (YYYY-MM)
+    canonical_field: delinquency_report_upload.report_period
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: period anchor
+  - source_column: resident_account_id
+    source_description: resident account id (opaque)
+    canonical_field: delinquency_report_upload.resident_account_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: crosswalk to pms.lease
+  - source_column: balance_usd
+    source_description: outstanding balance in dollars
+    canonical_field: delinquency_report_upload.balance_cents
+    transform_rule: parse_currency
+    type_cast: money_cents
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: core figure
+  - source_column: aging_bucket
+    source_description: aging bucket enum
+    canonical_field: delinquency_report_upload.aging_bucket
+    transform_rule: to_enum
+    type_cast: enum
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: aging classification
+  - source_column: notes
+    source_description: case notes
+    canonical_field: delinquency_report_upload.notes
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: optional
+
+work_order_backlog_upload:
+  - source_column: property_id
+    source_description: property code
+    canonical_field: work_order_backlog_upload.property_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: crosswalk
+  - source_column: report_period
+    source_description: month (YYYY-MM)
+    canonical_field: work_order_backlog_upload.report_period
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: period anchor
+  - source_column: work_order_id
+    source_description: WO id
+    canonical_field: work_order_backlog_upload.work_order_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: crosswalk to pms.work_order
+  - source_column: priority
+    source_description: priority enum
+    canonical_field: work_order_backlog_upload.priority
+    transform_rule: to_enum
+    type_cast: enum
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: triage
+  - source_column: age_days
+    source_description: days open
+    canonical_field: work_order_backlog_upload.age_days
+    transform_rule: to_integer
+    type_cast: integer
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: SLA tracking
+  - source_column: assigned_role
+    source_description: assigned role code
+    canonical_field: work_order_backlog_upload.assigned_role
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: crosswalk to role catalog
+
+pm_scorecard_upload:
+  - source_column: employee_id
+    source_description: PM employee id
+    canonical_field: pm_scorecard_upload.employee_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to hr_payroll.employee
+  - source_column: scoring_period
+    source_description: scoring period (YYYY-QN or YYYY-MM)
+    canonical_field: pm_scorecard_upload.scoring_period
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: period anchor
+  - source_column: score_category
+    source_description: category of scorecard row
+    canonical_field: pm_scorecard_upload.score_category
+    transform_rule: to_enum
+    type_cast: enum
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: disambiguates multi-row scorecards
+  - source_column: score_value
+    source_description: score value (0-100)
+    canonical_field: pm_scorecard_upload.score_value
+    transform_rule: to_number
+    type_cast: number
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: core figure
+  - source_column: commentary
+    source_description: narrative commentary
+    canonical_field: pm_scorecard_upload.commentary
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: optional

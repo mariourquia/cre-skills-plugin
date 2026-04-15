@@ -1,0 +1,92 @@
+pack_slug: post_ic_property_setup
+reads:
+  - path: reference/connectors/_core/stack_wave4/lifecycle_handoffs.md
+    category: stack_handoff_specification
+    expected_schema_version: "wave_4_authoritative"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: wave_4_current
+  - path: reference/connectors/_core/stack_wave4/source_of_truth_matrix.md
+    category: stack_handoff_specification
+    expected_schema_version: "wave_4_authoritative"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: wave_4_current
+  - path: reference/connectors/adapters/dealpath_deal_pipeline/manifest.yaml
+    category: adapter_contract
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: last_updated_within_staleness_window
+  - path: reference/connectors/adapters/dealpath_deal_pipeline/dq_rules.yaml
+    category: adapter_dq_rules
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: last_updated_within_staleness_window
+  - path: reference/connectors/adapters/appfolio_pms/manifest.yaml
+    category: adapter_contract
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: last_updated_within_staleness_window
+  - path: reference/connectors/adapters/sage_intacct_gl/manifest.yaml
+    category: adapter_contract
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: last_updated_within_staleness_window
+  - path: reference/connectors/master_data/property_master_crosswalk.yaml
+    category: crosswalk
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: last_validated_within_staleness_window
+  - path: reference/connectors/master_data/asset_crosswalk.yaml
+    category: crosswalk
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: last_validated_within_staleness_window
+  - path: reference/connectors/master_data/identity_resolution_framework.md
+    category: identity_resolution_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: wave_4_current
+  - path: reference/connectors/master_data/crosswalk.schema.yaml
+    category: crosswalk_schema
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: current
+  - path: reference/normalized/schemas/reconciliation_tolerance_band.yaml
+    category: tolerance_band_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: current
+  - path: reference/normalized/approval_threshold_defaults.csv
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: current
+  - path: reference/normalized/insurance_program__portfolio.csv
+    category: insurance_program_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: current
+writes:
+  - path: reference/connectors/master_data/property_master_crosswalk.yaml
+    category: crosswalk
+    write_mode: propose_then_approve
+    approval_gate: owner_approval_routing
+  - path: reference/connectors/master_data/asset_crosswalk.yaml
+    category: crosswalk
+    write_mode: propose_then_approve
+    approval_gate: owner_approval_routing
+  - path: reference/connectors/master_data/unresolved_exceptions_queue.md
+    category: exceptions_queue
+    write_mode: append

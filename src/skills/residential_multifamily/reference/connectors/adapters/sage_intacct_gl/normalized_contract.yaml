@@ -1,0 +1,265 @@
+# Normalized contract for the Sage Intacct GL adapter.
+#
+# Declares the canonical output shape after normalization. Maps Intacct
+# entities onto the canonical GL connector entities in ../../gl/schema.yaml
+# and onto canonical ontology objects in ../../../_core/ontology.md.
+#
+# Canonical GL entity contracts and ontology remain the source of truth.
+# This file documents how Intacct payloads resolve to the canonical
+# objects and which crosswalks mediate the mapping.
+
+status_tag: template
+
+source_precedence:
+  actual_line:
+    primary: sage_intacct_gl
+    secondary_cash_basis: appfolio_pms
+    rationale: |
+      Intacct is the accrual ledger and the system of record for posted
+      financials. AppFolio carries cash-basis collections on the revenue
+      side. Canonical actual_line uses Intacct; AppFolio receipts feed
+      the cash-vs-accrual reconciliation rather than a second actual
+      source.
+  budget_line:
+    primary: sage_intacct_gl
+    secondary: manual_excel_ingestion_stub
+    rationale: |
+      The Intacct Budget Module is authoritative when enabled. Manual
+      spreadsheet uploads act as a fallback for properties not yet
+      authoring budgets inside Intacct.
+  forecast_line:
+    primary: sage_intacct_gl
+    secondary: manual_excel_ingestion_stub
+    rationale: |
+      The Intacct Forecast Module is authoritative for reforecast
+      cycles. Fallback mirrors budget_line precedence.
+  variance_explanation:
+    primary: sage_intacct_gl
+    rationale: |
+      Manager commentary is typically entered directly in Intacct
+      notes fields or in the Budget Module narrative column and flows
+      to canonical variance_explanation.
+  capex_project:
+    primary_financial_side: sage_intacct_gl
+    primary_schedule_cost_side: procore_construction
+    rationale: |
+      Intacct owns the capex project dimension financials. Procore owns
+      the schedule, RFI, submittal, and cost-to-complete side. The
+      capex_project_crosswalk resolves both to one canonical capex_project_id.
+  vendor:
+    tie_break_order: [sage_intacct_gl, appfolio_pms, procore_construction]
+    rationale: |
+      Three-way vendor reconciliation runs through vendor_master_crosswalk.
+      Intacct vendor master wins on tax-id and payment-terms fields;
+      AppFolio wins on AP invoice lifecycle; Procore wins on contractor
+      insurance expiry.
+
+crosswalks_required:
+  - account_crosswalk
+  - property_master_crosswalk
+  - vendor_master_crosswalk
+  - capex_project_crosswalk
+
+normalized_entities:
+
+  chart_of_accounts:
+    canonical_entity: chart_of_accounts       # see ../../gl/schema.yaml
+    grain: one row per GL account
+    source_to_canonical:
+      - { source: RECORDNO,         canonical: source_row_id }
+      - { source: GLACCOUNTNO,      canonical: account_id }
+      - { source: ACCOUNTTITLE,     canonical: account_label }
+      - { source: ACCOUNT_TYPE,     canonical: account_type,     transform: map_intacct_account_type }
+      - { source: NORMAL_BALANCE,   canonical: normal_balance,   transform: lowercase_string }
+      - { source: STATUS,           canonical: inactive,         transform: status_to_inactive_flag }
+      - { source: PARENTACCOUNTNO,  canonical: parent_account_id }
+    crosswalk_mediated:
+      - field: canonical_account_slug
+        crosswalk: account_crosswalk
+        lookup_key: source_account_id
+        notes: |
+          Canonical account slug (e.g., revenue_base_rent, repairs_maintenance,
+          capex_roof_replacement) is resolved via the account_crosswalk.
+          Unmapped GLACCOUNTNO values land the row with the canonical
+          account_id populated but canonical_account_slug null; the
+          gl_account_mapping_completeness DQ rule fires.
+
+  actual_line:
+    canonical_entity: actual                  # see ../../gl/schema.yaml
+    grain: one row per posted line per account per period per property
+    source_to_canonical:
+      - { source: RECORDNO,          canonical: source_row_id }
+      - { source: GLACCOUNTNO,       canonical: account_id }
+      - { source: AMOUNT,            canonical: amount_cents,         transform: dollars_to_cents_with_sign }
+      - { source: POSTING_TYPE,      canonical: posting_side }
+      - { source: BATCH_DATE,        canonical: posting_date,         transform: to_iso_date }
+      - { source: PERIOD,            canonical: period,               transform: intacct_period_to_iso_month }
+      - { source: CURRENCY,          canonical: source_currency }
+      - { source: MEMO,              canonical: memo }
+      - { source: REVERSAL,          canonical: reversal_flag }
+      - { source: SERVICE_FROM,      canonical: service_period_start }
+      - { source: SERVICE_TO,        canonical: service_period_end }
+      - { source: STATE,             canonical: close_status,         transform: map_intacct_posting_state }
+    crosswalk_mediated:
+      - field: property_id
+        crosswalks: [property_master_crosswalk]
+        lookup_key_priority:
+          - { from: LOCATIONID, via: property_master_crosswalk, when: roll_up_entity_pattern }
+          - { from: ENTITYID,   via: property_master_crosswalk, when: entity_per_property_pattern }
+        notes: |
+          Property resolution respects the deployment pattern declared
+          in the onboarding runbook. The property_master_crosswalk
+          carries either ENTITYID or LOCATIONID on the source_id field
+          depending on the pattern, with notes fields documenting the
+          mapping.
+      - field: canonical_account_slug
+        crosswalk: account_crosswalk
+        lookup_key: GLACCOUNTNO
+      - field: capex_project_id
+        crosswalk: capex_project_crosswalk
+        lookup_key: PROJECTID
+        when: PROJECTID IS NOT NULL
+      - field: vendor_id
+        crosswalk: vendor_master_crosswalk
+        lookup_key: VENDORID
+        when: VENDORID IS NOT NULL
+
+  budget_line:
+    canonical_entity: budget                  # see ../../gl/schema.yaml
+    canonical_ontology: BudgetLine            # see ../../../_core/ontology.md
+    grain: one row per budget line per account per period per property per scenario
+    source_to_canonical:
+      - { source: RECORDNO,       canonical: source_row_id }
+      - { source: GLACCOUNTNO,    canonical: account_id }
+      - { source: PERIOD,         canonical: period,           transform: intacct_period_to_iso_month }
+      - { source: AMOUNT,         canonical: amount_cents,     transform: dollars_to_cents }
+      - { source: BUDGETID,       canonical: scenario,         transform: map_intacct_budget_version }
+      - { source: BUDGETNAME,     canonical: scenario_label }
+      - { source: FISCAL_YEAR,    canonical: fiscal_year }
+      - { source: CURRENCY,       canonical: source_currency }
+      - { source: STATE,          canonical: publication_state }
+      - { source: BUILD_BASIS,    canonical: build_basis }
+      - { source: APPROVED_BY,    canonical: approver_user_id }
+      - { source: APPROVED_AT,    canonical: approval_timestamp }
+    crosswalk_mediated:
+      - { field: property_id,              crosswalk: property_master_crosswalk, lookup_key: LOCATIONID_or_ENTITYID }
+      - { field: canonical_account_slug,   crosswalk: account_crosswalk,         lookup_key: GLACCOUNTNO }
+      - { field: capex_project_id,         crosswalk: capex_project_crosswalk,   lookup_key: PROJECTID, when: PROJECTID IS NOT NULL }
+    notes: |
+      as_of_date on a BudgetLine resolves to the APPROVAL_TIMESTAMP when
+      STATE = Approved. For Draft and Published-but-not-approved
+      budgets, as_of_date resolves to WHENMODIFIED from the source.
+
+  forecast_line:
+    canonical_entity: forecast                # see ../../gl/schema.yaml
+    canonical_ontology: ForecastLine          # see ../../../_core/ontology.md
+    grain: one row per forecast line per account per period per property per vintage
+    source_to_canonical:
+      - { source: RECORDNO,       canonical: source_row_id }
+      - { source: GLACCOUNTNO,    canonical: account_id }
+      - { source: PERIOD,         canonical: period,            transform: intacct_period_to_iso_month }
+      - { source: AS_OF_DATE,     canonical: as_of_date,        transform: to_iso_date }
+      - { source: AMOUNT,         canonical: amount_cents,      transform: dollars_to_cents }
+      - { source: FORECASTID,     canonical: forecast_version,  transform: map_intacct_forecast_version }
+      - { source: FORECASTNAME,   canonical: forecast_version_label }
+      - { source: CURRENCY,       canonical: source_currency }
+      - { source: STATE,          canonical: publication_state }
+      - { source: PRIOR_FORECASTID, canonical: prior_forecast_ref }
+      - { source: BUILD_BASIS,    canonical: build_basis }
+    crosswalk_mediated:
+      - { field: property_id,              crosswalk: property_master_crosswalk, lookup_key: LOCATIONID_or_ENTITYID }
+      - { field: canonical_account_slug,   crosswalk: account_crosswalk,         lookup_key: GLACCOUNTNO }
+
+  variance_explanation:
+    canonical_entity: variance_line           # see ../../gl/schema.yaml
+    canonical_ontology: VarianceExplanation   # see ../../../_core/ontology.md
+    grain: one row per account per period per property with budget and actual
+    source_derivation: |
+      Intacct does not carry a native VarianceExplanation object. The
+      canonical variance_explanation is assembled from Budget Module
+      narrative fields joined with actual_line sums and budget_line sums
+      at the (property_id, canonical_account_slug, period) grain. The
+      adapter produces the join output under the normalized contract
+      for downstream consumers.
+    source_to_canonical:
+      - { source: (budget_line.amount_cents sum),   canonical: budget_amount_cents }
+      - { source: (actual_line.amount_cents sum),   canonical: actual_amount_cents }
+      - { source: (actual - budget),                canonical: variance_cents }
+      - { source: BUDGETDETAIL.MEMO_or_NARRATIVE,   canonical: narrative }
+      - { source: BUDGETDETAIL.DRIVER_CATEGORY,     canonical: driver_category, transform: map_intacct_driver_category }
+
+  capex_project:
+    canonical_entity: capex_actual_header     # informational; capex posted detail lands in actual_line
+    canonical_ontology: CapexProject          # see ../../../_core/ontology.md (financial side)
+    grain: one row per capex project (financial side)
+    source_to_canonical:
+      - { source: RECORDNO,        canonical: source_row_id }
+      - { source: PROJECTID,       canonical: source_project_id }
+      - { source: PROJECTNAME,     canonical: project_name }
+      - { source: PROJECT_TYPE,    canonical: project_type }
+      - { source: CATEGORY,        canonical: category }
+      - { source: FUNDING_SOURCE,  canonical: funding_source }
+      - { source: BUDGET_AMOUNT,   canonical: total_budget_cents, transform: dollars_to_cents }
+      - { source: CONTINGENCY_PCT, canonical: contingency_pct }
+      - { source: START_DATE,      canonical: target_start }
+      - { source: COMPLETION_DATE, canonical: target_completion }
+      - { source: STATUS,          canonical: status }
+      - { source: PARENT_PROJECTID, canonical: parent_capex_project_id }
+    crosswalk_mediated:
+      - { field: capex_project_id, crosswalk: capex_project_crosswalk, lookup_key: PROJECTID }
+      - { field: property_id,      crosswalk: property_master_crosswalk, lookup_key: LOCATIONID }
+    notes: |
+      Canonical CapexProject is authored jointly by Intacct (financial
+      side: budget, contingency, funding source) and the construction
+      platform (schedule, RFI, submittal, cost-to-complete). Both
+      adapters populate the same canonical capex_project_id via the
+      capex_project_crosswalk; survivorship rules in master_data/
+      survivorship_rules.md arbitrate conflicts.
+
+  vendor:
+    canonical_ontology: Vendor                # see ../../../_core/ontology.md
+    grain: one row per vendor
+    source_to_canonical:
+      - { source: RECORDNO,                canonical: source_row_id }
+      - { source: VENDORID,                canonical: source_vendor_id }
+      - { source: VENDORNAME,              canonical: vendor_name }
+      - { source: TAXID,                   canonical: tax_id,                 notes: restricted sensitivity; redact in logs }
+      - { source: W9_ON_FILE,              canonical: w9_on_file }
+      - { source: INSURANCE_EXPIRY_DATE,   canonical: insurance_expiry_date }
+      - { source: TERMNAME,                canonical: payment_terms_label }
+      - { source: CURRENCY,                canonical: source_currency }
+      - { source: STATUS,                  canonical: status }
+    crosswalk_mediated:
+      - { field: vendor_id, crosswalk: vendor_master_crosswalk, lookup_key: VENDORID }
+
+  journal_entry:
+    canonical_entity: journal_entry_header    # informational; detail posts via actual_line
+    grain: one row per posted journal batch (header)
+    source_to_canonical:
+      - { source: RECORDNO,       canonical: source_row_id }
+      - { source: BATCHNO,        canonical: journal_id }
+      - { source: JOURNAL,        canonical: journal_code }
+      - { source: BATCH_DATE,     canonical: posting_date }
+      - { source: PERIOD,         canonical: period,          transform: intacct_period_to_iso_month }
+      - { source: STATE,          canonical: state }
+      - { source: SOURCE_MODULE,  canonical: source_module }
+      - { source: BATCH_TITLE,    canonical: batch_title }
+      - { source: REVERSED,       canonical: reversed_flag }
+      - { source: REVERSAL_OF,    canonical: reversal_of_journal_id }
+      - { source: CREATED_BY,     canonical: created_by }
+
+  dimension:
+    canonical_entity: dimension_registry      # informational; used by crosswalks
+    grain: one row per Intacct dimension record (entity, location, department, project, class)
+    source_to_canonical:
+      - { source: DIMENSION_TYPE,     canonical: dimension_type }
+      - { source: DIMENSION_ID,       canonical: dimension_id }
+      - { source: DIMENSION_NAME,     canonical: dimension_name }
+      - { source: STATUS,             canonical: status }
+      - { source: PARENT_DIMENSION_ID, canonical: parent_dimension_id }
+    notes: |
+      The dimension registry is consumed by the property_master_crosswalk
+      (entity + location to property_id), the capex_project_crosswalk
+      (project to capex_project_id), and reporting-slice overlays (class
+      to fund / reporting segment). It is not a direct consumer-facing
+      canonical object.

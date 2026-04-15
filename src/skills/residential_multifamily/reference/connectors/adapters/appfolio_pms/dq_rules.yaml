@@ -1,0 +1,223 @@
+# AppFolio-specific data quality rules.
+# Severity: blocker | warning | info.
+# Tolerance bands cite reference/normalized/schemas/reconciliation_tolerance_band.yaml; no hardcoded values.
+# Rule id prefix: af_
+
+rules:
+
+  # -------------------------------------------------------------------------
+  # Freshness
+  # -------------------------------------------------------------------------
+
+  - rule_id: af_freshness_property
+    dimension: freshness
+    severity: blocker
+    description: Property feed must land within expected_latency_minutes per source_registry.
+    expected: max(property.extracted_at) >= now - source_registry.expected_latency_minutes
+    remediation: runbooks/appfolio_common_issues.md::stale_property_feed
+
+  - rule_id: af_freshness_unit
+    dimension: freshness
+    severity: blocker
+    description: Unit feed must land within expected_latency_minutes per source_registry.
+    expected: max(unit.extracted_at) >= now - source_registry.expected_latency_minutes
+    remediation: runbooks/appfolio_common_issues.md::stale_unit_feed
+
+  - rule_id: af_freshness_lease
+    dimension: freshness
+    severity: blocker
+    description: Lease feed must land within expected_latency_minutes per source_registry.
+    expected: max(lease.extracted_at) >= now - source_registry.expected_latency_minutes
+    remediation: runbooks/appfolio_common_issues.md::stale_lease_feed
+
+  - rule_id: af_freshness_charge
+    dimension: freshness
+    severity: blocker
+    description: Charge feed must land within expected_latency_minutes per source_registry.
+    expected: max(charge.extracted_at) >= now - source_registry.expected_latency_minutes
+    remediation: runbooks/appfolio_common_issues.md::stale_ledger_feed
+
+  - rule_id: af_freshness_payment
+    dimension: freshness
+    severity: blocker
+    description: Payment feed must land within expected_latency_minutes per source_registry.
+    expected: max(payment.extracted_at) >= now - source_registry.expected_latency_minutes
+    remediation: runbooks/appfolio_common_issues.md::stale_ledger_feed
+
+  - rule_id: af_freshness_work_order
+    dimension: freshness
+    severity: warning
+    description: Work order feed must land within expected_latency_minutes per source_registry; warning rather than blocker because p1_safety has its own SLA rule.
+    expected: max(work_order.extracted_at) >= now - source_registry.expected_latency_minutes
+    remediation: runbooks/appfolio_common_issues.md::stale_work_order_feed
+
+  # -------------------------------------------------------------------------
+  # Completeness
+  # -------------------------------------------------------------------------
+
+  - rule_id: af_completeness_property_required
+    dimension: completeness
+    severity: blocker
+    description: Every property record must carry property_id, property_name, unit_count_total, market.
+    expected: no nulls in (property_id, property_name, unit_count_total, market)
+    remediation: master_data/unresolved_exceptions_queue.md
+
+  - rule_id: af_completeness_unit_required
+    dimension: completeness
+    severity: blocker
+    description: Every unit record must carry unit_id, property_id, bedrooms, bathrooms, nrsf, status.
+    expected: no nulls in (unit_id, property_id, bedrooms, bathrooms, nrsf, status)
+    remediation: master_data/unresolved_exceptions_queue.md
+
+  - rule_id: af_completeness_lease_required
+    dimension: completeness
+    severity: blocker
+    description: Every lease record must carry lease_id, property_id, unit_id, resident_account_id, start_date, end_date, base_rent_monthly_cents, status, is_renewal.
+    expected: no nulls in lease required fields
+    remediation: master_data/unresolved_exceptions_queue.md
+
+  - rule_id: af_completeness_work_order_required
+    dimension: completeness
+    severity: blocker
+    description: Every work_order record must carry work_order_id, property_id, reported_date, priority, status.
+    expected: no nulls in work_order required fields
+    remediation: master_data/unresolved_exceptions_queue.md
+
+  - rule_id: af_completeness_application_decided_policy_ref
+    dimension: completeness
+    severity: blocker
+    description: Applications in a decided approval_status (approved, approved_with_conditions, declined) must carry a policy_ref to the screening overlay.
+    expected: approval_status IN {approved, approved_with_conditions, declined} IMPLIES approval_outcome.policy_ref is not null
+    remediation: runbooks/appfolio_common_issues.md::screening_policy_ref_missing
+
+  # -------------------------------------------------------------------------
+  # Conformance (enums)
+  # -------------------------------------------------------------------------
+
+  - rule_id: af_conformance_lease_status_enum
+    dimension: conformance
+    severity: blocker
+    description: lease.status must map to canonical enum (draft, approved, executed, in_effect, renewing, expired, terminated, broken) via map_appfolio_lease_status.
+    expected: lease.status IN canonical_lease_status_enum
+    remediation: extend map_appfolio_lease_status or escalate
+
+  - rule_id: af_conformance_work_order_priority_enum
+    dimension: conformance
+    severity: blocker
+    description: work_order.priority must map to canonical enum (p1_safety, p2_habitability, p3_standard, p4_cosmetic) via map_appfolio_priority.
+    expected: work_order.priority IN canonical_priority_enum
+    remediation: extend map_appfolio_priority or escalate
+
+  - rule_id: af_conformance_application_status_enum
+    dimension: conformance
+    severity: blocker
+    description: application.approval_status must map to canonical enum (pending, in_review, approved, approved_with_conditions, declined, withdrawn) via map_appfolio_app_status.
+    expected: application.approval_status IN canonical_app_status_enum
+    remediation: extend map_appfolio_app_status or escalate
+
+  # -------------------------------------------------------------------------
+  # Uniqueness
+  # -------------------------------------------------------------------------
+
+  - rule_id: af_uniqueness_unit_within_property
+    dimension: uniqueness
+    severity: blocker
+    description: unit_id unique within a property across active records.
+    expected: count(distinct (property_id, unit_id)) = count((property_id, unit_id)) where status != down
+    remediation: dedupe via unit_crosswalk
+
+  - rule_id: af_uniqueness_lease_id
+    dimension: uniqueness
+    severity: blocker
+    description: lease_id unique across active records.
+    expected: count(distinct lease_id) = count(lease_id) where status != terminated
+    remediation: dedupe via lease_crosswalk
+
+  - rule_id: af_uniqueness_work_order_id
+    dimension: uniqueness
+    severity: blocker
+    description: work_order_id unique across active records.
+    expected: count(distinct work_order_id) = count(work_order_id)
+    remediation: dedupe and investigate
+
+  # -------------------------------------------------------------------------
+  # Referential integrity
+  # -------------------------------------------------------------------------
+
+  - rule_id: af_referential_lease_unit_present
+    dimension: consistency
+    severity: blocker
+    description: Every lease references a valid unit in the unit feed.
+    expected: lease.unit_id IN unit.unit_id
+    remediation: investigate orphan lease or unresolved unit_crosswalk row
+
+  - rule_id: af_referential_charge_lease_present
+    dimension: consistency
+    severity: warning
+    description: Charges carry a resolved lease_id. Recent charges must resolve; historical charges allowed to warn.
+    expected: charge.lease_id IN lease.lease_id for charge_date within 90 day window
+    remediation: runbooks/appfolio_common_issues.md::orphan_charge
+
+  - rule_id: af_referential_application_lead_present
+    dimension: consistency
+    severity: blocker
+    description: Every application references a valid lead (guest card).
+    expected: application.lead_id IN lead.lead_id
+    remediation: investigate orphan application
+
+  - rule_id: af_referential_work_order_vendor_present
+    dimension: consistency
+    severity: warning
+    description: Work orders with vendor_id assigned must reference a valid vendor_master_crosswalk row.
+    expected: work_order.vendor_id IN vendor_master_crosswalk.canonical_id where vendor_id is not null
+    remediation: master_data/unresolved_exceptions_queue.md
+
+  # -------------------------------------------------------------------------
+  # Consistency
+  # -------------------------------------------------------------------------
+
+  - rule_id: af_consistency_lease_term_months
+    dimension: consistency
+    severity: warning
+    description: lease.term_months consistent with (end_date - start_date) within term_match_band.
+    expected: abs(term_months - months_between(start_date, end_date)) <= term_match_band (cite reconciliation_tolerance_band.yaml)
+    remediation: runbooks/appfolio_common_issues.md::term_months_mismatch
+
+  - rule_id: af_consistency_ledger_sum_matches_balance
+    dimension: consistency
+    severity: blocker
+    description: Sum of (charges - payments) for a resident over the ledger window equals CurrentBalance within ledger_tie_band.
+    expected: abs(sum_charges - sum_payments - current_balance) <= ledger_tie_band (cite reconciliation_tolerance_band.yaml)
+    remediation: runbooks/appfolio_common_issues.md::ledger_tie_out
+
+  - rule_id: af_consistency_vendor_insurance_not_stale
+    dimension: consistency
+    severity: warning
+    description: Vendors with active dispatch history must have insurance_expiry_date within vendor_insurance_freshness_band.
+    expected: insurance_expiry_date >= now - vendor_insurance_freshness_band (cite reconciliation_tolerance_band.yaml)
+    remediation: runbooks/appfolio_common_issues.md::vendor_insurance_stale
+
+  - rule_id: af_consistency_p1_safety_assignment_sla
+    dimension: consistency
+    severity: blocker
+    description: p1_safety work orders must be assigned (status != open) within p1_safety_ack_band of reported_date.
+    expected: priority = p1_safety IMPLIES time_to_assignment <= p1_safety_ack_band (cite reconciliation_tolerance_band.yaml)
+    remediation: runbooks/appfolio_common_issues.md::p1_safety_sla_breach
+
+  # -------------------------------------------------------------------------
+  # Guardrails (fair housing / policy)
+  # -------------------------------------------------------------------------
+
+  - rule_id: af_guardrail_lead_notes_no_protected_class
+    dimension: conformance
+    severity: blocker
+    description: Lead.notes and lead.preferences free-text must not contain any protected-class flag (race, color, religion, national origin, sex, familial status, disability, state / local class). Tests enforce via pattern.
+    expected: no protected-class tokens in notes or preferences free text
+    remediation: route to security_review queue; runbooks/appfolio_common_issues.md::fair_housing_guardrail
+
+  - rule_id: af_guardrail_application_decided_requires_policy_ref
+    dimension: conformance
+    severity: blocker
+    description: Application transitions to decided status (approved, approved_with_conditions, declined) must carry approval_outcome.policy_ref.
+    expected: decided application IMPLIES policy_ref resolves to screening policy overlay
+    remediation: runbooks/appfolio_common_issues.md::screening_policy_ref_missing

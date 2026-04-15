@@ -1,0 +1,293 @@
+# Account Crosswalk (starter set).
+# Conforms to crosswalk.schema.yaml with the extension that source_id carries
+# the GL account code string from the source system and canonical_id is the
+# canonical account slug consumed by downstream budget and variance workflows.
+#
+# Canonical account slugs cross-reference the revenue / expense / capex
+# taxonomy surfaced in _core/ontology.md via BudgetLine.build_basis and
+# the residential multifamily skill's budget-defense templates.
+
+status_tag: sample
+
+rows:
+
+  # Revenue: base rent
+  - canonical_id: revenue_base_rent
+    source_system: corporate_gl
+    source_id: "4000"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2020-01-01"
+    survivorship_rule: account_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      GL account 4000 "Rental Income - Base". Canonical slug aggregates
+      net of concessions for residential multifamily revenue rollup.
+
+  # Revenue: other rental
+  - canonical_id: revenue_other_rental
+    source_system: corporate_gl
+    source_id: "4100"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2020-01-01"
+    survivorship_rule: account_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      GL account 4100 "Rental Income - Other". Covers parking, storage,
+      pet, tech package, and other lease-linked ancillary fees.
+
+  # Revenue: other non-rental
+  - canonical_id: revenue_other_non_rental
+    source_system: corporate_gl
+    source_id: "4200"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2020-01-01"
+    survivorship_rule: account_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      GL account 4200 "Other Income". Late fees, NSF fees, damage
+      recovery, utility reimbursement.
+
+  # Expense: payroll
+  - canonical_id: expense_payroll
+    source_system: corporate_gl
+    source_id: "6000"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2020-01-01"
+    survivorship_rule: account_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      GL account 6000 "Payroll - On-Site". Feeds the staffing_plan cost
+      rollup and the payroll variance narrative. Contractor spend is not
+      included here; see expense_contract_labor.
+
+  - canonical_id: expense_contract_labor
+    source_system: corporate_gl
+    source_id: "6050"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2020-01-01"
+    survivorship_rule: account_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      GL account 6050 "Contract Labor". Contractor payments; distinct
+      from employee payroll per the employee_crosswalk classification.
+
+  # Expense: repairs and maintenance
+  - canonical_id: expense_repairs_maintenance
+    source_system: corporate_gl
+    source_id: "6100"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2020-01-01"
+    survivorship_rule: account_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      GL account 6100 "Repairs and Maintenance". Feeds work_order cost
+      rollups and R&M benchmarking.
+
+  # Expense: turn
+  - canonical_id: expense_turn
+    source_system: corporate_gl
+    source_id: "6150"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2020-01-01"
+    survivorship_rule: account_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      GL account 6150 "Unit Turn". Not a capex account; expensed. Feeds
+      make-ready cost benchmarking.
+
+  # Capex: component replacement
+  - canonical_id: capex_component_replacement
+    source_system: corporate_gl
+    source_id: "7100"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2020-01-01"
+    survivorship_rule: account_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      GL account 7100 "Capex - Component Replacement". Roof, HVAC, siding
+      etc. Feeds the capex_project_crosswalk for project identity.
+
+  # Capex: value-add
+  - canonical_id: capex_value_add
+    source_system: corporate_gl
+    source_id: "7200"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2020-01-01"
+    survivorship_rule: account_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      GL account 7200 "Capex - Value-Add". Classic-to-renovated unit
+      upgrades, amenity refreshes, retail re-anchoring.
+
+  # Capex: compliance and life safety
+  - canonical_id: capex_compliance_life_safety
+    source_system: corporate_gl
+    source_id: "7300"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2020-01-01"
+    survivorship_rule: account_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      GL account 7300 "Capex - Compliance / Life Safety". ADA, fire, life
+      safety inspections required capex.
+
+  # -----------------------------------------------------------------------
+  # Wave 5 — Yardi multi-role adapter integration. Yardi GL chart is
+  # operator-defined; mapping survives from yardi_voyager_gl_stub only
+  # when operator role closes as primary GL (yardi_primary_pms_and_gl or
+  # yardi_primary_everything). Otherwise intacct wins per
+  # yardi_multi_role survivorship rule.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: gl_5001_rental_income
+    source_system: yardi_voyager_gl_stub
+    source_id: "5001"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: account_default
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Yardi GL row for rental income;
+      survives only when yardi_multi_role role closes as primary GL.
+      Provisional until classification_worksheet.md closes.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager GL account 5001 (revenue).
+      Cross-mapped to intacct 4000_RENT_INCOME.
+
+  - canonical_id: gl_5001_rental_income
+    source_system: sage_intacct_prod
+    source_id: "4000_RENT_INCOME"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: account_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Intacct-side pairing for Voyager
+      5001. Intacct wins when yardi role is not primary GL.
+
+  - canonical_id: gl_6100_property_mgmt_fees
+    source_system: yardi_voyager_gl_stub
+    source_id: "6100"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: account_default
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Yardi GL row for property
+      management fees (expense_operating).
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager GL account 6100.
+
+  - canonical_id: gl_6100_property_mgmt_fees
+    source_system: sage_intacct_prod
+    source_id: "6100_PROPERTY_MGMT_FEES"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: account_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Intacct-side pairing for Voyager
+      6100.
+
+  - canonical_id: gl_6200_repairs_maintenance
+    source_system: yardi_voyager_gl_stub
+    source_id: "6200"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: account_default
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Yardi GL row for repairs &
+      maintenance.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager GL account 6200.
+
+  - canonical_id: gl_6200_repairs_maintenance
+    source_system: sage_intacct_prod
+    source_id: "6200_REPAIRS_MAINT"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: account_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Intacct-side pairing for Voyager
+      6200.
+
+  - canonical_id: gl_2410_prepaid_rent_liability
+    source_system: yardi_voyager_gl_stub
+    source_id: "2410"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: account_default
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Yardi GL row for prepaid rent
+      liability. Covers prepay vs receivable attribution per
+      bounded_assumptions.yaml (prepay_vs_receivable_posting gotcha).
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager GL account 2410.
+
+  - canonical_id: gl_2410_prepaid_rent_liability
+    source_system: sage_intacct_prod
+    source_id: "2410_PREPAID_RENT_LIAB"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: account_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Intacct-side pairing for Voyager
+      2410.

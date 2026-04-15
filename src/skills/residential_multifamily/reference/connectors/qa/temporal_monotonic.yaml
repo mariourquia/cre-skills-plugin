@@ -1,0 +1,35 @@
+# Generic temporal-monotonic check template.
+# Events for a subject (a lead, a lease, a delinquency case, a schedule milestone)
+# must be in chronological order. Any regression requires an explicit reason.
+check_id: temporal_monotonic
+check_kind: date_coverage
+severity: warning
+description: |
+  For each subject, the sequence of event timestamps follows the declared
+  ordering. Stage or status transitions that regress through the allowed
+  sequence are flagged for operator review.
+parameters:
+  - name: subject_entity
+    description: Entity whose events are sequenced (lease, lead, delinquency_case, schedule_milestone)
+  - name: subject_id_field
+    description: PK field that groups the events
+  - name: event_timestamp_field
+    description: Timestamp or date field that defines the ordering
+  - name: ordering_ref
+    description: Pointer to the allowed_transitions list in schema.yaml or to overlay
+inputs:
+  - reference/normalized/<subject_entity>__<scope>.csv
+expected_invariant: |
+  for each <subject_id_field>:
+    event_timestamp_field is monotonically non-decreasing across the event
+    sequence AND any status transition matches allowed_transitions declared
+    at <ordering_ref>
+severity_default: warning
+remediation_pattern: |
+  Out-of-order events typically reflect back-dated entry, time-zone confusion,
+  or a cure event that was missed. Operator confirms with the system of record;
+  do not silently reorder.
+remediation: |
+  See remediation_pattern. The reconciliation_report.json lists the specific
+  subject ids and the offending event sequence; operator resolves before
+  re-landing.

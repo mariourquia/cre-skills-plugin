@@ -1,0 +1,20 @@
+# Date-coverage gap detection.
+check_id: date_coverage
+check_kind: date_coverage
+severity: warning
+description: |
+  Normalized records must cover the expected cadence (daily/weekly/monthly)
+  without gaps between as_of_date values relative to the prior landing.
+inputs:
+  - reference/normalized/<entity>__<scope>.csv
+expected_invariant: |
+  max(as_of_date) - min(as_of_date) within declared coverage window AND
+  no missing interior period per entity's expected cadence
+tolerance:
+  absolute: 1
+  relative_percent: 0.0
+remediation: |
+  Gap indicates a missed extraction or a source outage. Pull the missing
+  period from the operator and re-land before proceeding to derived
+  recomputation. A one-period gap at the tail of the series is acceptable
+  (the latest period simply has not landed yet).

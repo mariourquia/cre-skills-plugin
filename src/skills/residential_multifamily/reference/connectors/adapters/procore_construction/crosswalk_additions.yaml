@@ -1,0 +1,335 @@
+# Procore adapter — crosswalk fragments.
+#
+# Fragments that merge into reference/connectors/master_data/*.yaml.
+# Each fragment conforms to master_data/crosswalk.schema.yaml and pins
+# source_system = procore_prod for Procore-side rows. Intacct side uses
+# source_system = sage_intacct_prod or corporate_gl; AppFolio uses
+# appfolio_prod; Dealpath uses dealpath_prod.
+#
+# All rows carry status_tag: sample; synthetic ids only.
+
+status_tag: sample
+
+# ----------------------------------------------------------------------
+# capex_project_crosswalk — Procore project_id <-> Intacct dim_project <-> canonical capex_project_id.
+# ----------------------------------------------------------------------
+capex_project_crosswalk:
+  rows:
+    - canonical_id: capex_ashf_001_ren_2025
+      source_system: procore_prod
+      source_id: pc_proj_0002
+      match_confidence: high
+      match_method: manual
+      effective_start: "2025-03-15"
+      survivorship_rule: capex_project_default
+      manual_override: false
+      reviewer: construction_lead
+      last_validated_at: "2026-04-15"
+      notes: |
+        Major renovation at prop_ashford_park. Procore is primary for
+        scope and commitments; Intacct primary for posted actuals.
+
+    - canonical_id: capex_ashf_001_ren_2025
+      source_system: sage_intacct_prod
+      source_id: "22-4501-ASHF"
+      match_confidence: high
+      match_method: manual
+      effective_start: "2025-03-15"
+      survivorship_rule: capex_project_default
+      manual_override: false
+      reviewer: corporate_controller
+      last_validated_at: "2026-04-15"
+      notes: |
+        GL dim_project for renovation posting. Account slug per
+        account_crosswalk is capex_value_add.
+
+    - canonical_id: capex_mgnl_003_amen_2025
+      source_system: procore_prod
+      source_id: pc_proj_0003
+      match_confidence: high
+      match_method: manual
+      effective_start: "2025-06-01"
+      survivorship_rule: capex_project_default
+      manual_override: false
+      reviewer: construction_lead
+      last_validated_at: "2026-04-15"
+      notes: |
+        Amenity upgrade at prop_magnolia_terrace.
+
+    - canonical_id: capex_mgnl_003_amen_2025
+      source_system: sage_intacct_prod
+      source_id: "22-4501-MGNL-AMEN"
+      match_confidence: high
+      match_method: manual
+      effective_start: "2025-06-01"
+      survivorship_rule: capex_project_default
+      manual_override: false
+      reviewer: corporate_controller
+      last_validated_at: "2026-04-15"
+      notes: |
+        GL dim_project for amenity upgrade posting.
+
+    - canonical_id: capex_brln_004_roof_2026
+      source_system: procore_prod
+      source_id: pc_proj_0004
+      match_confidence: high
+      match_method: exact
+      effective_start: "2026-02-01"
+      survivorship_rule: capex_project_default
+      manual_override: false
+      reviewer: construction_lead
+      last_validated_at: "2026-04-15"
+      notes: |
+        Component replacement — roof — at prop_brookline_court.
+
+# ----------------------------------------------------------------------
+# dev_project_crosswalk — Procore project_id <-> Dealpath asset_id.
+# ----------------------------------------------------------------------
+dev_project_crosswalk:
+  rows:
+    - canonical_id: dev_hrbv_001_gu_2024
+      source_system: procore_prod
+      source_id: pc_proj_0001
+      match_confidence: high
+      match_method: exact
+      effective_start: "2024-10-01"
+      survivorship_rule: dev_project_default
+      manual_override: false
+      reviewer: development_lead
+      last_validated_at: "2026-04-15"
+      notes: |
+        Ground-up development. Tracker row anchors baseline schedule and
+        budget. Dealpath-seeded at IC approval on 2024-09-15.
+
+    - canonical_id: dev_hrbv_001_gu_2024
+      source_system: dealpath_prod
+      source_id: dp_asset_hrbv_001
+      match_confidence: high
+      match_method: manual
+      effective_start: "2024-09-15"
+      survivorship_rule: dev_project_default
+      manual_override: false
+      reviewer: investments_lead
+      last_validated_at: "2026-04-15"
+      notes: |
+        Dealpath asset record seeded at IC approval; superseded by Procore
+        once project executes per source_of_truth_matrix.
+
+    - canonical_id: dev_rdgl_005_gu_2023
+      source_system: procore_prod
+      source_id: pc_proj_0005
+      match_confidence: high
+      match_method: exact
+      effective_start: "2023-04-01"
+      survivorship_rule: dev_project_default
+      manual_override: false
+      reviewer: development_lead
+      last_validated_at: "2026-04-15"
+      notes: |
+        Ground-up development completed; in warranty stage. Delivery handoff
+        to Yardi completed 2026-01-20 (operator uses Yardi for this asset).
+
+    - canonical_id: dev_rdgl_005_gu_2023
+      source_system: dealpath_prod
+      source_id: dp_asset_rdgl_005
+      match_confidence: high
+      match_method: exact
+      effective_start: "2022-11-01"
+      survivorship_rule: dev_project_default
+      manual_override: false
+      reviewer: investments_lead
+      last_validated_at: "2026-04-15"
+      notes: |
+        Dealpath asset anchor for completed greenfield development.
+
+# ----------------------------------------------------------------------
+# vendor_master_crosswalk — Procore directory <-> Intacct AP <-> AppFolio vendor.
+# ----------------------------------------------------------------------
+vendor_master_crosswalk:
+  rows:
+    - canonical_id: vendor_harbor_steel_llc
+      source_system: procore_prod
+      source_id: pc_vendor_0001
+      match_confidence: high
+      match_method: composite
+      effective_start: "2024-10-01"
+      survivorship_rule: vendor_master_default
+      manual_override: false
+      reviewer: construction_lead
+      last_validated_at: "2026-04-15"
+      notes: |
+        Procore directory entry. Trade classification survives from this
+        row per survivorship rule vendor_master_default.
+
+    - canonical_id: vendor_harbor_steel_llc
+      source_system: sage_intacct_prod
+      source_id: AP-STEEL-4411
+      match_confidence: high
+      match_method: composite
+      effective_start: "2022-01-15"
+      survivorship_rule: vendor_master_default
+      manual_override: false
+      reviewer: ap_manager
+      last_validated_at: "2026-04-15"
+      notes: |
+        AP vendor master row. Legal name and tax_id survive from this row.
+
+    - canonical_id: vendor_vista_mechanical_inc
+      source_system: procore_prod
+      source_id: pc_vendor_0002
+      match_confidence: high
+      match_method: composite
+      effective_start: "2024-11-15"
+      survivorship_rule: vendor_master_default
+      manual_override: false
+      reviewer: construction_lead
+      last_validated_at: "2026-04-15"
+      notes: |
+        Procore directory entry for mechanical subcontractor.
+
+    - canonical_id: vendor_vista_mechanical_inc
+      source_system: sage_intacct_prod
+      source_id: AP-MECH-5544
+      match_confidence: high
+      match_method: composite
+      effective_start: "2020-06-01"
+      survivorship_rule: vendor_master_default
+      manual_override: false
+      reviewer: ap_manager
+      last_validated_at: "2026-04-15"
+      notes: |
+        AP vendor master row. Vendor also dispatches for post-delivery HVAC
+        maintenance via AppFolio; see companion appfolio_prod row.
+
+    - canonical_id: vendor_vista_mechanical_inc
+      source_system: appfolio_prod
+      source_id: AF-VEND-4420
+      match_confidence: high
+      match_method: composite
+      effective_start: "2021-04-01"
+      survivorship_rule: vendor_master_default
+      manual_override: false
+      reviewer: regional_ops_director
+      last_validated_at: "2026-04-15"
+      notes: |
+        AppFolio vendor record for post-delivery HVAC dispatch at
+        prop_ashford_park. Three-way vendor resolution.
+
+    - canonical_id: vendor_linden_finishes_group
+      source_system: procore_prod
+      source_id: pc_vendor_0004
+      match_confidence: high
+      match_method: composite
+      effective_start: "2025-07-01"
+      survivorship_rule: vendor_master_default
+      manual_override: false
+      reviewer: construction_lead
+      last_validated_at: "2026-04-15"
+      notes: |
+        Finishes subcontractor at amenity upgrade.
+
+    - canonical_id: vendor_linden_finishes_group
+      source_system: sage_intacct_prod
+      source_id: AP-FIN-2233
+      match_confidence: high
+      match_method: composite
+      effective_start: "2023-03-01"
+      survivorship_rule: vendor_master_default
+      manual_override: false
+      reviewer: ap_manager
+      last_validated_at: "2026-04-15"
+      notes: |
+        AP vendor master row.
+
+# ----------------------------------------------------------------------
+# change_order_crosswalk — Procore CO <-> Intacct journal (if applicable).
+# ----------------------------------------------------------------------
+change_order_crosswalk:
+  rows:
+    - canonical_id: co_hrbv_001_gu_2024_co_001
+      source_system: procore_prod
+      source_id: pc_co_0001
+      match_confidence: high
+      match_method: exact
+      effective_start: "2025-02-18"
+      survivorship_rule: change_order_default
+      manual_override: false
+      reviewer: construction_lead
+      last_validated_at: "2026-04-15"
+      notes: |
+        Approved CO for footing unforeseen rock. Posted to Intacct as a
+        reclass journal (GL-CO-HRBV-001).
+
+    - canonical_id: co_hrbv_001_gu_2024_co_001
+      source_system: sage_intacct_prod
+      source_id: GL-CO-HRBV-001
+      match_confidence: high
+      match_method: manual
+      effective_start: "2025-02-20"
+      survivorship_rule: change_order_default
+      manual_override: false
+      reviewer: corporate_controller
+      last_validated_at: "2026-04-15"
+      notes: |
+        GL journal for approved CO. Two-day posting lag within
+        co_posting_lag_band per reconciliation_tolerance_band.yaml.
+
+    - canonical_id: co_hrbv_001_gu_2024_co_004_pending
+      source_system: procore_prod
+      source_id: pc_co_0004
+      match_confidence: high
+      match_method: exact
+      effective_start: "2026-03-22"
+      survivorship_rule: change_order_default
+      manual_override: false
+      reviewer: construction_lead
+      last_validated_at: "2026-04-15"
+      notes: |
+        Pending CO; no Intacct row expected until approval.
+
+# ----------------------------------------------------------------------
+# draw_request_crosswalk — Procore pay app <-> Intacct funding entry.
+# ----------------------------------------------------------------------
+draw_request_crosswalk:
+  rows:
+    - canonical_id: draw_hrbv_001_gu_2024_dr_006
+      source_system: procore_prod
+      source_id: pc_draw_0001
+      match_confidence: high
+      match_method: exact
+      effective_start: "2026-03-03"
+      survivorship_rule: draw_request_default
+      manual_override: false
+      reviewer: construction_lead
+      last_validated_at: "2026-04-15"
+      notes: |
+        Pay app submitted 2026-03-03; approved 2026-03-06.
+
+    - canonical_id: draw_hrbv_001_gu_2024_dr_006
+      source_system: sage_intacct_prod
+      source_id: GL-DRAW-HRBV-006
+      match_confidence: high
+      match_method: manual
+      effective_start: "2026-03-11"
+      survivorship_rule: draw_request_default
+      manual_override: false
+      reviewer: corporate_controller
+      last_validated_at: "2026-04-15"
+      notes: |
+        Funding receipt posted 2026-03-11. Within draw_posting_lag_band
+        per reconciliation_tolerance_band.yaml.
+
+    - canonical_id: draw_mgnl_003_amen_2025_dr_008
+      source_system: procore_prod
+      source_id: pc_draw_0003
+      match_confidence: high
+      match_method: exact
+      effective_start: "2026-04-02"
+      survivorship_rule: draw_request_default
+      manual_override: false
+      reviewer: construction_lead
+      last_validated_at: "2026-04-15"
+      notes: |
+        Final pay app with retainage release; approved_as_noted on
+        2026-04-05 pending final lien waiver receipt; Intacct posting
+        expected within draw_posting_lag_band.

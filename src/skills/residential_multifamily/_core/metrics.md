@@ -1810,3 +1810,1818 @@ The following metric slugs are reserved for future definitions. Do not reuse the
 - `rent_growth_same_store`, `rent_growth_new_supply`, `absorption_rate`, `lease_exposure_by_month`, `rubs_recovery_rate`, `insurance_claim_frequency`, `capex_deferred_to_life_safety_ratio`, `tenant_satisfaction_index`, `vendor_scorecard_index`.
 
 Each will follow the full metric contract when added.
+---
+
+## Pipeline / Pre-Close / IC / Handoff family (wave-5; status: proposed)
+
+Wave-5 introduced these metrics through the pipeline_review, pre_close_deal_tracking, investment_committee_prep, acquisition_handoff, post_ic_property_setup, development_pipeline_tracking, lease_up_first_period, delivery_handoff, and executive_pipeline_summary workflow packs. Each ships at `status: proposed` until the operationalization run promotes it. Source-of-record per metric is documented inline; reconciliation bands cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+
+### pipeline_velocity_days
+
+```yaml
+name: Pipeline Velocity Days
+slug: pipeline_velocity_days
+description: |
+  Pipeline Velocity Days — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: rolling_window
+time_basis_window: T12
+scenario: [actual, forecast]
+unit: days
+rollup_rule: weighted_by_deal_dollars
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### stage_conversion_rate
+
+```yaml
+name: Stage Conversion Rate
+slug: stage_conversion_rate
+description: |
+  Stage Conversion Rate — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: rolling_window
+time_basis_window: T12
+scenario: [actual, forecast]
+unit: percent
+rollup_rule: weighted_by_deal_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### stalled_deal_count
+
+```yaml
+name: Stalled Deal Count
+slug: stalled_deal_count
+description: |
+  Stalled Deal Count — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: count
+rollup_rule: sum
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### ic_prep_load_count
+
+```yaml
+name: IC Prep Load Count
+slug: ic_prep_load_count
+description: |
+  IC Prep Load Count — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: count
+rollup_rule: sum
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### debt_term_sheet_variance
+
+```yaml
+name: Debt Term Sheet Variance
+slug: debt_term_sheet_variance
+description: |
+  Debt Term Sheet Variance — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: percent
+rollup_rule: weighted_by_deal_dollars
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### retrade_risk_count
+
+```yaml
+name: Retrade Risk Count
+slug: retrade_risk_count
+description: |
+  Retrade Risk Count — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: count
+rollup_rule: sum
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### closing_certainty_score
+
+```yaml
+name: Closing Certainty Score
+slug: closing_certainty_score
+description: |
+  Closing Certainty Score — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: ratio
+rollup_rule: weighted_by_deal_dollars
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### pipeline_weighted_capital_need
+
+```yaml
+name: Pipeline Weighted Capital Need
+slug: pipeline_weighted_capital_need
+description: |
+  Pipeline Weighted Capital Need — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: dollars
+rollup_rule: sum
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### pipeline_stage_committed_dollars
+
+```yaml
+name: Pipeline Stage Committed Dollars
+slug: pipeline_stage_committed_dollars
+description: |
+  Pipeline Stage Committed Dollars — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: dollars
+rollup_rule: sum
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### expected_close_by_month
+
+```yaml
+name: Expected Close By Month
+slug: expected_close_by_month
+description: |
+  Expected Close By Month — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: rolling_window
+time_basis_window: T12
+scenario: [actual, forecast]
+unit: dollars
+rollup_rule: sum
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### key_date_breach_count
+
+```yaml
+name: Key Date Breach Count
+slug: key_date_breach_count
+description: |
+  Key Date Breach Count — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: count
+rollup_rule: sum
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### key_date_days_remaining
+
+```yaml
+name: Key Date Days Remaining
+slug: key_date_days_remaining
+description: |
+  Key Date Days Remaining — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: days
+rollup_rule: not_rollupable (must be recomputed at target grain)
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### open_contingency_count
+
+```yaml
+name: Open Contingency Count
+slug: open_contingency_count
+description: |
+  Open Contingency Count — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: count
+rollup_rule: sum
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### lender_deliverable_status_score
+
+```yaml
+name: Lender Deliverable Status Score
+slug: lender_deliverable_status_score
+description: |
+  Lender Deliverable Status Score — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: ratio
+rollup_rule: weighted_by_deal_dollars
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### escrow_funding_status
+
+```yaml
+name: Escrow Funding Status
+slug: escrow_funding_status
+description: |
+  Escrow Funding Status — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: ratio
+rollup_rule: weighted_by_deal_dollars
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### pre_close_cycle_time
+
+```yaml
+name: Pre-Close Cycle Time
+slug: pre_close_cycle_time
+description: |
+  Pre-Close Cycle Time — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: rolling_window
+time_basis_window: T12
+scenario: [actual, forecast]
+unit: days
+rollup_rule: weighted_by_deal_dollars
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### days_to_close
+
+```yaml
+name: Days To Close
+slug: days_to_close
+description: |
+  Days To Close — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: days
+rollup_rule: not_rollupable (must be recomputed at target grain)
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### ic_approval_rate
+
+```yaml
+name: IC Approval Rate
+slug: ic_approval_rate
+description: |
+  IC Approval Rate — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: rolling_window
+time_basis_window: T12
+scenario: [actual, forecast]
+unit: percent
+rollup_rule: weighted_by_deal_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### ic_deferral_rate
+
+```yaml
+name: IC Deferral Rate
+slug: ic_deferral_rate
+description: |
+  IC Deferral Rate — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: rolling_window
+time_basis_window: T12
+scenario: [actual, forecast]
+unit: percent
+rollup_rule: weighted_by_deal_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### ic_decline_rate
+
+```yaml
+name: IC Decline Rate
+slug: ic_decline_rate
+description: |
+  IC Decline Rate — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: rolling_window
+time_basis_window: T12
+scenario: [actual, forecast]
+unit: percent
+rollup_rule: weighted_by_deal_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### ic_condition_completion_rate
+
+```yaml
+name: IC Condition Completion Rate
+slug: ic_condition_completion_rate
+description: |
+  IC Condition Completion Rate — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: percent
+rollup_rule: weighted_by_deal_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### ic_condition_aging_days
+
+```yaml
+name: IC Condition Aging Days
+slug: ic_condition_aging_days
+description: |
+  IC Condition Aging Days — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: days
+rollup_rule: weighted_by_deal_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### ic_docket_load_count
+
+```yaml
+name: IC Docket Load Count
+slug: ic_docket_load_count
+description: |
+  IC Docket Load Count — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: count
+rollup_rule: sum
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### ic_docket_forward_90d
+
+```yaml
+name: IC Docket Forward 90 Days
+slug: ic_docket_forward_90d
+description: |
+  IC Docket Forward 90 Days — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: rolling_window
+time_basis_window: T12
+scenario: [actual, forecast]
+unit: count
+rollup_rule: sum
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### sensitivity_test_pass_rate
+
+```yaml
+name: Sensitivity Test Pass Rate
+slug: sensitivity_test_pass_rate
+description: |
+  Sensitivity Test Pass Rate — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: percent
+rollup_rule: weighted_by_deal_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### comp_evidence_freshness_days
+
+```yaml
+name: Comp Evidence Freshness Days
+slug: comp_evidence_freshness_days
+description: |
+  Comp Evidence Freshness Days — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: days
+rollup_rule: weighted_by_deal_dollars
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### lp_capital_coverage_ratio
+
+```yaml
+name: LP Capital Coverage Ratio
+slug: lp_capital_coverage_ratio
+description: |
+  LP Capital Coverage Ratio — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: ratio
+rollup_rule: sum
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### ic_cycle_time_days
+
+```yaml
+name: IC Cycle Time Days
+slug: ic_cycle_time_days
+description: |
+  IC Cycle Time Days — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: rolling_window
+time_basis_window: T12
+scenario: [actual, forecast]
+unit: days
+rollup_rule: weighted_by_deal_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### handoff_completeness_score
+
+```yaml
+name: Handoff Completeness Score
+slug: handoff_completeness_score
+description: |
+  Handoff Completeness Score — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: asset_management
+grain: property
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: ratio
+rollup_rule: weighted_by_unit_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### handoff_lag_days
+
+```yaml
+name: Handoff Lag Days
+slug: handoff_lag_days
+description: |
+  Handoff Lag Days — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: asset_management
+grain: property
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: days
+rollup_rule: weighted_by_unit_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### vendor_rationalization_count
+
+```yaml
+name: Vendor Rationalization Count
+slug: vendor_rationalization_count
+description: |
+  Vendor Rationalization Count — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: asset_management
+grain: property
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: count
+rollup_rule: sum
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### opening_rent_roll_reconciliation_variance
+
+```yaml
+name: Opening Rent Roll Reconciliation Variance
+slug: opening_rent_roll_reconciliation_variance
+description: |
+  Opening Rent Roll Reconciliation Variance — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: asset_management
+grain: property
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: percent
+rollup_rule: weighted_by_unit_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### pma_execution_lag_days
+
+```yaml
+name: PMA Execution Lag Days
+slug: pma_execution_lag_days
+description: |
+  PMA Execution Lag Days — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: asset_management
+grain: property
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: days
+rollup_rule: weighted_by_unit_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### crosswalk_row_creation_lag_days
+
+```yaml
+name: Crosswalk Row Creation Lag Days
+slug: crosswalk_row_creation_lag_days
+description: |
+  Crosswalk Row Creation Lag Days — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: asset_management
+grain: property
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: days
+rollup_rule: weighted_by_unit_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### pre_close_setup_completeness_score
+
+```yaml
+name: Pre-Close Setup Completeness Score
+slug: pre_close_setup_completeness_score
+description: |
+  Pre-Close Setup Completeness Score — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: asset_management
+grain: property
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: ratio
+rollup_rule: weighted_by_unit_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### placeholder_crosswalk_creation_lag_days
+
+```yaml
+name: Placeholder Crosswalk Creation Lag Days
+slug: placeholder_crosswalk_creation_lag_days
+description: |
+  Placeholder Crosswalk Creation Lag Days — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: asset_management
+grain: property
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: days
+rollup_rule: weighted_by_unit_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### pre_close_insurance_binder_lead_days
+
+```yaml
+name: Pre-Close Insurance Binder Lead Days
+slug: pre_close_insurance_binder_lead_days
+description: |
+  Pre-Close Insurance Binder Lead Days — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: asset_management
+grain: property
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: days
+rollup_rule: weighted_by_unit_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### legal_entity_formation_lag_days
+
+```yaml
+name: Legal Entity Formation Lag Days
+slug: legal_entity_formation_lag_days
+description: |
+  Legal Entity Formation Lag Days — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: asset_management
+grain: property
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: days
+rollup_rule: weighted_by_unit_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### tax_lot_research_completion_rate
+
+```yaml
+name: Tax Lot Research Completion Rate
+slug: tax_lot_research_completion_rate
+description: |
+  Tax Lot Research Completion Rate — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: asset_management
+grain: property
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: percent
+rollup_rule: weighted_by_unit_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### handoff_baton_readiness_score
+
+```yaml
+name: Handoff Baton Readiness Score
+slug: handoff_baton_readiness_score
+description: |
+  Handoff Baton Readiness Score — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: asset_management
+grain: property
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: ratio
+rollup_rule: weighted_by_unit_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### handoff_lag_dealpath_to_procore
+
+```yaml
+name: Handoff Lag Dealpath To Procore
+slug: handoff_lag_dealpath_to_procore
+description: |
+  Handoff Lag Dealpath To Procore — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: asset_management
+grain: project
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: days
+rollup_rule: weighted_by_project_dollars
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### tco_to_first_unit_ready_days
+
+```yaml
+name: TCO To First Unit Ready Days
+slug: tco_to_first_unit_ready_days
+description: |
+  TCO To First Unit Ready Days — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: development_construction
+grain: project
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: days
+rollup_rule: not_rollupable (must be recomputed at target grain)
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### delivery_handoff_completeness_score
+
+```yaml
+name: Delivery Handoff Completeness Score
+slug: delivery_handoff_completeness_score
+description: |
+  Delivery Handoff Completeness Score — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: development_construction
+grain: project
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: ratio
+rollup_rule: weighted_by_unit_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### retainage_release_lag_days
+
+```yaml
+name: Retainage Release Lag Days
+slug: retainage_release_lag_days
+description: |
+  Retainage Release Lag Days — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: development_construction
+grain: project
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: days
+rollup_rule: weighted_by_project_dollars
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### warranty_package_completeness
+
+```yaml
+name: Warranty Package Completeness
+slug: warranty_package_completeness
+description: |
+  Warranty Package Completeness — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: development_construction
+grain: project
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: percent
+rollup_rule: weighted_by_project_dollars
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### as_built_doc_completeness
+
+```yaml
+name: As-Built Doc Completeness
+slug: as_built_doc_completeness
+description: |
+  As-Built Doc Completeness — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: development_construction
+grain: project
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: percent
+rollup_rule: weighted_by_project_dollars
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### capex_closeout_lag_days
+
+```yaml
+name: Capex Closeout Lag Days
+slug: capex_closeout_lag_days
+description: |
+  Capex Closeout Lag Days — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: development_construction
+grain: project
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: days
+rollup_rule: weighted_by_project_dollars
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### dev_project_crosswalk_closure_lag_days
+
+```yaml
+name: Dev Project Crosswalk Closure Lag Days
+slug: dev_project_crosswalk_closure_lag_days
+description: |
+  Dev Project Crosswalk Closure Lag Days — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: asset_management
+grain: project
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: days
+rollup_rule: weighted_by_project_dollars
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### cco_to_first_lease_days
+
+```yaml
+name: CCO To First Lease Days
+slug: cco_to_first_lease_days
+description: |
+  CCO To First Lease Days — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: asset_management
+grain: property
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: days
+rollup_rule: not_rollupable (must be recomputed at target grain)
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### critical_path_slip_days
+
+```yaml
+name: Critical Path Slip Days
+slug: critical_path_slip_days
+description: |
+  Critical Path Slip Days — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: development_construction
+grain: project
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: days
+rollup_rule: not_rollupable (must be recomputed at target grain)
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### draw_burn_rate_vs_plan
+
+```yaml
+name: Draw Burn Rate vs Plan
+slug: draw_burn_rate_vs_plan
+description: |
+  Draw Burn Rate vs Plan — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: development_construction
+grain: project
+time_basis: rolling_window
+time_basis_window: T12
+scenario: [actual, forecast]
+unit: ratio
+rollup_rule: weighted_by_project_dollars
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### commitment_exposure_forward_dollars
+
+```yaml
+name: Commitment Exposure Forward Dollars
+slug: commitment_exposure_forward_dollars
+description: |
+  Commitment Exposure Forward Dollars — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: development_construction
+grain: project
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: dollars
+rollup_rule: sum
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### capex_commitment_forward_exposure_dollars
+
+```yaml
+name: Capex Commitment Forward Exposure Dollars
+slug: capex_commitment_forward_exposure_dollars
+description: |
+  Capex Commitment Forward Exposure Dollars — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: dollars
+rollup_rule: sum
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### lease_up_pace_vs_underwriting
+
+```yaml
+name: Lease-Up Pace vs Underwriting
+slug: lease_up_pace_vs_underwriting
+description: |
+  Lease-Up Pace vs Underwriting — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: asset_management
+grain: property
+time_basis: rolling_window
+time_basis_window: T12
+scenario: [actual, forecast]
+unit: percent
+rollup_rule: weighted_by_unit_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### concession_depth_vs_market
+
+```yaml
+name: Concession Depth vs Market
+slug: concession_depth_vs_market
+description: |
+  Concession Depth vs Market — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: property_operations
+grain: property
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: percent
+rollup_rule: weighted_by_unit_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### broker_assist_rate
+
+```yaml
+name: Broker Assist Rate
+slug: broker_assist_rate
+description: |
+  Broker Assist Rate — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: property_operations
+grain: property
+time_basis: rolling_window
+time_basis_window: T12
+scenario: [actual, forecast]
+unit: percent
+rollup_rule: weighted_by_lease_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### model_unit_tour_conversion
+
+```yaml
+name: Model Unit Tour Conversion
+slug: model_unit_tour_conversion
+description: |
+  Model Unit Tour Conversion — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: property_operations
+grain: property
+time_basis: rolling_window
+time_basis_window: T12
+scenario: [actual, forecast]
+unit: percent
+rollup_rule: weighted_by_tour_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### first_renewal_window_retention_readiness
+
+```yaml
+name: First Renewal Window Retention Readiness
+slug: first_renewal_window_retention_readiness
+description: |
+  First Renewal Window Retention Readiness — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: asset_management
+grain: property
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: ratio
+rollup_rule: weighted_by_unit_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### noi_ramp_vs_underwriting
+
+```yaml
+name: NOI Ramp vs Underwriting
+slug: noi_ramp_vs_underwriting
+description: |
+  NOI Ramp vs Underwriting — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: asset_management
+grain: property
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: percent
+rollup_rule: weighted_by_unit_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### lender_reporting_compliance_status
+
+```yaml
+name: Lender Reporting Compliance Status
+slug: lender_reporting_compliance_status
+description: |
+  Lender Reporting Compliance Status — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: asset_management
+grain: property
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: ratio
+rollup_rule: weighted_by_property_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### equity_call_schedule_coverage
+
+```yaml
+name: Equity Call Schedule Coverage
+slug: equity_call_schedule_coverage
+description: |
+  Equity Call Schedule Coverage — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: ratio
+rollup_rule: sum
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### capital_deployment_pace_vs_target
+
+```yaml
+name: Capital Deployment Pace vs Target
+slug: capital_deployment_pace_vs_target
+description: |
+  Capital Deployment Pace vs Target — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: rolling_window
+time_basis_window: T12
+scenario: [actual, forecast]
+unit: percent
+rollup_rule: sum
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### declined_deal_hit_rate
+
+```yaml
+name: Declined Deal Hit Rate
+slug: declined_deal_hit_rate
+description: |
+  Declined Deal Hit Rate — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: rolling_window
+time_basis_window: T12
+scenario: [actual, forecast]
+unit: percent
+rollup_rule: weighted_by_deal_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### top_of_funnel_sourcing_health
+
+```yaml
+name: Top-of-Funnel Sourcing Health
+slug: top_of_funnel_sourcing_health
+description: |
+  Top-of-Funnel Sourcing Health — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: ratio
+rollup_rule: weighted_by_deal_count
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### jv_partner_concentration
+
+```yaml
+name: JV Partner Concentration
+slug: jv_partner_concentration
+description: |
+  JV Partner Concentration — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: ratio
+rollup_rule: sum
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### geographic_concentration_pipeline
+
+```yaml
+name: Geographic Concentration (Pipeline)
+slug: geographic_concentration_pipeline
+description: |
+  Geographic Concentration (Pipeline) — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: ratio
+rollup_rule: sum
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### segment_concentration_pipeline
+
+```yaml
+name: Segment Concentration (Pipeline)
+slug: segment_concentration_pipeline
+description: |
+  Segment Concentration (Pipeline) — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: percent
+rollup_rule: sum
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### debt_market_context_band
+
+```yaml
+name: Debt Market Context Band
+slug: debt_market_context_band
+description: |
+  Debt Market Context Band — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: ratio
+rollup_rule: not_rollupable (must be recomputed at target grain)
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+
+### confidence_band_per_metric
+
+```yaml
+name: Confidence Band Per Metric
+slug: confidence_band_per_metric
+description: |
+  Confidence Band Per Metric — wave-5 proposed metric supporting the deal-pipeline, IC, handoff, development, lease-up, and executive-summary workflows.
+  Status: proposed (wave-5). Promote when operationalization run validates the metric's bands and reconciliation against canonical source.
+family: portfolio_management
+grain: portfolio
+time_basis: as_of_date
+scenario: [actual, forecast]
+unit: ratio
+rollup_rule: not_rollupable (must be recomputed at target grain)
+null_handling: |
+  If required upstream feed (Dealpath / Procore / Intacct / AppFolio) is stale or carries a blocking dq issue, surface metric as `unavailable`. Do not impute.
+source_fields: [adapter_normalized_contract, master_data_crosswalks, reference_normalized_reconciliation_tolerance_band]
+qa_rule: |
+  Confidence reduced to medium when source feed has any open warning-severity dq rule; metric refused when blocker-severity dq rule is open.
+reconciliation_rule: |
+  Reconciles against the source-of-truth row in `_core/stack_wave4/source_of_truth_matrix.md` for the underlying canonical object. Discrepancies above the named band cite `reference/normalized/schemas/reconciliation_tolerance_band.yaml`.
+overlays_may_override: [target_band, threshold]
+open_questions:
+  - Promote from proposed status; lift bands into reference/normalized/ overlays.
+```
+

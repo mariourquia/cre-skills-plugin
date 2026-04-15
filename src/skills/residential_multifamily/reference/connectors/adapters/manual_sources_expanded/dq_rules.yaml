@@ -1,0 +1,52 @@
+# Manual Sources Expanded — data quality rules.
+
+rules:
+
+  - rule_id: msx_freshness_per_family
+    dimension: freshness
+    severity: warning
+    description: Each file family must arrive within staleness_threshold_days per file_family_registry.
+    expected: file_received_date >= now - staleness_threshold_days
+    remediation: runbooks/missing_file_handling.md
+
+  - rule_id: msx_attestation_required
+    dimension: completeness
+    severity: blocker
+    description: High-impact files (approval_matrix, capex_tracker, tpm_data_submission) require reviewer attestation.
+    expected: attestation_signed = true for high-impact families
+    remediation: notify reviewer; runbooks/manual_override_approval.md
+
+  - rule_id: msx_provenance_envelope
+    dimension: completeness
+    severity: blocker
+    description: Every record carries provenance fields (source_file, sheet_tab, as_of_date, submitter, received_at).
+    expected: no nulls in provenance envelope
+    remediation: route to exception_queue
+
+  - rule_id: msx_partial_period_flag
+    dimension: completeness
+    severity: warning
+    description: File covering partial period must declare period boundaries.
+    expected: as_of_date_start and as_of_date_end both populated
+    remediation: notify submitter
+
+  - rule_id: msx_tpm_submission_lag
+    dimension: freshness
+    severity: warning
+    description: TPM data submissions arriving >tpm_submission_band beyond cadence flagged.
+    expected: tpm_submission_lag_days <= tpm_submission_band (cite reconciliation_tolerance_band.yaml)
+    remediation: tpm_late_submission runbook (proposed) + escalate to asset_mgmt_director
+
+  - rule_id: msx_property_code_resolves
+    dimension: consistency
+    severity: blocker
+    description: Property code in manual file resolves via property_master_crosswalk.
+    expected: property_code IN property_master_crosswalk
+    remediation: master_data/unresolved_exceptions_queue.md
+
+  - rule_id: msx_no_pii_in_unredacted_fields
+    dimension: conformance
+    severity: blocker
+    description: Manual files must not carry unredacted PII in fields marked for redaction.
+    expected: pii_classification compliance per security/pii_classification.md
+    remediation: route to security_review queue

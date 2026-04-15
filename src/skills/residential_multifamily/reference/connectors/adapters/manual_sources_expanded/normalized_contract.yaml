@@ -1,0 +1,333 @@
+# Manual Sources Expanded -> canonical normalized contract.
+# Declares the canonical object shape for every file family in
+# file_family_registry.yaml. For each family, captures:
+#   - canonical object (from _core/ontology.md)
+#   - precedence (primary, secondary, tertiary) per source_of_truth_matrix.md
+#   - primary key mapping (file-family row -> canonical id via crosswalk)
+#   - required canonical fields
+#   - null handling
+#   - derived fields supplied by the file vs requiring computation
+#
+# Canonical schemas under ../../../normalized/schemas/ remain the contract.
+# Manual sources never redefine canonical fields; they only supply data.
+
+status_tag: sample
+
+mappings:
+
+  tpm_submission_monthly_report:
+    canonical_object: TpmScorecard
+    precedence: primary
+    primary_authority: manual_tpm_file_drop
+    notes: |
+      Third-party manager submits monthly scorecard via shared drive. Manual
+      is the sole source for tpm_scorecard when the TPM is not on a
+      shared PMS. AppFolio occupancy drift detection runs when TPM is on
+      AppFolio; see reconciliation_rules.md::manual_vs_appfolio.
+    primary_key:
+      source_field: (property_code, period)
+      canonical_field: tpm_scorecard_id
+      transform: deterministic_hash(property_id, period_start)
+    required_canonical_fields:
+      - tpm_scorecard_id
+      - property_id
+      - period_start
+      - period_end
+      - occupancy_physical
+      - occupancy_economic
+      - collections_rate
+      - delinquency_balance
+      - narrative_summary
+      - submitted_by
+      - submitted_date
+      - signed_off
+    null_handling:
+      - { field: narrative_summary,  behavior: escalate_missing, notes: required before downstream workflow consumption }
+      - { field: signed_off,         behavior: reject_record,    notes: unsigned scorecard cannot promote }
+      - { field: collections_rate,   behavior: reject_record,    notes: collections rate non-null blocker }
+    derived_from_source:
+      - property_id (via crosswalk on property_code)
+      - period_start, period_end (derived from period label)
+      - occupancy_physical, occupancy_economic, collections_rate, delinquency_balance
+    requires_computation:
+      - appfolio_drift_flag (compare vs appfolio_occupancy if present)
+      - confidence_flag (tpm_data_confidence per source_registry)
+
+  tpm_submission_quarterly_report:
+    canonical_object: TpmScorecard
+    precedence: primary
+    primary_authority: manual_tpm_file_drop
+    notes: |
+      Quarterly narrative pack supplements monthly scorecards. Carries
+      KPI bundle pointer plus free-form narrative. Contributes to
+      executive_operating_summary_generation.
+    primary_key:
+      source_field: (property_code, quarter)
+      canonical_field: tpm_scorecard_id
+      transform: deterministic_hash(property_id, quarter)
+    required_canonical_fields:
+      - tpm_scorecard_id
+      - property_id
+      - quarter
+      - kpi_bundle_ref
+      - narrative_pack_ref
+      - prepared_by
+      - reviewed_by
+      - submitted_date
+      - signed_off
+    null_handling:
+      - { field: reviewed_by, behavior: escalate_missing, notes: reviewer attestation required for quarterly pack }
+
+  operator_owner_report:
+    canonical_object: OwnerReportBundle
+    precedence: primary
+    primary_authority: operator_submission
+    notes: |
+      Emailed monthly owner report bundle. Not a canonical ontology object
+      in _core/ontology.md; treated as a derived bundle mapping to many
+      canonical objects downstream (variance_explanation, staffing_position,
+      approval_request).
+    primary_key:
+      source_field: (property_code, period)
+      canonical_field: owner_report_bundle_id
+      transform: deterministic_hash(property_id, period_start, prepared_by)
+    required_canonical_fields:
+      - owner_report_bundle_id
+      - property_id
+      - period_start
+      - period_end
+      - revenue_actual
+      - opex_actual
+      - noi_actual
+      - prepared_by
+      - submitted_date
+      - signed_off
+    null_handling:
+      - { field: signed_off, behavior: reject_record, notes: unsigned owner report cannot promote }
+
+  operator_variance_narrative:
+    canonical_object: VarianceExplanation
+    precedence: primary
+    primary_authority: operator_narrative
+    notes: |
+      Manual is primary source for variance_explanation per
+      source_of_truth_matrix.md. Narrative sits on top of intacct actuals.
+      Reconcile vs intacct; narrative without underlying intacct line is
+      a blocker per reconciliation_checks.yaml::ms_recon_variance_vs_intacct.
+    primary_key:
+      source_field: (property_code, period, account_code)
+      canonical_field: variance_explanation_id
+      transform: deterministic_hash(property_id, period_start, account_code)
+    required_canonical_fields:
+      - variance_explanation_id
+      - budget_line_id
+      - period
+      - actual_amount
+      - variance_amount
+      - variance_percent
+      - driver_category
+      - narrative
+      - author
+    null_handling:
+      - { field: narrative,        behavior: reject_record,    notes: empty narrative cannot promote }
+      - { field: driver_category,  behavior: escalate_missing, notes: "driver_category must map to {volume, rate, timing, one_time, mix, other}" }
+      - { field: reviewed_by,      behavior: default_to_null,  notes: reviewer optional except for owner-report-bound narratives }
+    derived_from_source:
+      - property_id (via crosswalk on property_code)
+      - budget_line_id (via crosswalk on (property_id, period, account_code))
+      - variance_amount, variance_percent, narrative, driver_category, author
+    requires_computation:
+      - approved_for_owner_report (derived from approval_request link)
+
+  bid_tab_construction:
+    canonical_object: BidComparison
+    precedence: secondary
+    primary_authority: procore_bid_package
+    notes: |
+      Manual bid tab is secondary to Procore bid_package. Reconciled via
+      reconciliation_checks.yaml::ms_recon_bidtab_vs_procore. Use manual
+      until Procore covers the scope.
+    primary_key:
+      source_field: (project_code, scope_description, bidder_name)
+      canonical_field: bid_comparison_id
+      transform: deterministic_hash(capex_project_id, scope_slug)
+    required_canonical_fields:
+      - bid_comparison_id
+      - bid_package_id
+      - leveled_line_items
+      - normalization_notes
+      - recommended_award
+      - recommendation_rationale
+      - approvals_required
+    null_handling:
+      - { field: recommendation_rationale, behavior: reject_record,    notes: recommendation without rationale cannot promote }
+      - { field: leveling_notes,            behavior: escalate_missing, notes: missing leveling blocks award approval }
+    derived_from_source:
+      - bid_package_id (via crosswalk on project_code + scope)
+      - bidder_name (via vendor_master_crosswalk)
+      - recommended_award, recommendation_rationale
+    requires_computation:
+      - bid_leveling (normalize alt_1, alt_2 into comparable grid)
+
+  bid_tab_services:
+    canonical_object: BidComparison
+    precedence: primary
+    primary_authority: manual_services_procurement
+    notes: |
+      Services bids (landscaping, janitorial, trash, pest control) land
+      only via manual. No Procore pattern exists for property-ops contracts.
+    primary_key:
+      source_field: (service_scope, property_code, bidder_name)
+      canonical_field: bid_comparison_id
+      transform: deterministic_hash(property_id, service_scope)
+    required_canonical_fields:
+      - bid_comparison_id
+      - bid_package_id
+      - recommended_award
+      - recommendation_rationale
+
+  approval_matrix_threshold_set:
+    canonical_object: ApprovalThresholdPolicy
+    precedence: primary
+    primary_authority: approval_matrix_workbook
+    notes: |
+      Approval matrix workbook is the canonical source for
+      approval_threshold_policy rows. Effective-dated; retroactive changes
+      flag msx_effective_dating_retroactive.
+    primary_key:
+      source_field: (action_type, effective_start)
+      canonical_field: approval_threshold_policy_reference_id
+      transform: deterministic_hash(action_type, effective_start)
+    required_canonical_fields:
+      - reference_id
+      - category
+      - scope
+      - value
+      - unit
+      - scenario
+      - threshold_slug
+      - threshold_category
+      - source_name
+      - source_type
+      - source_date
+      - as_of_date
+      - confidence
+      - status
+      - proposed_by
+    null_handling:
+      - { field: effective_start, behavior: reject_record, notes: approval threshold without effective_start cannot promote }
+      - { field: change_log_ref,  behavior: escalate_missing, notes: threshold change without change_log_ref flags msx_approval_change_without_log }
+
+  approval_matrix_authority_change:
+    canonical_object: ApprovalThresholdPolicy
+    precedence: primary
+    primary_authority: approval_matrix_workbook
+    notes: |
+      Authority-change rows modify the approver routing (not the dollar
+      threshold). Each row carries a change_log_ref pointing at the
+      threshold_set row that originated the change.
+    primary_key:
+      source_field: change_log_id
+      canonical_field: approval_threshold_policy_reference_id
+      transform: passthrough_with_namespace(manual_approval_matrix)
+
+  vendor_award_recommendation:
+    canonical_object: ApprovalRequest
+    precedence: primary
+    primary_authority: manual_vendor_award_memo
+    notes: |
+      PDF vendor-award memos become ApprovalRequest rows once extracted.
+      subject_object_type is vendor_award per _core/schemas/approval_request.yaml.
+    primary_key:
+      source_field: memo_id
+      canonical_field: approval_request_id
+      transform: passthrough_with_namespace(manual_award_memo)
+    required_canonical_fields:
+      - approval_request_id
+      - created_at
+      - created_by
+      - subject_object_type
+      - subject_object_id
+      - action_proposed
+      - rationale
+      - approvers_required
+      - status
+
+  escalation_log:
+    canonical_object: EscalationEvent
+    precedence: primary
+    primary_authority: manual_escalation_log
+    notes: |
+      Manual is the sole source for escalation_event per
+      source_of_truth_matrix.md.
+    primary_key:
+      source_field: event_id
+      canonical_field: escalation_event_id
+      transform: passthrough_with_namespace(manual_escalation_log)
+    required_canonical_fields:
+      - escalation_event_id
+      - source_pack
+      - kind
+      - severity
+      - opened_at
+      - routed_to
+    null_handling:
+      - { field: routed_to, behavior: reject_record, notes: escalation without owner cannot promote }
+
+  operator_payroll_summary:
+    canonical_object: StaffingPosition
+    precedence: primary
+    primary_authority: operator_payroll_workbook
+    notes: |
+      Operator property-level payroll summary seeds staffing_position when
+      no hr_payroll feed exists. When hr_payroll lands, operator payroll is
+      secondary and drift vs hr_payroll flags msx_payroll_drift_vs_hr.
+    primary_key:
+      source_field: (property_code, period, role_slug)
+      canonical_field: staffing_position_id
+      transform: deterministic_hash(property_id, period_start, role_slug)
+    required_canonical_fields:
+      - staffing_position_id
+      - property_id
+      - period_start
+      - period_end
+      - role_slug
+      - headcount_fte
+      - total_labor_cost
+    null_handling:
+      - { field: role_slug,      behavior: reject_record, notes: role_slug resolution via role taxonomy }
+      - { field: headcount_fte,  behavior: reject_record, notes: required for staffing math }
+
+  manual_property_correction:
+    canonical_object: SourceRecordAudit
+    precedence: primary
+    primary_authority: data_platform_correction_queue
+    notes: |
+      Manual corrections are an overlay on top of canonical objects. Each
+      row captures a field-level change with prior/new value, rationale,
+      and approver. Corrections without an approver block per
+      msx_correction_requires_approver.
+    primary_key:
+      source_field: (object_type, object_id, field_changed, approved_date)
+      canonical_field: source_record_audit_id
+      transform: deterministic_hash(object_type, object_id, field_changed, approved_date)
+    required_canonical_fields:
+      - source_record_audit_id
+      - object_type
+      - object_id
+      - field_changed
+      - prior_value
+      - new_value
+      - rationale
+      - requested_by
+      - approver
+      - approved_date
+    null_handling:
+      - { field: approver,      behavior: reject_record, notes: correction without approver cannot promote }
+      - { field: rationale,     behavior: reject_record, notes: correction without rationale cannot promote }
+
+null_handling_global:
+  - do not default null required fields to zero or portfolio average
+  - surface missing required fields as dq_blocker exceptions (see dq_rules.yaml)
+  - record-level rejects carry the raw source_row_id for operator remediation
+  - provenance fields (source_file, as_of_date, submitted_by, received_at, row_id) populated at landing, never nullable

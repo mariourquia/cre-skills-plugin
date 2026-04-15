@@ -1,0 +1,6 @@
+vendor_id,vendor_name,service,service_category,unit_basis,market,region,segment,rate_low,rate_typical,rate_high,currency,escalation,contract_term_months,as_of,source,source_basis,row_id
+VND_VISTA_MECH,Vista Mechanical,hvac_pm_biannual,hvac,dollars_per_unit,Charlotte,southeast,middle_market,85.00,95.00,110.00,USD,0.03,24,2026-01-15,MSA-2026-001,contracted,vrc_0001
+VND_VISTA_MECH,Vista Mechanical,plumbing_service_call,plumbing,dollars_per_trip,Charlotte,southeast,middle_market,120.00,145.00,175.00,USD,0.03,24,2026-01-15,MSA-2026-001,contracted,vrc_0002
+VND_VISTA_MECH,Vista Mechanical,electrical_service_call,electrical,dollars_per_trip,Charlotte,southeast,middle_market,135.00,160.00,195.00,USD,0.03,24,2026-01-15,MSA-2026-001,contracted,vrc_0003
+VND_SOUTHERN_TURN,Southern Turn Services,turn_clean_light,turn_clean,dollars_per_unit,Atlanta,southeast,middle_market,125.00,145.00,175.00,USD,0.025,12,2026-01-20,PO-ATL-2026-44,contracted,vrc_0004
+VND_SOUTHERN_TURN,Southern Turn Services,turn_clean_heavy,turn_clean,dollars_per_unit,Atlanta,southeast,middle_market,225.00,260.00,310.00,USD,0.025,12,2026-01-20,PO-ATL-2026-44,contracted,vrc_0005

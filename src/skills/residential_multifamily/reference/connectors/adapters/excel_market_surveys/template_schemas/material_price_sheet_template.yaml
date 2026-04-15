@@ -1,0 +1,52 @@
+# Template schema for material_price_sheet.
+# Aligns with canonical normalized schema at
+# ../../../../normalized/schemas/material_cost.yaml.
+
+status_tag: template
+template_slug: material_price_sheet
+canonical_reference_schema: reference/normalized/schemas/material_cost.yaml
+canonical_ontology_object: material_cost
+source_format: xlsx
+expected_sheets:
+  - material_prices
+  - supply_chain_notes
+  - cover_metadata
+
+sheet_schemas:
+
+  material_prices:
+    columns:
+      - { name: region,            required: true, type: string }
+      - { name: market,            required: false, type: string }
+      - { name: segment,           required: false, type: string, enum: [middle_market, affordable, luxury] }
+      - { name: sku_tier,          required: false, type: string, enum: [builder_grade, middle_market, premium] }
+      - { name: material_slug,     required: true, type: string }
+      - { name: material_category, required: true, type: string, enum: [flooring, paint, appliances, plumbing_fixtures, lighting, hardware, roofing, lumber, drywall, hvac_components, countertops, cabinetry, other] }
+      - { name: unit,              required: true, type: string, enum: [dollars_per_sf, dollars_per_each, dollars_per_gallon, dollars_per_board_foot, dollars_per_square_roofing, dollars_per_yard, dollars_per_linear_foot] }
+      - { name: value,             required: true, type: number }
+      - { name: trailing_12mo_change_pct, required: false, type: number }
+      - { name: as_of_date,        required: true, type: date }
+
+  supply_chain_notes:
+    columns:
+      - { name: material_slug,  required: true, type: string }
+      - { name: note_text,      required: true, type: string }
+      - { name: as_of_date,     required: true, type: date }
+
+  cover_metadata:
+    columns:
+      - { name: sheet_version,      required: true, type: string }
+      - { name: analyst_name,       required: true, type: string }
+      - { name: reviewer,           required: false, type: string }
+      - { name: signed_off_date,    required: false, type: date }
+
+validation_rules:
+  - rule_id: mps_material_slug_recognized
+    severity: blocker
+    description: material_slug matches the operator's material catalog
+  - rule_id: mps_price_outlier
+    severity: warning
+    description: value within plausible band per region and material category
+  - rule_id: mps_region_in_catalog
+    severity: blocker
+    description: region in the regional gazetteer

@@ -1,0 +1,32 @@
+# GL connector manifest (vendor-neutral stub).
+connector_id: gl
+connector_kind: gl
+version: 0.1.0
+status: stub
+owner: residential_multifamily_subsystem
+vendor_neutral: true
+description: |
+  General-ledger feed. Source of truth for actuals, budgets, forecasts,
+  variance, capex actuals, and commitments at property or entity level.
+entities:
+  - chart_of_accounts
+  - account_mapping
+  - actual
+  - budget
+  - forecast
+  - variance_line
+  - capex_actual
+  - commitment
+provenance_fields_required:
+  - source_name
+  - source_type
+  - source_date
+  - extracted_at
+  - extractor_version
+  - source_row_id
+handshake:
+  auth_kind: file_drop
+  access_pattern: pull_scheduled
+  notes: |
+    Stub. Future vendor adapter replaces with vendor-native auth.
+contact: operator_placeholder

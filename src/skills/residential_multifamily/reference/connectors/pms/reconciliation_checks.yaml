@@ -1,0 +1,249 @@
+checks:
+- check_id: pms_record_count
+  check_kind: record_count
+  severity: blocker
+  description: Raw row count minus rejects equals normalized row count for each entity.
+  inputs:
+  - reference/raw/pms/<YYYY>/<MM>/<source>__<as_of>.*
+  - reference/normalized/pms_<entity>__<scope>.csv
+  expected_invariant: count(raw) - count(rejected) == count(normalized)
+  remediation: See qa/record_count.yaml.
+- check_id: pms_duplicate_primary_key
+  check_kind: duplicate_id
+  severity: blocker
+  description: No duplicate primary keys across property, unit, lease, lease_event,
+    charge, payment, work_order, turn.
+  inputs:
+  - reference/normalized/pms_property__<scope>.csv
+  - reference/normalized/pms_unit__<scope>.csv
+  - reference/normalized/pms_lease__<scope>.csv
+  expected_invariant: count(distinct pk) == count(records) per entity
+  remediation: See qa/duplicate_id.yaml.
+- check_id: pms_unit_count_reconciles
+  check_kind: unit_count
+  severity: blocker
+  description: PMS unit count reconciles with property master unit_count_total.
+  inputs:
+  - reference/normalized/pms_unit__<scope>.csv
+  - reference/normalized/pms_property__<scope>.csv
+  expected_invariant: count(pms.unit where property_id = P) == pms.property[P].unit_count_total
+  remediation: See qa/unit_count_reconciliation.yaml.
+- check_id: pms_lease_status_reconciles
+  check_kind: lease_status
+  severity: blocker
+  description: Occupied + vacant + notice + preleased units == rentable unit count.
+  inputs:
+  - reference/normalized/pms_unit__<scope>.csv
+  - reference/normalized/pms_lease__<scope>.csv
+  expected_invariant: sum(statuses) == property.unit_count_rentable
+  remediation: See qa/lease_status_reconciliation.yaml.
+- check_id: pms_null_critical_field
+  check_kind: null_critical
+  severity: blocker
+  description: Required fields per entity are non-null in normalized output.
+  inputs:
+  - reference/normalized/pms_*.csv
+  - reference/connectors/pms/schema.yaml
+  expected_invariant: 'for each required field: count(null) == 0'
+  remediation: See qa/null_critical_field.yaml.
+- check_id: pms_future_lease_reconciliation
+  check_kind: lease_status
+  severity: warning
+  description: Leases with start_date > today are counted as preleased on the destination
+    unit and excluded from occupied counts.
+  inputs:
+  - reference/normalized/pms_lease__<scope>.csv
+  - reference/normalized/pms_unit__<scope>.csv
+  expected_invariant: 'for each lease where start_date > today AND status IN (approved,
+    executed): the destination unit_id status IN (vacant_rented, notice_occupied with
+    preleased_flag = true) AND the lease is not double-counted in occupied bucket'
+  remediation: 'Preleased units that slip into the occupied bucket inflate current
+
+    occupancy. Reconcile the unit status assignment against lease start_date
+
+    and re-land.
+
+    '
+- check_id: pms_notice_without_move_out_date
+  check_kind: null_critical
+  severity: warning
+  description: Leases in notice status must carry a move_out_target_date; the date
+    must be in the future or today.
+  inputs:
+  - reference/normalized/pms_lease__<scope>.csv
+  - reference/normalized/pms_lease_event__<scope>.csv
+  expected_invariant: 'for each lease where status = notice: exists lease_event with
+    event_type = notice_to_vacate AND move_out_target_date IS NOT NULL AND move_out_target_date
+    >= today - grace_window_days declared in overlays/segments/<segment>/overlay.yaml'
+  remediation: 'Notice without a move-out date leaves the turn pipeline blind. Operator
+
+    captures the target move-out date in the NTV event payload and re-lands.
+
+    '
+- check_id: pms_multiple_applicants_one_household
+  check_kind: null_critical
+  severity: warning
+  description: Applications sharing a normalized contact hash in the same household
+    must resolve to one lease_id via the resident crosswalk; independent lease_ids
+    for household members are disallowed.
+  inputs:
+  - reference/normalized/pms_application__<scope>.csv
+  - reference/normalized/pms_lease__<scope>.csv
+  - reference/connectors/master_data/resident_crosswalk.yaml
+  expected_invariant: 'for each (property_id, household_id, lease_cycle): count(distinct
+    lease_id where status IN (in_effect, executed)) == 1'
+  remediation: 'Two active leases for the same household indicate either a split
+
+    lease (allowed with override) or a duplicate lease (must be merged).
+
+    Operator resolves via master_data/resident_crosswalk.yaml.
+
+    '
+- check_id: pms_payment_plan_tracking
+  check_kind: null_critical
+  severity: warning
+  description: Delinquency cases with a payment plan carry a payment_plan_ref and
+    the plan's scheduled installments reconcile to the applied payment history.
+  inputs:
+  - reference/normalized/pms_delinquency_case__<scope>.csv
+  - reference/normalized/pms_payment__<scope>.csv
+  expected_invariant: 'for each delinquency_case where payment_plan_ref IS NOT NULL:
+    sum(payment.amount_cents applied to case_id) >= sum(plan_installment.amount_cents
+    where due_date <= today) within the plan tolerance'
+  remediation: 'Missed payment-plan installments escalate the case. Operator updates
+
+    the case stage and payment-plan status before re-landing.
+
+    '
+- check_id: pms_reversed_charge_audit_trail
+  check_kind: null_critical
+  severity: warning
+  description: Every charge with amount_cents < 0 or charge_type = concession_reversal
+    carries a reference to the original charge_id it offsets.
+  inputs:
+  - reference/normalized/pms_charge__<scope>.csv
+  expected_invariant: 'for each charge where amount_cents < 0 OR charge_type = concession_reversal:
+    reversed_charge_id IS NOT NULL AND reversed_charge_id IN pms.charge.charge_id'
+  remediation: 'An unlinked reversal distorts aging and collections ratios. Operator
+
+    links the reversal to its source charge in the PMS before re-landing.
+
+    '
+- check_id: pms_unit_offline_status_reason_required
+  check_kind: null_critical
+  severity: warning
+  description: Units with status = down or admin carry a status_reason and an expected_return_date
+    when known.
+  inputs:
+  - reference/normalized/pms_unit__<scope>.csv
+  expected_invariant: 'for each unit where status IN (down, admin): status_reason
+    IS NOT NULL AND (expected_return_date IS NOT NULL OR reason_category = indefinite)'
+  remediation: 'A down unit without a reason and a return date slips off the turn
+
+    pipeline. Operator captures the reason (casualty, renovation, admin hold)
+
+    and the expected-return date or flags indefinite.
+
+    '
+- check_id: pms_model_unit_flag_excluded_from_occupancy
+  check_kind: lease_status
+  severity: blocker
+  description: Units flagged model are excluded from unit_count_rentable and from
+    occupancy denominators.
+  inputs:
+  - reference/normalized/pms_unit__<scope>.csv
+  - reference/normalized/pms_property__<scope>.csv
+  expected_invariant: 'for each property_id: count(unit where status = model) is excluded
+    from unit_count_rentable and from occupancy_denominator in metric_contracts'
+  remediation: 'Model units reported inside occupancy inflate vacancy. Reconcile
+
+    unit status flags with the property master; adjust unit_count_rentable
+
+    to exclude model counts.
+
+    '
+- check_id: pms_employee_unit_flag_excluded_from_occupancy
+  check_kind: lease_status
+  severity: blocker
+  description: Units flagged employee are excluded from unit_count_rentable and from
+    occupancy denominators; employee leases do not feed collections metrics.
+  inputs:
+  - reference/normalized/pms_unit__<scope>.csv
+  - reference/normalized/pms_lease__<scope>.csv
+  expected_invariant: 'for each property_id: count(unit where status = employee) is
+    excluded from unit_count_rentable AND leases on employee units are flagged is_employee_lease
+    = true AND excluded from collections_rate numerators'
+  remediation: 'Employee units inside rentable counts distort occupancy and collections
+
+    metrics. Reconcile unit status and lease flags.
+
+    '
+- check_id: pms_work_order_missing_close_date
+  check_kind: date_coverage
+  severity: warning
+  description: Work orders with status IN (completed, closed) have a completed_date
+    within the landing window.
+  inputs:
+  - reference/normalized/pms_work_order__<scope>.csv
+  expected_invariant: 'for each work_order where status IN (completed, closed): completed_date
+    IS NOT NULL AND completed_date <= source_date'
+  remediation: 'A closed WO without a close date distorts SLA dashboards. Operator
+
+    completes the close-out timestamp in the PMS or reopens the WO if the
+
+    close was premature.
+
+    '
+- check_id: pms_turn_status_transition_valid
+  check_kind: null_critical
+  severity: warning
+  description: Turn status transitions follow the allowed sequence declared in the
+    PMS turn status_convention; skipped states are logged.
+  inputs:
+  - reference/normalized/pms_turn__<scope>.csv
+  expected_invariant: 'for each turn_id: sequence of status values observed over time
+    matches the allowed_transitions list in pms/schema.yaml#turn.status_convention'
+  remediation: 'A turn that jumps directly from planned to ready without passing
+
+    through in_progress or punchlist typically reflects data entry, not a
+
+    real workflow. Operator confirms the skip reason or corrects the history.
+
+    '
+- check_id: pms_transferred_unit_consistency
+  check_kind: null_critical
+  severity: warning
+  description: Residents transferred between units within the same property carry
+    a transfer_from_lease_id on the new lease and the prior lease is closed with event_type
+    = lease_terminated and reason = transfer.
+  inputs:
+  - reference/normalized/pms_lease__<scope>.csv
+  - reference/normalized/pms_lease_event__<scope>.csv
+  expected_invariant: 'for each lease where transfer_from_lease_id IS NOT NULL: transfer_from_lease_id
+    IN pms.lease.lease_id AND exists lease_event with event_type = lease_terminated
+    AND reason = transfer on the prior lease'
+  remediation: 'Transfers that do not close the prior lease leave two active leases
+
+    for one resident. Operator closes the prior lease with transfer reason
+
+    before re-landing.
+
+    '
+- check_id: pms_delinquency_case_stage_monotonic
+  check_kind: date_coverage
+  severity: warning
+  description: Delinquency case stage transitions are monotonic through the aging
+    buckets or explicitly carry a cure event; regressions from legal_notice back to
+    1_7 are flagged.
+  inputs:
+  - reference/normalized/pms_delinquency_case__<scope>.csv
+  - reference/normalized/pms_payment__<scope>.csv
+  expected_invariant: 'for each case_id: stage sequence is monotonic through the aging
+    ordering OR carries a cure_event_id referencing a payment that cured the balance'
+  remediation: 'A case that regresses from legal_notice to 1_7 without a cure event
+
+    indicates stage mismanagement. Operator records the payment that cured
+
+    the case or corrects the stage.
+
+    '

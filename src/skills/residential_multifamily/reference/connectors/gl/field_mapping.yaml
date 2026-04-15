@@ -1,0 +1,573 @@
+# Richer per-entity field mapping template for the GL connector.
+chart_of_accounts:
+  fields:
+  - canonical_field: account_id
+    source_field: acct_id
+    source_description: Operator-native account identifier
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: account_id unique per source; rename history in account_crosswalk
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: join key for all GL postings
+  - canonical_field: account_label
+    source_field: acct_label
+    source_description: Operator account label
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: non-empty after trim
+    required_for_load: true
+    required_for_kpi: false
+    provenance_note: used in variance templates display
+  - canonical_field: account_type
+    source_field: acct_type
+    source_description: Operator account type
+    transform_rule: map_account_type
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: account_type IN (asset, liability, equity, revenue, expense,
+      capex)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: drives aggregation in NOI and variance
+  - canonical_field: normal_balance
+    source_field: normal_balance
+    source_description: Debit or credit
+    transform_rule: map_debit_credit
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: normal_balance IN (debit, credit)
+    required_for_load: true
+    required_for_kpi: false
+    provenance_note: sign-convention check basis
+  - canonical_field: parent_account_id
+    source_field: parent_acct
+    source_description: Parent account
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: parent_account_id IS NULL OR parent_account_id IN chart_of_accounts.account_id
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: hierarchical rollup display
+  - canonical_field: inactive
+    source_field: inactive_flag
+    source_description: Inactive flag
+    transform_rule: to_boolean
+    type_cast_rule: boolean
+    null_handling: default_to_null
+    default_rule: false
+    validation_rule: inactive IN (true, false)
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: filters inactive accounts from current-period rollups
+account_mapping:
+  fields:
+  - canonical_field: source_account_id
+    source_field: acct_id
+    source_description: FK to chart_of_accounts
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: source_account_id IN chart_of_accounts.account_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to chart_of_accounts
+  - canonical_field: canonical_account_slug
+    source_field: canonical_slug
+    source_description: Canonical account slug
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: canonical_account_slug IN canonical taxonomy
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: canonical aggregation key
+  - canonical_field: effective_start
+    source_field: effective_start
+    source_description: Mapping effective start
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: effective_start <= effective_end when effective_end IS NOT NULL
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: time-travel window
+  - canonical_field: effective_end
+    source_field: effective_end
+    source_description: Mapping effective end
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: effective_end IS NULL OR effective_end >= effective_start
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: null means current mapping
+  - canonical_field: notes
+    source_field: notes
+    source_description: Operator notes
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: optional
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: audit trail for mapping change
+actual:
+  fields:
+  - canonical_field: property_id
+    source_field: prop_id
+    source_description: Property scope
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: property_id IN pms.property.property_id OR corporate_overhead
+      = true
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to property
+  - canonical_field: account_id
+    source_field: acct_id
+    source_description: Account FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: account_id IN chart_of_accounts.account_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to chart_of_accounts
+  - canonical_field: period
+    source_field: period
+    source_description: Accounting period label
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: period matches YYYY-MM or YYYY-Qn pattern
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: time key
+  - canonical_field: amount_cents
+    source_field: amount_usd
+    source_description: Actual amount in source dollars
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: amount_cents != 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: reconciles to source trial balance
+  - canonical_field: memo
+    source_field: memo
+    source_description: Posting memo
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: optional
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: audit reference
+budget:
+  fields:
+  - canonical_field: property_id
+    source_field: prop_id
+    source_description: Property scope
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: property_id IN pms.property.property_id OR corporate_overhead
+      = true
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to property
+  - canonical_field: account_id
+    source_field: acct_id
+    source_description: Account FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: account_id IN chart_of_accounts.account_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to chart_of_accounts
+  - canonical_field: period
+    source_field: period
+    source_description: Accounting period label
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: period matches YYYY-MM or YYYY-Qn pattern
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: time key
+  - canonical_field: scenario
+    source_field: scenario
+    source_description: Budget scenario
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: scenario IN (approved, baseline, rebudget, other_named_version)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: scenario comparison key
+  - canonical_field: amount_cents
+    source_field: amount_usd
+    source_description: Budget amount in source dollars
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: amount_cents IS NOT NULL
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: budget variance anchor
+  - canonical_field: build_basis
+    source_field: build_basis
+    source_description: Build basis descriptor
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: optional
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: narrative context for budget build
+forecast:
+  fields:
+  - canonical_field: property_id
+    source_field: prop_id
+    source_description: Property scope
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: property_id IN pms.property.property_id OR corporate_overhead
+      = true
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to property
+  - canonical_field: account_id
+    source_field: acct_id
+    source_description: Account FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: account_id IN chart_of_accounts.account_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to chart_of_accounts
+  - canonical_field: period
+    source_field: period
+    source_description: Forecast period label
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: period matches YYYY-MM or YYYY-Qn pattern
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: forecast time key
+  - canonical_field: as_of_date
+    source_field: forecast_vintage
+    source_description: Forecast vintage date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: as_of_date <= today
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: vintage comparison key
+  - canonical_field: amount_cents
+    source_field: amount_usd
+    source_description: Forecast amount in source dollars
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: amount_cents IS NOT NULL
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: forecast accuracy basis
+  - canonical_field: prior_forecast_amount_cents
+    source_field: prior_amount_usd
+    source_description: Prior-vintage amount for delta display
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: optional
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: delta calculation helper
+variance_line:
+  fields:
+  - canonical_field: property_id
+    source_field: prop_id
+    source_description: Property scope
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: property_id IN pms.property.property_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to property
+  - canonical_field: account_id
+    source_field: acct_id
+    source_description: Account FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: account_id IN chart_of_accounts.account_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to chart_of_accounts
+  - canonical_field: period
+    source_field: period
+    source_description: Period label
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: period matches YYYY-MM or YYYY-Qn pattern
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: time key
+  - canonical_field: budget_amount_cents
+    source_field: budget_amount_usd
+    source_description: Budget amount snapshot
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: budget_amount_cents IS NOT NULL
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: joined from gl.budget
+  - canonical_field: actual_amount_cents
+    source_field: actual_amount_usd
+    source_description: Actual amount snapshot
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: actual_amount_cents IS NOT NULL
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: joined from gl.actual
+  - canonical_field: variance_cents
+    source_field: variance_usd
+    source_description: Variance (actual minus budget)
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: variance_cents == actual_amount_cents - budget_amount_cents
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: variance narrative anchor
+  - canonical_field: driver_category
+    source_field: driver
+    source_description: Variance driver classification
+    transform_rule: map_variance_driver
+    type_cast_rule: enum
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: driver_category IN (volume, rate, timing, one_time, mix, other)
+      when non-null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: narrative template pivot
+  - canonical_field: narrative
+    source_field: narrative
+    source_description: Operator-written narrative
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: optional
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: required when variance exceeds reasonableness band
+capex_actual:
+  fields:
+  - canonical_field: capex_posting_id
+    source_field: posting_id
+    source_description: Stable posting id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: capex_posting_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: capex posting anchor
+  - canonical_field: property_id
+    source_field: prop_id
+    source_description: Property scope
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: property_id IN pms.property.property_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to property
+  - canonical_field: capex_project_id
+    source_field: project_id
+    source_description: Capex project FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: capex_project_id IN construction.project_registry
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: project-level capex roll-up
+  - canonical_field: posting_date
+    source_field: posting_date
+    source_description: Posting date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: posting_date <= today
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: capex spend timeline
+  - canonical_field: amount_cents
+    source_field: amount_usd
+    source_description: Posting amount
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: amount_cents > 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: capex_spend_vs_plan numerator
+  - canonical_field: account_id
+    source_field: acct_id
+    source_description: Account FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: account_id IN chart_of_accounts.account_id AND account.account_type
+      = capex
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to chart_of_accounts
+  - canonical_field: vendor_id
+    source_field: vendor_id
+    source_description: Vendor paid
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: vendor_id IS NULL OR vendor_id IN ap.vendor.vendor_id
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: vendor-level capex spend analysis
+commitment:
+  fields:
+  - canonical_field: commitment_id
+    source_field: commitment_id
+    source_description: Stable commitment id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: commitment_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: commitment anchor
+  - canonical_field: property_id
+    source_field: prop_id
+    source_description: Property scope
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: property_id IN pms.property.property_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to property
+  - canonical_field: commitment_type
+    source_field: commitment_type
+    source_description: Commitment kind
+    transform_rule: map_commitment_type
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: commitment_type IN (purchase_order, contract, accrual, other)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: commitment kind segmentation
+  - canonical_field: vendor_id
+    source_field: vendor_id
+    source_description: Vendor FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: vendor_id IN ap.vendor.vendor_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to ap.vendor
+  - canonical_field: amount_cents
+    source_field: amount_usd
+    source_description: Commitment amount
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: amount_cents > 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: commitment total
+  - canonical_field: status
+    source_field: status
+    source_description: Commitment status
+    transform_rule: map_commitment_status
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: status IN (open, partial, closed, cancelled)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: open commitment filter
+  - canonical_field: period_opened
+    source_field: period_opened
+    source_description: Period opened label
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: optional
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: commitment vintage analysis

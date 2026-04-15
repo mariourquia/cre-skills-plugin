@@ -1,0 +1,68 @@
+# Template schema for turn_cost_library Excel drops.
+# Aligns with canonical normalized schema at
+# ../../../../normalized/schemas/unit_turn_cost.yaml.
+# One row per (scope_template, unit_type, market, category). Rows express
+# low/typical/high cost per category (paint, flooring, appliance, etc.).
+
+status_tag: template
+template_slug: turn_cost_library
+canonical_reference_schema: reference/normalized/schemas/unit_turn_cost.yaml
+canonical_ontology_object: unit_turn_cost
+source_format: xlsx
+csv_sibling_format: csv
+expected_sheets:
+  - turn_cost_lines
+  - included_scope_items
+  - cover_metadata
+header_rows: 1
+filename_pattern: "^turn_cost_library__<region>__\\d{4}-Q\\d\\.(xlsx|csv)$"
+
+sheet_schemas:
+
+  turn_cost_lines:
+    columns:
+      - { name: scope_template,           required: true,  type: string, enum: [light, standard, heavy, classic_reno, premium_reno], description: turn scope tier }
+      - { name: classic_to_renovated,     required: true,  type: string, enum: [classic_to_classic, classic_to_renovated, renovated_refresh, down_to_rent_ready], description: renovation transition pattern }
+      - { name: market,                   required: true,  type: string }
+      - { name: region,                   required: false, type: string }
+      - { name: segment,                  required: true,  type: string, enum: [middle_market, affordable, luxury] }
+      - { name: property_form,            required: false, type: string, enum: [garden, walk_up, wrap, suburban_mid_rise, urban_mid_rise, high_rise] }
+      - { name: unit_type_label,          required: true,  type: string }
+      - { name: category,                 required: true,  type: string, enum: [paint, flooring, appliance, countertop, cabinetry, plumbing_fixture, lighting, hardware, cleaning, punch_labor, haul_away, misc], description: cost category within the turn }
+      - { name: low,                      required: true,  type: number, unit: dollars_per_unit, description: low end of cost band for this category }
+      - { name: typical,                  required: true,  type: number, unit: dollars_per_unit }
+      - { name: high,                     required: true,  type: number, unit: dollars_per_unit }
+      - { name: target_make_ready_days,   required: false, type: integer }
+      - { name: as_of,                    required: true,  type: date }
+      - { name: source,                   required: true,  type: string, description: derivation source (vendor_rate_card + material_price_sheet + labor_rate_sheet combo) }
+      - { name: source_basis,             required: true,  type: string, enum: [derived, vendor_quoted, contracted_bundle, manual_override] }
+      - { name: row_id,                   required: true,  type: string }
+
+  included_scope_items:
+    columns:
+      - { name: scope_template,  required: true, type: string }
+      - { name: line_item_slug,  required: true, type: string }
+      - { name: notes,           required: false, type: string }
+
+  cover_metadata:
+    columns:
+      - { name: library_version,    required: true, type: string }
+      - { name: analyst_name,       required: true, type: string }
+      - { name: reviewer,           required: true, type: string }
+      - { name: signed_off_date,    required: true, type: date }
+
+validation_rules:
+  - rule_id: tcl_band_monotonic
+    severity: blocker
+    description: low <= typical <= high
+  - rule_id: tcl_scope_template_enum
+    severity: blocker
+    description: scope_template in enum
+  - rule_id: tcl_category_enum
+    severity: blocker
+    description: category in enum
+  - rule_id: tcl_reviewer_signoff
+    severity: blocker
+    description: cover_metadata.reviewer and signed_off_date non-null
+
+allowed_markets_reference: reference/connectors/master_data/market_crosswalk.yaml

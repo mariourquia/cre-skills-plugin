@@ -1,0 +1,54 @@
+overlay_id: regulatory.affordable.usda_rd
+overlay_kind: regulatory.program
+parent_overlay: regulatory.affordable
+status: stub
+scope:
+  regulatory_program: usda_rd
+authoring_notes: |
+  Program overlay for USDA Rural Development Multifamily Housing programs,
+  primarily Section 515 (direct loan) and Section 521 (rental assistance).
+  Carries USDA-specific rent-limit mechanics, tenant certification, MINC
+  reporting, and RD-specific audit and inspection posture.
+
+  Phase 1 ships architecture only. USDA rent-limit and rental-assistance
+  subsidy tables live in reference to be populated in Phase 2:
+  `reference/normalized/rent_limits__usda_rd__{market}.csv`,
+  `reference/normalized/agency_reports__usda_rd.csv`.
+
+overrides:
+  - target_kind: reporting_emphasis
+    target_ref: overlays/regulatory/_shared/agency_reporting.md
+    override_value:
+      reporting_emphasis_ref: overlays/regulatory/affordable/programs/usda_rd/overlay.yaml
+    reason: |
+      MINC submissions and USDA annual reports carry different cadence and
+      format from HUD submissions. Rural property scope typically maps to
+      smaller portfolio count but tight documentation requirements.
+  - target_kind: reporting_emphasis
+    target_ref: overlays/regulatory/_shared/rent_limits.md
+    override_value:
+      reporting_emphasis_ref: overlays/regulatory/affordable/programs/usda_rd/overlay.yaml
+    reason: |
+      USDA rent limits follow program-specific basic-rent vs. note-rate-rent
+      mechanics. Tenant-portion reconciliation against rental-assistance
+      subsidy differs from HUD HAP mechanics.
+  - target_kind: reporting_emphasis
+    target_ref: overlays/regulatory/_shared/file_audit_preparedness.md
+    override_value:
+      reporting_emphasis_ref: overlays/regulatory/affordable/programs/usda_rd/overlay.yaml
+    reason: |
+      Supervisory visits and physical-inspection cadence by the RD state
+      office add audit surfaces that differ from REAC / NSPIRE.
+
+adds:
+  - added_kind: metric
+    slug: rental_assistance_reconciliation_status
+    definition_ref: overlays/regulatory/affordable/programs/usda_rd/overlay.yaml
+  - added_kind: checklist_item
+    slug: minc_submission_packet
+    definition_ref: overlays/regulatory/affordable/programs/usda_rd/overlay.yaml
+
+approvers:
+  - director_of_operations
+  - compliance_lead
+  - legal_counsel

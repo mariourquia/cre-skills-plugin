@@ -1,0 +1,263 @@
+# Crosswalk Additions contributed by the Manual Sources Expanded adapter.
+# Fragments to be merged into the parent master_data crosswalk files under
+# reference/connectors/master_data/. Each fragment conforms to
+# ../../master_data/crosswalk.schema.yaml.
+#
+# Three crosswalk targets:
+#   property_master_crosswalk  - operator-used property codes -> canonical property_id
+#   employee_crosswalk         - TPM submitted_by -> canonical owner_identity
+#   vendor_master_crosswalk    - bid-tab bidder name -> canonical vendor_id
+#
+# Per-adapter convention: fragments carry source_system slugs registered
+# in source_registry_entry.yaml so that crosswalk merge is deterministic.
+
+status_tag: template
+schema_version: "0.1.0"
+
+# ---------------------------------------------------------------------------
+# property_master_crosswalk additions
+# Operator codes observed in manual files map to canonical property_id.
+# ---------------------------------------------------------------------------
+
+property_master_crosswalk_additions:
+
+  - canonical_id: prop_cta_001
+    source_system: operator_monthly_report_inbox
+    source_id: ASH-CLT-001
+    match_confidence: high
+    match_method: exact
+    effective_start: "2026-01-01"
+    survivorship_rule: property_default
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2026-04-15"
+    notes: |
+      Operator code ASH-CLT-001 used in TPM submissions and owner reports
+      for Ashford Park in Charlotte. Canonical property_id owned by
+      AppFolio per source_of_truth_matrix.md.
+
+  - canonical_id: prop_rdu_004
+    source_system: operator_monthly_report_inbox
+    source_id: WAT-RDU-004
+    match_confidence: high
+    match_method: exact
+    effective_start: "2026-01-01"
+    survivorship_rule: property_default
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2026-04-15"
+    notes: Watershed in Raleigh-Durham. Appears in operator files as WAT-RDU-004.
+
+  - canonical_id: prop_atl_011
+    source_system: operator_monthly_report_inbox
+    source_id: OAK-ATL-011
+    match_confidence: high
+    match_method: exact
+    effective_start: "2026-01-01"
+    survivorship_rule: property_default
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2026-04-15"
+    notes: Oakwood in Atlanta.
+
+  - canonical_id: prop_nas_007
+    source_system: tpm_data_submission_drive
+    source_id: PIN-NAS-007
+    match_confidence: high
+    match_method: exact
+    effective_start: "2026-01-01"
+    survivorship_rule: property_default
+    manual_override: false
+    reviewer: asset_mgmt_director
+    last_validated_at: "2026-04-15"
+    notes: |
+      Pine Ridge in Nashville. TPM-managed; operator uses PIN-NAS-007 on
+      all shared-drive submissions. tpm_data_confidence flag applies to
+      all derived metrics.
+
+  - canonical_id: prop_phx_002
+    source_system: tpm_data_submission_drive
+    source_id: RIV-PHX-002
+    match_confidence: high
+    match_method: exact
+    effective_start: "2026-01-01"
+    survivorship_rule: property_default
+    manual_override: false
+    reviewer: asset_mgmt_director
+    last_validated_at: "2026-04-15"
+    notes: Riverbend in Phoenix. TPM-managed.
+
+# ---------------------------------------------------------------------------
+# employee_crosswalk additions
+# TPM submitted_by / prepared_by names map to canonical owner_identity rows.
+# Protected-class attributes are NEVER used as match keys. Match uses
+# submitter_email_hash + last_name normalized as composite fallback.
+# ---------------------------------------------------------------------------
+
+employee_crosswalk_additions:
+
+  - canonical_id: employee_tpm_0142
+    source_system: tpm_data_submission_drive
+    source_id: "R. Foley"
+    match_confidence: medium
+    match_method: composite
+    effective_start: "2026-01-01"
+    survivorship_rule: employee_default
+    manual_override: false
+    reviewer: asset_mgmt_director
+    last_validated_at: "2026-04-15"
+    notes: |
+      Regional TPM portfolio lead for east-region properties
+      (ASH-CLT-001, WAT-RDU-004). Composite match on email hash and
+      last-name initial; confirmed by asset_mgmt_director. Employment
+      type: third_party_manager_contact (not an employee of the operator).
+
+  - canonical_id: employee_tpm_0218
+    source_system: operator_monthly_report_inbox
+    source_id: "M. Caldera"
+    match_confidence: medium
+    match_method: composite
+    effective_start: "2026-01-01"
+    survivorship_rule: employee_default
+    manual_override: false
+    reviewer: asset_mgmt_director
+    last_validated_at: "2026-04-15"
+    notes: Regional TPM portfolio lead for southeast properties (OAK-ATL-011, PIN-NAS-007).
+
+  - canonical_id: employee_tpm_0311
+    source_system: tpm_data_submission_drive
+    source_id: "T. Hensley"
+    match_confidence: high
+    match_method: exact
+    effective_start: "2026-01-01"
+    survivorship_rule: employee_default
+    manual_override: false
+    reviewer: asset_mgmt_director
+    last_validated_at: "2026-04-15"
+    notes: West-region TPM portfolio lead for RIV-PHX-002.
+
+  - canonical_id: employee_e_00812
+    source_system: operator_monthly_report_inbox
+    source_id: "J. Osei"
+    match_confidence: high
+    match_method: exact
+    effective_start: "2026-01-01"
+    survivorship_rule: employee_default
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2026-04-15"
+    notes: |
+      Self-managed property manager at ASH-CLT-001. Employment type:
+      employee. Cross-reference to hr_payroll_primary employee_id via
+      master_data/employee_crosswalk.yaml main file.
+
+  - canonical_id: employee_e_00924
+    source_system: operator_monthly_report_inbox
+    source_id: "L. Mbeki"
+    match_confidence: high
+    match_method: exact
+    effective_start: "2026-01-01"
+    survivorship_rule: employee_default
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2026-04-15"
+    notes: Self-managed property manager at WAT-RDU-004.
+
+# ---------------------------------------------------------------------------
+# vendor_master_crosswalk additions
+# Bid-tab bidder names map to canonical vendor_id where the vendor already
+# exists in AP; pending rows carry match_confidence = medium until AP onboards.
+# ---------------------------------------------------------------------------
+
+vendor_master_crosswalk_additions:
+
+  - canonical_id: vendor_v_00217
+    source_system: bid_tab_workbook_drive
+    source_id: "Concrete Solutions Carolinas LLC"
+    match_confidence: high
+    match_method: composite
+    effective_start: "2026-01-01"
+    survivorship_rule: vendor_master_default
+    manual_override: false
+    reviewer: procurement_lead
+    last_validated_at: "2026-04-15"
+    notes: |
+      Bid-tab name variant of existing AP vendor "Concrete Solutions of
+      the Carolinas LLC". Resolved via composite match on tax_id_last_four
+      + service classification. Canonical legal name survives from AP.
+
+  - canonical_id: vendor_v_00418
+    source_system: bid_tab_workbook_drive
+    source_id: "Premier Roofing Systems LLC"
+    match_confidence: high
+    match_method: exact
+    effective_start: "2026-01-01"
+    survivorship_rule: vendor_master_default
+    manual_override: false
+    reviewer: procurement_lead
+    last_validated_at: "2026-04-15"
+    notes: |
+      Roofing vendor awarded ash_roof_2026 project. Already present in
+      AP with W-9 and COI on file.
+
+  - canonical_id: vendor_v_00419
+    source_system: bid_tab_workbook_drive
+    source_id: "Southern Peak Roofing"
+    match_confidence: medium
+    match_method: fuzzy
+    effective_start: "2026-01-01"
+    survivorship_rule: vendor_master_default
+    manual_override: false
+    reviewer: procurement_lead
+    last_validated_at: "2026-04-15"
+    notes: |
+      Not awarded but required for bid leveling reference. AP onboarding
+      pending. Medium confidence until W-9 and COI land.
+
+  - canonical_id: vendor_v_00502
+    source_system: bid_tab_workbook_drive
+    source_id: "Atlantic Deck & Surface"
+    match_confidence: high
+    match_method: exact
+    effective_start: "2026-01-01"
+    survivorship_rule: vendor_master_default
+    manual_override: false
+    reviewer: procurement_lead
+    last_validated_at: "2026-04-15"
+    notes: Pool deck contractor awarded cap_prj_wat_amen_2026.
+
+  - canonical_id: vendor_v_00611
+    source_system: bid_tab_workbook_drive
+    source_id: "SecureAccess Solutions Inc"
+    match_confidence: high
+    match_method: exact
+    effective_start: "2026-01-01"
+    survivorship_rule: vendor_master_default
+    manual_override: false
+    reviewer: procurement_lead
+    last_validated_at: "2026-04-15"
+    notes: Sole-source garage gate controller vendor; waiver on file.
+
+  - canonical_id: vendor_v_00714
+    source_system: bid_tab_workbook_drive
+    source_id: "BrightPath Electrical Contractors"
+    match_confidence: high
+    match_method: exact
+    effective_start: "2026-01-01"
+    survivorship_rule: vendor_master_default
+    manual_override: false
+    reviewer: procurement_lead
+    last_validated_at: "2026-04-15"
+    notes: LED retrofit vendor at cap_prj_oak_lighting_2026; leveling in progress.
+
+merge_instructions:
+  target_files:
+    - ../../master_data/property_master_crosswalk.yaml
+    - ../../master_data/employee_crosswalk.yaml
+    - ../../master_data/vendor_master_crosswalk.yaml
+  merge_strategy: append_rows
+  validation: |
+    Each row must conform to ../../master_data/crosswalk.schema.yaml. Duplicate
+    (source_system, source_id) pairs resolve to the later effective_start row
+    per survivorship_rule. Merge performed by data_platform_team at each
+    wave-5 release cut.

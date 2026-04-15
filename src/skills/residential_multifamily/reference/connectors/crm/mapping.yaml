@@ -1,0 +1,39 @@
+# CRM mapping template.
+
+lead_interaction:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [interaction_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: true
+  fields:
+    - { source_column: int_id,      normalized_column: interaction_id,  transform: trim_string,  required: true }
+    - { source_column: lead_id,     normalized_column: lead_id,         transform: trim_string,  required: true }
+    - { source_column: ts,          normalized_column: interaction_date, transform: to_iso_datetime, required: true }
+    - { source_column: ch,          normalized_column: channel,         transform: map_channel,  required: true }
+    - { source_column: dir,         normalized_column: direction,       transform: map_direction, required: true }
+    - { source_column: agent,       normalized_column: agent_id,        transform: trim_string,  required: false }
+    - { source_column: outcome,     normalized_column: outcome,         transform: map_outcome,  required: false }
+    - { source_column: notes_sanitized, normalized_column: notes,       transform: trim_string,  required: false }
+
+campaign_source:
+  source_format: [csv]
+  dedup_rule:
+    keys: [campaign_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: false
+  fields:
+    - { source_column: camp_id,     normalized_column: campaign_id,    transform: trim_string, required: true }
+    - { source_column: camp_label,  normalized_column: campaign_label, transform: trim_string, required: true }
+    - { source_column: medium,      normalized_column: medium,         transform: map_medium,  required: true }
+    - { source_column: start_dt,    normalized_column: start_date,     transform: to_iso_date, required: false }
+    - { source_column: end_dt,      normalized_column: end_date,       transform: to_iso_date, required: false }
+    - { source_column: spend_usd,   normalized_column: spend_cents,    transform: dollars_to_cents, required: false }
+
+resident_communication: { status: TODO, note: "map per vendor" }
+service_request:        { status: TODO, note: "map per vendor" }
+follow_up_task:         { status: TODO, note: "map per vendor" }

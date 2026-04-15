@@ -1,0 +1,207 @@
+# Capex Project Crosswalk (starter set).
+# Conforms to crosswalk.schema.yaml.
+# Illustrates the core hard case: same project appears in GL (capex_actual)
+# and construction tracker (dev_budget + schedule). See
+# identity_resolution_framework.md section 7.6.
+
+status_tag: sample
+
+rows:
+
+  # -----------------------------------------------------------------------
+  # Case: full-building renovation at prop_cta_001. GL posts actuals under
+  # 21-4501-CTA; construction tracker manages the project under P-REN-001.
+  # Canonical id is capex_cta_001_ren_2024.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: capex_cta_001_ren_2024
+    source_system: corporate_gl
+    source_id: "21-4501-CTA"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2024-01-15"
+    survivorship_rule: capex_project_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      GL row. Posts capex_actual and draw reimbursements against this code.
+      Account slug per account_crosswalk is capex_value_add.
+
+  - canonical_id: capex_cta_001_ren_2024
+    source_system: construction_tracker_primary
+    source_id: P-REN-001
+    match_confidence: high
+    match_method: manual
+    effective_start: "2024-01-15"
+    survivorship_rule: capex_project_default
+    manual_override: false
+    reviewer: construction_manager
+    last_validated_at: "2026-03-31"
+    notes: |
+      Construction tracker row. Schedule, change orders, draw requests
+      managed here. change_order_crosswalk.yaml and draw_request_crosswalk
+      resolve linked records.
+
+  # -----------------------------------------------------------------------
+  # Case: GL parent-child capex. GL books the project at a parent code;
+  # child splits (roof, HVAC, plumbing subprojects) are tracked in the
+  # construction system only. In the crosswalk, the canonical ids are
+  # distinct per child. A single GL parent code maps to multiple canonical
+  # capex ids using the related_canonical_ids array.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: capex_rdu_004_roof_2025
+    source_system: corporate_gl
+    source_id: "21-4501-RDU-ROOF"
+    match_confidence: medium
+    match_method: manual
+    effective_start: "2025-02-01"
+    survivorship_rule: capex_project_default
+    manual_override: true
+    override_reason: |
+      GL parent code 21-4501-RDU does not split into child accounts; the
+      child classification is carried manually at the crosswalk layer for
+      downstream project-level reporting.
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      GL row for the roof subproject. Account slug is
+      capex_component_replacement.
+    related_canonical_ids:
+      - capex_rdu_004_hvac_2025
+      - capex_rdu_004_plumb_2025
+
+  - canonical_id: capex_rdu_004_roof_2025
+    source_system: construction_tracker_primary
+    source_id: P-CR-ROOF-001
+    match_confidence: high
+    match_method: exact
+    effective_start: "2025-02-01"
+    survivorship_rule: capex_project_default
+    manual_override: false
+    reviewer: construction_manager
+    last_validated_at: "2026-03-31"
+    notes: |
+      Construction tracker row. Separate tracker project id per component.
+
+  - canonical_id: capex_rdu_004_hvac_2025
+    source_system: corporate_gl
+    source_id: "21-4501-RDU-HVAC"
+    match_confidence: medium
+    match_method: manual
+    effective_start: "2025-02-01"
+    survivorship_rule: capex_project_default
+    manual_override: true
+    override_reason: |
+      Same parent-child carve-out as above.
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      GL row for the HVAC subproject.
+    related_canonical_ids:
+      - capex_rdu_004_roof_2025
+      - capex_rdu_004_plumb_2025
+
+  - canonical_id: capex_rdu_004_hvac_2025
+    source_system: construction_tracker_primary
+    source_id: P-CR-HVAC-001
+    match_confidence: high
+    match_method: exact
+    effective_start: "2025-02-01"
+    survivorship_rule: capex_project_default
+    manual_override: false
+    reviewer: construction_manager
+    last_validated_at: "2026-03-31"
+    notes: |
+      Construction tracker row.
+
+  # -----------------------------------------------------------------------
+  # Case: project cancelled. Effective_end closes the canonical record.
+  # Future reinstatement would open a new canonical id (not reuse).
+  # -----------------------------------------------------------------------
+
+  - canonical_id: capex_atl_007a_amenity_2025
+    source_system: corporate_gl
+    source_id: "21-4501-ATL-AMEN"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2025-06-01"
+    effective_end: "2025-11-15"
+    survivorship_rule: capex_project_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2025-11-15"
+    notes: |
+      Cancelled after scope review. Retained with effective_end for
+      historical variance explanation.
+
+  - canonical_id: capex_atl_007a_amenity_2025
+    source_system: construction_tracker_primary
+    source_id: P-AMEN-ATL-009
+    match_confidence: high
+    match_method: manual
+    effective_start: "2025-06-01"
+    effective_end: "2025-11-15"
+    survivorship_rule: capex_project_default
+    manual_override: false
+    reviewer: construction_manager
+    last_validated_at: "2025-11-15"
+    notes: |
+      Construction tracker row. Marked cancelled; no further draws.
+
+  # -----------------------------------------------------------------------
+  # Wave 5 — Yardi multi-role adapter integration. Voyager job cost is
+  # optional and used only when the operator runs Procore-free. Procore
+  # remains the survivor for scope commitments; Yardi reconciles posted
+  # jobcost; Intacct holds the GL posting. See
+  # adapters/yardi_multi_role/crosswalk_additions.yaml::capex_project_crosswalk.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: capex_yd_001
+    source_system: yardi_voyager_pms_stub
+    source_id: JOB_YD_001
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: capex_project_default
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Voyager jobcost row. Procore
+      remains primary for scope and commitments per yardi_multi_role
+      survivorship rule; Yardi reconciles posted jobcost.
+      Provisional until classification_worksheet.md closes.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager job id JOB_YD_001 paired
+      with Procore project PROC_PROJ_4501 and Intacct project dim
+      PROJ_DIM_4501.
+
+  - canonical_id: capex_yd_001
+    source_system: procore_prod
+    source_id: PROC_PROJ_4501
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: capex_project_default
+    manual_override: false
+    reviewer: construction_manager
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Procore project row. Scope and
+      commitments survive from this row per yardi_multi_role survivorship.
+
+  - canonical_id: capex_yd_001
+    source_system: sage_intacct_prod
+    source_id: PROJ_DIM_4501
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: capex_project_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Intacct project dimension row.
+      GL posting survives from this row per yardi_multi_role survivorship.

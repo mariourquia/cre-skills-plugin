@@ -1,0 +1,104 @@
+# Template schema for market_survey_workbook.
+# Multiple ontology objects populated from a single workbook.
+
+status_tag: template
+template_slug: market_survey_workbook
+canonical_reference_schemas:
+  - reference/normalized/schemas/market_rent_benchmark.yaml
+  - reference/normalized/schemas/occupancy_benchmark.yaml
+  - reference/normalized/schemas/concession_benchmark.yaml
+  - reference/normalized/schemas/rent_comp.yaml
+canonical_ontology_objects: [rent_benchmark, occupancy_benchmark, concession_benchmark, market_comp]
+source_format: xlsx
+expected_sheets:
+  - cover_metadata
+  - rent_summary
+  - occupancy_summary
+  - concession_summary
+  - property_detail
+  - commentary
+
+sheet_schemas:
+
+  rent_summary:
+    columns:
+      - { name: market,          required: true, type: string }
+      - { name: submarket,       required: true, type: string }
+      - { name: segment,         required: true, type: string, enum: [middle_market, affordable, luxury] }
+      - { name: property_form,   required: true, type: string, enum: [garden, walk_up, wrap, suburban_mid_rise, urban_mid_rise, high_rise] }
+      - { name: unit_type_label, required: true, type: string }
+      - { name: unit_beds,       required: true, type: integer }
+      - { name: avg_asking_rent, required: true, type: number, unit: dollars_per_unit_per_month }
+      - { name: rent_per_sf,     required: false, type: number }
+      - { name: sample_size_properties, required: false, type: integer }
+      - { name: trailing_3mo_change_pct, required: false, type: number }
+      - { name: as_of_date,      required: true, type: date }
+
+  occupancy_summary:
+    columns:
+      - { name: market,       required: true, type: string }
+      - { name: submarket,    required: true, type: string }
+      - { name: segment,      required: true, type: string }
+      - { name: metric_slug,  required: true, type: string, enum: [physical_occupancy, leased_occupancy, economic_occupancy, preleased_occupancy, notice_exposure, turnover_rate, delinquency_rate_30plus, delinquency_rate_60plus, collections_rate, bad_debt_rate, concession_rate] }
+      - { name: value,        required: true, type: number }
+      - { name: band_low,     required: false, type: number }
+      - { name: band_high,    required: false, type: number }
+      - { name: peer_median,  required: false, type: number }
+      - { name: as_of_date,   required: true, type: date }
+
+  concession_summary:
+    columns:
+      - { name: market,                    required: true, type: string }
+      - { name: submarket,                 required: true, type: string }
+      - { name: segment,                   required: true, type: string }
+      - { name: lease_term_months,         required: true, type: integer }
+      - { name: concession_months_offered, required: true, type: number }
+      - { name: pct_comps_offering,        required: false, type: number }
+      - { name: as_of_date,                required: true, type: date }
+
+  property_detail:
+    columns:
+      - { name: comp_property_name,   required: true, type: string }
+      - { name: market,               required: true, type: string }
+      - { name: submarket,            required: true, type: string }
+      - { name: segment,              required: true, type: string }
+      - { name: unit_type_label,      required: true, type: string }
+      - { name: unit_beds,            required: true, type: integer }
+      - { name: asking_rent,          required: true, type: number }
+      - { name: effective_rent,       required: false, type: number }
+      - { name: concession_months_equivalent, required: false, type: number }
+      - { name: occupancy_reported,   required: false, type: number }
+      - { name: as_of_date,           required: true, type: date }
+
+  cover_metadata:
+    columns:
+      - { name: workbook_version,     required: true, type: string }
+      - { name: report_period,        required: true, type: string }
+      - { name: analyst_name,         required: true, type: string }
+      - { name: reviewer,             required: true, type: string }
+      - { name: signed_off_date,      required: true, type: date }
+
+  commentary:
+    columns:
+      - { name: section_slug,  required: true, type: string }
+      - { name: note_text,     required: true, type: string }
+      - { name: analyst_name,  required: true, type: string }
+
+validation_rules:
+  - rule_id: msw_workbook_version_recognized
+    severity: blocker
+    description: workbook_version from cover_metadata matches the current template release
+  - rule_id: msw_signed_off_required
+    severity: blocker
+    description: cover_metadata.signed_off_date non-null
+  - rule_id: msw_all_sheets_present
+    severity: blocker
+    description: every expected_sheets entry is present
+  - rule_id: msw_submarket_in_market
+    severity: blocker
+    description: submarket belongs to market per crosswalk_additions.yaml
+  - rule_id: msw_outlier_check
+    severity: warning
+    description: rent and concession values within plausible bands per segment overlay
+
+allowed_submarkets_reference: reference/connectors/master_data/submarket_crosswalk.yaml

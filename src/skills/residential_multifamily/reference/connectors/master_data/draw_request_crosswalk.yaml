@@ -1,0 +1,94 @@
+# Draw Request Crosswalk (starter set).
+# Conforms to crosswalk.schema.yaml.
+# Illustrates draw identity across construction tracker (package submission)
+# and GL (loan / equity draw posting).
+
+status_tag: sample
+
+rows:
+
+  # -----------------------------------------------------------------------
+  # Standard monthly draw. Tracker submitted the package; GL posted the
+  # funding receipt three business days later per the loan agreement.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: draw_cta_001_ren_2024_dr_006
+    source_system: construction_tracker_primary
+    source_id: P-REN-001-DR-006
+    match_confidence: high
+    match_method: exact
+    effective_start: "2024-07-05"
+    survivorship_rule: draw_request_default
+    manual_override: false
+    reviewer: construction_manager
+    last_validated_at: "2026-03-31"
+    notes: |
+      Tracker row. Draw package submitted 2024-07-05. Includes supporting
+      docs for cost-to-date and cost-to-complete.
+
+  - canonical_id: draw_cta_001_ren_2024_dr_006
+    source_system: corporate_gl
+    source_id: GL-DRAW-CTA001-006
+    match_confidence: high
+    match_method: manual
+    effective_start: "2024-07-09"
+    survivorship_rule: draw_request_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      GL row. Funding receipt posted 2024-07-09. Same canonical id; the
+      draw lifecycle (submit, review, approve, fund) is tracked on the
+      tracker row, the fund-received timestamp is tracked on the GL row.
+
+  # -----------------------------------------------------------------------
+  # Draw request rejected by lender and resubmitted. Two tracker ids;
+  # both share the canonical id. The first tracker row is closed with
+  # effective_end = rejection_date. No GL row for the first attempt.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: draw_rdu_004_hvac_2025_dr_002
+    source_system: construction_tracker_primary
+    source_id: P-CR-HVAC-001-DR-002a
+    match_confidence: high
+    match_method: exact
+    effective_start: "2025-06-01"
+    effective_end: "2025-06-19"
+    survivorship_rule: draw_request_default
+    manual_override: false
+    reviewer: construction_manager
+    last_validated_at: "2025-06-19"
+    notes: |
+      First submission. Rejected by lender 2025-06-19 for insufficient
+      supporting documentation. Retained with effective_end.
+
+  - canonical_id: draw_rdu_004_hvac_2025_dr_002
+    source_system: construction_tracker_primary
+    source_id: P-CR-HVAC-001-DR-002b
+    match_confidence: high
+    match_method: manual
+    effective_start: "2025-06-27"
+    survivorship_rule: draw_request_default
+    manual_override: true
+    override_reason: |
+      Same economic draw resubmitted with updated supporting docs; same
+      canonical id preserved to keep commitment + CO + draw reconciliation
+      clean.
+    reviewer: construction_manager
+    last_validated_at: "2026-03-31"
+    notes: |
+      Second submission. Approved by lender 2025-07-02.
+
+  - canonical_id: draw_rdu_004_hvac_2025_dr_002
+    source_system: corporate_gl
+    source_id: GL-DRAW-RDU004-HVAC-002
+    match_confidence: high
+    match_method: manual
+    effective_start: "2025-07-07"
+    survivorship_rule: draw_request_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      GL row. Funded 2025-07-07 after lender approval of the second
+      submission.

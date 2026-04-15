@@ -1,0 +1,109 @@
+# Executive (CEO / COO / CFO top-of-house) question bank
+# Audience: executive
+# Depth: 10 questions covering operating model, portfolio segmentation, capital allocation
+# posture, risk tolerance, approval matrix tier structure, board / LP reporting cadence,
+# growth vs disposition posture, and regulatory program participation.
+#
+# This bank supersedes the top-of-house questions previously captured in coo.yaml and
+# cfo.yaml. Functional detail (regional span of control, chart of accounts, variance
+# thresholds) moved to regional_ops.yaml and finance_reporting.yaml respectively.
+#
+# Each question conforms to:
+#   id, question_text, purpose, answer_type, choices, target_overlay_ref,
+#   follow_up_ids, missing_doc_triggers
+#
+# Numeric answers carry units described in question_text; the TUI prompts accordingly.
+# No hardcoded market / segment / dollar figures live in this bank. Thresholds are
+# operator-set; the TUI asks for a value without pre-filling one.
+
+bank_slug: executive
+audience: executive
+version: "0.1.0"
+supersedes: [coo, cfo]
+questions:
+
+  - id: exec_001
+    question_text: What is the organization's primary operating model across the portfolio?
+    purpose: Top-of-house operating model; gates which management_mode overlays apply at the org default level.
+    answer_type: single_choice
+    choices: [self_managed, third_party_managed, hybrid, owner_oversight_only, unknown]
+    target_overlay_ref: overlay.yaml#operating_model
+    follow_up_ids: [exec_002]
+    missing_doc_triggers: []
+
+  - id: exec_002
+    question_text: Describe the hybrid mix in plain language (for example, "roughly 70 percent self-managed, 30 percent third-party"). Free text is fine.
+    purpose: Informs per-property mode assignment defaults during onboarding.
+    answer_type: free_text
+    target_overlay_ref: overlay.yaml#operating_model_mix
+    follow_up_ids: []
+    missing_doc_triggers: []
+
+  - id: exec_003
+    question_text: Please upload or describe the executive / operating org chart. We map role packs to real people using this.
+    purpose: Grounds approval routing so sign-offs resolve to named approvers, not just role slugs.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#org_chart_ref
+    follow_up_ids: []
+    missing_doc_triggers: [org_chart]
+
+  - id: exec_004
+    question_text: How does the organization segment its portfolio? Select all that apply.
+    purpose: Establishes which segment overlays apply to which properties by default.
+    answer_type: multi_choice
+    choices: [middle_market, luxury, mixed_use_with_residential, other]
+    target_overlay_ref: overlay.yaml#portfolio_segmentation.segments
+    follow_up_ids: [exec_005]
+    missing_doc_triggers: [portfolio_segmentation_policy]
+
+  - id: exec_005
+    question_text: Which regulatory programs does the organization operate? Select all that apply. If none, select "none".
+    purpose: Gates regulatory overlay loading; answers feed per-property compliance routing.
+    answer_type: multi_choice
+    choices: [none, lihtc, hud_section_8, hud_202_811, usda_rd, state_program, mixed_income]
+    target_overlay_ref: overlay.yaml#portfolio_segmentation.regulatory_programs
+    follow_up_ids: []
+    missing_doc_triggers: [regulatory_program_participation_list]
+
+  - id: exec_006
+    question_text: What is the approval-matrix tier structure? Describe the tiers (for example, PM level, RM level, AM / COO level, executive / CEO level) without specifying dollar amounts yet.
+    purpose: Captures the operator's approval matrix shape so downstream threshold questions can be placed in the right tier.
+    answer_type: free_text
+    target_overlay_ref: overlay.yaml#approval_matrix.tier_shape
+    follow_up_ids: []
+    missing_doc_triggers: [approval_matrix_policy]
+
+  - id: exec_007
+    question_text: What is the organization's current capital-allocation posture? Describe growth vs hold vs disposition in plain language.
+    purpose: Sets portfolio-level strategic posture that informs disposition-prep and capital-raise workflows.
+    answer_type: single_choice
+    choices: [growth_acquisitive, growth_through_development, steady_state, selective_disposition, active_disposition, unknown]
+    target_overlay_ref: overlay.yaml#capital_allocation.posture
+    follow_up_ids: []
+    missing_doc_triggers: [risk_tolerance_policy]
+
+  - id: exec_008
+    question_text: What is the organization's risk tolerance on lease-up aggression (concession depth, pricing aggression) versus occupancy stability? Pick the closest.
+    purpose: Sets the executive-level posture that feeds concession policy defaults and pricing posture in overlays.
+    answer_type: single_choice
+    choices: [prioritize_occupancy_stability, balanced, prioritize_rent_growth_accept_occupancy_risk, unknown]
+    target_overlay_ref: overlay.yaml#risk_tolerance.leasing_posture
+    follow_up_ids: []
+    missing_doc_triggers: []
+
+  - id: exec_009
+    question_text: What is the reporting cadence the board or LPs currently receive, and in what format?
+    purpose: Sets the investor-facing reporting cadence at the top of house; finance_reporting bank refines.
+    answer_type: single_choice
+    choices: [monthly, quarterly, semi_annual, annual, ad_hoc, mixed]
+    target_overlay_ref: overlay.yaml#reporting.board_lp_cadence
+    follow_up_ids: []
+    missing_doc_triggers: [investor_reporting_cadence]
+
+  - id: exec_010
+    question_text: Are there any organizational changes in-flight that should pause or delay overlay apply? (leadership transition, fund close, audit period, strategic review)
+    purpose: Captures transient state that may gate whether the preview should be applied now or deferred.
+    answer_type: free_text
+    target_overlay_ref: overlay.yaml#organizational_state.notes
+    follow_up_ids: []
+    missing_doc_triggers: []

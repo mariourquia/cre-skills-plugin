@@ -1,0 +1,249 @@
+checks:
+- check_id: market_data_record_count
+  check_kind: record_count
+  severity: blocker
+  description: Raw row count minus rejects equals normalized row count.
+  inputs:
+  - reference/raw/market_data/<YYYY>/<MM>/<source>__<as_of>.*
+  - reference/normalized/market_data_<entity>__<scope>.csv
+  expected_invariant: count(raw) - count(rejected) == count(normalized)
+  remediation: See qa/record_count.yaml.
+- check_id: market_data_duplicate_primary_key
+  check_kind: duplicate_id
+  severity: blocker
+  description: No duplicate PKs across all market_data entities.
+  inputs:
+  - reference/normalized/market_data_rent_comp__<scope>.csv
+  - reference/normalized/market_data_concession_observation__<scope>.csv
+  - reference/normalized/market_data_occupancy_benchmark__<scope>.csv
+  - reference/normalized/market_data_payroll_reference__<scope>.csv
+  - reference/normalized/market_data_labor_reference__<scope>.csv
+  - reference/normalized/market_data_material_reference__<scope>.csv
+  - reference/normalized/market_data_utility_reference__<scope>.csv
+  expected_invariant: count(distinct pk) == count(records) per entity
+  remediation: See qa/duplicate_id.yaml.
+- check_id: market_data_date_coverage
+  check_kind: date_coverage
+  severity: warning
+  description: Market data cadence (quarterly or monthly) has no interior gaps.
+  inputs:
+  - reference/normalized/market_data_<entity>__<scope>.csv
+  expected_invariant: no missing interior period in the as_of_date series per market
+    and entity
+  remediation: See qa/date_coverage.yaml.
+- check_id: market_data_rent_comp_scope_coverage
+  check_kind: null_critical
+  severity: warning
+  description: Every market an owned property operates in has at least one rent_comp
+    observation within the coverage-window days referenced in market_data manifest.
+  inputs:
+  - reference/normalized/market_data_rent_comp__<scope>.csv
+  - reference/normalized/pms_property__<scope>.csv
+  - reference/connectors/market_data/manifest.yaml
+  expected_invariant: for each market in owned properties, exists rent_comp with as_of_date
+    >= today - rent_comp_coverage_window_days declared in market_data/manifest.yaml
+  remediation: 'A market without recent comps forces the comp-snapshot skill to refuse.
+
+    Escalate to the asset_mgmt audience; source a replacement feed or a
+
+    local survey.
+
+    '
+- check_id: md_freshness_sla
+  check_kind: date_coverage
+  severity: warning
+  description: Every market_data entity category respects the per-category freshness
+    SLA declared in manifest.yaml.
+  inputs:
+  - reference/normalized/market_data_<entity>__<scope>.csv
+  - reference/connectors/market_data/manifest.yaml
+  expected_invariant: 'for each entity category: today - max(as_of_date) <= max_age_days
+    declared per category in market_data/manifest.yaml'
+  remediation: 'Stale market data drives stale benchmarks. Operator refreshes the
+
+    feed per the category cadence in manifest.yaml and re-lands.
+
+    '
+- check_id: md_outlier_rent_detection
+  check_kind: null_critical
+  severity: warning
+  description: Asking rent observations outside the plausible band declared in overlay
+    or reference are flagged for review; the band is parameterized, not hardcoded.
+  inputs:
+  - reference/normalized/market_data_rent_comp__<scope>.csv
+  - reference/derived/market_rent_benchmark__<scope>.csv
+  - overlays/segments/<segment>/overlay.yaml
+  expected_invariant: 'for each rent_comp: asking_rent_monthly_cents within the outlier_band_percent
+    of the trailing median for (market, submarket, unit_type_label) declared in overlays/segments/<segment>/overlay.yaml'
+  remediation: 'Outliers are quarantined pending operator review. Confirm whether
+
+    the observation is a legitimate price leader, a data-entry error, or a
+
+    stale asking rent. Do not drop silently.
+
+    '
+- check_id: md_comp_population_coverage
+  check_kind: null_critical
+  severity: warning
+  description: Each submarket an owned property operates in has at least the minimum
+    comp-population count declared in manifest.yaml.
+  inputs:
+  - reference/normalized/market_data_rent_comp__<scope>.csv
+  - reference/normalized/pms_property__<scope>.csv
+  - reference/connectors/market_data/manifest.yaml
+  expected_invariant: 'for each (market, submarket) where owned_property_count > 0:
+    count(distinct comp_property_id in rent_comp within freshness window) >= minimum_comp_count
+    declared in market_data/manifest.yaml'
+  remediation: 'Below-minimum coverage forces comp-snapshot to widen its geographic
+
+    scope or refuse. Operator sources additional comps or relaxes the
+
+    geography with an explicit reason.
+
+    '
+- check_id: md_submarket_tag_required
+  check_kind: null_critical
+  severity: warning
+  description: rent_comp and concession_observation rows require either a submarket
+    tag or an explicit submarket_unknown flag referenced against a market-level gazetteer.
+  inputs:
+  - reference/normalized/market_data_rent_comp__<scope>.csv
+  - reference/normalized/market_data_concession_observation__<scope>.csv
+  - reference/connectors/market_data/master_data/market_gazetteer.yaml
+  expected_invariant: 'for each rent_comp and concession_observation: submarket IS
+    NOT NULL OR submarket_unknown = true with a documented reason in master_data/market_gazetteer.yaml'
+  remediation: 'Missing submarket tags collapse all comps to the market median
+
+    and silently distort submarket-level comp snapshots. Operator tags or
+
+    flags explicitly.
+
+    '
+- check_id: md_conflicting_sources_flagged
+  check_kind: null_critical
+  severity: warning
+  description: When two sources publish the same comp_property_id asking rent with
+    a delta beyond the conflict_tolerance_percent band, the landing flags the conflict
+    and requires operator adjudication.
+  inputs:
+  - reference/normalized/market_data_rent_comp__<scope>.csv
+  - reference/connectors/market_data/manifest.yaml
+  expected_invariant: 'for each (comp_property_id, unit_type_label, as_of_date_bucket):
+    max(asking_rent_monthly_cents) - min(asking_rent_monthly_cents) within conflict_tolerance_percent
+    of the mean declared in market_data/manifest.yaml OR carries conflict_adjudication_note'
+  remediation: 'Conflicting asking rents from two sources are common near lease-up
+
+    comps. Operator picks the trusted source per the provenance hierarchy
+
+    in manifest.yaml or records both with a conflict note.
+
+    '
+- check_id: md_concessions_decoded_consistently
+  check_kind: null_critical
+  severity: warning
+  description: Every concession_observation has its concession_magnitude decoded into
+    a comparable concession_weeks equivalent via the canonical formula.
+  inputs:
+  - reference/normalized/market_data_concession_observation__<scope>.csv
+  - reference/connectors/market_data/mapping.yaml
+  expected_invariant: 'for each concession_observation: concession_weeks_equivalent
+    IS NOT NULL AND equals the canonical decoding formula referenced in market_data/mapping.yaml'
+  remediation: 'Concessions expressed as look_and_lease, gift_card, or dollars_off
+
+    must all decode to a weeks-equivalent so they are comparable. Operator
+
+    confirms the decoding formula in mapping.yaml and re-runs normalization.
+
+    '
+- check_id: md_weak_provenance_warning
+  check_kind: null_critical
+  severity: warning
+  description: Observations sourced from vendor feeds with provenance_tier = weak
+    in the source registry carry a weak_provenance flag so downstream skills can down-weight
+    them.
+  inputs:
+  - reference/normalized/market_data_<entity>__<scope>.csv
+  - reference/connectors/source_registry/
+  expected_invariant: 'for each record: source_name resolves to source_registry entry
+    with provenance_tier IN (strong, medium, weak); if weak, weak_provenance_flag
+    = true'
+  remediation: 'Weak-provenance observations are allowed but down-weighted by the
+
+    comp-snapshot and submarket-truth-serum skills. Operator documents the
+
+    provenance tier for each source in source_registry/.
+
+    '
+- check_id: md_occupancy_benchmark_requires_effective_date
+  check_kind: null_critical
+  severity: blocker
+  description: Every occupancy_benchmark row has a non-null as_of_date and a non-null
+    physical_occupancy_percent.
+  inputs:
+  - reference/normalized/market_data_occupancy_benchmark__<scope>.csv
+  expected_invariant: 'for each occupancy_benchmark: as_of_date IS NOT NULL AND physical_occupancy_percent
+    IS NOT NULL'
+  remediation: 'Occupancy benchmarks without an effective date are uninterpretable.
+
+    Reject at landing; operator re-sources with an effective date.
+
+    '
+- check_id: md_payroll_reference_requires_geography
+  check_kind: null_critical
+  severity: blocker
+  description: Every payroll_reference row has a non-null market and role_slug; base_salary_annual_cents
+    IS NOT NULL.
+  inputs:
+  - reference/normalized/market_data_payroll_reference__<scope>.csv
+  expected_invariant: 'for each payroll_reference: market IS NOT NULL AND role_slug
+    IS NOT NULL AND base_salary_annual_cents IS NOT NULL'
+  remediation: 'Payroll benchmarks without geography collapse into a portfolio
+
+    average and under-price high-cost markets. Reject at landing.
+
+    '
+- check_id: md_labor_reference_requires_trade
+  check_kind: null_critical
+  severity: blocker
+  description: Every labor_reference row has a non-null trade and market and hourly_rate_cents.
+  inputs:
+  - reference/normalized/market_data_labor_reference__<scope>.csv
+  expected_invariant: 'for each labor_reference: trade IS NOT NULL AND market IS NOT
+    NULL AND hourly_rate_cents IS NOT NULL'
+  remediation: 'Labor rates without trade context cannot be consumed by turn-cost
+
+    or construction-budget skills. Reject at landing.
+
+    '
+- check_id: md_material_reference_requires_unit_of_measure
+  check_kind: null_critical
+  severity: blocker
+  description: Every material_reference row has a non-null unit and region and unit_cost_cents.
+  inputs:
+  - reference/normalized/market_data_material_reference__<scope>.csv
+  expected_invariant: 'for each material_reference: unit IS NOT NULL AND region IS
+    NOT NULL AND unit_cost_cents IS NOT NULL'
+  remediation: 'Material costs without a unit of measure cannot be applied to
+
+    takeoffs. Reject at landing.
+
+    '
+- check_id: md_benchmark_approval_status_required
+  check_kind: null_critical
+  severity: warning
+  description: Derived benchmark rows sourced from multiple observations carry an
+    approval_status field indicating whether the blended benchmark has been reviewed
+    and endorsed.
+  inputs:
+  - reference/derived/market_rent_benchmark__<scope>.csv
+  - reference/derived/concession_benchmark__<scope>.csv
+  - reference/derived/occupancy_benchmark__<scope>.csv
+  expected_invariant: 'for each derived benchmark row: approval_status IN (proposed,
+    endorsed, deprecated)'
+  remediation: 'Benchmarks flagged proposed should not be consumed by IC-memo or
+
+    LP-facing skills until endorsed. Operator runs the benchmark review
+
+    and updates approval_status.
+
+    '

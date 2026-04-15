@@ -75,6 +75,43 @@ The test suite scans:
 - Use of "comp" without "rent" or "sales" qualifier.
 - Use of "rate" without clear unit (percent, days, dollars).
 
+## Directory-slug exception for subsystem roots
+
+The wider `cre-skills-plugin` repository uses `kebab-case` for skill directory names
+(`acquisition-underwriting-engine`, `dd-command-center`). The residential multifamily
+subsystem uses `snake_case` for its internal slugs — roles, workflows, overlays, metrics,
+taxonomy axes — and the subsystem root directory (`src/skills/residential_multifamily/`)
+therefore also uses `snake_case` so that the skill-folder name and the internal slug
+are identical.
+
+This is an intentional exception, not a drift.
+
+- `conftest.py` explicitly asserts `SUBSYS.name == "residential_multifamily"`.
+- `src/catalog/catalog.yaml` registers the skill with `id: residential_multifamily`.
+- A rename to `residential-multifamily` would require updating the assertion, the
+  catalog, and every doc that names the path. It is tracked as a standalone ticket in
+  `session_state/NEXT_SESSION_PROMPT.md` and is NOT executed during the 2026-04-15
+  refinement pass.
+
+All new skill directories created elsewhere in the repo continue to use `kebab-case`.
+
+## Segment vs regulatory program
+
+Two distinct axes cover what used to be conflated:
+
+- `segment` covers **conventional market-positioning**: `middle_market`, `luxury`.
+- `regulatory_program` covers **regulated affordable housing compliance regimes**:
+  `none` (default), `lihtc`, `hud_section_8`, `hud_202_811`, `usda_rd`, `state_program`,
+  `mixed_income`.
+
+These axes compose. A property may be `segment: middle_market` AND
+`regulatory_program: lihtc` — the two overlays merge under the composition order in
+`_core/BOUNDARIES.md`. Conventional routes default `regulatory_program: none`; no
+regulatory overlay ever loads unless the user sets the axis explicitly.
+
+The legacy axis value `segment: affordable` is accepted for one refinement cycle as a
+migration alias that prompts the user for `regulatory_program` and retries routing.
+
 ## Preferred vocabulary
 
 To reduce drift, the subsystem prefers:

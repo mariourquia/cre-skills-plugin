@@ -1,0 +1,325 @@
+# Procore Construction — Source (raw payload) contract.
+#
+# Documents the raw payload shape per entity as returned by the Procore
+# Developer API. Field names mirror Procore conventions
+# (lowercase_with_underscore). This file is informational; it is NOT a
+# canonical schema. The canonical contract lives at
+# ../../construction/schema.yaml.
+#
+# Every raw record carries a provenance envelope (extracted_at,
+# source_name, etc.). The envelope is the same for every entity and is
+# declared once under `_provenance_envelope` and referenced per entity.
+
+status_tag: stub
+
+_provenance_envelope: &provenance_envelope
+  source_name: procore_prod            # matches source_registry.source_id
+  source_type: construction
+  source_date: "YYYY-MM-DD"            # as-of date of the pull
+  extracted_at: "YYYY-MM-DDTHH:MM:SSZ" # ISO-8601 datetime
+  extractor_version: string            # e.g., "0.1.0-stub"
+  source_row_id: string                # Procore id stringified
+  status: sample                       # sample | stub | template — required on every row
+
+# ----------------------------------------------------------------------
+# Projects (Projects API: GET /projects)
+# ----------------------------------------------------------------------
+project:
+  procore_endpoint: "GET /rest/v1.0/projects"
+  object_type: project
+  raw_fields:
+    - { name: id, type: integer, description: "Procore project id, numeric." }
+    - { name: name, type: string, description: "Project display name." }
+    - { name: project_number, type: string, description: "Operator-defined project number." }
+    - { name: stage, type: enum, description: "Procore stage label.",
+        enum_values: [Course of Construction, Pre-Construction, Current Construction, Post Construction, Warranty, Bidding, Closed] }
+    - { name: start_date, type: date, description: "Planned start date." }
+    - { name: completion_date, type: date, description: "Planned completion date." }
+    - { name: actual_start_date, type: date, description: "Actual start date (optional)." }
+    - { name: actual_completion_date, type: date, description: "Actual completion date (optional)." }
+    - { name: company_id, type: integer, description: "Owning company id in Procore." }
+    - { name: address, type: string, description: "Street address (rough match to property location)." }
+    - { name: city, type: string, description: "City." }
+    - { name: state_code, type: string, description: "State (US 2-letter)." }
+    - { name: zip, type: string, description: "Zip code." }
+    - { name: project_type, type: string, description: "Operator category (new construction, renovation, etc.)." }
+    - { name: active, type: boolean, description: "Whether project is active." }
+    - { name: created_at, type: datetime, description: "Procore record created timestamp." }
+    - { name: updated_at, type: datetime, description: "Procore record last-updated timestamp." }
+  provenance: *provenance_envelope
+
+# ----------------------------------------------------------------------
+# Project directory — Users and Companies on the project
+# ----------------------------------------------------------------------
+project_directory:
+  procore_endpoint: "GET /rest/v1.0/projects/{id}/users  AND  /projects/{id}/companies"
+  object_type: project_directory_entry
+  raw_fields:
+    - { name: id, type: integer, description: "User or company directory record id." }
+    - { name: project_id, type: integer, description: "FK to project." }
+    - { name: directory_type, type: enum, enum_values: [user, company] }
+    - { name: name, type: string, description: "User or company display name." }
+    - { name: role, type: string, description: "Role on the project (PM, Superintendent, Subcontractor, Owner, Architect, etc.)." }
+    - { name: email, type: string, description: "User email (PII — redact in sample)." }
+    - { name: company_id, type: integer, description: "Company id for subcontractors/vendors/architects." }
+    - { name: company_name, type: string, description: "Company display name." }
+    - { name: trade, type: string, description: "Trade (drywall, concrete, plumbing, etc.) when directory_type = company." }
+    - { name: is_active, type: boolean, description: "Directory active flag." }
+  provenance: *provenance_envelope
+
+# ----------------------------------------------------------------------
+# Budget (Budget API)
+#   Direct costs with line items. Procore budget is organized by WBS code
+#   (cost code) and line item type.
+# ----------------------------------------------------------------------
+budget:
+  procore_endpoint: "GET /rest/v1.0/projects/{id}/budget_changes  AND  /budget_line_items"
+  object_type: budget_snapshot
+  raw_fields:
+    - { name: id, type: integer, description: "Budget snapshot id." }
+    - { name: project_id, type: integer, description: "FK to project." }
+    - { name: budget_version, type: string, description: "Procore budget snapshot label — Original, Revised, Pending Revised, etc." }
+    - { name: active_version_flag, type: boolean, description: "Whether this version is the active Revised Budget." }
+    - { name: snapshot_date, type: date, description: "Date this budget snapshot was frozen." }
+    - { name: total_original_budget, type: number, description: "Budget total at original approval (USD)." }
+    - { name: total_revised_budget, type: number, description: "Budget total after approved budget changes (USD)." }
+    - { name: total_pending_budget, type: number, description: "Budget total including pending change events (USD)." }
+    - { name: budget_line_items, type: array, description: "Array of budget_line_item objects (see budget_line_item below)." }
+  provenance: *provenance_envelope
+
+budget_line_item:
+  object_type: budget_line_item
+  raw_fields:
+    - { name: id, type: integer, description: "Line item id." }
+    - { name: project_id, type: integer, description: "FK to project." }
+    - { name: budget_version, type: string, description: "FK to budget snapshot." }
+    - { name: cost_code, type: string, description: "Procore cost code (e.g., 03-10-00 Concrete Forming)." }
+    - { name: wbs_code, type: string, description: "WBS code, may equal cost_code or extend it." }
+    - { name: line_item_type, type: enum, enum_values: [Labor, Material, Equipment, Subcontract, "Other Cost", "Professional Service"] }
+    - { name: description, type: string, description: "Line item label." }
+    - { name: original_budget_amount, type: number, description: "Original line budget (USD)." }
+    - { name: approved_changes_amount, type: number, description: "Sum of approved budget modifications (USD)." }
+    - { name: revised_budget_amount, type: number, description: "Original + approved (USD)." }
+    - { name: pending_changes_amount, type: number, description: "Sum of pending change events (USD)." }
+    - { name: committed_amount, type: number, description: "Committed to contracts (USD)." }
+    - { name: direct_costs_amount, type: number, description: "Posted direct costs from invoices (USD)." }
+    - { name: forecast_to_complete_amount, type: number, description: "Forecast remaining (USD)." }
+    - { name: estimated_cost_at_completion, type: number, description: "EAC (USD)." }
+    - { name: projected_over_under, type: number, description: "Variance (USD)." }
+    - { name: quantity, type: number, description: "Optional quantity takeoff." }
+    - { name: unit, type: string, description: "Unit of measure (ea, sf, lf, cy, ton, hr, lot) when quantity present." }
+    - { name: unit_cost, type: number, description: "Unit cost (USD)." }
+  provenance: *provenance_envelope
+
+# ----------------------------------------------------------------------
+# Commitments — Purchase Orders + Work Order Contracts
+# ----------------------------------------------------------------------
+commitment:
+  procore_endpoint: "GET /rest/v1.0/projects/{id}/purchase_order_contracts  AND  /work_order_contracts"
+  object_type: commitment
+  raw_fields:
+    - { name: id, type: integer, description: "Commitment id (PO id or subcontract id)." }
+    - { name: project_id, type: integer, description: "FK to project." }
+    - { name: contract_type, type: enum, enum_values: [purchase_order, work_order_contract] }
+    - { name: number, type: string, description: "Commitment number (e.g., PO-0042, SUB-0015)." }
+    - { name: title, type: string, description: "Commitment title (scope label)." }
+    - { name: vendor_id, type: integer, description: "Procore directory company id for the vendor." }
+    - { name: vendor_name, type: string, description: "Vendor display name." }
+    - { name: original_commitment_amount, type: number, description: "Original contract total (USD)." }
+    - { name: approved_change_orders_amount, type: number, description: "Sum of approved commitment COs (USD)." }
+    - { name: revised_commitment_amount, type: number, description: "Original + approved COs (USD)." }
+    - { name: pending_change_orders_amount, type: number, description: "Sum of pending commitment COs (USD)." }
+    - { name: billed_to_date, type: number, description: "Total billed across pay apps (USD)." }
+    - { name: paid_to_date, type: number, description: "Total paid (USD)." }
+    - { name: remaining_balance_outstanding, type: number, description: "Revised - billed (USD)." }
+    - { name: retainage_percent, type: number, description: "Retention holdback percent at commitment." }
+    - { name: retainage_balance, type: number, description: "Current retainage held (USD)." }
+    - { name: executed_date, type: date, description: "Execution date of the commitment." }
+    - { name: status, type: enum, enum_values: [draft, out_for_signature, approved, complete, void, terminated] }
+    - { name: cost_code, type: string, description: "Default cost code for the commitment (line items may override)." }
+    - { name: created_at, type: datetime }
+    - { name: updated_at, type: datetime }
+  provenance: *provenance_envelope
+
+# ----------------------------------------------------------------------
+# Commitment line items — schedule-of-values per commitment
+# ----------------------------------------------------------------------
+commitment_line_item:
+  procore_endpoint: "GET /rest/v1.0/commitments/{id}/line_items"
+  object_type: commitment_line_item
+  raw_fields:
+    - { name: id, type: integer, description: "Line item id." }
+    - { name: commitment_id, type: integer, description: "FK to commitment." }
+    - { name: project_id, type: integer, description: "FK to project." }
+    - { name: cost_code, type: string, description: "Cost code for the line." }
+    - { name: wbs_code, type: string, description: "WBS code." }
+    - { name: line_item_type, type: enum, enum_values: [Labor, Material, Equipment, Subcontract, "Other Cost", "Professional Service"] }
+    - { name: description, type: string, description: "Line item scope label." }
+    - { name: quantity, type: number, description: "Quantity (optional)." }
+    - { name: unit, type: string, description: "Unit of measure." }
+    - { name: unit_cost, type: number, description: "Unit cost (USD)." }
+    - { name: amount, type: number, description: "Extended amount (USD)." }
+    - { name: billed_amount, type: number, description: "Amount billed on this line (USD)." }
+    - { name: paid_amount, type: number, description: "Amount paid on this line (USD)." }
+  provenance: *provenance_envelope
+
+# ----------------------------------------------------------------------
+# Change Orders — Commitment Change Orders + Change Events
+# ----------------------------------------------------------------------
+change_order:
+  procore_endpoint: "GET /rest/v1.0/projects/{id}/change_orders  AND  /commitment_change_orders"
+  object_type: change_order
+  raw_fields:
+    - { name: id, type: integer, description: "Change order id." }
+    - { name: project_id, type: integer, description: "FK to project." }
+    - { name: commitment_id, type: integer, description: "FK to commitment (for CCOs)." }
+    - { name: change_event_id, type: integer, description: "FK to parent change event (upstream)." }
+    - { name: co_type, type: enum, enum_values: [change_event, potential_change_order, commitment_change_order, budget_change_order] }
+    - { name: number, type: string, description: "Sequential CO number (e.g., CO-001)." }
+    - { name: title, type: string, description: "CO title (scope summary)." }
+    - { name: description, type: string, description: "CO scope narrative." }
+    - { name: cost_code, type: string, description: "Target cost code." }
+    - { name: amount, type: number, description: "Cost delta (USD)." }
+    - { name: time_delta_days, type: integer, description: "Schedule impact in days." }
+    - { name: status, type: enum, enum_values: [draft, pending, approved, void] }
+    - { name: reason_code, type: string, description: "Operator reason taxonomy — owner directive, design change, unforeseen, scope clarification, etc." }
+    - { name: created_date, type: date }
+    - { name: submitted_date, type: date }
+    - { name: approved_date, type: date, description: "Null if not yet approved." }
+    - { name: approver_name, type: string }
+    - { name: attachments, type: array, description: "Supporting documents list." }
+    - { name: void_reason, type: string, description: "Populated if status = void." }
+  provenance: *provenance_envelope
+
+# ----------------------------------------------------------------------
+# Draw / Pay applications (Commitment payment applications)
+# ----------------------------------------------------------------------
+draw_request:
+  procore_endpoint: "GET /rest/v1.0/projects/{id}/payment_applications  (commitment-scoped and project-scoped)"
+  object_type: payment_application
+  raw_fields:
+    - { name: id, type: integer, description: "Pay app id." }
+    - { name: project_id, type: integer, description: "FK to project." }
+    - { name: commitment_id, type: integer, description: "FK to commitment (owner-side draws may be project-scoped; commitment_id nullable for lender draws)." }
+    - { name: number, type: string, description: "Pay app number (e.g., 001, 002)." }
+    - { name: period_start, type: date, description: "Billing period start." }
+    - { name: period_end, type: date, description: "Billing period end." }
+    - { name: billing_date, type: date, description: "Date of the billing." }
+    - { name: status, type: enum, enum_values: [draft, submitted, under_review, approved, approved_as_noted, rejected, paid] }
+    - { name: current_payment_due, type: number, description: "Net payment requested this period (USD)." }
+    - { name: previous_applications_amount, type: number, description: "Cumulative prior pay apps (USD)." }
+    - { name: work_completed_to_date, type: number, description: "Value of work completed cumulative (USD)." }
+    - { name: stored_materials_to_date, type: number, description: "Value of stored materials (USD)." }
+    - { name: total_completed_and_stored_to_date, type: number, description: "Sum of work + stored (USD)." }
+    - { name: retainage_held_this_period, type: number, description: "Retention held this period (USD)." }
+    - { name: retainage_released_this_period, type: number, description: "Retention released this period (USD)." }
+    - { name: retainage_balance, type: number, description: "Retention balance held (USD)." }
+    - { name: percent_complete_cost, type: number, description: "Cost-basis percent complete (0-100)." }
+    - { name: submitted_by, type: string, description: "Submitter role." }
+    - { name: approved_by, type: string, description: "Approver name." }
+    - { name: approved_date, type: date, description: "Pay app approval date in Procore." }
+    - { name: paid_date, type: date, description: "Date marked paid (post-Intacct sync or manual update)." }
+    - { name: lien_waiver_status, type: enum, enum_values: [none_required, pending, received_conditional, received_unconditional, overdue] }
+  provenance: *provenance_envelope
+
+# ----------------------------------------------------------------------
+# Schedule — native or imported MS Project / P6
+# ----------------------------------------------------------------------
+schedule_milestone:
+  procore_endpoint: "GET /rest/v1.0/projects/{id}/schedule/tasks  OR  imported_schedule"
+  object_type: schedule_milestone
+  raw_fields:
+    - { name: id, type: integer, description: "Task/milestone id." }
+    - { name: project_id, type: integer, description: "FK to project." }
+    - { name: name, type: string, description: "Task or milestone name." }
+    - { name: task_type, type: enum, enum_values: [task, milestone, summary] }
+    - { name: is_milestone, type: boolean, description: "True for milestone rows." }
+    - { name: baseline_start, type: date }
+    - { name: baseline_finish, type: date }
+    - { name: forecast_start, type: date }
+    - { name: forecast_finish, type: date }
+    - { name: actual_start, type: date }
+    - { name: actual_finish, type: date, description: "Populated when task complete." }
+    - { name: percent_complete, type: number, description: "Physical percent complete (0-100)." }
+    - { name: on_critical_path, type: boolean, description: "Critical path flag (if calculated)." }
+    - { name: predecessors, type: array, description: "Array of predecessor task ids." }
+    - { name: source_schedule, type: enum, enum_values: [procore_native, msproject_import, p6_import] }
+    - { name: baseline_revision_id, type: string, description: "Pointer to schedule baseline set; null if no baseline captured." }
+    - { name: forecast_revision_history, type: array, description: "Array of prior forecast_finish values with timestamp." }
+  provenance: *provenance_envelope
+
+# ----------------------------------------------------------------------
+# Punchlist items
+# ----------------------------------------------------------------------
+punchlist_item:
+  procore_endpoint: "GET /rest/v1.0/projects/{id}/punch_items"
+  object_type: punchlist_item
+  raw_fields:
+    - { name: id, type: integer }
+    - { name: project_id, type: integer }
+    - { name: punch_item_number, type: string }
+    - { name: title, type: string }
+    - { name: description, type: string }
+    - { name: status, type: enum, enum_values: [draft, open, ready_for_review, closed, rejected, not_accepted] }
+    - { name: priority, type: enum, enum_values: [low, medium, high, critical] }
+    - { name: location, type: string, description: "Building, floor, unit identifier." }
+    - { name: assigned_to, type: string, description: "Company or user id responsible." }
+    - { name: trade, type: string, description: "Trade responsible." }
+    - { name: target_complete_date, type: date }
+    - { name: actual_complete_date, type: date }
+    - { name: deferred_to_warranty, type: boolean, description: "Flag for post-closeout resolution." }
+  provenance: *provenance_envelope
+
+# ----------------------------------------------------------------------
+# Closeout documents (as-built drawings, O&M manuals, warranties, TCO/CO)
+# ----------------------------------------------------------------------
+closeout_document:
+  procore_endpoint: "GET /rest/v1.0/projects/{id}/documents?category=closeout"
+  object_type: closeout_document
+  raw_fields:
+    - { name: id, type: integer }
+    - { name: project_id, type: integer }
+    - { name: document_type, type: enum, enum_values: [as_built, om_manual, warranty, tco, certificate_of_occupancy, lien_waiver, final_lien_release, final_pay_app] }
+    - { name: title, type: string }
+    - { name: received_date, type: date }
+    - { name: submitted_by, type: string, description: "Company providing the document." }
+    - { name: uri, type: string, description: "Procore document storage URI (redacted in sample)." }
+  provenance: *provenance_envelope
+
+# ----------------------------------------------------------------------
+# Project Financials snapshot — rollup status across budget, commitments, COs, draws
+# ----------------------------------------------------------------------
+project_financials_snapshot:
+  procore_endpoint: "GET /rest/v1.0/projects/{id}/financial_snapshot"
+  object_type: project_financials_snapshot
+  raw_fields:
+    - { name: project_id, type: integer }
+    - { name: snapshot_date, type: date }
+    - { name: budget_amount, type: number, description: "Revised Budget total (USD)." }
+    - { name: committed_amount, type: number, description: "Total committed across commitments (USD)." }
+    - { name: approved_change_orders_amount, type: number, description: "Total approved COs (USD)." }
+    - { name: pending_change_orders_amount, type: number, description: "Total pending COs (USD)." }
+    - { name: direct_costs_amount, type: number, description: "Total posted direct costs (USD)." }
+    - { name: billed_amount, type: number, description: "Total billed across pay apps (USD)." }
+    - { name: paid_amount, type: number, description: "Total paid (USD)." }
+    - { name: forecast_to_complete, type: number, description: "Forecast remaining (USD)." }
+    - { name: estimated_cost_at_completion, type: number, description: "EAC (USD)." }
+    - { name: projected_over_under, type: number, description: "Variance to budget (USD)." }
+    - { name: contingency_remaining, type: number, description: "Contingency balance (USD)." }
+    - { name: contingency_burned, type: number, description: "Contingency consumed (USD)." }
+  provenance: *provenance_envelope
+
+# ----------------------------------------------------------------------
+# Issues / RFIs — placeholder, out-of-scope for Wave 4 financial/schedule adapter.
+# Documented for completeness.
+# ----------------------------------------------------------------------
+issues_and_rfis:
+  procore_endpoint: "GET /rest/v1.0/projects/{id}/rfis  AND  /observations  AND  /incidents"
+  object_type: issue_or_rfi
+  status_note: out_of_scope_wave_4
+  description: |
+    Issues, RFIs, Observations, and Incident records are captured in
+    Procore but are not ingested by this Wave 4 financial/schedule
+    adapter. A follow-on wave may surface RFI cost-impact events for
+    early warning on commitment change events. No mapping to canonical
+    construction entities at this time.

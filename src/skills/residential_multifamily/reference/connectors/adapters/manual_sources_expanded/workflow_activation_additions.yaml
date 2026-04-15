@@ -1,0 +1,39 @@
+# Workflow activation fragment for manual_sources_expanded.
+
+manual_sources_expanded_role: contributing_to_manual_uploads_domain
+
+activates_existing_workflows:
+  - workflow: third_party_manager_scorecard_review
+    role: primary
+    objects_supplied: [lease, charge, payment, delinquency_case, work_order, staffing_position]
+    notes: TPM data submissions are sole source when manager not on shared system
+
+  - workflow: owner_approval_routing
+    role: primary
+    objects_supplied: [approval_request]
+    notes: approval matrix workbook governs threshold rules
+
+  - workflow: executive_operating_summary_generation
+    role: contributing
+    objects_supplied: [approval_request, staffing_position]
+    notes: executive reporting input workbook contributes commentary
+
+  - workflow: budget_build
+    role: contributing
+    objects_supplied: [staffing_position]
+    notes: operator staffing plans seed budget build
+
+  - workflow: capital_project_intake_and_prioritization
+    role: contributing
+    objects_supplied: [estimate_line_item, bid_package]
+    notes: capex trackers and bid tab workbooks contribute
+
+  - workflow: monthly_property_operating_review
+    role: contributing
+    objects_supplied: [staffing_position, work_order]
+    notes: when operator submits monthly report
+
+  - workflow: bid_leveling_procurement_review
+    role: contributing
+    objects_supplied: [bid_package, estimate_line_item]
+    notes: bid tab workbooks contribute pre-Procore award

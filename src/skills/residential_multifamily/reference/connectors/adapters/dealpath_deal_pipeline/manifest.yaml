@@ -1,0 +1,56 @@
+adapter_id: dealpath_deal_pipeline
+adapter_name: Dealpath Deal Pipeline Adapter
+vendor_family: dealpath_family
+connector_domain: deal_pipeline
+status: stub
+rollout_wave: wave_4
+description: |
+  Vendor-specific adapter that specializes the canonical deal_pipeline
+  connector for Dealpath. Primary source of truth for pre-close deal state,
+  IC milestones, deal team assignments, and deal key dates. Seeds downstream
+  AppFolio property setup, Procore project creation, and Intacct entity/
+  dimension setup at acquisition or development handoff.
+
+  After close, Dealpath becomes secondary; AppFolio + Intacct + Procore take
+  primary roles for operating + financial + construction state respectively.
+
+supported_source_systems:
+  - dealpath_prod
+
+mapping_hints:
+  - { source_field_pattern: "id|deal_id",                canonical_field: deal_id,                  transform_hint: crosswalk_lookup }
+  - { source_field_pattern: "asset_id",                  canonical_field: asset_id,                 transform_hint: crosswalk_lookup }
+  - { source_field_pattern: "deal_type",                 canonical_field: deal_type,                transform_hint: map_dealpath_deal_type }
+  - { source_field_pattern: "stage|deal_stage",          canonical_field: pipeline_stage,           transform_hint: map_dealpath_stage }
+  - { source_field_pattern: "loi_date",                  canonical_field: loi_signed_date,          transform_hint: to_iso_date }
+  - { source_field_pattern: "psa_date",                  canonical_field: psa_signed_date,          transform_hint: to_iso_date }
+  - { source_field_pattern: "expected_close_date",       canonical_field: expected_close_date,      transform_hint: to_iso_date }
+  - { source_field_pattern: "actual_close_date",         canonical_field: deal_close_date_actual,   transform_hint: to_iso_date }
+  - { source_field_pattern: "ic_status|ic_decision",     canonical_field: ic_status,                transform_hint: map_dealpath_ic_status }
+  - { source_field_pattern: "ic_decision_date",          canonical_field: ic_approval_date,         transform_hint: to_iso_date }
+  - { source_field_pattern: "deal_team",                 canonical_field: deal_team_assignments,    transform_hint: parse_team_array }
+  - { source_field_pattern: "market",                    canonical_field: market,                   transform_hint: crosswalk_lookup }
+  - { source_field_pattern: "submarket",                 canonical_field: submarket,                transform_hint: crosswalk_lookup }
+  - { source_field_pattern: "address",                   canonical_field: address_ref,              transform_hint: pii_redact_partial }
+
+known_gotchas:
+  - deal renamed after IC approval is common; track via deal_id stability
+  - one Dealpath deal may spawn multiple downstream properties (portfolio acquisition)
+  - development deals often split into phases after IC; canonical capex_project may be 1:N
+  - financing record (debt placement) may close before equity close; deal stage may not reflect both
+  - closed deals occasionally lack downstream AppFolio/Intacct/Procore setup; recon detects
+  - duplicate asset names in same market require fuzzy matching + manual disambiguation
+  - legacy deals (pre-stack adoption) carry sparse fields; treat as low confidence
+  - asset_crosswalk.yaml does not yet exist; flagged as wave-4 dependency
+  - GraySail may overlap deal_pipeline if classified as advisory layer; defer
+
+reference_documentation:
+  - placeholder_link_to_dealpath_api_documentation
+  - placeholder_link_to_dealpath_deal_export_guide
+  - placeholder_link_to_internal_deal_pipeline_taxonomy
+
+author_metadata:
+  authored_by: residential_multifamily_subsystem
+  authored_role: data_platform_team
+
+last_updated: "2026-04-15"

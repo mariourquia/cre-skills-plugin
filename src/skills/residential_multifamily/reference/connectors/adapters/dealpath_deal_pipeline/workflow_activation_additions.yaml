@@ -1,0 +1,66 @@
+# Workflow activation fragment for Dealpath.
+# Merged into _core/workflow_activation_map.yaml under the proposed workflows.
+
+dealpath_role: primary_for_deal_pipeline_domain
+
+activates_existing_workflows:
+  - workflow: monthly_asset_management_review
+    role: contributing
+    objects_supplied: [asset]
+    notes: dealpath provides asset master for pre-close pipeline awareness
+
+  - workflow: quarterly_portfolio_review
+    role: contributing
+    objects_supplied: [deal, asset]
+    notes: pipeline contribution to portfolio review
+
+  - workflow: executive_operating_summary_generation
+    role: contributing
+    objects_supplied: [deal, asset, approval_request]
+    notes: pipeline + IC summary for executive view
+
+proposes_new_workflows:
+  - workflow: pipeline_review
+    role: primary
+    objects_supplied: [deal, asset, deal_milestone, deal_key_date]
+    cadence: weekly
+    audience: [investments_lead, asset_mgmt_director, executive]
+    blocking_issues: [dp_completeness_ic_record, dp_handoff_lag]
+
+  - workflow: pre_close_deal_tracking
+    role: primary
+    objects_supplied: [deal, deal_key_date, deal_milestone]
+    cadence: weekly
+    audience: [investments_lead, deal_team_lead]
+
+  - workflow: development_pipeline_tracking
+    role: primary
+    objects_supplied: [deal, development_project, deal_milestone]
+    cadence: weekly
+    audience: [development_lead, construction_lead]
+
+  - workflow: acquisition_handoff
+    role: primary
+    objects_supplied: [deal, asset, approval_request, property]
+    cadence: event_driven
+    audience: [asset_mgmt_director, regional_ops_director, finance_systems_team]
+    blocking_issues: [dp_handoff_lag, dp_one_deal_multiple_projects]
+
+  - workflow: investment_committee_prep
+    role: primary
+    objects_supplied: [deal, deal_milestone, asset]
+    cadence: bi_weekly
+    audience: [investments_lead, ic_members, executive]
+
+  - workflow: post_ic_property_setup
+    role: contributing
+    objects_supplied: [deal, asset]
+    cadence: event_driven
+    audience: [data_platform_team, regional_ops_director]
+    notes: triggers AppFolio property setup; AppFolio adapter takes over
+
+  - workflow: executive_pipeline_summary
+    role: primary
+    objects_supplied: [deal, asset, approval_request]
+    cadence: monthly
+    audience: [executive, ic_members]

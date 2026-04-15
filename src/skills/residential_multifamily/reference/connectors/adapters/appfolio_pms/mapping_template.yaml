@@ -1,0 +1,137 @@
+# AppFolio PMS adapter mapping template.
+# Scaffolded version used by the standard adapter test harness. The
+# authoritative field-by-field mapping is in field_mapping.yaml; this
+# file is the compact view applied on top of ../../pms/mapping.yaml for
+# quick operator reference. Canonical pms/mapping.yaml wins on conflict.
+
+status_tag: template
+
+property:
+  source_format: [api_jsonl, csv]
+  dedup_rule:
+    keys: [property_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: PropertyId,     normalized_column: property_id,        transform: crosswalk_lookup, required: true }
+    - { source_column: PropertyName,   normalized_column: property_name,      transform: trim_string,      required: true }
+    - { source_column: GLPartnerCode,  normalized_column: legal_entity_id,    transform: crosswalk_lookup, required: true }
+    - { source_column: UnitCount,      normalized_column: unit_count_total,   transform: to_integer,       required: true }
+    - { source_column: MarketLabel,    normalized_column: market,             transform: trim_string,      required: true }
+    - { source_column: SubmarketLabel, normalized_column: submarket,          transform: trim_string,      required: false }
+
+unit:
+  source_format: [api_jsonl, csv]
+  dedup_rule:
+    keys: [property_id, unit_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: UnitId,       normalized_column: unit_id,     transform: crosswalk_lookup,         required: true }
+    - { source_column: PropertyId,   normalized_column: property_id, transform: crosswalk_lookup,         required: true }
+    - { source_column: Bedrooms,     normalized_column: bedrooms,    transform: to_integer,               required: true }
+    - { source_column: Bathrooms,    normalized_column: bathrooms,   transform: to_number,                required: true }
+    - { source_column: SquareFeet,   normalized_column: nrsf,        transform: to_integer,               required: true }
+    - { source_column: UnitStatus,   normalized_column: status,      transform: map_appfolio_unit_status, required: true }
+
+lease:
+  source_format: [api_jsonl, csv]
+  dedup_rule:
+    keys: [lease_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: LeaseId,            normalized_column: lease_id,                transform: crosswalk_lookup,          required: true }
+    - { source_column: PropertyId,         normalized_column: property_id,             transform: crosswalk_lookup,          required: true }
+    - { source_column: UnitId,             normalized_column: unit_id,                 transform: crosswalk_lookup,          required: true }
+    - { source_column: TenantId,           normalized_column: resident_account_id,     transform: crosswalk_lookup,          required: true }
+    - { source_column: StartDate,          normalized_column: start_date,              transform: to_iso_date,               required: true }
+    - { source_column: EndDate,            normalized_column: end_date,                transform: to_iso_date,               required: true }
+    - { source_column: MonthlyRent,        normalized_column: base_rent_monthly_cents, transform: dollars_to_cents,          required: true }
+    - { source_column: Status,             normalized_column: status,                  transform: map_appfolio_lease_status, required: true }
+    - { source_column: LeaseRenewalStatus, normalized_column: is_renewal,              transform: map_appfolio_renewal_flag, required: true }
+
+charge:
+  source_format: [api_jsonl, csv]
+  dedup_rule:
+    keys: [charge_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: TenantChargeId, normalized_column: charge_id,           transform: passthrough_with_namespace, required: true }
+    - { source_column: LeaseId,        normalized_column: lease_id,            transform: crosswalk_lookup,           required: true }
+    - { source_column: TenantId,       normalized_column: resident_account_id, transform: crosswalk_lookup,           required: true }
+    - { source_column: ChargeType,     normalized_column: charge_type,         transform: map_appfolio_charge_type,   required: true }
+    - { source_column: ChargeDate,     normalized_column: charge_date,         transform: to_iso_date,                required: true }
+    - { source_column: Amount,         normalized_column: amount_cents,        transform: dollars_to_cents,           required: true }
+
+payment:
+  source_format: [api_jsonl, csv]
+  dedup_rule:
+    keys: [payment_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: TenantPaymentId, normalized_column: payment_id,          transform: passthrough_with_namespace, required: true }
+    - { source_column: TenantId,        normalized_column: resident_account_id, transform: crosswalk_lookup,           required: true }
+    - { source_column: PaymentDate,     normalized_column: payment_date,        transform: to_iso_date,                required: true }
+    - { source_column: Amount,          normalized_column: amount_cents,        transform: dollars_to_cents,           required: true }
+    - { source_column: TenderType,      normalized_column: tender_type,         transform: map_appfolio_tender_type,   required: true }
+
+work_order:
+  source_format: [api_jsonl, csv]
+  dedup_rule:
+    keys: [work_order_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: ServiceRequestId, normalized_column: work_order_id, transform: passthrough_with_namespace, required: true }
+    - { source_column: PropertyId,       normalized_column: property_id,   transform: crosswalk_lookup,           required: true }
+    - { source_column: DateCreated,      normalized_column: reported_date, transform: to_iso_date,                required: true }
+    - { source_column: Priority,         normalized_column: priority,      transform: map_appfolio_priority,      required: true }
+    - { source_column: WorkOrderStatus,  normalized_column: status,        transform: map_appfolio_wo_status,     required: true }
+
+lead:
+  source_format: [api_jsonl, csv]
+  dedup_rule:
+    keys: [lead_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: GuestCardId,   normalized_column: lead_id,        transform: passthrough_with_namespace, required: true }
+    - { source_column: PropertyId,    normalized_column: property_id,    transform: crosswalk_lookup,           required: true }
+    - { source_column: SourceChannel, normalized_column: source_channel, transform: trim_string,                required: true }
+    - { source_column: InquiryDate,   normalized_column: inquiry_date,   transform: to_iso_date,                required: true }
+    - { source_column: PipelineStage, normalized_column: pipeline_stage, transform: map_appfolio_funnel_stage,  required: true }
+
+tour:
+  source_format: [api_jsonl]
+  dedup_rule:
+    keys: [tour_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: ShowingId,         normalized_column: tour_id,        transform: passthrough_with_namespace, required: true }
+    - { source_column: GuestCardId,       normalized_column: lead_id,        transform: passthrough_with_namespace, required: true }
+    - { source_column: ScheduledDateTime, normalized_column: scheduled_date, transform: to_iso_date,                required: true }
+    - { source_column: TourType,          normalized_column: tour_type,      transform: map_appfolio_tour_type,     required: true }
+
+application:
+  source_format: [api_jsonl]
+  dedup_rule:
+    keys: [application_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: ApplicationId,     normalized_column: application_id,  transform: passthrough_with_namespace, required: true }
+    - { source_column: GuestCardId,       normalized_column: lead_id,         transform: passthrough_with_namespace, required: true }
+    - { source_column: AppliedDate,       normalized_column: applied_date,    transform: to_iso_date,                required: true }
+    - { source_column: ApplicationStatus, normalized_column: approval_status, transform: map_appfolio_app_status,    required: true }
+
+vendor:
+  source_format: [api_jsonl]
+  dedup_rule:
+    keys: [vendor_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: VendorId,            normalized_column: vendor_id,             transform: crosswalk_lookup, required: true }
+    - { source_column: VendorName,          normalized_column: vendor_name,           transform: trim_string,      required: true }
+    - { source_column: InsuranceExpiryDate, normalized_column: insurance_expiry_date, transform: to_iso_date,      required: false }
+
+lease_event: { status: derived_or_native, note: "populated from direct AppFolio events + derived from DelinquencyStage transitions" }
+resident_account: { status: supported, note: "see field_mapping.yaml entities.resident_account" }
+tenant_ledger:    { status: supported, note: "see field_mapping.yaml entities.tenant_ledger" }
+unit_type:        { status: supported, note: "see field_mapping.yaml entities.unit_type" }
+turn_project:     { status: derived,   note: "inferred from move_out + work_order + move_in sequence" }
+delinquency_case: { status: derived,   note: "derived from tenant_ledger.DelinquencyStage + payment_plan state" }

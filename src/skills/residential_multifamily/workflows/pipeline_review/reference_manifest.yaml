@@ -1,0 +1,45 @@
+pack_slug: pipeline_review
+reads:
+  - path: reference/connectors/adapters/dealpath_deal_pipeline/normalized_contract.yaml
+    category: other
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    notes: primary deal pipeline contract; Dealpath-authoritative pre-close
+  - path: reference/connectors/adapters/dealpath_deal_pipeline/dq_rules.yaml
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    notes: blocking dq rules evaluated before any roll-up (dp_completeness_ic_record, dp_handoff_lag, dp_freshness_deals)
+  - path: reference/connectors/deal_pipeline/schema.yaml
+    category: other
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    notes: canonical deal_pipeline schema
+  - path: reference/connectors/master_data/asset_crosswalk.yaml
+    category: other
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    notes: resolves Dealpath asset_id to canonical asset_id
+  - path: reference/connectors/master_data/market_crosswalk.yaml
+    category: other
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    notes: resolves free-text market labels to canonical market
+  - path: reference/derived/role_kpi_targets.csv
+    category: occupancy_benchmark
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    notes: stage velocity bands and stalled-deal thresholds referenced per-stage
+  - path: reference/normalized/approval_threshold_defaults.csv
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    notes: concentration and capital-need thresholds
+writes: []

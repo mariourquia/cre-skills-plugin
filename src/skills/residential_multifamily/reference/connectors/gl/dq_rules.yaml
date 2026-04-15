@@ -1,0 +1,104 @@
+# GL data-quality rules.
+rules:
+- rule_id: gl_freshness_trial_balance
+  dimension: freshness
+  severity: blocker
+  description: Trial balance feed is no older than the trial-balance-cadence days
+    declared in gl/manifest.yaml.
+  expected: max(gl_actual.posting_date) >= today - tb_feed_max_age_days declared in
+    gl/manifest.yaml
+  remediation: Operator refreshes the TB export per the operator-declared close
+    cadence.
+- rule_id: gl_freshness_budget
+  dimension: freshness
+  severity: warning
+  description: Budget feed is current for the fiscal year in progress.
+  expected: exists gl_budget row with period covering the current fiscal year
+  remediation: If the budget has not been finalized, operator publishes the
+    approved scenario; otherwise the annual-budget-engine workflow produces a
+    placeholder baseline.
+- rule_id: gl_completeness_chart_of_accounts_mapped
+  dimension: completeness
+  severity: warning
+  description: Every posted account_id has at least one active account_mapping
+    entry effective for the posting period.
+  expected: for each distinct (account_id, period) in gl_actual, exists
+    account_mapping with effective window covering period
+  remediation: Operator maps new accounts to canonical_account_slug before
+    variance reporting.
+- rule_id: gl_conformance_account_type
+  dimension: conformance
+  severity: blocker
+  description: Every chart_of_accounts row has account_type IN canonical_enum.
+  expected: account_type IN (asset, liability, equity, revenue, expense, capex)
+  remediation: Unmapped account types break aggregation; operator assigns type.
+- rule_id: gl_consistency_debit_credit_convention
+  dimension: consistency
+  severity: warning
+  description: Sign convention in gl_actual.amount_cents matches normal_balance
+    declared in chart_of_accounts.
+  expected: for each gl_actual row, sign(amount_cents) is consistent with the
+    account's normal_balance rule OR row carries reversal_flag = true
+  remediation: Inconsistent signs typically reflect wrong side of the JE;
+    operator fixes the posting.
+- rule_id: gl_uniqueness_primary_keys
+  dimension: uniqueness
+  severity: blocker
+  description: No duplicate primary keys across gl_actual, gl_budget, gl_forecast,
+    gl_capex_actual, commitment.
+  expected: count(distinct pk) == count(records) per entity
+  remediation: See qa/duplicate_id.yaml.
+- rule_id: gl_referential_integrity_account_posted
+  dimension: referential_integrity
+  severity: blocker
+  description: Every gl_actual and gl_budget row references an account_id that
+    exists in chart_of_accounts at the posting period.
+  expected: for each row, account_id IN chart_of_accounts.account_id with
+    effective window covering posting period
+  remediation: Posting to a nonexistent account indicates either a rename
+    gap or a new account not yet in the chart; operator reconciles.
+- rule_id: gl_referential_integrity_property_id
+  dimension: referential_integrity
+  severity: blocker
+  description: Every gl_actual row has property_id IN pms.property.property_id OR
+    is flagged corporate_overhead with allocation rule.
+  expected: property_id IN pms.property.property_id OR corporate_overhead = true
+    AND allocation_rule_ref IS NOT NULL
+  remediation: See gl_missing_property_mapping reconciliation check.
+- rule_id: gl_reasonableness_manual_journal_magnitude
+  dimension: reasonableness
+  severity: warning
+  description: Manual journal entries exceeding the manual-journal reasonableness
+    band declared in overlays/org/<org_id>/overlay.yaml are flagged.
+  expected: for each gl_actual row where source_subtype = manual_journal,
+    abs(amount_cents) <= manual_journal_reasonableness_cents declared in
+    overlays/org/<org_id>/overlay.yaml OR narrative AND approver fields populated
+  remediation: See gl_manual_adjustment_out_of_band_flagged reconciliation check.
+- rule_id: gl_consistency_period_close_metadata
+  dimension: consistency
+  severity: warning
+  description: Every gl_actual row for a closed period carries consistent
+    close_status and close_lock_timestamp.
+  expected: all gl_actual rows for (property_id, period) where close_status =
+    closed share the same close_lock_timestamp
+  remediation: Inconsistent metadata indicates a partial close; operator
+    finalizes.
+- rule_id: gl_reasonableness_variance_magnitude
+  dimension: reasonableness
+  severity: warning
+  description: Variance magnitude (actual - budget) outside the band declared in
+    overlays/org/<org_id>/overlay.yaml for the account triggers a narrative
+    requirement.
+  expected: for each variance_line, abs(variance_cents) within the account-specific
+    band declared in overlays/org/<org_id>/overlay.yaml OR narrative IS NOT NULL
+  remediation: Variance-narrative-generator skill enforces; operator provides
+    narrative or reclassifies.
+- rule_id: gl_conformance_forecast_version
+  dimension: conformance
+  severity: warning
+  description: Forecast rows carry forecast_version IN the allowed list declared
+    in gl/manifest.yaml.
+  expected: forecast_version IN (reforecast_q1, reforecast_q2, reforecast_q3,
+    year_end_estimate, other_named_version) per gl/manifest.yaml
+  remediation: Unknown forecast_version labels break version comparison; operator
+    extends manifest enum.

@@ -1,0 +1,385 @@
+# Procore Construction — Normalized (canonical) contract.
+#
+# Maps Procore raw entities to canonical construction entities per
+# ../../construction/schema.yaml. The canonical schema is authoritative;
+# this file documents how Procore-sourced records populate the canonical
+# shape, which canonical entity each Procore record normalizes to, and
+# where the handoff to other connectors (gl, ap, pms) occurs.
+#
+# Source precedence summary:
+#   - Procore: primary for construction cost commitments, COs, draws,
+#     schedule, punchlist, project directory.
+#   - Intacct (gl): primary for posted GL actuals (capex_actual, draw
+#     postings, vendor invoice postings).
+#   - AppFolio (pms): primary for post-delivery property operations.
+#   - Dealpath (crm/deal-pipeline): canonical deal record; Procore project
+#     resolves to canonical capex_project / dev_project via
+#     dev_project_crosswalk.
+
+status_tag: stub
+
+# ----------------------------------------------------------------------
+# Project normalization
+# ----------------------------------------------------------------------
+project_normalization:
+  description: |
+    A Procore project normalizes to one of three canonical objects
+    depending on project_type and project_phase:
+
+    - `CapexProject` (ontology): value_add, component_replacement,
+      amenity_upgrade, deferred_mx, life_safety, compliance renovations
+      against an existing operating Property.
+    - `ConstructionProject` (ontology, extends CapexProject): major
+      renovation or full rehab that is structurally significant.
+    - `DevelopmentProject` (ontology, extends CapexProject): ground-up
+      new construction, pre-delivery.
+
+    Operator sets project_type on the Procore project; adapter maps as
+    below.
+
+  mapping_rules:
+    - procore_project_type: "new_construction"
+      canonical_entity: DevelopmentProject
+    - procore_project_type: "major_renovation"
+      canonical_entity: ConstructionProject
+    - procore_project_type: "renovation|value_add|rehab"
+      canonical_entity: CapexProject
+    - procore_project_type: "component_replacement|amenity_upgrade|life_safety|compliance"
+      canonical_entity: CapexProject
+    - procore_project_type: unmapped
+      canonical_entity: CapexProject
+      fallback_note: |
+        Default to CapexProject when operator has not set a Procore
+        project_type; requires explicit reclassification during onboarding.
+
+  canonical_fields_populated:
+    capex_project_id: derived from capex_project_crosswalk (canonical_id)
+    property_id: derived from property_master_crosswalk (one or many via
+      related_canonical_ids for phased delivery)
+    project_name: Procore `name`
+    project_type: mapped from Procore `project_type`
+    scope_summary: Procore `description` (if present) or `name`
+    target_start: Procore `start_date`
+    target_completion: Procore `completion_date`
+    total_budget: Procore revised_budget from latest active budget snapshot
+    funding_source: NOT IN PROCORE — sourced from dev_project_crosswalk or
+      manual_uploads; Procore does not model funding source
+    approvals: NOT IN PROCORE — pulled from canonical approval matrix
+    status: mapped from Procore `stage` via map_procore_stage
+  status_enum_mapping:
+    - { procore_stage: "Bidding",                  canonical_status: proposed }
+    - { procore_stage: "Pre-Construction",          canonical_status: approved }
+    - { procore_stage: "Course of Construction",    canonical_status: in_progress }
+    - { procore_stage: "Current Construction",      canonical_status: in_progress }
+    - { procore_stage: "Post Construction",         canonical_status: in_progress,
+        note: "handoff-to-AppFolio trigger; punchlist closeout still in scope" }
+    - { procore_stage: "Warranty",                  canonical_status: complete }
+    - { procore_stage: "Closed",                    canonical_status: complete }
+
+# ----------------------------------------------------------------------
+# Budget line item normalization
+# ----------------------------------------------------------------------
+budget_line_item_normalization:
+  canonical_entity: EstimateLineItem
+  canonical_schema_ref: "../../construction/schema.yaml#estimate_line_item"
+  canonical_fields_populated:
+    line_item_id: Procore budget_line_item.id (prefixed to avoid collision)
+    project_id: via capex_project_crosswalk
+    line_label: Procore `description`
+    unit: Procore `unit` (mapped through map_uom; default to `lot` if null)
+    quantity: Procore `quantity` (default 1 if null)
+    unit_cost_cents: Procore `unit_cost` dollars_to_cents
+    extended_cost_cents: Procore `original_budget_amount` dollars_to_cents
+    csi_division: Procore `cost_code` (CSI-format cost codes are preserved
+      as-is; non-CSI cost codes are nulled with a flag)
+    source_basis: mapped per cost basis heuristic; default to reference_library
+      for baseline budgets, bid once commitment lands
+  budget_version_handling:
+    description: |
+      Procore exposes multiple budget snapshots (Original Budget, Revised
+      Budget, Pending Revised Budget). Only the active revised version
+      normalizes by default. The adapter preserves budget_version in a
+      side field so the canonical construction
+      `con_multiple_budget_versions_flagged` DQ rule can validate.
+    active_version_selection:
+      default_rule: Procore budget snapshot where active_version_flag = true
+      fallback_rule: |
+        If no active_version_flag is set, normalize the most recent
+        snapshot and flag for operator via DQ.
+
+# ----------------------------------------------------------------------
+# Commitment normalization  (OPEN QUESTION — see README and edge_cases.md)
+# ----------------------------------------------------------------------
+commitment_normalization:
+  canonical_entity: commitment
+  canonical_schema_ref: "../../construction/schema.yaml#commitment"
+  open_question_wave_4:
+    status: flagged_for_integration_agent
+    issue: |
+      The residential_multifamily `_core/ontology.md` does not list
+      `Commitment` as a first-class canonical object. Commitments are
+      currently modeled as an extension of `VendorAgreement` scoped to
+      `CapexProject`. The canonical `../../construction/schema.yaml`
+      DOES define a `commitment` entity. This creates a mild contract
+      gap: the ontology level lacks `Commitment`, while the construction
+      connector schema defines it.
+
+      Recommendation for Wave 4 integration agent: add `Commitment` as a
+      canonical object in `_core/ontology.md` with:
+        commitment_id, capex_project_id, vendor_id, commitment_type
+        (purchase_order, subcontract), scope_description,
+        original_contract_total, approved_co_total, revised_contract_total,
+        billed_to_date, paid_to_date, retention_percent, status
+      This brings the ontology in alignment with what the construction
+      connector already carries and what Procore primarily emits.
+  canonical_fields_populated:
+    commitment_id: via a `procore_commitment_crosswalk` (not yet created;
+      piggybacks on capex_project_crosswalk semantics by commitment number
+      pattern until formal crosswalk file exists)
+    project_id: via capex_project_crosswalk
+    vendor_id: via vendor_master_crosswalk
+    scope_description: Procore `title`
+    contract_total_cents: Procore `original_commitment_amount` dollars_to_cents
+      (the canonical `contract_total_cents` field is semantically the
+      original contract total; Procore revised_commitment_amount is
+      derivable as contract_total + approved COs)
+    status: mapped from Procore commitment status via map_procore_commitment_status
+    retention_percent: Procore `retainage_percent`
+  status_enum_mapping:
+    - { procore_commitment_status: draft,              canonical_status: draft }
+    - { procore_commitment_status: out_for_signature,  canonical_status: draft }
+    - { procore_commitment_status: approved,           canonical_status: signed }
+    - { procore_commitment_status: complete,           canonical_status: closed }
+    - { procore_commitment_status: void,               canonical_status: cancelled }
+    - { procore_commitment_status: terminated,         canonical_status: cancelled }
+  line_item_type_handling:
+    description: |
+      Procore commitments are Purchase Orders or Work Order Contracts
+      (subcontracts). Both normalize to the same canonical `commitment`
+      entity; a side field `commitment_type` preserves the distinction
+      for downstream analytics (vendor_dispatch_sla_review distinguishes
+      PO-driven material vendors from subcontractors).
+
+# ----------------------------------------------------------------------
+# Change order normalization
+# ----------------------------------------------------------------------
+change_order_normalization:
+  canonical_entity: ChangeOrder
+  canonical_schema_ref: "../../construction/schema.yaml#change_order"
+  scope:
+    description: |
+      Only Commitment Change Orders (CCOs) normalize to canonical
+      change_order. Change Events and Potential Change Orders are
+      pre-CO artifacts; they flag downstream budget impact but do not
+      create canonical ChangeOrder rows. The adapter surfaces Change
+      Event counts and dollar impact as a separate metric for early
+      warning.
+  canonical_fields_populated:
+    change_order_id: via change_order_crosswalk
+    project_id: via capex_project_crosswalk
+    commitment_id: FK resolved via same commitment crosswalk logic as above
+    co_number: Procore `number`
+    cost_delta_cents: Procore `amount` dollars_to_cents
+    status: mapped from Procore CO state via map_procore_co_status
+    time_delta_days: Procore `time_delta_days`
+    category: mapped from Procore `reason_code` via map_procore_co_category
+  status_enum_mapping:
+    - { procore_co_state: draft,    canonical_status: proposed }
+    - { procore_co_state: pending,  canonical_status: pending_approval }
+    - { procore_co_state: approved, canonical_status: approved }
+    - { procore_co_state: void,     canonical_status: rejected,
+        note: "Carry void_reason in notes; void is NOT identical to rejected. Reviewers must distinguish policy-rejected COs from voided-for-scope-change COs." }
+
+# ----------------------------------------------------------------------
+# Draw request normalization
+# ----------------------------------------------------------------------
+draw_request_normalization:
+  canonical_entity: DrawRequest
+  canonical_schema_ref: "../../construction/schema.yaml#draw_request"
+  canonical_fields_populated:
+    draw_request_id: via draw_request_crosswalk
+    project_id: via capex_project_crosswalk
+    period: derived from Procore `period_start` and `period_end`
+      (canonical `period` is a YYYY-MM label per canonical validation rule;
+       use period_end month; flag if period_end spans months)
+    amount_requested_cents: Procore `current_payment_due` dollars_to_cents
+    approval_status: mapped from Procore pay app status via map_procore_pay_app_status
+    cost_to_date_cents: Procore `work_completed_to_date` dollars_to_cents
+    percent_complete_physical: NOT IN PROCORE by default — requires
+      a schedule-sourced inference or manual entry; canonical field
+      is optional
+    percent_complete_cost: Procore `percent_complete_cost` (0-100)
+  status_enum_mapping:
+    - { procore_pay_app_status: draft,               canonical_approval_status: submitted }
+    - { procore_pay_app_status: submitted,           canonical_approval_status: submitted }
+    - { procore_pay_app_status: under_review,        canonical_approval_status: in_review }
+    - { procore_pay_app_status: approved,            canonical_approval_status: approved }
+    - { procore_pay_app_status: approved_as_noted,   canonical_approval_status: approved_with_conditions }
+    - { procore_pay_app_status: rejected,            canonical_approval_status: denied }
+    - { procore_pay_app_status: paid,                canonical_approval_status: funded }
+  retention_handling:
+    description: |
+      Procore carries retention at three grains:
+        - commitment.retainage_balance
+        - pay_app.retainage_held_this_period
+        - pay_app.retainage_released_this_period
+      The canonical DrawRequest does not currently carry retention per
+      draw; instead, the reconciliation framework reconciles commitment
+      retainage_balance against cumulative pay-app retention activity at
+      closeout. See reconciliation_checks.yaml.
+
+# ----------------------------------------------------------------------
+# Schedule milestone normalization
+# ----------------------------------------------------------------------
+schedule_milestone_normalization:
+  canonical_entity: ScheduleMilestone
+  canonical_schema_ref: "../../construction/schema.yaml#schedule_milestone"
+  canonical_fields_populated:
+    milestone_id: Procore schedule task id (or imported MSP/P6 task id)
+      scoped by project
+    project_id: via capex_project_crosswalk
+    milestone_name: Procore `name`
+    baseline_date: Procore `baseline_finish` (adapter defaults the
+      canonical baseline_date to baseline_finish; baseline_start is
+      preserved as a side field)
+    current_forecast_date: Procore `forecast_finish`
+    actual_date: Procore `actual_finish`
+    critical_path_flag: Procore `on_critical_path`
+  filter_rule:
+    description: |
+      Only milestone rows (is_milestone = true) normalize. Summary and
+      task rows are preserved in the raw landing zone for
+      schedule-risk analytics but do not create canonical
+      ScheduleMilestone rows.
+  baseline_preservation:
+    note: |
+      Procore schedule baselines require the baseline feature to be
+      enabled at project setup. Projects without a baseline have
+      baseline_start / baseline_finish null; canonical baseline_date
+      is required, so such projects fail load with a
+      `schedule_baseline_missing` DQ flag.
+
+# ----------------------------------------------------------------------
+# Punchlist item normalization
+# ----------------------------------------------------------------------
+punchlist_normalization:
+  canonical_entity: PunchItem
+  canonical_schema_ref: "../../construction/schema.yaml#punch_item"
+  canonical_fields_populated:
+    punch_item_id: Procore punch item id
+    project_id: via capex_project_crosswalk
+    description: Procore `title` + `description`
+    status: mapped from Procore status via map_procore_punch_status
+    assigned_to: Procore `assigned_to`
+    target_complete_date: Procore `target_complete_date`
+  status_enum_mapping:
+    - { procore_punch_status: draft,              canonical_status: open }
+    - { procore_punch_status: open,               canonical_status: open }
+    - { procore_punch_status: ready_for_review,   canonical_status: in_progress }
+    - { procore_punch_status: closed,             canonical_status: resolved }
+    - { procore_punch_status: rejected,           canonical_status: rejected }
+    - { procore_punch_status: not_accepted,       canonical_status: rejected }
+
+# ----------------------------------------------------------------------
+# Vendor normalization
+# ----------------------------------------------------------------------
+vendor_normalization:
+  canonical_entity: Vendor
+  canonical_schema_ref: "_core/ontology.md#Vendor"
+  description: |
+    Procore project directory entries with directory_type = company (and
+    a trade / subcontractor role) normalize to canonical Vendor via the
+    vendor_master_crosswalk. Duplicate Procore directory entries across
+    projects resolve to the same canonical vendor_id when the crosswalk
+    matches on tax_id_last_four + trade + legal_name.
+  canonical_fields_populated:
+    vendor_id: via vendor_master_crosswalk
+    vendor_name: Procore company.name (survivorship: AP remains authoritative
+      for legal name; Procore authoritative for trade)
+    services: derived from Procore `trade` field
+    preferred_flag: NOT IN PROCORE — sourced from AP vendor master
+  cross_system_note: |
+    Three-way vendor reconciliation: Procore directory + Intacct AP
+    vendor master + AppFolio vendor directory. Duplicate detection runs
+    across all three; see reconciliation_rules.md.
+
+# ----------------------------------------------------------------------
+# Approval request normalization
+# ----------------------------------------------------------------------
+approval_request_normalization:
+  canonical_entity: ApprovalRequest
+  canonical_schema_ref: "_core/schemas/approval_request.yaml"
+  description: |
+    Procore approval activity (CO approvals, draw approvals) normalizes
+    to canonical ApprovalRequest records. The Procore-side approver
+    name and timestamp map to decisions[]. This keeps approval
+    traceability aligned with canonical approval matrix while Procore
+    remains the system of record for construction-side approvals.
+  subject_object_types_supported:
+    - change_order       # Procore CCO approval flow
+    - draw_request       # Procore pay app approval flow
+  canonical_fields_populated:
+    approval_request_id: synthetic id per Procore approval event
+    subject_object_type: derived from Procore record type
+    subject_object_id: canonical id of the linked ChangeOrder or DrawRequest
+    status: mapped from Procore approval state
+    decisions: array with approver_name, decided_at from Procore
+  scope_exclusions:
+    note: |
+      Procore does not expose full ApprovalRequest lifecycle (expires_at,
+      approvers_required) granularly. Gaps are filled by the canonical
+      approval matrix at `_core/approval_matrix.md`; Procore merely
+      records the decision timestamp.
+
+# ----------------------------------------------------------------------
+# Source precedence registry
+# ----------------------------------------------------------------------
+source_precedence:
+  description: |
+    Per-object, declares which system is primary for each piece of data
+    when reconciling Procore with adjacent sources.
+  rules:
+    - object: capex_project_scope
+      primary_source: procore_prod
+      secondary_sources: [dealpath_prod]
+      note: Procore owns scope_summary once project is active; Dealpath
+        owns pre-close entitlement data.
+    - object: capex_project_budget
+      primary_source: procore_prod
+      secondary_sources: [intacct_gl_prod]
+      note: Procore primary for Revised Budget; Intacct primary for
+        posted capex_actual; reconciliation framework handles timing.
+    - object: commitment
+      primary_source: procore_prod
+      secondary_sources: [intacct_gl_prod]
+      note: Procore authoritative for commitment existence, amounts, status.
+    - object: change_order
+      primary_source: procore_prod
+      secondary_sources: [intacct_gl_prod]
+      note: Procore authoritative for CO amount, status, approval.
+        Intacct reclass entries reflect approved COs with lag.
+    - object: draw_request
+      primary_source: procore_prod
+      secondary_sources: [intacct_gl_prod]
+      note: Procore authoritative for pay app submission and approval.
+        Intacct authoritative for funding posted and paid_date.
+    - object: vendor_master
+      primary_source: intacct_gl_prod
+      secondary_sources: [procore_prod, appfolio_pms_prod]
+      note: Intacct AP authoritative for vendor legal name and tax id;
+        Procore authoritative for trade classification; three-way
+        reconciliation.
+    - object: schedule_milestone
+      primary_source: procore_prod
+      secondary_sources: []
+      note: Procore sole authoritative source; no downstream fallback.
+    - object: punchlist_item
+      primary_source: procore_prod
+      secondary_sources: [appfolio_pms_prod]
+      note: Procore authoritative during project; AppFolio inherits
+        post-delivery for warranty/defect tracking.
+    - object: property_master
+      primary_source: appfolio_pms_prod
+      secondary_sources: [procore_prod]
+      note: AppFolio authoritative once property is operating; Procore
+        is a pre-delivery placeholder only.

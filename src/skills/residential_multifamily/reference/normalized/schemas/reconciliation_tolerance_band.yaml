@@ -1,0 +1,603 @@
+# reference/normalized/schemas/reconciliation_tolerance_band.yaml
+# Named tolerance bands cited by adapter dq_rules.yaml, reconciliation_checks.yaml, and stack reconciliation matrices.
+# Bands are overridable by overlay; the canonical default lives here.
+# Adding/changing bands is a core change; log to change_log.md and route through approval matrix.
+status_tag: sample
+schema_version: 0.1.0
+
+# ---------------------------------------------------------------------------
+# Conventions
+# ---------------------------------------------------------------------------
+# Each entry in `bands:` is one named band. Fields:
+#   band_id                : snake_case slug (matches the `::<band_id>` fragment in adapter citations).
+#   description            : one sentence describing what the band measures.
+#   default_value          : object with `magnitude` and `unit`. Units are one of
+#                            days, hours, minutes, dollars, cents, percent, count, ratio.
+#   severity_below_band    : severity when the measured value is BELOW / INSIDE the band.
+#                            Allowed: silent_audit, confidence_reduced, blocker.
+#   severity_above_band    : severity when the measured value is ABOVE / OUTSIDE the band.
+#                            Allowed: silent_audit, confidence_reduced, blocker.
+#   overridable_by         : list of overlay scopes allowed to override the default.
+#                            Allowed scopes: org_overlay, market_overlay, property_overlay,
+#                            segment_overlay, regulatory_overlay.
+#   as_of                  : ISO-8601 date the band default was last reviewed.
+#   authored_by            : role that authored / last edited this band.
+#   notes                  : optional free-form guidance on tuning the band.
+#
+# Default severity posture:
+#   - Silent-audit inside the band (the band is "healthy" territory).
+#   - Confidence-reduced or blocker once outside the band, depending on whether
+#     the rule is a soft data-quality warning or a hard correctness gate.
+# ---------------------------------------------------------------------------
+
+bands:
+
+  # -------------------------------------------------------------------------
+  # Close / feed lag bands
+  # -------------------------------------------------------------------------
+
+  - band_id: close_feed_lag_band
+    description: Acceptable lag between source-period close and arrival of the feed in raw landing.
+    default_value:
+      magnitude: 48
+      unit: hours
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay, market_overlay, property_overlay]
+    as_of: "2026-04-15"
+    authored_by: data_platform_team
+    notes: |
+      Cited by sage_intacct_gl close-feed freshness rule. Exceeding the band
+      degrades downstream workflows that depend on closed-period actuals.
+
+  - band_id: budget_publish_lag_band
+    description: Acceptable lag between budget approval and publication of the budget feed.
+    default_value:
+      magnitude: 72
+      unit: hours
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: finance_systems_team
+    notes: |
+      Budgets published beyond the band trigger a reforecast check.
+
+  - band_id: data_connect_lag_band
+    description: Acceptable replication lag between Yardi Voyager and the Yardi Data Connect warehouse.
+    default_value:
+      magnitude: 240
+      unit: minutes
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: data_platform_team
+    notes: |
+      Typical range 60-240 minutes; month-close workflows tighten the band.
+
+  - band_id: rentcafe_to_voyager_latency_band
+    description: Acceptable latency for a RentCafe lead / resident state transition to appear in Voyager.
+    default_value:
+      magnitude: 60
+      unit: minutes
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: data_platform_team
+
+  - band_id: replicated_data_lag_band
+    description: Generic replication lag tolerance for any warehouse-replicated source (Data Connect, etc).
+    default_value:
+      magnitude: 1440
+      unit: minutes
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay, property_overlay]
+    as_of: "2026-04-15"
+    authored_by: data_platform_team
+
+  - band_id: sample_export_staleness_band
+    description: Acceptable staleness of a sample or manual export before it is treated as historical-only.
+    default_value:
+      magnitude: 30
+      unit: days
+    severity_below_band: silent_audit
+    severity_above_band: blocker
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: data_platform_team
+    notes: |
+      Cited by manual file adapters and yardi_legacy_export_stub.
+
+  - band_id: report_export_staleness_band
+    description: Acceptable staleness of a Yardi report export relative to its internal as_of_date.
+    default_value:
+      magnitude: 30
+      unit: days
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: data_platform_team
+
+  # -------------------------------------------------------------------------
+  # Revenue / charge / payment bands
+  # -------------------------------------------------------------------------
+
+  - band_id: revenue_basis_band
+    description: Acceptable drift between PMS-derived revenue and GL-posted revenue for the same period.
+    default_value:
+      magnitude: 1.0
+      unit: percent
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay, property_overlay]
+    as_of: "2026-04-15"
+    authored_by: finance_reporting
+    notes: |
+      Expressed as percent of period revenue. Exceeding the band triggers
+      a variance narrative requirement.
+
+  - band_id: post_vs_accrual_band
+    description: Acceptable drift between post_date and accrual_month for a charge or payment.
+    default_value:
+      magnitude: 5
+      unit: days
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: finance_reporting
+    notes: |
+      Yardi Voyager carries both post_date and accrual_month; GL
+      reconciliation uses accrual_month as canonical.
+
+  - band_id: ledger_drift_band
+    description: Acceptable drift between PMS resident ledger balance and GL AR balance.
+    default_value:
+      magnitude: 0.5
+      unit: percent
+    severity_below_band: silent_audit
+    severity_above_band: blocker
+    overridable_by: [org_overlay, property_overlay]
+    as_of: "2026-04-15"
+    authored_by: finance_reporting
+
+  - band_id: collections_drift_band
+    description: Acceptable drift between PMS-reported collections and GL cash receipts.
+    default_value:
+      magnitude: 0.5
+      unit: percent
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay, property_overlay]
+    as_of: "2026-04-15"
+    authored_by: finance_reporting
+
+  # -------------------------------------------------------------------------
+  # Identity / match bands
+  # -------------------------------------------------------------------------
+
+  - band_id: identity_match_band
+    description: Minimum composite-match confidence for auto-accepting a crosswalk row.
+    default_value:
+      magnitude: 0.90
+      unit: ratio
+    severity_below_band: confidence_reduced
+    severity_above_band: silent_audit
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: data_platform_team
+    notes: |
+      Rows falling below the band route to the fuzzy match queue.
+
+  # -------------------------------------------------------------------------
+  # Cutover / overlap bands
+  # -------------------------------------------------------------------------
+
+  - band_id: cutover_overlap_band
+    description: Maximum allowed duration of a dual-run overlap between two PMS feeds for the same property.
+    default_value:
+      magnitude: 45
+      unit: days
+    severity_below_band: silent_audit
+    severity_above_band: blocker
+    overridable_by: [org_overlay, property_overlay]
+    as_of: "2026-04-15"
+    authored_by: data_platform_team
+    notes: |
+      Cited by yardi_multi_role reconciliation_checks for Yardi-AppFolio
+      cutover windows; overlap beyond the band blocks post-cutover writes.
+
+  - band_id: gl_parallel_band
+    description: Acceptable drift between Yardi GL and Sage Intacct GL when both carry overlapping actuals.
+    default_value:
+      magnitude: 0.25
+      unit: percent
+    severity_below_band: silent_audit
+    severity_above_band: blocker
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: finance_reporting
+
+  - band_id: rentcafe_vs_voyager_band
+    description: Acceptable disagreement between RentCafe and Voyager on lead / resident state.
+    default_value:
+      magnitude: 2
+      unit: days
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: data_platform_team
+    notes: |
+      Voyager wins for resident; RentCafe wins for pre-resident lead per
+      bounded_assumptions::rentcafe_voyager_drift_defaults.
+
+  - band_id: classification_pending_block_band
+    description: Maximum age of a pending classification worksheet before downstream workflows block.
+    default_value:
+      magnitude: 60
+      unit: days
+    severity_below_band: silent_audit
+    severity_above_band: blocker
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: compliance_risk
+    notes: |
+      Cited by yardi_multi_role and graysail_placeholder adapters.
+
+  # -------------------------------------------------------------------------
+  # Capex / construction bands
+  # -------------------------------------------------------------------------
+
+  - band_id: capex_posting_band
+    description: Acceptable drift between construction-tracker capex-actual and GL capex-posting.
+    default_value:
+      magnitude: 1.0
+      unit: percent
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay, property_overlay]
+    as_of: "2026-04-15"
+    authored_by: capital_projects_team
+
+  - band_id: capex_cost_drift_band
+    description: Acceptable drift between capex-line-item reference cost and actual posted cost.
+    default_value:
+      magnitude: 5.0
+      unit: percent
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay, market_overlay]
+    as_of: "2026-04-15"
+    authored_by: capital_projects_team
+
+  - band_id: co_posting_lag_band
+    description: Acceptable lag between change-order approval and GL posting.
+    default_value:
+      magnitude: 10
+      unit: days
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: capital_projects_team
+
+  - band_id: draw_posting_lag_band
+    description: Acceptable lag between draw-request approval and GL posting.
+    default_value:
+      magnitude: 14
+      unit: days
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: capital_projects_team
+
+  - band_id: procore_yardi_jobcost_band
+    description: Acceptable drift between Procore jobcost-to-date and Yardi posted jobcost when both live.
+    default_value:
+      magnitude: 1.0
+      unit: percent
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay, property_overlay]
+    as_of: "2026-04-15"
+    authored_by: capital_projects_team
+
+  - band_id: handoff_lag_band
+    description: Acceptable lag between acquisition close and property-setup handoff to the operating stack.
+    default_value:
+      magnitude: 10
+      unit: days
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: data_platform_team
+
+  - band_id: dev_handoff_lag_band
+    description: Acceptable lag between temp-CO receipt and handoff from construction tracker to operating PMS.
+    default_value:
+      magnitude: 14
+      unit: days
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay, property_overlay]
+    as_of: "2026-04-15"
+    authored_by: capital_projects_team
+
+  # -------------------------------------------------------------------------
+  # Budget / variance bands
+  # -------------------------------------------------------------------------
+
+  - band_id: budget_reforecast_variance_band
+    description: Threshold above which actual-vs-budget variance requires a reforecast entry.
+    default_value:
+      magnitude: 5.0
+      unit: percent
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay, property_overlay]
+    as_of: "2026-04-15"
+    authored_by: finance_reporting
+
+  - band_id: variance_narrative_required_band
+    description: Variance magnitude above which a narrative explanation is mandatory.
+    default_value:
+      magnitude: 3.0
+      unit: percent
+    severity_below_band: silent_audit
+    severity_above_band: blocker
+    overridable_by: [org_overlay, property_overlay]
+    as_of: "2026-04-15"
+    authored_by: finance_reporting
+
+  - band_id: variance_narrative_deadline_band
+    description: Maximum days allowed for a variance narrative to be filed after the period close.
+    default_value:
+      magnitude: 10
+      unit: days
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: finance_reporting
+
+  # -------------------------------------------------------------------------
+  # GL / accounting bands
+  # -------------------------------------------------------------------------
+
+  - band_id: account_class_band
+    description: Acceptable variance of period-over-period balance within an account-class grouping.
+    default_value:
+      magnitude: 10.0
+      unit: percent
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: finance_reporting
+
+  - band_id: period_reopen_lag_band
+    description: Maximum lag between a closed-period reopen request and GL posting of the reopening.
+    default_value:
+      magnitude: 5
+      unit: days
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: finance_reporting
+
+  - band_id: fxr_translation_band
+    description: Acceptable drift between reporting-currency translation rates across adjacent periods.
+    default_value:
+      magnitude: 0.5
+      unit: percent
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: finance_reporting
+
+  - band_id: intercompany_elimination_band
+    description: Acceptable residual balance on intercompany eliminations after period close.
+    default_value:
+      magnitude: 1000
+      unit: dollars
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: finance_reporting
+
+  # -------------------------------------------------------------------------
+  # AP / vendor / three-way match bands
+  # -------------------------------------------------------------------------
+
+  - band_id: vendor_three_way_resolution_band
+    description: Maximum days allowed for three-way match resolution (PO / receipt / invoice).
+    default_value:
+      magnitude: 10
+      unit: days
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: finance_systems_team
+
+  - band_id: three_way_match_band
+    description: Acceptable dollar variance across PO / receipt / invoice for a three-way match.
+    default_value:
+      magnitude: 50
+      unit: dollars
+    severity_below_band: silent_audit
+    severity_above_band: blocker
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: finance_systems_team
+
+  # -------------------------------------------------------------------------
+  # Occupancy / collections / rent-comp drift bands
+  # -------------------------------------------------------------------------
+
+  - band_id: occupancy_drift_band
+    description: Acceptable drift between period-over-period physical occupancy at a single property.
+    default_value:
+      magnitude: 2.0
+      unit: percent
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay, property_overlay]
+    as_of: "2026-04-15"
+    authored_by: regional_ops_director
+
+  - band_id: rent_comp_drift_band
+    description: Acceptable drift between a rent-comp benchmark and the property's asking rent.
+    default_value:
+      magnitude: 5.0
+      unit: percent
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [market_overlay, property_overlay]
+    as_of: "2026-04-15"
+    authored_by: asset_mgmt_director
+
+  - band_id: concession_drift_band
+    description: Acceptable drift between concession benchmark and the property's actual concession percent.
+    default_value:
+      magnitude: 2.0
+      unit: percent
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [market_overlay, property_overlay]
+    as_of: "2026-04-15"
+    authored_by: asset_mgmt_director
+
+  - band_id: turn_cost_drift_band
+    description: Acceptable drift between unit-turn-cost benchmark and posted turn expense.
+    default_value:
+      magnitude: 10.0
+      unit: percent
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [market_overlay, property_overlay]
+    as_of: "2026-04-15"
+    authored_by: regional_ops_director
+
+  # -------------------------------------------------------------------------
+  # Staffing / labor bands
+  # -------------------------------------------------------------------------
+
+  - band_id: staffing_drift_band
+    description: Acceptable drift between staffing plan and actual headcount.
+    default_value:
+      magnitude: 1
+      unit: count
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay, property_overlay]
+    as_of: "2026-04-15"
+    authored_by: hr_systems_team
+
+  - band_id: labor_rate_drift_band
+    description: Acceptable drift between labor-rate reference and actual hourly rate paid.
+    default_value:
+      magnitude: 10.0
+      unit: percent
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [market_overlay, org_overlay]
+    as_of: "2026-04-15"
+    authored_by: hr_systems_team
+
+  # -------------------------------------------------------------------------
+  # Third-party manager (TPM) bands
+  # -------------------------------------------------------------------------
+
+  - band_id: tpm_submission_band
+    description: Maximum allowed lag on third-party-manager data submission.
+    default_value:
+      magnitude: 10
+      unit: days
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: asset_mgmt_director
+
+  # -------------------------------------------------------------------------
+  # Default data-quality bands (cited by generic dq rules)
+  # -------------------------------------------------------------------------
+
+  - band_id: freshness_default_band
+    description: Default freshness tolerance for any feed without a vendor-specific band.
+    default_value:
+      magnitude: 24
+      unit: hours
+    severity_below_band: silent_audit
+    severity_above_band: confidence_reduced
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: data_platform_team
+
+  - band_id: completeness_default_band
+    description: Default completeness tolerance (percent of expected rows present).
+    default_value:
+      magnitude: 99.0
+      unit: percent
+    severity_below_band: confidence_reduced
+    severity_above_band: silent_audit
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: data_platform_team
+
+  - band_id: conformance_default_band
+    description: Default conformance tolerance (percent of rows passing schema / enum checks).
+    default_value:
+      magnitude: 99.5
+      unit: percent
+    severity_below_band: confidence_reduced
+    severity_above_band: silent_audit
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: data_platform_team
+
+  - band_id: uniqueness_default_band
+    description: Default uniqueness tolerance (percent of rows with unique primary key).
+    default_value:
+      magnitude: 100.0
+      unit: percent
+    severity_below_band: blocker
+    severity_above_band: silent_audit
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: data_platform_team
+    notes: |
+      Duplicate primary keys always block; the band is effectively a floor.
+
+  - band_id: referential_default_band
+    description: Default referential-integrity tolerance (percent of rows whose foreign keys resolve).
+    default_value:
+      magnitude: 99.0
+      unit: percent
+    severity_below_band: confidence_reduced
+    severity_above_band: silent_audit
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: data_platform_team
+
+  - band_id: consistency_default_band
+    description: Default cross-feed consistency tolerance (percent of records agreeing across paired feeds).
+    default_value:
+      magnitude: 99.0
+      unit: percent
+    severity_below_band: confidence_reduced
+    severity_above_band: silent_audit
+    overridable_by: [org_overlay]
+    as_of: "2026-04-15"
+    authored_by: data_platform_team

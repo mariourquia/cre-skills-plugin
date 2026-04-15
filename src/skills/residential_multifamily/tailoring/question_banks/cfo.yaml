@@ -1,3 +1,10 @@
+# DEPRECATED 2026-04-15 — superseded by executive.yaml and finance_reporting.yaml
+# This bank is retained for backward compatibility with prior sessions.
+# New sessions should use the 8-audience map in tailoring/AUDIENCE_MAP.md.
+# Top-of-house CEO / COO / CFO posture moved to executive.yaml.
+# CFO-detail finance + reporting questions moved to finance_reporting.yaml.
+# Remove this file in the next refinement cycle.
+#
 # CFO / Finance Leadership question bank
 # Audience: cfo_finance_leader, reporting_finance_ops_lead
 # Depth: 28 questions covering budget process, forecast cadence, chart of accounts

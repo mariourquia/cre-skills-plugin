@@ -1,0 +1,39 @@
+pack_slug: pre_close_deal_tracking
+reads:
+  - path: reference/connectors/adapters/dealpath_deal_pipeline/normalized_contract.yaml
+    category: other
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    notes: primary deal pipeline contract
+  - path: reference/connectors/adapters/dealpath_deal_pipeline/dq_rules.yaml
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    notes: dq gate evaluated before any closing-week claim
+  - path: reference/connectors/deal_pipeline/schema.yaml
+    category: other
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    notes: canonical deal_pipeline schema including DealMilestone and DealKeyDate
+  - path: reference/connectors/master_data/asset_crosswalk.yaml
+    category: other
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    notes: resolves Dealpath asset_id to canonical asset_id
+  - path: reference/normalized/approval_threshold_defaults.csv
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    notes: escalation bands, close window, alert bands
+  - path: reference/normalized/close_calendar__portfolio.csv
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: use_prior_period
+    notes: portfolio close calendar; absence surfaces as banner warning
+writes: []

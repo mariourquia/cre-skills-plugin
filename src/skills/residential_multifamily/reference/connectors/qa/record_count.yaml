@@ -1,0 +1,21 @@
+# Generic record-count reconciliation check.
+# Per-connector reconciliation_checks.yaml references this as a template.
+check_id: record_count
+check_kind: record_count
+severity: blocker
+description: |
+  Raw record count (minus rejects) must equal normalized record count
+  for the same landing within tolerance.
+inputs:
+  - reference/raw/<domain>/<YYYY>/<MM>/<source>__<as_of>.*
+  - reference/normalized/<entity>__<scope>.csv
+expected_invariant: |
+  count(raw_records) - count(rejected_records) == count(normalized_records)
+tolerance:
+  absolute: 0
+  relative_percent: 0.0
+remediation: |
+  Inspect reference/raw/<domain>/_rejected/ for rejected rows. If reject
+  reasons are legitimate (missing provenance), reconcile with the operator.
+  If normalized count is lower than expected, re-run mapping and inspect
+  mapping.yaml transforms for silent drops.

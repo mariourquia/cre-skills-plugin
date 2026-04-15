@@ -1,0 +1,44 @@
+pack_slug: pre_close_deal_tracking
+pack_type: workflow
+priority: 15
+triggers:
+  explicit_phrases:
+    - "closing checklist"
+    - "pre-close tracking"
+    - "pre close tracking"
+    - "closing week dashboard"
+    - "key date countdown"
+    - "key-date countdown"
+    - "days to close"
+    - "lender deliverable status"
+    - "closing certainty"
+    - "closing dashboard"
+  implicit_signals:
+    - "deal enters under_psa, under_dd, under_financing, or pre_close in Dealpath"
+    - "deal_key_date approaches within overlay alert band"
+    - "closing week calendar trigger"
+    - "executive asks for the week's closes"
+    - "deal team requests status on open contingencies"
+required_axes:
+  - asset_class
+  - segment
+  - lifecycle_stage
+  - management_mode
+  - org_id
+  - deal_id
+optional_axes:
+  - form_factor
+  - market
+  - submarket
+  - role
+  - output_type
+  - fund_id
+  - jurisdiction
+axes_match:
+  segment: [middle_market, luxury, affordable]
+  lifecycle: [development, construction, lease_up, stabilized, renovation, recap_support]
+  management_mode: [self_managed, third_party_managed, owner_oversight]
+  output_types: [checklist, kpi_review, memo, email_draft]
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

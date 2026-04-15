@@ -1,0 +1,114 @@
+# Finance & Reporting question bank
+# Audience: finance_reporting
+# Depth: 11 questions covering chart-of-accounts standard, budget cadence, variance
+# thresholds, reporting package format, lender covenant reporting, investor reporting
+# cadence, cash management preferences, audit firm, and 10-Q / 10-K readiness.
+#
+# This bank supersedes reporting.yaml and folds in the CFO-detail content previously
+# captured in cfo.yaml. Top-of-house CEO / COO / CFO posture moved to executive.yaml.
+#
+# Each question conforms to:
+#   id, question_text, purpose, answer_type, choices, target_overlay_ref,
+#   follow_up_ids, missing_doc_triggers
+#
+# No hardcoded dollar / percent / market figures. The TUI prompts for numeric thresholds
+# without pre-filling values.
+
+bank_slug: finance_reporting
+audience: finance_reporting
+version: "0.1.0"
+supersedes: [reporting, cfo]
+questions:
+
+  - id: fin_001
+    question_text: Please upload the current chart of accounts plus any mapping to standard NOI-line categories.
+    purpose: COA mapping is required for automated variance commentary and cross-asset rollups.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#finance.coa_ref
+    follow_up_ids: []
+    missing_doc_triggers: [chart_of_accounts]
+
+  - id: fin_002
+    question_text: What is the fiscal year convention?
+    purpose: Sets reporting calendar anchor and variance window.
+    answer_type: single_choice
+    choices: [calendar_year, fiscal_jul_jun, fiscal_apr_mar, fiscal_oct_sep, other]
+    target_overlay_ref: overlay.yaml#finance.fiscal_year_convention
+    follow_up_ids: []
+    missing_doc_triggers: []
+
+  - id: fin_003
+    question_text: What is the budget build cadence? (when do you kick off the next-year budget?)
+    purpose: Sets budget workflow trigger window.
+    answer_type: single_choice
+    choices: [jul_for_next_fy, aug_for_next_fy, sep_for_next_fy, oct_for_next_fy, other]
+    target_overlay_ref: overlay.yaml#finance.budget_kickoff_window
+    follow_up_ids: []
+    missing_doc_triggers: [budget_template]
+
+  - id: fin_004
+    question_text: What is the reforecast cadence?
+    purpose: Sets reforecast workflow cadence.
+    answer_type: single_choice
+    choices: [monthly, quarterly, semi_annual, annual, ad_hoc]
+    target_overlay_ref: overlay.yaml#finance.reforecast_cadence
+    follow_up_ids: []
+    missing_doc_triggers: []
+
+  - id: fin_005
+    question_text: What variance magnitude triggers a written narrative from the property manager? Provide a percent or dollar threshold; leave blank if none is set.
+    purpose: Sets variance narrative trigger; feeds variance_narrative_generator workflow.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#finance.variance_policy.narrative_trigger
+    follow_up_ids: []
+    missing_doc_triggers: [variance_policy]
+
+  - id: fin_006
+    question_text: What variance magnitude triggers a CFO-level escalation? Provide a percent or dollar threshold; leave blank if none is set.
+    purpose: Sets CFO escalation threshold; feeds approval routing.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#finance.variance_policy.escalation_trigger
+    follow_up_ids: []
+    missing_doc_triggers: [variance_policy]
+
+  - id: fin_007
+    question_text: What is the lender reporting cadence, and what documents are in the standard covenant package?
+    purpose: Sets lender-facing cadence and covenant-package contents.
+    answer_type: free_text
+    target_overlay_ref: overlay.yaml#reporting.lender_cadence
+    follow_up_ids: []
+    missing_doc_triggers: [lender_reporting_cadence]
+
+  - id: fin_008
+    question_text: What is the investor / LP reporting cadence, and what format (deck, letter, portal, data room)?
+    purpose: Sets investor-facing cadence and preferred format; feeds quarterly_investor_update workflow.
+    answer_type: free_text
+    target_overlay_ref: overlay.yaml#reporting.investor_cadence
+    follow_up_ids: []
+    missing_doc_triggers: [investor_reporting_cadence]
+
+  - id: fin_009
+    question_text: What is the primary reporting platform?
+    purpose: Sets reporting_platform overlay for property- and portfolio-level automation.
+    answer_type: single_choice
+    choices: [yardi, entrata, realpage, appfolio, mri_software, custom_bi, spreadsheets_only]
+    target_overlay_ref: overlay.yaml#reporting.primary_platform
+    follow_up_ids: []
+    missing_doc_triggers: []
+
+  - id: fin_010
+    question_text: Who is the audit firm, and what is the audit cycle?
+    purpose: Captures audit firm and cycle for audit-coordination workflows.
+    answer_type: free_text
+    target_overlay_ref: overlay.yaml#finance.audit_ref
+    follow_up_ids: []
+    missing_doc_triggers: []
+
+  - id: fin_011
+    question_text: Is the organization subject to any public-market reporting requirement (10-Q, 10-K, Form PF, or analogous)?
+    purpose: Flags whether reporting cadence must align to a regulatory filing calendar.
+    answer_type: single_choice
+    choices: [none, form_pf_only, 10q_10k, other]
+    target_overlay_ref: overlay.yaml#reporting.public_market_filing_requirement
+    follow_up_ids: []
+    missing_doc_triggers: []

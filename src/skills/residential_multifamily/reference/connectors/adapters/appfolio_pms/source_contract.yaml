@@ -1,0 +1,276 @@
+# AppFolio raw payload shapes per entity.
+# Describes the AppFolio API response fields as they arrive at raw landing.
+# AppFolio field names are preserved in PascalCase. Provenance envelope is
+# appended by the ingestion layer at landing. Types follow AppFolio API
+# conventions (Id = integer string, dates = ISO, money = decimal USD).
+#
+# Canonical object mapping lives in normalized_contract.yaml and
+# field_mapping.yaml. This file documents the raw shape only.
+
+status_tag: sample
+
+provenance_envelope:
+  description: |
+    Every raw record at landing carries this envelope. Not part of the
+    AppFolio payload proper; set by the extractor.
+  required:
+    - { field: source_name,        type: string,   value: appfolio_prod }
+    - { field: source_type,        type: string,   value: pms }
+    - { field: source_date,        type: date,     note: extract-window as-of date }
+    - { field: extracted_at,       type: datetime, note: extractor run timestamp }
+    - { field: extractor_version,  type: string,   note: adapter version }
+    - { field: source_row_id,      type: string,   note: AppFolio primary key preserved as-is }
+
+entities:
+
+  property:
+    appfolio_endpoint: GET /api/v1/properties
+    grain: one record per AppFolio property
+    required_fields:
+      - { name: PropertyId,           type: string,  note: AppFolio stable numeric id }
+      - { name: PropertyName,         type: string }
+      - { name: PropertyType,         type: enum,    values: [Residential, Commercial, Association] }
+      - { name: GLPartnerCode,        type: string,  note: AppFolio GL Partner association }
+      - { name: UnitCount,            type: integer }
+      - { name: Status,               type: enum,    values: [Active, Inactive] }
+    optional_fields:
+      - { name: AddressLine1,         type: string,  note: redact before landing if restricted-PII policy set }
+      - { name: City,                 type: string }
+      - { name: State,                type: string }
+      - { name: Zip,                  type: string }
+      - { name: MarketLabel,          type: string,  note: operator-populated free text }
+      - { name: SubmarketLabel,       type: string }
+      - { name: YearBuilt,            type: integer }
+      - { name: YearRenovated,        type: integer }
+      - { name: PortfolioId,          type: string }
+      - { name: DateCreated,          type: datetime }
+      - { name: DateUpdated,          type: datetime }
+
+  unit:
+    appfolio_endpoint: GET /api/v1/units
+    grain: one record per AppFolio unit
+    required_fields:
+      - { name: UnitId,               type: string }
+      - { name: PropertyId,           type: string }
+      - { name: UnitNumber,           type: string }
+      - { name: Bedrooms,             type: integer }
+      - { name: Bathrooms,            type: number }
+      - { name: SquareFeet,           type: integer }
+      - { name: UnitStatus,           type: enum,    values: [Occupied, Vacant, Notice, OnHold, Offline, Down, Model, Employee, Admin] }
+    optional_fields:
+      - { name: UnitTypeId,           type: string,  note: AppFolio floor plan / type reference }
+      - { name: FloorPlanName,        type: string }
+      - { name: Floor,                type: integer }
+      - { name: MarketRent,           type: number,  note: USD dollars, decimal }
+      - { name: CurrentLeaseId,       type: string }
+      - { name: MakeReadyStatus,      type: enum,    values: [NotStarted, InProgress, Punchlist, Ready] }
+      - { name: OfflineReason,        type: string,  note: present when UnitStatus = Offline or Down }
+      - { name: ExpectedReturnDate,   type: date }
+
+  unit_turn_inferred:
+    appfolio_endpoint: derived
+    grain: inferred per (unit, vacancy_cycle)
+    note: |
+      AppFolio has no native TurnProject object. Adapter derives a turn
+      from the sequence:
+        move_out LeaseEvent
+        -> make_ready work_orders (WorkOrderType = Turn)
+        -> move_in LeaseEvent (or AvailableForLease flip)
+      Fields assembled in derivation step, not sourced directly.
+
+  lead:
+    appfolio_endpoint: GET /api/v1/guest_cards
+    grain: one record per AppFolio guest card
+    required_fields:
+      - { name: GuestCardId,          type: string,  note: canonical lead_id upstream }
+      - { name: PropertyId,           type: string }
+      - { name: SourceChannel,        type: string,  note: e.g., Zillow, Apartments, Referral, WalkIn }
+      - { name: InquiryDate,          type: datetime }
+      - { name: PipelineStage,        type: enum,    values: [New, Contacted, TourScheduled, Toured, Applied, Approved, Leased, Lost, Waitlist] }
+    optional_fields:
+      - { name: PreferredBedrooms,    type: integer }
+      - { name: MoveInTarget,         type: date }
+      - { name: AssignedAgent,        type: string }
+
+  tour:
+    appfolio_endpoint: GET /api/v1/showings
+    grain: one record per scheduled or completed showing
+    required_fields:
+      - { name: ShowingId,            type: string }
+      - { name: GuestCardId,          type: string }
+      - { name: ScheduledDateTime,    type: datetime }
+      - { name: TourType,             type: enum,    values: [InPerson, SelfGuided, Virtual] }
+    optional_fields:
+      - { name: ConductedDateTime,    type: datetime }
+      - { name: Outcome,              type: enum,    values: [Applied, FollowUp, Lost, NoShow, Rescheduled] }
+      - { name: ConductedBy,          type: string }
+      - { name: UnitsShown,           type: array,   note: array of UnitIds }
+
+  application:
+    appfolio_endpoint: GET /api/v1/applications
+    grain: one record per rental application
+    required_fields:
+      - { name: ApplicationId,        type: string }
+      - { name: GuestCardId,          type: string }
+      - { name: PropertyId,           type: string }
+      - { name: AppliedDate,          type: date }
+      - { name: ApplicationStatus,    type: enum,    values: [Pending, InReview, Approved, ApprovedWithConditions, Declined, Withdrawn] }
+    optional_fields:
+      - { name: PreferredUnitId,      type: string }
+      - { name: CoApplicantIds,       type: array,   note: other ApplicationIds tied to the same household }
+      - { name: ScreeningResult,      type: enum,    values: [Pass, Conditional, Fail, Pending] }
+      - { name: DecidedDate,          type: date }
+      - { name: DecidedBy,            type: string }
+
+  lease:
+    appfolio_endpoint: GET /api/v1/leases
+    grain: one record per AppFolio lease
+    required_fields:
+      - { name: LeaseId,              type: string }
+      - { name: PropertyId,           type: string }
+      - { name: UnitId,               type: string }
+      - { name: TenantId,             type: string,  note: primary tenant }
+      - { name: StartDate,            type: date }
+      - { name: EndDate,              type: date }
+      - { name: MonthlyRent,          type: number,  note: USD dollars }
+      - { name: Status,               type: enum,    values: [Draft, Pending, Active, Expired, Terminated, FutureActive, Broken] }
+      - { name: LeaseRenewalStatus,   type: enum,    values: [NotRenewal, Renewal, OfferExtended, OfferAccepted, OfferDeclined] }
+    optional_fields:
+      - { name: TermMonths,           type: integer }
+      - { name: MoveInDate,           type: date }
+      - { name: MoveOutDate,          type: date }
+      - { name: NoticeMoveOutDate,    type: date,    note: resident NTV target }
+      - { name: SecurityDepositAmount, type: number }
+      - { name: PriorLeaseId,         type: string }
+      - { name: TransferFromLeaseId,  type: string,  note: within-property transfers }
+      - { name: ConcessionsTotal,     type: number,  note: informal sum of Concession charges }
+      - { name: IsCorporateLease,     type: boolean }
+      - { name: CoTenantIds,          type: array }
+
+  tenant:
+    appfolio_endpoint: GET /api/v1/tenants
+    grain: one record per resident account
+    required_fields:
+      - { name: TenantId,             type: string }
+      - { name: TenantName,           type: string,  note: primary resident display name }
+      - { name: CurrentBalance,       type: number,  note: USD dollars, net of charges and payments }
+    optional_fields:
+      - { name: Email,                type: string,  note: PII; redact to hash at landing }
+      - { name: Phone,                type: string,  note: PII; redact to hash at landing }
+      - { name: MoveInDate,           type: date }
+      - { name: MoveOutDate,          type: date }
+      - { name: CurrentLeaseId,       type: string }
+      - { name: HouseholdId,          type: string,  note: AppFolio internal household grouping where available }
+
+  lease_event:
+    appfolio_endpoint: derived + GET /api/v1/lease_events
+    grain: one record per lease lifecycle event
+    note: |
+      AppFolio surfaces move-in, move-out, renewal-offered,
+      renewal-accepted, renewal-declined, and notice directly. Legal
+      notices and eviction events are derived from DelinquencyStage
+      transitions. Payment-plan events come from the payment-plan feed.
+    required_fields:
+      - { name: EventId,              type: string }
+      - { name: LeaseId,              type: string }
+      - { name: EventType,            type: enum,    values: [LeaseSigned, MoveIn, RenewalOffered, RenewalAccepted, RenewalDeclined, NoticeToVacate, LatePayment, LegalNoticeServed, EvictionFiled, EvictionJudgment, MoveOut, LeaseBroken, LeaseTerminated, Skip, TransferOut, TransferIn] }
+      - { name: EventDate,            type: date }
+    optional_fields:
+      - { name: EventPayload,         type: object,  note: event-specific fields }
+      - { name: AgentUserId,          type: string }
+
+  charge:
+    appfolio_endpoint: GET /api/v1/tenant_charges
+    grain: one row per charge posting on tenant ledger
+    required_fields:
+      - { name: TenantChargeId,       type: string }
+      - { name: LeaseId,              type: string }
+      - { name: TenantId,             type: string }
+      - { name: ChargeType,           type: enum,    values: [BaseRent, Rent, PetFee, PetRent, LateFee, NSFFee, Utility, Damage, Other, Credit, Concession, ManualAdjustment, ConcessionReversal, Parking, Storage] }
+      - { name: ChargeDate,           type: date }
+      - { name: Amount,               type: number }
+    optional_fields:
+      - { name: Description,          type: string }
+      - { name: OriginalChargeId,     type: string,  note: populated on reversals / adjustments }
+      - { name: AdjustmentSource,     type: enum,    values: [Manual, SystemGenerated, Concession, ReversalOfPosting] }
+      - { name: PostedByUserId,       type: string }
+
+  payment:
+    appfolio_endpoint: GET /api/v1/tenant_payments
+    grain: one row per tenant payment
+    required_fields:
+      - { name: TenantPaymentId,      type: string }
+      - { name: TenantId,             type: string }
+      - { name: PaymentDate,          type: date }
+      - { name: Amount,               type: number }
+      - { name: TenderType,           type: enum,    values: [ACH, Card, Cash, Check, MoneyOrder, Portal, Other] }
+    optional_fields:
+      - { name: LeaseId,              type: string }
+      - { name: AppliedToChargeIds,   type: array }
+      - { name: BankAccountId,        type: string }
+      - { name: PaymentStatus,        type: enum,    values: [Posted, Reversed, NSF, Pending] }
+
+  tenant_ledger:
+    appfolio_endpoint: GET /api/v1/tenant_ledgers
+    grain: one record per (tenant, as_of_date)
+    note: |
+      Used for aging calculations. Charges and payments can be
+      reconstructed, but the ledger feed provides the AppFolio-computed
+      running balance and aging buckets for faster reconciliation.
+    required_fields:
+      - { name: TenantId,             type: string }
+      - { name: LeaseId,              type: string }
+      - { name: AsOfDate,             type: date }
+      - { name: CurrentBalance,       type: number }
+      - { name: DelinquencyStage,     type: enum,    values: [Current, OneToSeven, EightToThirty, ThirtyOneToSixty, SixtyOneToNinety, NinetyOnePlus, PaymentPlan, LegalNotice, EvictionFiled, Judgment, WriteOff] }
+    optional_fields:
+      - { name: PaymentPlanId,        type: string }
+      - { name: LastContactDate,      type: date }
+      - { name: LastContactChannel,   type: enum, values: [Email, Phone, PortalMessage, DoorHang, CertifiedMail] }
+
+  work_order:
+    appfolio_endpoint: GET /api/v1/service_requests
+    grain: one row per AppFolio service request
+    required_fields:
+      - { name: ServiceRequestId,     type: string }
+      - { name: PropertyId,           type: string }
+      - { name: DateCreated,          type: datetime }
+      - { name: Priority,             type: enum,    values: [Emergency, High, Normal, Low, Cosmetic] }
+      - { name: WorkOrderStatus,      type: enum,    values: [New, Assigned, InProgress, AwaitingParts, AwaitingVendor, Scheduled, Completed, Closed, Deferred, Cancelled] }
+    optional_fields:
+      - { name: UnitId,               type: string,  note: null = common area }
+      - { name: Category,             type: enum,    values: [Plumbing, HVAC, Electrical, Appliance, DoorsLocks, Pest, Landscape, General, Other] }
+      - { name: DateCompleted,        type: datetime }
+      - { name: AssignedVendorId,     type: string }
+      - { name: AssignedUserId,       type: string }
+      - { name: Description,          type: string,  note: free text; PII redact pass at landing }
+      - { name: ReportedBy,           type: enum, values: [Resident, Staff, Inspection, PreventiveMaintenance, System] }
+
+  vendor:
+    appfolio_endpoint: GET /api/v1/vendors
+    grain: one record per vendor in AppFolio directory
+    required_fields:
+      - { name: VendorId,             type: string }
+      - { name: VendorName,           type: string }
+      - { name: VendorStatus,         type: enum,    values: [Active, Inactive] }
+    optional_fields:
+      - { name: Services,             type: array,   note: array of service category strings }
+      - { name: Phone,                type: string,  note: redact to hash }
+      - { name: Email,                type: string,  note: redact to hash }
+      - { name: InsuranceExpiryDate,  type: date }
+      - { name: W9OnFile,             type: boolean }
+      - { name: PreferredFlag,        type: boolean }
+      - { name: GLPartnerCode,        type: string,  note: duplicates across partners require vendor_master_crosswalk dedup }
+
+  staff_user:
+    appfolio_endpoint: GET /api/v1/users
+    grain: one record per AppFolio staff user
+    note: |
+      Used to resolve AssignedUserId / PostedByUserId / DecidedBy
+      references into canonical employee ids via employee_crosswalk.
+      Not emitted as a canonical entity by this adapter.
+    required_fields:
+      - { name: UserId,               type: string }
+      - { name: UserName,             type: string }
+      - { name: Role,                 type: string }
+      - { name: Status,               type: enum,    values: [Active, Inactive] }

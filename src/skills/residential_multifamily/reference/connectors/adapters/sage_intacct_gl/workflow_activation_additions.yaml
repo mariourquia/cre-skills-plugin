@@ -1,0 +1,153 @@
+# Workflow activation fragment for Sage Intacct.
+# Merged into _core/workflow_activation_map.yaml under the declared workflows.
+# Declares role (primary, contributing), objects supplied, blocking issues
+# (cited by DQ rule id with ic_ prefix or recon id with ic_recon_ prefix),
+# partial_mode_behavior, and human_approvals_required.
+
+intacct_role: primary_for_financial_domain
+
+activates_existing_workflows:
+
+  - workflow: monthly_property_operating_review
+    role: primary_for_variance
+    objects_supplied:
+      - actual_line
+      - budget_line
+      - forecast_line
+      - variance_explanation
+      - chart_of_accounts
+      - journal_entry
+    blocking_issues:
+      - ic_completeness_required_dims_actual
+      - ic_completeness_posting_date_period
+      - ic_conformance_account_in_coa
+      - ic_conformance_property_dim_in_crosswalk
+      - ic_consistency_posting_period_close_lock
+      - ic_consistency_debit_credit_balanced
+      - ic_recon_property_dim_present
+      - ic_recon_unmapped_account
+      - ic_recon_manual_journal_attribution
+      - ic_recon_period_reopen_drift
+    partial_mode_behavior: |
+      If only ic_recon_cash_to_accrual_revenue or ic_recon_variance_narrative_coverage
+      are at warning (not blocker), the review runs with
+      effective_confidence = medium and annotates affected lines as
+      low_confidence. A blocker on any completeness or conformance rule
+      halts the workflow.
+    human_approvals_required:
+      - regional_ops_director signs off on variance narratives above
+        variance_narrative_required_band
+      - corporate_controller approves any period reopen or back-dated posting
+    notes: |
+      Intacct is the primary source for the variance calculation and for
+      the chart-of-account rollup. AppFolio supplies cash receipts for the
+      cash-accrual reconciliation surface (secondary).
+
+  - workflow: reforecast
+    role: primary
+    objects_supplied:
+      - forecast_line
+      - budget_line
+      - actual_line
+      - variance_explanation
+    blocking_issues:
+      - ic_completeness_forecast_as_of_date
+      - ic_uniqueness_forecast_composite_key
+      - ic_consistency_budget_vs_reforecast_variance
+      - ic_recon_unmapped_account
+    partial_mode_behavior: |
+      If a forecast_version label has not landed in map_intacct_forecast_version,
+      affected lines carry forecast_version = unresolved_forecast_version_<FORECASTID>
+      and downstream aggregation runs at low_confidence for those lines.
+      Manual spreadsheet fallback is accepted per ic_recon_manual_budget_fallback_attestation
+      tolerance band.
+    human_approvals_required:
+      - cfo approves the published reforecast vintage
+      - corporate_controller validates the prior_forecast_ref chain
+    notes: |
+      Reforecast cadence is quarterly by default (reforecast_q1, reforecast_q2,
+      reforecast_q3, year_end_estimate). A mid-cycle reforecast draft is
+      permitted but does not publish until cfo approval.
+
+  - workflow: budget_build
+    role: primary
+    objects_supplied:
+      - budget_line
+      - chart_of_accounts
+      - actual_line
+    blocking_issues:
+      - ic_completeness_budget_required_keys
+      - ic_uniqueness_budget_composite_key
+      - ic_conformance_account_in_coa
+      - ic_recon_manual_budget_fallback_attestation
+    partial_mode_behavior: |
+      Properties not yet on the Intacct Budget Module fall back to manual
+      spreadsheet uploads. Build runs at low_confidence for those
+      properties until the manual attestation lands within
+      tpm_submission_band. Excel benchmarks (labor rate, material cost)
+      inform the build as reference input only.
+    human_approvals_required:
+      - cfo approves the final approved_<fy>_v1 budget version
+      - asset_mgmt_director approves per-property budgets before publication
+
+  - workflow: executive_operating_summary_generation
+    role: primary_for_financials
+    objects_supplied:
+      - actual_line
+      - budget_line
+      - forecast_line
+      - variance_explanation
+      - capex_project
+    blocking_issues:
+      - ic_consistency_posting_period_close_lock
+      - ic_recon_variance_narrative_coverage
+      - ic_recon_capex_commitment_vs_posted
+    partial_mode_behavior: |
+      The summary will annotate the executive view with effective_confidence
+      and with lines requiring manager narrative. A consolidation_only_flag
+      line without supporting memo blocks the summary per edge_case 13.
+    human_approvals_required:
+      - cfo signs off on the final summary for owners and lenders
+      - corporate_controller validates consolidation adjustments
+
+  - workflow: quarterly_portfolio_review
+    role: primary
+    objects_supplied:
+      - actual_line
+      - budget_line
+      - forecast_line
+      - capex_project
+      - variance_explanation
+    blocking_issues:
+      - ic_recon_vendor_three_way
+      - ic_recon_labor_classification
+      - ic_recon_capex_commitment_vs_posted
+      - ic_consistency_budget_vs_reforecast_variance
+    partial_mode_behavior: |
+      Portfolio review runs at fund or portfolio grain; property-level
+      partial_mode annotations roll up into portfolio-level confidence.
+      Intercompany eliminations are applied before rollup.
+    human_approvals_required:
+      - asset_mgmt_director approves the portfolio-level commentary
+      - cfo approves any fund-level fair-value marks in consolidation layer
+
+  - workflow: draw_package_review
+    role: contributing
+    objects_supplied:
+      - actual_line
+      - capex_project
+      - vendor
+    blocking_issues:
+      - ic_recon_capex_commitment_vs_posted
+      - ic_recon_draw_vs_posted
+      - ic_recon_capex_project_dim_handshake
+    partial_mode_behavior: |
+      Procore is primary for draw package; Intacct contributes the posted
+      spend side and the vendor payment detail. When draw posting lag is
+      within draw_posting_lag_band, review runs normally. Beyond band, the
+      draw blocks.
+    human_approvals_required:
+      - corporate_controller approves the draw request (from Procore)
+      - lender technical_reviewer approves the draw package
+
+proposes_new_workflows: []

@@ -1,0 +1,126 @@
+# Workflow activation fragment for the Excel market surveys adapter.
+# Merged into _core/workflow_activation_map.yaml.
+# Every workflow entry declares role, objects_supplied, blocking_issues,
+# partial_mode_behavior, and human_approvals_required.
+
+excel_market_surveys_role: primary_for_market_data_domain
+
+workflows:
+
+  - workflow: rent_comp_intake
+    role: primary
+    objects_supplied: [market_comp, rent_benchmark]
+    cadence: weekly
+    audience: [research_analyst, investments_lead, asset_mgmt_director]
+    blocking_issues:
+      - ex_freshness_per_family
+      - ex_conformance_column_headers_match_schema
+      - ex_consistency_segment_sheet_declaration
+      - ex_reference_submarket_in_crosswalk
+      - ex_uniqueness_rent_comp_key
+    partial_mode_behavior: |
+      If a submarket has no fresh rent_comp within staleness window, the
+      workflow produces a rollup marked partial with the missing submarket
+      surfaced explicitly. Downstream underwriting receives the gap rather
+      than a silent imputation.
+    human_approvals_required:
+      - research_analyst must confirm the comp set before the weekly
+        refresh lands for downstream workflows
+      - regional_ops_director cross-sign required for comp rows that
+        land outside the segment overlay tolerance band
+
+  - workflow: market_rent_refresh
+    role: primary
+    objects_supplied: [rent_benchmark, occupancy_benchmark, concession_benchmark, market_commentary]
+    cadence: quarterly
+    audience: [research_analyst, investments_director, asset_mgmt_director, executive]
+    blocking_issues:
+      - ex_freshness_per_family
+      - ex_completeness_reviewer_for_highimpact
+      - ex_conformance_column_headers_match_schema
+      - ex_consistency_outlier_check
+      - ex_reference_market_in_crosswalk
+    partial_mode_behavior: |
+      If concession_benchmark drifts outside tolerance vs AppFolio
+      concession_rate metric, the refresh runs with confidence reduced to
+      medium and a paired commentary annotation explaining the drift
+      until calibrated.
+    human_approvals_required:
+      - investments_director signs off on analyst_benchmark_pack before
+        the quarterly refresh publishes
+      - research_analyst authors market_commentary annotations with
+        confidence_band and directional_call
+
+  - workflow: capex_estimate_generation
+    role: primary
+    objects_supplied: [capex_line_item_assumption, material_cost_reference, labor_rate_reference, turn_cost_reference]
+    cadence: on_demand
+    audience: [development_director, capital_projects_team, construction_lead]
+    blocking_issues:
+      - ex_completeness_reviewer_for_highimpact
+      - ex_consistency_band_monotonic
+      - ex_uniqueness_capex_key
+      - ex_reference_market_in_crosswalk
+      - ex_freshness_per_family
+    partial_mode_behavior: |
+      If capex_cost_library drifts outside tolerance_band.yaml::capex_cost_drift
+      vs Intacct posted spend for two consecutive months, the workflow
+      requires a mid-cycle library refresh before producing a fresh
+      estimate. Estimates generated before the refresh are tagged with a
+      confidence flag.
+    human_approvals_required:
+      - development_director signs off on the capex cost library version
+        used in the estimate
+      - capital_projects_team reviews line items above a threshold defined
+        in _core/approval_threshold_policy.yaml
+
+  - workflow: bid_leveling_procurement_review
+    role: contributing
+    objects_supplied: [capex_line_item_assumption, vendor_rate]
+    cadence: per_award
+    audience: [procurement_lead, development_director, construction_lead]
+    blocking_issues:
+      - ex_recon_capex_cost_library_vs_procore_commitment
+      - ex_recon_vendor_rate_vs_intacct_invoice
+    partial_mode_behavior: |
+      Excel provides the cost benchmark used to level GC / sub bids in
+      Procore. If Excel is stale or reviewer sign-off missing, bid leveling
+      runs against the last-known-good library version with a confidence
+      flag; bid recommendation requires a paired justification.
+    human_approvals_required:
+      - procurement_lead approves award when commitment deviates from
+        Excel reference outside tolerance_band.yaml::capex_commitment_drift
+
+  - workflow: construction_meeting_prep_and_action_tracking
+    role: contributing
+    objects_supplied: [schedule_duration_assumption]
+    cadence: weekly
+    audience: [construction_lead, development_director, regional_ops_director]
+    blocking_issues:
+      - ex_recon_schedule_assumption_vs_procore_baseline
+    partial_mode_behavior: |
+      Excel schedule_assumption provides the benchmark for baseline
+      duration review during construction meetings. If the Procore
+      baseline deviates from Excel by more than the tolerance band for
+      schedule_duration_drift, the meeting agenda surfaces the deviation
+      but does not block the meeting.
+    human_approvals_required:
+      - construction_lead adjudicates deviations at the weekly meeting
+        and documents resolution in the meeting minutes
+
+  - workflow: executive_operating_summary_generation
+    role: contributing
+    objects_supplied: [market_commentary, rent_benchmark, occupancy_benchmark]
+    cadence: monthly
+    audience: [executive, ic_members, asset_mgmt_director]
+    blocking_issues:
+      - ex_provenance_commentary_author_named
+      - ex_freshness_per_family
+    partial_mode_behavior: |
+      Excel market_commentary feeds the executive narrative. If commentary
+      is stale or author is unnamed, the summary generator uses a placeholder
+      with a confidence flag and requires an analyst-authored refresh
+      before distribution.
+    human_approvals_required:
+      - investments_director reviews commentary before the summary
+        publishes
