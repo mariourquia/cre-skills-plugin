@@ -1,0 +1,17 @@
+# Router Tie-Breakers
+# When multiple rules match, priority decides. Lower number wins.
+
+priority_order:
+  - pack_type: router          # router packs (tailoring, interview) win over all
+    priority: 10
+  - pack_type: workflow        # explicit workflow request wins next
+    priority: 20
+  - pack_type: role            # role pack is the default if no workflow specified
+    priority: 30
+  - pack_type: overlay         # overlays are always layered; never stand alone
+    priority: 40
+
+tie_breakers:
+  - by_specificity: "pack with more matching axes wins"
+  - by_recency: "newer pack version wins"
+  - by_explicit_priority: "pack.routing.yaml.priority (lower wins)"

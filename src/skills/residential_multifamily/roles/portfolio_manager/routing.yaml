@@ -1,0 +1,31 @@
+pack_slug: portfolio_manager
+pack_type: role
+priority: 70
+triggers:
+  explicit_phrases:
+    - "portfolio manager"
+    - "portfolio review"
+    - "portfolio scorecard"
+    - "same-store"
+    - "investor letter"
+    - "capital allocation"
+    - "disposition recommendation"
+    - "acquisition recommendation"
+    - "concentration monitoring"
+    - "debt ladder"
+    - "portfolio concentration"
+  implicit_signals:
+    - "asker is tagged role=portfolio_manager in session context"
+    - "request scope spans multiple assets, a fund, or portfolio-level strategy"
+required_axes:
+  - asset_class
+  - segment
+  - role
+optional_axes:
+  - management_mode
+  - market
+  - output_type
+  - decision_severity
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

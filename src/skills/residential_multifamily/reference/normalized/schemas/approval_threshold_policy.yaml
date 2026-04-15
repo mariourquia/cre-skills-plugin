@@ -1,0 +1,70 @@
+# Category Schema: approval_threshold_policy
+# Dollar thresholds and policy limits that trigger approval gates.
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: ApprovalThresholdPolicyReferenceRecord
+description: |
+  Threshold values driving the approval matrix. Each row is one policy lever - a single
+  dollar amount, percent cap, or day count - that a workflow compares against before
+  taking action. Tailoring overrides these values per org/property.
+extends: _core/schemas/reference_record.yaml
+required:
+  - reference_id
+  - category
+  - scope
+  - value
+  - unit
+  - scenario
+  - source_name
+  - source_type
+  - source_date
+  - as_of_date
+  - confidence
+  - status
+  - proposed_by
+  - threshold_slug
+  - threshold_category
+properties:
+  category:
+    const: approval_threshold_policy
+  scope:
+    type: object
+    properties:
+      market:
+        type: string
+      segment:
+        type: string
+        enum: [middle_market, affordable, luxury]
+      management_mode:
+        type: string
+        enum: [self_managed, third_party_managed, owner_oversight]
+      org_id:
+        type: string
+      property_id:
+        type: string
+  threshold_slug:
+    type: string
+    description: |
+      e.g., threshold_disbursement_1, threshold_disbursement_2, threshold_procurement,
+      threshold_bid_major, threshold_co_minor, threshold_co_major, concession_policy_max,
+      delinquency_notice_trigger_days, write_off_trigger_days.
+  threshold_category:
+    type: string
+    enum:
+      - disbursement
+      - procurement
+      - bid_award
+      - change_order
+      - concession
+      - lease_deviation
+      - delinquency_notice
+      - write_off
+      - capex_release
+      - contract_award
+      - other
+  unit:
+    type: string
+    enum: [dollars, percent, days, months, count]
+  policy_owner_role:
+    type: string
+    description: e.g., regional_manager, asset_manager, cfo_finance_leader. Identifies whose desk the gate crosses.

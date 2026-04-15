@@ -1,0 +1,84 @@
+# Category Schema: rent_comp
+# Extends _core/schemas/reference_record.yaml with fields specific to individual
+# rent comparable observations (property-level rent comps).
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: RentCompReferenceRecord
+description: |
+  Property-level rent comparable observation. Each row represents one comparable property
+  at one point in time, with one or more unit-type rent observations.
+extends: _core/schemas/reference_record.yaml
+required:
+  - reference_id
+  - category
+  - scope
+  - value
+  - unit
+  - scenario
+  - source_name
+  - source_type
+  - source_date
+  - as_of_date
+  - confidence
+  - status
+  - proposed_by
+  - comp_property_name
+  - unit_type_label
+  - unit_beds
+properties:
+  category:
+    const: rent_comp
+  scope:
+    type: object
+    required:
+      - market
+      - submarket
+      - segment
+      - property_form
+    properties:
+      market:
+        type: string
+      submarket:
+        type: string
+      segment:
+        type: string
+        enum: [middle_market, affordable, luxury]
+      property_form:
+        type: string
+        enum: [garden, walk_up, wrap, suburban_mid_rise, urban_mid_rise, high_rise]
+      vintage_year:
+        type: integer
+      property_class:
+        type: string
+        enum: [A, B, C, D]
+  comp_property_name:
+    type: string
+    description: Illustrative name (e.g., 'Ashford Park'). Never a real operating property in sample data.
+  unit_type_label:
+    type: string
+    description: e.g., 'A1', 'B2', 'Studio', '1BR-1BA'.
+  unit_beds:
+    type: integer
+    minimum: 0
+    maximum: 5
+  unit_baths:
+    type: number
+  unit_sf:
+    type: integer
+  asking_rent:
+    type: number
+    description: Current asking/street rent in dollars_per_unit_per_month.
+  effective_rent:
+    type: number
+    description: Asking rent net of concessions; same unit basis as asking_rent.
+  concession_months:
+    type: number
+    description: Concession weeks/months offered, expressed in equivalent months off.
+  occupancy_reported:
+    type: number
+    description: Property-reported physical occupancy as of source_date, 0-1 range.
+  distance_miles:
+    type: number
+    description: Distance from subject property, if a subject is provided.
+  unit:
+    const: dollars_per_unit_per_month

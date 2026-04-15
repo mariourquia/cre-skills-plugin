@@ -1,0 +1,13 @@
+pack_slug: schedule_risk_review
+reads:
+  - path: reference/normalized/construction_duration_assumptions__{region}.csv
+    category: construction_duration_assumption
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/approval_threshold_defaults.csv
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+writes: []

@@ -1,0 +1,32 @@
+# Sign-off Queue
+# Entries awaiting leadership approval before being committed to overlays/org/{org_id}/overlay.yaml.
+# The tailoring skill never writes to the org overlay directly; a separate commit tool reads
+# approved entries and applies them.
+#
+# Schema per entry:
+#   queue_entry_id: <ulid or uuid>
+#   org_id: <org slug>
+#   session_id: <session slug that created the entry>
+#   overlay_key: <overlay.yaml#key the change targets>
+#   proposed_value: <new value; scalar, list, or mapping>
+#   prior_value: <value before the proposed change; null for new keys>
+#   rationale: <one-line reason, grounded in interview answers>
+#   interview_source:
+#     bank_slug: <audience bank>
+#     question_id: <question id that drove the proposal>
+#   approver_role: <role slug required to approve>
+#   approval_matrix_row: <row number from _core/approval_matrix.md; null if not gated>
+#   created_at: <ISO-8601 UTC timestamp>
+#   expires_at: <ISO-8601 UTC timestamp; default 30 days from created_at>
+#   status: <pending | approved | rejected | expired | applied>
+#   approver_note: <optional; populated on approve or reject>
+#
+# Status transitions:
+#   pending   — waiting for approver action.
+#   approved  — approver has approved; external commit tool may apply.
+#   rejected  — approver has rejected; no change to overlay.
+#   expired   — expires_at passed; dropped.
+#   applied   — commit tool has applied the change; kept for audit.
+
+schema_version: "0.1.0"
+entries: []

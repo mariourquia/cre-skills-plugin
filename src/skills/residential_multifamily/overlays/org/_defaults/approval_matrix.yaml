@@ -1,0 +1,50 @@
+# Org approval matrix — default thresholds template.
+# Values are placeholder tokens collected by the tailoring interview.
+# The overlay.yaml in this directory binds approval-matrix rows to these tokens.
+
+thresholds:
+  threshold_disbursement_1: $TBD_THRESHOLD_DISBURSEMENT_1
+  threshold_disbursement_2: $TBD_THRESHOLD_DISBURSEMENT_2
+  threshold_procurement: $TBD_THRESHOLD_PROCUREMENT
+  threshold_bid_major: $TBD_THRESHOLD_BID_MAJOR
+  threshold_co_minor: $TBD_THRESHOLD_CO_MINOR
+  threshold_co_major: $TBD_THRESHOLD_CO_MAJOR
+  threshold_tpm_disbursement_owner_signoff: $TBD_THRESHOLD_TPM_DISBURSEMENT_OWNER_SIGNOFF
+  threshold_tpm_procurement_owner_signoff: $TBD_THRESHOLD_TPM_PROCUREMENT_OWNER_SIGNOFF
+
+approvers:
+  tier1_disbursement:
+    - property_manager
+    - regional_manager
+  tier2_disbursement:
+    - property_manager
+    - regional_manager
+    - asset_manager
+  procurement:
+    - regional_manager
+    - asset_manager
+  bid_major:
+    - construction_manager
+    - asset_manager
+    - $TBD_EXECUTIVE_APPROVER
+  co_minor:
+    - construction_manager
+    - asset_manager
+  co_major:
+    - construction_manager
+    - asset_manager
+    - $TBD_EXECUTIVE_APPROVER
+  legal_notice:
+    - property_manager
+    - regional_manager
+    - $TBD_OWNER_REP_FOR_LEGAL_NOTICES
+  eviction_filing:
+    - property_manager
+    - regional_manager
+    - $TBD_LEGAL_COUNSEL
+
+notes: |
+  All values beginning with $TBD_ are placeholders filled by the tailoring skill
+  during onboarding. Until every token is resolved, the org overlay stays in
+  `status: template` and downstream skills treat the org overlay as not yet
+  authoritative for gated actions.

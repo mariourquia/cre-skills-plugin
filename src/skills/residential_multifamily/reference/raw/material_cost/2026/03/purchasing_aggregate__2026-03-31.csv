@@ -1,0 +1,5 @@
+source_row_id,region,segment,sku_tier,material_slug,material_category,price_amount,unit,trailing_12mo_change_pct,source_file,source_date,as_of_date,notes
+MC-2026Q1-SE-LVP-6MM,southeast,middle_market,middle_market,lvp_flooring_6mm,flooring,3.35,dollars_per_sf,3.5,purchasing_agg_2026Q1.xlsx,2026-03-12,2026-02-28,Starter.
+MC-2026Q1-SE-PAINT-EGG,southeast,middle_market,middle_market,interior_paint_eggshell,paint,32.50,dollars_per_gallon,2.0,purchasing_agg_2026Q1.xlsx,2026-03-12,2026-02-28,Starter.
+MC-2026Q1-SE-RANGE-30,southeast,middle_market,middle_market,appliance_range_electric_30,appliances,585,dollars_per_each,5.8,purchasing_agg_2026Q1.xlsx,2026-03-12,2026-02-28,Starter.
+MC-2026Q1-SE-LUMB-2X4,southeast,middle_market,builder_grade,lumber_2x4x8_spf,lumber,4.25,dollars_per_board_foot,-2.5,commodity_futures_2026Q1.xlsx,2026-03-12,2026-02-28,Commodity index.

@@ -1,0 +1,24 @@
+pack_slug: rent_comp_intake
+reads:
+  - path: reference/raw/rent_comp/
+    category: rent_comp
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/market_rents__{market}_mf.csv
+    category: market_rent_benchmark
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: use_prior_period
+  - path: reference/normalized/comp_normalization_rules__middle_market.yaml
+    category: market_rent_benchmark
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+writes:
+  - path: reference/raw/rent_comp/
+    category: rent_comp
+    write_mode: append
+  - path: reference/normalized/market_rents__{market}_mf.csv
+    category: market_rent_benchmark
+    write_mode: upsert

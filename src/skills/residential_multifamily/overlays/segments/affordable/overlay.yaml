@@ -1,0 +1,33 @@
+overlay_id: segment.affordable
+overlay_kind: segment
+status: stub
+scope:
+  segment: affordable
+authoring_notes: |
+  Stub overlay for affordable / LIHTC / HUD / Section 8 / workforce-restricted segments.
+  Phase 1 does not deepen this overlay; it exists so the segment can diverge from
+  middle_market without touching canonical core. See DIVERGENCE.md for the narrative
+  enumeration of how this segment is expected to differ. Do not add depth here in Phase 1.
+
+overrides:
+  - target_kind: screening_policy
+    target_ref: _core/guardrails.md#screening
+    override_value:
+      screening_policy_ref: overlays/segments/affordable/DIVERGENCE.md#screening_divergence
+    reason: |
+      Affordable-housing screening is subject to program-specific eligibility rules
+      (income certification, student status, household composition) that diverge from
+      middle-market. Placeholder pointer until the full overlay is built.
+  - target_kind: reporting_emphasis
+    target_ref: _core/metrics.md#collections_rate
+    override_value:
+      reporting_emphasis_ref: overlays/segments/affordable/DIVERGENCE.md#reporting_divergence
+    reason: |
+      Affordable reporting adds compliance surfaces (rent limit, income certification,
+      UA, subsidy reconciliation) not present in middle-market reporting. Full overlay
+      TBD.
+
+adds: []
+
+approvers:
+  - director_of_operations

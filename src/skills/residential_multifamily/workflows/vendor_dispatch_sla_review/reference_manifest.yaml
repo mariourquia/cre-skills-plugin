@@ -1,0 +1,23 @@
+pack_slug: vendor_dispatch_sla_review
+reads:
+  - path: reference/normalized/approved_vendor_list__{market}.csv
+    category: vendor_rate
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/vendor_rate_cards__{market}.csv
+    category: vendor_rate
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/vendor_sla_policy__{org}.yaml
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/approval_threshold_defaults.csv
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+writes: []

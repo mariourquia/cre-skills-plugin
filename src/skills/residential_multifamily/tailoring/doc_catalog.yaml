@@ -1,0 +1,196 @@
+# Document Catalog — tailoring
+# Catalog of documents the tailoring skill knows how to request during an interview.
+# A question's `missing_doc_triggers` must reference a `doc_slug` that exists here;
+# the tailoring TUI refuses to add a missing_docs_queue entry whose doc_slug is not
+# in this catalog.
+#
+# Schema per entry:
+#   doc_slug: <kebab-case-unique-slug>
+#   doc_title: <human readable>
+#   typical_format: <pdf | xlsx | docx | md | csv | mixed>
+#   ingest_handler: <none | manual | automated_parse>
+#   overlay_keys_filled: [<overlay.yaml#key>, ...]
+#   notes: <explanatory text; no hardcoded figures>
+#
+# ingest_handler semantics:
+#   none            — the doc informs overlay but is not parsed by the skill; treat as reference only.
+#   manual          — interviewer walks the doc in conversation; skill records structured answers.
+#   automated_parse — the tailoring TUI or a downstream tool parses the doc; not yet implemented for all slugs.
+
+catalog_version: "0.1.0"
+documents:
+
+  - doc_slug: org_chart
+    doc_title: Executive / operating org chart
+    typical_format: pdf
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#org_chart_ref
+      - overlay.yaml#staffing_ratios.regional_span_of_control_units
+    notes: |
+      Maps role packs to real people so approval requests resolve to named approvers.
+
+  - doc_slug: approval_matrix
+    doc_title: Approval matrix (thresholds, approver roles)
+    typical_format: xlsx
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#approval_matrix.threshold_disbursement_1
+      - overlay.yaml#approval_matrix.threshold_disbursement_2
+      - overlay.yaml#approval_matrix.threshold_vendor_contract
+      - overlay.yaml#approval_matrix.threshold_co_minor
+      - overlay.yaml#approval_matrix.threshold_co_major
+    notes: |
+      The org's canonical approval thresholds. The tailoring skill must not loosen
+      any threshold below the canonical floor in _core/approval_matrix.md.
+
+  - doc_slug: property_list
+    doc_title: Property list (segment, form factor, lifecycle, market per property)
+    typical_format: xlsx
+    ingest_handler: automated_parse
+    overlay_keys_filled:
+      - overlay.yaml#property_list_ref
+    notes: |
+      Required for per-property overlays and portfolio segmentation in reporting.
+
+  - doc_slug: sample_monthly_owner_report
+    doc_title: Sample monthly owner report (redacted acceptable)
+    typical_format: pdf
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#finance.sample_monthly_owner_report_ref
+    notes: |
+      Used to align monthly_property_operating_review workflow to operator format.
+
+  - doc_slug: budget_template
+    doc_title: Annual budget template
+    typical_format: xlsx
+    ingest_handler: automated_parse
+    overlay_keys_filled:
+      - overlay.yaml#finance.budget_template_ref
+    notes: |
+      Anchors budget_build workflow to operator template. Must align to chart_of_accounts_mapping.
+
+  - doc_slug: forecast_template
+    doc_title: Forecast / reforecast template
+    typical_format: xlsx
+    ingest_handler: automated_parse
+    overlay_keys_filled:
+      - overlay.yaml#finance.forecast_template_ref
+    notes: |
+      Anchors reforecast workflow to operator template.
+
+  - doc_slug: chart_of_accounts_mapping
+    doc_title: Chart of accounts mapping to NOI line categories
+    typical_format: csv
+    ingest_handler: automated_parse
+    overlay_keys_filled:
+      - overlay.yaml#finance.coa_ref
+    notes: |
+      Required for variance narrative automation.
+
+  - doc_slug: pma_template
+    doc_title: Property management agreement template (TPM operators)
+    typical_format: docx
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#tpm_oversight.pma_template_ref
+      - overlay.yaml#tpm_oversight.improvement_plan_trigger
+    notes: |
+      Defines TPM contract norms and performance triggers.
+
+  - doc_slug: vendor_policy
+    doc_title: Vendor policy and approved-vendor list
+    typical_format: mixed
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#vendor_policy_ref
+      - overlay.yaml#vendor_policy.centrally_approved_categories
+    notes: |
+      Governs dispatch model and approval of non-listed vendors.
+
+  - doc_slug: capex_approval_policy
+    doc_title: Capex approval policy
+    typical_format: pdf
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#finance.capex_approval_policy_ref
+      - overlay.yaml#finance.capex_vs_rm_threshold_dollars
+    notes: |
+      Sets capex vs. R&M boundary and approval tiers.
+
+  - doc_slug: development_budget_template
+    doc_title: Development budget template
+    typical_format: xlsx
+    ingest_handler: automated_parse
+    overlay_keys_filled:
+      - overlay.yaml#development.dev_budget_template_ref
+    notes: |
+      Anchors dev_proforma workflow to operator format.
+
+  - doc_slug: construction_draw_template
+    doc_title: Construction draw package template
+    typical_format: xlsx
+    ingest_handler: automated_parse
+    overlay_keys_filled:
+      - overlay.yaml#construction.draw_template_ref
+    notes: |
+      Anchors construction_draw workflow to operator format.
+
+  - doc_slug: reporting_calendar
+    doc_title: Reporting calendar
+    typical_format: xlsx
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#finance.reporting_calendar_ref
+      - overlay.yaml#reporting.report_inventory_ref
+    notes: |
+      Sets the cadence of monthly, quarterly, and annual outputs.
+
+  - doc_slug: market_survey_template
+    doc_title: Market survey / comp template
+    typical_format: xlsx
+    ingest_handler: automated_parse
+    overlay_keys_filled:
+      - overlay.yaml#reporting.market_survey_template_ref
+    notes: |
+      Anchors market_rent_refresh workflow.
+
+  - doc_slug: leasing_policy
+    doc_title: Leasing and pricing policy
+    typical_format: mixed
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#concession_policy.pm_max_weeks
+      - overlay.yaml#renewal_strategy.renewal_offer_lead_time_days
+    notes: |
+      Documents concession limits, renewal offer windows, and screening posture.
+
+  - doc_slug: delinquency_policy
+    doc_title: Delinquency collections policy
+    typical_format: pdf
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#delinquency_playbook.risk_tolerance
+      - overlay.yaml#reporting.delinquency_policy_ref
+    notes: |
+      Drives delinquency_playbook_stage overlay.
+
+  - doc_slug: resident_comm_templates
+    doc_title: Resident communication templates
+    typical_format: mixed
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#resident_comm_templates_ref
+    notes: |
+      Templates the operator wants preserved rather than generated from canonical starters.
+
+  - doc_slug: existing_sops
+    doc_title: Existing standard operating procedures library
+    typical_format: mixed
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#sop_library_ref
+      - overlay.yaml#regional.playbook_ref
+    notes: |
+      Links role packs to the operator's existing SOPs rather than canonical starter templates.

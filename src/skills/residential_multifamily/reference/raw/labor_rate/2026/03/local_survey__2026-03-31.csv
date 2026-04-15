@@ -1,0 +1,5 @@
+source_row_id,market,region,segment,trade_slug,labor_tier,rate_type,rate_amount,unit,source_file,source_date,as_of_date,notes
+LR-2026Q1-CLT-PLUMB-J,Charlotte,southeast,middle_market,plumber,journeyman,hourly_straight,95,dollars_per_hour,vendor_rate_survey_2026Q1.xlsx,2026-03-10,2026-02-28,Starter.
+LR-2026Q1-CLT-ELEC-J,Charlotte,southeast,middle_market,electrician,journeyman,hourly_straight,105,dollars_per_hour,vendor_rate_survey_2026Q1.xlsx,2026-03-10,2026-02-28,Starter.
+LR-2026Q1-CLT-HVAC-J,Charlotte,southeast,middle_market,hvac_tech,journeyman,hourly_straight,110,dollars_per_hour,vendor_rate_survey_2026Q1.xlsx,2026-03-10,2026-02-28,Starter.
+LR-2026Q1-CLT-PAINT-J,Charlotte,southeast,middle_market,painter,journeyman,hourly_straight,52,dollars_per_hour,vendor_rate_survey_2026Q1.xlsx,2026-03-10,2026-02-28,Starter.

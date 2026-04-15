@@ -1,0 +1,28 @@
+pack_slug: draw_package_review
+pack_type: workflow
+priority: 10
+triggers:
+  explicit_phrases:
+    - "draw review"
+    - "draw package"
+    - "lender requisition"
+    - "draw submission"
+    - "monthly draw"
+  implicit_signals:
+    - "GC submitted pencil draw"
+    - "owner's rep produced requisition draft"
+    - "lender calendar deadline approaching"
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - market
+  - project_id
+  - loan_id
+optional_axes:
+  - role
+  - lifecycle_stage
+  - output_type
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

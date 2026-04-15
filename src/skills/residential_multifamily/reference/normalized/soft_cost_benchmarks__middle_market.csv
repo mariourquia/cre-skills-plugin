@@ -1,0 +1,2 @@
+reference_id,category,scope,value,unit,scenario,source_name,source_type,source_date,as_of_date,confidence,status,proposed_by,notes
+placeholder-001,other,"{}",TBD,TBD,benchmark,placeholder,internal_record,2026-04-15,2026-04-15,low,placeholder,agent:scaffolder,"placeholder file — populate via tailoring/reference update workflow before operational use"

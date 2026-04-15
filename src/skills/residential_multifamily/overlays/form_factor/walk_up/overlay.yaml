@@ -1,0 +1,36 @@
+overlay_id: form_factor.walk_up
+overlay_kind: form_factor
+scope:
+  form_factor: walk_up
+authoring_notes: |
+  Walk-up overlay. Small footprint, no elevator, often urban infill. Amenity
+  program is minimal; common-area maintenance centers on stairwells and building
+  entry. Turn scope is standard but fourth-floor walk-ups increase labor time for
+  heavy items. No numeric targets embedded; references point to reference rows.
+
+overrides:
+  - target_kind: service_standard
+    target_ref: _core/metrics.md#average_days_vacant
+    override_value:
+      service_standard_ref: reference/derived/role_kpi_targets.csv#row_ff_walk_up_common_area_cadence
+    reason: |
+      Stairwell and entry cadence is the primary common-area cost driver.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#make_ready_days
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_ff_walk_up_make_ready_days
+    reason: |
+      Upper-floor walk-up turn durations can run slightly longer; row captures the
+      adjustment.
+  - target_kind: staffing_ratio
+    target_ref: _core/taxonomy.md#role.maintenance_supervisor
+    override_value:
+      staffing_ratio_ref: reference/derived/role_kpi_targets.csv#row_ff_walk_up_maintenance_ratio
+    reason: |
+      Low-amenity walk-up properties staff leaner than garden or mid-rise; row
+      reflects the shift.
+
+adds: []
+
+approvers:
+  - director_of_operations

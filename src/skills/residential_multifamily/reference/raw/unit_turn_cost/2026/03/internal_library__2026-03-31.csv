@@ -1,0 +1,5 @@
+source_row_id,region,segment,property_form,turn_scope,unit_type_label,scope_items,target_make_ready_days,cost_amount,unit,source_file,source_date,as_of_date,notes
+UTC-2026Q1-SE-MM-GARDEN-LIGHT-A1,southeast,middle_market,garden,light,A1,paint_touchup;clean_light,5,785,dollars_per_unit,turn_cost_library_2026Q1.xlsx,2026-03-18,2026-02-28,Starter.
+UTC-2026Q1-SE-MM-GARDEN-STD-A1,southeast,middle_market,garden,standard,A1,paint_full_unit;clean_light;minor_repairs,8,1285,dollars_per_unit,turn_cost_library_2026Q1.xlsx,2026-03-18,2026-02-28,Starter.
+UTC-2026Q1-SE-MM-GARDEN-HEAVY-A1,southeast,middle_market,garden,heavy,A1,paint_full_unit;carpet_replace_per_unit;clean_heavy;punch,14,2345,dollars_per_unit,turn_cost_library_2026Q1.xlsx,2026-03-18,2026-02-28,Starter.
+UTC-2026Q1-SE-MM-GARDEN-CLASS-A1,southeast,middle_market,garden,classic_reno,A1,paint_full_unit;lvp_replace_unit;countertops_classic;hardware_swap;appliance_range_swap;clean_heavy,28,6950,dollars_per_unit,turn_cost_library_2026Q1.xlsx,2026-03-18,2026-02-28,Starter.

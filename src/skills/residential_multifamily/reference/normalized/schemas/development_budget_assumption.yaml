@@ -1,0 +1,53 @@
+# Category Schema: development_budget_assumption
+# Hard cost, soft cost, FF&E, and developer fee norms for ground-up development.
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: DevelopmentBudgetAssumptionReferenceRecord
+description: |
+  Ground-up development cost assumptions by budget line. Used in dev pro forma underwriting.
+  Expressed per-unit or per-GSF depending on line.
+extends: _core/schemas/reference_record.yaml
+required:
+  - reference_id
+  - category
+  - scope
+  - value
+  - unit
+  - scenario
+  - source_name
+  - source_type
+  - source_date
+  - as_of_date
+  - confidence
+  - status
+  - proposed_by
+  - budget_line_slug
+  - budget_line_category
+properties:
+  category:
+    const: development_budget_assumption
+  scope:
+    type: object
+    required:
+      - market
+      - property_form
+    properties:
+      market:
+        type: string
+      region:
+        type: string
+      segment:
+        type: string
+        enum: [middle_market, affordable, luxury]
+      property_form:
+        type: string
+        enum: [garden, walk_up, wrap, suburban_mid_rise, urban_mid_rise, high_rise]
+  budget_line_slug:
+    type: string
+    description: e.g., hard_cost_shell, hard_cost_interior, site_work, ffe_amenity, developer_fee, soft_cost_a_e, hard_cost_contingency, soft_cost_contingency.
+  budget_line_category:
+    type: string
+    enum: [hard_cost, soft_cost, ffe, developer_fee, contingency, financing_cost, land]
+  unit:
+    type: string
+    enum: [dollars_per_unit, dollars_per_gsf, dollars_per_nrsf, percent_of_hard, percent_of_total]

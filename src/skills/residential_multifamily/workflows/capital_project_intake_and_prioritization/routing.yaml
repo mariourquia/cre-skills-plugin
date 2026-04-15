@@ -1,0 +1,29 @@
+pack_slug: capital_project_intake_and_prioritization
+pack_type: workflow
+priority: 20
+triggers:
+  explicit_phrases:
+    - "capex intake"
+    - "prioritize capex"
+    - "capex backlog"
+    - "year-end capex plan"
+    - "capital plan"
+    - "capex prioritization"
+  implicit_signals:
+    - "monthly_property_operating_review surfaced deferred maintenance"
+    - "repeat WO pattern implies capex fix"
+    - "insurance claim produced scope"
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - lifecycle_stage
+  - management_mode
+  - market
+optional_axes:
+  - role
+  - jurisdiction
+  - output_type
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

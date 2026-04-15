@@ -1,0 +1,103 @@
+# Construction question bank
+# Audience: construction_manager, estimator_preconstruction_lead (construction slice)
+# Depth: 12 questions covering draw cadence, change order authority, GC contract norms,
+# insurance/bonding requirements.
+
+bank_slug: construction
+audience: construction_manager
+version: "0.1.0"
+questions:
+
+  - id: con_001
+    question_text: What is the standard GC contract structure the org uses?
+    purpose: Sets gc_contract_norm overlay.
+    answer_type: single_choice
+    choices:
+      - gmp_guaranteed_max_price
+      - cost_plus_with_shared_savings
+      - cost_plus_with_cap
+      - stipulated_sum_fixed_price
+      - mix_by_project
+    target_overlay_ref: overlay.yaml#construction.gc_contract_norm
+    follow_up_ids: []
+
+  - id: con_002
+    question_text: What is the draw submission cadence?
+    purpose: Sets draw workflow cadence.
+    answer_type: single_choice
+    choices: [monthly, biweekly, weekly, per_milestone]
+    target_overlay_ref: overlay.yaml#construction.draw_cadence
+    follow_up_ids: []
+
+  - id: con_003
+    question_text: Please upload the current construction draw package template.
+    purpose: Needed to align draw_package workflow to operator format.
+    answer_type: document_request
+    target_overlay_ref: overlay.yaml#construction.draw_template_ref
+    missing_doc_triggers: [construction_draw_template]
+
+  - id: con_004
+    question_text: What is the construction manager's autonomous change order threshold?
+    purpose: Sets approval_matrix row 10 threshold for CO minor.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#approval_matrix.threshold_co_minor
+    follow_up_ids: []
+
+  - id: con_005
+    question_text: What change order amount requires executive approval?
+    purpose: Sets approval_matrix row 11 threshold for CO major.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#approval_matrix.threshold_co_major
+    follow_up_ids: []
+
+  - id: con_006
+    question_text: Does the org require bonding on all GC contracts?
+    purpose: Sets gc_bonding_required overlay.
+    answer_type: single_choice
+    choices: [always, above_project_size_threshold, never, varies_by_lender_requirement]
+    target_overlay_ref: overlay.yaml#construction.gc_bonding_requirement
+    follow_up_ids: []
+
+  - id: con_007
+    question_text: Above what project dollar size is bonding required if not always? (numeric, dollars; if always, enter 0)
+    purpose: Sets bonding threshold overlay.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#construction.gc_bonding_threshold_dollars
+    follow_up_ids: []
+
+  - id: con_008
+    question_text: Does the org use an owner-controlled insurance program (OCIP) or contractor-controlled (CCIP)?
+    purpose: Sets insurance_program overlay for construction.
+    answer_type: single_choice
+    choices: [ocip_standard, ccip_standard, project_by_project, neither]
+    target_overlay_ref: overlay.yaml#construction.insurance_program
+    follow_up_ids: []
+
+  - id: con_009
+    question_text: What is the GC general liability minimum limit the org requires?
+    purpose: Sets insurance minimums overlay. Expressed as answer ref to operator's insurance schedule rather than a hard number here.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#construction.gl_minimum_per_occurrence_dollars
+    follow_up_ids: []
+
+  - id: con_010
+    question_text: Does the org require the GC to maintain a builder's risk policy or does the owner procure?
+    purpose: Sets builders_risk overlay.
+    answer_type: single_choice
+    choices: [gc_maintains, owner_procures, both_redundant, varies_by_lender]
+    target_overlay_ref: overlay.yaml#construction.builders_risk_ownership
+    follow_up_ids: []
+
+  - id: con_011
+    question_text: Does the org require monthly lien waivers with each draw?
+    purpose: Sets lien_waiver_cadence overlay.
+    answer_type: boolean
+    target_overlay_ref: overlay.yaml#construction.lien_waivers_with_each_draw
+    follow_up_ids: []
+
+  - id: con_012
+    question_text: What retainage does the org typically hold back from the GC?
+    purpose: Sets retainage overlay. Numeric, percent.
+    answer_type: numeric
+    target_overlay_ref: overlay.yaml#construction.retainage_pct
+    follow_up_ids: []

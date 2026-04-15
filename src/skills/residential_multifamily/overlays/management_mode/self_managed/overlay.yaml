@@ -1,0 +1,30 @@
+overlay_id: management_mode.self_managed
+overlay_kind: management_mode
+scope:
+  management_mode: self_managed
+authoring_notes: |
+  Self-managed overlay. Owner operates directly. This is the baseline management-
+  mode overlay; it primarily asserts that approval routing does not include a
+  third-party-manager layer and that owner-side oversight is implicit (the owner
+  is also the operator). No numeric targets embedded.
+
+overrides:
+  - target_kind: reporting_emphasis
+    target_ref: _core/metrics.md#collections_rate
+    override_value:
+      reporting_emphasis_ref: reference/derived/role_kpi_targets.csv#row_mm_mode_self_managed_reporting
+    reason: |
+      Self-managed reporting flows directly from site to owner; no TPM-scorecard
+      layer. This row asserts the simplified routing.
+  - target_kind: staffing_ratio
+    target_ref: _core/taxonomy.md#role.regional_manager
+    override_value:
+      staffing_ratio_ref: reference/derived/role_kpi_targets.csv#row_mm_mode_self_managed_regional_ratio
+    reason: |
+      Regional-manager coverage in a self-managed organization is typically the
+      owner's internal regional role; row reflects the segment's expected ratio.
+
+adds: []
+
+approvers:
+  - director_of_operations

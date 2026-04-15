@@ -1,0 +1,19 @@
+pack_slug: <workflow_slug>
+pack_type: workflow
+priority: 20
+triggers:
+  explicit_phrases: []
+  implicit_signals: []
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - lifecycle_stage
+  - management_mode
+optional_axes:
+  - role
+  - market
+  - output_type
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

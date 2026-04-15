@@ -1,0 +1,42 @@
+overlay_id: form_factor.suburban_mid_rise
+overlay_kind: form_factor
+scope:
+  form_factor: suburban_mid_rise
+authoring_notes: |
+  Suburban mid-rise overlay. Four to six stories with structured parking, usually on
+  a single site in a suburban submarket. Amenity program is full (pool, fitness,
+  club room, often pet spa). Elevator service is standard. No numeric targets
+  embedded; references point to rows.
+
+overrides:
+  - target_kind: service_standard
+    target_ref: _core/metrics.md#average_days_vacant
+    override_value:
+      service_standard_ref: reference/derived/role_kpi_targets.csv#row_ff_suburban_mid_rise_common_area_cadence
+    reason: |
+      Full amenity program adds common-area cadence surfaces not present in garden
+      or walk-up.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#make_ready_days
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_ff_suburban_mid_rise_make_ready_days
+    reason: |
+      Suburban mid-rise turn durations align with wrap.
+  - target_kind: staffing_ratio
+    target_ref: _core/taxonomy.md#role.leasing_manager
+    override_value:
+      staffing_ratio_ref: reference/derived/role_kpi_targets.csv#row_ff_suburban_mid_rise_leasing_ratio
+    reason: |
+      Suburban mid-rise carries a full leasing-staff presence consistent with the
+      amenity program.
+  - target_kind: staffing_ratio
+    target_ref: _core/taxonomy.md#role.maintenance_supervisor
+    override_value:
+      staffing_ratio_ref: reference/derived/role_kpi_targets.csv#row_ff_suburban_mid_rise_maintenance_ratio
+    reason: |
+      Maintenance staffing reflects elevator service and full amenity program.
+
+adds: []
+
+approvers:
+  - director_of_operations

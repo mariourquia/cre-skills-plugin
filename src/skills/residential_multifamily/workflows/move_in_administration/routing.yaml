@@ -1,0 +1,29 @@
+pack_slug: move_in_administration
+pack_type: workflow
+priority: 20
+triggers:
+  explicit_phrases:
+    - "move-in"
+    - "move in prep"
+    - "welcome packet"
+    - "document packet"
+    - "utility setup"
+    - "move-in readiness"
+  implicit_signals:
+    - "lease transitioned from executed to within preleased_window of start_date"
+    - "unit ready-date upcoming"
+    - "resident confirmed move-in time"
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - lifecycle_stage
+  - management_mode
+  - market
+  - jurisdiction
+optional_axes:
+  - role
+  - submarket
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

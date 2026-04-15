@@ -1,0 +1,25 @@
+pack_slug: market_rent_refresh
+pack_type: workflow
+priority: 30
+triggers:
+  explicit_phrases:
+    - "refresh market rents"
+    - "market survey"
+    - "shop comps"
+    - "quarterly market"
+    - "stale benchmark"
+  implicit_signals:
+    - "reference as_of_date older than overlay staleness threshold"
+    - "renewal or funnel workflow cites stale benchmark"
+    - "new supply event in submarket"
+required_axes:
+  - asset_class
+  - segment
+  - market
+optional_axes:
+  - submarket
+  - role
+  - output_type
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

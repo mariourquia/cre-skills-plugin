@@ -1,0 +1,57 @@
+# Category Schema: insurance_tax_assumption
+# Insurance and real estate tax assumption placeholders by market.
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: InsuranceTaxAssumptionReferenceRecord
+description: |
+  Insurance and real estate tax assumption placeholders. Used in pro forma and budgeting.
+  Real figures must be sourced from underwriting and kept in underwriting artifacts;
+  these are planning-grade placeholders.
+extends: _core/schemas/reference_record.yaml
+required:
+  - reference_id
+  - category
+  - scope
+  - value
+  - unit
+  - scenario
+  - source_name
+  - source_type
+  - source_date
+  - as_of_date
+  - confidence
+  - status
+  - proposed_by
+  - assumption_slug
+  - assumption_category
+properties:
+  category:
+    const: insurance_tax_assumption
+  scope:
+    type: object
+    required:
+      - market
+    properties:
+      market:
+        type: string
+      region:
+        type: string
+      state:
+        type: string
+      county:
+        type: string
+      segment:
+        type: string
+        enum: [middle_market, affordable, luxury]
+      property_form:
+        type: string
+        enum: [garden, walk_up, wrap, suburban_mid_rise, urban_mid_rise, high_rise]
+  assumption_slug:
+    type: string
+    description: e.g., property_insurance_per_unit, liability_insurance_per_unit, umbrella_insurance_per_unit, windstorm_deductible_pct, real_estate_tax_effective_rate, real_estate_tax_millage, reassessment_trigger_years.
+  assumption_category:
+    type: string
+    enum: [property_insurance, liability_insurance, umbrella_insurance, flood_insurance, windstorm, earthquake, real_estate_tax, tax_abatement, pilot]
+  unit:
+    type: string
+    enum: [dollars_per_unit_per_year, dollars_per_unit_per_month, dollars_per_sf, percent_of_value, percent_of_assessed, millage_rate, years]

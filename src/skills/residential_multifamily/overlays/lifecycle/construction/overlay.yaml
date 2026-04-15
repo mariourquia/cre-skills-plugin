@@ -1,0 +1,86 @@
+overlay_id: lifecycle.construction
+overlay_kind: lifecycle
+scope:
+  lifecycle: construction
+authoring_notes: |
+  Construction overlay. Active construction through substantial completion. Adds
+  draw-cycle discipline, cost-to-complete tracking, schedule risk reviews, change-
+  order discipline, and trade-buyout variance reporting. Shifts approval posture
+  toward construction-manager plus asset-manager plus executive as dollar magnitudes
+  grow.
+
+overrides:
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#cost_to_complete
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_construction_cost_to_complete
+    reason: |
+      Cost-to-complete discipline is the primary construction KPI; target band
+      reflects expected discipline at each schedule phase.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#contingency_remaining
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_construction_contingency_remaining
+    reason: |
+      Contingency-remaining band by schedule completion percentage; early exhaustion
+      triggers executive review.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#contingency_burn_rate
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_construction_contingency_burn_rate
+    reason: |
+      Contingency burn rate by schedule; sustained over-band is an early-warning
+      flag.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#change_orders_pct_of_contract
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_construction_co_pct_of_contract
+    reason: |
+      Change-orders as a percent of contract; band varies with delivery method.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#schedule_variance_days
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_construction_schedule_variance_days
+    reason: |
+      Schedule-variance-days tolerance; breach triggers recovery-plan review.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#draw_cycle_time
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_construction_draw_cycle_time
+    reason: |
+      Draw-cycle time from submission to funding; lender-facing discipline.
+  - target_kind: approval_threshold
+    target_ref: _core/approval_matrix.md#row_10_change_order_minor
+    override_value:
+      threshold_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_construction_co_minor_threshold
+    reason: |
+      Minor change-order gate anchored to the org default; construction overlay
+      does not loosen floor.
+  - target_kind: approval_threshold
+    target_ref: _core/approval_matrix.md#row_11_change_order_major
+    override_value:
+      threshold_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_construction_co_major_threshold
+    reason: |
+      Major change-order gate anchored to org default with executive escalation.
+  - target_kind: reporting_emphasis
+    target_ref: _core/metrics.md#cost_to_complete
+    override_value:
+      reporting_emphasis_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_construction_reporting
+    reason: |
+      Construction reporting surfaces: cost to complete, schedule variance,
+      contingency status, change-order register, trade buyout variance, draw cycle
+      health, punchlist status at late phases.
+
+adds:
+  - added_kind: checklist_item
+    slug: weekly_construction_review
+    definition_ref: overlays/lifecycle/construction/README.md#weekly_review
+  - added_kind: checklist_item
+    slug: draw_cycle_discipline
+    definition_ref: overlays/lifecycle/construction/README.md#draw_discipline
+
+approvers:
+  - construction_manager
+  - asset_manager
+  - coo_operations_leader
+  - ceo_executive_leader

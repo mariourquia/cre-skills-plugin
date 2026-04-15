@@ -1,0 +1,27 @@
+pack_slug: construction_meeting_prep_and_action_tracking
+pack_type: workflow
+priority: 30
+triggers:
+  explicit_phrases:
+    - "construction meeting pack"
+    - "OAC agenda"
+    - "action item update"
+    - "weekly construction meeting"
+    - "biweekly construction meeting"
+  implicit_signals:
+    - "scheduled meeting date approaching"
+    - "open action items aging past overlay"
+    - "new RFI or submittal opened"
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - market
+  - project_id
+optional_axes:
+  - role
+  - lifecycle_stage
+  - output_type
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

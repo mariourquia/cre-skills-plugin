@@ -1,0 +1,5 @@
+source_row_id,region,segment,property_form,lifecycle_stage,metric_slug,band_low,band_high,peer_median,as_of_date,source_file,source_date,notes
+PS-2026Q1-SE-MM-GARDEN-STAB-PO,southeast,middle_market,garden,stabilized,physical_occupancy,0.93,0.955,0.945,2026-02-28,internal_peerset_2026Q1.xlsx,2026-03-05,Peer set aggregate.
+PS-2026Q1-SE-MM-GARDEN-STAB-D30,southeast,middle_market,garden,stabilized,delinquency_rate_30plus,0.015,0.035,0.025,2026-02-28,internal_peerset_2026Q1.xlsx,2026-03-05,Peer set aggregate.
+PS-2026Q1-SE-MM-GARDEN-STAB-COLL,southeast,middle_market,garden,stabilized,collections_rate,0.975,0.995,0.985,2026-02-28,internal_peerset_2026Q1.xlsx,2026-03-05,Peer set aggregate.
+PS-2026Q1-SE-MM-GARDEN-STAB-TO,southeast,middle_market,garden,stabilized,turnover_rate,0.45,0.55,0.50,2026-02-28,internal_peerset_2026Q1.xlsx,2026-03-05,Peer set aggregate.

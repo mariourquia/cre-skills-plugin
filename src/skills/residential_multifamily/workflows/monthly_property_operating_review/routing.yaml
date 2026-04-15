@@ -1,0 +1,27 @@
+pack_slug: monthly_property_operating_review
+pack_type: workflow
+priority: 20
+triggers:
+  explicit_phrases:
+    - "monthly review"
+    - "monthly scorecard"
+    - "monthly operating review"
+    - "property scorecard"
+    - "AM submission"
+  implicit_signals:
+    - "calendar month close"
+    - "AM requests monthly pack"
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - lifecycle_stage
+  - management_mode
+  - market
+optional_axes:
+  - role
+  - jurisdiction
+  - output_type
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

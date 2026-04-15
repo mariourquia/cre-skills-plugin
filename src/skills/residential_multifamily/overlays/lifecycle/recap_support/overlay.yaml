@@ -1,0 +1,56 @@
+overlay_id: lifecycle.recap_support
+overlay_kind: lifecycle
+scope:
+  lifecycle: recap_support
+authoring_notes: |
+  Recap support overlay. Applies when the asset is preparing for refi, disposition,
+  partnership buyout, or recapitalization. Reporting emphasis shifts to rent-roll
+  clean-up, comp-package preparation, disposition or refi narrative, and lender /
+  buyer-facing data integrity. Operating discipline continues; the overlay layers
+  an outward-facing readiness surface on top of stabilized posture.
+
+overrides:
+  - target_kind: reporting_emphasis
+    target_ref: _core/metrics.md#noi
+    override_value:
+      reporting_emphasis_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_recap_support_reporting
+    reason: |
+      Recap-support reporting surfaces NOI trend, T-12 normalization, rent-roll
+      integrity, market comp package, and narrative for lender or buyer.
+  - target_kind: service_standard
+    target_ref: _core/metrics.md#work_order_aging
+    override_value:
+      service_standard_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_recap_support_punch_cadence
+    reason: |
+      Pre-listing punch cadence: corridors, amenity, curb appeal, and deferred
+      maintenance review ahead of tour or lender inspection.
+  - target_kind: metric_target_band
+    target_ref: _core/metrics.md#notice_exposure
+    override_value:
+      target_band_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_recap_support_notice_exposure
+    reason: |
+      Notice-exposure ceiling tightens during marketing and lender-diligence
+      windows; a clean rollover picture supports the recap.
+  - target_kind: renewal_strategy
+    target_ref: _core/metrics.md#renewal_offer_rate
+    override_value:
+      renewal_strategy_ref: reference/derived/role_kpi_targets.csv#row_lifecycle_recap_support_renewal_posture
+    reason: |
+      Renewal posture during recap windows emphasizes term length and
+      expiration-ladder shape to support the buyer / lender narrative.
+
+adds:
+  - added_kind: checklist_item
+    slug: rent_roll_scrub
+    definition_ref: overlays/lifecycle/recap_support/README.md#rent_roll_scrub
+  - added_kind: checklist_item
+    slug: comp_package_prep
+    definition_ref: overlays/lifecycle/recap_support/README.md#comp_package_prep
+  - added_kind: checklist_item
+    slug: disposition_narrative
+    definition_ref: overlays/lifecycle/recap_support/README.md#disposition_narrative
+
+approvers:
+  - asset_manager
+  - portfolio_manager
+  - cfo_finance_leader

@@ -1,0 +1,38 @@
+pack_slug: bid_leveling_procurement_review
+reads:
+  - path: reference/normalized/capex_line_items__{scope}.csv
+    category: capex_line_item
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/labor_rates__{market}.csv
+    category: labor_rate
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/material_costs__{region}_residential.csv
+    category: material_cost
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/approved_vendor_list__{market}.csv
+    category: vendor_rate
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/vendor_rate_cards__{market}.csv
+    category: vendor_rate
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/derived/contingency_assumptions__{org}.csv
+    category: capex_line_item
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/approval_threshold_defaults.csv
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+writes: []

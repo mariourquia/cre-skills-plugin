@@ -1,0 +1,27 @@
+pack_slug: cost_to_complete_review
+pack_type: workflow
+priority: 15
+triggers:
+  explicit_phrases:
+    - "cost to complete"
+    - "CTC"
+    - "pressure test budget"
+    - "CTC refresh"
+    - "remaining budget"
+  implicit_signals:
+    - "draw_package_review surfaced CTC drift"
+    - "change_order_review produced material cost delta"
+    - "milestone slippage from schedule"
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - market
+  - project_id
+optional_axes:
+  - role
+  - lifecycle_stage
+  - output_type
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

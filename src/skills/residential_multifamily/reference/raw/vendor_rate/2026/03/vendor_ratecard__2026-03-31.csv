@@ -1,0 +1,5 @@
+source_row_id,market,region,segment,vendor_name,service_slug,service_category,contract_term_months,price_amount,unit,source_file,source_date,as_of_date,notes
+VR-2026Q1-CLT-CLEANCO-LIGHT,Charlotte,southeast,middle_market,CleanCo (illustrative vendor),turn_clean_light,turn_clean,12,145,dollars_per_unit,vendor_ratecard_2026Q1.xlsx,2026-03-15,2026-02-28,Starter.
+VR-2026Q1-CLT-CLEANCO-HEAVY,Charlotte,southeast,middle_market,CleanCo (illustrative vendor),turn_clean_heavy,turn_clean,12,225,dollars_per_unit,vendor_ratecard_2026Q1.xlsx,2026-03-15,2026-02-28,Starter.
+VR-2026Q1-CLT-QCPAINT-FULL,Charlotte,southeast,middle_market,Queen City Painters (illustrative vendor),paint_full_unit,turn_paint,12,785,dollars_per_unit,vendor_ratecard_2026Q1.xlsx,2026-03-15,2026-02-28,Starter.
+VR-2026Q1-CLT-FLOORPRO-CARPET,Charlotte,southeast,middle_market,FloorPro Charlotte (illustrative vendor),carpet_replace_per_unit,turn_flooring,12,685,dollars_per_unit,vendor_ratecard_2026Q1.xlsx,2026-03-15,2026-02-28,Starter.

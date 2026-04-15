@@ -1,0 +1,35 @@
+pack_slug: estimator_preconstruction_lead
+pack_type: role
+priority: 40
+triggers:
+  explicit_phrases:
+    - "estimator"
+    - "preconstruction"
+    - "ROM estimate"
+    - "conceptual estimate"
+    - "schematic estimate"
+    - "DD estimate"
+    - "GMP estimate"
+    - "bid leveling"
+    - "bid tabulation"
+    - "VE options"
+    - "unit turn estimate"
+    - "capex line-item estimate"
+    - "assembly cost"
+    - "estimate reconciliation"
+  implicit_signals:
+    - "asker is tagged role=estimator_preconstruction_lead in session context"
+    - "request is a dollar-denominated scope estimate or bid leveling task"
+required_axes:
+  - asset_class
+  - segment
+  - role
+optional_axes:
+  - form_factor
+  - lifecycle_stage
+  - market
+  - output_type
+  - decision_severity
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

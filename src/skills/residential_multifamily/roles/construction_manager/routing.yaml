@@ -1,0 +1,33 @@
+pack_slug: construction_manager
+pack_type: role
+priority: 50
+triggers:
+  explicit_phrases:
+    - "construction manager"
+    - "OAC meeting"
+    - "RFI submittal review"
+    - "monthly construction status"
+    - "change order review"
+    - "draw field inputs"
+    - "long-lead tracker"
+    - "safety posture"
+    - "substantial completion"
+    - "punch list"
+  implicit_signals:
+    - "asker is tagged role=construction_manager in session context"
+    - "request concerns vertical construction or major renovation execution"
+    - "lifecycle_stage axis resolves to construction or renovation"
+required_axes:
+  - asset_class
+  - segment
+  - lifecycle_stage
+  - role
+optional_axes:
+  - form_factor
+  - management_mode
+  - market
+  - output_type
+  - decision_severity
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

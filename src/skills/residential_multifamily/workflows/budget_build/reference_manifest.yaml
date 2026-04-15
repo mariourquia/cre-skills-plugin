@@ -1,0 +1,53 @@
+pack_slug: budget_build
+reads:
+  - path: reference/normalized/payroll_assumptions__{org}.csv
+    category: payroll_assumption
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/insurance_tax_assumptions__{market}.csv
+    category: insurance_tax_assumption
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/utility_benchmarks__{market}.csv
+    category: utility_benchmark
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/staffing_ratios__middle_market.csv
+    category: staffing_model
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/market_rents__{market}_mf.csv
+    category: market_rent_benchmark
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/concession_benchmarks__{market}_mf.csv
+    category: concession_benchmark
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/collections_benchmarks__{region}_mf.csv
+    category: occupancy_benchmark
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/unit_turn_cost_library__{market}.csv
+    category: unit_turn_cost
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/derived/budget_escalator_assumptions__{market}.csv
+    category: concession_benchmark
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/normalized/approval_threshold_defaults.csv
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+writes: []

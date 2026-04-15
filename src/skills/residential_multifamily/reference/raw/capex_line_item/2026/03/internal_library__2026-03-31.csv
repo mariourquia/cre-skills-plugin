@@ -1,0 +1,5 @@
+source_row_id,region,segment,property_form,line_item_slug,capex_category,assembly_basis,typical_useful_life_years,yield_on_cost_assumption,cost_amount,unit,source_file,source_date,as_of_date,notes
+CPX-2026Q1-SE-MM-GARDEN-UNITKIT-CLASS,southeast,middle_market,garden,unit_kitchen_package_classic,unit_interior_classic,per_unit,12,0.10,4650,dollars_per_unit,capex_library_2026Q1.xlsx,2026-03-20,2026-02-28,Starter.
+CPX-2026Q1-SE-MM-GARDEN-ROOF,southeast,middle_market,garden,roof_replace_shingle,building_envelope,per_sf,25,,8.75,dollars_per_sf,capex_library_2026Q1.xlsx,2026-03-20,2026-02-28,Starter.
+CPX-2026Q1-SE-MM-GARDEN-PARK,southeast,middle_market,garden,parking_lot_mill_overlay,site_hardscape,per_sf,15,,3.85,dollars_per_sf,capex_library_2026Q1.xlsx,2026-03-20,2026-02-28,Starter.
+CPX-2026Q1-SE-MM-GARDEN-CLUB,southeast,middle_market,garden,clubhouse_refresh,common_area,per_lump_sum,10,,185000,dollars_per_lump_sum,capex_library_2026Q1.xlsx,2026-03-20,2026-02-28,Starter.

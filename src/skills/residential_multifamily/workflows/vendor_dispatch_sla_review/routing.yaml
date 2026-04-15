@@ -1,0 +1,27 @@
+pack_slug: vendor_dispatch_sla_review
+pack_type: workflow
+priority: 25
+triggers:
+  explicit_phrases:
+    - "vendor scorecard"
+    - "SLA review"
+    - "rotate vendor"
+    - "vendor performance"
+    - "dispatch review"
+  implicit_signals:
+    - "repeat_work_order_rate above overlay threshold for a vendor"
+    - "vendor license or insurance expiry within overlay window"
+    - "SLA breach pattern"
+required_axes:
+  - asset_class
+  - segment
+  - management_mode
+  - market
+optional_axes:
+  - role
+  - form_factor
+  - lifecycle_stage
+  - output_type
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

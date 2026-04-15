@@ -1,0 +1,52 @@
+# Category Schema: labor_rate
+# Trade labor rates by market.
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: LaborRateReferenceRecord
+description: |
+  Hourly labor rates for trades used in residential multifamily capex, unit turns, and
+  ongoing R&M. Market-scoped.
+extends: _core/schemas/reference_record.yaml
+required:
+  - reference_id
+  - category
+  - scope
+  - value
+  - unit
+  - scenario
+  - source_name
+  - source_type
+  - source_date
+  - as_of_date
+  - confidence
+  - status
+  - proposed_by
+  - trade_slug
+  - labor_tier
+properties:
+  category:
+    const: labor_rate
+  scope:
+    type: object
+    required:
+      - market
+    properties:
+      market:
+        type: string
+      region:
+        type: string
+      segment:
+        type: string
+        enum: [middle_market, affordable, luxury]
+  trade_slug:
+    type: string
+    description: e.g., plumber, electrician, hvac_tech, painter, carpenter, flooring_installer, drywall, general_laborer, appliance_tech.
+  labor_tier:
+    type: string
+    enum: [apprentice, journeyman, master, helper, foreman, prevailing_wage]
+  rate_type:
+    type: string
+    enum: [hourly_straight, hourly_overtime, flat_trip, daily]
+  unit:
+    type: string
+    enum: [dollars_per_hour, dollars_per_trip, dollars_per_day]

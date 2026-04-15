@@ -1,0 +1,39 @@
+pack_slug: asset_manager
+pack_type: role
+priority: 60
+triggers:
+  explicit_phrases:
+    - "asset manager"
+    - "asset review"
+    - "monthly asset review"
+    - "quarterly asset review"
+    - "business plan refresh"
+    - "hold sell refi"
+    - "hold/sell/refi screen"
+    - "covenant check"
+    - "debt yield"
+    - "DSCR cushion"
+    - "capex reallocation"
+    - "renovation yield"
+    - "lender compliance"
+    - "TPM scorecard review"
+    - "property tax appeal"
+    - "insurance renewal"
+    - "draw review"
+  implicit_signals:
+    - "asker is tagged role=asset_manager in session context"
+    - "request concerns business plan, hold-period return, capex program, or covenant management for one or more assets"
+required_axes:
+  - asset_class
+  - segment
+  - role
+optional_axes:
+  - form_factor
+  - lifecycle_stage
+  - management_mode
+  - market
+  - output_type
+  - decision_severity
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default
