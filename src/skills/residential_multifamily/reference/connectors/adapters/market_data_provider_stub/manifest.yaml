@@ -1,0 +1,54 @@
+# Adapter manifest for the generic market data provider stub.
+# Conforms to reference/connectors/adapters/adapter_manifest.schema.yaml.
+
+adapter_id: market_data_provider_stub
+adapter_name: Generic Market Data Provider Stub
+vendor_family: generic_market_data_stub
+connector_domain: market_data
+status: stub
+rollout_wave: wave_1
+description: |
+  Placeholder adapter over the canonical market_data connector. Seeds
+  operator onboarding with common rent-comp formats, concession encoding,
+  submarket tagging, and effective-date conventions. Canonical schema in
+  ../../market_data/ wins on any conflict.
+
+supported_source_systems:
+  - market_data_generic_stub
+
+mapping_hints:
+  - { source_field_pattern: "comp*id|comp*ref|observation*id",             canonical_field: market_comp_id,          transform_hint: trim_string }
+  - { source_field_pattern: "property*name|subject*name|community*name",   canonical_field: comp_property_name,      transform_hint: trim_string }
+  - { source_field_pattern: "submarket|submkt|market*area",                canonical_field: submarket,               transform_hint: map_submarket }
+  - { source_field_pattern: "market|metro|msa",                            canonical_field: market,                  transform_hint: trim_string }
+  - { source_field_pattern: "observation*date|effective*date|as*of*date",  canonical_field: effective_date,          transform_hint: to_iso_date }
+  - { source_field_pattern: "unit*type|floor*plan",                        canonical_field: unit_type_label,         transform_hint: trim_string }
+  - { source_field_pattern: "beds|bedrooms",                               canonical_field: bedrooms,                transform_hint: to_integer }
+  - { source_field_pattern: "baths|bathrooms",                             canonical_field: bathrooms,               transform_hint: to_number }
+  - { source_field_pattern: "sqft|nrsf|square*feet",                       canonical_field: nrsf,                    transform_hint: to_integer }
+  - { source_field_pattern: "asking*rent|market*rent|list*rent",           canonical_field: asking_rent_monthly_cents,  transform_hint: dollars_to_cents }
+  - { source_field_pattern: "effective*rent|net*effective*rent",           canonical_field: effective_rent_monthly_cents, transform_hint: dollars_to_cents }
+  - { source_field_pattern: "concession*weeks|free*rent*weeks|free*months", canonical_field: concession_periods,      transform_hint: to_number }
+  - { source_field_pattern: "concession*type|promo*type",                  canonical_field: concession_type,         transform_hint: map_concession_type }
+  - { source_field_pattern: "source*tag|provider*name|dataset*name",       canonical_field: source_provider,         transform_hint: trim_string }
+  - { source_field_pattern: "observation*method|survey*method",            canonical_field: observation_method,      transform_hint: map_observation_method }
+
+known_gotchas:
+  - conflicting sources for the same comp; rank by observation_method and effective_date freshness
+  - stale comps where the underlying lease is months old but the comp is re-published; always carry effective_date
+  - outlier rents from broker puffery; apply outlier flags before use in rent benchmarking
+  - missing submarket tags require internal mapping via map_submarket
+  - manual survey sheets vary widely in layout; template drift is common
+  - concession encoding varies across weeks-free, months-free, percent-off, and one-time credit; normalize to concession_periods plus concession_type
+  - unit-type labels rarely align across providers; maintain a unit-type crosswalk if consuming multi-provider comps
+  - providers may redact building-level identity; preserve anonymization flags
+
+reference_documentation:
+  - placeholder_link_to_submarket_taxonomy
+  - placeholder_link_to_comp_rank_rules
+
+author_metadata:
+  authored_by: residential_multifamily_subsystem
+  authored_role: data_platform_team
+
+last_updated: "2026-04-15"

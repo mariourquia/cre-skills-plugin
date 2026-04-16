@@ -1,0 +1,100 @@
+# Reconciliation Check Schema
+# Applies to every item in reference/connectors/<domain>/reconciliation_checks.yaml
+# AND to every file under reference/connectors/qa/*.yaml.
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: ReconciliationCheck
+type: object
+required:
+  - check_id
+  - check_kind
+  - severity
+  - description
+  - inputs
+  - expected_invariant
+  - remediation
+properties:
+  check_id:
+    type: string
+    pattern: "^[a-z][a-z0-9_]*$"
+    description: Unique slug for the check. Used as the key in reconciliation_report.json.
+  check_kind:
+    type: string
+    enum:
+      - record_count
+      - duplicate_id
+      - null_critical
+      - date_coverage
+      - unit_count
+      - lease_status
+      - budget_actual
+      - commitment_draw
+  severity:
+    type: string
+    enum:
+      - blocker
+      - warning
+      - info
+    description: |
+      blocker = fail prevents promotion to normalized/; warning = log only;
+      info = report only, never gate.
+  description:
+    type: string
+    description: One-sentence human-readable statement of what the check enforces.
+  inputs:
+    type: array
+    minItems: 1
+    description: Entity or reference paths the check reads.
+    items:
+      type: string
+  expected_invariant:
+    type: string
+    description: Plain-language statement of the invariant. Implementations compile
+      this to a deterministic comparison.
+  tolerance:
+    type: object
+    description: Optional numeric tolerance block.
+    properties:
+      absolute:
+        type: number
+      relative_percent:
+        type: number
+    additionalProperties: false
+  remediation:
+    type: string
+    description: Operator-facing guidance when the check fails.
+  escalation_ref:
+    type: string
+    description: Optional pointer to escalation matrix row.
+  parameters:
+    type: array
+    description: |
+      Optional. Used only in shared templates under reference/connectors/qa/.
+      Names the parameters an operator configures at instantiation (e.g., max_age_days,
+      entity_category). Ignored on per-connector reconciliation_checks.yaml items.
+    items:
+      type: object
+  severity_default:
+    type: string
+    enum:
+      - blocker
+      - warning
+      - info
+    description: |
+      Optional. Used in shared templates under reference/connectors/qa/ to declare the
+      default severity when no per-instantiation override is provided.
+  remediation_pattern:
+    type: string
+    description: |
+      Optional. Used in shared templates under reference/connectors/qa/ as a narrative
+      remediation pattern that per-connector instantiations specialize. Narrative
+      counterpart to the required remediation string.
+  affected_workflows:
+    type: array
+    description: |
+      Optional. Names workflow slugs (from workflows/) that this check gates.
+      Informational only; consumed by routing and escalation tooling.
+    items:
+      type: string
+      pattern: "^[a-z][a-z0-9_/]*$"
+additionalProperties: false

@@ -1,0 +1,55 @@
+overlay_id: regulatory.affordable.mixed_income
+overlay_kind: regulatory.program
+parent_overlay: regulatory.affordable
+status: stub
+scope:
+  regulatory_program: mixed_income
+authoring_notes: |
+  Overlay for mixed-income properties where some units are restricted under
+  a regulatory program (typically LIHTC, state HFA, or inclusionary zoning)
+  and the remaining units operate at market rate. The set-aside model is
+  unit-level, not property-level: each unit is tagged with its regulatory
+  program (or `none`) and rent / income tests apply per unit.
+
+  Phase 1 ships architecture only. Unit-level set-aside tables live in
+  reference: `reference/normalized/unit_set_aside__{property}.csv`.
+
+overrides:
+  - target_kind: reporting_emphasis
+    target_ref: overlays/regulatory/_shared/rent_limits.md
+    override_value:
+      reporting_emphasis_ref: overlays/regulatory/affordable/programs/mixed_income/overlay.yaml
+    reason: |
+      Rent-limit compliance applies to the regulated subset of units only;
+      reporting separates regulated and market-rate performance and
+      surfaces the unit-level set-aside composition.
+  - target_kind: reporting_emphasis
+    target_ref: overlays/regulatory/_shared/eligibility_and_certification.md
+    override_value:
+      reporting_emphasis_ref: overlays/regulatory/affordable/programs/mixed_income/overlay.yaml
+    reason: |
+      Certification workflows apply only to regulated units; market-rate
+      units follow the segment's screening policy without the regulatory
+      layer. Unit-transfer events between regulated and market pools are
+      a distinct event type.
+  - target_kind: reporting_emphasis
+    target_ref: overlays/regulatory/_shared/compliance_calendar.md
+    override_value:
+      reporting_emphasis_ref: overlays/regulatory/affordable/programs/mixed_income/overlay.yaml
+    reason: |
+      Compliance calendar is produced against the regulated subset.
+      Inspection and audit scope usually covers the whole property even
+      when only a subset is regulated; the overlay flags that asymmetry.
+
+adds:
+  - added_kind: metric
+    slug: set_aside_band_composition
+    definition_ref: overlays/regulatory/affordable/programs/mixed_income/overlay.yaml
+  - added_kind: metric
+    slug: set_aside_unit_transfer_events
+    definition_ref: overlays/regulatory/affordable/programs/mixed_income/overlay.yaml
+
+approvers:
+  - director_of_operations
+  - compliance_lead
+  - legal_counsel

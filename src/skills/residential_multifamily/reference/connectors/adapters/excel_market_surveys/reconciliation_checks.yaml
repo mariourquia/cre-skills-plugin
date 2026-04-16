@@ -1,0 +1,138 @@
+# Excel market surveys machine-readable reconciliation checks.
+# Prefix ex_recon_. Citations reference
+# reference/normalized/schemas/reconciliation_tolerance_band.yaml for bands.
+# No numeric thresholds hardcoded here.
+
+checks:
+
+  - check_id: ex_recon_rent_comp_vs_appfolio_trade_out
+    left: excel_rent_comp.effective_rent
+    right: appfolio.lease_trade_out_weighted_avg
+    grain: [market, submarket, segment, property_form, unit_type_label, as_of_date]
+    metric: relative_difference
+    tolerance_band_ref: reconciliation_tolerance_band.yaml::rent_trade_out_drift
+    drift_within_band_action: reduce_confidence_to_medium
+    drift_outside_band_action: route_to_research_analyst
+    cadence: monthly
+    blocks_workflow_on_breach: [market_rent_refresh]
+
+  - check_id: ex_recon_concession_benchmark_vs_appfolio_concession_rate
+    left: excel_concession_benchmark.concession_months_offered
+    right: appfolio.concession_rate_derived
+    grain: [market, submarket, segment, property_form, lease_term_months, as_of_date]
+    metric: absolute_difference_percentage_points
+    tolerance_band_ref: reconciliation_tolerance_band.yaml::concession_benchmark_drift
+    drift_within_band_action: reduce_confidence_to_medium
+    drift_outside_band_action: route_to_leasing_director
+    cadence: monthly
+    blocks_workflow_on_breach: [market_rent_refresh, renewal_retention]
+
+  - check_id: ex_recon_turn_cost_library_vs_appfolio_actuals
+    left: excel_turn_cost_library.typical
+    right: appfolio.turn_project_actual_cost_median
+    grain: [market, segment, property_form, turn_scope, unit_type_label, as_of_date]
+    metric: relative_difference
+    tolerance_band_ref: reconciliation_tolerance_band.yaml::turn_cost_drift
+    drift_within_band_action: reduce_confidence_to_medium
+    drift_outside_band_action: route_to_regional_ops_director
+    cadence: monthly
+    blocks_workflow_on_breach: [unit_turn_make_ready, budget_build]
+
+  - check_id: ex_recon_capex_cost_library_vs_intacct_posted
+    left: excel_capex_cost_library.typical
+    right: intacct.actual_line_unit_cost
+    grain: [market, csi_division, line_item_slug, segment, property_form, as_of_date]
+    metric: relative_difference
+    tolerance_band_ref: reconciliation_tolerance_band.yaml::capex_cost_drift
+    drift_within_band_action: reduce_confidence_to_medium
+    drift_outside_band_action: route_to_development_director
+    cadence: monthly
+    blocks_workflow_on_breach: [capex_estimate_generation, budget_build]
+
+  - check_id: ex_recon_vendor_rate_vs_intacct_invoice
+    left: excel_vendor_rate_card.rate_typical
+    right: intacct.invoice_unit_rate
+    grain: [vendor_id, service_slug, market, as_of_date]
+    metric: relative_difference
+    tolerance_band_ref: reconciliation_tolerance_band.yaml::vendor_invoice_drift
+    drift_within_band_action: reduce_confidence_to_medium
+    drift_outside_band_action: route_to_procurement_lead
+    cadence: monthly
+    blocks_workflow_on_breach: [budget_build, vendor_dispatch_sla_review]
+
+  - check_id: ex_recon_capex_cost_library_vs_procore_commitment
+    left: excel_capex_cost_library.typical
+    right: procore.commitment_unit_rate
+    grain: [csi_division, line_item_slug, market, project_phase, as_of_date]
+    metric: relative_difference
+    tolerance_band_ref: reconciliation_tolerance_band.yaml::capex_commitment_drift
+    drift_within_band_action: reduce_confidence_to_medium
+    drift_outside_band_action: route_to_bid_leveling_review
+    cadence: per_award
+    blocks_workflow_on_breach: [capex_estimate_generation, bid_leveling_procurement_review]
+
+  - check_id: ex_recon_capex_cost_library_vs_procore_actuals
+    left: excel_capex_cost_library.typical
+    right: procore.actual_unit_rate
+    grain: [csi_division, line_item_slug, market, project_phase, as_of_date]
+    metric: relative_difference
+    tolerance_band_ref: reconciliation_tolerance_band.yaml::capex_cost_drift
+    drift_within_band_action: reduce_confidence_to_medium
+    drift_outside_band_action: route_to_construction_lead
+    cadence: monthly
+    blocks_workflow_on_breach: [budget_build]
+
+  - check_id: ex_recon_schedule_assumption_vs_procore_baseline
+    left: excel_schedule_assumption.baseline_duration_days
+    right: procore.schedule_milestone_baseline_duration
+    grain: [project_type, milestone_category, market, property_form, project_size_band, as_of_date]
+    metric: absolute_difference_days
+    tolerance_band_ref: reconciliation_tolerance_band.yaml::schedule_duration_drift
+    drift_within_band_action: reduce_confidence_to_medium
+    drift_outside_band_action: route_to_development_director
+    cadence: per_baseline
+    blocks_workflow_on_breach: [capital_project_intake_and_prioritization, schedule_risk_review]
+
+  - check_id: ex_recon_schedule_assumption_vs_procore_actuals
+    left: excel_schedule_assumption.baseline_duration_days
+    right: procore.schedule_milestone_actual_duration
+    grain: [project_type, milestone_category, market, property_form, project_size_band, as_of_date]
+    metric: absolute_difference_days
+    tolerance_band_ref: reconciliation_tolerance_band.yaml::schedule_duration_drift
+    drift_within_band_action: reduce_confidence_to_medium
+    drift_outside_band_action: route_to_construction_lead
+    cadence: quarterly
+    blocks_workflow_on_breach: []
+
+  - check_id: ex_recon_labor_rate_vs_hr_payroll
+    left: excel_labor_rate_quarterly.value
+    right: hr_payroll.paid_rate_median
+    grain: [market, trade_slug, labor_tier, rate_type, as_of_date]
+    metric: relative_difference
+    tolerance_band_ref: reconciliation_tolerance_band.yaml::labor_rate_vs_payroll_drift
+    drift_within_band_action: reduce_confidence_to_medium
+    drift_outside_band_action: route_to_capital_projects_team
+    cadence: quarterly
+    blocks_workflow_on_breach: [capex_estimate_generation]
+
+  - check_id: ex_recon_material_cost_vs_intacct_purchase
+    left: excel_material_price_sheet.value
+    right: intacct.purchase_unit_rate
+    grain: [material_slug, region, sku_tier, as_of_date]
+    metric: relative_difference
+    tolerance_band_ref: reconciliation_tolerance_band.yaml::material_cost_drift
+    drift_within_band_action: reduce_confidence_to_medium
+    drift_outside_band_action: route_to_capital_projects_team
+    cadence: monthly
+    blocks_workflow_on_breach: []
+
+  - check_id: ex_recon_analyst_override_volume
+    left: excel.analyst_override_rows_per_period
+    right: reconciliation_tolerance_band.yaml::analyst_override_volume_band
+    grain: [analyst_name, file_family, period]
+    metric: count_and_ratio
+    tolerance_band_ref: reconciliation_tolerance_band.yaml::analyst_override_volume_band
+    drift_within_band_action: log_and_monitor
+    drift_outside_band_action: route_to_research_analyst_calibration_review
+    cadence: monthly
+    blocks_workflow_on_breach: []

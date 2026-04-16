@@ -1,0 +1,287 @@
+# Workflow activation fragment for Yardi multi-role adapter.
+# Merged into _core/workflow_activation_map.yaml.
+#
+# Because Yardi plays different roles at different operators, the role
+# field below is POSTURE-DEPENDENT. The actual activation depends on
+# classification_worksheet.md Dimension 1. Each workflow entry declares
+# the Yardi role under each classification posture.
+
+yardi_role_by_classification:
+  primary_pms: primary_for_pms_domain
+  primary_gl: primary_for_gl_domain
+  primary_leasing_crm: primary_for_crm_leasing_domain
+  primary_everything: primary_for_pms_gl_and_crm_domains
+  secondary_reporting_feed: secondary_for_reporting_domain
+  legacy_historical_only: historical_only
+  dual_run_during_cutover: contributing_with_overlap_tie_out
+  mixed_by_portfolio_segment: role_varies_per_property_segment
+
+activates_existing_workflows:
+
+  - workflow: monthly_asset_management_review
+    role_by_classification:
+      primary_pms: contributing
+      primary_gl: contributing
+      primary_everything: primary
+      legacy_historical_only: historical_only
+      dual_run_during_cutover: contributing
+    objects_supplied: [property, lease, charge, payment, work_order, actual_line, budget_line]
+
+  - workflow: monthly_property_operating_review
+    role_by_classification:
+      primary_pms: primary
+      primary_everything: primary
+      legacy_historical_only: historical_only
+      dual_run_during_cutover: contributing_with_overlap
+    objects_supplied: [property, unit, lease, charge, payment, delinquency_case, work_order]
+    blocking_issues:
+      - yd_completeness_required_property_fields
+      - yd_conformance_tcode_decoded
+      - yd_conformance_chargecode_property_scoped
+      - yd_classification_pending_block_primary_claims
+
+  - workflow: quarterly_portfolio_review
+    role_by_classification:
+      primary_pms: contributing
+      primary_gl: contributing
+      primary_everything: contributing
+    objects_supplied: [property, asset, actual_line]
+
+  - workflow: executive_operating_summary_generation
+    role_by_classification:
+      primary_pms: contributing
+      primary_everything: contributing
+      legacy_historical_only: historical_only
+    objects_supplied: [property, lease, actual_line, work_order]
+
+  - workflow: lead_to_lease_funnel_review
+    role_by_classification:
+      primary_leasing_crm: primary
+      primary_everything: primary
+    objects_supplied: [lead, tour, application, approval_outcome]
+    blocking_issues:
+      - yd_classification_pending_block_rentcafe
+
+  - workflow: renewal_retention
+    role_by_classification:
+      primary_pms: primary
+      primary_everything: primary
+    objects_supplied: [lease, lease_event]
+
+  - workflow: delinquency_collections
+    role_by_classification:
+      primary_pms: primary
+      primary_everything: primary
+    objects_supplied: [delinquency_case, resident_account, charge, payment]
+
+proposes_new_workflows:
+
+  - workflow: occupancy_review
+    role_by_classification:
+      primary_pms: primary
+      primary_everything: primary
+      secondary_reporting_feed: contributing
+      legacy_historical_only: historical_only
+    objects_supplied: [property, unit, lease, lease_event]
+    cadence: weekly
+    audience: [regional_ops_director, asset_mgmt_director, executive]
+    minimum_viable_data_set:
+      - property
+      - unit (with current status)
+      - lease (active + notice + future)
+    blockers:
+      - yd_completeness_required_property_fields
+      - yd_conformance_tcode_decoded
+      - yd_referential_lease_unit_propid
+      - yd_classification_pending_block_primary_claims
+    fallback_mode: partial_mode_behavior_using_appfolio_if_dual_run_active
+    confidence_rules:
+      - high when yd_recon_yardi_vs_intacct_gl_parallel passes
+      - medium when yd_consistency_overlap_with_appfolio within band
+    reconciliation_dependencies: [yd_recon_yardi_vs_appfolio_overlap]
+    human_approvals_required: [regional_ops_director_signoff_for_dual_run_outputs]
+
+  - workflow: leasing_funnel_review
+    role_by_classification:
+      primary_leasing_crm: primary
+      primary_everything: primary
+      primary_pms: contributing
+    objects_supplied: [lead, tour, application, approval_outcome]
+    cadence: weekly
+    audience: [regional_portfolio_lead, marketing_lead]
+    minimum_viable_data_set:
+      - lead with inquiry_date and source_channel
+      - tour with scheduled_at
+      - application with applied_date and status
+    blockers:
+      - yd_classification_pending_block_rentcafe
+    fallback_mode: blocked_until_rentcafe_scope_confirmed
+    confidence_rules:
+      - medium until yd_recon_rentcafe_vs_voyager_lead_state passes
+    reconciliation_dependencies: [yd_recon_rentcafe_vs_voyager_lead_state]
+    human_approvals_required: [compliance_risk_signoff_on_applicant_pii]
+
+  - workflow: renewal_review
+    role_by_classification:
+      primary_pms: primary
+      primary_everything: primary
+    objects_supplied: [lease, lease_event]
+    cadence: monthly
+    audience: [regional_ops_director, asset_mgmt_director]
+    minimum_viable_data_set:
+      - lease with end_date in 120-day horizon
+      - lease_event renewal_offered / renewal_accepted / renewal_declined
+    blockers:
+      - yd_conformance_tcode_decoded
+      - yd_completeness_required_lease_fields
+    fallback_mode: partial_mode_behavior_with_inferred_renewals
+    confidence_rules:
+      - high when lease_event stream complete
+      - medium when renewal status derived from lease_status transitions only
+    reconciliation_dependencies: []
+    human_approvals_required: []
+
+  - workflow: collections_delinquency_review
+    role_by_classification:
+      primary_pms: primary
+      primary_everything: primary
+    objects_supplied: [delinquency_case, charge, payment]
+    cadence: weekly
+    audience: [regional_ops_director, finance_reporting]
+    minimum_viable_data_set:
+      - delinquency_case with current stage and stage_entered_date
+      - charge and payment ledger current
+    blockers:
+      - yd_conformance_tcode_decoded
+      - yd_referential_charge_lease
+      - yd_referential_payment_hten
+    fallback_mode: partial_mode_behavior
+    confidence_rules:
+      - high when yd_recon_yardi_charge_vs_intacct_revenue passes
+    reconciliation_dependencies: [yd_recon_yardi_charge_vs_intacct_revenue]
+    human_approvals_required: [legal_signoff_for_eviction_workflow_triggers]
+
+  - workflow: work_order_backlog_review
+    role_by_classification:
+      primary_pms: primary
+      primary_everything: primary
+    objects_supplied: [work_order, vendor]
+    cadence: weekly
+    audience: [regional_ops_director, facilities_lead]
+    minimum_viable_data_set:
+      - work_order with priority and status
+      - vendor directory current
+    blockers: []
+    fallback_mode: partial_mode_behavior
+    confidence_rules:
+      - high when vendor_master_crosswalk complete
+      - medium when vendor fields missing
+    reconciliation_dependencies: [yd_recon_vendor_three_way_with_yardi]
+    human_approvals_required: []
+
+  - workflow: turn_review
+    role_by_classification:
+      primary_pms: primary
+      primary_everything: primary
+    objects_supplied: [unit, lease_event, work_order]
+    cadence: weekly
+    audience: [regional_ops_director, facilities_lead]
+    minimum_viable_data_set:
+      - unit with current status and make_ready_status
+      - move_out lease_events
+      - make_ready work_orders
+      - move_in lease_events (when available)
+    blockers:
+      - yd_referential_lease_unit_propid
+    fallback_mode: partial_mode_behavior
+    confidence_rules:
+      - high when event stream complete
+      - medium when turn inferred from status transitions only
+    reconciliation_dependencies: []
+    human_approvals_required: []
+
+  - workflow: monthly_property_review
+    role_by_classification:
+      primary_pms: primary
+      primary_everything: primary
+      secondary_reporting_feed: contributing
+      legacy_historical_only: historical_only
+    objects_supplied: [property, unit, lease, charge, payment, work_order, actual_line, budget_line]
+    cadence: monthly
+    audience: [regional_ops_director, asset_mgmt_director, finance_reporting]
+    minimum_viable_data_set:
+      - all PMS-domain objects for month being closed
+      - actuals for month being closed
+      - budget and forecast for comparison
+    blockers:
+      - yd_freshness_voyager_pms
+      - yd_conformance_tcode_decoded
+      - yd_conformance_chargecode_property_scoped
+      - yd_conformance_book_id_declared
+    fallback_mode: partial_mode_behavior
+    confidence_rules:
+      - high when all DQ blockers pass and Intacct parallel recon passes
+      - medium when drift within gl_parallel_band
+    reconciliation_dependencies:
+      - yd_recon_yardi_vs_intacct_gl_parallel
+      - yd_recon_yardi_charge_vs_intacct_revenue
+    human_approvals_required: [finance_reporting_signoff_for_close]
+
+  - workflow: third_party_manager_oversight
+    role_by_classification:
+      primary_pms: contributing
+      primary_everything: contributing
+      mixed_by_portfolio_segment: primary_for_tpm_properties
+    objects_supplied: [property, lease, charge, payment, work_order]
+    cadence: monthly
+    audience: [asset_mgmt_director, compliance_risk]
+    minimum_viable_data_set:
+      - property assigned to TPM
+      - lease and charge current
+    blockers:
+      - yd_completeness_required_property_fields
+    fallback_mode: partial_mode_behavior
+    confidence_rules:
+      - high when TPM scoreable
+    reconciliation_dependencies: []
+    human_approvals_required: []
+
+  - workflow: executive_reporting
+    role_by_classification:
+      primary_pms: contributing
+      primary_gl: contributing
+      primary_everything: contributing
+      secondary_reporting_feed: primary
+    objects_supplied: [property, asset, actual_line, budget_line, forecast_line]
+    cadence: monthly
+    audience: [executive, ic_members]
+    minimum_viable_data_set:
+      - property with market and submarket
+      - actuals for reporting period
+      - budget and forecast for comparison
+    blockers:
+      - yd_conformance_book_id_declared
+    fallback_mode: partial_mode_behavior
+    confidence_rules:
+      - high when reporting feed current
+    reconciliation_dependencies:
+      - yd_recon_data_connect_vs_voyager_charges
+      - yd_recon_data_connect_vs_voyager_gl_actuals
+    human_approvals_required: []
+
+  - workflow: migration_validation
+    role_by_classification:
+      dual_run_during_cutover: primary
+      legacy_historical_only: contributing
+    objects_supplied: [property, unit, lease, charge, payment, actual_line]
+    cadence: daily_during_cutover
+    audience: [regional_ops_director, finance_reporting, data_platform_team]
+    minimum_viable_data_set:
+      - both Yardi and AppFolio extracts for overlap period
+    blockers:
+      - yd_consistency_overlap_with_appfolio
+    fallback_mode: escalate_to_data_platform_team
+    confidence_rules:
+      - high when cutover_overlap_band satisfied
+    reconciliation_dependencies: [yd_recon_yardi_vs_appfolio_overlap]
+    human_approvals_required: [regional_ops_director_signoff_for_cutover_completion]

@@ -1,0 +1,64 @@
+overlay_id: regulatory.affordable.lihtc
+overlay_kind: regulatory.program
+parent_overlay: regulatory.affordable
+status: stub
+scope:
+  regulatory_program: lihtc
+authoring_notes: |
+  Program overlay for LIHTC (9%, 4%, tax-exempt bond-financed, and state
+  credit variants). Carries LIHTC-specific divergences: AMI-banded set-aside
+  testing, 8609 placed-in-service, student rule, extended-use covenant, and
+  qualified-contract window. This overlay inherits from regulatory.affordable
+  and only declares what differs from the parent.
+
+  Phase 1 ships architecture only. Rent limits, income limits, and UA
+  schedules live in reference tables to be populated in Phase 2:
+  `reference/normalized/rent_limits__lihtc__{market}.csv`,
+  `reference/normalized/income_limits__lihtc__{market}.csv`,
+  `reference/normalized/utility_allowance__lihtc__{market}.csv`.
+
+overrides:
+  - target_kind: reporting_emphasis
+    target_ref: overlays/regulatory/_shared/rent_limits.md
+    override_value:
+      reporting_emphasis_ref: overlays/regulatory/affordable/programs/lihtc/overlay.yaml
+    reason: |
+      LIHTC rent limits vary by set-aside band (e.g., 60%, 50%, 40%, 30% AMI
+      bands, and the average-income test multi-unit aggregation). Reporting
+      emphasis adds the per-band compliance waterfall and the average-income
+      test set composition tracking where applicable.
+  - target_kind: reporting_emphasis
+    target_ref: overlays/regulatory/_shared/eligibility_and_certification.md
+    override_value:
+      reporting_emphasis_ref: overlays/regulatory/affordable/programs/lihtc/overlay.yaml
+    reason: |
+      LIHTC student rule adds a household-composition gate that is not
+      present in conventional eligibility. Certification packet includes
+      student-status attestation each year.
+  - target_kind: approval_threshold
+    target_ref: overlays/regulatory/_shared/escalation_sensitivity.md
+    override_value:
+      threshold_ref: overlays/regulatory/affordable/programs/lihtc/overlay.yaml
+    reason: |
+      Recapture risk and extended-use covenant breach escalate to legal
+      counsel, owner, and tax counsel. Qualified-contract window events
+      escalate to compliance lead, director of operations, and owner.
+
+adds:
+  - added_kind: threshold
+    slug: extended_use_covenant_window
+    definition_ref: overlays/regulatory/affordable/programs/lihtc/overlay.yaml
+  - added_kind: threshold
+    slug: qualified_contract_window
+    definition_ref: overlays/regulatory/affordable/programs/lihtc/overlay.yaml
+  - added_kind: metric
+    slug: average_income_test_compliance
+    definition_ref: overlays/regulatory/affordable/programs/lihtc/overlay.yaml
+  - added_kind: checklist_item
+    slug: form_8609_placed_in_service
+    definition_ref: overlays/regulatory/affordable/programs/lihtc/overlay.yaml
+
+approvers:
+  - director_of_operations
+  - compliance_lead
+  - legal_counsel

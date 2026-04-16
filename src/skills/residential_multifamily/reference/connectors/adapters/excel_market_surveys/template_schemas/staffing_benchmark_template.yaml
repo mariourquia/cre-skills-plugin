@@ -1,0 +1,58 @@
+# Template schema for staffing_benchmark.
+# Aligns with canonical normalized schema at
+# ../../../../normalized/schemas/staffing_model.yaml.
+
+status_tag: template
+template_slug: staffing_benchmark
+canonical_reference_schema: reference/normalized/schemas/staffing_model.yaml
+canonical_ontology_object: staffing_benchmark
+source_format: xlsx
+expected_sheets:
+  - staffing_ratio_by_size_band
+  - dedicated_headcount
+  - cover_metadata
+
+sheet_schemas:
+
+  staffing_ratio_by_size_band:
+    columns:
+      - { name: market,             required: false, type: string }
+      - { name: segment,            required: true,  type: string, enum: [middle_market, affordable, luxury] }
+      - { name: property_form,      required: true,  type: string, enum: [garden, walk_up, wrap, suburban_mid_rise, urban_mid_rise, high_rise] }
+      - { name: management_mode,    required: true,  type: string, enum: [self_managed, third_party_managed, owner_oversight] }
+      - { name: role_slug,          required: true,  type: string }
+      - { name: property_size_band, required: true,  type: string, enum: [under_100, 100_to_199, 200_to_299, 300_to_399, 400_plus] }
+      - { name: fte_count,          required: true,  type: number }
+      - { name: units_per_fte,      required: false, type: number }
+      - { name: unit,               required: true,  type: string, enum: [fte, units_per_fte] }
+      - { name: as_of_date,         required: true,  type: date }
+
+  dedicated_headcount:
+    columns:
+      - { name: role_slug,          required: true, type: string }
+      - { name: property_size_band, required: true, type: string }
+      - { name: fte_count,          required: true, type: number }
+      - { name: notes,              required: false, type: string }
+
+  cover_metadata:
+    columns:
+      - { name: benchmark_version,  required: true, type: string }
+      - { name: analyst_name,       required: true, type: string }
+      - { name: reviewer,           required: true, type: string }
+      - { name: signed_off_date,    required: true, type: date }
+
+validation_rules:
+  - rule_id: sb_role_slug_recognized
+    severity: blocker
+    description: role_slug matches the operator's role catalog
+  - rule_id: sb_size_band_consistency
+    severity: blocker
+    description: property_size_band value matches the schema enum
+  - rule_id: sb_units_per_fte_reasonable
+    severity: warning
+    description: units_per_fte within plausible band per role and segment
+  - rule_id: sb_reviewer_signoff_required
+    severity: warning
+    description: cover_metadata.signed_off_date non-null
+
+allowed_submarkets_reference: reference/connectors/master_data/submarket_crosswalk.yaml

@@ -1,0 +1,436 @@
+# HR / Payroll / Staffing entity contracts.
+# Conforms to reference/connectors/_schema/entity_contract.schema.yaml.
+# PII minimization: no SSN, no DOB, no home address in any entity.
+entities:
+  employee:
+    entity_name: employee
+    grain: one row per employee stub identifier in the HR master
+    time_basis: state
+    primary_key:
+    - employee_id
+    required_fields:
+    - name: employee_id
+      type: string
+      description: Stable HR-master employee identifier (opaque, not SSN)
+      is_key: true
+    - name: employment_status
+      type: enum
+      description: Current employment state
+      is_key: false
+      enum_values:
+      - active
+      - on_leave
+      - terminated
+      - rehire_eligible
+      - not_rehire_eligible
+    - name: hire_date
+      type: date
+      description: Most recent hire date
+      is_key: false
+    - name: ft_pt_flag
+      type: enum
+      description: Full-time or part-time classification
+      is_key: false
+      enum_values:
+      - full_time
+      - part_time
+      - seasonal
+      - temp
+    optional_fields:
+    - name: term_date
+      type: date
+      description: Termination date, null if active
+    - name: display_code
+      type: string
+      description: Non-PII display code (initials or anonymized handle) when operator must reference a row
+    foreign_keys: []
+    null_handling:
+    - field: employment_status
+      behavior: reject_record
+      notes: headcount rollups require status
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - staffing coverage metrics; headcount reconciliation to StaffingPlan
+  staffing_position:
+    entity_name: staffing_position
+    grain: one row per budgeted position in the StaffingPlan
+    time_basis: state
+    primary_key:
+    - property_id
+    - position_id
+    required_fields:
+    - name: property_id
+      type: string
+      description: FK to property master (null = shared or regional)
+      is_key: true
+    - name: position_id
+      type: string
+      description: Stable position identifier within the staffing plan
+      is_key: true
+    - name: role_code
+      type: string
+      description: Canonical role code (see master_data.role_catalog)
+      is_key: false
+    - name: budgeted_fte
+      type: number
+      description: Budgeted FTE for the position
+      is_key: false
+    - name: position_status
+      type: enum
+      description: Current position state
+      is_key: false
+      enum_values:
+      - budgeted
+      - filled
+      - vacant
+      - on_hold
+      - eliminated
+    optional_fields:
+    - name: position_title
+      type: string
+      description: Position title as it appears in the staffing plan
+    - name: pay_band
+      type: string
+      description: Pay band identifier (no cash figures in prose)
+    foreign_keys: []
+    null_handling:
+    - field: role_code
+      behavior: reject_record
+      notes: must match canonical role catalog
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - StaffingPlan roll-up; vacancy metrics; headcount gap analysis
+  role_assignment:
+    entity_name: role_assignment
+    grain: one row per employee-to-position assignment (time-sliced)
+    time_basis: state
+    primary_key:
+    - assignment_id
+    required_fields:
+    - name: assignment_id
+      type: string
+      description: Stable assignment identifier
+      is_key: true
+    - name: employee_id
+      type: string
+      description: FK to employee
+      is_key: false
+    - name: position_id
+      type: string
+      description: FK to staffing_position
+      is_key: false
+    - name: effective_date
+      type: date
+      description: Date assignment began
+      is_key: false
+    - name: assignment_status
+      type: enum
+      description: Assignment lifecycle
+      is_key: false
+      enum_values:
+      - active
+      - pending
+      - ended
+      - transferred
+    optional_fields:
+    - name: end_date
+      type: date
+      description: Date assignment ended, null if active
+    - name: allocation_pct
+      type: number
+      description: FTE allocation percent (0 to 100), default 100
+    foreign_keys:
+    - field: employee_id
+      references: employee.employee_id
+      on_missing: reject
+    - field: position_id
+      references: staffing_position.position_id
+      on_missing: reject
+    null_handling:
+    - field: effective_date
+      behavior: reject_record
+      notes: time-sliced assignments need an anchor date
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - staffing coverage; fill-rate metrics; variance narratives
+  property_assignment:
+    entity_name: property_assignment
+    grain: one row per employee-to-property assignment (including shared and remote)
+    time_basis: state
+    primary_key:
+    - employee_id
+    - property_id
+    required_fields:
+    - name: employee_id
+      type: string
+      description: FK to employee
+      is_key: true
+    - name: property_id
+      type: string
+      description: FK to property master or sentinel (shared, remote, corporate)
+      is_key: true
+    - name: assignment_kind
+      type: enum
+      description: Assignment type
+      is_key: false
+      enum_values:
+      - primary
+      - shared
+      - remote
+      - corporate
+      - floater
+    optional_fields:
+    - name: allocation_pct
+      type: number
+      description: Allocation percent for cost-splitting (0 to 100)
+    - name: effective_date
+      type: date
+      description: Date assignment began
+    foreign_keys:
+    - field: employee_id
+      references: employee.employee_id
+      on_missing: reject
+    null_handling:
+    - field: property_id
+      behavior: reject_record
+      notes: every employee must resolve to a property_id or a sentinel
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - payroll-to-property allocation; StaffingPlan reconciliation
+  vacancy_status:
+    entity_name: vacancy_status
+    grain: one row per vacant position observation (per pay period)
+    time_basis: snapshot
+    primary_key:
+    - position_id
+    - as_of_date
+    required_fields:
+    - name: position_id
+      type: string
+      description: FK to staffing_position
+      is_key: true
+    - name: as_of_date
+      type: date
+      description: Observation date (aligned to pay period end)
+      is_key: true
+    - name: vacancy_state
+      type: enum
+      description: Vacancy classification
+      is_key: false
+      enum_values:
+      - open_posted
+      - open_unposted
+      - offer_out
+      - hold
+      - filled_effective_next_period
+    - name: days_vacant
+      type: integer
+      description: Days vacant through as_of_date
+      is_key: false
+    optional_fields:
+    - name: requisition_id
+      type: string
+      description: External ATS requisition identifier
+    foreign_keys:
+    - field: position_id
+      references: staffing_position.position_id
+      on_missing: reject
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - vacancy ratio metric; hiring velocity; StaffingPlan variance
+  payroll_line:
+    entity_name: payroll_line
+    grain: one row per employee per pay period per earnings type
+    time_basis: event
+    primary_key:
+    - payroll_line_id
+    required_fields:
+    - name: payroll_line_id
+      type: string
+      description: Stable payroll line identifier
+      is_key: true
+    - name: employee_id
+      type: string
+      description: FK to employee
+      is_key: false
+    - name: property_id
+      type: string
+      description: Property scope (sentinel allowed for corporate or shared)
+      is_key: false
+    - name: pay_period_end
+      type: date
+      description: Pay period end date
+      is_key: false
+    - name: earnings_type
+      type: enum
+      description: Earnings category
+      is_key: false
+      enum_values:
+      - regular
+      - overtime
+      - bonus
+      - commission
+      - pto
+      - holiday
+      - severance
+      - other
+    - name: regular_hours
+      type: number
+      description: Regular hours for the line
+      is_key: false
+    - name: gross_pay_cents
+      type: money_cents
+      description: Gross pay in cents for this line
+      is_key: false
+      unit: cents_usd
+    optional_fields:
+    - name: gl_account_code
+      type: string
+      description: Target GL account code (for crosswalk)
+    - name: cost_center_code
+      type: string
+      description: Cost center or department code
+    foreign_keys:
+    - field: employee_id
+      references: employee.employee_id
+      on_missing: reject
+    null_handling:
+    - field: gross_pay_cents
+      behavior: reject_record
+      notes: payroll reconciliation requires a signed amount
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - payroll_per_unit metric; gl_actual payroll reconciliation; BudgetLine reconciliation
+  overtime_line:
+    entity_name: overtime_line
+    grain: one row per overtime event per employee per pay period
+    time_basis: event
+    primary_key:
+    - overtime_line_id
+    required_fields:
+    - name: overtime_line_id
+      type: string
+      description: Stable overtime line identifier
+      is_key: true
+    - name: employee_id
+      type: string
+      description: FK to employee
+      is_key: false
+    - name: pay_period_end
+      type: date
+      description: Pay period end date
+      is_key: false
+    - name: ot_hours
+      type: number
+      description: Overtime hours for the line
+      is_key: false
+    - name: ot_pay_cents
+      type: money_cents
+      description: Overtime pay in cents
+      is_key: false
+      unit: cents_usd
+    optional_fields:
+    - name: property_id
+      type: string
+      description: Property scope (null = unallocated, triggers qa flag)
+    - name: work_order_id
+      type: string
+      description: Optional link to a work order if OT was triggered by maintenance surge
+    foreign_keys:
+    - field: employee_id
+      references: employee.employee_id
+      on_missing: reject
+    null_handling:
+    - field: property_id
+      behavior: escalate_missing
+      notes: unallocated OT blocks payroll_per_property reconciliation
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - overtime_ratio metric; maintenance surge detection
+  employee_vs_contractor_flag:
+    entity_name: employee_vs_contractor_flag
+    grain: one row per employee stating W2 vs 1099 classification
+    time_basis: state
+    primary_key:
+    - employee_id
+    required_fields:
+    - name: employee_id
+      type: string
+      description: FK to employee
+      is_key: true
+    - name: classification
+      type: enum
+      description: W2 versus 1099 classification
+      is_key: false
+      enum_values:
+      - w2_employee
+      - contractor_1099
+      - statutory_employee
+      - intern
+    - name: classification_effective_date
+      type: date
+      description: Date classification became effective
+      is_key: false
+    optional_fields:
+    - name: contractor_vendor_id
+      type: string
+      description: FK to ap.vendor for contractors paid via AP rather than payroll
+    foreign_keys:
+    - field: employee_id
+      references: employee.employee_id
+      on_missing: reject
+    null_handling:
+    - field: classification
+      behavior: reject_record
+      notes: classification gates payroll_line ingestion
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - contractor-flag consistency check; AP crosswalk; compliance

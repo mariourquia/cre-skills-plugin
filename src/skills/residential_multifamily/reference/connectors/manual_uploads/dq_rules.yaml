@@ -1,0 +1,155 @@
+# Data-quality rules for manual_uploads.
+# Freshness, completeness, conformance, size, consistency. Each rule
+# carries id, kind, severity, target_template, rule, remediation.
+
+rules:
+  - id: mu_freshness_budget
+    kind: freshness
+    severity: warning
+    target_template: budget_file
+    rule: most recent budget_file upload within 400 days of today
+    remediation: |
+      Budget files are annual; a gap over a year means the operator
+      has not landed the new year. Escalate to finance.
+
+  - id: mu_freshness_forecast
+    kind: freshness
+    severity: blocker
+    target_template: forecast_file
+    rule: most recent forecast_file upload within 45 days of today
+    remediation: |
+      Forecast staleness breaks variance narratives. Re-run the forecast
+      upload.
+
+  - id: mu_freshness_owner_report
+    kind: freshness
+    severity: blocker
+    target_template: owner_report
+    rule: most recent owner_report upload within 45 days of today
+    remediation: |
+      Owner reports are monthly; staleness blocks quarterly investor
+      update generation.
+
+  - id: mu_freshness_monthly_review_pack
+    kind: freshness
+    severity: warning
+    target_template: monthly_review_pack
+    rule: most recent monthly_review_pack upload within 45 days of today
+    remediation: |
+      Monthly review pack staleness delays property dashboard refresh.
+
+  - id: mu_freshness_pm_scorecard
+    kind: freshness
+    severity: warning
+    target_template: pm_scorecard_upload
+    rule: most recent pm_scorecard_upload within 100 days (quarterly cadence)
+    remediation: |
+      Scorecard staleness weakens portfolio review. Schedule quarterly uploads.
+
+  - id: mu_freshness_delinquency_report
+    kind: freshness
+    severity: blocker
+    target_template: delinquency_report_upload
+    rule: most recent delinquency_report_upload within 35 days
+    remediation: |
+      Stale delinquency report breaks collections workflow.
+
+  - id: mu_completeness_required_columns
+    kind: completeness
+    severity: blocker
+    target_template: all
+    rule: |
+      all required_fields declared in schema.yaml are non-null in every
+      normalized record for each template.
+    remediation: See qa/null_critical_field.yaml.
+
+  - id: mu_completeness_approval_status
+    kind: completeness
+    severity: warning
+    target_template: owner_report, monthly_review_pack, capex_request_upload, draw_package_upload
+    rule: |
+      approval_status is non-null on every row for approval-gated templates.
+    remediation: |
+      Rows without approval status cannot feed downstream approval-gated workflows.
+
+  - id: mu_conformance_template_version
+    kind: conformance
+    severity: blocker
+    target_template: all
+    rule: |
+      template_slug recognized in the templates block of schema.yaml.
+    remediation: |
+      Operator either lands in the wrong folder (fix path) or uses an
+      outdated template (refresh from file_templates/).
+
+  - id: mu_conformance_file_format
+    kind: conformance
+    severity: blocker
+    target_template: all
+    rule: |
+      file extension matches expected_file_format declared in schema.yaml
+      for the template.
+    remediation: |
+      csv template landed as xlsx or vice versa. Operator saves as the
+      declared format and re-lands.
+
+  - id: mu_conformance_header_pattern
+    kind: conformance
+    severity: blocker
+    target_template: all
+    rule: |
+      header row matches expected_header_pattern for the template.
+    remediation: |
+      Column renamed or dropped. Operator restores the canonical header
+      from file_templates/.
+
+  - id: mu_size_budget_file_max_rows
+    kind: size
+    severity: warning
+    target_template: budget_file
+    rule: budget_file row count <= 50000 per landing
+    remediation: |
+      Abnormally large budget file suggests a concatenation bug (multiple
+      years in one file) or a property explosion in the COA.
+
+  - id: mu_size_owner_report_max_sections
+    kind: size
+    severity: warning
+    target_template: owner_report
+    rule: owner_report sections <= 10 per property per period
+    remediation: |
+      Operator confirms section count; more than 10 suggests duplication.
+
+  - id: mu_size_monthly_review_pack_max_sections
+    kind: size
+    severity: warning
+    target_template: monthly_review_pack
+    rule: monthly_review_pack sections <= 10 per property per month
+    remediation: |
+      Operator confirms section count.
+
+  - id: mu_size_property_list_max_rows
+    kind: size
+    severity: warning
+    target_template: property_list
+    rule: property_list row count <= 5000
+    remediation: |
+      Portfolio-sized row count is unusual; operator confirms.
+
+  - id: mu_consistency_period_format
+    kind: consistency
+    severity: blocker
+    target_template: owner_report, monthly_review_pack, forecast_file, delinquency_report_upload, work_order_backlog_upload
+    rule: report_period in YYYY-MM form; forecast_period in YYYY-MM form
+    remediation: |
+      Mixed period formats (YYYY-MM vs YYYY_MM vs MM/YYYY) break
+      period-joins across feeds. Operator normalizes to YYYY-MM.
+
+  - id: mu_consistency_scoring_period_format
+    kind: consistency
+    severity: blocker
+    target_template: pm_scorecard_upload
+    rule: scoring_period in YYYY-QN or YYYY-MM form
+    remediation: |
+      Scorecard uses quarterly or monthly cadence; operator picks one
+      and stays consistent within a landing.

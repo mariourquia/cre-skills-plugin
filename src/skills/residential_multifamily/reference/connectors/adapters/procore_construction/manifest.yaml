@@ -1,0 +1,92 @@
+# Adapter manifest for the Procore construction stack adapter.
+# Conforms to reference/connectors/adapters/adapter_manifest.schema.yaml.
+# Overlays the canonical construction connector at
+# ../../construction/; canonical schema and mapping always win on conflict.
+
+adapter_id: procore_construction
+adapter_name: Procore Construction Adapter
+vendor_family: procore_family
+connector_domain: construction
+status: stub
+rollout_wave: wave_4
+description: |
+  Vendor-specific overlay on the canonical construction connector for the
+  Procore project-management, budget, commitment, change-order, draw (pay
+  application), and schedule stack. Procore is primary for construction-side
+  data (project structure, commitments, COs, draws, schedule, punchlist);
+  Intacct remains primary for posted GL actuals and AppFolio owns property
+  operations post-delivery. Canonical construction schema at
+  ../../construction/schema.yaml is the contract; this adapter only
+  documents vendor semantics and provides mapping hints.
+
+supported_source_systems:
+  - procore_prod
+
+mapping_hints:
+  - { source_field_pattern: "^id$",                             canonical_field: source_primary_key,           transform_hint: trim_string,                notes: "Procore numeric id; carried in source_id on crosswalk." }
+  - { source_field_pattern: "^project_id$|^project\\.id$",      canonical_field: capex_project_id,              transform_hint: trim_string,                notes: "Procore project object; canonical id resolved via capex_project_crosswalk." }
+  - { source_field_pattern: "^name$|^project_name$",            canonical_field: project_name,                  transform_hint: trim_string,                notes: "Procore project name frequently != AppFolio property name." }
+  - { source_field_pattern: "stage|phase",                      canonical_field: project_phase,                 transform_hint: map_procore_stage,          notes: "Procore Stage: Pre-Construction, Current Construction, Post Construction, Warranty; map to canonical project_phase." }
+  - { source_field_pattern: "start_date|planned_start_date",    canonical_field: baseline_start_date,           transform_hint: to_iso_date }
+  - { source_field_pattern: "completion_date|planned_completion_date", canonical_field: baseline_completion_date, transform_hint: to_iso_date }
+  - { source_field_pattern: "budget_amount|original_budget_amount", canonical_field: budget_amount_cents,       transform_hint: dollars_to_cents }
+  - { source_field_pattern: "cost_code|cost_code\\.code",       canonical_field: cost_code,                     transform_hint: trim_string,                notes: "Procore cost codes are project-scoped; mapping to GL chart via account_crosswalk." }
+  - { source_field_pattern: "wbs_code|wbs",                     canonical_field: wbs_code,                      transform_hint: trim_string }
+  - { source_field_pattern: "commitment_id|^contract_id$",      canonical_field: commitment_id,                 transform_hint: trim_string,                notes: "Commitment = Purchase Order or Work Order Contract; commitment canonical object not yet in ontology (open question, wave_4)." }
+  - { source_field_pattern: "original_commitment_amount",        canonical_field: original_contract_total_cents, transform_hint: dollars_to_cents }
+  - { source_field_pattern: "approved_change_orders_amount",    canonical_field: approved_co_amount_cents,      transform_hint: dollars_to_cents }
+  - { source_field_pattern: "revised_commitment_amount",        canonical_field: revised_contract_total_cents,  transform_hint: dollars_to_cents,           notes: "Procore computes revised = original + approved COs; reconciles against canonical derived field." }
+  - { source_field_pattern: "billed_to_date|total_billed",      canonical_field: billed_to_date_cents,          transform_hint: dollars_to_cents }
+  - { source_field_pattern: "paid_to_date|total_paid",          canonical_field: paid_to_date_cents,            transform_hint: dollars_to_cents }
+  - { source_field_pattern: "vendor_id|vendor\\.id",            canonical_field: vendor_id,                     transform_hint: trim_string }
+  - { source_field_pattern: "vendor_name|vendor\\.name",        canonical_field: vendor_name,                   transform_hint: trim_string }
+  - { source_field_pattern: "line_item_type",                   canonical_field: line_item_type,                transform_hint: map_procore_line_item_type, notes: "Procore types: Labor, Material, Equipment, Subcontract, Other Cost, Professional Service." }
+  - { source_field_pattern: "change_order_id|co_id",            canonical_field: change_order_id,               transform_hint: trim_string }
+  - { source_field_pattern: "co_status|^status$",               canonical_field: change_order_status,           transform_hint: map_procore_co_status,      notes: "Procore CO states: draft, pending, approved, void; map to canonical (proposed, pending_approval, approved, rejected)." }
+  - { source_field_pattern: "draw_id|pay_app_id|payment_application_id", canonical_field: draw_request_id,       transform_hint: trim_string }
+  - { source_field_pattern: "requisition_amount|current_payment_due", canonical_field: amount_requested_cents,  transform_hint: dollars_to_cents }
+  - { source_field_pattern: "retainage_amount|retention_amount", canonical_field: retention_amount_cents,      transform_hint: dollars_to_cents }
+  - { source_field_pattern: "milestone_id|task_id|schedule_id", canonical_field: milestone_id,                  transform_hint: trim_string }
+  - { source_field_pattern: "baseline_start|baseline_finish",   canonical_field: baseline_date,                 transform_hint: to_iso_date }
+  - { source_field_pattern: "forecast_start|forecast_finish|current_finish_date", canonical_field: current_forecast_date, transform_hint: to_iso_date }
+  - { source_field_pattern: "actual_finish|actual_completion_date", canonical_field: actual_date,               transform_hint: to_iso_date }
+  - { source_field_pattern: "punch_item_id|punch_id",           canonical_field: punch_item_id,                 transform_hint: trim_string }
+  - { source_field_pattern: "budget_version|budget_snapshot_id", canonical_field: budget_version,               transform_hint: trim_string,                notes: "Procore exposes Original Budget, Revised Budget snapshots; multiple versions may coexist; active version tag required." }
+
+known_gotchas:
+  - Procore project name typically != AppFolio property name; canonical id joins via property_master_crosswalk and capex_project_crosswalk, not name matching.
+  - Commitment is not a first-class canonical object in the current ontology; modeled via extension of vendor_agreement + capex_project linkage. Flag as Wave 4 open question for the integration agent.
+  - Procore Purchase Orders and Work Order Contracts (subcontracts) are separate object types but both land as canonical commitment; use line_item_type to distinguish.
+  - Procore CO lifecycle (draft -> pending -> approved -> void) maps to canonical (proposed -> pending_approval -> approved -> rejected); void must be separated from rejected by operator override note.
+  - Procore exposes Change Events (upstream of COs) and Commitment Change Orders (actual contract change); reconcile Change Events against COs before trusting budget impact.
+  - Procore revised_commitment_amount = original + sum(approved COs); do not double-count by summing both revised and COs separately.
+  - Procore pay applications carry retainage held and released separately; retention_amount at commitment level can drift from sum(pay_app retainage); reconcile at closeout.
+  - Procore cost codes are project-scoped and map to GL chart via account_crosswalk; a single Procore cost code may span multiple GL accounts.
+  - Procore schedule (native Gantt or imported P6/MS Project) carries baseline_start, baseline_finish, forecast_start, forecast_finish, actual_finish; baseline preservation requires Procore schedule baseline feature toggle.
+  - Projects appear in Procore before property ids exist in AppFolio (ground-up); handoff trigger when project reaches Post Construction stage.
+  - Pending COs are frequently visible in Procore budget rollups as Pending Revised Budget; filter by status = approved before running variance.
+  - Procore Issues and RFIs are documented separately and are out of scope for financial/schedule reconciliation in this adapter (placeholder).
+  - Draws in Procore (pay applications) lag actual work by the review cycle; draw timing band vs Intacct posting date is real and expected.
+  - Contingency in Procore is sometimes a cost code line; sometimes a dedicated budget bucket; owner vs contractor contingency classification is project-setup dependent.
+  - Project split (one Procore project spanning multiple canonical properties, e.g., two-building development) is handled via related_canonical_ids in property_master_crosswalk.
+  - Commitment amendments in Procore can happen without a CO (rare but permitted); reconcile via revised_commitment_amount vs original + COs check.
+
+reference_documentation:
+  - placeholder_link_to_procore_developer_api_projects
+  - placeholder_link_to_procore_developer_api_budget
+  - placeholder_link_to_procore_developer_api_commitments
+  - placeholder_link_to_procore_developer_api_change_orders
+  - placeholder_link_to_procore_developer_api_payment_applications
+  - placeholder_link_to_procore_developer_api_schedule
+  - placeholder_link_to_capex_project_crosswalk
+  - placeholder_link_to_change_order_crosswalk
+  - placeholder_link_to_draw_request_crosswalk
+  - placeholder_link_to_vendor_master_crosswalk
+  - placeholder_link_to_dev_project_crosswalk
+  - placeholder_link_to_property_master_crosswalk
+
+author_metadata:
+  authored_by: residential_multifamily_subsystem
+  authored_role: capital_projects_team
+
+last_updated: "2026-04-15"

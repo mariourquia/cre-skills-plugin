@@ -1,0 +1,425 @@
+entities:
+  dev_budget:
+    entity_name: dev_budget
+    grain: one row per development-budget line per project per period
+    time_basis: snapshot
+    primary_key:
+    - project_id
+    - budget_line_slug
+    - scenario
+    - as_of_date
+    required_fields:
+    - name: project_id
+      type: string
+      description: Development project id
+      is_key: true
+    - name: budget_line_slug
+      type: string
+      description: Canonical line slug (land/hard_cost/soft_cost/ffe/financing/contingency)
+      is_key: true
+    - name: scenario
+      type: enum
+      description: Budget scenario
+      is_key: true
+      enum_values:
+      - baseline
+      - current
+      - approved
+      - proposed
+    - name: as_of_date
+      type: date
+      description: Budget vintage
+      is_key: true
+    - name: amount_cents
+      type: money_cents
+      description: Budget amount in cents
+      is_key: false
+      unit: cents_usd
+    optional_fields:
+    - name: contingency_applied_percent
+      type: number
+      description: Contingency applied to this line
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - dev-proforma-engine; draw-request reconciliation
+  estimate_line_item:
+    entity_name: estimate_line_item
+    grain: one row per estimate line item within a project estimate
+    time_basis: snapshot
+    primary_key:
+    - line_item_id
+    required_fields:
+    - name: line_item_id
+      type: string
+      description: Stable id
+      is_key: true
+    - name: project_id
+      type: string
+      description: FK to project
+      is_key: false
+    - name: line_label
+      type: string
+      description: Line label
+      is_key: false
+    - name: unit
+      type: enum
+      description: Quantity unit
+      is_key: false
+      enum_values:
+      - ea
+      - sf
+      - lf
+      - cy
+      - ton
+      - hr
+      - lot
+    - name: quantity
+      type: number
+      description: Quantity
+      is_key: false
+    - name: unit_cost_cents
+      type: money_cents
+      description: Unit cost in cents
+      is_key: false
+      unit: cents_usd
+    - name: extended_cost_cents
+      type: money_cents
+      description: Extended cost in cents
+      is_key: false
+      unit: cents_usd
+    optional_fields:
+    - name: csi_division
+      type: string
+      description: CSI division code
+    - name: source_basis
+      type: enum
+      description: Cost basis
+      enum_values:
+      - historical
+      - bid
+      - reference_library
+      - rom
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - construction-budget-gc-analyzer
+  bid_package:
+    entity_name: bid_package
+    grain: one row per bid package issued
+    time_basis: state
+    primary_key:
+    - bid_package_id
+    required_fields:
+    - name: bid_package_id
+      type: string
+      description: Stable id
+      is_key: true
+    - name: project_id
+      type: string
+      description: FK to project
+      is_key: false
+    - name: scope_description
+      type: string
+      description: Scope description
+      is_key: false
+    - name: bid_due_date
+      type: date
+      description: Bid due date
+      is_key: false
+    optional_fields:
+    - name: bidders_invited
+      type: array
+      description: List of bidder vendor ids
+    - name: status
+      type: enum
+      description: Bid package status
+      enum_values:
+      - issued
+      - bids_received
+      - leveled
+      - awarded
+      - cancelled
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - construction-procurement-contracts-engine
+  commitment:
+    entity_name: commitment
+    grain: one row per signed subcontract or material commitment
+    time_basis: state
+    primary_key:
+    - commitment_id
+    required_fields:
+    - name: commitment_id
+      type: string
+      description: Stable id
+      is_key: true
+    - name: project_id
+      type: string
+      description: FK to project
+      is_key: false
+    - name: vendor_id
+      type: string
+      description: FK to ap.vendor
+      is_key: false
+    - name: scope_description
+      type: string
+      description: Scope
+      is_key: false
+    - name: contract_total_cents
+      type: money_cents
+      description: Contract total in cents
+      is_key: false
+      unit: cents_usd
+    - name: status
+      type: enum
+      description: Commitment status
+      is_key: false
+      enum_values:
+      - draft
+      - signed
+      - in_progress
+      - closed
+      - cancelled
+    optional_fields:
+    - name: retention_percent
+      type: number
+      description: Retention percent
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - draw reconciliation; CO tracking
+  change_order:
+    entity_name: change_order
+    grain: one row per change order
+    time_basis: state
+    primary_key:
+    - change_order_id
+    required_fields:
+    - name: change_order_id
+      type: string
+      description: Stable id
+      is_key: true
+    - name: project_id
+      type: string
+      description: FK to project
+      is_key: false
+    - name: commitment_id
+      type: string
+      description: FK to commitment
+      is_key: false
+    - name: co_number
+      type: string
+      description: Sequential CO number
+      is_key: false
+    - name: cost_delta_cents
+      type: money_cents
+      description: Cost delta in cents
+      is_key: false
+      unit: cents_usd
+    - name: status
+      type: enum
+      description: CO status
+      is_key: false
+      enum_values:
+      - proposed
+      - pending_approval
+      - approved
+      - rejected
+    optional_fields:
+    - name: time_delta_days
+      type: integer
+      description: Schedule delta in days
+    - name: category
+      type: enum
+      description: CO category
+      enum_values:
+      - owner_directed
+      - design_error
+      - site_condition
+      - scope_clarification
+      - unforeseen
+    foreign_keys:
+    - field: commitment_id
+      references: commitment.commitment_id
+      on_missing: reject
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - commitment-change-order-draw reconciliation
+  draw_request:
+    entity_name: draw_request
+    grain: one row per lender-draw request
+    time_basis: state
+    primary_key:
+    - draw_request_id
+    required_fields:
+    - name: draw_request_id
+      type: string
+      description: Stable id
+      is_key: true
+    - name: project_id
+      type: string
+      description: FK to project
+      is_key: false
+    - name: period
+      type: string
+      description: Draw period label
+      is_key: false
+    - name: amount_requested_cents
+      type: money_cents
+      description: Amount requested in cents
+      is_key: false
+      unit: cents_usd
+    - name: approval_status
+      type: enum
+      description: Draw approval status
+      is_key: false
+      enum_values:
+      - submitted
+      - in_review
+      - approved
+      - approved_with_conditions
+      - denied
+      - funded
+    optional_fields:
+    - name: cost_to_date_cents
+      type: money_cents
+      description: Cost to date in cents
+      unit: cents_usd
+    - name: percent_complete_physical
+      type: number
+      description: Physical percent complete
+    - name: percent_complete_cost
+      type: number
+      description: Cost percent complete
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - construction-command-center; draw QA
+  schedule_milestone:
+    entity_name: schedule_milestone
+    grain: one row per scheduled milestone (baseline or current)
+    time_basis: state
+    primary_key:
+    - milestone_id
+    required_fields:
+    - name: milestone_id
+      type: string
+      description: Stable id
+      is_key: true
+    - name: project_id
+      type: string
+      description: FK to project
+      is_key: false
+    - name: milestone_name
+      type: string
+      description: Milestone name
+      is_key: false
+    - name: baseline_date
+      type: date
+      description: Baseline date
+      is_key: false
+    - name: current_forecast_date
+      type: date
+      description: Current forecast date
+      is_key: false
+    optional_fields:
+    - name: actual_date
+      type: date
+      description: Actual completion date
+    - name: critical_path_flag
+      type: boolean
+      description: On critical path
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - construction-command-center schedule tracking
+  punch_item:
+    entity_name: punch_item
+    grain: one row per punch-list item
+    time_basis: state
+    primary_key:
+    - punch_item_id
+    required_fields:
+    - name: punch_item_id
+      type: string
+      description: Stable id
+      is_key: true
+    - name: project_id
+      type: string
+      description: FK to project
+      is_key: false
+    - name: description
+      type: string
+      description: Item description
+      is_key: false
+    - name: status
+      type: enum
+      description: Punch status
+      is_key: false
+      enum_values:
+      - open
+      - in_progress
+      - resolved
+      - verified
+      - rejected
+    optional_fields:
+    - name: assigned_to
+      type: string
+      description: Assignee (vendor or staff)
+    - name: target_complete_date
+      type: date
+      description: Target close date
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - punchlist closeout; unit delivery readiness

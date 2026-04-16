@@ -1,5 +1,5 @@
 version: 1.0.0
-generated_at: '2026-04-15T06:21:44.974785+00:00'
+generated_at: '2026-04-15T23:56:03.079351+00:00'
 plugin_version: 4.1.2
 items:
 - id: 1031-exchange-executor
@@ -2881,7 +2881,7 @@ items:
 - id: residential_multifamily
   display_name: Residential Multifamily Operating System
   type: skill
-  status: stable
+  status: experimental
   source_path: src/skills/residential_multifamily/SKILL.md
   domain: cross-cutting
   persona: 'Entry point and router for the U.S. residential multifamily operating subsystem.
@@ -2903,8 +2903,8 @@ items:
   last_reviewed_at: null
   notes: ''
   calculator_file: null
-  priority: null
-  version: 0.1.0
+  priority: P1
+  version: 0.5.0
 - id: sec-reg-d-compliance
   display_name: SEC Regulation D Compliance
   type: skill

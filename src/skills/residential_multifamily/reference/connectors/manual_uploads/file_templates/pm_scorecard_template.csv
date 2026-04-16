@@ -1,0 +1,10 @@
+employee_id,scoring_period,score_category,score_value,commentary
+emp_0001,2026-Q1,occupancy,92.0,illustrative scorecard row
+emp_0001,2026-Q1,collections,88.5,illustrative scorecard row
+emp_0001,2026-Q1,leasing_velocity,85.0,illustrative scorecard row
+emp_0001,2026-Q1,resident_satisfaction,90.0,illustrative scorecard row
+emp_0001,2026-Q1,variance_discipline,87.0,illustrative scorecard row
+emp_0001,2026-Q1,safety_compliance,95.0,illustrative scorecard row
+emp_0001,2026-Q1,overall,89.5,illustrative overall score
+# status: template
+# schema: reference/connectors/manual_uploads/schema.yaml entities.pm_scorecard_upload

@@ -1,0 +1,204 @@
+# Sage Intacct GL adapter: data quality rules.
+# Per-adapter rule_id prefix: ic_ (for Intacct).
+# Severity: blocker | warning | info.
+# Tolerance bands cite reference/normalized/schemas/reconciliation_tolerance_band.yaml;
+# no hardcoded numeric thresholds. Every band is addressed by name so the
+# operator can tune without editing this file.
+
+rules:
+
+  # ---------------------------------------------------------------------------
+  # Freshness
+  # ---------------------------------------------------------------------------
+
+  - rule_id: ic_freshness_actual_lines_daily
+    dimension: freshness
+    severity: blocker
+    description: Posted actual_lines feed must land within expected_latency_minutes per source_registry for sage_intacct_prod.
+    expected: max(actual_line.extracted_at) >= now - source_registry.expected_latency_minutes
+    remediation: runbooks/sage_intacct_common_issues.md::stale_feed
+
+  - rule_id: ic_freshness_closed_period_lag
+    dimension: freshness
+    severity: blocker
+    description: After a period is closed in Intacct, the corresponding actuals feed must be complete within close_feed_lag_band after close_timestamp.
+    expected: close_feed_lag_hours <= close_feed_lag_band (cite reconciliation_tolerance_band.yaml)
+    remediation: runbooks/sage_intacct_common_issues.md::close_feed_lag
+
+  - rule_id: ic_freshness_budget_version_monthly
+    dimension: freshness
+    severity: warning
+    description: When a new BUDGETID is published mid-year, its detail must land within budget_publish_lag_band of the publish event.
+    expected: budget_publish_lag_hours <= budget_publish_lag_band (cite reconciliation_tolerance_band.yaml)
+    remediation: runbooks/sage_intacct_common_issues.md::budget_version_lag
+
+  # ---------------------------------------------------------------------------
+  # Completeness
+  # ---------------------------------------------------------------------------
+
+  - rule_id: ic_completeness_required_dims_actual
+    dimension: completeness
+    severity: blocker
+    description: Every posted actual_line must carry entity_id, property-resolving dim (LOCATIONID or ENTITYID), and GLACCOUNTNO.
+    expected: no nulls in {ENTITYID, GLACCOUNTNO} AND (LOCATIONID present OR entity_per_property_pattern)
+    remediation: route to master_data/unresolved_exceptions_queue.md::manual_journal_attrib
+
+  - rule_id: ic_completeness_posting_date_period
+    dimension: completeness
+    severity: blocker
+    description: Actual_line must carry both BATCH_DATE (posting_date) and PERIOD (operating_month).
+    expected: no nulls in {BATCH_DATE, PERIOD}
+    remediation: flag record; block downstream variance calculation for property
+
+  - rule_id: ic_completeness_budget_required_keys
+    dimension: completeness
+    severity: blocker
+    description: Budget_line must carry BUDGETID, BUDGETNAME, GLACCOUNTNO, PERIOD, AMOUNT, property-resolving dim.
+    expected: no nulls in required budget_line keys
+    remediation: runbooks/sage_intacct_common_issues.md::budget_required_fields
+
+  - rule_id: ic_completeness_forecast_as_of_date
+    dimension: completeness
+    severity: blocker
+    description: Forecast_line must carry AS_OF_DATE (vintage), FORECASTID, PERIOD.
+    expected: no nulls in {AS_OF_DATE, FORECASTID, PERIOD}
+    remediation: notify finance_systems_team; route to exception queue
+
+  # ---------------------------------------------------------------------------
+  # Conformance
+  # ---------------------------------------------------------------------------
+
+  - rule_id: ic_conformance_account_in_coa
+    dimension: conformance
+    severity: blocker
+    description: Every actual_line, budget_line, and forecast_line GLACCOUNTNO must exist in the chart_of_accounts feed.
+    expected: actual_line.GLACCOUNTNO IN chart_of_accounts.GLACCOUNTNO
+    remediation: runbooks/sage_intacct_common_issues.md::unmapped_account; extend account_crosswalk
+
+  - rule_id: ic_conformance_property_dim_in_crosswalk
+    dimension: conformance
+    severity: blocker
+    description: Resolved property_id must exist in property_master_crosswalk via LOCATIONID or ENTITYID per deployment pattern.
+    expected: resolved_property_id IN property_master_crosswalk.canonical_id OR property_attribution_missing_flag = true
+    remediation: route to master_data/unresolved_exceptions_queue.md::property_resolution
+
+  - rule_id: ic_conformance_account_type_enum
+    dimension: conformance
+    severity: blocker
+    description: ACCOUNT_TYPE in chart_of_accounts must map via map_intacct_account_type to {asset, liability, equity, revenue, expense}.
+    expected: ACCOUNT_TYPE IN canonical_account_type_enum
+    remediation: extend map_intacct_account_type
+
+  - rule_id: ic_conformance_posting_state_enum
+    dimension: conformance
+    severity: warning
+    description: STATE on journal_entries and actual_lines must map to {posted, reversed, open} via map_intacct_posting_state.
+    expected: STATE IN canonical_posting_state_enum
+    remediation: extend map_intacct_posting_state
+
+  # ---------------------------------------------------------------------------
+  # Uniqueness
+  # ---------------------------------------------------------------------------
+
+  - rule_id: ic_uniqueness_transaction_id
+    dimension: uniqueness
+    severity: blocker
+    description: RECORDNO on GLENTRY (actual_line) must be unique across active records.
+    expected: count(distinct RECORDNO) = count(RECORDNO) where STATE != deleted
+    remediation: dedupe via field_mapping.actual_lines.dedup_rule; investigate export double-run
+
+  - rule_id: ic_uniqueness_budget_composite_key
+    dimension: uniqueness
+    severity: blocker
+    description: Composite key (BUDGETID, GLACCOUNTNO, PERIOD, LOCATIONID, PROJECTID) must be unique in BUDGETDETAIL.
+    expected: no duplicates on the composite key per tie_breaker=latest_WHENMODIFIED_wins
+    remediation: investigate manual line edit race; re-pull via backfill
+
+  - rule_id: ic_uniqueness_forecast_composite_key
+    dimension: uniqueness
+    severity: warning
+    description: Composite key (FORECASTID, GLACCOUNTNO, PERIOD, LOCATIONID, PROJECTID, AS_OF_DATE) must be unique in FORECASTDETAIL.
+    expected: no duplicates on the composite key
+    remediation: investigate forecast vintage race; preserve both and flag for reviewer
+
+  # ---------------------------------------------------------------------------
+  # Referential
+  # ---------------------------------------------------------------------------
+
+  - rule_id: ic_referential_vendor_in_master
+    dimension: consistency
+    severity: warning
+    description: When VENDORID is set on actual_line, it must resolve via vendor_master_crosswalk to a canonical vendor_id.
+    expected: VENDORID IS NULL OR VENDORID IN vendor_master_crosswalk.source_id
+    remediation: runbooks/sage_intacct_common_issues.md::vendor_crosswalk_mismatch
+
+  - rule_id: ic_referential_capex_project_mapped
+    dimension: consistency
+    severity: warning
+    description: When PROJECTID is set on actual_line with a capex account, it must resolve via capex_project_crosswalk.
+    expected: PROJECTID IS NULL OR (PROJECTID IN capex_project_crosswalk.source_id AND canonical_account_slug IN capex_family) OR (PROJECTID IN capex_project_crosswalk.source_id)
+    remediation: runbooks/sage_intacct_common_issues.md::capex_project_unmapped
+
+  # ---------------------------------------------------------------------------
+  # Consistency
+  # ---------------------------------------------------------------------------
+
+  - rule_id: ic_consistency_posting_period_close_lock
+    dimension: consistency
+    severity: blocker
+    description: New posting into a closed period without a formal reopen event is forbidden.
+    expected: BATCH_DATE > period_close_timestamp IMPLIES period_reopen_event present
+    remediation: runbooks/sage_intacct_common_issues.md::period_reopen_drift
+
+  - rule_id: ic_consistency_accrual_reverses_next_period
+    dimension: consistency
+    severity: warning
+    description: An accrual line flagged reversal_flag=true must have a matching reversed_of_entry_id in the prior period.
+    expected: REVERSAL = true IMPLIES REVERSAL_OF IS NOT NULL AND original posting period precedes current period
+    remediation: runbooks/sage_intacct_common_issues.md::accrual_reversal_misalignment
+
+  - rule_id: ic_consistency_budget_vs_reforecast_variance
+    dimension: consistency
+    severity: warning
+    description: Forecast_line amount must not drift from budget_line amount beyond budget_reforecast_variance_band for the same (property_id, canonical_account_slug, period) without reviewer narrative.
+    expected: abs(forecast_amount - budget_amount) / budget_amount <= budget_reforecast_variance_band (cite reconciliation_tolerance_band.yaml) OR VarianceExplanation.narrative IS NOT NULL
+    remediation: variance_narrative_generator skill; variance_explanation audit
+
+  - rule_id: ic_consistency_capex_opex_misclass
+    dimension: consistency
+    severity: warning
+    description: Posting carries PROJECTID but account resolves to opex slug, or carries capex account with no PROJECTID.
+    expected: (PROJECTID IS NOT NULL AND canonical_account_slug IN capex_family) OR (PROJECTID IS NULL AND canonical_account_slug NOT IN capex_family)
+    remediation: runbooks/sage_intacct_common_issues.md::capex_opex_misclass
+
+  - rule_id: ic_consistency_debit_credit_balanced
+    dimension: consistency
+    severity: blocker
+    description: Sum of debit_cents equals sum of credit_cents per journal_id.
+    expected: per(journal_id) sum(debit_cents) = sum(credit_cents)
+    remediation: block entire journal; raise to ap_clerk / controller
+
+  # ---------------------------------------------------------------------------
+  # Guardrails
+  # ---------------------------------------------------------------------------
+
+  - rule_id: ic_guardrail_posted_without_approver
+    dimension: conformance
+    severity: blocker
+    description: Posted entry with amount above approval_threshold_policy band must carry APPROVED_BY.
+    expected: abs(amount_cents) > approval_threshold_policy.band IMPLIES APPROVED_BY IS NOT NULL (cite reference/normalized/schemas/approval_threshold_policy.yaml and reconciliation_tolerance_band.yaml)
+    remediation: route to approval_queue; runbooks/sage_intacct_common_issues.md::approval_missing
+
+  - rule_id: ic_guardrail_tax_id_redacted_in_logs
+    dimension: conformance
+    severity: blocker
+    description: VENDOR.TAXID must never appear unredacted in logs, notifications, or normalized outputs.
+    expected: TAXID field is tagged restricted and rendered as mask in all downstream surfaces
+    remediation: security/pii_classification.md enforcement; block release
+
+  - rule_id: ic_guardrail_placeholder_project_must_resolve
+    dimension: consistency
+    severity: warning
+    description: Project row with placeholder_flag=true (e.g., PRJ_PLACEHOLDER_*) must be resolved to a concrete capex_project_id before the next monthly close.
+    expected: placeholder_flag = true IMPLIES resolution_due_date <= next_close_timestamp
+    remediation: runbooks/sage_intacct_common_issues.md::placeholder_project_awaiting_setup

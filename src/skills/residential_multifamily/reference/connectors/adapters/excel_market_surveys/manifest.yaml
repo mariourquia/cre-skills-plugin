@@ -1,0 +1,136 @@
+# Adapter manifest for the Excel Market Surveys adapter.
+# Conforms to reference/connectors/adapters/adapter_manifest.schema.yaml.
+#
+# Excel files (market surveys, analyst benchmark packs, operator spreadsheets)
+# are treated as first-class production inputs, not "temporary hacks". This
+# adapter frames the file-based intake contract that sits on top of the
+# canonical market_data and manual_uploads connectors. Canonical schemas win
+# on any conflict.
+#
+# Sensitivity posture summary (authoring notes, not a schema field):
+#   pii_classification: low
+#   financial_sensitivity: moderate
+#   legal_sensitivity: low
+#   credential_method: none (files arrive on a shared drive or an email inbox)
+#
+# Companion source_registry_entry.yaml carries one registry row per file
+# family (see that file for source_id slugs and ingestion_mode declarations).
+
+adapter_id: excel_market_surveys
+adapter_name: Excel Market Surveys Adapter
+vendor_family: excel_benchmark_family
+connector_domain: market_data
+status: stub
+rollout_wave: wave_4
+description: |
+  File-based intake framework for Excel market surveys, analyst benchmark
+  packs, operator spreadsheets, and cost libraries. Primary source_domain:
+  market_data (rent comps, concession observations, occupancy benchmarks,
+  staffing benchmarks, labor rate sheets, material price sheets, turn cost
+  libraries, capex cost libraries, schedule assumption sheets, market
+  commentary). Secondary source_domain: manual_uploads (the physical
+  transport is a shared drive or email inbox; intake governance borrows from
+  the manual_uploads connector even though the payload objects land under
+  market_data reference schemas).
+
+  Canonical schemas under ../../market_data/ and ../../../normalized/schemas/
+  remain the contract. Canonical reference slugs for ontology objects:
+  market_comp, rent_benchmark, concession_benchmark, occupancy_benchmark,
+  labor_rate, material_cost, turn_cost, capex_line_item_assumption,
+  staffing_benchmark, schedule_duration_assumption, vendor_rate.
+
+  Object coverage spans 11 reference categories:
+    - market_comp (rent_comp_template)
+    - rent_benchmark (market_survey_workbook_template, analyst_benchmark_pack_template)
+    - concession_benchmark (concession_tracker_template)
+    - occupancy_benchmark (market_survey_workbook_template, analyst_benchmark_pack_template)
+    - labor_rate (labor_rate_sheet_template)
+    - material_cost (material_price_sheet_template)
+    - turn_cost (turn_cost_library_template)
+    - capex_line_item_assumption (capex_cost_library_template)
+    - staffing_benchmark (staffing_benchmark_template)
+    - schedule_duration_assumption (schedule_assumption_template)
+    - vendor_rate (vendor_rate_card_template)
+
+  Ingestion posture (not schema fields; see README.md and intake_manifest.yaml):
+    - ingestion_mode: shared_drive + email_drop
+    - cadence: weekly for rent comps, monthly for concessions and staffing,
+      quarterly for capex cost libraries and labor rate sheets
+    - status: active (these files are already in operator use; the adapter
+      documents their production contract). adapter lifecycle stays at
+      status: stub until lifecycle gates are cleared.
+
+supported_source_systems:
+  - excel_rent_comp_weekly
+  - excel_concession_tracker_monthly
+  - excel_market_survey_workbook
+  - excel_analyst_benchmark_pack
+  - excel_capex_cost_library
+  - excel_labor_rate_sheet
+  - excel_turn_cost_library
+  - excel_staffing_benchmark
+  - excel_schedule_assumption_sheet
+  - excel_material_price_sheet
+  - excel_vendor_rate_card
+  - excel_asset_specific_comp_pack
+  - excel_market_commentary_file
+
+mapping_hints:
+  - { source_field_pattern: "comp*id|obs*id|row*id",                          canonical_field: market_comp_id,              transform_hint: trim_string }
+  - { source_field_pattern: "comp*name|subject*name|property*name",            canonical_field: comp_property_name,          transform_hint: trim_string }
+  - { source_field_pattern: "submarket|submkt|broker*market",                  canonical_field: submarket,                   transform_hint: map_submarket_from_broker_label }
+  - { source_field_pattern: "market|metro|msa",                                canonical_field: market,                      transform_hint: trim_string }
+  - { source_field_pattern: "as*of*date|survey*date|refresh*date|effective*date", canonical_field: as_of_date,               transform_hint: to_iso_date }
+  - { source_field_pattern: "analyst*name|prepared*by|author",                 canonical_field: analyst_name,                transform_hint: trim_string }
+  - { source_field_pattern: "reviewer|approved*by|signed*off*by",              canonical_field: reviewer,                    transform_hint: trim_string }
+  - { source_field_pattern: "sheet*tab|tab*name|worksheet",                    canonical_field: sheet_tab,                   transform_hint: trim_string }
+  - { source_field_pattern: "source*file|file*name|workbook",                  canonical_field: source_file,                 transform_hint: trim_string }
+  - { source_field_pattern: "unit*type|floor*plan",                            canonical_field: unit_type_label,             transform_hint: trim_string }
+  - { source_field_pattern: "beds|bedrooms",                                    canonical_field: unit_beds,                   transform_hint: to_integer }
+  - { source_field_pattern: "baths|bathrooms",                                  canonical_field: unit_baths,                  transform_hint: to_number }
+  - { source_field_pattern: "sqft|sf|square*feet|nrsf",                        canonical_field: unit_sf,                     transform_hint: to_integer }
+  - { source_field_pattern: "asking*rent|list*rent|market*rent",               canonical_field: asking_rent,                 transform_hint: dollars_to_cents }
+  - { source_field_pattern: "effective*rent|net*effective",                    canonical_field: effective_rent,              transform_hint: dollars_to_cents }
+  - { source_field_pattern: "concession*weeks|free*weeks|free*rent",           canonical_field: concession_months,           transform_hint: weeks_to_months_equivalent }
+  - { source_field_pattern: "occupancy|phys*occ|leased*occ",                   canonical_field: occupancy_reported,          transform_hint: percent_to_decimal }
+  - { source_field_pattern: "trade|craft|labor*type",                          canonical_field: trade_slug,                  transform_hint: map_trade_slug }
+  - { source_field_pattern: "rate|hourly|dollars*per*hour",                    canonical_field: labor_rate_value,            transform_hint: dollars_to_cents }
+  - { source_field_pattern: "material|sku|item*code",                          canonical_field: material_slug,               transform_hint: map_material_slug }
+  - { source_field_pattern: "turn*scope|scope*tier",                           canonical_field: turn_scope,                  transform_hint: map_turn_scope }
+  - { source_field_pattern: "line*item|cost*code|assembly",                    canonical_field: line_item_slug,              transform_hint: map_line_item_slug }
+  - { source_field_pattern: "milestone|schedule*phase",                        canonical_field: milestone_slug,              transform_hint: map_milestone_slug }
+  - { source_field_pattern: "role|position|headcount*role",                    canonical_field: role_slug,                   transform_hint: map_role_slug }
+  - { source_field_pattern: "segment|product*class",                           canonical_field: segment,                     transform_hint: map_segment }
+  - { source_field_pattern: "property*form|build*type",                        canonical_field: property_form,               transform_hint: map_property_form }
+
+known_gotchas:
+  - broker and analyst submarket labels drift from internal submarket taxonomy; resolve via crosswalk_additions.yaml before ingest
+  - hidden tabs contain the real calculation inputs while the visible tab shows the rolled-up pretty view; always enumerate every sheet_tab during extraction
+  - merged cells carry the anchor value implicitly; unmerge upstream and propagate the anchor down the column or row
+  - analyst formula cells are extracted as the formula string rather than the value when the parser uses a formula-mode reader; parse the value snapshot
+  - as_of_date is frequently implied by filename rather than by a cell value; the filename convention in intake_manifest.yaml must be enforced
+  - duplicate comp rows appear when the analyst re-pastes a provider row alongside an internally observed row; dedup on (comp_property_name, unit_type_label, as_of_date)
+  - outlier rents from broker puffery or leasing-office narratives require outlier flagging before use; tolerance bands are declared in the segment overlays, not hardcoded here
+  - luxury comps get pasted into a middle_market sheet; segment mismatch must surface as a blocker not a warning
+  - unit-type comparability drift occurs when one row says A1 while another says 1x1 Classic; reconcile through the unit-type label crosswalk and never via pattern matching
+  - embedded macros that normalize values at open-time can silently rewrite cells on save; operators must save as macro-free workbooks before drop
+  - manual overrides applied by the analyst without a source note cannot be audited; override cells require a paired note cell
+  - column order changes across quarterly refreshes; always read by header name, never by position
+  - multi-market workbooks interleave markets in the same sheet; every row must carry market and submarket explicitly
+  - mixed currency is unlikely in US operator portfolios but has been observed in cross-border analyst packs; require a currency column
+  - version drift across quarterly refreshes means the capex cost library refreshed in 2026-Q1 differs in line-item slugs from the 2025-Q4 version, making version tag mandatory
+  - staleness gap occurs when the file refresh cadence is not mapped to the workflow that consumes it; staleness threshold per file family is declared in intake_manifest.yaml
+  - reviewer sign-off gaps on capex cost libraries and labor rate sheets block downstream usage per dq_rules.yaml
+
+reference_documentation:
+  - placeholder_link_to_excel_intake_runbook
+  - placeholder_link_to_canonical_market_data_connector
+  - placeholder_link_to_canonical_manual_uploads_connector
+  - placeholder_link_to_normalized_schemas_reference
+  - placeholder_link_to_submarket_crosswalk
+
+author_metadata:
+  authored_by: residential_multifamily_subsystem
+  authored_role: data_platform_team
+
+last_updated: "2026-04-15"

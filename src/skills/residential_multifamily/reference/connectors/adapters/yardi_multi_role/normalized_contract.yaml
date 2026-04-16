@@ -1,0 +1,506 @@
+# Yardi -> canonical normalized contract.
+# For every Yardi raw entity in source_contract.yaml, declare:
+#   - canonical object (from _core/ontology.md)
+#   - primary key mapping (Yardi id -> canonical id via crosswalk)
+#   - required canonical fields
+#   - null handling
+#   - derived vs requires_computation fields
+#   - source precedence (Yardi primary vs secondary vs historical)
+#   - classification-gated flags (entries that require classification
+#     closure before downstream workflows trust Yardi as primary)
+#
+# Precedence uses the source_of_truth_matrix.md rules. Yardi's precedence
+# depends on operator's classification outcome; this file documents the
+# default posture for each role.
+
+status_tag: sample
+
+mappings:
+
+  property:
+    canonical_object: Property
+    precedence_default: historical_only
+    precedence_if_role_primary_pms: primary
+    precedence_if_role_primary_gl: secondary        # GL-primary but PMS elsewhere still needs property definition
+    precedence_if_role_legacy: historical_only
+    primary_authority_if_secondary: accounting_stack_intacct
+    requires_classification: true
+    notes: |
+      Yardi carries operating attributes (unit count, status, property
+      type, market labels). Legal_entity_id resolves via
+      property_master_crosswalk -> Intacct. Canonical property_id is
+      assigned by master_data and resolved via
+      property_master_crosswalk with Voyager propid as source key.
+    primary_key:
+      yardi_field: propid
+      canonical_field: property_id
+      transform: crosswalk_lookup(property_master_crosswalk, source_system=yardi_voyager_stub)
+    required_canonical_fields:
+      - property_id
+      - property_name
+      - legal_entity_id
+      - unit_count_total
+      - unit_count_rentable
+      - market
+    null_handling:
+      - { field: legal_entity_id, behavior: escalate_missing }
+      - { field: market, behavior: default_to_null }
+    derived_from_source:
+      - property_id (via crosswalk on propid)
+      - property_name
+      - unit_count_total
+    requires_computation:
+      - unit_count_rentable (exclude model / employee / down / admin)
+      - legal_entity_id (resolve via property_master_crosswalk)
+      - segment, form_factor, lifecycle_stage, management_mode (overlay)
+
+  building:
+    canonical_object: Building
+    precedence_default: historical_only
+    precedence_if_role_primary_pms: primary
+    requires_classification: true
+    primary_key:
+      yardi_field: (propid, building_code)
+      canonical_field: (property_id, building_id)
+      transform: crosswalk_lookup(building_crosswalk, source_system=yardi_voyager_stub)
+    required_canonical_fields:
+      - building_id
+      - property_id
+      - building_label
+      - stories
+
+  unit:
+    canonical_object: Unit
+    precedence_default: historical_only
+    precedence_if_role_primary_pms: primary
+    requires_classification: true
+    primary_key:
+      yardi_field: hunit
+      canonical_field: unit_id
+      transform: crosswalk_lookup(unit_crosswalk, source_system=yardi_voyager_stub)
+    required_canonical_fields:
+      - unit_id
+      - property_id
+      - bedrooms
+      - bathrooms
+      - nrsf
+      - status
+    null_handling:
+      - { field: nrsf, behavior: escalate_missing }
+      - { field: status, behavior: reject_record }
+    derived_from_source:
+      - unit_id, property_id, bedrooms, bathrooms, nrsf, unit_type_id
+      - status (mapped from unit_status via map_yardi_unit_status)
+    requires_computation:
+      - classification (from floorplan -> renovation overlay)
+      - effective_end_date_handling (historical unit structure)
+
+  floor_plan:
+    canonical_object: UnitType
+    precedence_default: historical_only
+    precedence_if_role_primary_pms: primary
+    requires_classification: true
+    primary_key:
+      yardi_field: fpcode
+      canonical_field: unit_type_id
+      transform: crosswalk_lookup(unit_type_crosswalk, source_system=yardi_voyager_stub)
+    required_canonical_fields:
+      - unit_type_id
+      - property_id
+      - label
+      - bedrooms
+      - bathrooms
+      - nrsf_typical
+      - unit_count
+
+  lease:
+    canonical_object: Lease
+    precedence_default: historical_only
+    precedence_if_role_primary_pms: primary
+    requires_classification: true
+    primary_key:
+      yardi_field: hlease
+      canonical_field: lease_id
+      transform: crosswalk_lookup(lease_crosswalk, source_system=yardi_voyager_stub)
+    required_canonical_fields:
+      - lease_id
+      - property_id
+      - unit_id
+      - resident_account_id
+      - start_date
+      - end_date
+      - base_rent_monthly_cents
+      - status
+      - is_renewal
+    null_handling:
+      - { field: base_rent_monthly_cents, behavior: reject_record }
+      - { field: prior_lease_id, behavior: escalate_missing, notes: required if is_renewal = true }
+    derived_from_source:
+      - start_date (lease_from)
+      - end_date (lease_to)
+      - monthly_rent
+      - is_renewal
+    requires_computation:
+      - term_months (from start_date/end_date)
+      - concessions_total_cents (sum from concession-coded charges; chargecode decode property-scoped)
+      - status (map_yardi_lease_status — future maps to executed+preleased)
+      - t_code_decoded_lineage (before any ledger joins)
+
+  lease_event:
+    canonical_object: LeaseEvent
+    precedence_default: historical_only
+    precedence_if_role_primary_pms: primary
+    requires_classification: true
+    primary_key:
+      yardi_field: event_id
+      canonical_field: lease_event_id
+      transform: passthrough_with_namespace(yardi_voyager_stub)
+    required_canonical_fields:
+      - lease_event_id
+      - lease_id
+      - event_type
+      - event_date
+
+  notice:
+    canonical_object: LeaseEvent        # ontology folds notice events into LeaseEvent.event_type
+    precedence_default: historical_only
+    precedence_if_role_primary_pms: primary
+    requires_classification: true
+    primary_key:
+      yardi_field: notice_id
+      canonical_field: lease_event_id
+      transform: passthrough_with_namespace(yardi_voyager_stub)
+    required_canonical_fields:
+      - lease_event_id
+      - lease_id
+      - event_type
+      - event_date
+    notes: |
+      Yardi notice records fold into canonical LeaseEvent with event_type
+      in {notice_to_vacate, legal_notice_served, eviction_filed,
+      eviction_judgment}. No canonical extension required.
+
+  move_in:
+    canonical_object: LeaseEvent
+    precedence_default: historical_only
+    precedence_if_role_primary_pms: primary
+    requires_classification: true
+    notes: |
+      Yardi move_in record maps to LeaseEvent.event_type=move_in with
+      event_date=move_in_date.
+
+  move_out:
+    canonical_object: LeaseEvent
+    precedence_default: historical_only
+    precedence_if_role_primary_pms: primary
+    requires_classification: true
+    notes: |
+      Yardi move_out record maps to LeaseEvent.event_type=move_out with
+      event_date=move_out_date; reason_code captured as event_payload.
+
+  resident_account:
+    canonical_object: ResidentAccount
+    precedence_default: historical_only
+    precedence_if_role_primary_pms: primary
+    requires_classification: true
+    primary_key:
+      yardi_field: hten
+      canonical_field: resident_account_id
+      transform: crosswalk_lookup(resident_account_crosswalk, source_system=yardi_voyager_stub)
+    required_canonical_fields:
+      - resident_account_id
+      - primary_resident_name_ref
+      - ledger_balance_cents
+    null_handling:
+      - { field: primary_resident_name_ref, behavior: reject_record }
+    derived_from_source:
+      - ledger_balance_cents (from current_balance)
+    requires_computation:
+      - risk_flags (derived from late-payment pattern; never includes protected-class attributes)
+
+  charge:
+    canonical_object: Charge
+    precedence_default: historical_only
+    precedence_if_role_primary_pms: primary
+    precedence_if_role_primary_gl: secondary    # accounts-side primary, tenant-ledger primary stays with PMS
+    requires_classification: true
+    primary_key:
+      yardi_field: charge_id
+      canonical_field: charge_id
+      transform: passthrough_with_namespace(yardi_voyager_stub)
+    required_canonical_fields:
+      - charge_id
+      - lease_id
+      - resident_account_id
+      - charge_type
+      - charge_date
+      - amount_cents
+    null_handling:
+      - { field: lease_id, behavior: escalate_missing }
+      - { field: reversed_charge_id, behavior: escalate_missing, notes: required when adjustment_source = reversal_of_posting }
+    derived_from_source:
+      - charge_type (PROPERTY-SCOPED decode via map_yardi_chargecode — see charge_code_crosswalk_by_property)
+      - charge_date (from accrual month unless operator overrides)
+    requires_computation:
+      - accrual_vs_post_alignment (prefer accrual month for period attribution)
+      - recovery_fee_handling (residential portfolios suppress non-null recovery_code)
+
+  payment:
+    canonical_object: Payment
+    precedence_default: historical_only
+    precedence_if_role_primary_pms: primary
+    requires_classification: true
+    primary_key:
+      yardi_field: receipt_id
+      canonical_field: payment_id
+      transform: passthrough_with_namespace(yardi_voyager_stub)
+    required_canonical_fields:
+      - payment_id
+      - resident_account_id
+      - payment_date
+      - amount_cents
+      - tender_type
+    derived_from_source:
+      - tender_type (map_yardi_tender_type)
+
+  delinquency_case:
+    canonical_object: DelinquencyCase
+    precedence_default: historical_only
+    precedence_if_role_primary_pms: primary
+    requires_classification: true
+    primary_key:
+      yardi_field: hten + stage_entered_date
+      canonical_field: case_id
+      transform: deterministic_hash(resident_account_id, stage_entered_date)
+    required_canonical_fields:
+      - case_id
+      - lease_id
+      - stage
+      - current_balance_cents
+      - stage_entered_date
+
+  vendor:
+    canonical_object: Vendor
+    precedence_default: historical_only
+    precedence_if_role_primary_pms: secondary
+    primary_authority_if_secondary: ap_system
+    requires_classification: true
+    primary_key:
+      yardi_field: hvendor
+      canonical_field: vendor_id
+      transform: crosswalk_lookup(vendor_master_crosswalk, source_system=yardi_voyager_stub)
+    required_canonical_fields:
+      - vendor_id
+      - vendor_name
+    notes: |
+      Yardi vendor directory overlaps with Intacct and Procore vendor
+      masters; three-way dedup via vendor_master_crosswalk.
+
+  work_order:
+    canonical_object: WorkOrder
+    precedence_default: historical_only
+    precedence_if_role_primary_pms: primary
+    requires_classification: true
+    primary_key:
+      yardi_field: workorder_id
+      canonical_field: work_order_id
+      transform: passthrough_with_namespace(yardi_voyager_stub)
+    required_canonical_fields:
+      - work_order_id
+      - property_id
+      - reported_date
+      - priority
+      - status
+
+  # --- gl side ---
+
+  account:
+    canonical_object: Account       # canonical chart-of-accounts record
+    precedence_default: historical_only
+    precedence_if_role_primary_gl: primary
+    primary_authority_if_secondary: accounting_stack_intacct
+    requires_classification: true
+    primary_key:
+      yardi_field: account_code
+      canonical_field: gl_account_code
+      transform: crosswalk_lookup(account_crosswalk, source_system=yardi_voyager_stub)
+
+  budget_line:
+    canonical_object: BudgetLine
+    precedence_default: historical_only
+    precedence_if_role_primary_gl: primary
+    requires_classification: true
+    primary_key:
+      yardi_field: (propid, account_code, period, budget_version)
+      canonical_field: budget_line_id
+      transform: deterministic_hash(property_id, gl_account_code, period, budget_version)
+    required_canonical_fields:
+      - budget_line_id
+      - property_id
+      - gl_account_code
+      - period
+      - budget_version
+      - amount_cents
+
+  actual_line:
+    canonical_object: ActualLine
+    precedence_default: historical_only
+    precedence_if_role_primary_gl: primary
+    requires_classification: true
+    primary_key:
+      yardi_field: (propid, account_code, period, book_id)
+      canonical_field: actual_line_id
+      transform: deterministic_hash(property_id, gl_account_code, period, book_id)
+    required_canonical_fields:
+      - actual_line_id
+      - property_id
+      - gl_account_code
+      - period
+      - book_id
+      - amount_cents
+    notes: |
+      Accrual book is canonical for period attribution. Post_date is
+      preserved for audit but not used unless operator declares
+      post_date-primary convention.
+
+  forecast_line:
+    canonical_object: ForecastLine
+    precedence_default: historical_only
+    precedence_if_role_primary_gl: primary
+    requires_classification: true
+    primary_key:
+      yardi_field: (propid, account_code, period, forecast_version)
+      canonical_field: forecast_line_id
+      transform: deterministic_hash(property_id, gl_account_code, period, forecast_version)
+
+  # --- construction support ---
+
+  job_cost:
+    canonical_object: CapexProject           # loose mapping; Procore usually primary
+    precedence_default: historical_only
+    precedence_if_role_primary_pms: secondary
+    primary_authority_if_secondary: construction_stack_procore
+    requires_classification: true
+    notes: |
+      Yardi job_cost rolls up to canonical CapexProject only when the
+      operator runs Procore-free. Otherwise these records are preserved
+      for audit and reconciliation but are not primary.
+
+  # --- leasing / crm ---
+
+  lead:
+    canonical_object: Lead
+    precedence_default: blocked_until_rentcafe_scope_confirmed
+    precedence_if_role_primary_leasing_crm: primary
+    requires_classification: true
+    primary_key:
+      yardi_field: guest_id
+      canonical_field: lead_id
+      transform: passthrough_with_namespace(yardi_rentcafe_stub)
+    required_canonical_fields:
+      - lead_id
+      - property_id
+      - source_channel
+      - inquiry_date
+      - pipeline_stage
+
+  tour:
+    canonical_object: Tour
+    precedence_default: blocked_until_rentcafe_scope_confirmed
+    precedence_if_role_primary_leasing_crm: primary
+    requires_classification: true
+    primary_key:
+      yardi_field: tour_id
+      canonical_field: tour_id
+      transform: passthrough_with_namespace(yardi_rentcafe_stub)
+    required_canonical_fields:
+      - tour_id
+      - lead_id
+      - scheduled_date
+      - tour_type
+
+  application:
+    canonical_object: Application
+    precedence_default: blocked_until_rentcafe_scope_confirmed
+    precedence_if_role_primary_leasing_crm: primary
+    requires_classification: true
+    primary_key:
+      yardi_field: application_id
+      canonical_field: application_id
+      transform: passthrough_with_namespace(yardi_rentcafe_stub)
+    required_canonical_fields:
+      - application_id
+      - lead_id
+      - applied_date
+      - approval_status
+
+  approval_outcome:
+    canonical_object: ApprovalOutcome
+    precedence_default: blocked_until_rentcafe_scope_confirmed
+    precedence_if_role_primary_leasing_crm: primary
+    requires_classification: true
+
+  # --- resident portal (no canonical mapping in this wave) ---
+
+  resident_portal_activity:
+    canonical_object: none_in_wave_5
+    precedence_default: retained_in_raw_only
+    requires_canonical_extension: true
+    notes: |
+      Portal activity events are retained in raw landing for future
+      ontology extension. No canonical object carries them today; see
+      bounded_assumptions.yaml::no_canonical_extension_by_this_adapter.
+
+  # --- data connect warehouse (reporting re-projection) ---
+
+  dc_fact_charge:
+    canonical_object: Charge
+    precedence_default: historical_only
+    precedence_if_role_primary_reporting_feed: primary
+    requires_classification: true
+    notes: |
+      Data Connect replicates voyager_pms.charge. When operator is on
+      data_connect_warehouse as the primary reporting feed, Data Connect
+      becomes the source-of-truth for reporting-domain reconciliation.
+      Latency per source_registry.
+
+  dc_fact_gl_actual:
+    canonical_object: ActualLine
+    precedence_default: historical_only
+    precedence_if_role_primary_reporting_feed: primary
+    requires_classification: true
+
+  dc_dim_unit_effective:
+    canonical_object: Unit
+    precedence_default: secondary
+    notes: |
+      Effective-dated unit structure enables historical-lease to
+      current-unit joins. Always secondary to Voyager operational unit
+      feed; used for reconciliation only.
+
+  # --- report export files (manual uploads) ---
+
+  report_export_record:
+    canonical_object: varies_by_template
+    precedence_default: manual_uploads_fallback
+    requires_classification: true
+    notes: |
+      Routes to canonical objects per column_map declared in
+      master_data/report_export_templates. Records lacking a registered
+      template map are rejected.
+
+null_handling_global:
+  - do not default null required fields to zero or portfolio average
+  - surface missing required fields as dq_blocker exceptions
+  - record-level rejects carry the raw source_row_id for operator remediation
+  - tcode lineage must always be decoded before joining; undecoded rows
+    are blocked per rule yd_conformance_tcode_decoded
+
+classification_gating_summary:
+  - every mapping is gated on classification_worksheet.md closure
+  - mappings with precedence_if_role_* variants switch posture based on
+    the role declared in Dimension 1
+  - rentcafe leasing objects remain blocked until Dimension 2c declares
+    a non-no_extraction access path AND Dimension 4 closes applicant PII
+    posture
+  - resident_portal_activity is NOT mapped — flagged requires_canonical_extension

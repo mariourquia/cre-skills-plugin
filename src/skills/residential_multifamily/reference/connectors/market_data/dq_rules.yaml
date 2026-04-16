@@ -1,0 +1,98 @@
+# Market data DQ rules.
+rules:
+- rule_id: md_freshness_rent_comp
+  dimension: freshness
+  severity: warning
+  description: Rent comp feed is no older than the max-age days declared in
+    market_data/manifest.yaml per category.
+  expected: max(market_data.rent_comp.as_of_date) >= today -
+    rent_comp_max_age_days declared in market_data/manifest.yaml
+  remediation: Operator sources a replacement feed or increases max_age; stale
+    comps force comp-snapshot refusal.
+- rule_id: md_freshness_occupancy_benchmark
+  dimension: freshness
+  severity: warning
+  description: Occupancy benchmark feed is no older than the max-age days
+    declared per market in market_data/manifest.yaml.
+  expected: max(market_data.occupancy_benchmark.as_of_date) >= today -
+    occupancy_benchmark_max_age_days declared in market_data/manifest.yaml
+  remediation: Operator sources replacement or degrades benchmarks to
+    last-reliable-period reporting.
+- rule_id: md_completeness_required_fields
+  dimension: completeness
+  severity: blocker
+  description: Every required field in market_data/schema.yaml is non-null.
+  expected: for each entity and required_field, count(null) == 0
+  remediation: Null in required fields rejects the record; operator fixes
+    source.
+- rule_id: md_conformance_unit_type_harmonized
+  dimension: conformance
+  severity: blocker
+  description: rent_comp.unit_type_label resolves to a canonical unit_type
+    via unit_type_harmonization.yaml.
+  expected: unit_type_label IN harmonized_labels OR mapped via
+    unit_type_harmonization.yaml
+  remediation: Unmapped labels reject at landing; operator extends
+    unit_type_harmonization.yaml.
+- rule_id: md_consistency_submarket_in_market
+  dimension: consistency
+  severity: warning
+  description: submarket value is a known submarket of its market per
+    market_gazetteer.yaml.
+  expected: for each record with submarket IS NOT NULL, submarket IN
+    gazetteer[market].submarkets
+  remediation: Mismatched submarket-to-market mapping indicates a vendor
+    label not yet registered in the gazetteer.
+- rule_id: md_uniqueness_primary_keys
+  dimension: uniqueness
+  severity: blocker
+  description: No duplicate primary keys across market_data entities.
+  expected: count(distinct pk) == count(records) per entity
+  remediation: See qa/duplicate_id.yaml.
+- rule_id: md_uniqueness_comp_property_per_source
+  dimension: uniqueness
+  severity: warning
+  description: Each (source_name, comp_property_id, unit_type_label, as_of_date)
+    appears at most once.
+  expected: count(distinct tuple) == count(records)
+  remediation: Duplicate load detected; operator reruns landing with dedup
+    or flags the source as append-vs-replace.
+- rule_id: md_referential_integrity_market_in_gazetteer
+  dimension: referential_integrity
+  severity: warning
+  description: Every market label in rent_comp, concession_observation, and
+    occupancy_benchmark is registered in market_gazetteer.yaml.
+  expected: market IN gazetteer.markets
+  remediation: Unregistered markets queued for operator review.
+- rule_id: md_referential_integrity_source_registered
+  dimension: referential_integrity
+  severity: warning
+  description: Every source_name used in market_data entities is registered
+    in source_registry/ with a provenance_tier.
+  expected: source_name IN source_registry.source_names with non-null
+    provenance_tier
+  remediation: Unregistered sources block tier-aware down-weighting; operator
+    registers.
+- rule_id: md_reasonableness_rent_band
+  dimension: reasonableness
+  severity: warning
+  description: Rent observations within the plausible band declared in
+    overlays/segments/<segment>/overlay.yaml.
+  expected: see md_outlier_rent_detection
+  remediation: See md_outlier_rent_detection.
+- rule_id: md_reasonableness_occupancy_band
+  dimension: reasonableness
+  severity: warning
+  description: physical_occupancy_percent falls within the plausible band
+    declared in overlays/segments/<segment>/overlay.yaml.
+  expected: physical_occupancy_percent within plausible_occupancy_band per
+    segment overlay
+  remediation: Out-of-band occupancy often reflects an erroneous source
+    definition (leased vs physical). Operator confirms.
+- rule_id: md_consistency_concession_decoding
+  dimension: consistency
+  severity: warning
+  description: Every concession observation carries a concession_weeks_equivalent
+    decoded via the canonical formula.
+  expected: see md_concessions_decoded_consistently
+  remediation: See md_concessions_decoded_consistently.

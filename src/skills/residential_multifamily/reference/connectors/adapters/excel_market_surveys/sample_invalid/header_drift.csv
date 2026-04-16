@@ -1,0 +1,4 @@
+scope_tier,renovation_mode,msa,region,product_class,form,unit_code,cost_bucket,low_cost,typical_cost,high_cost,make_ready_days,effective_date,derivation,basis_type,id
+light,classic_to_classic,Charlotte,southeast,middle_market,garden,A1,paint,180,220,275,5,2026-01-31,derived_from_labor+material_q1_2026,derived,tci_0001
+light,classic_to_classic,Charlotte,southeast,middle_market,garden,A1,cleaning,85,110,140,5,2026-01-31,derived_from_labor+material_q1_2026,derived,tci_0002
+standard,classic_to_classic,Charlotte,southeast,middle_market,garden,B1,paint,240,285,340,7,2026-01-31,derived_from_labor+material_q1_2026,derived,tci_0003

@@ -1,0 +1,226 @@
+# Dealpath reconciliation checks.
+# Concrete check rows that pair Dealpath entities against AppFolio, Procore,
+# and Intacct. Each check carries the dp_recon_ prefix, a severity, the
+# reconciled inputs, an expected invariant, and a remediation pointer.
+# Tolerances cite reference/normalized/schemas/reconciliation_tolerance_band.yaml;
+# no numeric thresholds appear inline.
+
+checks:
+
+  - check_id: dp_recon_asset_to_property
+    check_kind: crosswalk_resolution
+    severity: blocker
+    description: |
+      Every Dealpath asset tied to a closed, non-refi deal resolves to an
+      AppFolio PropertyId via property_master_crosswalk.
+    inputs:
+      - reference/raw/deal_pipeline/<YYYY>/<MM>/dealpath__<as_of>.jsonl
+      - reference/raw/pms/<YYYY>/<MM>/appfolio__<as_of>.jsonl
+      - master_data/property_master_crosswalk.yaml
+    expected_invariant: |
+      for each deal where pipeline_stage = closed AND deal_type IN {acquisition, recap}:
+        deal.asset_id resolves to exactly one AppFolio PropertyId
+        within handoff_lag_threshold_days post deal_close_date_actual
+    remediation: runbooks/dealpath_common_issues.md::closed_deal_no_setup
+
+  - check_id: dp_recon_unit_count_drift_dp_vs_af
+    check_kind: unit_count
+    severity: warning
+    description: |
+      Dealpath asset.unit_count compared against AppFolio property.UnitCount
+      at the time of setup. Drift within unit_count_drift_band is tolerated;
+      beyond band escalates to blocker.
+    inputs:
+      - dealpath.asset
+      - appfolio.property
+    expected_invariant: |
+      abs(dealpath.asset.unit_count - appfolio.property.UnitCount)
+        <= unit_count_drift_band (cite reconciliation_tolerance_band.yaml)
+    remediation: runbooks/dealpath_common_issues.md::closed_deal_no_setup
+
+  - check_id: dp_recon_handoff_lag_af
+    check_kind: lag_threshold
+    severity: warning
+    description: |
+      Closed acquisition/recap deals must have an AppFolio property
+      created within handoff_lag_threshold_days of deal_close_date_actual.
+      Exceedance escalates to blocker beyond the threshold multiplier.
+    inputs:
+      - dealpath.deal
+      - appfolio.property
+    expected_invariant: |
+      for each closed deal:
+        appfolio.property.DateCreated - deal.deal_close_date_actual
+          <= handoff_lag_threshold_days
+          (cite reconciliation_tolerance_band.yaml)
+    remediation: runbooks/dealpath_common_issues.md::closed_deal_no_setup
+
+  - check_id: dp_recon_dev_deal_to_procore_project
+    check_kind: crosswalk_resolution
+    severity: blocker
+    description: |
+      Every ic_approved development deal resolves to a Procore project
+      via dev_project_crosswalk once milestone.gc_selected is achieved.
+    inputs:
+      - dealpath.deal
+      - dealpath.deal_milestone
+      - procore.project
+      - master_data/dev_project_crosswalk.yaml
+    expected_invariant: |
+      for each deal where deal_type = development
+                     AND milestone.gc_selected.status = achieved:
+        deal.deal_id resolves to exactly one procore.project.id
+    remediation: runbooks/dealpath_common_issues.md::dev_handoff
+
+  - check_id: dp_recon_dev_handoff_lag_pc
+    check_kind: lag_threshold
+    severity: warning
+    description: |
+      Procore project creation for a dev deal must land within
+      dev_handoff_lag_threshold_days of milestone.gc_selected achievement.
+    inputs:
+      - dealpath.deal_milestone
+      - procore.project
+    expected_invariant: |
+      for each dev deal with gc_selected achieved:
+        procore.project.created_at - milestone.gc_selected.actual_date
+          <= dev_handoff_lag_threshold_days
+          (cite reconciliation_tolerance_band.yaml)
+    remediation: runbooks/dealpath_common_issues.md::dev_handoff
+
+  - check_id: dp_recon_ic_approval_to_intacct_entity
+    check_kind: crosswalk_resolution
+    severity: blocker
+    description: |
+      Every ic_approved deal that closes resolves its sponsor_entity_id
+      to a canonical legal_entity_id in Intacct via legal_entity_crosswalk
+      within legal_entity_setup_lag_threshold_days of close.
+    inputs:
+      - dealpath.ic_decision
+      - dealpath.deal
+      - intacct.entity
+      - master_data/legal_entity_crosswalk.yaml
+    expected_invariant: |
+      for each closed deal with ic_decision.decision = approved:
+        deal.sponsor_entity_id resolves to exactly one intacct.entity.id
+          within legal_entity_setup_lag_threshold_days post
+          deal_close_date_actual
+          (cite reconciliation_tolerance_band.yaml)
+    remediation: runbooks/dealpath_common_issues.md::late_legal_entity_setup
+
+  - check_id: dp_recon_one_deal_one_property
+    check_kind: mapping_cardinality
+    severity: warning
+    description: |
+      Default expectation is one Dealpath deal maps to one AppFolio
+      property. Deviations (portfolio acquisitions, phased deliveries)
+      require manual_override = true on the crosswalk.
+    inputs:
+      - dealpath.deal
+      - master_data/property_master_crosswalk.yaml
+    expected_invariant: |
+      for each closed deal:
+        count(property_master_crosswalk rows where dealpath_id = deal.deal_id) = 1
+        OR manual_override = true
+    remediation: runbooks/dealpath_common_issues.md::multi_property_deals
+
+  - check_id: dp_recon_ic_decision_to_approval_request
+    check_kind: one_to_one
+    severity: blocker
+    description: |
+      Every Dealpath ic_decision row corresponds to a canonical
+      ApprovalRequest with subject_object_type = deal. Missing mapping
+      blocks the gated post-IC workflow.
+    inputs:
+      - dealpath.ic_decision
+      - canonical.approval_request
+    expected_invariant: |
+      for each ic_decision:
+        exists approval_request where
+          subject_object_type = 'deal'
+          AND subject_object_id = ic_decision.deal_id
+          AND created_at <= ic_decision.decided_date + 1 day
+    remediation: runbooks/dealpath_common_issues.md::ic_condition_unresolved
+
+  - check_id: dp_recon_condition_resolution_at_close
+    check_kind: condition_status
+    severity: blocker
+    description: |
+      A deal with ic_decision.decision = conditional cannot progress to
+      pipeline_stage = closed unless all conditions are marked resolved
+      before close_target date (or a documented policy override exists).
+    inputs:
+      - dealpath.ic_decision
+      - dealpath.deal
+    expected_invariant: |
+      for each deal where ic_decision.decision = conditional:
+        all conditions resolved OR policy_override_id is not null
+        BEFORE deal.deal_close_date_actual
+    remediation: runbooks/dealpath_common_issues.md::ic_condition_unresolved
+
+  - check_id: dp_recon_debt_term_sheet_vs_executed_loan
+    check_kind: value_drift
+    severity: warning
+    description: |
+      Dealpath milestone.debt_term_sheet commitment value reconciles
+      against the executed loan posted in Intacct post-close. Drift
+      within debt_term_sheet_variance_band tolerated; beyond band requires
+      narrative.
+    inputs:
+      - dealpath.deal
+      - dealpath.deal_milestone
+      - intacct.loan_master
+    expected_invariant: |
+      abs(dealpath.milestone.debt_term_sheet.value - intacct.loan.face_amount)
+        / intacct.loan.face_amount
+        <= debt_term_sheet_variance_band
+        (cite reconciliation_tolerance_band.yaml)
+    remediation: runbooks/dealpath_common_issues.md::debt_term_sheet_drift
+
+  - check_id: dp_recon_deal_rename_audit
+    check_kind: change_tracking
+    severity: warning
+    description: |
+      Deal renames after ic_approved must produce a status_history row
+      with transition_type = rename and be logged to source_record_audit.
+    inputs:
+      - dealpath.deal
+      - dealpath.deal_status_history
+    expected_invariant: |
+      for each deal where pipeline_stage >= ic_approved AND name changed:
+        exists status_history row with transition_type = rename
+    remediation: runbooks/dealpath_common_issues.md::rename_after_approval
+
+  - check_id: dp_recon_dead_deal_resurrection
+    check_kind: change_tracking
+    severity: warning
+    description: |
+      A deal transitioning from status = dead or pipeline_stage = ic_declined
+      back to active must have a status_history row with transition_type
+      = resurrection and documented rationale.
+    inputs:
+      - dealpath.deal_status_history
+    expected_invariant: |
+      for each deal with resurrection event:
+        exists status_history row with transition_type = resurrection
+          AND reason is not null
+    remediation: runbooks/dealpath_common_issues.md::declined_then_resurrected
+
+  - check_id: dp_recon_retrade_purchase_price
+    check_kind: value_drift
+    severity: warning
+    description: |
+      Dealpath total_purchase_price adjustments (retrades) after psa_signed
+      must produce a status_history row and remain within
+      purchase_price_retrade_band; beyond band requires IC re-presentation
+      flag.
+    inputs:
+      - dealpath.deal
+      - dealpath.deal_status_history
+    expected_invariant: |
+      for each deal where price changed post psa_signed:
+        abs(delta) / original_price
+          <= purchase_price_retrade_band
+          (cite reconciliation_tolerance_band.yaml)
+        OR ic_re_presentation_flag = true
+    remediation: runbooks/dealpath_common_issues.md::retrade_purchase_price

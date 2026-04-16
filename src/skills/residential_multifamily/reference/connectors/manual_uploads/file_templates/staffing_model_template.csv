@@ -1,0 +1,7 @@
+property_id,role_code,budgeted_fte,notes
+sample_property_one,property_manager,1.0,on-site PM
+sample_property_one,leasing_consultant,2.0,front-of-house leasing
+sample_property_one,maintenance_tech,2.0,on-site maintenance
+sample_property_one,porter,1.0,site services
+# status: template
+# schema: reference/connectors/manual_uploads/schema.yaml entities.staffing_model_upload

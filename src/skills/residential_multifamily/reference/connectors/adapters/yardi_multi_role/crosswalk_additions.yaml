@@ -1,0 +1,259 @@
+# Crosswalk additions for Yardi multi-role adapter.
+# Fragments merged into master_data crosswalks at integration time.
+# Every row carries effective_start, survivorship_rule, confidence, and
+# source_of_record_per_attribute, per master_data conventions.
+
+status_tag: sample
+
+property_master_crosswalk:
+  additions:
+    - yardi_propid: YP_50001
+      yardi_scode: mvst
+      appfolio_property_id: "10481"
+      intacct_entity_dim: ENT_MAPLE_VISTA_LLC
+      canonical_property_id: PROP_YD_50001
+      effective_start: "2018-04-01"
+      survivorship_rule: intacct_wins_on_legal_entity; appfolio_wins_on_operating_identity; yardi_wins_on_historical
+      confidence: high
+      source_of_record_per_attribute:
+        legal_entity_id: intacct
+        property_name: appfolio
+        unit_count_total: appfolio
+        market_label: appfolio
+        historical_periods_pre_2024_07: yardi_voyager_stub
+
+    - yardi_propid: YP_50002
+      yardi_scode: hrcr
+      appfolio_property_id: null
+      intacct_entity_dim: ENT_HARBOR_CREST_LLC
+      canonical_property_id: PROP_YD_50002
+      effective_start: "2015-09-01"
+      survivorship_rule: yardi_primary_pms_and_gl (no AppFolio)
+      confidence: high
+      source_of_record_per_attribute:
+        legal_entity_id: yardi_voyager_stub
+        property_name: yardi_voyager_stub
+        unit_count_total: yardi_voyager_stub
+        gl_actuals: yardi_voyager_stub
+
+    - yardi_propid: YP_50003
+      yardi_scode: ltft
+      appfolio_property_id: null
+      intacct_entity_dim: ENT_LANTERN_FLATS_LLC
+      canonical_property_id: PROP_YD_50003
+      effective_start: "2021-02-15"
+      survivorship_rule: yardi_primary_pms; intacct_wins_on_legal_entity
+      confidence: high
+      source_of_record_per_attribute:
+        legal_entity_id: intacct
+        property_name: yardi_voyager_stub
+        unit_count_total: yardi_voyager_stub
+
+    - yardi_propid: YP_50004
+      yardi_scode: brfd
+      appfolio_property_id: "10484"
+      intacct_entity_dim: ENT_BRIARFIELD_LLC
+      canonical_property_id: PROP_YD_50004
+      effective_start: "2010-06-20"
+      effective_end: "2025-11-30"
+      survivorship_rule: cutover_completed_archival; appfolio_primary_post_cutover; yardi_historical_only
+      confidence: high
+      source_of_record_per_attribute:
+        current_operating_state: appfolio
+        pre_2025_11_historical: yardi_voyager_stub
+
+unit_crosswalk:
+  additions:
+    - yardi_hunit: YU_70001
+      appfolio_unit_id: null
+      canonical_unit_id: UNIT_YD_70001
+      effective_start: "2018-04-01"
+      survivorship_rule: yardi_primary_pms
+      confidence: high
+      source_of_record_per_attribute:
+        all: yardi_voyager_stub
+
+    - yardi_hunit: YU_70201
+      appfolio_unit_id: null
+      canonical_unit_id: UNIT_YD_70201_HIST
+      effective_start: "2010-06-20"
+      effective_end: "2024-07-01"
+      survivorship_rule: historical_only_unit_retired_post_renovation
+      confidence: medium
+      source_of_record_per_attribute:
+        historical_structure: yardi_voyager_stub
+        current_structure: dc_dim_unit_effective
+
+lease_crosswalk:
+  additions:
+    - yardi_hlease: YL_90001
+      yardi_tcode_decoded: resident_current
+      appfolio_lease_id: null
+      canonical_lease_id: LEASE_YD_90001
+      effective_start: "2025-09-01"
+      survivorship_rule: yardi_primary_pms
+      confidence: high
+      source_of_record_per_attribute:
+        all: yardi_voyager_stub
+
+    - yardi_hlease: YL_90201
+      yardi_tcode_decoded: past_resident_historical
+      appfolio_lease_id: null
+      canonical_lease_id: LEASE_YD_90201_HIST
+      effective_start: "2022-08-01"
+      effective_end: "2024-07-01"
+      survivorship_rule: historical_only_post_renovation
+      confidence: medium
+      source_of_record_per_attribute:
+        all: yardi_voyager_stub
+
+vendor_master_crosswalk:
+  additions:
+    - yardi_hvendor: YV_60001
+      intacct_vendor_id: INT_VEND_001
+      procore_vendor_id: PROC_VEND_017
+      canonical_vendor_id: VEND_YD_60001
+      effective_start: "2020-01-01"
+      survivorship_rule: intacct_wins_on_tax_id; yardi_wins_on_service_dispatch; procore_wins_on_construction_commitments
+      confidence: high
+      source_of_record_per_attribute:
+        tax_id: intacct
+        service_dispatch: yardi_voyager_stub
+        construction_commitments: procore
+
+    - yardi_hvendor: YV_60002
+      intacct_vendor_id: INT_VEND_002
+      procore_vendor_id: null
+      canonical_vendor_id: VEND_YD_60002
+      effective_start: "2021-06-15"
+      survivorship_rule: intacct_wins_on_tax_id; yardi_wins_on_service_dispatch
+      confidence: high
+      source_of_record_per_attribute:
+        tax_id: intacct
+        service_dispatch: yardi_voyager_stub
+
+account_crosswalk:
+  additions:
+    - yardi_account_code: "5001"
+      intacct_account_code: "4000_RENT_INCOME"
+      canonical_gl_account_code: gl_5001_rental_income
+      account_class: revenue
+      effective_start: "2020-01-01"
+      survivorship_rule: yardi_primary_if_role_primary_gl_else_intacct
+      confidence: high
+
+    - yardi_account_code: "6100"
+      intacct_account_code: "6100_PROPERTY_MGMT_FEES"
+      canonical_gl_account_code: gl_6100_property_mgmt_fees
+      account_class: expense_operating
+      effective_start: "2020-01-01"
+      survivorship_rule: yardi_primary_if_role_primary_gl_else_intacct
+      confidence: high
+
+    - yardi_account_code: "6200"
+      intacct_account_code: "6200_REPAIRS_MAINT"
+      canonical_gl_account_code: gl_6200_repairs_maintenance
+      account_class: expense_operating
+      effective_start: "2020-01-01"
+      survivorship_rule: yardi_primary_if_role_primary_gl_else_intacct
+      confidence: high
+
+    - yardi_account_code: "2410"
+      intacct_account_code: "2410_PREPAID_RENT_LIAB"
+      canonical_gl_account_code: gl_2410_prepaid_rent_liability
+      account_class: liability
+      effective_start: "2020-01-01"
+      survivorship_rule: yardi_primary_if_role_primary_gl_else_intacct
+      confidence: high
+
+capex_project_crosswalk:
+  additions:
+    - yardi_job_id: JOB_YD_001
+      procore_project_id: PROC_PROJ_4501
+      intacct_project_dim: PROJ_DIM_4501
+      canonical_capex_project_id: CAPEX_YD_001
+      effective_start: "2024-05-01"
+      survivorship_rule: procore_wins_on_commitments; yardi_reconciles_posted
+      confidence: high
+      source_of_record_per_attribute:
+        scope_commitments: procore
+        posted_jobcost: yardi_voyager_stub
+        gl_posting: intacct
+
+dev_project_crosswalk:
+  additions:
+    - yardi_propid: YP_50003
+      dealpath_deal_id: DEAL_LTFT_2021
+      procore_project_id: PROC_PROJ_LTFT
+      canonical_dev_project_id: DEV_YD_50003
+      effective_start: "2021-02-15"
+      survivorship_rule: dealpath_pre_close; procore_during_construction; yardi_post_delivery_operating
+      confidence: high
+
+asset_crosswalk:
+  additions:
+    - yardi_propid: YP_50001
+      dealpath_asset_id: ASSET_MVST
+      canonical_asset_id: ASSET_YD_50001
+      effective_start: "2018-04-01"
+      survivorship_rule: dealpath_wins_pre_close; yardi_primary_post_close_operating
+      confidence: high
+
+    - yardi_propid: YP_50002
+      dealpath_asset_id: ASSET_HRCR
+      canonical_asset_id: ASSET_YD_50002
+      effective_start: "2015-09-01"
+      survivorship_rule: dealpath_wins_pre_close; yardi_primary_post_close_operating
+      confidence: high
+
+market_crosswalk:
+  additions:
+    - yardi_market_label: sample_market_one
+      canonical_market_id: MKT_ONE
+      effective_start: "2020-01-01"
+      survivorship_rule: operator_declared
+      confidence: high
+      source_of_record_per_attribute:
+        all: operator_metadata
+
+    - yardi_market_label: sample_market_two
+      canonical_market_id: MKT_TWO
+      effective_start: "2020-01-01"
+      survivorship_rule: operator_declared
+      confidence: high
+
+    - yardi_market_label: sample_market_three
+      canonical_market_id: MKT_THREE
+      effective_start: "2020-01-01"
+      survivorship_rule: operator_declared
+      confidence: high
+
+submarket_crosswalk:
+  additions:
+    - yardi_submarket_label: sample_submarket_one
+      canonical_submarket_id: SUB_ONE_A
+      canonical_market_id: MKT_ONE
+      effective_start: "2020-01-01"
+      survivorship_rule: operator_declared
+      confidence: high
+
+    - yardi_submarket_label: sample_submarket_two
+      canonical_submarket_id: SUB_TWO_A
+      canonical_market_id: MKT_TWO
+      effective_start: "2020-01-01"
+      survivorship_rule: operator_declared
+      confidence: high
+
+    - yardi_submarket_label: sample_submarket_three
+      canonical_submarket_id: SUB_THREE_A
+      canonical_market_id: MKT_THREE
+      effective_start: "2020-01-01"
+      survivorship_rule: operator_declared
+      confidence: high
+
+    - yardi_submarket_label: sample_submarket_four
+      canonical_submarket_id: SUB_ONE_B
+      canonical_market_id: MKT_ONE
+      effective_start: "2020-01-01"
+      survivorship_rule: operator_declared
+      confidence: medium

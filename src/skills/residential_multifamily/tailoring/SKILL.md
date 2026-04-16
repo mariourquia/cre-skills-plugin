@@ -40,6 +40,9 @@ references:
     - _core/metrics.md
     - tailoring/question_banks/
     - tailoring/doc_catalog.yaml
+    - tailoring/AUDIENCE_MAP.md
+    - tailoring/DIFF_APPROVAL_PREVIEW.md
+    - tailoring/MISSING_DOC_MATRIX.md
   writes:
     - tailoring/sessions/{org_id}/{session_id}.yaml
     - tailoring/sessions/{org_id}/{session_id}__summary.md
@@ -221,10 +224,22 @@ This pack is a router; it is invoked by the top-level router when the activation
 
 ## Templates used
 
-- `question_banks/coo.yaml`, `question_banks/cfo.yaml`, `question_banks/regional_ops.yaml`, `question_banks/asset_mgmt.yaml`, `question_banks/development.yaml`, `question_banks/construction.yaml`, `question_banks/reporting.yaml` — audience question banks.
+- Question banks under `question_banks/` (8-audience layout per `AUDIENCE_MAP.md`):
+  - `question_banks/executive.yaml` — CEO / COO / CFO top-of-house.
+  - `question_banks/regional_ops.yaml` — RM / DOO portfolio-level ops.
+  - `question_banks/asset_mgmt.yaml` — asset-level performance and business plan posture.
+  - `question_banks/finance_reporting.yaml` — CFO-detail finance plus reporting.
+  - `question_banks/development.yaml` — development pipeline and preconstruction.
+  - `question_banks/construction.yaml` — construction, GC / procurement / draw posture.
+  - `question_banks/compliance_risk.yaml` — fair housing, screening, VAWA, regulatory programs, insurance, safety.
+  - `question_banks/site_ops.yaml` — PM / APM / leasing / maintenance norms (read-only, endorsed by regional_ops).
+  - Retained for backward compatibility with deprecation banners: `question_banks/coo.yaml`, `question_banks/cfo.yaml`, `question_banks/reporting.yaml`. New sessions use the 8-bank layout; removal scheduled for the next refinement cycle.
+- `AUDIENCE_MAP.md` — canonical 8-audience split, legacy-bank mapping, and per-audience onboarding requirement.
+- `DIFF_APPROVAL_PREVIEW.md` — canonical preview / approval spec (file actions, canonical citations, conflicts, sign-offs, floor check, refusal conditions). Complements `PREVIEW_PROTOCOL.md`.
+- `MISSING_DOC_MATRIX.md` — canonical missing-doc status enum, audience-to-document matrix, and blocker protocol.
 - `missing_docs_queue.yaml`, `sign_off_queue.yaml` — queue schemas.
 - `doc_catalog.yaml` — document catalog.
-- `PREVIEW_PROTOCOL.md` — diff and preview convention.
+- `PREVIEW_PROTOCOL.md` — diff and preview formatting convention (short-form); the formal gate logic lives in `DIFF_APPROVAL_PREVIEW.md`.
 - `INTERVIEW_FLOW.md` — interview sequencing and session persistence.
 - `how_to_produce_org_overlays.md` — step-by-step explanation of the overlay production flow.
 

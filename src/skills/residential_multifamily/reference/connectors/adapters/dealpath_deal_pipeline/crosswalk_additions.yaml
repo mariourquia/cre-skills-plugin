@@ -1,0 +1,73 @@
+# Crosswalk row fragments contributed by the Dealpath adapter.
+# Merges into master_data/<crosswalk>.yaml at integration.
+# Each row carries dealpath_id, canonical_id, effective_start,
+# survivorship_rule, and confidence. Effective dating follows the
+# rules in _core/stack_wave4/source_of_truth_matrix.md.
+
+status_tag: sample
+
+# ---------------------------------------------------------------------
+# asset_crosswalk — Dealpath asset_id <-> canonical asset_id.
+# Canonical asset_id is assigned by master_data and may later resolve
+# to an AppFolio property_id once post-close setup completes.
+# ---------------------------------------------------------------------
+asset_crosswalk:
+  description: |
+    Resolves Dealpath asset_id to canonical asset_id. Post-close, the
+    canonical asset is represented through AppFolio Property; that
+    mapping lives in property_master_crosswalk below.
+  rows:
+    - { dealpath_id: DP_ASSET_001, canonical_id: CAN_ASSET_000001, effective_start: "2025-12-15", survivorship_rule: dealpath_wins_until_setup_complete, confidence: high }
+    - { dealpath_id: DP_ASSET_002, canonical_id: CAN_ASSET_000002, effective_start: "2025-10-10", survivorship_rule: dealpath_wins_until_setup_complete, confidence: high }
+    - { dealpath_id: DP_ASSET_003, canonical_id: CAN_ASSET_000003, effective_start: "2019-03-01", survivorship_rule: dealpath_wins_until_setup_complete, confidence: high }
+    - { dealpath_id: DP_ASSET_004, canonical_id: CAN_ASSET_000004, effective_start: "2022-06-15", survivorship_rule: dealpath_wins_until_setup_complete, confidence: high }
+    - { dealpath_id: DP_ASSET_005, canonical_id: CAN_ASSET_000005, effective_start: "2026-03-18", survivorship_rule: dealpath_wins_until_setup_complete, confidence: high }
+
+# ---------------------------------------------------------------------
+# property_master_crosswalk — Dealpath asset_id <-> AppFolio property_id.
+# Populated only after close and AppFolio property setup. Pre-setup rows
+# carry status = unmapped.
+# ---------------------------------------------------------------------
+property_master_crosswalk:
+  description: |
+    Resolves Dealpath asset_id to AppFolio PropertyId once property
+    setup completes post-close. Effective_start = deal_close_date_actual.
+    Survivorship: appfolio_wins_post_setup.
+  rows:
+    - { dealpath_id: DP_ASSET_001, canonical_id: PROP_SAMPLE_MIDRISE_ALPHA,   effective_start: "2026-05-15", survivorship_rule: appfolio_wins_post_setup, confidence: medium, status: pending_close }
+    - { dealpath_id: DP_ASSET_003, canonical_id: PROP_SAMPLE_GARDEN_GAMMA,    effective_start: "2026-03-05", survivorship_rule: appfolio_wins_post_setup, confidence: high, status: active }
+    - { dealpath_id: DP_ASSET_004, canonical_id: PROP_SAMPLE_PORTFOLIO_DELTA_01, effective_start: "2026-05-28", survivorship_rule: appfolio_wins_post_setup, confidence: medium, status: pending_close, manual_override: true, rationale: portfolio_acquisition_requires_multiple_property_ids }
+    - { dealpath_id: DP_ASSET_004, canonical_id: PROP_SAMPLE_PORTFOLIO_DELTA_02, effective_start: "2026-05-28", survivorship_rule: appfolio_wins_post_setup, confidence: medium, status: pending_close, manual_override: true, rationale: portfolio_acquisition_requires_multiple_property_ids }
+
+# ---------------------------------------------------------------------
+# dev_project_crosswalk — Dealpath asset_id <-> Procore project_id.
+# Populated after milestone.gc_award achievement for dev deals.
+# ---------------------------------------------------------------------
+dev_project_crosswalk:
+  description: |
+    Resolves Dealpath dev-deal asset_id to Procore project_id. Created
+    when milestone.gc_selected or milestone.gc_award reaches achieved
+    status. Effective_start = milestone.actual_date.
+    Survivorship: procore_wins_at_project_execution.
+  rows:
+    - { dealpath_id: DP_ASSET_002, canonical_id: PC_PROJECT_GROUND_UP_BETA, effective_start: "2026-04-30", survivorship_rule: procore_wins_at_project_execution, confidence: medium, status: pending_gc_award }
+
+# ---------------------------------------------------------------------
+# market_crosswalk — Dealpath market label <-> canonical market.
+# Markets are operator-maintained free text in Dealpath and must
+# resolve to the canonical market slug in reference/normalized/markets/.
+# ---------------------------------------------------------------------
+market_crosswalk:
+  description: |
+    Resolves operator-free-text market labels from Dealpath to the
+    canonical market slug. No effective_start — market labels are
+    treated as durable once resolved; confidence tracks operator
+    acknowledgement rather than time.
+  rows:
+    - { dealpath_id: sample_market_alpha,    canonical_id: charlotte,   effective_start: "2025-01-01", survivorship_rule: canonical_wins, confidence: high }
+    - { dealpath_id: sample_market_gamma,    canonical_id: atlanta,     effective_start: "2025-01-01", survivorship_rule: canonical_wins, confidence: high }
+    - { dealpath_id: sample_market_epsilon,  canonical_id: dallas,      effective_start: "2025-01-01", survivorship_rule: canonical_wins, confidence: high }
+    - { dealpath_id: sample_submarket_alpha, canonical_id: south_end,       effective_start: "2025-01-01", survivorship_rule: canonical_wins, confidence: high }
+    - { dealpath_id: sample_submarket_beta,  canonical_id: north_meck,      effective_start: "2025-01-01", survivorship_rule: canonical_wins, confidence: medium }
+    - { dealpath_id: sample_submarket_gamma, canonical_id: midtown_atlanta, effective_start: "2025-01-01", survivorship_rule: canonical_wins, confidence: high }
+    - { dealpath_id: sample_submarket_epsilon, canonical_id: uptown_dallas, effective_start: "2025-01-01", survivorship_rule: canonical_wins, confidence: medium }

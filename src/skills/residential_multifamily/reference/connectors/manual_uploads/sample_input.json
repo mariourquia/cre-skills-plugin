@@ -1,0 +1,244 @@
+{
+  "budget_file": [
+    {
+      "property_id": "prop_demo_001",
+      "account_code": "4100_gross_potential_rent",
+      "budget_year": 2026,
+      "budget_version": "approved",
+      "annual_amount_usd": "2400000.00",
+      "period_split": "even",
+      "notes": "sample illustrative budget line",
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-01-15",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "budget_prop_demo_001__4100__2026"
+    }
+  ],
+  "forecast_file": [
+    {
+      "property_id": "prop_demo_001",
+      "account_code": "4100_gross_potential_rent",
+      "forecast_period": "2026-05",
+      "forecast_amount_usd": "200000.00",
+      "forecast_method": "trend",
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "forecast_prop_demo_001__4100__2026_05"
+    }
+  ],
+  "owner_report": [
+    {
+      "property_id": "prop_demo_001",
+      "report_period": "2026-03",
+      "section_key": "executive_summary",
+      "body_markdown": "## Executive summary\nSample illustrative owner report section.",
+      "approval_status": "approved",
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-04-10",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "owner_report_prop_demo_001__2026_03__executive_summary"
+    }
+  ],
+  "vendor_bid_tab": [
+    {
+      "solicitation_id": "rfp_001",
+      "vendor_id": "vendor_demo_001",
+      "scope_line_id": "scope_line_001",
+      "bid_amount_usd": "45000.00",
+      "bid_date": "2026-04-05",
+      "property_id": "prop_demo_001",
+      "leveled_adjustment_usd": "-500.00",
+      "recommendation_flag": true,
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-04-05",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "bid_rfp_001__vendor_demo_001__scope_line_001"
+    }
+  ],
+  "rent_survey": [
+    {
+      "comp_id": "comp_sample_001",
+      "survey_date": "2026-04-01",
+      "comp_name": "Sample Comp One",
+      "unit_type": "2bed_2bath",
+      "asking_rent_usd": "2150.00",
+      "concession_summary": "one month free on 13 month term",
+      "occupancy_reported_pct": 94.5,
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "rs_comp_sample_001__2026_04_01"
+    }
+  ],
+  "market_comp_sheet": [
+    {
+      "comp_sale_id": "sale_sample_001",
+      "property_name": "Sample Sold Property",
+      "sale_date": "2026-02-20",
+      "sale_price_usd": "48000000.00",
+      "unit_count": 200,
+      "cap_rate_pct": 520,
+      "year_built": 2010,
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-03-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "sale_sample_001"
+    }
+  ],
+  "approval_matrix_upload": [
+    {
+      "matrix_id": "amatrix_sample_001",
+      "row_id": "row_01",
+      "scope": "capex_request",
+      "threshold_usd": "25000.00",
+      "approver_role": "regional_director",
+      "notes": "sample illustrative approval row",
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "amatrix_sample_001__row_01"
+    }
+  ],
+  "property_list": [
+    {
+      "property_id": "prop_demo_001",
+      "property_name": "Sample Property One",
+      "market": "sample_market",
+      "unit_count": 200,
+      "submarket": "sample_submarket",
+      "entity_id": "entity_sample_001",
+      "status": "active",
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "plist_prop_demo_001"
+    }
+  ],
+  "staffing_model_upload": [
+    {
+      "property_id": "prop_demo_001",
+      "role_code": "property_manager",
+      "budgeted_fte": 1.0,
+      "notes": "on-site PM for sample property",
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-01-15",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "staff_prop_demo_001__property_manager"
+    }
+  ],
+  "capex_request_upload": [
+    {
+      "request_id": "capex_req_sample_001",
+      "property_id": "prop_demo_001",
+      "request_date": "2026-04-01",
+      "category": "hvac",
+      "requested_amount_usd": "75000.00",
+      "justification": "sample illustrative capex request",
+      "approval_status": "submitted",
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "capex_req_sample_001"
+    }
+  ],
+  "draw_package_upload": [
+    {
+      "project_id": "proj_sample_001",
+      "draw_number": 3,
+      "draw_date": "2026-04-05",
+      "draw_amount_usd": "250000.00",
+      "review_status": "under_review",
+      "supporting_docs_count": 12,
+      "property_id": "prop_demo_001",
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-04-05",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "draw_proj_sample_001__3"
+    }
+  ],
+  "monthly_review_pack": [
+    {
+      "property_id": "prop_demo_001",
+      "report_period": "2026-03",
+      "pack_section_key": "summary",
+      "body_markdown": "## Summary\nSample illustrative monthly review pack section.",
+      "approval_status": "approved",
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-04-10",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "mrp_prop_demo_001__2026_03__summary"
+    }
+  ],
+  "delinquency_report_upload": [
+    {
+      "property_id": "prop_demo_001",
+      "report_period": "2026-03",
+      "resident_account_id": "resident_sample_001",
+      "balance_usd": "1850.00",
+      "aging_bucket": "31_60",
+      "notes": "sample illustrative delinquency row",
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "delinq_prop_demo_001__2026_03__resident_sample_001"
+    }
+  ],
+  "work_order_backlog_upload": [
+    {
+      "property_id": "prop_demo_001",
+      "report_period": "2026-03",
+      "work_order_id": "wo_sample_001",
+      "priority": "p3_standard",
+      "age_days": 12,
+      "assigned_role": "maintenance_tech",
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "wob_prop_demo_001__2026_03__wo_sample_001"
+    }
+  ],
+  "pm_scorecard_upload": [
+    {
+      "employee_id": "emp_0001",
+      "scoring_period": "2026-Q1",
+      "score_category": "occupancy",
+      "score_value": 92.0,
+      "commentary": "sample illustrative scorecard row",
+      "source_name": "sample_feed",
+      "source_type": "gl",
+      "source_date": "2026-04-10",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "pms_emp_0001__2026_Q1__occupancy"
+    }
+  ]
+}

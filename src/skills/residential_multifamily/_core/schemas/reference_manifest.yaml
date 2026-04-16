@@ -30,7 +30,7 @@ properties:
           default: true
         fallback_behavior:
           type: string
-          enum: [ask_user, use_portfolio_average, use_prior_period, refuse, escalate]
+          enum: [ask_user, use_portfolio_average, use_prior_period, refuse, escalate, proceed_with_default]
   writes:
     type: array
     items:
@@ -43,5 +43,5 @@ properties:
           type: string
         write_mode:
           type: string
-          enum: [append, upsert, replace]
+          enum: [append, upsert, replace, propose_then_approve]
 additionalProperties: false

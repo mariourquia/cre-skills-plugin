@@ -1,0 +1,89 @@
+# Mapping template for the generic PMS vendor family stub.
+# Applied on top of reference/connectors/pms/mapping.yaml. The canonical
+# mapping.yaml wins on conflict. Entries here are non-binding hints shown
+# as a scaffold for operators forking this stub.
+
+status_tag: template
+
+property:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [property_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: false
+  fields:
+    - { source_column: prop_code,      normalized_column: property_id,         transform: trim_string, required: true }
+    - { source_column: prop_name,      normalized_column: property_name,       transform: trim_string, required: true }
+    - { source_column: total_units,    normalized_column: unit_count_total,    transform: to_integer,  required: true }
+    - { source_column: rentable_units, normalized_column: unit_count_rentable, transform: to_integer,  required: true }
+    - { source_column: market_label,   normalized_column: market,              transform: trim_string, required: true }
+    - { source_column: submkt,         normalized_column: submarket,           transform: trim_string, required: false }
+    - { source_column: yr_built,       normalized_column: year_built,          transform: to_integer,  required: false }
+
+unit:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [property_id, unit_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: prop_code,       normalized_column: property_id,  transform: trim_string,     required: true }
+    - { source_column: unit_number,     normalized_column: unit_id,      transform: trim_string,     required: true }
+    - { source_column: bed_count,       normalized_column: bedrooms,     transform: to_integer,      required: true }
+    - { source_column: bath_count,      normalized_column: bathrooms,    transform: to_number,       required: true }
+    - { source_column: sqft,            normalized_column: nrsf,         transform: to_integer,      required: true }
+    - { source_column: unit_status,     normalized_column: status,       transform: map_unit_status, required: true }
+    - { source_column: unit_type_code,  normalized_column: unit_type_id, transform: trim_string,     required: false }
+
+lease:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [lease_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: lse_id,            normalized_column: lease_id,                transform: trim_string,       required: true }
+    - { source_column: prop_code,         normalized_column: property_id,             transform: trim_string,       required: true }
+    - { source_column: unit_number,       normalized_column: unit_id,                 transform: trim_string,       required: true }
+    - { source_column: resident_id,       normalized_column: resident_account_id,     transform: trim_string,       required: true }
+    - { source_column: lease_start,       normalized_column: start_date,              transform: to_iso_date,       required: true }
+    - { source_column: lease_end,         normalized_column: end_date,                transform: to_iso_date,       required: true }
+    - { source_column: base_rent,         normalized_column: base_rent_monthly_cents, transform: dollars_to_cents,  required: true }
+    - { source_column: concession_total,  normalized_column: concessions_total_cents, transform: dollars_to_cents,  required: false }
+    - { source_column: lease_status,      normalized_column: status,                  transform: map_lease_status,  required: true }
+    - { source_column: renewal_flag,      normalized_column: is_renewal,              transform: to_boolean,        required: false }
+
+charge:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [charge_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: charge_ref,  normalized_column: charge_id,           transform: trim_string,      required: true }
+    - { source_column: lse_id,      normalized_column: lease_id,            transform: trim_string,      required: true }
+    - { source_column: resident_id, normalized_column: resident_account_id, transform: trim_string,      required: true }
+    - { source_column: charge_code, normalized_column: charge_type,         transform: map_charge_type,  required: true }
+    - { source_column: post_date,   normalized_column: charge_date,         transform: to_iso_date,      required: true }
+    - { source_column: amount_paid, normalized_column: amount_cents,        transform: dollars_to_cents, required: true }
+
+payment:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [payment_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: payment_ref, normalized_column: payment_id,          transform: trim_string,      required: true }
+    - { source_column: resident_id, normalized_column: resident_account_id, transform: trim_string,      required: true }
+    - { source_column: txn_date,    normalized_column: payment_date,        transform: to_iso_date,      required: true }
+    - { source_column: amount_paid, normalized_column: amount_cents,        transform: dollars_to_cents, required: true }
+    - { source_column: tender,      normalized_column: tender_type,         transform: trim_string,      required: true }
+
+# Remaining canonical entities are scaffolded as TODO for vendor-specialization.
+lease_event:      { status: TODO, note: "map per vendor" }
+delinquency_case: { status: TODO, note: "map per vendor" }
+lead:             { status: TODO, note: "map per vendor" }
+tour:             { status: TODO, note: "map per vendor" }
+application:      { status: TODO, note: "map per vendor" }
+renewal_offer:    { status: TODO, note: "map per vendor" }
+work_order:       { status: TODO, note: "map per vendor" }
+turn:             { status: TODO, note: "map per vendor" }

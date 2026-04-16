@@ -1,0 +1,42 @@
+pack_slug: acquisition_handoff
+pack_type: workflow
+priority: 10
+triggers:
+  event_driven: true
+  explicit_phrases:
+    - "acquisition handoff"
+    - "open operating handoff package"
+    - "close the handoff"
+    - "handoff status"
+    - "handoff checklist"
+  implicit_signals:
+    - "dealpath deal_close_date_actual non-null"
+    - "post_ic_property_setup emits handoff_baton_pass"
+    - "appfolio property lifecycle_stage transition requested from pre_acquisition"
+  event_sources:
+    - dealpath:deal.close_complete
+    - lifecycle_handoffs.md:handoff_1
+    - lifecycle_handoffs.md:handoff_3
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - lifecycle_stage
+  - management_mode
+  - market
+  - org_id
+  - deal_id
+optional_axes:
+  - jurisdiction
+  - submarket
+  - role
+  - output_type
+axes_match:
+  segment: all
+  lifecycle_stage_transition:
+    from: [pre_acquisition]
+    to: [stabilized, renovation, recap_support, lease_up]
+  management_mode: all
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

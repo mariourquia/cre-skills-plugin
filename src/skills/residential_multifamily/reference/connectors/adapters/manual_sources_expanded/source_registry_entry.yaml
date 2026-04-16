@@ -1,0 +1,111 @@
+# Source registry FRAGMENT for expanded manual sources.
+# Captures emailed files, shared-drive submissions, operator workbooks.
+# Merged into source_registry.yaml.
+
+records:
+
+  - source_id: operator_monthly_report_inbox
+    source_name: Operator Monthly Report Email Inbox
+    source_domain: manual_upload
+    vendor_family: manual_file_family
+    ingestion_mode: email_drop
+    environment: prod
+    cadence: monthly
+    data_owner: regional_ops_director
+    business_owner: regional_portfolio_lead
+    technical_owner: data_platform_team
+    credential_method: email_inbox_placeholder
+    object_coverage:
+      - approval_request
+      - staffing_position
+      - work_order
+    expected_latency_minutes: 43200
+    known_limitations:
+      - file naming inconsistent across operators
+      - missing sheet in workbook common
+      - partial-period coverage
+      - attestation sometimes missing
+    pii_classification: moderate
+    financial_sensitivity: moderate
+    legal_sensitivity: low
+    status: active
+    rollout_wave: wave_4
+    notes: |
+      Inbox receives monthly operator reports. Reviewer triages by file
+      family; attestation required. See adapters/manual_sources_expanded/.
+
+  - source_id: tpm_data_submission_drive
+    source_name: Third-Party Manager Data Submission Shared Drive
+    source_domain: manual_upload
+    vendor_family: manual_file_family
+    ingestion_mode: shared_drive
+    environment: prod
+    cadence: weekly
+    data_owner: asset_mgmt_director
+    business_owner: asset_mgmt_director
+    technical_owner: data_platform_team
+    credential_method: shared_drive_placeholder
+    object_coverage:
+      - lease
+      - charge
+      - payment
+      - delinquency_case
+      - work_order
+      - staffing_position
+    expected_latency_minutes: 10080
+    known_limitations:
+      - submission lag common
+      - exception aging requires manual reconciliation
+      - confidence flag tpm_data_confidence required on derived outputs
+    pii_classification: high
+    financial_sensitivity: high
+    legal_sensitivity: moderate
+    status: active
+    rollout_wave: wave_4
+
+  - source_id: bid_tab_workbook_drive
+    source_name: Bid Tab Workbook Shared Drive
+    source_domain: manual_upload
+    vendor_family: manual_file_family
+    ingestion_mode: shared_drive
+    environment: prod
+    cadence: on_demand
+    data_owner: construction_lead
+    business_owner: development_lead
+    technical_owner: data_platform_team
+    credential_method: shared_drive_placeholder
+    object_coverage:
+      - bid_package
+      - estimate_line_item
+    expected_latency_minutes: 1440
+    known_limitations:
+      - bid leveling logic varies by analyst
+      - vendor naming inconsistent vs vendor_master_crosswalk
+    pii_classification: low
+    financial_sensitivity: moderate
+    legal_sensitivity: moderate
+    status: active
+    rollout_wave: wave_4
+
+  - source_id: approval_matrix_workbook
+    source_name: Approval Matrix Workbook
+    source_domain: manual_upload
+    vendor_family: manual_file_family
+    ingestion_mode: shared_drive
+    environment: prod
+    cadence: quarterly
+    data_owner: cffo
+    business_owner: cffo
+    technical_owner: data_platform_team
+    credential_method: shared_drive_placeholder
+    object_coverage:
+      - approval_request
+    expected_latency_minutes: 129600
+    known_limitations:
+      - approval thresholds change quarterly; effective-dating required
+      - approver assignments vary by deal type
+    pii_classification: low
+    financial_sensitivity: high
+    legal_sensitivity: high
+    status: active
+    rollout_wave: wave_4

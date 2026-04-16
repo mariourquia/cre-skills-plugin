@@ -1,0 +1,132 @@
+# Deal-pipeline mapping template (vendor-neutral stub).
+# Vendor adapters under ../adapters/<vendor>_deal_pipeline/ override per-field
+# source_column names. Canonical targets on this file are the contract.
+
+deal:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [deal_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: true
+  fields:
+    - { source_column: deal_id,              normalized_column: deal_id,               transform: trim_string,          required: true }
+    - { source_column: deal_name,            normalized_column: deal_name,             transform: trim_string,          required: true }
+    - { source_column: deal_type,            normalized_column: deal_type,             transform: map_deal_type,        required: true }
+    - { source_column: pipeline_stage,       normalized_column: pipeline_stage,        transform: map_pipeline_stage,   required: true }
+    - { source_column: status,               normalized_column: status,                transform: map_deal_status,      required: true }
+    - { source_column: deal_created_date,    normalized_column: deal_created_date,     transform: to_iso_date,          required: true }
+    - { source_column: asset_placeholder_id, normalized_column: asset_placeholder_id,  transform: trim_string,          required: false }
+    - { source_column: market_label,         normalized_column: market_label,          transform: trim_string,          required: false }
+    - { source_column: submarket_label,      normalized_column: submarket_label,       transform: trim_string,          required: false }
+    - { source_column: strategy_tag,         normalized_column: strategy_tag,          transform: map_strategy_tag,     required: false }
+    - { source_column: source_channel,       normalized_column: source_channel,        transform: map_source_channel,   required: false }
+    - { source_column: broker_name,          normalized_column: broker_name,           transform: trim_string,          required: false }
+    - { source_column: seller_entity_label,  normalized_column: seller_entity_label,   transform: trim_string,          required: false }
+
+deal_stage:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [deal_stage_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: true
+  fields:
+    - { source_column: deal_stage_id,   normalized_column: deal_stage_id,   transform: trim_string,        required: true }
+    - { source_column: deal_id,         normalized_column: deal_id,         transform: trim_string,        required: true }
+    - { source_column: pipeline_stage,  normalized_column: pipeline_stage,  transform: map_pipeline_stage, required: true }
+    - { source_column: entered_date,    normalized_column: entered_date,    transform: to_iso_date,        required: true }
+    - { source_column: exited_date,     normalized_column: exited_date,     transform: to_iso_date,        required: false }
+    - { source_column: stage_reason,    normalized_column: stage_reason,    transform: trim_string,        required: false }
+
+deal_milestone:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [milestone_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: true
+  fields:
+    - { source_column: milestone_id,    normalized_column: milestone_id,    transform: trim_string,        required: true }
+    - { source_column: deal_id,         normalized_column: deal_id,         transform: trim_string,        required: true }
+    - { source_column: milestone_type,  normalized_column: milestone_type,  transform: map_milestone_type, required: true }
+    - { source_column: milestone_date,  normalized_column: milestone_date,  transform: to_iso_date,        required: true }
+    - { source_column: ic_review_id,    normalized_column: ic_review_id,    transform: trim_string,        required: false }
+    - { source_column: notes,           normalized_column: notes,           transform: trim_string,        required: false }
+
+investment_committee_review:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [ic_review_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: true
+  fields:
+    - { source_column: ic_review_id,   normalized_column: ic_review_id,   transform: trim_string,       required: true }
+    - { source_column: deal_id,        normalized_column: deal_id,        transform: trim_string,       required: true }
+    - { source_column: review_status,  normalized_column: review_status,  transform: map_ic_status,     required: true }
+    - { source_column: scheduled_date, normalized_column: scheduled_date, transform: to_iso_date,       required: true }
+    - { source_column: decision_date,  normalized_column: decision_date,  transform: to_iso_date,       required: false }
+
+deal_key_date:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [deal_key_date_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: true
+  fields:
+    - { source_column: deal_key_date_id, normalized_column: deal_key_date_id, transform: trim_string,      required: true }
+    - { source_column: deal_id,          normalized_column: deal_id,          transform: trim_string,      required: true }
+    - { source_column: date_kind,        normalized_column: date_kind,        transform: map_date_kind,    required: true }
+    - { source_column: target_date,      normalized_column: target_date,      transform: to_iso_date,      required: true }
+    - { source_column: actual_date,      normalized_column: actual_date,      transform: to_iso_date,      required: false }
+
+deal_team_assignment:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [assignment_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: true
+  fields:
+    - { source_column: assignment_id,  normalized_column: assignment_id,  transform: trim_string,       required: true }
+    - { source_column: deal_id,        normalized_column: deal_id,        transform: trim_string,       required: true }
+    - { source_column: role,           normalized_column: role,           transform: map_team_role,     required: true }
+    - { source_column: assignee_label, normalized_column: assignee_label, transform: trim_string,       required: true }
+
+deal_financing_placeholder:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [financing_placeholder_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: true
+  fields:
+    - { source_column: financing_placeholder_id, normalized_column: financing_placeholder_id, transform: trim_string,           required: true }
+    - { source_column: deal_id,                  normalized_column: deal_id,                  transform: trim_string,           required: true }
+    - { source_column: tranche_kind,             normalized_column: tranche_kind,             transform: map_tranche_kind,      required: true }
+    - { source_column: placeholder_status,       normalized_column: placeholder_status,       transform: map_financing_status,  required: true }
+    - { source_column: target_leverage_bps,      normalized_column: target_leverage_bps,      transform: percent_to_bps,        required: false }
+
+deal_asset_placeholder:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [asset_placeholder_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: true
+  fields:
+    - { source_column: asset_placeholder_id, normalized_column: asset_placeholder_id, transform: trim_string,     required: true }
+    - { source_column: placeholder_name,     normalized_column: placeholder_name,     transform: trim_string,     required: true }
+    - { source_column: asset_type,           normalized_column: asset_type,           transform: map_asset_type,  required: true }
+    - { source_column: market_label,         normalized_column: market_label,         transform: trim_string,     required: false }
+    - { source_column: submarket_label,      normalized_column: submarket_label,      transform: trim_string,     required: false }

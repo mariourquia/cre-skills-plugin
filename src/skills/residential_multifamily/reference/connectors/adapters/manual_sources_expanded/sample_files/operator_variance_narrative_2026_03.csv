@@ -1,0 +1,7 @@
+property_code,period,account,budget,actual,variance_amount,variance_pct,driver_category,narrative,author,reviewed_by
+ASH-CLT-001,2026-03,6120-turn-expense,14200.00,19840.00,5640.00,0.397,rate,"Turn cost ran over plan due to higher flooring replacement rate (3 units received LVP versus budgeted carpet per renovation scope shift).",J. Osei,R. Foley
+ASH-CLT-001,2026-03,6310-repairs-maintenance,8400.00,11260.00,2860.00,0.340,timing,"Deferred HVAC coil cleaning from Q4 2025 executed in March. Not a structural overrun; will normalize by Q2.",J. Osei,R. Foley
+WAT-RDU-004,2026-03,5100-gross-rent,248900.00,242150.00,-6750.00,-0.027,volume,"Physical occupancy ran 1.1pp below plan; two units in punchlist as of month-end pushed rent-ready dates into April.",L. Mbeki,R. Foley
+OAK-ATL-011,2026-03,6200-payroll,52400.00,49820.00,-2580.00,0.049,timing,"Open leasing consultant seat filled only in week 3 of March; approved headcount unchanged.",A. Strand,M. Caldera
+PIN-NAS-007,2026-03,6510-marketing,3200.00,7850.00,4650.00,1.453,one_time,"Targeted digital push initiated in response to February move-out cluster. Approved by asset manager on 2026-03-10 via approval_request apr_2026_0231.",A. Strand,M. Caldera
+RIV-PHX-002,2026-03,5200-other-income,18200.00,21940.00,3740.00,0.206,rate,"Pet-fee capture improved after policy refresh in February; RUBS billback caught up from January backlog.",D. Patel,T. Hensley

@@ -1,0 +1,235 @@
+{
+  "property": [
+    {
+      "property_id": "prop_demo_001",
+      "property_name": "Sample Property One",
+      "unit_count_total": 200,
+      "unit_count_rentable": 198,
+      "market": "sample_market",
+      "submarket": "sample_submarket",
+      "year_built": 2005,
+      "year_renovated": 2018,
+      "source_name": "sample_feed",
+      "source_type": "pms",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "prop_demo_001"
+    }
+  ],
+  "unit": [
+    {
+      "property_id": "prop_demo_001",
+      "unit_id": "101",
+      "bedrooms": 1,
+      "bathrooms": 1.0,
+      "nrsf": 750,
+      "status": "occupied",
+      "unit_type_id": "A1",
+      "floor": 1,
+      "classification": "classic",
+      "source_name": "sample_feed",
+      "source_type": "pms",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "unit_101_prop_demo_001"
+    },
+    {
+      "property_id": "prop_demo_001",
+      "unit_id": "102",
+      "bedrooms": 2,
+      "bathrooms": 2.0,
+      "nrsf": 1050,
+      "status": "vacant_unrented",
+      "unit_type_id": "B1",
+      "floor": 1,
+      "classification": "renovated",
+      "source_name": "sample_feed",
+      "source_type": "pms",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "unit_102_prop_demo_001"
+    }
+  ],
+  "lease": [
+    {
+      "lease_id": "lease_sample_001",
+      "property_id": "prop_demo_001",
+      "unit_id": "101",
+      "resident_account_id": "resident_sample_001",
+      "start_date": "2025-08-01",
+      "end_date": "2026-07-31",
+      "base_rent_monthly_cents": 1234500,
+      "status": "in_effect",
+      "term_months": 12,
+      "concessions_total_cents": 0,
+      "is_renewal": false,
+      "prior_lease_id": null,
+      "source_name": "sample_feed",
+      "source_type": "pms",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "lease_sample_001"
+    }
+  ],
+  "lease_event": [
+    {
+      "lease_event_id": "evt_sample_001",
+      "lease_id": "lease_sample_001",
+      "event_type": "lease_signed",
+      "event_date": "2025-07-15",
+      "event_payload": {},
+      "source_name": "sample_feed",
+      "source_type": "pms",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "evt_sample_001"
+    }
+  ],
+  "charge": [
+    {
+      "charge_id": "chg_sample_001",
+      "lease_id": "lease_sample_001",
+      "resident_account_id": "resident_sample_001",
+      "charge_type": "base_rent",
+      "charge_date": "2026-04-01",
+      "amount_cents": 1234500,
+      "source_name": "sample_feed",
+      "source_type": "pms",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "chg_sample_001"
+    }
+  ],
+  "payment": [
+    {
+      "payment_id": "pay_sample_001",
+      "resident_account_id": "resident_sample_001",
+      "payment_date": "2026-04-03",
+      "amount_cents": 1234500,
+      "tender_type": "ach",
+      "source_name": "sample_feed",
+      "source_type": "pms",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "pay_sample_001"
+    }
+  ],
+  "delinquency_case": [
+    {
+      "case_id": "case_sample_001",
+      "lease_id": "lease_sample_001",
+      "stage": "current",
+      "current_balance_cents": 0,
+      "stage_entered_date": "2026-04-01",
+      "legal_flag": false,
+      "source_name": "sample_feed",
+      "source_type": "pms",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "case_sample_001"
+    }
+  ],
+  "lead": [
+    {
+      "lead_id": "lead_sample_001",
+      "property_id": "prop_demo_001",
+      "source_channel": "sample_channel",
+      "inquiry_date": "2026-04-10",
+      "pipeline_stage": "contacted",
+      "source_name": "sample_feed",
+      "source_type": "pms",
+      "source_date": "2026-04-10",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "lead_sample_001"
+    }
+  ],
+  "tour": [
+    {
+      "tour_id": "tour_sample_001",
+      "lead_id": "lead_sample_001",
+      "scheduled_date": "2026-04-12",
+      "tour_type": "in_person",
+      "outcome": "follow_up",
+      "source_name": "sample_feed",
+      "source_type": "pms",
+      "source_date": "2026-04-12",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "tour_sample_001"
+    }
+  ],
+  "application": [
+    {
+      "application_id": "app_sample_001",
+      "lead_id": "lead_sample_001",
+      "applied_date": "2026-04-13",
+      "approval_status": "pending",
+      "source_name": "sample_feed",
+      "source_type": "pms",
+      "source_date": "2026-04-13",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "app_sample_001"
+    }
+  ],
+  "renewal_offer": [
+    {
+      "renewal_offer_id": "off_sample_001",
+      "lease_id": "lease_sample_001",
+      "offer_date": "2026-04-01",
+      "offered_rent_monthly_cents": 1256700,
+      "offered_term_months": 12,
+      "response": "pending",
+      "source_name": "sample_feed",
+      "source_type": "pms",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "off_sample_001"
+    }
+  ],
+  "work_order": [
+    {
+      "work_order_id": "wo_sample_001",
+      "property_id": "prop_demo_001",
+      "reported_date": "2026-04-14",
+      "priority": "p3_standard",
+      "status": "open",
+      "unit_id": "101",
+      "category": "plumbing",
+      "source_name": "sample_feed",
+      "source_type": "pms",
+      "source_date": "2026-04-14",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "wo_sample_001"
+    }
+  ],
+  "turn": [
+    {
+      "turn_id": "turn_sample_001",
+      "property_id": "prop_demo_001",
+      "unit_id": "102",
+      "move_out_date": "2026-03-15",
+      "status": "in_progress",
+      "actual_ready_date": null,
+      "budget_total_cents": 300000,
+      "actual_total_cents": null,
+      "source_name": "sample_feed",
+      "source_type": "pms",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "turn_sample_001"
+    }
+  ]
+}

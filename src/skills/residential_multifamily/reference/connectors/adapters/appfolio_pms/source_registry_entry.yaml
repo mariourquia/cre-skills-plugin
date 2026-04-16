@@ -1,0 +1,50 @@
+# Source registry FRAGMENT for AppFolio PMS.
+# Will be merged into source_registry/source_registry.yaml by integration step.
+# Conforms to source_registry.schema.yaml.
+
+records:
+
+  - source_id: appfolio_prod
+    source_name: AppFolio Property Management Production
+    source_domain: pms
+    vendor_family: appfolio_family
+    ingestion_mode: api
+    environment: prod
+    cadence: hourly
+    data_owner: regional_ops_director
+    business_owner: regional_portfolio_lead
+    technical_owner: data_platform_team
+    credential_method: api_key_placeholder
+    object_coverage:
+      - property
+      - building
+      - unit
+      - unit_type
+      - lease
+      - lease_event
+      - resident_account
+      - charge
+      - payment
+      - delinquency_case
+      - lead
+      - tour
+      - application
+      - approval_outcome
+      - work_order
+      - turn_project
+      - vendor
+    expected_latency_minutes: 60
+    known_limitations:
+      - turns derived from event sequences (move_out + make_ready work_orders + move_in)
+      - concession tracking informal; sums via ChargeType=Credit/Concession
+      - eviction status not distinct from delinquency stage; derived
+      - GL Partner splits create multiple GL views of one operating property
+      - vendor directory contains duplicates across GL partners; dedupe via vendor_master_crosswalk
+    pii_classification: high
+    financial_sensitivity: high
+    legal_sensitivity: high
+    status: stubbed
+    rollout_wave: wave_4
+    notes: |
+      Primary AppFolio PMS source for wave 4. Resolves to canonical pms domain.
+      See adapters/appfolio_pms/ for mapping, dq, edge cases, runbooks.

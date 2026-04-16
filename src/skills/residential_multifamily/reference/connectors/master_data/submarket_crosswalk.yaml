@@ -1,0 +1,146 @@
+# Submarket crosswalk
+# Conforms to crosswalk.schema.yaml.
+# Created in wave 4. Brokers use neighborhood / Realtor names; AppFolio uses
+# operator-defined submarket tags; Excel benchmark files often use both. This
+# crosswalk reconciles them.
+
+status_tag: sample
+
+rows:
+
+  - canonical_id: submarket_atlanta_buckhead
+    source_system: excel_rent_comp_weekly
+    source_id: "Buckhead"
+    match_confidence: high
+    match_method: exact
+    effective_start: "2025-01-01"
+    survivorship_rule: appfolio_authoritative_for_internal_naming
+    manual_override: false
+    reviewer: asset_mgmt_analyst_team
+    last_validated_at: "2026-04-15"
+    notes: Sample row; broker uses neighborhood name.
+
+  - canonical_id: submarket_atlanta_buckhead
+    source_system: appfolio_prod
+    source_id: "ATL-BUCK"
+    match_confidence: high
+    match_method: exact
+    effective_start: "2025-01-01"
+    survivorship_rule: appfolio_authoritative_for_internal_naming
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2026-04-15"
+    notes: Sample row; AppFolio uses prefixed submarket code.
+
+  - canonical_id: submarket_charlotte_southpark
+    source_system: excel_rent_comp_weekly
+    source_id: "South Park / Cotswold"
+    match_confidence: medium
+    match_method: fuzzy
+    effective_start: "2025-01-01"
+    survivorship_rule: appfolio_authoritative_for_internal_naming
+    manual_override: true
+    override_reason: Broker bundles two adjacent submarkets; canonical splits.
+    reviewer: asset_mgmt_director
+    last_validated_at: "2026-04-15"
+    notes: Sample row; manual override required for split.
+
+  - canonical_id: submarket_charlotte_southpark
+    source_system: appfolio_prod
+    source_id: "CLT-SP"
+    match_confidence: high
+    match_method: exact
+    effective_start: "2025-01-01"
+    survivorship_rule: appfolio_authoritative_for_internal_naming
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2026-04-15"
+    notes: Sample row.
+
+  # -----------------------------------------------------------------------
+  # Wave 5 — Yardi multi-role adapter integration. Yardi submarket labels
+  # are operator-declared strings on the property record (submarket_label).
+  # Canonical submarket ids follow the same snake_case convention as other
+  # rows. One submarket pairs to a single canonical market id (see
+  # related_canonical_ids on the parent market_crosswalk entry).
+  # -----------------------------------------------------------------------
+
+  - canonical_id: submarket_sample_one_a
+    source_system: yardi_voyager_pms_stub
+    source_id: "sample_submarket_one"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: appfolio_authoritative_for_internal_naming
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Yardi submarket label from
+      Voyager property.submarket_label; operator_declared survivorship.
+      Provisional until classification_worksheet.md closes.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager submarket label
+      sample_submarket_one within market_sample_one (covers Maple Vista).
+    related_canonical_ids:
+      - market_sample_one
+
+  - canonical_id: submarket_sample_two_a
+    source_system: yardi_voyager_pms_stub
+    source_id: "sample_submarket_two"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: appfolio_authoritative_for_internal_naming
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Yardi submarket label from
+      Voyager property.submarket_label; operator_declared survivorship.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager submarket label
+      sample_submarket_two within market_sample_two (covers Harbor Crest).
+    related_canonical_ids:
+      - market_sample_two
+
+  - canonical_id: submarket_sample_three_a
+    source_system: yardi_voyager_pms_stub
+    source_id: "sample_submarket_three"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: appfolio_authoritative_for_internal_naming
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Yardi submarket label from
+      Voyager property.submarket_label; operator_declared survivorship.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager submarket label
+      sample_submarket_three within market_sample_three (covers Lantern Flats).
+    related_canonical_ids:
+      - market_sample_three
+
+  - canonical_id: submarket_sample_one_b
+    source_system: yardi_voyager_pms_stub
+    source_id: "sample_submarket_four"
+    match_confidence: medium
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: appfolio_authoritative_for_internal_naming
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Yardi submarket label from
+      Voyager property.submarket_label. Medium confidence because the
+      Briarfield (YP_50004) historical submarket label predates the
+      post-renovation reclass; surviving label awaits operator sign-off.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager submarket label
+      sample_submarket_four within market_sample_one (covers historical
+      Briarfield footprint; cutover-completed).
+    related_canonical_ids:
+      - market_sample_one

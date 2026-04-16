@@ -1,0 +1,246 @@
+# Manual Uploads mapping template - header-as-typed-by-operator to normalized column.
+# Vendor-neutral. Each template has its own mapping because operator-prepared
+# files differ from system-exported feeds. Dollar headers map to cents
+# columns via parse_currency.
+
+budget_file:
+  source_format: [csv]
+  dedup_rule:
+    keys: [property_id, account_code, budget_year]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: true
+  fields:
+    - { source_column: property_id,           normalized_column: property_id,          transform: trim_string,    required: true }
+    - { source_column: account_code,          normalized_column: account_code,         transform: trim_string,    required: true }
+    - { source_column: budget_year,           normalized_column: budget_year,          transform: to_integer,     required: true }
+    - { source_column: budget_version,        normalized_column: budget_version,       transform: to_enum,        required: true }
+    - { source_column: annual_amount_usd,     normalized_column: annual_amount_cents,  transform: parse_currency, required: true }
+    - { source_column: period_split,          normalized_column: period_split,         transform: trim_string,    required: false }
+    - { source_column: notes,                 normalized_column: notes,                transform: trim_string,    required: false }
+
+forecast_file:
+  source_format: [csv]
+  dedup_rule:
+    keys: [property_id, account_code, forecast_period]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: true
+  fields:
+    - { source_column: property_id,           normalized_column: property_id,            transform: trim_string,    required: true }
+    - { source_column: account_code,          normalized_column: account_code,           transform: trim_string,    required: true }
+    - { source_column: forecast_period,       normalized_column: forecast_period,        transform: trim_string,    required: true }
+    - { source_column: forecast_amount_usd,   normalized_column: forecast_amount_cents,  transform: parse_currency, required: true }
+    - { source_column: forecast_method,       normalized_column: forecast_method,        transform: trim_string,    required: false }
+
+owner_report:
+  source_format: [markdown]
+  dedup_rule:
+    keys: [property_id, report_period, section_key]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: false
+  fields:
+    - { source_column: property_id,           normalized_column: property_id,       transform: trim_string, required: true }
+    - { source_column: report_period,         normalized_column: report_period,     transform: trim_string, required: true }
+    - { source_column: section_key,           normalized_column: section_key,       transform: to_enum,     required: true }
+    - { source_column: body_markdown,         normalized_column: body_markdown,     transform: trim_string, required: true }
+    - { source_column: approval_status,       normalized_column: approval_status,   transform: to_enum,     required: false }
+
+vendor_bid_tab:
+  source_format: [csv, xlsx]
+  dedup_rule:
+    keys: [solicitation_id, vendor_id, scope_line_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: true
+  fields:
+    - { source_column: solicitation_id,          normalized_column: solicitation_id,          transform: trim_string,    required: true }
+    - { source_column: vendor_id,                normalized_column: vendor_id,                transform: trim_string,    required: true }
+    - { source_column: scope_line_id,            normalized_column: scope_line_id,            transform: trim_string,    required: true }
+    - { source_column: bid_amount_usd,           normalized_column: bid_amount_cents,         transform: parse_currency, required: true }
+    - { source_column: bid_date,                 normalized_column: bid_date,                 transform: to_date,        required: true }
+    - { source_column: property_id,              normalized_column: property_id,              transform: trim_string,    required: false }
+    - { source_column: leveled_adjustment_usd,   normalized_column: leveled_adjustment_cents, transform: parse_currency, required: false }
+    - { source_column: recommendation_flag,      normalized_column: recommendation_flag,      transform: to_boolean,     required: false }
+
+rent_survey:
+  source_format: [csv, xlsx]
+  dedup_rule:
+    keys: [comp_id, survey_date]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: true
+  fields:
+    - { source_column: comp_id,                   normalized_column: comp_id,                 transform: trim_string,    required: true }
+    - { source_column: survey_date,               normalized_column: survey_date,             transform: to_date,        required: true }
+    - { source_column: comp_name,                 normalized_column: comp_name,               transform: trim_string,    required: true }
+    - { source_column: unit_type,                 normalized_column: unit_type,               transform: trim_string,    required: true }
+    - { source_column: asking_rent_usd,           normalized_column: asking_rent_cents,       transform: parse_currency, required: true }
+    - { source_column: concession_summary,        normalized_column: concession_summary,      transform: trim_string,    required: false }
+    - { source_column: occupancy_reported_pct,    normalized_column: occupancy_reported_pct,  transform: to_number,      required: false }
+
+market_comp_sheet:
+  source_format: [csv, xlsx]
+  dedup_rule:
+    keys: [comp_sale_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: true
+  fields:
+    - { source_column: comp_sale_id,              normalized_column: comp_sale_id,            transform: trim_string,    required: true }
+    - { source_column: property_name,             normalized_column: property_name,           transform: trim_string,    required: true }
+    - { source_column: sale_date,                 normalized_column: sale_date,               transform: to_date,        required: true }
+    - { source_column: sale_price_usd,            normalized_column: sale_price_cents,        transform: parse_currency, required: true }
+    - { source_column: unit_count,                normalized_column: unit_count,              transform: to_integer,     required: true }
+    - { source_column: cap_rate_pct,              normalized_column: cap_rate_bps,            transform: to_integer,     required: false }
+    - { source_column: year_built,                normalized_column: year_built,              transform: to_integer,     required: false }
+
+approval_matrix_upload:
+  source_format: [yaml]
+  dedup_rule:
+    keys: [matrix_id, row_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: false
+  fields:
+    - { source_column: matrix_id,                 normalized_column: matrix_id,           transform: trim_string,    required: true }
+    - { source_column: row_id,                    normalized_column: row_id,              transform: trim_string,    required: true }
+    - { source_column: scope,                     normalized_column: scope,               transform: trim_string,    required: true }
+    - { source_column: threshold_usd,             normalized_column: threshold_cents,     transform: parse_currency, required: true }
+    - { source_column: approver_role,             normalized_column: approver_role,       transform: trim_string,    required: true }
+    - { source_column: notes,                     normalized_column: notes,               transform: trim_string,    required: false }
+
+property_list:
+  source_format: [csv, xlsx]
+  dedup_rule:
+    keys: [property_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: false
+  fields:
+    - { source_column: property_id,               normalized_column: property_id,         transform: trim_string, required: true }
+    - { source_column: property_name,             normalized_column: property_name,       transform: trim_string, required: true }
+    - { source_column: market,                    normalized_column: market,              transform: trim_string, required: true }
+    - { source_column: unit_count,                normalized_column: unit_count,          transform: to_integer,  required: true }
+    - { source_column: submarket,                 normalized_column: submarket,           transform: trim_string, required: false }
+    - { source_column: entity_id,                 normalized_column: entity_id,           transform: trim_string, required: false }
+    - { source_column: status,                    normalized_column: status,              transform: to_enum,     required: false }
+
+staffing_model_upload:
+  source_format: [csv, xlsx]
+  dedup_rule:
+    keys: [property_id, role_code]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: false
+  fields:
+    - { source_column: property_id,               normalized_column: property_id,         transform: trim_string, required: true }
+    - { source_column: role_code,                 normalized_column: role_code,           transform: lowercase,   required: true }
+    - { source_column: budgeted_fte,              normalized_column: budgeted_fte,        transform: to_number,   required: true }
+    - { source_column: notes,                     normalized_column: notes,               transform: trim_string, required: false }
+
+capex_request_upload:
+  source_format: [yaml]
+  dedup_rule:
+    keys: [request_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: false
+  fields:
+    - { source_column: request_id,                normalized_column: request_id,               transform: trim_string,    required: true }
+    - { source_column: property_id,               normalized_column: property_id,              transform: trim_string,    required: true }
+    - { source_column: request_date,              normalized_column: request_date,             transform: to_date,        required: true }
+    - { source_column: category,                  normalized_column: category,                 transform: to_enum,        required: true }
+    - { source_column: requested_amount_usd,      normalized_column: requested_amount_cents,   transform: parse_currency, required: true }
+    - { source_column: justification,             normalized_column: justification,            transform: trim_string,    required: false }
+    - { source_column: approval_status,           normalized_column: approval_status,          transform: to_enum,        required: false }
+
+draw_package_upload:
+  source_format: [markdown, pdf]
+  dedup_rule:
+    keys: [project_id, draw_number]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: false
+  fields:
+    - { source_column: project_id,                normalized_column: project_id,              transform: trim_string,    required: true }
+    - { source_column: draw_number,               normalized_column: draw_number,             transform: to_integer,     required: true }
+    - { source_column: draw_date,                 normalized_column: draw_date,               transform: to_date,        required: true }
+    - { source_column: draw_amount_usd,           normalized_column: draw_amount_cents,       transform: parse_currency, required: true }
+    - { source_column: review_status,             normalized_column: review_status,           transform: to_enum,        required: true }
+    - { source_column: supporting_docs_count,     normalized_column: supporting_docs_count,   transform: to_integer,     required: false }
+    - { source_column: property_id,               normalized_column: property_id,             transform: trim_string,    required: false }
+
+monthly_review_pack:
+  source_format: [markdown]
+  dedup_rule:
+    keys: [property_id, report_period, pack_section_key]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: false
+  fields:
+    - { source_column: property_id,               normalized_column: property_id,         transform: trim_string, required: true }
+    - { source_column: report_period,             normalized_column: report_period,       transform: trim_string, required: true }
+    - { source_column: pack_section_key,          normalized_column: pack_section_key,    transform: to_enum,     required: true }
+    - { source_column: body_markdown,             normalized_column: body_markdown,       transform: trim_string, required: true }
+    - { source_column: approval_status,           normalized_column: approval_status,     transform: to_enum,     required: false }
+
+delinquency_report_upload:
+  source_format: [csv, xlsx]
+  dedup_rule:
+    keys: [property_id, report_period, resident_account_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: false
+  fields:
+    - { source_column: property_id,               normalized_column: property_id,             transform: trim_string,    required: true }
+    - { source_column: report_period,             normalized_column: report_period,           transform: trim_string,    required: true }
+    - { source_column: resident_account_id,       normalized_column: resident_account_id,     transform: trim_string,    required: true }
+    - { source_column: balance_usd,               normalized_column: balance_cents,           transform: parse_currency, required: true }
+    - { source_column: aging_bucket,              normalized_column: aging_bucket,            transform: to_enum,        required: true }
+    - { source_column: notes,                     normalized_column: notes,                   transform: trim_string,    required: false }
+
+work_order_backlog_upload:
+  source_format: [csv, xlsx]
+  dedup_rule:
+    keys: [property_id, report_period, work_order_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: false
+  fields:
+    - { source_column: property_id,               normalized_column: property_id,             transform: trim_string, required: true }
+    - { source_column: report_period,             normalized_column: report_period,           transform: trim_string, required: true }
+    - { source_column: work_order_id,             normalized_column: work_order_id,           transform: trim_string, required: true }
+    - { source_column: priority,                  normalized_column: priority,                transform: to_enum,     required: true }
+    - { source_column: age_days,                  normalized_column: age_days,                transform: to_integer,  required: true }
+    - { source_column: assigned_role,             normalized_column: assigned_role,           transform: trim_string, required: false }
+
+pm_scorecard_upload:
+  source_format: [csv]
+  dedup_rule:
+    keys: [employee_id, scoring_period, score_category]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: false
+  fields:
+    - { source_column: employee_id,               normalized_column: employee_id,           transform: trim_string, required: true }
+    - { source_column: scoring_period,            normalized_column: scoring_period,        transform: trim_string, required: true }
+    - { source_column: score_category,            normalized_column: score_category,        transform: to_enum,     required: true }
+    - { source_column: score_value,               normalized_column: score_value,           transform: to_number,   required: true }
+    - { source_column: commentary,                normalized_column: commentary,            transform: trim_string, required: false }

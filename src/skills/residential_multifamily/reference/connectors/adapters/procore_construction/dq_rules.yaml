@@ -1,0 +1,200 @@
+# Procore construction adapter — data quality rules.
+# Prefix `pc_` namespaces all rules to the Procore vendor.
+# Severity: blocker | warning | info. Tolerance bands reference
+# reference/normalized/schemas/reconciliation_tolerance_band.yaml; no hardcoded
+# values.
+
+rules:
+
+  # ---------------------------------------------------------------------
+  # Freshness — feed latency per object type.
+  # ---------------------------------------------------------------------
+  - rule_id: pc_freshness_projects
+    dimension: freshness
+    severity: blocker
+    description: Procore project feed must land within expected_latency_minutes per source_registry.
+    expected: max(project.extracted_at) >= now - source_registry.expected_latency_minutes
+    remediation: runbooks/procore_common_issues.md::stale_project_feed
+
+  - rule_id: pc_freshness_commitments
+    dimension: freshness
+    severity: blocker
+    description: Procore commitment feed must land within expected_latency_minutes per source_registry.
+    expected: max(commitment.extracted_at) >= now - source_registry.expected_latency_minutes
+    remediation: runbooks/procore_common_issues.md::stale_commitment_feed
+
+  - rule_id: pc_freshness_change_orders
+    dimension: freshness
+    severity: blocker
+    description: Procore change-order feed must land within expected_latency_minutes per source_registry.
+    expected: max(change_order.extracted_at) >= now - source_registry.expected_latency_minutes
+    remediation: runbooks/procore_common_issues.md::stale_co_feed
+
+  - rule_id: pc_freshness_draws
+    dimension: freshness
+    severity: blocker
+    description: Procore draw (pay application) feed must land within expected_latency_minutes per source_registry.
+    expected: max(draw_request.extracted_at) >= now - source_registry.expected_latency_minutes
+    remediation: runbooks/procore_common_issues.md::stale_draw_feed
+
+  # ---------------------------------------------------------------------
+  # Completeness — required fields per object.
+  # ---------------------------------------------------------------------
+  - rule_id: pc_completeness_project_required
+    dimension: completeness
+    severity: blocker
+    description: Every project row must carry project_id, project_name, stage (status), construction_type, and either start_date or created_at.
+    expected: no nulls in project_id, project_name, stage, construction_type
+    remediation: route to master_data/unresolved_exceptions_queue.md
+
+  - rule_id: pc_completeness_commitment_required
+    dimension: completeness
+    severity: blocker
+    description: Every commitment row must carry commitment_id, project_id, contract_company_id, title, status, original_contract_amount.
+    expected: no nulls in commitment_id, project_id, contract_company_id, title, status, original_contract_amount
+    remediation: route to master_data/unresolved_exceptions_queue.md
+
+  - rule_id: pc_completeness_change_order_required
+    dimension: completeness
+    severity: blocker
+    description: Every change-order row must carry change_order_id, project_id, commitment_id, co_number, status, cost_delta.
+    expected: no nulls in change_order_id, project_id, commitment_id, co_number, status, cost_delta
+    remediation: route to master_data/unresolved_exceptions_queue.md
+
+  - rule_id: pc_completeness_draw_required
+    dimension: completeness
+    severity: blocker
+    description: Every draw row must carry draw_request_id, project_id, period, amount_requested, status.
+    expected: no nulls in draw_request_id, project_id, period, amount_requested, status
+    remediation: route to master_data/unresolved_exceptions_queue.md
+
+  # ---------------------------------------------------------------------
+  # Conformance — enum + format checks.
+  # ---------------------------------------------------------------------
+  - rule_id: pc_conformance_project_status_enum
+    dimension: conformance
+    severity: blocker
+    description: Project status must map to Procore enum via map_procore_stage.
+    expected: status IN (active, inactive, complete) and stage IN (Bidding, Pre-Construction, Course of Construction, Current Construction, Post Construction, Warranty, Closed)
+    remediation: extend map_procore_stage or escalate
+
+  - rule_id: pc_conformance_commitment_status_enum
+    dimension: conformance
+    severity: blocker
+    description: Commitment status must map to Procore enum via map_procore_commitment_status.
+    expected: status IN (draft, out_for_signature, approved, complete, void, terminated)
+    remediation: extend map_procore_commitment_status or escalate
+
+  - rule_id: pc_conformance_co_status_enum
+    dimension: conformance
+    severity: blocker
+    description: Change-order status must map to Procore enum via map_procore_co_status.
+    expected: status IN (draft, pending, approved, void, rejected)
+    remediation: extend map_procore_co_status or escalate
+
+  - rule_id: pc_conformance_draw_status_enum
+    dimension: conformance
+    severity: blocker
+    description: Draw (pay app) status must map to Procore enum via map_procore_pay_app_status.
+    expected: status IN (draft, submitted, under_review, approved, approved_as_noted, rejected, paid)
+    remediation: extend map_procore_pay_app_status or escalate
+
+  - rule_id: pc_conformance_csi_division
+    dimension: conformance
+    severity: warning
+    description: cost_code CSI division follows two-digit pattern (01-48); non-conforming cost codes flagged for review.
+    expected: csi_division matches /^[0-4][0-9]$/ when populated
+    remediation: annotate with non_csi flag; route to runbooks/procore_common_issues.md::cost_code_drift
+
+  # ---------------------------------------------------------------------
+  # Uniqueness — primary key invariants.
+  # ---------------------------------------------------------------------
+  - rule_id: pc_uniqueness_commitment_id
+    dimension: uniqueness
+    severity: blocker
+    description: commitment_id unique across active records.
+    expected: count(distinct commitment_id) = count(commitment_id) where status != void
+    remediation: dedupe via change_order_crosswalk audit; master_data/unresolved_exceptions_queue.md
+
+  - rule_id: pc_uniqueness_change_order_id
+    dimension: uniqueness
+    severity: blocker
+    description: change_order_id unique across active records.
+    expected: count(distinct change_order_id) = count(change_order_id)
+    remediation: dedupe via change_order_crosswalk audit
+
+  - rule_id: pc_uniqueness_draw_request_id
+    dimension: uniqueness
+    severity: blocker
+    description: draw_request_id unique across active records.
+    expected: count(distinct draw_request_id) = count(draw_request_id)
+    remediation: dedupe via draw_request_crosswalk audit
+
+  # ---------------------------------------------------------------------
+  # Referential integrity — cross-object FK resolution.
+  # ---------------------------------------------------------------------
+  - rule_id: pc_referential_commitment_project_fk
+    dimension: consistency
+    severity: blocker
+    description: Every commitment.project_id resolves via capex_project_crosswalk to a canonical capex_project.
+    expected: commitment.project_id IN capex_project_crosswalk.source_id where source_system = procore_prod
+    remediation: runbooks/procore_common_issues.md::orphan_commitment
+
+  - rule_id: pc_referential_change_order_commitment_fk
+    dimension: consistency
+    severity: blocker
+    description: Every change_order.commitment_id resolves to a known commitment record.
+    expected: change_order.commitment_id IN commitment.commitment_id
+    remediation: runbooks/procore_common_issues.md::orphan_co
+
+  - rule_id: pc_referential_draw_project_fk
+    dimension: consistency
+    severity: blocker
+    description: Every draw.project_id resolves via capex_project_crosswalk.
+    expected: draw_request.project_id IN capex_project_crosswalk.source_id where source_system = procore_prod
+    remediation: runbooks/procore_common_issues.md::orphan_draw
+
+  - rule_id: pc_referential_vendor_master_fk
+    dimension: consistency
+    severity: blocker
+    description: Every commitment.contract_company_id resolves to vendor_master_crosswalk.
+    expected: commitment.contract_company_id IN vendor_master_crosswalk.source_id where source_system = procore_prod
+    remediation: runbooks/procore_common_issues.md::vendor_master_duplication
+
+  # ---------------------------------------------------------------------
+  # Consistency — cross-object business invariants.
+  # ---------------------------------------------------------------------
+  - rule_id: pc_consistency_commitment_overdrawn
+    dimension: consistency
+    severity: blocker
+    description: paid_to_date must not exceed revised_contract_amount; overdrawn commitments blocked pending reconciliation.
+    expected: commitment.paid_to_date <= commitment.revised_contract_amount (within overdrawn_tolerance_band per reconciliation_tolerance_band.yaml)
+    remediation: runbooks/procore_common_issues.md::commitment_overdrawn
+
+  - rule_id: pc_consistency_co_sum_vs_revised
+    dimension: consistency
+    severity: blocker
+    description: Sum of approved commitment change orders must equal revised_contract_amount minus original_contract_amount (within co_sum_reconciliation_band).
+    expected: sum(co.cost_delta where status = approved) == (commitment.revised_contract_amount - commitment.original_contract_amount) within co_sum_reconciliation_band (cite reconciliation_tolerance_band.yaml)
+    remediation: runbooks/procore_common_issues.md::co_sum_mismatch
+
+  - rule_id: pc_consistency_schedule_baseline_preserved
+    dimension: consistency
+    severity: warning
+    description: Schedule baseline_date must be preserved when current_forecast_date shifts; re-baselining requires a new baseline_revision_id and an operator note.
+    expected: milestone.baseline_date IS NOT NULL AND baseline_revision_id IS NOT NULL AND (milestone.baseline_date unchanged OR manual_override_approved)
+    remediation: runbooks/procore_common_issues.md::schedule_baseline_overwrite
+
+  - rule_id: pc_consistency_draw_cost_vs_total
+    dimension: consistency
+    severity: blocker
+    description: cost_to_date + cost_to_complete_estimate should reconcile to commitment.revised_contract_amount within draw_cost_reconciliation_band.
+    expected: (draw.cost_to_date + draw.cost_to_complete_estimate) ≈ commitment.revised_contract_amount within draw_cost_reconciliation_band (cite reconciliation_tolerance_band.yaml)
+    remediation: runbooks/procore_common_issues.md::draw_cost_drift
+
+  - rule_id: pc_consistency_vendor_insurance_active
+    dimension: consistency
+    severity: blocker
+    description: Vendors bound to active commitments must carry non-expired insurance; expired COI blocks commitment signature.
+    expected: for each commitment where status IN (approved, complete) AND vendor.insurance_expiry >= today
+    remediation: runbooks/procore_common_issues.md::expired_insurance_active_commitment

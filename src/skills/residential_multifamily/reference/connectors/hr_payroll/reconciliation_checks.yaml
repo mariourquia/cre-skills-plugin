@@ -1,0 +1,84 @@
+checks:
+- check_id: hr_record_count
+  check_kind: record_count
+  severity: blocker
+  description: Raw row count minus rejects equals normalized row count for each entity.
+  inputs:
+  - reference/raw/hr_payroll/<YYYY>/<MM>/<source>__<as_of>.*
+  - reference/normalized/hr_payroll_<entity>__<scope>.csv
+  expected_invariant: count(raw) - count(rejected) == count(normalized)
+  remediation: See qa/record_count.yaml.
+- check_id: hr_duplicate_primary_key
+  check_kind: duplicate_id
+  severity: blocker
+  description: No duplicate primary keys across employee, staffing_position, role_assignment, property_assignment, payroll_line, overtime_line, employee_vs_contractor_flag.
+  inputs:
+  - reference/normalized/hr_payroll_employee__<scope>.csv
+  - reference/normalized/hr_payroll_staffing_position__<scope>.csv
+  - reference/normalized/hr_payroll_payroll_line__<scope>.csv
+  expected_invariant: count(distinct pk) == count(records) per entity
+  remediation: See qa/duplicate_id.yaml.
+- check_id: hr_null_critical_field
+  check_kind: null_critical
+  severity: blocker
+  description: Required fields per entity are non-null in normalized output (especially employee_id, property_id, pay_period_end, gross_pay_cents).
+  inputs:
+  - reference/normalized/hr_payroll_*.csv
+  - reference/connectors/hr_payroll/schema.yaml
+  expected_invariant: 'for each required field: count(null) == 0'
+  remediation: See qa/null_critical_field.yaml.
+- check_id: hr_headcount_matches_staffing_plan
+  check_kind: unit_count
+  severity: blocker
+  description: Sum of filled staffing_position FTE per property reconciles with count of active role_assignment records for that property.
+  inputs:
+  - reference/normalized/hr_payroll_staffing_position__<scope>.csv
+  - reference/normalized/hr_payroll_role_assignment__<scope>.csv
+  - reference/normalized/hr_payroll_property_assignment__<scope>.csv
+  expected_invariant: for each property_id, sum(staffing_position.budgeted_fte where position_status = filled) == sum(role_assignment.allocation_pct / 100 where assignment_status = active)
+  tolerance:
+    absolute: 0.1
+    relative_percent: 2.0
+  remediation: Mismatch signals either a stale staffing plan (position filled but plan still marks vacant) or a missing role_assignment record. Reconcile against the StaffingPlan source document and replay landing.
+- check_id: hr_payroll_total_matches_gl
+  check_kind: budget_actual
+  severity: blocker
+  description: Sum of payroll_line gross_pay_cents plus overtime_line ot_pay_cents per property per period reconciles within tolerance to the sum of gl.actual for payroll-class GL accounts for the same property and period.
+  inputs:
+  - reference/normalized/hr_payroll_payroll_line__<scope>.csv
+  - reference/normalized/hr_payroll_overtime_line__<scope>.csv
+  - reference/normalized/gl_actual__<scope>.csv
+  - master_data/gl_payroll_account_crosswalk.yaml
+  expected_invariant: for each (property_id, period), sum(payroll_line.gross_pay_cents) + sum(overtime_line.ot_pay_cents) ~= sum(gl.actual.amount_cents where account_code in payroll_account_set)
+  tolerance:
+    absolute: 100
+    relative_percent: 0.5
+  remediation: Delta usually reflects an unmapped GL payroll account, a pay-period cut-off mismatch, or benefit-loaded payroll being posted to a different account family. Verify payroll account crosswalk and period boundaries.
+- check_id: hr_no_orphan_property_assignment
+  check_kind: null_critical
+  severity: blocker
+  description: Every active employee has a property_assignment row pointing to a property_id or a valid sentinel (shared, remote, corporate, floater).
+  inputs:
+  - reference/normalized/hr_payroll_employee__<scope>.csv
+  - reference/normalized/hr_payroll_property_assignment__<scope>.csv
+  expected_invariant: for every employee where employment_status = active, count(property_assignment where employee_id = E) >= 1
+  remediation: An active employee without a property_assignment blocks payroll-to-property allocation. Operator must tag the row with primary/shared/remote/corporate/floater before landing promotes.
+- check_id: hr_contractor_flag_consistency
+  check_kind: null_critical
+  severity: blocker
+  description: Employees classified as contractor_1099 must not carry payroll_line entries; their disbursement exposure belongs in ap.invoice keyed by contractor_vendor_id.
+  inputs:
+  - reference/normalized/hr_payroll_employee_vs_contractor_flag__<scope>.csv
+  - reference/normalized/hr_payroll_payroll_line__<scope>.csv
+  - reference/normalized/ap_invoice__<scope>.csv
+  expected_invariant: for every employee where classification = contractor_1099, count(payroll_line where employee_id = E) == 0 AND contractor_vendor_id IS NOT NULL
+  remediation: A contractor appearing on a payroll_line indicates either a misclassification or a dual-feed bug. Reconcile against the classification flag source and route the spend to ap.invoice via the contractor vendor crosswalk.
+- check_id: hr_role_code_conforms_to_staffing_plan_roles
+  check_kind: null_critical
+  severity: warning
+  description: Every staffing_position.role_code appears in the canonical role catalog at master_data/role_catalog.yaml.
+  inputs:
+  - reference/normalized/hr_payroll_staffing_position__<scope>.csv
+  - master_data/role_catalog.yaml
+  expected_invariant: for every row in staffing_position, role_code in canonical_role_catalog
+  remediation: Unknown role_code either reflects a new role (operator adds to role_catalog and re-runs) or a data-entry error. Do not silently bucket unknown codes.

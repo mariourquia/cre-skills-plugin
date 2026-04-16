@@ -1,0 +1,42 @@
+# Generic reasonableness-band check template.
+# Values outside a plausible band declared by an overlay or reference are
+# flagged for operator review. The band is ALWAYS parameterized: no
+# hardcoded thresholds live in this template.
+check_id: reasonableness_band
+check_kind: null_critical
+severity: warning
+description: |
+  Observed values that fall outside the plausible band defined by an overlay
+  or a reference data file are flagged for operator review. The band is
+  resolved at runtime from the referenced overlay; the template carries no
+  specific numeric threshold.
+parameters:
+  - name: entity
+    description: Entity slug being checked
+  - name: field
+    description: Field whose value is bounded
+  - name: band_source
+    description: Path to the overlay or reference file declaring the band
+  - name: band_lower_key
+    description: Key in the band source for the lower bound
+  - name: band_upper_key
+    description: Key in the band source for the upper bound
+  - name: grouping_keys
+    description: Keys over which the band is computed (e.g., market, submarket, unit_type_label)
+  - name: action_on_violation
+    description: "quarantine / warn / reject; resolved per domain"
+inputs:
+  - reference/normalized/<entity>__<scope>.csv
+  - <band_source>
+expected_invariant: |
+  for each row in <entity>:
+    lookup_band(<band_source>, <grouping_keys>) yields (lower, upper)
+    row.<field> is within [lower, upper] OR row carries reasonableness_override_flag = true
+severity_default: warning
+remediation_pattern: |
+  Operator inspects the out-of-band observation. Data entry error? Legitimate
+  outlier (price leader)? Stale benchmark band? The remediation resolves the
+  underlying cause; do not silently quarantine.
+remediation: |
+  See remediation_pattern. Each out-of-band row is listed with the observed
+  value, the resolved (lower, upper), and the grouping keys used.

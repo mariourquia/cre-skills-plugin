@@ -1,0 +1,42 @@
+# Construction mapping template.
+
+dev_budget:
+  source_format: [csv]
+  dedup_rule:
+    keys: [project_id, budget_line_slug, scenario, as_of_date]
+    tie_breaker: latest_source_date_wins
+  as_of_handling:
+    carry_field: as_of_date
+    allow_backfill: true
+  fields:
+    - { source_column: proj_id,       normalized_column: project_id,        transform: trim_string,      required: true }
+    - { source_column: line_slug,     normalized_column: budget_line_slug,  transform: trim_string,      required: true }
+    - { source_column: scen,          normalized_column: scenario,          transform: map_budget_scenario, required: true }
+    - { source_column: as_of,         normalized_column: as_of_date,        transform: to_iso_date,      required: true }
+    - { source_column: amt_usd,       normalized_column: amount_cents,      transform: dollars_to_cents, required: true }
+    - { source_column: cont_pct,      normalized_column: contingency_applied_percent, transform: to_number, required: false }
+
+change_order:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [change_order_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: true
+  fields:
+    - { source_column: co_id,         normalized_column: change_order_id,   transform: trim_string,     required: true }
+    - { source_column: proj_id,       normalized_column: project_id,        transform: trim_string,     required: true }
+    - { source_column: cmt_id,        normalized_column: commitment_id,     transform: trim_string,     required: true }
+    - { source_column: co_num,        normalized_column: co_number,         transform: trim_string,     required: true }
+    - { source_column: cost_delta_usd, normalized_column: cost_delta_cents, transform: dollars_to_cents, required: true }
+    - { source_column: co_status,     normalized_column: status,            transform: map_co_status,   required: true }
+    - { source_column: time_delta,    normalized_column: time_delta_days,   transform: to_integer,      required: false }
+    - { source_column: co_category,   normalized_column: category,          transform: map_co_category, required: false }
+
+estimate_line_item:   { status: TODO, note: "map per vendor" }
+bid_package:          { status: TODO, note: "map per vendor" }
+commitment:           { status: TODO, note: "map per vendor" }
+draw_request:         { status: TODO, note: "map per vendor" }
+schedule_milestone:   { status: TODO, note: "map per vendor" }
+punch_item:           { status: TODO, note: "map per vendor" }

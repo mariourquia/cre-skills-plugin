@@ -1,0 +1,393 @@
+# Alert Policies, Residential Multifamily Integration Layer
+#
+# Each policy declares:
+#   alert_id                  : stable snake_case slug
+#   alert_name                : human-readable short name
+#   trigger_condition         : prose condition referencing dq checks in
+#                               ../qa/ or reconciliation_check_ids, or
+#                               observability event types in observability_events.yaml
+#   severity                  : info | warning | critical
+#   default_route             : list of audience slugs and functional roles
+#                               (audiences from tailoring/AUDIENCE_MAP.md)
+#   dwell_time_sla            : qualitative band; actual numerics live in
+#                               overlays/org/<org_id>/
+#   repeat_policy             : how often a still-open alert re-fires
+#   mute_policy               : conditions under which the alert is suppressed
+#   related_runbook           : file under ../runbooks/
+#
+# No numerics in prose. No vendor-specific configuration.
+
+status_tag: reference
+alert_policy_version: "0.1.0"
+
+policies:
+
+  - alert_id: landing_guard_reject
+    alert_name: Raw landing guard rejected a file
+    trigger_condition: |
+      An observability event of type raw_file_landed emitted status=rejected
+      because a provenance field is missing or the filename pattern is invalid.
+    severity: warning
+    default_route:
+      - on_call_ops
+      - data_owner
+    dwell_time_sla: same_business_day
+    repeat_policy: once_per_landing
+    mute_policy: none
+    related_runbook: failed_normalization_triage.md
+
+  - alert_id: normalization_failed
+    alert_name: Normalization job failed
+    trigger_condition: |
+      An observability event of type normalization_failed is emitted for a
+      landed file; the normalized artifact was not produced.
+    severity: critical
+    default_route:
+      - on_call_ops
+      - technical_owner
+      - data_owner
+    dwell_time_sla: immediate_response
+    repeat_policy: every_hour_until_resolved
+    mute_policy: none
+    related_runbook: failed_normalization_triage.md
+
+  - alert_id: reconciliation_blocker_failed
+    alert_name: Reconciliation blocker check failed
+    trigger_condition: |
+      A reconciliation check with severity=blocker in
+      ../qa/<check>.yaml returned status=fail for a landing.
+    severity: critical
+    default_route:
+      - on_call_ops
+      - data_owner
+      - business_owner
+    dwell_time_sla: immediate_response
+    repeat_policy: every_hour_until_resolved
+    mute_policy: none
+    related_runbook: failed_normalization_triage.md
+
+  - alert_id: reconciliation_warning
+    alert_name: Reconciliation warning check failed
+    trigger_condition: |
+      A reconciliation check with severity=warning returned status=fail. The
+      landing proceeded but the mismatch is recorded.
+    severity: warning
+    default_route:
+      - data_owner
+      - on_call_ops
+    dwell_time_sla: same_business_week
+    repeat_policy: once_per_check_run
+    mute_policy: accept_with_override_log_entry
+    related_runbook: exception_queue_review.md
+
+  - alert_id: missing_file_after_cadence
+    alert_name: Expected file did not arrive within cadence
+    trigger_condition: |
+      No raw landing for a source within (cadence + expected_latency_minutes)
+      relative to the registry entry.
+    severity: warning
+    default_route:
+      - on_call_ops
+      - data_owner
+      - business_owner
+    dwell_time_sla: same_business_day
+    repeat_policy: every_cadence_interval
+    mute_policy: planned_outage_window
+    related_runbook: missing_file_handling.md
+
+  - alert_id: stale_as_of
+    alert_name: Feed on time but as_of is stale
+    trigger_condition: |
+      A raw landing arrived within cadence but its source_date or per-record
+      as_of_date is older than the cadence plus tolerance.
+    severity: warning
+    default_route:
+      - on_call_ops
+      - data_owner
+    dwell_time_sla: same_business_day
+    repeat_policy: once_per_landing
+    mute_policy: planned_close_window
+    related_runbook: stale_feed_handling.md
+
+  - alert_id: unresolved_property_id
+    alert_name: Property identifier cannot be resolved against master data
+    trigger_condition: |
+      Normalization produced one or more records whose property_id does not
+      resolve against master_data/property_master_crosswalk.yaml.
+    severity: warning
+    default_route:
+      - on_call_ops
+      - data_owner
+      - asset_mgmt
+      - regional_ops
+    dwell_time_sla: same_business_week
+    repeat_policy: once_per_landing
+    mute_policy: none
+    related_runbook: property_crosswalk_issue.md
+
+  - alert_id: unmapped_gl_account
+    alert_name: GL account absent from account crosswalk
+    trigger_condition: |
+      GL normalization encountered one or more account codes not present in
+      master_data/account_crosswalk.yaml. Records accumulated to the unmapped
+      bucket.
+    severity: warning
+    default_route:
+      - on_call_ops
+      - data_owner
+      - finance_reporting
+    dwell_time_sla: same_business_week
+    repeat_policy: once_per_landing
+    mute_policy: none
+    related_runbook: unmapped_account_handling.md
+
+  - alert_id: schema_drift_detected
+    alert_name: Source schema differs from connector contract
+    trigger_condition: |
+      Incoming raw records fail contract validation because a field was
+      added, renamed, removed, or changed type since the last known-good sample.
+    severity: critical
+    default_route:
+      - on_call_ops
+      - technical_owner
+      - data_owner
+    dwell_time_sla: immediate_response
+    repeat_policy: every_hour_until_resolved
+    mute_policy: none
+    related_runbook: source_schema_change.md
+
+  - alert_id: schema_drift_downstream_impact
+    alert_name: Schema drift impacts downstream workflows
+    trigger_condition: |
+      A schema drift event has flagged at least one workflow in
+      workflow_activation_map.yaml as workflow_blocked or degraded.
+    severity: critical
+    default_route:
+      - on_call_ops
+      - technical_owner
+      - data_owner
+      - asset_mgmt
+      - finance_reporting
+    dwell_time_sla: same_business_day
+    repeat_policy: every_business_day_until_resolved
+    mute_policy: none
+    related_runbook: schema_drift_escalation.md
+
+  - alert_id: mapping_override_pending
+    alert_name: Mapping override awaiting approval
+    trigger_condition: |
+      A mapping override request has been opened and is not yet approved or
+      rejected.
+    severity: info
+    default_route:
+      - data_owner
+      - business_owner
+    dwell_time_sla: same_business_week
+    repeat_policy: every_business_day_until_resolved
+    mute_policy: none
+    related_runbook: manual_override_approval.md
+
+  - alert_id: approval_gate_breach_imminent
+    alert_name: Automation about to act beyond approval floor
+    trigger_condition: |
+      A workflow flagged action_requires_approval attempted to execute
+      without a matching approval_request in approved status.
+    severity: critical
+    default_route:
+      - on_call_ops
+      - finance_reporting
+      - asset_mgmt
+    dwell_time_sla: immediate_response
+    repeat_policy: every_hour_until_resolved
+    mute_policy: none
+    related_runbook: financial_control_gate_breach.md
+
+  - alert_id: approval_request_aging
+    alert_name: Approval request has aged beyond dwell-time SLA
+    trigger_condition: |
+      An approval_request in pending status has exceeded the dwell time for
+      its gate category in _core/approval_matrix.md.
+    severity: warning
+    default_route:
+      - approvers_for_gate
+      - finance_reporting
+    dwell_time_sla: escalation_tick_next_level
+    repeat_policy: every_business_day_until_resolved
+    mute_policy: none
+    related_runbook: financial_control_gate_breach.md
+
+  - alert_id: fair_housing_field_touched
+    alert_name: Fair-housing-sensitive field crossed a boundary
+    trigger_condition: |
+      A field classified as fair_housing_sensitive appeared in a normalized
+      record, a workflow draft, or a communication template where it should
+      not be present.
+    severity: critical
+    default_route:
+      - compliance_risk
+      - legal_counsel
+    dwell_time_sla: immediate_response
+    repeat_policy: every_hour_until_resolved
+    mute_policy: none
+    related_runbook: fair_housing_sensitive_flag.md
+
+  - alert_id: legal_sensitive_field_touched
+    alert_name: Legal-sensitive content crossed a boundary
+    trigger_condition: |
+      A field classified as legal_sensitive appeared outside a permitted
+      destination (for example, an eviction note leaked into a routine
+      reporting surface).
+    severity: critical
+    default_route:
+      - legal_counsel
+      - compliance_risk
+    dwell_time_sla: immediate_response
+    repeat_policy: every_hour_until_resolved
+    mute_policy: none
+    related_runbook: fair_housing_sensitive_flag.md
+
+  - alert_id: benchmark_refresh_drift_exceeds_tolerance
+    alert_name: Benchmark refresh drift exceeds tolerance
+    trigger_condition: |
+      A refresh of reference/derived/<benchmark>__<scope>.csv produced deltas
+      vs the prior version exceeding the overlay-defined drift tolerance.
+    severity: warning
+    default_route:
+      - data_owner
+      - finance_reporting
+      - asset_mgmt
+    dwell_time_sla: same_business_week
+    repeat_policy: once_per_refresh
+    mute_policy: none
+    related_runbook: benchmark_refresh.md
+
+  - alert_id: benchmark_refresh_blocked_by_reconciliation
+    alert_name: Benchmark refresh blocked by reconciliation failure
+    trigger_condition: |
+      A refresh cannot publish because the underlying source landings did
+      not pass reconciliation.
+    severity: warning
+    default_route:
+      - data_owner
+      - technical_owner
+    dwell_time_sla: same_business_day
+    repeat_policy: every_business_day_until_resolved
+    mute_policy: none
+    related_runbook: benchmark_refresh.md
+
+  - alert_id: reference_rollback_initiated
+    alert_name: A reference rollback has been initiated
+    trigger_condition: |
+      A benchmark or reference artifact has been flagged for rollback and a
+      benchmark_update_log entry of kind rollback has been opened.
+    severity: critical
+    default_route:
+      - data_owner
+      - business_owner
+      - finance_reporting
+      - asset_mgmt
+    dwell_time_sla: same_business_day
+    repeat_policy: every_business_day_until_resolved
+    mute_policy: none
+    related_runbook: reference_rollback.md
+
+  - alert_id: exception_queue_aging
+    alert_name: Exception queue has items beyond dwell-time SLA
+    trigger_condition: |
+      One or more items in the exception queue are older than their
+      category's dwell-time SLA in exception_routing.yaml.
+    severity: warning
+    default_route:
+      - on_call_ops
+    dwell_time_sla: next_queue_review
+    repeat_policy: every_business_day_until_resolved
+    mute_policy: none
+    related_runbook: exception_queue_review.md
+
+  - alert_id: exception_queue_volume_spike
+    alert_name: Exception queue volume exceeds steady-state band
+    trigger_condition: |
+      Queue arrivals per interval exceed the overlay-defined steady-state
+      band; a spike is under way.
+    severity: warning
+    default_route:
+      - on_call_ops
+      - data_owner
+    dwell_time_sla: same_business_day
+    repeat_policy: every_hour_until_resolved
+    mute_policy: planned_cutover_window
+    related_runbook: exception_queue_review.md
+
+  - alert_id: orphan_source_name
+    alert_name: Normalized record cites a source_name with no registry entry
+    trigger_condition: |
+      One or more normalized records carry a source_name that does not
+      resolve in source_registry/source_registry.yaml.
+    severity: warning
+    default_route:
+      - on_call_ops
+      - data_owner
+    dwell_time_sla: same_business_week
+    repeat_policy: once_per_landing
+    mute_policy: none
+    related_runbook: new_source_onboarding.md
+
+  - alert_id: connector_deprecation_dual_run_diverged
+    alert_name: Deprecating connector and replacement have diverged during dual run
+    trigger_condition: |
+      A dual-run reconciliation comparison between a deprecating source and
+      its replacement has produced a divergent-meaning delta.
+    severity: warning
+    default_route:
+      - data_owner
+      - business_owner
+    dwell_time_sla: same_business_week
+    repeat_policy: every_business_day_until_resolved
+    mute_policy: none
+    related_runbook: connector_deprecation.md
+
+  - alert_id: cutover_parallel_run_diverged
+    alert_name: Manual-to-system cutover parallel run produced a divergent delta
+    trigger_condition: |
+      A parallel-run reconciliation comparison between a manual source and
+      its system replacement has produced a divergent-meaning delta.
+    severity: warning
+    default_route:
+      - data_owner
+      - business_owner
+    dwell_time_sla: same_business_week
+    repeat_policy: every_business_day_until_resolved
+    mute_policy: none
+    related_runbook: cutover_manual_to_system.md
+
+  - alert_id: workflow_activation_rate_regression
+    alert_name: Workflow activation success rate regressed
+    trigger_condition: |
+      The share of attempted workflow activations succeeding in the current
+      window dropped below the overlay-defined acceptable band (see
+      slo_definitions.md).
+    severity: warning
+    default_route:
+      - on_call_ops
+      - data_owner
+      - asset_mgmt
+      - finance_reporting
+    dwell_time_sla: same_business_day
+    repeat_policy: every_business_day_until_resolved
+    mute_policy: planned_maintenance_window
+    related_runbook: exception_queue_review.md
+
+  - alert_id: registry_status_drift
+    alert_name: Registry entry status out of sync with observed behavior
+    trigger_condition: |
+      A source in source_registry.yaml is status=active but has not landed a
+      reconciling file within its cadence window, or a status=stubbed source
+      has landed a production file.
+    severity: info
+    default_route:
+      - data_owner
+      - technical_owner
+    dwell_time_sla: same_business_week
+    repeat_policy: weekly
+    mute_policy: none
+    related_runbook: new_source_onboarding.md

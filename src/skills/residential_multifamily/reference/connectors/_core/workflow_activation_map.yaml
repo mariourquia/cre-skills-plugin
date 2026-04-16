@@ -1,0 +1,801 @@
+# workflow_activation_map.yaml
+#
+# Machine-readable dependency table for the 27 canonical workflows. Keyed by
+# workflow_slug. Consumers: activation gate in the orchestration layer,
+# reconciliation and exception routing, skill manifest linting.
+#
+# Connectors referenced: pms, gl, crm, ap, market_data, construction,
+# hr_payroll, manual_uploads.
+#
+# Metric/reference slugs align with reference_manifest.yaml paths and
+# _core/metrics.md.
+
+schema_version: "0.1.0"
+status: approved
+
+workflows:
+
+  monthly_property_operating_review:
+    required_domains: [pms, gl, manual_uploads]
+    required_normalized_objects:
+      - Property
+      - Building
+      - Unit
+      - UnitType
+      - Lease
+      - LeaseEvent
+      - Charge
+      - Payment
+      - DelinquencyCase
+      - WorkOrder
+      - TurnProject
+      - BudgetLine
+      - ForecastLine
+      - VarianceExplanation
+    required_derived:
+      - role_kpi_targets
+      - occupancy_benchmark
+      - concession_benchmark
+    optional_enrichment: [market_rent_benchmark, utility_benchmark]
+    minimum_confidence: medium
+    blocking_issues:
+      - unit_count_reconciliation_fail
+      - lease_status_sum_not_equal_unit_count
+      - budget_actual_alignment_fail
+      - null_critical_occupancy_field
+    partial_mode_behavior: >
+      produce property scorecard with data-gap annotations, mark missing KPIs
+      as unavailable, exclude the market-comparison panel if market_rent_benchmark
+      is absent, flag to site_ops and regional_ops audiences.
+    example_output_type: property_scorecard_markdown
+    human_approvals_required: [concession_over_policy, vendor_over_policy]
+
+  monthly_asset_management_review:
+    required_domains: [pms, gl]
+    required_normalized_objects:
+      - Property
+      - BudgetLine
+      - ForecastLine
+      - VarianceExplanation
+      - Charge
+      - Payment
+      - CapexProject
+    required_derived:
+      - asset_watchlist_score
+      - role_kpi_targets
+    optional_enrichment: [occupancy_benchmark, market_rent_benchmark]
+    minimum_confidence: medium
+    blocking_issues:
+      - budget_actual_alignment_fail
+      - forecast_completeness_fail
+    partial_mode_behavior: >
+      produce asset-level commentary, mark watchlist score as stale with
+      confidence=low, surface missing inputs at the top of output.
+    example_output_type: asset_management_review_markdown
+    human_approvals_required: [capex_reforecast_above_threshold, hold_sell_recommendation]
+
+  quarterly_portfolio_review:
+    required_domains: [pms, gl]
+    required_normalized_objects:
+      - Property
+      - Building
+      - Unit
+      - Lease
+      - BudgetLine
+      - ForecastLine
+      - CapexProject
+    required_derived:
+      - same_store_noi_growth
+      - occupancy_by_market
+      - delinquency_by_market
+      - portfolio_concentration_market
+    optional_enrichment: [market_rent_benchmark, utility_benchmark]
+    minimum_confidence: medium
+    blocking_issues:
+      - same_store_cohort_undefined
+      - portfolio_cohort_membership_missing
+    partial_mode_behavior: >
+      produce partial roll-up, flag properties with missing inputs, exclude
+      affected properties from the same-store cohort with rationale.
+    example_output_type: quarterly_portfolio_memo_markdown
+    human_approvals_required: [allocation_shift_recommendation]
+
+  third_party_manager_scorecard_review:
+    required_domains: [pms, gl, manual_uploads, hr_payroll]
+    required_normalized_objects:
+      - Property
+      - Charge
+      - Payment
+      - DelinquencyCase
+      - WorkOrder
+      - TurnProject
+      - ApprovalRequest
+      - StaffingPlan
+      - VarianceExplanation
+    required_derived:
+      - report_timeliness
+      - kpi_completeness
+      - tpm_collections_performance
+      - tpm_turn_performance
+      - staffing_vacancy_rate_tpm
+      - service_level_adherence
+      - budget_adherence_tpm
+      - variance_explanation_completeness
+      - approval_response_time_tpm
+    optional_enrichment: [audit_issue_count_and_severity]
+    minimum_confidence: medium
+    blocking_issues:
+      - tpm_report_feed_missing
+      - kpi_completeness_blocker
+    partial_mode_behavior: >
+      produce scorecard with completeness_score visible, list missing KPIs,
+      do not compute composite until completeness threshold is met.
+    example_output_type: tpm_scorecard_markdown
+    human_approvals_required: [tpm_remediation_plan, tpm_contract_action]
+
+  owner_approval_routing:
+    required_domains: [pms, gl, ap, construction]
+    required_normalized_objects:
+      - ApprovalRequest
+      - Property
+      - Lease
+      - VendorAgreement
+      - ChangeOrder
+      - DrawRequest
+      - CapexProject
+    required_derived:
+      - approval_threshold_policy
+      - approval_response_time_tpm
+    optional_enrichment: []
+    minimum_confidence: high
+    blocking_issues:
+      - approval_matrix_not_loaded
+      - approver_identity_unresolved
+      - policy_violation
+    partial_mode_behavior: >
+      do not route; surface missing threshold or approver with dq_blocker
+      exception and wait for remediation.
+    example_output_type: routed_approval_request
+    human_approvals_required: [primary_approver, backup_approver]
+
+  executive_operating_summary_generation:
+    required_domains: [pms, gl, manual_uploads]
+    required_normalized_objects:
+      - Property
+      - Charge
+      - Payment
+      - VarianceExplanation
+      - BudgetLine
+      - CapexProject
+    required_derived:
+      - noi
+      - noi_margin
+      - budget_attainment
+      - asset_watchlist_score
+      - same_store_noi_growth
+    optional_enrichment: [market_rent_benchmark, occupancy_by_market]
+    minimum_confidence: medium
+    blocking_issues:
+      - budget_actual_alignment_fail
+    partial_mode_behavior: >
+      produce summary with data-gap sidebar, mark metrics with confidence=low
+      and cite the gap in narrative.
+    example_output_type: executive_summary_markdown
+    human_approvals_required: []
+
+  lead_to_lease_funnel_review:
+    required_domains: [crm, pms]
+    required_normalized_objects:
+      - Lead
+      - Tour
+      - Application
+      - ApprovalOutcome
+      - Lease
+      - LeaseEvent
+    required_derived:
+      - lead_response_time
+      - tour_conversion
+      - application_conversion
+      - approval_rate
+      - move_in_conversion
+    optional_enrichment: [preleased_occupancy, market_rent_benchmark]
+    minimum_confidence: medium
+    blocking_issues:
+      - crm_feed_missing
+      - lead_to_lease_join_rate_below_floor
+    partial_mode_behavior: >
+      compute funnel from joinable stages, flag missing stages, show funnel
+      with unobserved segments called out.
+    example_output_type: leasing_funnel_markdown
+    human_approvals_required: []
+
+  renewal_retention:
+    required_domains: [pms]
+    required_normalized_objects:
+      - Lease
+      - LeaseEvent
+      - Unit
+      - ResidentAccount
+    required_derived:
+      - renewal_offer_rate
+      - renewal_acceptance_rate
+      - turnover_rate
+    optional_enrichment: [market_rent_benchmark, concession_benchmark]
+    minimum_confidence: medium
+    blocking_issues:
+      - lease_event_sequence_gap
+      - null_critical_renewal_window
+    partial_mode_behavior: >
+      limit analysis to leases with complete event sequences, annotate
+      excluded leases, output retention bands with confidence labels.
+    example_output_type: renewal_cohort_markdown
+    human_approvals_required: [renewal_offer_over_policy]
+
+  move_in_administration:
+    required_domains: [pms, crm]
+    required_normalized_objects:
+      - Application
+      - ApprovalOutcome
+      - Lease
+      - LeaseEvent
+      - Unit
+      - WorkOrder
+      - TurnProject
+    required_derived:
+      - make_ready_days
+    optional_enrichment: []
+    minimum_confidence: medium
+    blocking_issues:
+      - unit_not_ready_blocker
+      - approval_pending_blocker
+      - fair_housing_sensitive
+    partial_mode_behavior: >
+      surface blockers and wait; produce punch list of items that must
+      resolve before move-in can proceed.
+    example_output_type: move_in_packet_markdown
+    human_approvals_required: [screening_approval, reasonable_accommodation_decision]
+
+  move_out_administration:
+    required_domains: [pms, gl]
+    required_normalized_objects:
+      - Lease
+      - LeaseEvent
+      - Unit
+      - WorkOrder
+      - TurnProject
+      - Charge
+      - Payment
+      - ResidentAccount
+    required_derived:
+      - average_days_vacant
+      - make_ready_days
+    optional_enrichment: [unit_turn_cost]
+    minimum_confidence: medium
+    blocking_issues:
+      - final_account_statement_missing
+      - lease_termination_reason_unmapped
+    partial_mode_behavior: >
+      produce move-out packet with clearly-marked pending items, flag
+      security-deposit accounting gaps.
+    example_output_type: move_out_packet_markdown
+    human_approvals_required: [security_deposit_withholding_over_threshold]
+
+  delinquency_collections:
+    required_domains: [pms, gl]
+    required_normalized_objects:
+      - ResidentAccount
+      - Charge
+      - Payment
+      - DelinquencyCase
+      - Lease
+    required_derived:
+      - delinquency_rate_30plus
+      - collections_rate
+      - bad_debt_rate
+    optional_enrichment: [approval_threshold_policy]
+    minimum_confidence: medium
+    blocking_issues:
+      - charge_payment_tie_out_fail
+      - legal_sensitive_eviction_status
+    partial_mode_behavior: >
+      produce aged schedule, exclude accounts where charge-payment tie-out
+      fails, flag exceptions to finance_reporting.
+    example_output_type: aged_delinquency_schedule_markdown
+    human_approvals_required: [eviction_filing, payment_plan_over_policy]
+
+  capital_project_intake_and_prioritization:
+    required_domains: [construction, pms]
+    required_normalized_objects:
+      - CapexProject
+      - EstimateLineItem
+      - Property
+      - Unit
+      - WorkOrder
+    required_derived:
+      - capex_spend_vs_plan
+    optional_enrichment:
+      - capex_line_item
+      - labor_rate
+      - material_cost
+      - construction_duration_assumption
+    minimum_confidence: low
+    blocking_issues:
+      - capex_project_scope_undefined
+    partial_mode_behavior: >
+      rank projects by available signals, mark ranking confidence as low
+      when cost references are absent, surface missing inputs.
+    example_output_type: capex_prioritization_markdown
+    human_approvals_required: [capex_approval_over_threshold]
+
+  capex_estimate_generation:
+    required_domains: [construction]
+    required_normalized_objects:
+      - CapexProject
+      - EstimateLineItem
+      - Property
+      - Unit
+    required_derived:
+      - capex_line_item
+    optional_enrichment: [labor_rate, material_cost, vendor_rate]
+    minimum_confidence: low
+    blocking_issues:
+      - capex_line_item_reference_missing
+    partial_mode_behavior: >
+      produce estimate with explicit assumption citations, mark gaps.
+    example_output_type: capex_estimate_markdown
+    human_approvals_required: []
+
+  schedule_risk_review:
+    required_domains: [construction]
+    required_normalized_objects:
+      - CapexProject
+      - ScheduleMilestone
+    required_derived:
+      - schedule_variance_days
+      - milestone_slippage_rate
+    optional_enrichment: [construction_duration_assumption]
+    minimum_confidence: medium
+    blocking_issues:
+      - milestone_sequence_incomplete
+    partial_mode_behavior: >
+      produce schedule risk view for milestones with complete data, exclude
+      incomplete phases, flag the gap.
+    example_output_type: schedule_risk_markdown
+    human_approvals_required: []
+
+  cost_to_complete_review:
+    required_domains: [construction, gl, ap]
+    required_normalized_objects:
+      - CapexProject
+      - EstimateLineItem
+      - ChangeOrder
+      - DrawRequest
+    required_derived:
+      - cost_to_complete
+      - contingency_remaining
+      - contingency_burn_rate
+    optional_enrichment: [capex_line_item, labor_rate, material_cost]
+    minimum_confidence: medium
+    blocking_issues:
+      - commitment_co_draw_reconciliation_fail
+    partial_mode_behavior: >
+      compute cost-to-complete for reconciled packages, surface unreconciled
+      packages.
+    example_output_type: cost_to_complete_markdown
+    human_approvals_required: [contingency_release_over_threshold]
+
+  change_order_review:
+    required_domains: [construction, ap]
+    required_normalized_objects:
+      - CapexProject
+      - BidPackage
+      - ChangeOrder
+      - DrawRequest
+    required_derived:
+      - change_orders_pct_of_contract
+    optional_enrichment: [capex_line_item]
+    minimum_confidence: medium
+    blocking_issues:
+      - change_order_scope_unmapped
+      - approval_override_pending
+    partial_mode_behavior: >
+      list change orders with confidence labels, isolate pending-approval
+      items.
+    example_output_type: change_order_packet_markdown
+    human_approvals_required: [change_order_over_threshold]
+
+  draw_package_review:
+    required_domains: [construction, ap, gl]
+    required_normalized_objects:
+      - DrawRequest
+      - CapexProject
+      - BidPackage
+      - ChangeOrder
+    required_derived:
+      - draw_cycle_time
+      - contingency_remaining
+    optional_enrichment: []
+    minimum_confidence: medium
+    blocking_issues:
+      - commitment_co_draw_reconciliation_fail
+      - lien_waiver_missing
+    partial_mode_behavior: >
+      produce draw package with missing-document checklist, do not route
+      until completeness threshold is met.
+    example_output_type: draw_package_markdown
+    human_approvals_required: [draw_certification]
+
+  bid_leveling_procurement_review:
+    required_domains: [construction, ap]
+    required_normalized_objects:
+      - CapexProject
+      - BidPackage
+      - Vendor
+      - VendorAgreement
+      - EstimateLineItem
+    required_derived:
+      - trade_buyout_variance
+    optional_enrichment: [capex_line_item, labor_rate, material_cost, vendor_rate]
+    minimum_confidence: medium
+    blocking_issues:
+      - bid_scope_not_comparable_across_bidders
+    partial_mode_behavior: >
+      produce leveled view with non-comparable scope items flagged, require
+      human sign-off to proceed.
+    example_output_type: bid_level_sheet_markdown
+    human_approvals_required: [vendor_award]
+
+  construction_meeting_prep_and_action_tracking:
+    required_domains: [construction]
+    required_normalized_objects:
+      - CapexProject
+      - ScheduleMilestone
+      - ChangeOrder
+      - DrawRequest
+    required_derived:
+      - schedule_variance_days
+      - cost_to_complete
+    optional_enrichment: []
+    minimum_confidence: low
+    blocking_issues:
+      - action_tracker_missing
+    partial_mode_behavior: >
+      produce agenda and open-action list from whatever is available,
+      surface missing inputs at top.
+    example_output_type: meeting_packet_markdown
+    human_approvals_required: []
+
+  vendor_dispatch_sla_review:
+    required_domains: [pms, ap]
+    required_normalized_objects:
+      - WorkOrder
+      - Vendor
+      - VendorAgreement
+    required_derived:
+      - service_level_adherence
+      - tpm_turn_performance
+    optional_enrichment: [vendor_rate]
+    minimum_confidence: medium
+    blocking_issues:
+      - vendor_agreement_unmapped
+    partial_mode_behavior: >
+      produce SLA view per vendor for those with mapped agreements, flag
+      unmapped vendors.
+    example_output_type: vendor_sla_markdown
+    human_approvals_required: [vendor_suspension]
+
+  unit_turn_make_ready:
+    required_domains: [pms, ap]
+    required_normalized_objects:
+      - WorkOrder
+      - TurnProject
+      - Unit
+      - Lease
+      - LeaseEvent
+    required_derived:
+      - make_ready_days
+      - unit_turn_cost
+    optional_enrichment: [vendor_rate, material_cost]
+    minimum_confidence: medium
+    blocking_issues:
+      - turn_project_unit_link_unresolved
+    partial_mode_behavior: >
+      produce turn dashboard for linked units, flag unresolved linkages.
+    example_output_type: turn_dashboard_markdown
+    human_approvals_required: [turn_scope_over_threshold]
+
+  work_order_triage:
+    required_domains: [pms]
+    required_normalized_objects:
+      - WorkOrder
+      - Unit
+      - Lease
+    required_derived:
+      - open_work_orders
+      - work_order_aging
+      - repeat_work_order_rate
+    optional_enrichment: [vendor_rate]
+    minimum_confidence: low
+    blocking_issues:
+      - work_order_priority_unmapped
+    partial_mode_behavior: >
+      triage by available fields, escalate life-safety indicators
+      immediately regardless of completeness.
+    example_output_type: triaged_work_order_queue
+    human_approvals_required: [life_safety_escalation]
+
+  budget_build:
+    required_domains: [pms, gl, ap, hr_payroll, construction]
+    required_normalized_objects:
+      - Property
+      - Unit
+      - Lease
+      - LeaseEvent
+      - Charge
+      - Payment
+      - BudgetLine
+      - StaffingPlan
+      - CapexProject
+    required_derived:
+      - role_kpi_targets
+      - occupancy_benchmark
+      - concession_benchmark
+      - payroll_assumption
+      - staffing_model
+      - utility_benchmark
+      - capex_line_item
+    optional_enrichment:
+      - market_rent_benchmark
+      - labor_rate
+      - material_cost
+      - insurance_tax_assumption
+    minimum_confidence: medium
+    blocking_issues:
+      - unit_count_reconciliation_fail
+      - staffing_plan_missing
+    partial_mode_behavior: >
+      build budget with explicit assumption citations for missing
+      references, mark lines with confidence labels.
+    example_output_type: annual_budget_markdown
+    human_approvals_required: [budget_adoption]
+
+  reforecast:
+    required_domains: [pms, gl]
+    required_normalized_objects:
+      - Property
+      - Charge
+      - Payment
+      - BudgetLine
+      - ForecastLine
+      - VarianceExplanation
+      - Lease
+      - LeaseEvent
+    required_derived:
+      - forecast_accuracy
+      - role_kpi_targets
+    optional_enrichment: [market_rent_benchmark, occupancy_benchmark]
+    minimum_confidence: medium
+    blocking_issues:
+      - ytd_actuals_missing
+      - budget_line_to_actual_gap
+    partial_mode_behavior: >
+      produce reforecast with annotated gaps, flag lines with stale inputs.
+    example_output_type: reforecast_markdown
+    human_approvals_required: [reforecast_adoption]
+
+  market_rent_refresh:
+    required_domains: [market_data, pms]
+    required_normalized_objects:
+      - Unit
+      - UnitType
+      - Lease
+    required_derived:
+      - market_rent_benchmark
+      - rent_comp
+    optional_enrichment: [concession_benchmark, occupancy_benchmark]
+    minimum_confidence: medium
+    blocking_issues:
+      - rent_comp_scope_mismatch
+      - stale_source
+    partial_mode_behavior: >
+      refresh subset of units with matched comps, flag units without comps.
+    example_output_type: market_rent_refresh_markdown
+    human_approvals_required: [market_rent_change_over_threshold]
+
+  rent_comp_intake:
+    required_domains: [market_data]
+    required_normalized_objects:
+      - Property
+      - Unit
+      - UnitType
+    required_derived:
+      - rent_comp
+    optional_enrichment: [market_rent_benchmark]
+    minimum_confidence: low
+    blocking_issues:
+      - comp_identity_unresolved
+      - stale_source
+    partial_mode_behavior: >
+      accept comps with higher confidence, flag proposed identities for
+      human review.
+    example_output_type: rent_comp_intake_log
+    human_approvals_required: [rent_comp_canonicalization]
+
+  pipeline_review:
+    required_domains: [deal_pipeline]
+    required_normalized_objects:
+      - Deal
+      - Asset
+      - DealMilestone
+      - DealKeyDate
+    required_derived: [pipeline_stage_targets]
+    optional_enrichment: [debt_market_context]
+    minimum_confidence: medium
+    blocking_issues:
+      - dp_completeness_ic_record
+      - dp_handoff_lag
+    partial_mode_behavior: >
+      report pipeline composition with low-confidence flag on stalled deals;
+      surface dq blockers but do not refuse the report.
+    example_output_type: pipeline_summary_markdown
+    human_approvals_required: []
+
+  pre_close_deal_tracking:
+    required_domains: [deal_pipeline]
+    required_normalized_objects:
+      - Deal
+      - DealKeyDate
+      - DealMilestone
+    required_derived: []
+    optional_enrichment: []
+    minimum_confidence: high
+    blocking_issues:
+      - dp_completeness_ic_record
+      - dp_freshness_deals
+    partial_mode_behavior: >
+      surface key-date countdown for deals with complete records; flag deals
+      missing target_close_date for resolution.
+    example_output_type: closing_checklist_markdown
+    human_approvals_required: [closing_extension_request]
+
+  investment_committee_prep:
+    required_domains: [deal_pipeline]
+    required_normalized_objects:
+      - Deal
+      - DealMilestone
+      - Asset
+    required_derived: [sensitivity_test_pass_rate]
+    optional_enrichment: [rent_comp, market_rent_benchmark]
+    minimum_confidence: high
+    blocking_issues:
+      - dp_completeness_ic_record
+      - dp_freshness_deals
+    partial_mode_behavior: >
+      assemble IC packet with completeness flags per deal; refuse to mark
+      packet ready for IC if blocking dq issues are open.
+    example_output_type: ic_packet_markdown
+    human_approvals_required: [ic_committee_approval]
+
+  acquisition_handoff:
+    required_domains: [deal_pipeline, pms, gl]
+    required_normalized_objects:
+      - Deal
+      - Asset
+      - ApprovalRequest
+      - Property
+    required_derived: []
+    optional_enrichment: []
+    minimum_confidence: high
+    blocking_issues:
+      - dp_handoff_lag
+      - dp_one_deal_multiple_projects
+    partial_mode_behavior: >
+      run handoff checklist with per-item status; refuse terminal sign-off
+      if any required setup item is incomplete.
+    example_output_type: handoff_checklist_markdown
+    human_approvals_required: [handoff_signoff, vendor_master_rationalization]
+
+  post_ic_property_setup:
+    required_domains: [deal_pipeline, pms, gl]
+    required_normalized_objects:
+      - Deal
+      - Asset
+    required_derived: []
+    optional_enrichment: []
+    minimum_confidence: medium
+    blocking_issues:
+      - dp_handoff_lag
+    partial_mode_behavior: >
+      create placeholder property + entity dim with `pre_acquisition` status;
+      gate downstream activation behind close.
+    example_output_type: pre_close_setup_checklist_markdown
+    human_approvals_required: [pre_close_setup_signoff]
+
+  delivery_handoff:
+    required_domains: [construction, pms, gl]
+    required_normalized_objects:
+      - DevelopmentProject
+      - ConstructionProject
+      - Property
+      - ScheduleMilestone
+      - CapexProject
+    required_derived: []
+    optional_enrichment: []
+    minimum_confidence: high
+    blocking_issues:
+      - pc_recon_commitment_overdrawn
+      - pc_co_pending_approval_aging
+    partial_mode_behavior: >
+      partial delivery (some units TCO'd, others pending) is supported;
+      handoff checklist runs per delivered unit set.
+    example_output_type: delivery_handoff_checklist_markdown
+    human_approvals_required: [delivery_handoff_signoff, capex_closeout]
+
+  development_pipeline_tracking:
+    required_domains: [deal_pipeline, construction, gl]
+    required_normalized_objects:
+      - Deal
+      - DevelopmentProject
+      - ConstructionProject
+      - DealMilestone
+      - ScheduleMilestone
+      - CapexProject
+      - ChangeOrder
+      - DrawRequest
+      - Commitment
+    required_derived: []
+    optional_enrichment: []
+    minimum_confidence: medium
+    blocking_issues:
+      - dp_handoff_dev_lag
+      - pc_recon_commitment_overdrawn
+    partial_mode_behavior: >
+      report rollup with flags for projects with stale data; allow weekly
+      report to ship even when a subset of projects has dq warnings.
+    example_output_type: development_pipeline_dashboard_markdown
+    human_approvals_required: [critical_path_slip_acknowledgment]
+
+  lease_up_first_period:
+    required_domains: [pms, market_data]
+    required_normalized_objects:
+      - Lead
+      - Tour
+      - Application
+      - ApprovalOutcome
+      - Lease
+      - LeaseEvent
+      - Charge
+    required_derived: [rent_comp, market_rent_benchmark, concession_benchmark]
+    optional_enrichment: [labor_rate_reference]
+    minimum_confidence: medium
+    blocking_issues:
+      - af_freshness_leases
+      - af_completeness_required_fields
+    partial_mode_behavior: >
+      monthly ramp report runs with confidence flag for any KPI whose source
+      feed is stale; first-renewal-window readiness flagged separately.
+    example_output_type: lease_up_ramp_report_markdown
+    human_approvals_required: [concession_above_policy, equity_call_schedule_change]
+
+  executive_pipeline_summary:
+    required_domains: [deal_pipeline, construction, gl]
+    required_normalized_objects:
+      - Deal
+      - Asset
+      - DealMilestone
+      - ApprovalRequest
+      - CapexProject
+      - Commitment
+    required_derived: [portfolio_concentration_targets, role_kpi_targets]
+    optional_enrichment: [debt_market_context]
+    minimum_confidence: high
+    blocking_issues:
+      - dp_completeness_ic_record
+      - pc_recon_commitment_overdrawn
+      - ic_recon_capex_post_lag
+    partial_mode_behavior: >
+      board-ready summary refuses to run if any blocker-severity dq is open
+      against Dealpath, Procore, or Intacct primary feeds; allows
+      partial run during board-meeting freeze with explicit annotation.
+    example_output_type: executive_pipeline_summary_dashboard_markdown
+    human_approvals_required: [board_pack_submission]

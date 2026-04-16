@@ -1,0 +1,146 @@
+# HR / Payroll mapping template - raw source column to normalized column.
+# Vendor-neutral. Transforms: trim_string | to_integer | to_date |
+# to_enum | lowercase | null_if_blank | parse_currency | dollars_to_cents |
+# to_boolean | to_number.
+# Transform rules MUST strip PII below the minimum needed for reconciliation.
+# No first_name, last_name, SSN, DOB, or home_address is carried into the
+# normalized layer; operator pre-hash or drop those columns at landing.
+
+employee:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [employee_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: false
+  fields:
+    - { source_column: emp_id,              normalized_column: employee_id,           transform: trim_string,   required: true }
+    - { source_column: employment_status,   normalized_column: employment_status,     transform: to_enum,       required: true }
+    - { source_column: hire_date,           normalized_column: hire_date,             transform: to_date,       required: true }
+    - { source_column: ft_pt_flag,          normalized_column: ft_pt_flag,            transform: to_enum,       required: true }
+    - { source_column: term_date,           normalized_column: term_date,             transform: to_date,       required: false }
+    - { source_column: display_code,        normalized_column: display_code,          transform: trim_string,   required: false }
+  # PII fields dropped at landing (never propagated):
+  dropped_source_columns:
+    - first_name
+    - last_name
+    - ssn
+    - dob
+    - home_address
+    - personal_email
+    - phone
+
+staffing_position:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [property_id, position_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: true
+  fields:
+    - { source_column: property_code,       normalized_column: property_id,           transform: trim_string,   required: true }
+    - { source_column: position_id,         normalized_column: position_id,           transform: trim_string,   required: true }
+    - { source_column: role_code,           normalized_column: role_code,             transform: lowercase,     required: true }
+    - { source_column: budgeted_fte,        normalized_column: budgeted_fte,          transform: to_number,     required: true }
+    - { source_column: position_status,     normalized_column: position_status,       transform: to_enum,       required: true }
+    - { source_column: position_title,      normalized_column: position_title,        transform: trim_string,   required: false }
+    - { source_column: pay_band,            normalized_column: pay_band,              transform: trim_string,   required: false }
+
+role_assignment:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [assignment_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: true
+  fields:
+    - { source_column: assignment_id,       normalized_column: assignment_id,         transform: trim_string,   required: true }
+    - { source_column: emp_id,              normalized_column: employee_id,           transform: trim_string,   required: true }
+    - { source_column: position_id,         normalized_column: position_id,           transform: trim_string,   required: true }
+    - { source_column: effective_date,      normalized_column: effective_date,        transform: to_date,       required: true }
+    - { source_column: assignment_status,   normalized_column: assignment_status,     transform: to_enum,       required: true }
+    - { source_column: end_date,            normalized_column: end_date,              transform: to_date,       required: false }
+    - { source_column: allocation_pct,      normalized_column: allocation_pct,        transform: to_number,     required: false }
+
+property_assignment:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [employee_id, property_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: false
+  fields:
+    - { source_column: emp_id,              normalized_column: employee_id,           transform: trim_string,   required: true }
+    - { source_column: property_code,       normalized_column: property_id,           transform: trim_string,   required: true }
+    - { source_column: assignment_kind,     normalized_column: assignment_kind,       transform: to_enum,       required: true }
+    - { source_column: allocation_pct,      normalized_column: allocation_pct,        transform: to_number,     required: false }
+    - { source_column: effective_date,      normalized_column: effective_date,        transform: to_date,       required: false }
+
+vacancy_status:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [position_id, as_of_date]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: true
+  fields:
+    - { source_column: position_id,         normalized_column: position_id,           transform: trim_string,   required: true }
+    - { source_column: as_of_date,          normalized_column: as_of_date,            transform: to_date,       required: true }
+    - { source_column: vacancy_state,       normalized_column: vacancy_state,         transform: to_enum,       required: true }
+    - { source_column: days_vacant,         normalized_column: days_vacant,           transform: to_integer,    required: true }
+    - { source_column: requisition_id,      normalized_column: requisition_id,        transform: trim_string,   required: false }
+
+payroll_line:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [payroll_line_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: false
+  fields:
+    - { source_column: payroll_line_id,     normalized_column: payroll_line_id,       transform: trim_string,        required: true }
+    - { source_column: emp_id,              normalized_column: employee_id,           transform: trim_string,        required: true }
+    - { source_column: property_code,       normalized_column: property_id,           transform: trim_string,        required: true }
+    - { source_column: pay_period_end,      normalized_column: pay_period_end,        transform: to_date,            required: true }
+    - { source_column: earnings_type,       normalized_column: earnings_type,         transform: to_enum,            required: true }
+    - { source_column: regular_hours,       normalized_column: regular_hours,         transform: to_number,          required: true }
+    - { source_column: regular_pay,         normalized_column: gross_pay_cents,       transform: parse_currency,     required: true }
+    - { source_column: gl_account_code,     normalized_column: gl_account_code,       transform: trim_string,        required: false }
+    - { source_column: cost_center_code,    normalized_column: cost_center_code,      transform: trim_string,        required: false }
+
+overtime_line:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [overtime_line_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: false
+  fields:
+    - { source_column: overtime_line_id,    normalized_column: overtime_line_id,      transform: trim_string,        required: true }
+    - { source_column: emp_id,              normalized_column: employee_id,           transform: trim_string,        required: true }
+    - { source_column: pay_period_end,      normalized_column: pay_period_end,        transform: to_date,            required: true }
+    - { source_column: ot_hours,            normalized_column: ot_hours,              transform: to_number,          required: true }
+    - { source_column: ot_pay,              normalized_column: ot_pay_cents,          transform: parse_currency,     required: true }
+    - { source_column: property_code,       normalized_column: property_id,           transform: trim_string,        required: false }
+    - { source_column: work_order_id,       normalized_column: work_order_id,         transform: trim_string,        required: false }
+
+employee_vs_contractor_flag:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [employee_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: false
+  fields:
+    - { source_column: emp_id,                     normalized_column: employee_id,                  transform: trim_string, required: true }
+    - { source_column: is_contractor,              normalized_column: classification,               transform: to_enum,     required: true }
+    - { source_column: classification_eff_date,    normalized_column: classification_effective_date, transform: to_date,    required: true }
+    - { source_column: contractor_vendor_id,       normalized_column: contractor_vendor_id,         transform: trim_string, required: false }

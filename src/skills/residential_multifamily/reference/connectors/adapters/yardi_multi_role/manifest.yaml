@@ -1,0 +1,151 @@
+# Adapter manifest for Yardi (multi-role).
+# Conforms to reference/connectors/adapters/adapter_manifest.schema.yaml.
+#
+# Yardi is the most flexible source family in the stack. A single operator
+# may run it as any combination of:
+#   - primary PMS (Voyager residential)
+#   - primary GL (Voyager financial)
+#   - primary leasing / CRM (RentCafe + Voyager leasing)
+#   - reporting feed (Data Connect warehouse, report exports)
+#   - legacy / historical archive during migration
+#
+# The primary connector_domain registered here is `pms` because the most
+# common operator footprint puts Voyager in front of the resident ledger.
+# Multi-domain coverage (gl, crm, reporting, manual_uploads) is documented
+# in the description and enforced at classification time. Every adapter
+# behavior is gated on `classification_worksheet.md` closure.
+#
+# Live adapter is NOT running. Status: stub. Credentials, API scopes, and
+# per-sub-system access paths are declared in the companion
+# source_registry_entry material only, never in this file.
+
+adapter_id: yardi_multi_role
+adapter_name: Yardi Multi-Role Adapter (Voyager + RentCafe + Data Connect)
+vendor_family: yardi_family
+connector_domain: pms
+status: stub
+rollout_wave: wave_2
+description: |
+  Vendor-specific adapter that specializes the canonical `pms` connector
+  for Yardi. Unlike AppFolio (single-domain PMS), Yardi commonly acts as
+  more than one canonical domain at a given operator. The adapter
+  surfaces multi-domain coverage explicitly:
+
+    - pms               : Voyager residential (unit, lease, ledger, work order)
+    - gl                : Voyager financial (chart of accounts, actuals)
+    - crm / leasing     : RentCafe + Voyager leasing workflow
+    - market_data       : RentCafe market rate surveys (optional, rarely used)
+    - construction      : Voyager construction support (limited; Procore typically owns)
+    - reporting         : Data Connect warehouse, report export files
+    - manual_uploads    : Yardi report exports delivered as Excel / CSV
+
+  Because the role Yardi plays depends on the operator's stack posture,
+  this adapter is CLASSIFICATION-GATED. The `classification_worksheet.md`
+  must be completed before downstream workflows trust Yardi output as
+  primary for any canonical object. Until classification closes, Yardi
+  output is treated as historical-only per
+  `bounded_assumptions.yaml::yardi_role.unknown`.
+
+  Multi-role posture combinations the adapter supports:
+    - yardi_primary_pms_only                 (Voyager residential only)
+    - yardi_primary_pms_and_gl               (Voyager residential + GL)
+    - yardi_primary_pms_and_crm              (Voyager + RentCafe leasing)
+    - yardi_primary_everything               (Voyager residential + GL + RentCafe + Data Connect)
+    - yardi_secondary_reporting_only         (Data Connect warehouse feed; other systems primary)
+    - yardi_historical_only                  (legacy read-only during cutover to AppFolio)
+    - yardi_cutover_dual_run                 (Yardi + AppFolio both live during migration window)
+
+  Downstream consumers depend on classification outcome. See
+  `workflow_activation_additions.yaml` for the workflow role matrix.
+
+supported_source_systems:
+  - yardi_voyager_stub
+  - yardi_rentcafe_stub
+  - yardi_data_connect_stub
+
+mapping_hints:
+  # Identity and property-side
+  - { source_field_pattern: "propid|hprop|propid_id",         canonical_field: property_id,                transform_hint: crosswalk_lookup,       notes: Voyager propid is authoritative within Yardi; resolves via property_master_crosswalk. requires_classification. }
+  - { source_field_pattern: "scode|property_scode",           canonical_field: property_code,              transform_hint: trim_string,            notes: Voyager scode is the short property code; often used by operators to reference a property outside Yardi. }
+  - { source_field_pattern: "property_name|property_nam",     canonical_field: property_name,              transform_hint: trim_string }
+  - { source_field_pattern: "hunit|unit_id|unitid",           canonical_field: unit_id,                    transform_hint: crosswalk_lookup }
+  - { source_field_pattern: "unit_code|unit_no|unit_number",  canonical_field: unit_label,                 transform_hint: trim_string }
+  - { source_field_pattern: "floorplan|floor_plan|fpcode",    canonical_field: unit_type_id,               transform_hint: crosswalk_lookup }
+  - { source_field_pattern: "bedrooms|br_count|bedroomcount", canonical_field: bedrooms,                   transform_hint: to_integer }
+  - { source_field_pattern: "bathrooms|ba_count|bathcount",   canonical_field: bathrooms,                  transform_hint: to_number }
+  - { source_field_pattern: "sqft|rentable_sf|sf",            canonical_field: nrsf,                       transform_hint: to_integer }
+
+  # Resident and lease-side
+  - { source_field_pattern: "resident*id|tcode|h_tcode|tcode_id", canonical_field: resident_account_id,    transform_hint: crosswalk_lookup,       notes: Voyager t-code is overloaded; same t-code lineage can represent applicant, resident, past-resident, or collections. transform must t_code_decode before mapping. }
+  - { source_field_pattern: "tenant*id|hten",                  canonical_field: resident_account_id,       transform_hint: crosswalk_lookup }
+  - { source_field_pattern: "lease*id|hlease|leaseid",         canonical_field: lease_id,                  transform_hint: crosswalk_lookup }
+  - { source_field_pattern: "lease_from|move_in_date|movein",  canonical_field: start_date,                transform_hint: to_iso_date }
+  - { source_field_pattern: "lease_to|lease_end|expiredate",   canonical_field: end_date,                  transform_hint: to_iso_date }
+  - { source_field_pattern: "monthly_rent|rent_amount|gpr",    canonical_field: base_rent_monthly_cents,   transform_hint: dollars_to_cents }
+  - { source_field_pattern: "status|lease_status|occstatus",   canonical_field: status,                    transform_hint: map_yardi_lease_status }
+  - { source_field_pattern: "is_renewal|renewal_flag",         canonical_field: is_renewal,                transform_hint: map_yardi_renewal_flag }
+
+  # Charges and payments
+  - { source_field_pattern: "charge_code|chargecode|chgcode",  canonical_field: charge_type,               transform_hint: t_code_decode,          notes: Yardi charge codes vary BY PROPERTY; a chargecode table lookup is required. Property-scoped decode, not global. }
+  - { source_field_pattern: "post_date|transaction_date",      canonical_field: charge_date,               transform_hint: to_iso_date,            notes: Voyager carries BOTH post_date and month; posting-month vs accrual-month drift common. See runbooks/yardi_common_issues.md::posting_vs_accrual. }
+  - { source_field_pattern: "month|accrual_month",             canonical_field: accrual_month,             transform_hint: to_iso_month }
+  - { source_field_pattern: "charge_amount|amount|amt",        canonical_field: amount_cents,              transform_hint: dollars_to_cents }
+  - { source_field_pattern: "recovery_code|recoverycode",      canonical_field: recovery_code,             transform_hint: trim_string,            notes: recovery-fee posting on commercial/mixed portfolios drifts from standard charge flow. Residential-only portfolios may ignore; flagged as known gotcha. }
+  - { source_field_pattern: "receipt_id|payment_id|rcptid",    canonical_field: payment_id,                transform_hint: passthrough_with_namespace }
+  - { source_field_pattern: "receipt_date|payment_date",       canonical_field: payment_date,              transform_hint: to_iso_date }
+  - { source_field_pattern: "tender|payment_type",             canonical_field: tender_type,               transform_hint: map_yardi_tender_type }
+
+  # GL and budget
+  - { source_field_pattern: "acct_code|account_code|account",  canonical_field: gl_account_code,           transform_hint: crosswalk_lookup,       notes: Yardi GL chart is operator-defined; resolves via account_crosswalk. }
+  - { source_field_pattern: "period|fiscal_period|posting_period", canonical_field: posting_period,        transform_hint: to_iso_month }
+  - { source_field_pattern: "book|book_id|bookid",             canonical_field: book_id,                   transform_hint: trim_string,            notes: Yardi supports multiple books (accrual, cash, tax, budget) on the same property; declare book at extract time. }
+  - { source_field_pattern: "budget_version|budgetid",         canonical_field: budget_version,            transform_hint: trim_string }
+  - { source_field_pattern: "forecast_version|forecastid",     canonical_field: forecast_version,          transform_hint: trim_string }
+
+  # Work order and vendor
+  - { source_field_pattern: "workorder_id|wo_id|woid",         canonical_field: work_order_id,             transform_hint: passthrough_with_namespace }
+  - { source_field_pattern: "wo_status|workorder_status",      canonical_field: status,                    transform_hint: map_yardi_wo_status }
+  - { source_field_pattern: "vendor_code|vendorcode|hvendor",  canonical_field: vendor_id,                 transform_hint: crosswalk_lookup }
+
+  # Leasing funnel (RentCafe)
+  - { source_field_pattern: "guest*id|prospect*id|guestcard",  canonical_field: lead_id,                   transform_hint: passthrough_with_namespace }
+  - { source_field_pattern: "source|leadsource|inquiry_source", canonical_field: source_channel,           transform_hint: trim_string }
+  - { source_field_pattern: "tour_id|showing_id",              canonical_field: tour_id,                   transform_hint: passthrough_with_namespace }
+  - { source_field_pattern: "application_id|appid",            canonical_field: application_id,            transform_hint: passthrough_with_namespace }
+
+  # Construction job cost (limited; Procore usually primary)
+  - { source_field_pattern: "job_id|jobcode|jobid",            canonical_field: capex_project_id,          transform_hint: crosswalk_lookup,       notes: Voyager job cost is optional; Procore usually primary for capex. Only used when operator runs Procore-free. }
+
+known_gotchas:
+  - classification_required_before_trust — adapter output is historical-only until classification_worksheet.md Section 1+2 close
+  - multi_role_ambiguity — same Yardi tenant can simultaneously be primary PMS, GL, and leasing; operator must declare posture per domain
+  - voyager_t_code_overloading — t-code lineage represents applicant / resident / past-resident / collections / notice depending on context; always t_code_decode before mapping
+  - rentcafe_api_scope_not_equal_voyager_scope — RentCafe exposes a subset of resident and leasing state; some operator-critical fields (balance detail, lease docs) live only in Voyager
+  - data_connect_lag — Data Connect warehouse typically lags Voyager by 60 to 240 minutes; posting-month reports pulled too early miss late entries
+  - posting_month_vs_accrual_month_drift — Voyager carries both post_date and month; GL actuals pulled on post_date may not reconcile to accrual-month budget
+  - recovery_fee_handling — recovery-fee posting deviates from standard charge flow on commercial and mixed portfolios; flag residential-only to suppress
+  - charge_code_by_property_variation — same logical charge (e.g., base_rent) uses different chargecodes per property; global decode unsafe, must be property-scoped
+  - chart_of_accounts_operator_defined — Yardi GL chart is not standardized; account_crosswalk required
+  - deleted_but_not_purged_records — Voyager soft-deletes via status flag; deleted rows appear in full extracts unless filtered
+  - prepay_vs_receivable_posting — prepaid rent on some configurations posts to a liability account; careless GL pull mis-attributes revenue
+  - refund_handling_post_move_out — security deposit refunds post days to months after move-out; watch for late-arriving debits on closed resident_account rows
+  - property_code_mismatch_with_appfolio_during_cutover — Voyager scode rarely matches AppFolio PropertyName; property_master_crosswalk mandatory during dual-run
+  - historical_leases_not_mapping_to_current_property_structure — post-renovation or unit-split properties carry historical leases referencing unit_ids no longer present
+  - rentcafe_vs_voyager_drift — RentCafe and Voyager occasionally disagree on lead stage or resident status; Voyager wins for resident, RentCafe wins for pre-resident leads
+  - report_export_file_drift — Yardi report exports carry column labels that change with report template edits; adapter cannot bind to label position
+  - stale_exports — manual Yardi report exports can be emailed or dropped long after as_of_date; always read the as_of_date inside the file, not the file_received_at
+
+reference_documentation:
+  - placeholder_link_to_yardi_voyager_api_documentation
+  - placeholder_link_to_yardi_rentcafe_api_documentation
+  - placeholder_link_to_yardi_data_connect_warehouse_schema
+  - placeholder_link_to_yardi_charge_code_taxonomy_per_operator
+  - placeholder_link_to_internal_pms_taxonomy_reference
+  - placeholder_link_to_intacct_property_crosswalk_guide
+  - placeholder_link_to_migration_protocol_yardi_to_appfolio
+
+author_metadata:
+  authored_by: residential_multifamily_subsystem
+  authored_role: data_platform_team
+
+last_updated: "2026-04-15"

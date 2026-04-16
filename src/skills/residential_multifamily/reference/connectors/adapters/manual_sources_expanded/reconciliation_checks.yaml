@@ -1,0 +1,203 @@
+# Reconciliation checks for the Manual Sources Expanded adapter.
+# Conforms to ../../_schema/reconciliation_check.schema.yaml.
+# Every check_id uses the ms_recon_ prefix.
+# Tolerance bands cite reference/normalized/schemas/reconciliation_tolerance_band.yaml
+# by slug; no hardcoded values.
+
+checks:
+
+  - check_id: ms_recon_variance_vs_intacct
+    check_kind: budget_actual
+    severity: blocker
+    description: Every manual variance_explanation references a valid budget_line_id with a posted actual in the matching period.
+    inputs:
+      - reference/normalized/manual_uploads_operator_variance_narrative__<scope>.csv
+      - reference/normalized/gl_actual_line__<scope>.csv
+      - master_data/account_crosswalk.yaml
+    expected_invariant: for every variance row, (property_id, period, account_code) resolves to a posted actual_line
+    remediation: |
+      Missing underlying actual means the variance narrative is unbacked.
+      Operator either (a) waits for Intacct close to post the actual, or
+      (b) retires the narrative and resubmits after close.
+
+  - check_id: ms_recon_variance_amount_matches
+    check_kind: budget_actual
+    severity: warning
+    description: Manual variance_amount reconciles to (actual - budget) from Intacct within tolerance.
+    inputs:
+      - reference/normalized/manual_uploads_operator_variance_narrative__<scope>.csv
+      - reference/normalized/gl_actual_line__<scope>.csv
+      - reference/normalized/gl_budget_line__<scope>.csv
+    expected_invariant: |
+      abs(manual.variance_amount - (intacct.actual - intacct.budget)) within variance_match_band
+    tolerance:
+      absolute: 0
+      relative_percent: 0
+    remediation: |
+      Within band: reduce confidence to medium. Outside band: escalate
+      and block per msx_dq_variance_reconciled. Tolerance band slug is
+      variance_match_band in reference/normalized/schemas/reconciliation_tolerance_band.yaml.
+
+  - check_id: ms_recon_variance_period_alignment
+    check_kind: date_coverage
+    severity: blocker
+    description: Manual variance period must match Intacct posting period.
+    inputs:
+      - reference/normalized/manual_uploads_operator_variance_narrative__<scope>.csv
+      - reference/normalized/gl_actual_line__<scope>.csv
+    expected_invariant: manual.period == intacct.posting_period
+    remediation: Cross-period variance narratives require manual_property_correction; do not accept directly.
+
+  - check_id: ms_recon_tpm_occupancy_vs_appfolio
+    check_kind: budget_actual
+    severity: warning
+    description: TPM scorecard occupancy_physical drifts from AppFolio-computed occupancy within tolerance.
+    inputs:
+      - reference/normalized/manual_uploads_tpm_submission_monthly_report__<scope>.csv
+      - reference/normalized/pms_appfolio_occupancy_rollup__<scope>.csv
+    expected_invariant: |
+      abs(tpm.occupancy_physical - appfolio.occupancy_physical) within tpm_occupancy_drift_band
+    tolerance:
+      absolute: 0
+      relative_percent: 0
+    remediation: |
+      Within band: reduce confidence on downstream tpm_scorecard outputs.
+      Outside band: block and route to asset_mgmt_director. Tolerance band
+      slug is tpm_occupancy_drift_band in reference/normalized/schemas/reconciliation_tolerance_band.yaml.
+
+  - check_id: ms_recon_tpm_collections_vs_appfolio
+    check_kind: budget_actual
+    severity: warning
+    description: TPM scorecard collections_rate drifts from AppFolio-computed collections within tolerance.
+    inputs:
+      - reference/normalized/manual_uploads_tpm_submission_monthly_report__<scope>.csv
+      - reference/normalized/pms_appfolio_collections_rollup__<scope>.csv
+    expected_invariant: |
+      abs(tpm.collections_rate - appfolio.collections_rate) within tpm_collections_drift_band
+    tolerance:
+      absolute: 0
+      relative_percent: 0
+    remediation: "Within band: reduce confidence. Outside band: block; cite tpm_collections_drift_band."
+
+  - check_id: ms_recon_tpm_lag_enforcement
+    check_kind: date_coverage
+    severity: warning
+    description: TPM submission submitted_date must not lag beyond cadence plus tpm_submission_band.
+    inputs:
+      - reference/normalized/manual_uploads_tpm_submission_monthly_report__<scope>.csv
+    expected_invariant: |
+      (submitted_date - period_end) <= cadence_days + tpm_submission_band
+    remediation: Escalate late submissions to asset_mgmt_director per runbooks/manual_common_issues.md::late_tpm_submission.
+
+  - check_id: ms_recon_correction_vs_excel_benchmark
+    check_kind: budget_actual
+    severity: warning
+    description: Manual corrections to Excel-benchmark-sourced fields stay within analyst_override_band.
+    inputs:
+      - reference/normalized/manual_uploads_manual_property_correction__<scope>.csv
+      - reference/normalized/market_data_excel_benchmarks__<scope>.csv
+    expected_invariant: |
+      abs(correction.new_value - excel.benchmark_value) within analyst_override_band
+    tolerance:
+      absolute: 0
+      relative_percent: 0
+    remediation: |
+      Outside band: require benchmark refresh OR policy_exception_ref.
+      Tolerance band slug is analyst_override_band in reference/normalized/schemas/reconciliation_tolerance_band.yaml.
+
+  - check_id: ms_recon_correction_refresh_link
+    check_kind: null_critical
+    severity: warning
+    description: A correction pointing at an Excel-sourced field carries refresh_ref or policy_exception_ref.
+    inputs:
+      - reference/normalized/manual_uploads_manual_property_correction__<scope>.csv
+    expected_invariant: |
+      for every correction row where prior_value is sourced from excel,
+      (refresh_ref is not null) OR (policy_exception_ref is not null)
+    remediation: Route missing-link corrections to master_data/unresolved_exceptions_queue.md.
+
+  - check_id: ms_recon_bidtab_vs_procore
+    check_kind: duplicate_id
+    severity: blocker
+    description: Manual bid_tab_construction rows cannot coexist with an open Procore bid_package for the same project+scope.
+    inputs:
+      - reference/normalized/manual_uploads_bid_tab_construction__<scope>.csv
+      - reference/normalized/construction_procore_bid_package__<scope>.csv
+    expected_invariant: |
+      no (project_code, scope_description) pair has rows in both manual
+      bid_tab_construction AND procore bid_package with status in {open, awaiting_award}
+    remediation: |
+      Double-awarded scope is a governance blocker. Either retire the
+      manual bid tab (procore is authoritative) or close the procore
+      bid_package before promoting the manual tab.
+
+  - check_id: ms_recon_bidtab_leveling_complete
+    check_kind: null_critical
+    severity: blocker
+    description: Recommended award rows carry non-null leveling_notes.
+    inputs:
+      - reference/normalized/manual_uploads_bid_tab_construction__<scope>.csv
+    expected_invariant: |
+      for every row where recommended_award = true, leveling_notes is not null
+    remediation: Incomplete leveling blocks award; operator completes leveling before promotion.
+
+  - check_id: ms_recon_bidtab_rationale_present
+    check_kind: null_critical
+    severity: blocker
+    description: Recommended award rows carry non-empty recommendation_rationale.
+    inputs:
+      - reference/normalized/manual_uploads_bid_tab_construction__<scope>.csv
+    expected_invariant: |
+      for every row where recommended_award = true, recommendation_rationale is not null and not empty
+    remediation: Empty rationale blocks award per _core/approval_matrix.md.
+
+  - check_id: ms_recon_approval_matrix_effective_dating
+    check_kind: date_coverage
+    severity: blocker
+    description: Approval matrix threshold changes obey effective-dating chain.
+    inputs:
+      - reference/normalized/manual_uploads_approval_matrix_threshold_set__<scope>.csv
+      - reference/normalized/manual_uploads_approval_matrix_authority_change__<scope>.csv
+    expected_invariant: |
+      for every threshold_set row, effective_start >= latest prior row's effective_end
+      OR a paired authority_change row exists referencing this row
+    remediation: |
+      Retroactive threshold changes without a paired authority_change row
+      block. Route to cfo_finance_leader for review.
+
+  - check_id: ms_recon_approval_change_has_log
+    check_kind: null_critical
+    severity: blocker
+    description: Every threshold or authority change carries a change_log_ref.
+    inputs:
+      - reference/normalized/manual_uploads_approval_matrix_threshold_set__<scope>.csv
+      - reference/normalized/manual_uploads_approval_matrix_authority_change__<scope>.csv
+    expected_invariant: change_log_ref is not null on every change row
+    remediation: Missing change_log_ref blocks; operator attaches the governance log entry.
+
+  - check_id: ms_recon_escalation_has_owner
+    check_kind: null_critical
+    severity: blocker
+    description: Every escalation_event row carries a non-null routed_to mapping to a known role.
+    inputs:
+      - reference/normalized/manual_uploads_escalation_log__<scope>.csv
+      - _core/approval_matrix.md (role registry)
+    expected_invariant: routed_to is not null AND routed_to IN known_roles
+    remediation: Escalation without owner blocks; operator assigns routing.
+
+  - check_id: ms_recon_payroll_drift_vs_hr
+    check_kind: budget_actual
+    severity: warning
+    description: Operator payroll summary drifts from hr_payroll primary within payroll_drift_band.
+    inputs:
+      - reference/normalized/manual_uploads_operator_payroll_summary__<scope>.csv
+      - reference/normalized/hr_payroll_payroll_summary__<scope>.csv
+    expected_invariant: |
+      abs(manual.total_labor_cost - hr_payroll.total_labor_cost) within payroll_drift_band
+    tolerance:
+      absolute: 0
+      relative_percent: 0
+    remediation: |
+      Within band: reduce confidence. Outside band: hr_payroll is
+      primary when present; block and escalate to hr_director. Tolerance
+      band slug is payroll_drift_band in reference/normalized/schemas/reconciliation_tolerance_band.yaml.

@@ -4,6 +4,7 @@
 defaults:
   asset_class: residential_multifamily
   segment: null                 # ask; no safe default
+  regulatory_program: none      # safe default; regulatory overlays load only on explicit non-none
   form_factor: null             # ask; no safe default
   lifecycle_stage: stabilized   # safe default for "what do you want to do"
   management_mode: null         # ask; critical for routing
@@ -18,3 +19,7 @@ notes: |
   majority of ongoing operator questions apply to stabilized assets. If the user is in
   development/construction/lease_up, they almost always say so explicitly; the router still
   confirms when the asker did not clarify.
+
+  `regulatory_program: none` is a safety default: the router never auto-loads
+  overlays/regulatory/ without an explicit non-`none` value. Any load path that would
+  bypass this must be rejected — see rules.yaml r012.

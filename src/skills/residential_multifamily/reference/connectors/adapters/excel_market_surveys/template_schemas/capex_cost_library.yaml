@@ -1,0 +1,76 @@
+# Template schema for capex_cost_library Excel drops.
+# Aligns with canonical normalized schema at
+# ../../../../normalized/schemas/capex_line_item.yaml.
+# Rows organized by CSI division + section + line item. High-impact file.
+
+status_tag: template
+template_slug: capex_cost_library
+canonical_reference_schema: reference/normalized/schemas/capex_line_item.yaml
+canonical_ontology_object: capex_line_item_assumption
+source_format: xlsx
+csv_sibling_format: csv
+expected_sheets:
+  - capex_cost_lines
+  - csi_division_index
+  - cover_metadata
+header_rows: 1
+filename_pattern: "^capex_cost_library__<region>__\\d{4}-Q\\d\\.(xlsx|csv)$"
+
+sheet_schemas:
+
+  capex_cost_lines:
+    columns:
+      - { name: csi_division,       required: true,  type: string, description: CSI MasterFormat division (e.g., 03, 09, 23) }
+      - { name: csi_section,        required: true,  type: string, description: CSI section code (e.g., 09 65 00 Resilient Flooring) }
+      - { name: line_item,          required: true,  type: string, description: line item label (e.g., Vinyl plank flooring 6mm wear-layer) }
+      - { name: line_item_slug,     required: true,  type: string, description: canonical slug, e.g., lvp_flooring_6mm }
+      - { name: capex_category,     required: true,  type: string, enum: [life_safety, building_envelope, mep_systems, site_hardscape, site_landscape, amenity, common_area, unit_interior_classic, unit_interior_premium, technology, sustainability, other] }
+      - { name: unit_basis,         required: true,  type: string, enum: [dollars_per_unit, dollars_per_sf, dollars_per_each, dollars_per_lump_sum] }
+      - { name: market,             required: true,  type: string }
+      - { name: region,             required: false, type: string }
+      - { name: segment,            required: true,  type: string, enum: [middle_market, affordable, luxury] }
+      - { name: property_form,      required: false, type: string, enum: [garden, walk_up, wrap, suburban_mid_rise, urban_mid_rise, high_rise] }
+      - { name: low,                required: true,  type: number, description: low end of cost band }
+      - { name: typical,            required: true,  type: number }
+      - { name: high,               required: true,  type: number }
+      - { name: currency,           required: true,  type: string, enum: [USD] }
+      - { name: escalation_assumption, required: false, type: number, description: annual escalation pct applied forward (decimal form) }
+      - { name: typical_useful_life_years, required: false, type: integer }
+      - { name: source_basis,       required: true,  type: string, enum: [rs_means, vendor_bid, contracted_unit_price, historical_actual, engineered_estimate, extrapolated] }
+      - { name: source,             required: true,  type: string, description: "citation (bid number, GC agreement, publication)" }
+      - { name: as_of,              required: true,  type: date }
+      - { name: row_id,             required: true,  type: string }
+
+  csi_division_index:
+    columns:
+      - { name: csi_division,    required: true, type: string }
+      - { name: division_label,  required: true, type: string, description: human-readable label (e.g., 09 Finishes) }
+
+  cover_metadata:
+    columns:
+      - { name: library_version,     required: true, type: string }
+      - { name: quarter,             required: true, type: string }
+      - { name: analyst_name,        required: true, type: string }
+      - { name: reviewer,            required: true, type: string }
+      - { name: signed_off_date,     required: true, type: date }
+      - { name: escalation_base_date, required: true, type: date, description: reference date for escalation_assumption application }
+
+validation_rules:
+  - rule_id: ccl_band_monotonic
+    severity: blocker
+    description: low <= typical <= high per row
+  - rule_id: ccl_csi_division_recognized
+    severity: blocker
+    description: csi_division value matches csi_division_index sheet
+  - rule_id: ccl_reviewer_signoff
+    severity: blocker
+    description: high-impact file; cover_metadata.reviewer and signed_off_date non-null
+  - rule_id: ccl_line_item_unique
+    severity: blocker
+    description: (csi_division, line_item_slug, market, as_of) unique within submission
+  - rule_id: ccl_unit_basis_enum
+    severity: blocker
+    description: unit_basis value in enum
+
+allowed_markets_reference: reference/connectors/master_data/market_crosswalk.yaml
+cost_code_reference: reference/connectors/master_data/cost_code_crosswalk.yaml

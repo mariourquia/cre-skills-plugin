@@ -1,0 +1,96 @@
+# Crosswalk Schema
+# Applies to every crosswalk row across every crosswalk file in this directory:
+# property_master_crosswalk.yaml, unit_crosswalk.yaml, lease_crosswalk.yaml,
+# resident_account_crosswalk.yaml, vendor_master_crosswalk.yaml,
+# account_crosswalk.yaml, capex_project_crosswalk.yaml,
+# change_order_crosswalk.yaml, draw_request_crosswalk.yaml,
+# employee_crosswalk.yaml, dev_project_crosswalk.yaml.
+#
+# Manual overrides are a separate file (manual_overrides.yaml) with a
+# super-set schema; see that file for the expanded fields.
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: CrosswalkRow
+type: object
+required:
+  - canonical_id
+  - source_system
+  - source_id
+  - match_confidence
+  - match_method
+  - effective_start
+  - survivorship_rule
+  - manual_override
+  - reviewer
+  - last_validated_at
+properties:
+  canonical_id:
+    type: string
+    pattern: "^[a-z][a-z0-9_]*$"
+    description: snake_case canonical identifier for the underlying business
+      record. Stable across source changes. Never reused after retirement.
+  source_system:
+    type: string
+    pattern: "^[a-z][a-z0-9_]*$"
+    description: source_id from the source registry. Must match an entry in
+      ../source_registry/source_registry.yaml.
+  source_id:
+    type: string
+    description: The source-system primary key (source_primary_key). Preserves
+      original formatting from the source. Not constrained to snake_case.
+  match_confidence:
+    type: string
+    enum:
+      - high
+      - medium
+      - low
+      - unresolved
+    description: |
+      Unresolved rows are not persisted here; they live in
+      unresolved_exceptions_queue.md.
+  match_method:
+    type: string
+    enum:
+      - exact
+      - fuzzy
+      - composite
+      - manual
+  effective_start:
+    type: string
+    description: ISO-8601 date on which this mapping becomes effective.
+  effective_end:
+    type: string
+    description: ISO-8601 date on which this mapping ceases to be effective.
+      Null or absent = current.
+  survivorship_rule:
+    type: string
+    description: Slug of the survivorship rule that applies to this row. Rules
+      are defined in survivorship_rules.md.
+  manual_override:
+    type: boolean
+    description: True if this row is a manual override of the default survivorship.
+  override_reason:
+    type: string
+    description: Required if manual_override=true.
+  reviewer:
+    type: string
+    description: Role or named person who last validated the row.
+  last_validated_at:
+    type: string
+    description: ISO-8601 date of the last validation.
+  notes:
+    type: string
+    description: Free-form operator notes. May include edge-case context,
+      historical references, and cross-crosswalk pointers.
+  prior_canonical_id:
+    type: string
+    description: Optional pointer to a prior canonical id in the same record
+      family. Used for unit split / merge, lease renewal chains, vendor renames
+      with canonical id changes.
+  related_canonical_ids:
+    type: array
+    description: Optional list of related canonical ids. Used for multi-property
+      legal entities and other many-to-one relationships.
+    items:
+      type: string
+additionalProperties: false

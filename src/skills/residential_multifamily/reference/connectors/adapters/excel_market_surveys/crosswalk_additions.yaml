@@ -1,0 +1,67 @@
+# Crosswalk row fragments proposed by the Excel market surveys adapter.
+# Merged into the canonical crosswalks under reference/connectors/master_data/
+# when those crosswalk files ship. Until then these fragments flag missing
+# crosswalk rows via dq rule ex_reference_market_in_crosswalk and
+# ex_reference_vendor_in_crosswalk.
+
+status_tag: template
+schema_version: "0.1.0"
+
+market_crosswalk:
+  # Excel market label -> canonical market_id. One row per market the
+  # adapter has encountered in sample_valid/ or in real drops so far.
+  target_crosswalk_file: reference/connectors/master_data/market_crosswalk.yaml
+  effective_dating_required: true
+  rows:
+    - { excel_label: Charlotte,    canonical_market_id: MKT_CLT, region: southeast, effective_start: 2022-01-01, note: canonical label }
+    - { excel_label: Atlanta,      canonical_market_id: MKT_ATL, region: southeast, effective_start: 2022-01-01, note: canonical label }
+    - { excel_label: Raleigh,      canonical_market_id: MKT_RDU, region: southeast, effective_start: 2022-01-01, note: also matches Raleigh-Durham in some broker memos }
+    - { excel_label: Tampa,        canonical_market_id: MKT_TPA, region: southeast, effective_start: 2022-01-01, note: canonical label }
+    - { excel_label: Charlotte MSA, canonical_market_id: MKT_CLT, region: southeast, effective_start: 2022-01-01, note: alias used by CoStar-sourced sheets }
+    - { excel_label: ATL Metro,     canonical_market_id: MKT_ATL, region: southeast, effective_start: 2022-01-01, note: alias }
+
+submarket_crosswalk:
+  target_crosswalk_file: reference/connectors/master_data/submarket_crosswalk.yaml
+  effective_dating_required: true
+  rows:
+    - { excel_label: South End,    canonical_submarket_id: SUB_CLT_SOUTHEND, parent_market_id: MKT_CLT, effective_start: 2022-01-01 }
+    - { excel_label: Uptown,       canonical_submarket_id: SUB_CLT_UPTOWN,   parent_market_id: MKT_CLT, effective_start: 2022-01-01 }
+    - { excel_label: NoDa,         canonical_submarket_id: SUB_CLT_NODA,     parent_market_id: MKT_CLT, effective_start: 2022-01-01 }
+    - { excel_label: Midtown,      canonical_submarket_id: SUB_ATL_MIDTOWN,  parent_market_id: MKT_ATL, effective_start: 2022-01-01 }
+    - { excel_label: North Hills,  canonical_submarket_id: SUB_RDU_NORTHHILLS, parent_market_id: MKT_RDU, effective_start: 2022-01-01 }
+    - { excel_label: Westshore,    canonical_submarket_id: SUB_TPA_WESTSHORE, parent_market_id: MKT_TPA, effective_start: 2022-01-01 }
+
+vendor_master_crosswalk:
+  # Excel vendor name -> canonical vendor_id. Aliases carry effective_start
+  # to support vendor name changes (DBA, acquisitions).
+  target_crosswalk_file: reference/connectors/master_data/vendor_master_crosswalk.yaml
+  effective_dating_required: true
+  rows:
+    - { excel_label: Vista Mechanical,          canonical_vendor_id: VND_VISTA_MECH,   dba_of: null,        effective_start: 2023-01-01 }
+    - { excel_label: Vista Mechanical Services, canonical_vendor_id: VND_VISTA_MECH,   dba_of: null,        effective_start: 2023-01-01, note: alias }
+    - { excel_label: Vista Mechanical LLC,      canonical_vendor_id: VND_VISTA_MECH,   dba_of: null,        effective_start: 2024-01-01, note: post-conversion alias }
+    - { excel_label: Southern Turn Services,    canonical_vendor_id: VND_SOUTHERN_TURN, dba_of: null,       effective_start: 2023-01-01 }
+
+cost_code_crosswalk:
+  # New optional crosswalk. Excel CSI division -> canonical csi_division
+  # slug. Ensures capex line items from different GCs and analysts roll up
+  # to a consistent taxonomy.
+  target_crosswalk_file: reference/connectors/master_data/cost_code_crosswalk.yaml
+  effective_dating_required: true
+  status: proposed
+  rows:
+    - { excel_label: "02",     canonical_csi_division: "02_existing_conditions", label: Existing Conditions, effective_start: 2022-01-01 }
+    - { excel_label: "03",     canonical_csi_division: "03_concrete",            label: Concrete,             effective_start: 2022-01-01 }
+    - { excel_label: "07",     canonical_csi_division: "07_thermal_moisture",    label: Thermal and Moisture Protection, effective_start: 2022-01-01 }
+    - { excel_label: "09",     canonical_csi_division: "09_finishes",            label: Finishes,             effective_start: 2022-01-01 }
+    - { excel_label: "11",     canonical_csi_division: "11_equipment",           label: Equipment,            effective_start: 2022-01-01 }
+    - { excel_label: "13",     canonical_csi_division: "13_special_construction", label: Special Construction, effective_start: 2022-01-01 }
+    - { excel_label: "23",     canonical_csi_division: "23_hvac",                label: HVAC,                 effective_start: 2022-01-01 }
+    - { excel_label: "26",     canonical_csi_division: "26_electrical",          label: Electrical,           effective_start: 2022-01-01 }
+
+unresolved_exceptions:
+  # Markets / vendors / cost codes seen in the sample drops that require a
+  # crosswalk extension before go-live. Flagged here, escalated via
+  # master_data/unresolved_exceptions_queue.md when encountered in real drops.
+  status: placeholder
+  entries: []

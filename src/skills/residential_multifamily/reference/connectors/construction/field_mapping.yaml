@@ -1,0 +1,652 @@
+# Richer per-entity field mapping template for the construction connector.
+dev_budget:
+  fields:
+  - canonical_field: project_id
+    source_field: project_id
+    source_description: Development project id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: project_id resolves via construction_project_registry
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: project anchor
+  - canonical_field: budget_line_slug
+    source_field: budget_line
+    source_description: Canonical line slug
+    transform_rule: map_budget_line
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: budget_line_slug IN canonical dev_budget_line taxonomy
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: line-level roll-up
+  - canonical_field: scenario
+    source_field: scenario
+    source_description: Budget scenario
+    transform_rule: map_budget_scenario
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: scenario IN (baseline, current, approved, proposed)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: scenario filter basis
+  - canonical_field: as_of_date
+    source_field: as_of
+    source_description: Budget vintage
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: as_of_date <= today
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: vintage comparison key
+  - canonical_field: amount_cents
+    source_field: amount_usd
+    source_description: Budget amount
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: amount_cents >= 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: budget total
+  - canonical_field: contingency_applied_percent
+    source_field: contingency_pct
+    source_description: Contingency applied to the line
+    transform_rule: to_number
+    type_cast_rule: number
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: contingency_applied_percent IS NULL OR contingency_applied_percent
+      >= 0
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: contingency analysis
+estimate_line_item:
+  fields:
+  - canonical_field: line_item_id
+    source_field: line_id
+    source_description: Stable id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: line_item_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: estimate anchor
+  - canonical_field: project_id
+    source_field: project_id
+    source_description: Project FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: project_id resolves via construction_project_registry
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to project
+  - canonical_field: line_label
+    source_field: line_label
+    source_description: Line label
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: non-empty
+    required_for_load: true
+    required_for_kpi: false
+    provenance_note: display
+  - canonical_field: unit
+    source_field: unit
+    source_description: Quantity unit
+    transform_rule: map_uom
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: unit IN (ea, sf, lf, cy, ton, hr, lot)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: takeoff application
+  - canonical_field: quantity
+    source_field: qty
+    source_description: Quantity
+    transform_rule: to_number
+    type_cast_rule: number
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: quantity > 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: takeoff quantity
+  - canonical_field: unit_cost_cents
+    source_field: unit_cost_usd
+    source_description: Unit cost
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: unit_cost_cents > 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: unit rate
+  - canonical_field: extended_cost_cents
+    source_field: ext_cost_usd
+    source_description: Extended cost
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: extended_cost_cents == quantity * unit_cost_cents within rounding
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: line total
+  - canonical_field: csi_division
+    source_field: csi
+    source_description: CSI division code
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: optional
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: division-level spend analysis
+  - canonical_field: source_basis
+    source_field: basis
+    source_description: Cost basis
+    transform_rule: map_source_basis
+    type_cast_rule: enum
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: source_basis IN (historical, bid, reference_library, rom) when
+      non-null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: confidence metadata
+bid_package:
+  fields:
+  - canonical_field: bid_package_id
+    source_field: bid_package_id
+    source_description: Stable id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: bid_package_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: bid anchor
+  - canonical_field: project_id
+    source_field: project_id
+    source_description: Project FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: project_id resolves via construction_project_registry
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to project
+  - canonical_field: scope_description
+    source_field: scope
+    source_description: Scope description
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: non-empty
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: scope summary
+  - canonical_field: bid_due_date
+    source_field: bid_due
+    source_description: Bid due date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: bid_due_date >= today - backfill_window OR status = awarded
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: procurement timeline
+  - canonical_field: bidders_invited
+    source_field: bidders
+    source_description: Bidders invited list
+    transform_rule: parse_json_array
+    type_cast_rule: array
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: each element IN ap.vendor.vendor_id when non-null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: bidder pool analytics
+  - canonical_field: status
+    source_field: status
+    source_description: Bid package status
+    transform_rule: map_bid_status
+    type_cast_rule: enum
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: status IN (issued, bids_received, leveled, awarded, cancelled)
+      when non-null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: procurement pipeline tracking
+commitment:
+  fields:
+  - canonical_field: commitment_id
+    source_field: commitment_id
+    source_description: Stable id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: commitment_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: commitment anchor
+  - canonical_field: project_id
+    source_field: project_id
+    source_description: Project FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: project_id resolves via construction_project_registry
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to project
+  - canonical_field: vendor_id
+    source_field: vendor_id
+    source_description: Vendor FK via bridge
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: vendor_id IN ap.vendor.vendor_id via vendor_ap_construction_bridge
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to ap.vendor via bridge
+  - canonical_field: scope_description
+    source_field: scope
+    source_description: Scope description
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: non-empty
+    required_for_load: true
+    required_for_kpi: false
+    provenance_note: display
+  - canonical_field: contract_total_cents
+    source_field: contract_total_usd
+    source_description: Contract total
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: contract_total_cents > 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: commitment ceiling basis
+  - canonical_field: status
+    source_field: status
+    source_description: Commitment status
+    transform_rule: map_commitment_status
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: status IN (draft, signed, in_progress, closed, cancelled)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: open-commitment filter
+  - canonical_field: retention_percent
+    source_field: retention_pct
+    source_description: Retention percent
+    transform_rule: to_number
+    type_cast_rule: number
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: retention_percent IS NULL OR retention_percent >= 0
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: retention-release tracking
+change_order:
+  fields:
+  - canonical_field: change_order_id
+    source_field: co_id
+    source_description: Stable id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: change_order_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: CO anchor
+  - canonical_field: project_id
+    source_field: project_id
+    source_description: Project FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: project_id resolves via construction_project_registry
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to project
+  - canonical_field: commitment_id
+    source_field: commitment_id
+    source_description: Commitment FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: commitment_id IN construction.commitment.commitment_id
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to commitment
+  - canonical_field: co_number
+    source_field: co_number
+    source_description: Sequential CO number
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: co_number unique per commitment
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: CO audit trail
+  - canonical_field: cost_delta_cents
+    source_field: cost_delta_usd
+    source_description: Cost delta
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: cost_delta_cents IS NOT NULL
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: ceiling extension
+  - canonical_field: status
+    source_field: status
+    source_description: CO status
+    transform_rule: map_co_status
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: status IN (proposed, pending_approval, approved, rejected)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: pending-vs-approved pivot
+  - canonical_field: time_delta_days
+    source_field: time_delta
+    source_description: Schedule delta
+    transform_rule: to_integer
+    type_cast_rule: integer
+    null_handling: default_to_null
+    default_rule: 0
+    validation_rule: time_delta_days IS NULL OR time_delta_days INTEGER
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: schedule impact analysis
+  - canonical_field: category
+    source_field: category
+    source_description: CO category
+    transform_rule: map_co_category
+    type_cast_rule: enum
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: category IN (owner_directed, design_error, site_condition, scope_clarification,
+      unforeseen) when non-null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: CO driver analysis
+draw_request:
+  fields:
+  - canonical_field: draw_request_id
+    source_field: draw_id
+    source_description: Stable id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: draw_request_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: draw anchor
+  - canonical_field: project_id
+    source_field: project_id
+    source_description: Project FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: project_id resolves via construction_project_registry
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to project
+  - canonical_field: period
+    source_field: period
+    source_description: Draw period label
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: period matches YYYY-MM pattern
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: draw cycle key
+  - canonical_field: amount_requested_cents
+    source_field: amount_usd
+    source_description: Amount requested
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: amount_requested_cents > 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: draw amount
+  - canonical_field: approval_status
+    source_field: status
+    source_description: Draw approval status
+    transform_rule: map_draw_status
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: approval_status IN (submitted, in_review, approved, approved_with_conditions,
+      denied, funded)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: funded-draw filter
+  - canonical_field: cost_to_date_cents
+    source_field: cost_to_date_usd
+    source_description: Cost to date
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: cost_to_date_cents IS NULL OR cost_to_date_cents >= 0
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: percent-complete-by-cost derivation
+  - canonical_field: percent_complete_physical
+    source_field: pct_complete_physical
+    source_description: Physical percent complete
+    transform_rule: to_number
+    type_cast_rule: number
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: percent_complete_physical IS NULL OR percent_complete_physical
+      between 0 AND 100
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: earned-value calculation
+  - canonical_field: percent_complete_cost
+    source_field: pct_complete_cost
+    source_description: Cost percent complete
+    transform_rule: to_number
+    type_cast_rule: number
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: percent_complete_cost IS NULL OR percent_complete_cost between
+      0 AND 100
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: earned-value calculation
+schedule_milestone:
+  fields:
+  - canonical_field: milestone_id
+    source_field: milestone_id
+    source_description: Stable id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: milestone_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: milestone anchor
+  - canonical_field: project_id
+    source_field: project_id
+    source_description: Project FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: project_id resolves via construction_project_registry
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to project
+  - canonical_field: milestone_name
+    source_field: milestone_name
+    source_description: Milestone name
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: non-empty
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: schedule node label
+  - canonical_field: baseline_date
+    source_field: baseline_date
+    source_description: Baseline date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: baseline_date IS NOT NULL
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: baseline anchor; frozen at project approval
+  - canonical_field: current_forecast_date
+    source_field: forecast_date
+    source_description: Current forecast date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: current_forecast_date IS NOT NULL
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: slippage computation basis
+  - canonical_field: actual_date
+    source_field: actual_date
+    source_description: Actual completion
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: actual_date IS NULL OR actual_date <= today
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: completed-milestone filter
+  - canonical_field: critical_path_flag
+    source_field: critical_path
+    source_description: Critical-path flag
+    transform_rule: to_boolean
+    type_cast_rule: boolean
+    null_handling: default_to_null
+    default_rule: false
+    validation_rule: critical_path_flag IN (true, false)
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: critical-path slippage emphasis
+punch_item:
+  fields:
+  - canonical_field: punch_item_id
+    source_field: punch_id
+    source_description: Stable id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: punch_item_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: punch item anchor
+  - canonical_field: project_id
+    source_field: project_id
+    source_description: Project FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: project_id resolves via construction_project_registry
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to project
+  - canonical_field: description
+    source_field: description
+    source_description: Item description
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: non-empty
+    required_for_load: true
+    required_for_kpi: false
+    provenance_note: display
+  - canonical_field: status
+    source_field: status
+    source_description: Punch status
+    transform_rule: map_punch_status
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: status IN (open, in_progress, resolved, verified, rejected)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: closeout progress
+  - canonical_field: assigned_to
+    source_field: assigned_to
+    source_description: Assignee
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: optional
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: responsibility attribution
+  - canonical_field: target_complete_date
+    source_field: target_date
+    source_description: Target close date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: target_complete_date IS NULL OR target_complete_date >= today
+      - backfill_window
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: closeout SLA

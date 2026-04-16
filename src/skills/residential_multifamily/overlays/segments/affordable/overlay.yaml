@@ -1,13 +1,21 @@
 overlay_id: segment.affordable
 overlay_kind: segment
-status: stub
+status: deprecated
 scope:
   segment: affordable
 authoring_notes: |
-  Stub overlay for affordable / LIHTC / HUD / Section 8 / workforce-restricted segments.
-  Phase 1 does not deepen this overlay; it exists so the segment can diverge from
-  middle_market without touching canonical core. See DIVERGENCE.md for the narrative
-  enumeration of how this segment is expected to differ. Do not add depth here in Phase 1.
+  @deprecated 2026-04-15. This overlay has moved to `overlays/regulatory/affordable/`.
+  Affordable regulated housing is a compliance axis, not a market-positioning segment,
+  and `overlays/segments/` is reserved for conventional market-positioning overlays
+  (middle_market, luxury). See `overlays/segments/affordable/DEPRECATED.md` for the
+  migration notice. This stub remains for one refinement cycle for backward compatibility
+  and will be removed in the 2026-Q3 refinement pass.
+
+  Original note (superseded): stub overlay for affordable / LIHTC / HUD / Section 8 /
+  workforce-restricted segments. Phase 1 does not deepen this overlay; it exists so the
+  segment can diverge from middle_market without touching canonical core. See
+  DIVERGENCE.md for the narrative enumeration of how this segment is expected to differ.
+  Do not add depth here in Phase 1.
 
 overrides:
   - target_kind: screening_policy

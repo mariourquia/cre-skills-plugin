@@ -1,0 +1,340 @@
+entities:
+  rent_comp:
+    entity_name: rent_comp
+    grain: one row per property-level rent comp observation
+    time_basis: snapshot
+    primary_key:
+    - comp_observation_id
+    required_fields:
+    - name: comp_observation_id
+      type: string
+      description: Stable observation id
+      is_key: true
+    - name: comp_property_id
+      type: string
+      description: Comp property identifier
+      is_key: false
+    - name: market
+      type: string
+      description: Market label
+      is_key: false
+    - name: as_of_date
+      type: date
+      description: Observation as-of
+      is_key: false
+    - name: unit_type_label
+      type: string
+      description: Unit type label at comp
+      is_key: false
+    - name: asking_rent_monthly_cents
+      type: money_cents
+      description: Asking rent in cents
+      is_key: false
+      unit: cents_usd
+    optional_fields:
+    - name: submarket
+      type: string
+      description: Submarket
+    - name: nrsf
+      type: integer
+      description: NRSF of the unit type
+    - name: concessions_weeks
+      type: number
+      description: Concessions in weeks of free rent
+    foreign_keys: []
+    null_handling:
+    - field: asking_rent_monthly_cents
+      behavior: reject_record
+      notes: observations without rent have no use
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - market_rent_benchmark reference category; comp-snapshot skill
+  concession_observation:
+    entity_name: concession_observation
+    grain: one row per observed concession offer
+    time_basis: snapshot
+    primary_key:
+    - concession_observation_id
+    required_fields:
+    - name: concession_observation_id
+      type: string
+      description: Stable id
+      is_key: true
+    - name: comp_property_id
+      type: string
+      description: Comp property id
+      is_key: false
+    - name: market
+      type: string
+      description: Market
+      is_key: false
+    - name: as_of_date
+      type: date
+      description: Observation as-of
+      is_key: false
+    - name: concession_type
+      type: enum
+      description: Concession kind
+      is_key: false
+      enum_values:
+      - weeks_free
+      - dollars_off
+      - look_and_lease
+      - gift_card
+      - fee_waiver
+      - other
+    - name: concession_magnitude
+      type: number
+      description: Magnitude in the concession_type's natural unit
+      is_key: false
+    optional_fields:
+    - name: submarket
+      type: string
+      description: Submarket
+    - name: lease_term_required_months
+      type: integer
+      description: Minimum lease term to earn concession
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - concession_benchmark reference category
+  occupancy_benchmark:
+    entity_name: occupancy_benchmark
+    grain: one row per market-level occupancy benchmark observation
+    time_basis: snapshot
+    primary_key:
+    - market
+    - submarket
+    - as_of_date
+    required_fields:
+    - name: market
+      type: string
+      description: Market
+      is_key: true
+    - name: submarket
+      type: string
+      description: Submarket (empty string if market-only)
+      is_key: true
+    - name: as_of_date
+      type: date
+      description: Observation date
+      is_key: true
+    - name: physical_occupancy_percent
+      type: number
+      description: Physical occupancy percent
+      is_key: false
+    optional_fields:
+    - name: leased_occupancy_percent
+      type: number
+      description: Leased occupancy percent
+    - name: economic_occupancy_percent
+      type: number
+      description: Economic occupancy percent
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - occupancy_benchmark reference category
+  payroll_reference:
+    entity_name: payroll_reference
+    grain: one row per role-level payroll benchmark observation
+    time_basis: snapshot
+    primary_key:
+    - role_slug
+    - market
+    - as_of_date
+    required_fields:
+    - name: role_slug
+      type: string
+      description: Canonical role slug
+      is_key: true
+    - name: market
+      type: string
+      description: Market
+      is_key: true
+    - name: as_of_date
+      type: date
+      description: Observation date
+      is_key: true
+    - name: base_salary_annual_cents
+      type: money_cents
+      description: Base salary annual in cents
+      is_key: false
+      unit: cents_usd
+    optional_fields:
+    - name: bonus_target_annual_cents
+      type: money_cents
+      description: Bonus target annual in cents
+      unit: cents_usd
+    - name: burden_rate_percent
+      type: number
+      description: Benefits and burden rate percent
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - payroll_assumption reference category; annual-budget-engine
+  labor_reference:
+    entity_name: labor_reference
+    grain: one row per trade labor rate observation
+    time_basis: snapshot
+    primary_key:
+    - trade
+    - market
+    - as_of_date
+    required_fields:
+    - name: trade
+      type: string
+      description: Trade label (plumber / electrician / hvac / etc.)
+      is_key: true
+    - name: market
+      type: string
+      description: Market
+      is_key: true
+    - name: as_of_date
+      type: date
+      description: Observation date
+      is_key: true
+    - name: hourly_rate_cents
+      type: money_cents
+      description: Blended hourly rate in cents
+      is_key: false
+      unit: cents_usd
+    optional_fields:
+    - name: rate_type
+      type: enum
+      description: Rate type
+      enum_values:
+      - blended
+      - journeyman
+      - apprentice
+      - foreman
+      - prevailing_wage
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - labor_rate reference category; turn-cost derivation
+  material_reference:
+    entity_name: material_reference
+    grain: one row per material cost observation
+    time_basis: snapshot
+    primary_key:
+    - material_slug
+    - region
+    - as_of_date
+    required_fields:
+    - name: material_slug
+      type: string
+      description: Material slug (flooring_lvp / paint / hvac_condenser / etc.)
+      is_key: true
+    - name: region
+      type: string
+      description: Regional scope
+      is_key: true
+    - name: as_of_date
+      type: date
+      description: Observation date
+      is_key: true
+    - name: unit
+      type: string
+      description: Unit (sf / ea / lf / cy)
+      is_key: false
+    - name: unit_cost_cents
+      type: money_cents
+      description: Unit cost in cents
+      is_key: false
+      unit: cents_usd
+    optional_fields:
+    - name: notes
+      type: string
+      description: Source notes
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - material_cost reference category; capex pricing
+  utility_reference:
+    entity_name: utility_reference
+    grain: one row per utility cost benchmark observation
+    time_basis: snapshot
+    primary_key:
+    - market
+    - form_factor
+    - utility_type
+    - as_of_date
+    required_fields:
+    - name: market
+      type: string
+      description: Market
+      is_key: true
+    - name: form_factor
+      type: string
+      description: Form factor (garden / mid_rise / high_rise)
+      is_key: true
+    - name: utility_type
+      type: enum
+      description: Utility type
+      is_key: true
+      enum_values:
+      - electric
+      - gas
+      - water_sewer
+      - trash
+      - internet_common
+      - other
+    - name: as_of_date
+      type: date
+      description: Observation date
+      is_key: true
+    - name: cost_per_unit_per_month_cents
+      type: money_cents
+      description: Cost per unit per month in cents
+      is_key: false
+      unit: cents_usd
+    optional_fields:
+    - name: net_of_rubs
+      type: boolean
+      description: True if net of RUBS recovery
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - utility_benchmark reference category

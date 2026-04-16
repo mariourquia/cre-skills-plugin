@@ -1,0 +1,5 @@
+comp_id,survey_date,comp_name,unit_type,asking_rent_usd,concession_summary,occupancy_reported_pct
+comp_sample_001,2026-04-01,Sample Comp One,2bed_2bath,2150.00,one month free on 13 month term,94.5
+comp_sample_001,2026-04-01,Sample Comp One,1bed_1bath,1750.00,none,96.0
+# status: template
+# schema: reference/connectors/manual_uploads/schema.yaml entities.rent_survey

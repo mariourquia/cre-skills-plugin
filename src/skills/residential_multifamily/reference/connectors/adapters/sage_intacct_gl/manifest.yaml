@@ -1,0 +1,107 @@
+# Adapter manifest: Sage Intacct GL.
+# Conforms to reference/connectors/adapters/adapter_manifest.schema.yaml.
+# Canonical GL connector at ../../gl/ remains the source of truth; this
+# adapter layers Intacct-native field names, dimension structure, and
+# budget/forecast module semantics on top.
+
+adapter_id: sage_intacct_gl
+adapter_name: Sage Intacct General Ledger
+vendor_family: sage_intacct_family
+connector_domain: gl
+status: stub
+rollout_wave: wave_4
+description: |
+  Stack-specific adapter for Sage Intacct. Ingests chart of accounts,
+  dimension structure (entities, locations, departments, projects,
+  classes), journal entries, actuals, budget versions, forecast
+  versions, vendor master, and capex project dimension. Ingestion
+  mode is api (Sage Intacct Web Services, oauth_placeholder credential
+  method). Canonical GL schema in ../../gl/ wins on any conflict. See
+  source_contract.yaml for the raw Intacct payload shape per entity and
+  normalized_contract.yaml for the canonical object mapping.
+
+  Cadence split:
+    - daily for posted actuals + journal entries
+    - monthly for finalized budget and forecast versions
+    - on_demand for chart-of-accounts and dimension master refreshes
+
+  Sensitivity posture:
+    - pii_classification: low (Intacct holds vendor records but no
+      resident PII in the CRE pattern)
+    - financial_sensitivity: restricted (GL is the book of record for
+      actuals, budget, forecast, capex financials)
+    - legal_sensitivity: high (subledger support for audit, lender,
+      and LP reporting)
+
+supported_source_systems:
+  - sage_intacct_prod
+
+object_coverage:
+  - budget_line
+  - forecast_line
+  - variance_explanation
+  - actual_line
+  - capex_project
+  - journal_entry
+  - chart_of_account
+  - dimension
+
+mapping_hints:
+  - { source_field_pattern: "GLACCOUNTNO",          canonical_field: source_account_id,        transform_hint: trim_string }
+  - { source_field_pattern: "ACCOUNTTITLE",         canonical_field: source_account_label,     transform_hint: trim_string }
+  - { source_field_pattern: "POSTING_TYPE",         canonical_field: posting_type,             transform_hint: trim_string }
+  - { source_field_pattern: "ACCOUNT_TYPE|CATEGORY", canonical_field: account_type,             transform_hint: map_intacct_account_type }
+  - { source_field_pattern: "NORMAL_BALANCE",       canonical_field: normal_balance,           transform_hint: lowercase_string }
+  - { source_field_pattern: "ENTITYID|LOCATIONID",  canonical_field: property_id,              transform_hint: map_entity_location_to_property }
+  - { source_field_pattern: "DEPARTMENTID",         canonical_field: department_id,            transform_hint: trim_string }
+  - { source_field_pattern: "PROJECTID",            canonical_field: capex_project_id,         transform_hint: map_project_to_capex_project }
+  - { source_field_pattern: "CLASSID",              canonical_field: class_id,                 transform_hint: trim_string }
+  - { source_field_pattern: "RECORDNO|BATCHNO",     canonical_field: journal_id,               transform_hint: trim_string }
+  - { source_field_pattern: "LINE_NO|ENTRYNO",      canonical_field: journal_line_id,          transform_hint: trim_string }
+  - { source_field_pattern: "JOURNAL",              canonical_field: journal_code,             transform_hint: trim_string }
+  - { source_field_pattern: "BATCH_DATE|POSTDATE",  canonical_field: posting_date,             transform_hint: to_iso_date }
+  - { source_field_pattern: "PERIOD|REPORTINGPERIOD", canonical_field: operating_month,        transform_hint: intacct_period_to_iso_month }
+  - { source_field_pattern: "SERVICE_FROM|SERVICE_TO", canonical_field: service_period_range,  transform_hint: to_iso_date_range }
+  - { source_field_pattern: "AMOUNT|TRX_AMOUNT",    canonical_field: amount_cents,             transform_hint: dollars_to_cents }
+  - { source_field_pattern: "DEBITAMOUNT",          canonical_field: debit_cents,              transform_hint: dollars_to_cents }
+  - { source_field_pattern: "CREDITAMOUNT",         canonical_field: credit_cents,             transform_hint: dollars_to_cents }
+  - { source_field_pattern: "CURRENCY|CURR",        canonical_field: source_currency,          transform_hint: trim_string }
+  - { source_field_pattern: "VENDORID",             canonical_field: vendor_id,                transform_hint: trim_string }
+  - { source_field_pattern: "VENDORNAME",           canonical_field: vendor_name,              transform_hint: trim_string }
+  - { source_field_pattern: "BUDGETID",             canonical_field: budget_version,           transform_hint: map_intacct_budget_version }
+  - { source_field_pattern: "BUDGETNAME",           canonical_field: budget_version_label,     transform_hint: trim_string }
+  - { source_field_pattern: "FORECASTID",           canonical_field: forecast_version,         transform_hint: map_intacct_forecast_version }
+  - { source_field_pattern: "FORECASTNAME",         canonical_field: forecast_version_label,   transform_hint: trim_string }
+  - { source_field_pattern: "MEMO|DESCRIPTION",     canonical_field: memo,                     transform_hint: trim_string }
+  - { source_field_pattern: "POSTED|STATE",         canonical_field: posting_state,            transform_hint: map_intacct_posting_state }
+  - { source_field_pattern: "RECORDNO",             canonical_field: source_row_id,            transform_hint: trim_string }
+  - { source_field_pattern: "REVERSAL|REVERSED",    canonical_field: reversal_flag,            transform_hint: to_boolean }
+
+known_gotchas:
+  - Intacct entity structure varies by deployment; one deployment may map an entity-per-property, another a single entity with a location-per-property. Confirm the property grain via the entity-and-location crosswalk before trusting ENTITYID alone.
+  - Dimension tagging is optional per Intacct config; a journal with a missing PROJECTID or LOCATIONID still posts cleanly, so property attribution may rely on the account rather than the dimension.
+  - Budget module carries versions (BUDGETID) with operator-set labels; version naming drifts across years (initial_2026, fy26_v1, 2026 approved). Enforce the budget-version convention in the onboarding runbook.
+  - Forecast module is separate from the Budget module in Intacct; forecast publishes at a different cadence than budget. Do not conflate BUDGETID with FORECASTID.
+  - Capex coded to an opex account and vice versa is common when operators do not tie a Project dimension to the posting; reconcile via capex_project_crosswalk.
+  - Manual journals (top-side entries) may post without a LOCATIONID or PROJECTID, stranding the posting from property attribution; flag and escalate.
+  - Inter-entity postings (entity A pays on behalf of entity B) create shadow postings that must be eliminated at consolidation; Intacct carries them in the inter-entity sub-ledger.
+  - Period close is a ledger-level lock in Intacct; late postings land in a reopened period with a different BATCH_DATE than the original posting_date.
+  - Reversal of a posted entry creates a new journal line with REVERSAL = true; do not double-count.
+  - Chart-of-account renames are tracked via GLACCOUNTNO history in Intacct but not always exported; the account_crosswalk must preserve historical slugs.
+  - Currency: most CRE deployments are USD-only, but multi-entity portfolios occasionally mix USD and CAD; require source_currency in every row and resolve via the fx_rate_registry.
+
+reference_documentation:
+  - placeholder_link_to_intacct_web_services_guide
+  - placeholder_link_to_intacct_dimension_reference
+  - placeholder_link_to_intacct_budget_module_overview
+  - placeholder_link_to_intacct_forecast_module_overview
+  - placeholder_link_to_intacct_capex_project_pattern
+  - placeholder_link_to_internal_account_crosswalk
+  - placeholder_link_to_internal_property_entity_map
+  - placeholder_link_to_internal_close_calendar
+
+author_metadata:
+  authored_by: residential_multifamily_subsystem
+  authored_role: finance_systems_team
+
+last_updated: "2026-04-15"

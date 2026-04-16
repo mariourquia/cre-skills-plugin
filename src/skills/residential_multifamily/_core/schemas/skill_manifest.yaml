@@ -73,7 +73,7 @@ properties:
         type: array
         items:
           type: string
-          enum: [development, construction, lease_up, stabilized, renovation, recap_support]
+          enum: [pre_acquisition, development, construction, lease_up, stabilized, renovation, recap_support, disposition]
       management_mode:
         type: array
         items:
@@ -87,7 +87,7 @@ properties:
         type: array
         items:
           type: string
-          enum: [memo, kpi_review, checklist, estimate, operating_review, scorecard, dashboard, email_draft]
+          enum: [memo, kpi_review, checklist, estimate, operating_review, scorecard, dashboard, email_draft, handoff_checklist, ic_packet, pipeline_summary]
       decision_severity_max:
         type: string
         enum: [informational, recommendation, action_routable, action_requires_approval]

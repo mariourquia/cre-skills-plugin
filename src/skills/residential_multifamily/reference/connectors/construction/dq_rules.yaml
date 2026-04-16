@@ -1,0 +1,87 @@
+# Construction DQ rules.
+rules:
+- rule_id: con_freshness_schedule
+  dimension: freshness
+  severity: warning
+  description: Schedule milestone feed is no older than the schedule-cadence days
+    declared in construction/manifest.yaml.
+  expected: max(construction.schedule_milestone.source_date) >= today -
+    schedule_feed_max_age_days declared in construction/manifest.yaml
+  remediation: Operator re-lands schedule per the declared cadence.
+- rule_id: con_freshness_draw
+  dimension: freshness
+  severity: blocker
+  description: Draw request feed is current with the active draw cycle.
+  expected: max(construction.draw_request.source_date) >= today -
+    draw_feed_max_age_days declared in construction/manifest.yaml
+  remediation: Draw review cannot run without current draw data.
+- rule_id: con_completeness_required_fields
+  dimension: completeness
+  severity: blocker
+  description: Every required field in construction/schema.yaml is non-null.
+  expected: for each entity and required_field, count(null) == 0
+  remediation: Null in required fields rejects.
+- rule_id: con_conformance_status_enum
+  dimension: conformance
+  severity: blocker
+  description: change_order.status, commitment.status, draw_request.approval_status,
+    punch_item.status are in canonical enums.
+  expected: status IN canonical_enum per entity
+  remediation: Unmapped status rejected at landing.
+- rule_id: con_consistency_budget_line_taxonomy
+  dimension: consistency
+  severity: warning
+  description: budget_line_slug in dev_budget is a canonical line per
+    construction/manifest.yaml budget taxonomy.
+  expected: budget_line_slug IN canonical dev_budget_line taxonomy
+  remediation: Unmapped budget line rejected; operator extends taxonomy.
+- rule_id: con_uniqueness_primary_keys
+  dimension: uniqueness
+  severity: blocker
+  description: No duplicate primary keys across construction entities.
+  expected: count(distinct pk) == count(records) per entity
+  remediation: See qa/duplicate_id.yaml.
+- rule_id: con_referential_integrity_change_order_commitment
+  dimension: referential_integrity
+  severity: blocker
+  description: change_order.commitment_id resolves to commitment.commitment_id.
+  expected: see construction_change_order_commitment_fk
+  remediation: See construction_change_order_commitment_fk reconciliation check.
+- rule_id: con_referential_integrity_vendor_bridge
+  dimension: referential_integrity
+  severity: warning
+  description: commitment.vendor_id resolves to ap.vendor.vendor_id via
+    vendor_ap_construction_bridge.
+  expected: commitment.vendor_id IN ap.vendor.vendor_id resolved through
+    vendor_ap_construction_bridge.yaml
+  remediation: Missing bridge entry fragments vendor spend across two connectors.
+- rule_id: con_reasonableness_contingency_balance
+  dimension: reasonableness
+  severity: warning
+  description: Contingency remaining after approved COs is within the plausible
+    band declared in construction/manifest.yaml.
+  expected: contingency_remaining_cents / original_contingency_cents >=
+    remaining_contingency_threshold declared in construction/manifest.yaml at
+    percent_complete milestones
+  remediation: Contingency burning faster than project progress signals
+    overrun risk; escalate to construction-project-command-center.
+- rule_id: con_consistency_draw_vs_commitment
+  dimension: consistency
+  severity: blocker
+  description: Draws referencing a commitment occur on or after the commitment
+    execution date.
+  expected: see con_draw_timing_vs_commitment
+  remediation: See con_draw_timing_vs_commitment reconciliation check.
+- rule_id: con_consistency_schedule_monotonic
+  dimension: consistency
+  severity: warning
+  description: current_forecast_date is greater than or equal to baseline_date
+    for in-progress milestones.
+  expected: see construction_schedule_milestone_monotonic
+  remediation: See construction_schedule_milestone_monotonic reconciliation check.
+- rule_id: con_consistency_lien_waiver_tracking
+  dimension: consistency
+  severity: warning
+  description: Draw requests paying subcontractors reference lien waiver status.
+  expected: see con_lien_waiver_tracking_flag
+  remediation: See con_lien_waiver_tracking_flag reconciliation check.

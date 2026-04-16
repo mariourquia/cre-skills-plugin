@@ -1,0 +1,6 @@
+action_type,tier_1_threshold,tier_2_threshold,tier_3_threshold,tier_1_approver,tier_2_approver,tier_3_approver,effective_start,effective_end,change_log_ref
+capex_release,25000,100000,500000,regional_manager,asset_manager,cfo_finance_leader,2026-01-01,,chg_log_2026_001
+change_order,10000,50000,250000,project_manager,regional_manager,asset_manager,2026-01-01,,chg_log_2026_002
+vendor_award,15000,75000,300000,procurement_lead,regional_manager,asset_manager,2026-01-01,,chg_log_2026_003
+concession_above_policy,500,2000,5000,leasing_manager,regional_manager,asset_manager,2026-01-01,,chg_log_2026_004
+lease_deviation,100,500,2000,leasing_manager,regional_manager,asset_manager,2026-01-01,,chg_log_2026_005
