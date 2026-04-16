@@ -1,0 +1,32 @@
+{
+  "deal_id": "sample_value_add_01",
+  "variant": "value_add",
+  "asset_class": "multifamily",
+  "property_name": "The Magnolia (sample)",
+  "market": "Atlanta",
+  "submarket": "Midtown",
+  "year_built": 1995,
+  "units": 240,
+  "square_feet": 218000,
+  "purchase_price_usd": 48000000,
+  "closing_costs_usd": 750000,
+  "capex_plan_usd": 4320000,
+  "going_in_cap_rate": 0.052,
+  "stabilized_cap_rate": 0.061,
+  "underwritten_exit_cap_rate": 0.058,
+  "hold_years": 5,
+  "target_gross_irr": 0.18,
+  "target_net_irr": 0.15,
+  "target_equity_multiple": 1.95,
+  "financing": {
+    "ltv_going_in": 0.65,
+    "ltv_post_stabilization": 0.60,
+    "dscr_at_close": 1.10,
+    "dscr_stabilized": 1.45,
+    "rate_at_close": 0.068,
+    "io_years": 3,
+    "amort_years": 30
+  },
+  "source_of_truth_contract": "dealpath_deal_pipeline",
+  "_notes": "Sample illustrative value-add deal. Do not treat as an operational underwriting. See docs/PREVIEW_MODE.md."
+}

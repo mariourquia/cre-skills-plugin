@@ -826,6 +826,240 @@ def _wrap_text(text: str, width: int) -> list[str]:
 
 
 # --------------------------------------------------------------------------- #
+# Tailoring guardrails (v4.3 pass 2)                                           #
+# --------------------------------------------------------------------------- #
+#
+# Four guards required by the tailoring capability matrix. Each is a pure
+# function so it can run in dry-run mode, in CI, and inside the interactive
+# flow. The interactive TUI invokes them before committing any change.
+#
+# Guards:
+#   1. guard_approval_floor_not_lowered   — proposed overlay cannot lower an
+#                                           approval threshold declared in
+#                                           _core/approval_matrix.md
+#   2. guard_no_canonical_redefinition    — proposed overlay cannot rename or
+#                                           redefine a canonical metric/type
+#                                           declared in _core/ontology.md or
+#                                           _core/metrics.md
+#   3. emit_preview_bundle                — render all pending edits as a
+#                                           YAML preview the operator can
+#                                           review before commit
+#   4. guard_missing_doc_blockers         — refuse if a question bank trigger
+#                                           references a doc_catalog slug
+#                                           that has no entry
+#
+# Each guard returns a list of strings — empty list means "no violation",
+# non-empty means "refuse; violations detailed here".
+
+_CORE = Path(__file__).resolve().parents[2] / "_core"
+_APPROVAL_MATRIX = _CORE / "approval_matrix.md"
+_ONTOLOGY = _CORE / "ontology.md"
+_METRICS = _CORE / "metrics.md"
+
+_APPROVAL_FLOOR_KEY_PREFIXES = (
+    "approval_thresholds",
+    "approval_matrix",
+)
+
+_APPROVAL_FLOOR_NUMERIC_KEYS = {
+    "capex_approval_threshold_usd",
+    "change_order_approval_threshold_usd",
+    "lease_concession_approval_threshold_days_free_rent",
+    "disposition_approval_threshold_usd",
+    "refi_approval_threshold_usd",
+    "emergency_spend_threshold_usd",
+}
+
+
+def _numeric_floors_from_overlay(overlay: Any, _path: str = "") -> dict[str, float]:
+    """Collect numeric approval-floor values from an overlay dict, keyed by dotted path."""
+    out: dict[str, float] = {}
+    if not isinstance(overlay, dict):
+        return out
+    for k, v in overlay.items():
+        dotted = f"{_path}.{k}" if _path else k
+        if isinstance(v, dict):
+            out.update(_numeric_floors_from_overlay(v, dotted))
+            continue
+        name = k.lower()
+        if name in _APPROVAL_FLOOR_NUMERIC_KEYS or any(
+            dotted.startswith(p) for p in _APPROVAL_FLOOR_KEY_PREFIXES
+        ):
+            try:
+                out[dotted] = float(v)
+            except (TypeError, ValueError):
+                continue
+    return out
+
+
+def guard_approval_floor_not_lowered(
+    current_overlay: dict[str, Any],
+    proposed_overlay: dict[str, Any],
+) -> list[str]:
+    """Refuse if a numeric approval threshold in the proposed overlay is
+    lower than the current overlay's value for the same path.
+
+    A firm-level tailoring run CAN raise a threshold (more conservative)
+    but CANNOT lower one below the current overlay. Lowering is a
+    governance action that belongs in an approval_matrix.md change, not
+    a tailoring run.
+    """
+    current_floors = _numeric_floors_from_overlay(current_overlay)
+    proposed_floors = _numeric_floors_from_overlay(proposed_overlay)
+    violations: list[str] = []
+    for key, proposed_value in proposed_floors.items():
+        if key not in current_floors:
+            continue
+        current_value = current_floors[key]
+        if proposed_value < current_value:
+            violations.append(
+                f"approval floor {key!r} would drop from {current_value} to "
+                f"{proposed_value}; tailoring cannot lower approval floors "
+                f"(edit _core/approval_matrix.md instead)"
+            )
+    return violations
+
+
+_CANONICAL_TYPE_PATTERN = re.compile(r"^##+\s+([A-Z][A-Za-z0-9_]*)\s*$", re.MULTILINE)
+
+
+def _canonical_names_from_doc(path: Path) -> set[str]:
+    if not path.exists():
+        return set()
+    body = path.read_text(encoding="utf-8")
+    return {m.group(1) for m in _CANONICAL_TYPE_PATTERN.finditer(body)}
+
+
+def guard_no_canonical_redefinition(proposed_overlay: dict[str, Any]) -> list[str]:
+    """Refuse if the proposed overlay contains a key at canonical scope
+    (`_canonical.*` or `ontology.*` or `metrics.*`) that redefines a
+    name that already exists in _core/ontology.md or _core/metrics.md.
+
+    Overlays may add new names, but renaming an existing canonical
+    name is forbidden because every downstream workflow references it.
+    """
+    canonical = _canonical_names_from_doc(_ONTOLOGY) | _canonical_names_from_doc(_METRICS)
+    violations: list[str] = []
+
+    def _walk(node: Any, path: str) -> None:
+        if not isinstance(node, dict):
+            return
+        for k, v in node.items():
+            dotted = f"{path}.{k}" if path else k
+            is_canonical_scope = (
+                dotted.startswith("_canonical.")
+                or dotted.startswith("ontology.")
+                or dotted.startswith("metrics.")
+            )
+            if is_canonical_scope and isinstance(k, str) and k in canonical:
+                if isinstance(v, dict) and ("redefinition" in v or "rename" in v):
+                    violations.append(
+                        f"canonical name {k!r} at {dotted} carries a "
+                        f"redefinition/rename directive — tailoring cannot "
+                        f"redefine canonical names"
+                    )
+            _walk(v, dotted)
+
+    _walk(proposed_overlay, "")
+    return violations
+
+
+def emit_preview_bundle(
+    session: Session,
+    diff_entries: list["DiffEntry"],
+    proposed_overlay: dict[str, Any],
+    guard_violations: list[str] | None = None,
+) -> str:
+    """Render a YAML preview of everything the session would commit, plus
+    any guard violations. Operators review this before giving sign-off.
+
+    Shape:
+        session:
+          id: <session_id>
+          audience: <audience>
+          started_at: <iso>
+        diff_summary:
+          total_keys: <n>
+          with_conflict: <n>
+        diff_entries:
+          - overlay_key: ...
+            prior_value: ...
+            proposed_value: ...
+            has_conflict: <bool>
+            conflicting_sources: [...]
+        proposed_overlay:
+          <nested dict>
+        guard_violations: [<str>, ...]
+
+    The caller writes the returned string to
+    tailoring/sessions/<org>/<session_id>__preview.yaml before seeking
+    sign-off.
+    """
+    entries: list[dict[str, Any]] = []
+    for e in diff_entries:
+        entries.append(
+            {
+                "overlay_key": e.overlay_key,
+                "prior_value": e.prior_value,
+                "proposed_value": e.proposed_value,
+                "has_conflict": bool(e.has_conflict),
+                "conflicting_sources": e.conflicting_sources,
+                "approver_role": e.approver_role,
+                "approval_matrix_row": e.approval_matrix_row,
+                "rationale": e.rationale,
+            }
+        )
+    bundle = {
+        "session": {
+            "id": session.session_id,
+            "org_id": session.org_id,
+            "audiences_scheduled": list(session.audiences_scheduled),
+            "audiences_completed": list(session.audiences_completed),
+            "created_at": session.created_at,
+            "updated_at": session.updated_at,
+        },
+        "diff_summary": {
+            "total_keys": len(entries),
+            "with_conflict": sum(1 for e in entries if e["has_conflict"]),
+        },
+        "diff_entries": entries,
+        "proposed_overlay": proposed_overlay,
+        "guard_violations": guard_violations or [],
+    }
+    return yaml.safe_dump(bundle, sort_keys=False, allow_unicode=True)
+
+
+def guard_missing_doc_blockers(
+    banks: dict[str, Bank],
+    doc_catalog: dict[str, dict[str, Any]],
+) -> list[str]:
+    """Refuse if any question-bank trigger references a doc_catalog slug
+    that has no catalog entry. Matches the discipline enforced at
+    test-time by DocCatalogTests.test_missing_doc_triggers_resolve_to_catalog
+    but is a runtime guard so the TUI surfaces the problem before it
+    silently collapses an audience.
+
+    Triggers may be either plain string slugs or dicts with a `doc_slug`
+    key — both shapes are tolerated."""
+    violations: list[str] = []
+    for bank_slug, bank in banks.items():
+        for q in bank.questions:
+            for trigger in getattr(q, "missing_doc_triggers", []) or []:
+                if isinstance(trigger, dict):
+                    doc_slug = trigger.get("doc_slug")
+                elif isinstance(trigger, str):
+                    doc_slug = trigger
+                else:
+                    doc_slug = None
+                if doc_slug and doc_slug not in doc_catalog:
+                    violations.append(
+                        f"bank {bank_slug!r} question {q.id!r} references "
+                        f"doc_catalog slug {doc_slug!r} which has no entry"
+                    )
+    return violations
+
+
+# --------------------------------------------------------------------------- #
 # Answer validation                                                            #
 # --------------------------------------------------------------------------- #
 
