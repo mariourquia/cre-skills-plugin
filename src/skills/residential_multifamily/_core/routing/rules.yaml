@@ -65,7 +65,7 @@ rules:
         - workflows/bid_leveling_procurement_review
         - workflows/change_order_review
         - workflows/draw_package_review
-        - workflows/construction_meeting_prep
+        - workflows/construction_meeting_prep_and_action_tracking
 
   - id: r006_estimator_preconstruction
     conditions:
