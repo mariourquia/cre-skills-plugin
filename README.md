@@ -73,7 +73,9 @@ This release is an **internal beta / controlled release candidate**. Most top-le
 
 ---
 
-## What's New in v4.1.2
+## What's New in v4.2.0
+
+**Hardening pass 2 close**: `residential_multifamily` subsystem moves from `status: draft` (v0.5.0) to `status: beta_rc` (v0.6.0). Three deferred objectives close: sealed-close gating (Obj 5) pins period-grade workflows behind a declared `close_status` floor; a finance-critical placeholder scanner (Obj 6) rejects un-labeled TBD/PLACEHOLDER rows in every CSV read by a final-marked workflow; an executive output contract (Obj 8) requires verdict-first structure + source-class labels on every numeric cell. +13 tests (total 436). Full ledger in [`docs/implementation_hardening_status.md`](docs/implementation_hardening_status.md).
 
 **Catalog-driven architecture**: Single source of truth (`src/catalog/catalog.yaml`, 203 items). Every public surface -- README stats, plugin.json, hooks prompt, routing table, registry -- is generated from the catalog. CI catches drift.
 
