@@ -1,0 +1,38 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: ImplementationReportingCalendar
+type: object
+required:
+  - schema_version
+  - records
+properties:
+  schema_version:
+    type: string
+  records:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      required:
+        - review_or_report_name
+        - owner
+        - schedule
+        - dependency_inputs
+        - late_threshold
+        - escalation_path
+      properties:
+        review_or_report_name:
+          type: string
+        owner:
+          type: string
+        schedule:
+          type: string
+        dependency_inputs:
+          type: array
+          items:
+            type: string
+        late_threshold:
+          type: string
+        escalation_path:
+          type: string
+      additionalProperties: false
+additionalProperties: false

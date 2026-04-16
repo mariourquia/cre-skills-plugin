@@ -1,0 +1,16 @@
+schema_version: "0.1.0"
+assumptions:
+  - assumption_id: asm_001
+    statement: GraySail is the current benchmark source for market survey updates.
+    why_assumed: The reporting lead referenced GraySail verbally, but no owned workbook or refresh calendar has been attached yet.
+    impacted_area: benchmark_refresh
+    current_confidence: low
+    evidence_needed_to_resolve: A current GraySail workbook plus the owner and refresh cadence.
+    risk_if_wrong: Build logic may point to the wrong benchmark source and produce stale market comparisons.
+  - assumption_id: asm_002
+    statement: Yardi remains in scope only for a legacy subset of properties closing out in the next reporting cycle.
+    why_assumed: The legacy analyst described a sunset path, but the property-level scope list is not yet signed.
+    impacted_area: legacy_scope
+    current_confidence: medium
+    evidence_needed_to_resolve: A property list naming the Yardi-only properties and the sunset date for each.
+    risk_if_wrong: The implementation may under-scope legacy reporting and leave a live dependency unsupported.

@@ -1,0 +1,29 @@
+schema_version: "0.1.0"
+blockers:
+  - blocker_id: blk_001
+    description: Intacct field dictionary for dimension and reporting-entity mapping has not been provided.
+    severity: critical
+    impacted_area: field_semantics
+    owner: Controller
+    requested_from: Intacct admin
+    date_requested: "2026-04-08"
+    follow_up_due: "2026-04-18"
+    status: open
+  - blocker_id: blk_002
+    description: One Yardi legacy rent-roll export is available, but it conflicts with the reporting-entity mapping used in Intacct.
+    severity: high
+    impacted_area: crosswalk_and_source_of_truth
+    owner: Data lead
+    requested_from: Legacy systems analyst
+    date_requested: "2026-04-09"
+    follow_up_due: "2026-04-16"
+    status: blocked
+  - blocker_id: blk_003
+    description: Third-party manager delinquency backup has not been submitted for the properties still operating in file-only mode.
+    severity: high
+    impacted_area: third_party_manager_reporting
+    owner: TPM oversight lead
+    requested_from: Third-party manager
+    date_requested: "2026-04-10"
+    follow_up_due: "2026-04-17"
+    status: in_progress

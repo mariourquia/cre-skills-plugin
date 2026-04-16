@@ -1,0 +1,52 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: ImplementationDecisionLog
+type: object
+required:
+  - schema_version
+  - decisions
+properties:
+  schema_version:
+    type: string
+  decisions:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      required:
+        - decision_id
+        - topic
+        - decision
+        - decision_owner
+        - date
+        - evidence_basis
+        - impacted_sources
+        - impacted_workflows
+        - downstream_risk
+        - follow_up_required
+      properties:
+        decision_id:
+          type: string
+        topic:
+          type: string
+        decision:
+          type: string
+        decision_owner:
+          type: string
+        date:
+          type: string
+        evidence_basis:
+          type: string
+        impacted_sources:
+          type: array
+          items:
+            type: string
+        impacted_workflows:
+          type: array
+          items:
+            type: string
+        downstream_risk:
+          type: string
+        follow_up_required:
+          type: string
+      additionalProperties: false
+additionalProperties: false

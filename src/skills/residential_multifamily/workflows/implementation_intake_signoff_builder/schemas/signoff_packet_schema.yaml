@@ -1,0 +1,119 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: ImplementationLeaderSignoffPacket
+type: object
+required:
+  - version
+  - status
+  - document_purpose
+  - implementation_objective
+  - systems_covered
+  - environments_covered
+  - confirmed_facts
+  - unresolved_assumptions
+  - missing_evidence
+  - blockers
+  - top_risks
+  - ownership_assignments
+  - decisions_requested
+  - approvals_requested
+  - recommended_next_phase
+  - signoff_status
+  - review_metadata
+properties:
+  version:
+    type: string
+  status:
+    type: string
+  document_purpose:
+    type: string
+  implementation_objective:
+    type: string
+  systems_covered:
+    type: array
+    items:
+      type: string
+  environments_covered:
+    type: array
+    items:
+      type: string
+  confirmed_facts:
+    type: array
+    items:
+      type: string
+  unresolved_assumptions:
+    type: array
+    items:
+      type: string
+  missing_evidence:
+    type: array
+    items:
+      type: string
+  blockers:
+    type: array
+    items:
+      type: string
+  top_risks:
+    type: array
+    items:
+      type: string
+    minItems: 1
+  ownership_assignments:
+    type: array
+    items:
+      type: object
+      required: [owner, role, due_date, scope]
+      properties:
+        owner:
+          type: string
+        role:
+          type: string
+        due_date:
+          type: string
+        scope:
+          type: string
+      additionalProperties: false
+  decisions_requested:
+    type: array
+    items:
+      type: string
+  approvals_requested:
+    type: array
+    items:
+      type: string
+  recommended_next_phase:
+    type: string
+  signoff_status:
+    type: string
+    enum:
+      - draft
+      - pending stakeholder review
+      - pending leadership review
+      - approved with conditions
+      - approved
+      - rejected / revise
+  review_metadata:
+    type: array
+    items:
+      type: object
+      required:
+        - reviewer_name
+        - reviewer_role
+        - review_date
+        - approval_status
+        - approval_notes
+        - conditions_if_any
+      properties:
+        reviewer_name:
+          type: string
+        reviewer_role:
+          type: string
+        review_date:
+          type: string
+        approval_status:
+          type: string
+        approval_notes:
+          type: string
+        conditions_if_any:
+          type: string
+      additionalProperties: false
+additionalProperties: false

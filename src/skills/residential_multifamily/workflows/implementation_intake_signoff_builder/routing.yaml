@@ -1,0 +1,36 @@
+pack_slug: implementation_intake_signoff_builder
+pack_type: workflow
+priority: 12
+triggers:
+  explicit_phrases:
+    - "implementation intake"
+    - "implementation discovery"
+    - "leader sign-off"
+    - "sign-off packet"
+    - "sign-off memo"
+    - "systems and environments covered"
+    - "source inventory"
+    - "export field inventory"
+    - "crosswalk rules"
+    - "reporting calendar"
+    - "approvals and controls"
+    - "missing-doc chase"
+    - "implementation readiness"
+  implicit_signals:
+    - "architecture is complete but build inputs are still unclear"
+    - "connector onboarding is blocked by missing source facts"
+    - "leadership needs a scope and approval packet before execution"
+required_axes:
+  - asset_class
+  - management_mode
+optional_axes:
+  - role
+  - segment
+  - form_factor
+  - lifecycle_stage
+  - market
+  - org_id
+  - output_type
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

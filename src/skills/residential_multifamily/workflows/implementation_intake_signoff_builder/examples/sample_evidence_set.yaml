@@ -1,0 +1,98 @@
+schema_version: "0.1.0"
+evidence_items:
+  - evidence_id: ev_appfolio_unit_export
+    evidence_type: export_sample
+    file_name_or_reference: AppFolio_UnitStatus_2026-04-10.csv
+    source_system: appfolio
+    object_family: property_and_unit
+    date_received: "2026-04-10"
+    received_from: Sunrise PM systems admin
+    validation_status: reviewed_sufficient
+    coverage_level: portfolio_full
+    related_questions:
+      - sys_appfolio_scope
+      - field_sample_exports
+    related_outputs:
+      - source_inventory_register
+      - export_and_field_inventory
+    notes: Includes property code, unit code, occupancy status, and lease status columns.
+  - evidence_id: ev_intacct_coa_workbook
+    evidence_type: spreadsheet_template
+    file_name_or_reference: Sunrise_Intacct_COA_Map_v3.xlsx
+    source_system: sage_intacct
+    object_family: account_and_dimension
+    date_received: "2026-04-09"
+    received_from: Controller
+    validation_status: reviewed_incomplete
+    coverage_level: system_partial
+    related_questions:
+      - sys_intacct_scope
+      - field_dictionary_location
+    related_outputs:
+      - export_and_field_inventory
+      - credentials_and_access_model_packet
+    notes: Entity and location tabs are present. Dimension-to-reporting-entity logic is still missing.
+  - evidence_id: ev_procore_draw_screenshot
+    evidence_type: screenshot
+    file_name_or_reference: procore_draw_request_queue.png
+    source_system: procore
+    object_family: draw_request
+    date_received: "2026-04-11"
+    received_from: Construction manager
+    validation_status: received_not_reviewed
+    coverage_level: system_partial
+    related_questions:
+      - sys_procore_scope
+      - development_construction_pack
+    related_outputs:
+      - source_inventory_register
+      - export_and_field_inventory
+    notes: Confirms the company account and project list, but not the export layout.
+  - evidence_id: ev_calendar_owner_reporting
+    evidence_type: calendar_document
+    file_name_or_reference: Sunrise_Owner_Reporting_Calendar_2026.pdf
+    source_system: shared_drive
+    object_family: reporting_calendar
+    date_received: "2026-04-08"
+    received_from: Reporting finance lead
+    validation_status: reviewed_sufficient
+    coverage_level: portfolio_full
+    related_questions:
+      - reporting_calendar_close
+      - reporting_calendar_exec_reviews
+    related_outputs:
+      - reporting_calendar_and_sla_register
+      - leader_signoff_pack
+    notes: Covers close, regional review, owner reporting, investor letter, and benchmark refresh timing.
+  - evidence_id: ev_tpm_monthly_pack
+    evidence_type: report_pack
+    file_name_or_reference: TPM_Monthly_Owner_Pack_March_2026.pdf
+    source_system: third_party_manager_submission
+    object_family: operations_reporting
+    date_received: "2026-04-07"
+    received_from: Third-party manager
+    validation_status: reviewed_incomplete
+    coverage_level: multi_property_partial
+    related_questions:
+      - tpm_submission_channel
+      - tpm_calendar_alignment
+    related_outputs:
+      - assumptions_and_confidence_log
+      - reporting_calendar_and_sla_register
+    notes: Includes rent roll and variance narrative, but not the delinquency backup or field dictionary.
+  - evidence_id: ev_yardi_legacy_export
+    evidence_type: export_sample
+    file_name_or_reference: Yardi_Legacy_RentRoll_2026-03-31.xlsx
+    source_system: yardi
+    object_family: lease_and_resident_placeholder
+    date_received: "2026-04-05"
+    received_from: Legacy systems analyst
+    validation_status: conflicting_with_prior
+    coverage_level: system_partial
+    related_questions:
+      - sys_yardi_legacy_scope
+      - exception_conflict_resolution
+    related_outputs:
+      - source_inventory_register
+      - leader_signoff_pack
+    notes: Property labels conflict with the owner reporting entity list used in Intacct.

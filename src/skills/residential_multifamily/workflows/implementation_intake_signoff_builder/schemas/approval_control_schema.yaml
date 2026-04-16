@@ -1,0 +1,38 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: ApprovalControlRegister
+type: array
+minItems: 1
+items:
+  type: object
+  required:
+    - control_id
+    - approval_area
+    - approver
+    - threshold_or_trigger
+    - legal_or_policy_review_required
+    - evidence_status
+  properties:
+    control_id:
+      type: string
+      pattern: "^[a-z][a-z0-9_]*$"
+    approval_area:
+      type: string
+    approver:
+      type: string
+    threshold_or_trigger:
+      type: string
+    backup_approver:
+      type: string
+    legal_or_policy_review_required:
+      type: boolean
+    escalation_path:
+      type: string
+    notes:
+      type: string
+    evidence_status:
+      type: string
+      enum: [confirmed, assumed, inferred, missing, blocked, conflicting]
+    evidence_detail:
+      type: string
+      enum: [file, screenshot, verbal, assumed, inferred, missing, blocked, conflicting]
+  additionalProperties: false
