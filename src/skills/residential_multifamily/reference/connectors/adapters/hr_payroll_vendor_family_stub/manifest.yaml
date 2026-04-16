@@ -1,0 +1,56 @@
+# Adapter manifest for the generic HR/payroll vendor family stub.
+# Conforms to reference/connectors/adapters/adapter_manifest.schema.yaml.
+
+adapter_id: hr_payroll_vendor_family_stub
+adapter_name: Generic HR/Payroll Vendor Family Stub
+vendor_family: generic_hr_payroll_stub
+connector_domain: hr_payroll
+status: stub
+rollout_wave: wave_1
+description: |
+  Placeholder adapter over the canonical hr_payroll connector. Seeds
+  operator onboarding with employee identity stubs (PII-minimized),
+  role codes, property assignments, pay-period, regular-hours,
+  overtime, and contractor-flag mapping hints. Canonical schema in
+  ../../hr_payroll/ wins on any conflict.
+
+supported_source_systems:
+  - hr_payroll_generic_stub
+
+mapping_hints:
+  - { source_field_pattern: "emp*id|employee*id|worker*id",                canonical_field: employee_id,            transform_hint: trim_string }
+  - { source_field_pattern: "emp*number|employee*number",                  canonical_field: employee_number,        transform_hint: trim_string }
+  - { source_field_pattern: "job*title|role*title|position*title",         canonical_field: job_title,              transform_hint: trim_string }
+  - { source_field_pattern: "role*code|position*code|job*code",            canonical_field: role_code,              transform_hint: map_role_code }
+  - { source_field_pattern: "prop*code|property*id|location*id",           canonical_field: property_id,            transform_hint: trim_string }
+  - { source_field_pattern: "pay*period*end|period*end|check*date",        canonical_field: pay_period_end,         transform_hint: to_iso_date }
+  - { source_field_pattern: "reg*hours|regular*hours|straight*hours",      canonical_field: regular_hours,          transform_hint: to_number }
+  - { source_field_pattern: "ot*hours|overtime*hours",                     canonical_field: ot_hours,               transform_hint: to_number }
+  - { source_field_pattern: "reg*pay|regular*pay|straight*pay",            canonical_field: regular_pay_cents,      transform_hint: dollars_to_cents }
+  - { source_field_pattern: "ot*pay|overtime*pay",                         canonical_field: ot_pay_cents,           transform_hint: dollars_to_cents }
+  - { source_field_pattern: "gross*pay|total*pay",                         canonical_field: gross_pay_cents,        transform_hint: dollars_to_cents }
+  - { source_field_pattern: "contractor*flag|is*contractor|1099*flag",     canonical_field: is_contractor,          transform_hint: to_boolean }
+  - { source_field_pattern: "position*status|vacancy*status",              canonical_field: vacancy_status,         transform_hint: map_vacancy_status }
+  - { source_field_pattern: "assignment*split|allocation*pct",             canonical_field: property_allocation_pct, transform_hint: to_number }
+  - { source_field_pattern: "temp*flag|is*temp|agency*worker",             canonical_field: is_temp_staff,          transform_hint: to_boolean }
+
+known_gotchas:
+  - employees shared across multiple properties require an allocation split; do not double-count gross_pay
+  - temp staff and agency workers are often outside the main payroll feed; maintain a separate intake
+  - overtime frequently not tagged to a specific property; expect manual allocation
+  - vacant roles that are budgeted appear in staffing_position but not in payroll; do not infer spend from position alone
+  - contractor labor sits in AP rather than HR payroll; join via the vendor_master_crosswalk when reconciling total labor spend
+  - PII minimization is required; employee_number and role_code are the canonical identifiers, not name or SSN
+  - pay-period-end dates vary (weekly, biweekly, semimonthly); always carry pay_period_end explicitly
+  - employees who change role mid-period show up on two lines; preserve both and reconcile at period close
+  - property assignment sometimes only at cost-center level; map cost_center to property_id via the crosswalk
+
+reference_documentation:
+  - placeholder_link_to_employee_crosswalk
+  - placeholder_link_to_pii_minimization_guardrail
+
+author_metadata:
+  authored_by: residential_multifamily_subsystem
+  authored_role: hr_systems_team
+
+last_updated: "2026-04-15"

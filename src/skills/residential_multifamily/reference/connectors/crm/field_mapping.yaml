@@ -1,0 +1,376 @@
+# Richer per-entity field mapping template for the CRM connector.
+lead_interaction:
+  fields:
+  - canonical_field: interaction_id
+    source_field: interaction_id
+    source_description: Stable interaction id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: interaction_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: interaction anchor
+  - canonical_field: lead_id
+    source_field: lead_id
+    source_description: Lead FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: lead_id IS NULL OR lead_id IN pms.lead.lead_id
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: FK to pms.lead; warn on orphan
+  - canonical_field: interaction_date
+    source_field: interaction_ts
+    source_description: Interaction timestamp
+    transform_rule: to_iso_datetime
+    type_cast_rule: datetime
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: interaction_date <= today
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: lead_response_time computation
+  - canonical_field: channel
+    source_field: channel
+    source_description: Channel used
+    transform_rule: map_channel
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: channel IN canonical_enum(crm.lead_interaction.channel)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: channel mix analytics
+  - canonical_field: direction
+    source_field: direction
+    source_description: Inbound vs outbound
+    transform_rule: map_direction
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: direction IN (inbound, outbound)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: response-time measurement pivot
+  - canonical_field: agent_id
+    source_field: agent_id
+    source_description: Agent FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: agent_id IS NULL OR agent_id IN staff registry
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: agent-level coaching reports
+  - canonical_field: outcome
+    source_field: outcome
+    source_description: Interaction outcome
+    transform_rule: map_interaction_outcome
+    type_cast_rule: enum
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: outcome IN canonical_enum(crm.lead_interaction.outcome) when
+      non-null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: touch effectiveness
+  - canonical_field: notes
+    source_field: notes
+    source_description: Sanitized free text
+    transform_rule: sanitize_text
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: protected_class_scan clean
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: protected-class scan gate
+campaign_source:
+  fields:
+  - canonical_field: campaign_id
+    source_field: campaign_id
+    source_description: Campaign id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: campaign_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: attribution anchor
+  - canonical_field: campaign_label
+    source_field: label
+    source_description: Operator-facing label
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: non-empty
+    required_for_load: true
+    required_for_kpi: false
+    provenance_note: display
+  - canonical_field: medium
+    source_field: medium
+    source_description: Media channel
+    transform_rule: map_medium
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: medium IN canonical_enum(crm.campaign_source.medium)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: medium mix analytics
+  - canonical_field: start_date
+    source_field: start_date
+    source_description: Campaign start
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: start_date IS NULL OR start_date <= end_date when end_date IS
+      NOT NULL
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: attribution window start
+  - canonical_field: end_date
+    source_field: end_date
+    source_description: Campaign end
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: end_date IS NULL OR end_date >= start_date
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: attribution window end
+  - canonical_field: spend_cents
+    source_field: spend_usd
+    source_description: Campaign spend in dollars
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: spend_cents IS NULL OR spend_cents >= 0
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: cost-per-lead numerator
+resident_communication:
+  fields:
+  - canonical_field: communication_id
+    source_field: communication_id
+    source_description: Stable id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: communication_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: communication anchor
+  - canonical_field: resident_account_id
+    source_field: resident_id
+    source_description: Resident FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: resident_account_id resolves via resident_crosswalk
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: resident targeting
+  - canonical_field: communication_date
+    source_field: communication_ts
+    source_description: Timestamp
+    transform_rule: to_iso_datetime
+    type_cast_rule: datetime
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: communication_date <= today
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: cadence analytics
+  - canonical_field: channel
+    source_field: channel
+    source_description: Channel
+    transform_rule: map_resident_channel
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: channel IN canonical_enum(crm.resident_communication.channel)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: channel mix
+  - canonical_field: purpose
+    source_field: purpose
+    source_description: Purpose code
+    transform_rule: map_purpose
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: purpose IN canonical_enum(crm.resident_communication.purpose)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: retention campaign segmentation
+  - canonical_field: template_ref
+    source_field: template_ref
+    source_description: Template id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: template_ref resolves to template registry when non-null
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: template A/B analysis
+  - canonical_field: response_received
+    source_field: response_flag
+    source_description: Reply received
+    transform_rule: to_boolean
+    type_cast_rule: boolean
+    null_handling: default_to_null
+    default_rule: false
+    validation_rule: response_received IN (true, false)
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: response-rate metric
+service_request:
+  fields:
+  - canonical_field: service_request_id
+    source_field: request_id
+    source_description: Stable id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: service_request_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: request anchor
+  - canonical_field: resident_account_id
+    source_field: resident_id
+    source_description: Resident FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: resident_account_id resolves via resident_crosswalk
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: request-level resident satisfaction
+  - canonical_field: request_type
+    source_field: request_type
+    source_description: Request type
+    transform_rule: map_request_type
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: request_type IN canonical_enum(crm.service_request.request_type)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: request-category analytics
+  - canonical_field: created_date
+    source_field: created_ts
+    source_description: Creation timestamp
+    transform_rule: to_iso_datetime
+    type_cast_rule: datetime
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: created_date <= today
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: SLA start
+  - canonical_field: status
+    source_field: status
+    source_description: Status
+    transform_rule: map_request_status
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: status IN canonical_enum(crm.service_request.status)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: open-request backlog
+  - canonical_field: resolved_date
+    source_field: resolved_ts
+    source_description: Resolution timestamp
+    transform_rule: to_iso_datetime
+    type_cast_rule: datetime
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: resolved_date IS NULL OR resolved_date >= created_date
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: cycle-time calculation
+follow_up_task:
+  fields:
+  - canonical_field: task_id
+    source_field: task_id
+    source_description: Stable id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: task_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: task anchor
+  - canonical_field: related_lead_id
+    source_field: lead_id
+    source_description: Lead FK
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: related_lead_id IS NULL OR related_lead_id IN pms.lead.lead_id
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: FK to pms.lead
+  - canonical_field: due_date
+    source_field: due_date
+    source_description: SLA deadline
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: due_date IS NOT NULL
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: SLA aging basis
+  - canonical_field: task_type
+    source_field: task_type
+    source_description: Task type
+    transform_rule: map_task_type
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: task_type IN canonical_enum(crm.follow_up_task.task_type)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: task mix analytics
+  - canonical_field: status
+    source_field: status
+    source_description: Task status
+    transform_rule: map_task_status
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: status IN canonical_enum(crm.follow_up_task.status)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: open-task queue
+  - canonical_field: assigned_to
+    source_field: assigned_to
+    source_description: Assigned agent
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: optional
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: agent workload analytics

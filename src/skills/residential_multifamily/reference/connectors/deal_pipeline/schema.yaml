@@ -1,0 +1,582 @@
+entities:
+  deal:
+    entity_name: deal
+    grain: one row per investment deal
+    time_basis: state
+    primary_key:
+    - deal_id
+    required_fields:
+    - name: deal_id
+      type: string
+      description: Stable deal id
+      is_key: true
+    - name: deal_name
+      type: string
+      description: Operator-facing deal label
+      is_key: false
+    - name: deal_type
+      type: enum
+      description: Primary deal classification
+      is_key: false
+      enum_values:
+      - acquisition
+      - development
+      - recapitalization
+      - refinance
+      - other
+    - name: pipeline_stage
+      type: enum
+      description: Current pipeline stage
+      is_key: false
+      enum_values:
+      - sourcing
+      - screening
+      - under_loi
+      - under_psa
+      - under_dd
+      - ic_review
+      - approved
+      - under_financing
+      - pre_close
+      - closed
+      - dropped
+      - dead
+    - name: status
+      type: enum
+      description: Deal lifecycle status
+      is_key: false
+      enum_values:
+      - active
+      - on_hold
+      - closed_won
+      - closed_lost
+      - dropped
+      - dead
+    - name: deal_created_date
+      type: date
+      description: Date deal was opened in source
+      is_key: false
+    optional_fields:
+    - name: asset_placeholder_id
+      type: string
+      description: FK to deal_asset_placeholder.asset_placeholder_id
+    - name: market_label
+      type: string
+      description: Market / MSA tag for the deal
+    - name: submarket_label
+      type: string
+      description: Submarket tag
+    - name: strategy_tag
+      type: enum
+      description: High-level strategy label
+      enum_values:
+      - core
+      - core_plus
+      - value_add
+      - opportunistic
+      - development
+      - other
+    - name: source_channel
+      type: enum
+      description: How the deal was sourced
+      enum_values:
+      - broker
+      - direct
+      - off_market_relationship
+      - repeat_seller
+      - auction
+      - loan_sale
+      - other
+    - name: broker_name
+      type: string
+      description: Broker label or firm name (non-PII placeholder acceptable)
+    - name: seller_entity_label
+      type: string
+      description: Seller legal-entity label or placeholder
+    - name: deal_renamed_from
+      type: string
+      description: Prior deal_name if the deal was renamed after approval
+    - name: parent_deal_id
+      type: string
+      description: FK for a split-phase deal pointing to the parent deal
+    - name: recapitalization_of_deal_id
+      type: string
+      description: FK for a recap deal pointing to the original acquisition deal
+    foreign_keys:
+    - field: asset_placeholder_id
+      references: deal_asset_placeholder.asset_placeholder_id
+      on_missing: warn
+    - field: parent_deal_id
+      references: deal.deal_id
+      on_missing: warn
+    - field: recapitalization_of_deal_id
+      references: deal.deal_id
+      on_missing: warn
+    null_handling:
+    - field: broker_name
+      behavior: default_to_null
+      notes: non-PII placeholder acceptable
+    status_convention:
+      field: status
+      values:
+      - active
+      - on_hold
+      - closed_won
+      - closed_lost
+      - dropped
+      - dead
+      allowed_transitions:
+      - active -> on_hold
+      - on_hold -> active
+      - active -> closed_won
+      - active -> closed_lost
+      - active -> dropped
+      - active -> dead
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - pipeline_review workflow; executive_pipeline_summary; acquisition_handoff; development_pipeline_tracking
+  deal_stage:
+    entity_name: deal_stage
+    grain: one row per pipeline stage entry for a deal
+    time_basis: event
+    primary_key:
+    - deal_stage_id
+    required_fields:
+    - name: deal_stage_id
+      type: string
+      description: Stable id for the stage entry
+      is_key: true
+    - name: deal_id
+      type: string
+      description: FK to deal
+      is_key: false
+    - name: pipeline_stage
+      type: enum
+      description: Stage entered
+      is_key: false
+      enum_values:
+      - sourcing
+      - screening
+      - under_loi
+      - under_psa
+      - under_dd
+      - ic_review
+      - approved
+      - under_financing
+      - pre_close
+      - closed
+      - dropped
+      - dead
+    - name: entered_date
+      type: date
+      description: Date stage was entered
+      is_key: false
+    optional_fields:
+    - name: exited_date
+      type: date
+      description: Date stage was exited (null = current)
+    - name: stage_reason
+      type: string
+      description: Free-form reason for entering the stage
+    - name: stage_changed_by
+      type: string
+      description: Role or person label who moved the deal
+    foreign_keys:
+    - field: deal_id
+      references: deal.deal_id
+      on_missing: reject
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - pipeline_review; pre_close_deal_tracking; stage-aging dashboards
+  deal_milestone:
+    entity_name: deal_milestone
+    grain: one row per discrete milestone event for a deal
+    time_basis: event
+    primary_key:
+    - milestone_id
+    required_fields:
+    - name: milestone_id
+      type: string
+      description: Stable id for the milestone event
+      is_key: true
+    - name: deal_id
+      type: string
+      description: FK to deal
+      is_key: false
+    - name: milestone_type
+      type: enum
+      description: Kind of milestone
+      is_key: false
+      enum_values:
+      - ic_pre_review
+      - ic_scheduled
+      - ic_approved
+      - ic_deferred
+      - ic_declined
+      - key_date_hit
+      - handoff_trigger
+      - phase_split
+      - financing_pivot
+      - retrade_logged
+      - dropped
+      - other
+    - name: milestone_date
+      type: date
+      description: Date milestone occurred
+      is_key: false
+    optional_fields:
+    - name: ic_review_id
+      type: string
+      description: FK to investment_committee_review if the milestone is IC-related
+    - name: notes
+      type: string
+      description: Free-form operator notes
+    foreign_keys:
+    - field: deal_id
+      references: deal.deal_id
+      on_missing: reject
+    - field: ic_review_id
+      references: investment_committee_review.ic_review_id
+      on_missing: warn
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - investment_committee_prep; acquisition_handoff; executive_pipeline_summary
+  investment_committee_review:
+    entity_name: investment_committee_review
+    grain: one row per IC review cycle for a deal
+    time_basis: state
+    primary_key:
+    - ic_review_id
+    required_fields:
+    - name: ic_review_id
+      type: string
+      description: Stable id for the IC review cycle
+      is_key: true
+    - name: deal_id
+      type: string
+      description: FK to deal
+      is_key: false
+    - name: review_status
+      type: enum
+      description: IC review outcome
+      is_key: false
+      enum_values:
+      - pre_ic
+      - scheduled
+      - in_review
+      - approved
+      - approved_with_conditions
+      - deferred
+      - declined
+      - withdrawn
+    - name: scheduled_date
+      type: date
+      description: Scheduled IC date
+      is_key: false
+    optional_fields:
+    - name: decision_date
+      type: date
+      description: Date decision was rendered
+    - name: approval_request_ref
+      type: string
+      description: Pointer to canonical ApprovalRequest.approval_request_id
+    - name: conditions_summary
+      type: string
+      description: Summary of conditions attached to an approved_with_conditions decision
+    - name: minute_reference
+      type: string
+      description: Pointer to IC meeting minutes (document reference only)
+    foreign_keys:
+    - field: deal_id
+      references: deal.deal_id
+      on_missing: reject
+    status_convention:
+      field: review_status
+      values:
+      - pre_ic
+      - scheduled
+      - in_review
+      - approved
+      - approved_with_conditions
+      - deferred
+      - declined
+      - withdrawn
+      allowed_transitions:
+      - pre_ic -> scheduled
+      - scheduled -> in_review
+      - in_review -> approved
+      - in_review -> approved_with_conditions
+      - in_review -> deferred
+      - in_review -> declined
+      - pre_ic -> withdrawn
+      - scheduled -> withdrawn
+      - deferred -> scheduled
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - investment_committee_prep; ApprovalRequest audit; IC escalation routing
+  deal_key_date:
+    entity_name: deal_key_date
+    grain: one row per named key date per deal
+    time_basis: state
+    primary_key:
+    - deal_key_date_id
+    required_fields:
+    - name: deal_key_date_id
+      type: string
+      description: Stable id for the key-date row
+      is_key: true
+    - name: deal_id
+      type: string
+      description: FK to deal
+      is_key: false
+    - name: date_kind
+      type: enum
+      description: Which key date this row represents
+      is_key: false
+      enum_values:
+      - loi_executed
+      - psa_executed
+      - dd_start
+      - dd_end
+      - financing_contingency
+      - financing_commitment
+      - expected_close
+      - actual_close
+      - delivery_target
+      - delivery_actual
+      - phase_delivery_target
+      - phase_delivery_actual
+      - other
+    - name: target_date
+      type: date
+      description: Target date for the key date
+      is_key: false
+    optional_fields:
+    - name: actual_date
+      type: date
+      description: Actual date if the key date has landed
+    - name: variance_days
+      type: integer
+      description: Days between target and actual (positive = late, negative = early)
+    - name: revision_count
+      type: integer
+      description: Count of times the target date was revised
+    foreign_keys:
+    - field: deal_id
+      references: deal.deal_id
+      on_missing: reject
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - pre_close_deal_tracking; closing checklist skill; delivery-risk dashboards
+  deal_team_assignment:
+    entity_name: deal_team_assignment
+    grain: one row per team-member assignment per deal
+    time_basis: state
+    primary_key:
+    - assignment_id
+    required_fields:
+    - name: assignment_id
+      type: string
+      description: Stable id for the assignment row
+      is_key: true
+    - name: deal_id
+      type: string
+      description: FK to deal
+      is_key: false
+    - name: role
+      type: enum
+      description: Role of the assignment
+      is_key: false
+      enum_values:
+      - sponsor
+      - lead_analyst
+      - ic_sponsor
+      - capital_markets
+      - asset_management_lead
+      - construction_lead
+      - legal
+      - compliance
+      - other
+    - name: assignee_label
+      type: string
+      description: Role slug or name placeholder (not PII-bearing in stubs)
+      is_key: false
+    optional_fields:
+    - name: effective_start
+      type: date
+      description: Assignment start date
+    - name: effective_end
+      type: date
+      description: Assignment end date (null = current)
+    foreign_keys:
+    - field: deal_id
+      references: deal.deal_id
+      on_missing: reject
+    null_handling:
+    - field: assignee_label
+      behavior: default_to_null
+      notes: stubs use role slugs or anonymized placeholders, not personal ids
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - pipeline_review; investor-reporting attribution
+  deal_financing_placeholder:
+    entity_name: deal_financing_placeholder
+    grain: one row per pre-close financing commitment placeholder
+    time_basis: state
+    primary_key:
+    - financing_placeholder_id
+    required_fields:
+    - name: financing_placeholder_id
+      type: string
+      description: Stable id
+      is_key: true
+    - name: deal_id
+      type: string
+      description: FK to deal
+      is_key: false
+    - name: tranche_kind
+      type: enum
+      description: Tranche in the capital stack
+      is_key: false
+      enum_values:
+      - senior_debt
+      - mezzanine
+      - preferred_equity
+      - common_equity
+      - jv_equity
+      - bridge
+      - construction_loan
+      - other
+    - name: placeholder_status
+      type: enum
+      description: State of the commitment placeholder
+      is_key: false
+      enum_values:
+      - indicative
+      - soft_commit
+      - firm_commit
+      - executed
+      - withdrawn
+    optional_fields:
+    - name: lender_entity_label
+      type: string
+      description: Lender label placeholder (non-PII)
+    - name: target_leverage_bps
+      type: integer
+      description: Target leverage in basis points (e.g., 6500 = 65.00 percent)
+      unit: percent_basis_points
+    - name: note_placeholder
+      type: string
+      description: Free-form note
+    foreign_keys:
+    - field: deal_id
+      references: deal.deal_id
+      on_missing: reject
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - capital-stack planning; pre_close_deal_tracking
+  deal_asset_placeholder:
+    entity_name: deal_asset_placeholder
+    grain: one row per prospective asset / site referenced by a deal pre-canonical-master
+    time_basis: state
+    primary_key:
+    - asset_placeholder_id
+    required_fields:
+    - name: asset_placeholder_id
+      type: string
+      description: Stable id for the asset placeholder
+      is_key: true
+    - name: placeholder_name
+      type: string
+      description: Operator-facing label for the prospective asset
+      is_key: false
+    - name: asset_type
+      type: enum
+      description: Asset type at the placeholder level
+      is_key: false
+      enum_values:
+      - multifamily_garden
+      - multifamily_midrise
+      - multifamily_highrise
+      - mixed_use
+      - sfr_portfolio
+      - land
+      - other
+    optional_fields:
+    - name: market_label
+      type: string
+      description: Market / MSA label
+    - name: submarket_label
+      type: string
+      description: Submarket label
+    - name: street_address_placeholder
+      type: string
+      description: Street address placeholder (NOT a live production address)
+    - name: resolved_canonical_property_id
+      type: string
+      description: Pointer to canonical Property id after close; null pre-close
+    - name: resolved_canonical_asset_id
+      type: string
+      description: Pointer to canonical Asset id after close; null pre-close
+    foreign_keys: []
+    null_handling:
+    - field: street_address_placeholder
+      behavior: default_to_null
+      notes: stubs do not carry real addresses
+    - field: resolved_canonical_property_id
+      behavior: default_to_null
+      notes: populated via property_master_crosswalk at close
+    - field: resolved_canonical_asset_id
+      behavior: default_to_null
+      notes: populated via the proposed asset_crosswalk at close
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - property_master_crosswalk seeding; asset_crosswalk seeding; acquisition_handoff

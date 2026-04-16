@@ -1,0 +1,402 @@
+entities:
+  chart_of_accounts:
+    entity_name: chart_of_accounts
+    grain: one row per account in the operator chart of accounts
+    time_basis: state
+    primary_key:
+    - account_id
+    required_fields:
+    - name: account_id
+      type: string
+      description: Operator account id
+      is_key: true
+    - name: account_label
+      type: string
+      description: Operator account label
+      is_key: false
+    - name: account_type
+      type: enum
+      description: Account type
+      is_key: false
+      enum_values:
+      - asset
+      - liability
+      - equity
+      - revenue
+      - expense
+      - capex
+    - name: normal_balance
+      type: enum
+      description: Debit or credit
+      is_key: false
+      enum_values:
+      - debit
+      - credit
+    optional_fields:
+    - name: parent_account_id
+      type: string
+      description: Parent account id
+    - name: inactive
+      type: boolean
+      description: True if inactive in source
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - account mapping; variance templates
+  account_mapping:
+    entity_name: account_mapping
+    grain: one row per source account mapped to canonical account slug
+    time_basis: state
+    primary_key:
+    - source_account_id
+    - canonical_account_slug
+    required_fields:
+    - name: source_account_id
+      type: string
+      description: FK to chart_of_accounts
+      is_key: true
+    - name: canonical_account_slug
+      type: string
+      description: Canonical account slug
+      is_key: true
+    - name: effective_start
+      type: date
+      description: Mapping effective start
+      is_key: false
+    optional_fields:
+    - name: effective_end
+      type: date
+      description: Mapping effective end (null = current)
+    - name: notes
+      type: string
+      description: Operator-facing notes
+    foreign_keys:
+    - field: source_account_id
+      references: chart_of_accounts.account_id
+      on_missing: reject
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - all GL metrics that aggregate by canonical account
+  actual:
+    entity_name: actual
+    grain: one row per GL posting per account per period per property
+    time_basis: snapshot
+    primary_key:
+    - property_id
+    - account_id
+    - period
+    required_fields:
+    - name: property_id
+      type: string
+      description: Property scope
+      is_key: true
+    - name: account_id
+      type: string
+      description: FK to chart_of_accounts
+      is_key: true
+    - name: period
+      type: string
+      description: Accounting period (YYYY-MM or YYYY-Qn)
+      is_key: true
+    - name: amount_cents
+      type: money_cents
+      description: Actual amount in cents
+      is_key: false
+      unit: cents_usd
+    optional_fields:
+    - name: memo
+      type: string
+      description: Optional memo
+    foreign_keys:
+    - field: account_id
+      references: chart_of_accounts.account_id
+      on_missing: reject
+    null_handling:
+    - field: amount_cents
+      behavior: reject_record
+      notes: posting must have an amount
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - property-performance-dashboard; variance-narrative-generator
+  budget:
+    entity_name: budget
+    grain: one row per budget line per account per period per property
+    time_basis: snapshot
+    primary_key:
+    - property_id
+    - account_id
+    - period
+    - scenario
+    required_fields:
+    - name: property_id
+      type: string
+      description: Property scope
+      is_key: true
+    - name: account_id
+      type: string
+      description: FK to chart_of_accounts
+      is_key: true
+    - name: period
+      type: string
+      description: Accounting period
+      is_key: true
+    - name: scenario
+      type: string
+      description: Budget scenario (e.g. approved or rebudget)
+      is_key: true
+    - name: amount_cents
+      type: money_cents
+      description: Budget amount in cents
+      is_key: false
+      unit: cents_usd
+    optional_fields:
+    - name: build_basis
+      type: string
+      description: Build basis (psf / fixed / per_unit_month / etc.)
+    foreign_keys:
+    - field: account_id
+      references: chart_of_accounts.account_id
+      on_missing: reject
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - annual-budget-engine; variance-narrative-generator
+  forecast:
+    entity_name: forecast
+    grain: one row per forecast line per account per period per property per as-of
+    time_basis: snapshot
+    primary_key:
+    - property_id
+    - account_id
+    - period
+    - as_of_date
+    required_fields:
+    - name: property_id
+      type: string
+      description: Property scope
+      is_key: true
+    - name: account_id
+      type: string
+      description: FK to chart_of_accounts
+      is_key: true
+    - name: period
+      type: string
+      description: Forecast period
+      is_key: true
+    - name: as_of_date
+      type: date
+      description: Forecast vintage
+      is_key: true
+    - name: amount_cents
+      type: money_cents
+      description: Forecast amount in cents
+      is_key: false
+      unit: cents_usd
+    optional_fields:
+    - name: prior_forecast_amount_cents
+      type: money_cents
+      description: Prior-vintage amount for delta
+    foreign_keys:
+    - field: account_id
+      references: chart_of_accounts.account_id
+      on_missing: reject
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - reforecast workflow; variance narrative
+  variance_line:
+    entity_name: variance_line
+    grain: one row per account per period per property capturing budget-actual
+    time_basis: snapshot
+    primary_key:
+    - property_id
+    - account_id
+    - period
+    required_fields:
+    - name: property_id
+      type: string
+      description: Property scope
+      is_key: true
+    - name: account_id
+      type: string
+      description: FK to chart_of_accounts
+      is_key: true
+    - name: period
+      type: string
+      description: Period label
+      is_key: true
+    - name: budget_amount_cents
+      type: money_cents
+      description: Budget amount in cents
+      is_key: false
+      unit: cents_usd
+    - name: actual_amount_cents
+      type: money_cents
+      description: Actual amount in cents
+      is_key: false
+      unit: cents_usd
+    - name: variance_cents
+      type: money_cents
+      description: Actual minus budget in cents
+      is_key: false
+      unit: cents_usd
+    optional_fields:
+    - name: driver_category
+      type: enum
+      description: Variance driver
+      enum_values:
+      - volume
+      - rate
+      - timing
+      - one_time
+      - mix
+      - other
+    - name: narrative
+      type: string
+      description: Operator-written variance narrative
+    foreign_keys:
+    - field: account_id
+      references: chart_of_accounts.account_id
+      on_missing: reject
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - variance-narrative-generator; property-performance-dashboard
+  capex_actual:
+    entity_name: capex_actual
+    grain: one row per capex posting to an asset account
+    time_basis: event
+    primary_key:
+    - capex_posting_id
+    required_fields:
+    - name: capex_posting_id
+      type: string
+      description: Stable posting id
+      is_key: true
+    - name: property_id
+      type: string
+      description: Property scope
+      is_key: false
+    - name: capex_project_id
+      type: string
+      description: FK to capex project
+      is_key: false
+    - name: posting_date
+      type: date
+      description: Posting date
+      is_key: false
+    - name: amount_cents
+      type: money_cents
+      description: Posting amount in cents
+      is_key: false
+      unit: cents_usd
+    - name: account_id
+      type: string
+      description: FK to chart_of_accounts
+      is_key: false
+    optional_fields:
+    - name: vendor_id
+      type: string
+      description: Vendor paid (FK to ap.vendor)
+    foreign_keys:
+    - field: account_id
+      references: chart_of_accounts.account_id
+      on_missing: reject
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - capex-prioritizer; construction-command-center
+  commitment:
+    entity_name: commitment
+    grain: one row per open GL commitment (PO, contract, accrual)
+    time_basis: state
+    primary_key:
+    - commitment_id
+    required_fields:
+    - name: commitment_id
+      type: string
+      description: Stable commitment id
+      is_key: true
+    - name: property_id
+      type: string
+      description: Property scope
+      is_key: false
+    - name: commitment_type
+      type: enum
+      description: Commitment kind
+      is_key: false
+      enum_values:
+      - purchase_order
+      - contract
+      - accrual
+      - other
+    - name: vendor_id
+      type: string
+      description: Vendor (FK to ap.vendor)
+      is_key: false
+    - name: amount_cents
+      type: money_cents
+      description: Commitment amount in cents
+      is_key: false
+      unit: cents_usd
+    - name: status
+      type: enum
+      description: Commitment status
+      is_key: false
+      enum_values:
+      - open
+      - partial
+      - closed
+      - cancelled
+    optional_fields:
+    - name: period_opened
+      type: string
+      description: Accounting period opened
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - capex commitment tracking; vendor-invoice-validator

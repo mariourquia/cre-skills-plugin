@@ -1,0 +1,22 @@
+# Lease status reconciliation.
+check_id: lease_status_reconciliation
+check_kind: lease_status
+severity: blocker
+description: |
+  Sum of units by lease/unit status (occupied + vacant + notice + preleased)
+  must equal rentable unit count per property.
+inputs:
+  - reference/normalized/pms_unit__<scope>.csv
+  - reference/normalized/pms_lease__<scope>.csv
+expected_invariant: |
+  for each property_id:
+    count(occupied) + count(vacant_rented) + count(vacant_unrented)
+    + count(notice_occupied) + count(notice_unrented)
+    == unit_count_rentable
+tolerance:
+  absolute: 0
+  relative_percent: 0.0
+remediation: |
+  Mismatch indicates orphan lease records, stale unit statuses, or
+  double-counted notice-plus-preleased units. Check LeaseEvent history
+  for missing move_out or move_in events.

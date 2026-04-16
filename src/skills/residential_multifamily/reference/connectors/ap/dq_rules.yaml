@@ -1,0 +1,94 @@
+# AP data-quality rules.
+rules:
+- rule_id: ap_freshness_invoices
+  dimension: freshness
+  severity: blocker
+  description: Invoice feed is no older than the invoice-cadence days declared
+    in ap/manifest.yaml.
+  expected: max(ap.invoice.invoice_date) >= today - invoice_feed_max_age_days
+    declared in ap/manifest.yaml
+  remediation: Operator re-lands AP per the declared cadence. Freshness gaps
+    blind vendor-invoice-validator and COI tracking.
+- rule_id: ap_freshness_vendor_master
+  dimension: freshness
+  severity: warning
+  description: Vendor master is refreshed per the cadence declared in
+    ap/manifest.yaml.
+  expected: max(ap.vendor.source_date) >= today - vendor_master_max_age_days
+    declared in ap/manifest.yaml
+  remediation: Vendor master staleness causes new-vendor invoices to reject
+    at landing. Operator re-lands master.
+- rule_id: ap_completeness_required_fields
+  dimension: completeness
+  severity: blocker
+  description: Every required field in ap/schema.yaml is non-null.
+  expected: for each entity and required_field, count(null) == 0
+  remediation: Null in required fields typically reflects mapping gap or
+    missing source; operator fixes mapping.
+- rule_id: ap_conformance_status_enum
+  dimension: conformance
+  severity: blocker
+  description: Invoice, PO, contract, commitment, and payment_status enums
+    are in canonical enum lists.
+  expected: status IN canonical_enum per entity
+  remediation: Unmapped source status rejected at landing.
+- rule_id: ap_consistency_invoice_vs_po
+  dimension: consistency
+  severity: warning
+  description: Invoice.po_id, when non-null, references a PO whose vendor_id
+    matches the invoice.vendor_id.
+  expected: for each invoice with po_id IS NOT NULL, purchase_order.vendor_id
+    == invoice.vendor_id
+  remediation: Mismatch indicates PO misassignment; operator reconciles.
+- rule_id: ap_uniqueness_primary_keys
+  dimension: uniqueness
+  severity: blocker
+  description: No duplicate primary keys across AP entities.
+  expected: count(distinct pk) == count(records) per entity
+  remediation: See qa/duplicate_id.yaml.
+- rule_id: ap_uniqueness_invoice_number_per_vendor
+  dimension: uniqueness
+  severity: blocker
+  description: No duplicate (vendor_id, vendor_invoice_number) combinations.
+  expected: count(distinct (vendor_id, vendor_invoice_number)) == count(rows
+    where vendor_invoice_number IS NOT NULL)
+  remediation: See ap_duplicate_invoice_by_vendor_and_invoice_number.
+- rule_id: ap_referential_integrity_vendor_fk
+  dimension: referential_integrity
+  severity: blocker
+  description: invoice.vendor_id, contract.vendor_id, commitment.vendor_id,
+    purchase_order.vendor_id all resolve to ap.vendor.vendor_id.
+  expected: vendor_id IN ap.vendor.vendor_id
+  remediation: See ap_invoice_vendor_fk.
+- rule_id: ap_referential_integrity_contract_fk
+  dimension: referential_integrity
+  severity: warning
+  description: invoice.contract_id and commitment.contract_id, when non-null,
+    resolve to ap.contract.contract_id.
+  expected: for each row with contract_id IS NOT NULL, contract_id IN
+    ap.contract.contract_id
+  remediation: Orphan contract_id usually reflects a retired contract still
+    being invoiced. Operator closes the commitment or reassigns.
+- rule_id: ap_reasonableness_invoice_amount
+  dimension: reasonableness
+  severity: warning
+  description: Invoice amount per vendor per period is within the plausible
+    band declared in overlays/org/<org_id>/overlay.yaml.
+  expected: for each vendor and period, sum(invoice.amount_cents) within the
+    vendor reasonableness band declared in overlays/org/<org_id>/overlay.yaml
+    OR carries reasonableness_override_flag
+  remediation: Out-of-band spend signals either a legitimate spike (capex,
+    emergency repair) or an error (mis-coded vendor). Operator confirms.
+- rule_id: ap_consistency_coi_dispatch
+  dimension: consistency
+  severity: blocker
+  description: Vendors dispatched for safety-critical work have
+    insurance_expiry_date > today.
+  expected: see ap_coi_expiry_gate
+  remediation: See ap_coi_expiry_gate reconciliation check.
+- rule_id: ap_consistency_credit_memo_link
+  dimension: consistency
+  severity: warning
+  description: Every credit memo (amount_cents < 0) references a related invoice.
+  expected: see ap_invoice_credit_memo_handled
+  remediation: See ap_invoice_credit_memo_handled reconciliation check.

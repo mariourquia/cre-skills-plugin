@@ -1,0 +1,61 @@
+# Adapter manifest for the generic PMS vendor family stub.
+# Conforms to reference/connectors/adapters/adapter_manifest.schema.yaml.
+# Vendor-family name is a generic placeholder. Operators fork this directory
+# under a new slug when specializing to a real vendor.
+
+adapter_id: pms_vendor_family_stub
+adapter_name: Generic PMS Vendor Family Stub
+vendor_family: generic_pms_stub
+connector_domain: pms
+status: stub
+rollout_wave: wave_0
+description: |
+  Placeholder adapter over the canonical pms connector. Seeds operator
+  onboarding with common rent-roll, lease, charge, payment, and leasing-
+  funnel column-name patterns. Canonical schema in ../../pms/ wins on any
+  conflict.
+
+supported_source_systems:
+  - pms_generic_stub
+
+mapping_hints:
+  - { source_field_pattern: "prop*code|property*id|prop*id",         canonical_field: property_id,              transform_hint: trim_string }
+  - { source_field_pattern: "prop*name|property*name|community*name", canonical_field: property_name,            transform_hint: trim_string }
+  - { source_field_pattern: "total*units|unit*count",                 canonical_field: unit_count_total,         transform_hint: to_integer }
+  - { source_field_pattern: "rentable*units|avail*units",             canonical_field: unit_count_rentable,      transform_hint: to_integer }
+  - { source_field_pattern: "unit*id|apt*id|unit*number|apt*number",  canonical_field: unit_id,                  transform_hint: trim_string }
+  - { source_field_pattern: "bed*count|beds|bedrooms",                canonical_field: bedrooms,                 transform_hint: to_integer }
+  - { source_field_pattern: "bath*count|baths|bathrooms",             canonical_field: bathrooms,                transform_hint: to_number }
+  - { source_field_pattern: "sqft|sf|nrsf|sq*ft|square*feet",         canonical_field: nrsf,                     transform_hint: to_integer }
+  - { source_field_pattern: "unit*status|occupancy*status",           canonical_field: status,                   transform_hint: map_unit_status }
+  - { source_field_pattern: "lease*id|lease*number|lse*id",           canonical_field: lease_id,                 transform_hint: trim_string }
+  - { source_field_pattern: "resident*id|tenant*id|customer*id",      canonical_field: resident_account_id,      transform_hint: trim_string }
+  - { source_field_pattern: "lease*start|move*in*date|start*date",    canonical_field: start_date,               transform_hint: to_iso_date }
+  - { source_field_pattern: "lease*end|expire*date|end*date",         canonical_field: end_date,                 transform_hint: to_iso_date }
+  - { source_field_pattern: "rent|base*rent|market*rent|effective*rent", canonical_field: base_rent_monthly_cents, transform_hint: dollars_to_cents }
+  - { source_field_pattern: "concession*total|credit*total|abate",    canonical_field: concessions_total_cents,  transform_hint: dollars_to_cents }
+  - { source_field_pattern: "renewal*flag|is*renewal",                canonical_field: is_renewal,               transform_hint: to_boolean }
+  - { source_field_pattern: "charge*code|charge*type|txn*type",       canonical_field: charge_type,              transform_hint: map_charge_type }
+  - { source_field_pattern: "charge*date|post*date|txn*date",         canonical_field: charge_date,              transform_hint: to_iso_date }
+  - { source_field_pattern: "payment*amt|amount*paid|amt",            canonical_field: amount_cents,             transform_hint: dollars_to_cents }
+  - { source_field_pattern: "tour*date|showing*date",                 canonical_field: scheduled_date,           transform_hint: to_iso_date }
+
+known_gotchas:
+  - model units often omitted from rent-roll exports; unit_count_total vs unit_count_rentable must be reconciled against master data
+  - unit-status taxonomies vary (e.g., occupied_on_notice vs notice_rented vs ntv)
+  - concessions sometimes encoded as negative rent on the rent line and sometimes as a separate credit; both paths must normalize to concessions_total_cents
+  - unit-number suffix conventions vary (e.g., 101-A vs 101.01 vs 101a); the master-data crosswalk resolves
+  - future-lease rows appear in some exports and not others; filter by lease status before reconciliation
+  - resident ids are not stable across moves; anchor on lease_id plus unit_id plus property_id for dedup
+  - charge categories ride vendor-specific chart-of-accounts slugs; map through the account crosswalk
+  - delinquency stage enums are inconsistent (e.g., 30_days vs aged_30)
+
+reference_documentation:
+  - placeholder_link_to_vendor_family_export_guide
+  - placeholder_link_to_internal_pms_taxonomy_reference
+
+author_metadata:
+  authored_by: residential_multifamily_subsystem
+  authored_role: data_platform_team
+
+last_updated: "2026-04-15"

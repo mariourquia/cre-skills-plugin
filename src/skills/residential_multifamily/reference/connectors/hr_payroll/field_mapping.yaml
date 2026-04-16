@@ -1,0 +1,501 @@
+# Enriched field mapping for hr_payroll.
+# Each row carries: source_description, canonical_field, transform_rule,
+# type_cast, null_handling, default_rule, required_for_load,
+# required_for_kpi, provenance_note. This is the documentation-grade
+# companion to mapping.yaml.
+
+employee:
+  - source_column: emp_id
+    source_description: stable opaque employee identifier issued by HR system
+    canonical_field: employee.employee_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: anchor for every payroll and assignment record; never null
+  - source_column: employment_status
+    source_description: current lifecycle state (active, leave, terminated, etc.)
+    canonical_field: employee.employment_status
+    transform_rule: to_enum
+    type_cast: enum
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: drives active-headcount rollups
+  - source_column: hire_date
+    source_description: most recent hire date (respects rehire)
+    canonical_field: employee.hire_date
+    transform_rule: to_date
+    type_cast: date
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: false
+    provenance_note: tenure calculations
+  - source_column: ft_pt_flag
+    source_description: full_time | part_time | seasonal | temp
+    canonical_field: employee.ft_pt_flag
+    transform_rule: to_enum
+    type_cast: enum
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FTE conversion
+  - source_column: term_date
+    source_description: termination date, null if active
+    canonical_field: employee.term_date
+    transform_rule: to_date
+    type_cast: date
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: drives turnover metrics
+  - source_column: display_code
+    source_description: non-PII display handle for operator reference
+    canonical_field: employee.display_code
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: default_to_null
+    default_rule: employee_id
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: optional convenience field; never carries a legal name
+
+staffing_position:
+  - source_column: property_code
+    source_description: property code tied to the position (null = shared)
+    canonical_field: staffing_position.property_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: resolves to property master
+  - source_column: position_id
+    source_description: stable position id from the staffing plan
+    canonical_field: staffing_position.position_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: primary key half
+  - source_column: role_code
+    source_description: canonical role code from role_catalog
+    canonical_field: staffing_position.role_code
+    transform_rule: lowercase
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: must exist in master_data/role_catalog.yaml
+  - source_column: budgeted_fte
+    source_description: budgeted FTE for the position (0.0-2.0 expected)
+    canonical_field: staffing_position.budgeted_fte
+    transform_rule: to_number
+    type_cast: number
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: drives StaffingPlan reconciliation
+  - source_column: position_status
+    source_description: budgeted | filled | vacant | on_hold | eliminated
+    canonical_field: staffing_position.position_status
+    transform_rule: to_enum
+    type_cast: enum
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: vacancy ratio
+
+role_assignment:
+  - source_column: assignment_id
+    source_description: stable assignment identifier
+    canonical_field: role_assignment.assignment_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: false
+    provenance_note: primary key
+  - source_column: emp_id
+    source_description: employee id linked to the assignment
+    canonical_field: role_assignment.employee_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to employee
+  - source_column: position_id
+    source_description: staffing_position id linked to the assignment
+    canonical_field: role_assignment.position_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to staffing_position
+  - source_column: effective_date
+    source_description: date assignment began
+    canonical_field: role_assignment.effective_date
+    transform_rule: to_date
+    type_cast: date
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: time-slice anchor
+  - source_column: assignment_status
+    source_description: active | pending | ended | transferred
+    canonical_field: role_assignment.assignment_status
+    transform_rule: to_enum
+    type_cast: enum
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: fill-rate metric
+  - source_column: end_date
+    source_description: date assignment ended
+    canonical_field: role_assignment.end_date
+    transform_rule: to_date
+    type_cast: date
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: tenure on position
+  - source_column: allocation_pct
+    source_description: FTE allocation percent (0-100)
+    canonical_field: role_assignment.allocation_pct
+    transform_rule: to_number
+    type_cast: number
+    null_handling: default_to_null
+    default_rule: 100
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: split-FTE support
+
+property_assignment:
+  - source_column: emp_id
+    source_description: employee id
+    canonical_field: property_assignment.employee_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to employee
+  - source_column: property_code
+    source_description: property code or sentinel (shared, remote, corporate)
+    canonical_field: property_assignment.property_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: resolves to property master or reserved sentinel
+  - source_column: assignment_kind
+    source_description: primary | shared | remote | corporate | floater
+    canonical_field: property_assignment.assignment_kind
+    transform_rule: to_enum
+    type_cast: enum
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: drives cost allocation
+  - source_column: allocation_pct
+    source_description: allocation percent for cost-splitting
+    canonical_field: property_assignment.allocation_pct
+    transform_rule: to_number
+    type_cast: number
+    null_handling: default_to_null
+    default_rule: 100
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: multi-property splits
+  - source_column: effective_date
+    source_description: assignment start
+    canonical_field: property_assignment.effective_date
+    transform_rule: to_date
+    type_cast: date
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: time-slice anchor
+
+vacancy_status:
+  - source_column: position_id
+    source_description: staffing_position id
+    canonical_field: vacancy_status.position_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to staffing_position
+  - source_column: as_of_date
+    source_description: observation date (pay period end)
+    canonical_field: vacancy_status.as_of_date
+    transform_rule: to_date
+    type_cast: date
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: snapshot anchor
+  - source_column: vacancy_state
+    source_description: vacancy enum
+    canonical_field: vacancy_status.vacancy_state
+    transform_rule: to_enum
+    type_cast: enum
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: vacancy ratio classifier
+  - source_column: days_vacant
+    source_description: days vacant through observation
+    canonical_field: vacancy_status.days_vacant
+    transform_rule: to_integer
+    type_cast: integer
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: hiring velocity
+  - source_column: requisition_id
+    source_description: ATS requisition id
+    canonical_field: vacancy_status.requisition_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: ATS crosswalk
+
+payroll_line:
+  - source_column: payroll_line_id
+    source_description: payroll line identifier
+    canonical_field: payroll_line.payroll_line_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: false
+    provenance_note: primary key
+  - source_column: emp_id
+    source_description: employee id
+    canonical_field: payroll_line.employee_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to employee
+  - source_column: property_code
+    source_description: property scope
+    canonical_field: payroll_line.property_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: payroll_per_property anchor
+  - source_column: pay_period_end
+    source_description: pay period end date
+    canonical_field: payroll_line.pay_period_end
+    transform_rule: to_date
+    type_cast: date
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: period boundary
+  - source_column: earnings_type
+    source_description: regular | overtime | bonus | commission | pto | holiday | severance | other
+    canonical_field: payroll_line.earnings_type
+    transform_rule: to_enum
+    type_cast: enum
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: drives earnings breakdown
+  - source_column: regular_hours
+    source_description: regular hours for the line
+    canonical_field: payroll_line.regular_hours
+    transform_rule: to_number
+    type_cast: number
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: payroll_per_hour metric
+  - source_column: regular_pay
+    source_description: gross pay (dollars in source, stored as cents)
+    canonical_field: payroll_line.gross_pay_cents
+    transform_rule: parse_currency
+    type_cast: money_cents
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: reconciles to gl.actual payroll accounts
+  - source_column: gl_account_code
+    source_description: GL account code for posting
+    canonical_field: payroll_line.gl_account_code
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: crosswalk to gl_payroll_account_crosswalk
+  - source_column: cost_center_code
+    source_description: cost center / department
+    canonical_field: payroll_line.cost_center_code
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: departmental rollup
+
+overtime_line:
+  - source_column: overtime_line_id
+    source_description: overtime line identifier
+    canonical_field: overtime_line.overtime_line_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: false
+    provenance_note: primary key
+  - source_column: emp_id
+    source_description: employee id
+    canonical_field: overtime_line.employee_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to employee
+  - source_column: pay_period_end
+    source_description: pay period end
+    canonical_field: overtime_line.pay_period_end
+    transform_rule: to_date
+    type_cast: date
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: period boundary
+  - source_column: ot_hours
+    source_description: overtime hours
+    canonical_field: overtime_line.ot_hours
+    transform_rule: to_number
+    type_cast: number
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: overtime_ratio numerator
+  - source_column: ot_pay
+    source_description: overtime pay (dollars in source, stored as cents)
+    canonical_field: overtime_line.ot_pay_cents
+    transform_rule: parse_currency
+    type_cast: money_cents
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: gl reconciliation
+  - source_column: property_code
+    source_description: property scope (null triggers qa flag)
+    canonical_field: overtime_line.property_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: escalate_missing
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: unallocated OT blocks payroll_per_property
+  - source_column: work_order_id
+    source_description: link to work_order if OT was WO-driven
+    canonical_field: overtime_line.work_order_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: maintenance surge attribution
+
+employee_vs_contractor_flag:
+  - source_column: emp_id
+    source_description: employee id
+    canonical_field: employee_vs_contractor_flag.employee_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK to employee
+  - source_column: is_contractor
+    source_description: classification enum
+    canonical_field: employee_vs_contractor_flag.classification
+    transform_rule: to_enum
+    type_cast: enum
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: gates payroll_line eligibility
+  - source_column: classification_eff_date
+    source_description: date classification became effective
+    canonical_field: employee_vs_contractor_flag.classification_effective_date
+    transform_rule: to_date
+    type_cast: date
+    null_handling: reject_record
+    default_rule: none
+    required_for_load: true
+    required_for_kpi: false
+    provenance_note: effective-dated audit trail
+  - source_column: contractor_vendor_id
+    source_description: FK to ap.vendor for contractors paid through AP
+    canonical_field: employee_vs_contractor_flag.contractor_vendor_id
+    transform_rule: trim_string
+    type_cast: string
+    null_handling: default_to_null
+    default_rule: null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: required when classification = contractor_1099

@@ -1,0 +1,180 @@
+# AppFolio reconciliation checks.
+# Each check pairs AppFolio with a peer source, names the fields compared,
+# cites the tolerance band in reference/normalized/schemas/reconciliation_tolerance_band.yaml,
+# declares severity and remediation runbook. No numeric thresholds hardcoded here.
+# Check id prefix: af_recon_
+
+checks:
+
+  # -------------------------------------------------------------------------
+  # AppFolio <-> Intacct (PMS <-> GL)
+  # -------------------------------------------------------------------------
+
+  - check_id: af_recon_collections_vs_gl_revenue
+    sources: [appfolio_prod, sage_intacct_prod]
+    grain: property_period
+    fields_compared:
+      appfolio: sum(tenant_payment.Amount where PaymentStatus = Posted) + sum(charge.Amount where ChargeType in {BaseRent, Rent})
+      intacct: sum(actual_line.amount where account_category = operating_revenue)
+    tolerance_ref: revenue_basis_band
+    severity: warning
+    cadence: monthly
+    affected_workflows: [monthly_property_operating_review, monthly_asset_management_review]
+    remediation_runbook: runbooks/appfolio_common_issues.md::ledger_tie_out
+
+  - check_id: af_recon_concession_accrual
+    sources: [appfolio_prod, sage_intacct_prod]
+    grain: property_period
+    fields_compared:
+      appfolio: sum(charge.Amount where ChargeType in {Credit, Concession})
+      intacct: sum(actual_line.amount where account_subcategory = concession_expense)
+    tolerance_ref: revenue_basis_band
+    severity: warning
+    cadence: monthly
+    affected_workflows: [monthly_property_operating_review]
+    remediation_runbook: runbooks/appfolio_common_issues.md::concession_encoding_ambiguity
+
+  - check_id: af_recon_payment_deposit
+    sources: [appfolio_prod, sage_intacct_prod]
+    grain: bank_account_day
+    fields_compared:
+      appfolio: sum(tenant_payment.Amount by BankAccountId, PaymentDate)
+      intacct: sum(actual_line.amount by bank_account_dim, posting_date)
+    tolerance_ref: cash_tie_band
+    severity: blocker
+    cadence: daily
+    affected_workflows: [monthly_property_operating_review, monthly_asset_management_review]
+    remediation_runbook: runbooks/appfolio_common_issues.md::payment_posted_to_wrong_charge
+
+  - check_id: af_recon_property_list_vs_gl_entity_dim
+    sources: [appfolio_prod, sage_intacct_prod]
+    grain: property
+    fields_compared:
+      appfolio: PropertyId -> property_master_crosswalk -> canonical_id
+      intacct: entity_dim -> property_master_crosswalk -> canonical_id
+    tolerance_ref: identity_match_band
+    severity: blocker
+    cadence: weekly
+    affected_workflows: [monthly_property_operating_review]
+    remediation_runbook: runbooks/appfolio_common_issues.md::property_unmapped_in_gl
+
+  - check_id: af_recon_vendor_master_three_way
+    sources: [appfolio_prod, sage_intacct_prod, procore_construction]
+    grain: vendor
+    fields_compared:
+      appfolio: VendorId (dispatch side)
+      intacct: vendor tax_id + W-9 (authoritative)
+      procore: subcontractor_id (commitments)
+    tolerance_ref: identity_match_band
+    severity: warning
+    cadence: weekly
+    affected_workflows: [vendor_dispatch_sla_review]
+    remediation_runbook: runbooks/appfolio_common_issues.md::vendor_directory_dedup
+
+  - check_id: af_recon_nsf_reversal
+    sources: [appfolio_prod, sage_intacct_prod]
+    grain: payment
+    fields_compared:
+      appfolio: tenant_payment.PaymentStatus = NSF + TenantChargeId link
+      intacct: reversing journal entry + original payment posting
+    tolerance_ref: cash_tie_band
+    severity: warning
+    cadence: monthly
+    affected_workflows: [monthly_property_operating_review, delinquency_collections]
+    remediation_runbook: runbooks/appfolio_common_issues.md::nsf_reversal_handling
+
+  # -------------------------------------------------------------------------
+  # AppFolio <-> Excel (benchmarks)
+  # -------------------------------------------------------------------------
+
+  - check_id: af_recon_rent_comp_drift
+    sources: [appfolio_prod, excel_market_surveys]
+    grain: submarket_bedroom_class
+    fields_compared:
+      appfolio: median(lease.MonthlyRent) for current window
+      excel: rent_comp.effective_rent_psf * nrsf_typical
+    tolerance_ref: comp_outlier_band
+    severity: warning
+    cadence: weekly
+    affected_workflows: [market_rent_refresh, renewal_retention]
+    remediation_runbook: runbooks/appfolio_common_issues.md::rent_comp_drift
+
+  - check_id: af_recon_concession_benchmark_drift
+    sources: [appfolio_prod, excel_market_surveys]
+    grain: submarket
+    fields_compared:
+      appfolio: mean(ConcessionsTotal / (MonthlyRent * TermMonths)) for new leases
+      excel: concession_benchmark.months_off_per_submarket
+    tolerance_ref: segment_match_band
+    severity: warning
+    cadence: weekly
+    affected_workflows: [market_rent_refresh, renewal_retention]
+    remediation_runbook: runbooks/appfolio_common_issues.md::concession_encoding_ambiguity
+
+  - check_id: af_recon_submarket_tag_consistency
+    sources: [appfolio_prod, excel_market_surveys]
+    grain: property
+    fields_compared:
+      appfolio: property.SubmarketLabel -> submarket_crosswalk -> canonical_id
+      excel: rent_comp.submarket -> submarket_crosswalk -> canonical_id
+    tolerance_ref: submarket_tag_band
+    severity: warning
+    cadence: weekly
+    affected_workflows: [market_rent_refresh]
+    remediation_runbook: runbooks/appfolio_common_issues.md::submarket_tag_drift
+
+  # -------------------------------------------------------------------------
+  # AppFolio <-> Procore (construction)
+  # -------------------------------------------------------------------------
+
+  - check_id: af_recon_vendor_overlap_with_procore
+    sources: [appfolio_prod, procore_construction]
+    grain: vendor
+    fields_compared:
+      appfolio: VendorId + Services
+      procore: subcontractor_id + trade_scope
+    tolerance_ref: identity_match_band
+    severity: warning
+    cadence: weekly
+    affected_workflows: [vendor_dispatch_sla_review, change_order_review]
+    remediation_runbook: runbooks/appfolio_common_issues.md::vendor_directory_dedup
+
+  - check_id: af_recon_delivery_handoff
+    sources: [appfolio_prod, procore_construction]
+    grain: property
+    fields_compared:
+      appfolio: property.DateCreated + unit feed presence
+      procore: project.final_completion_date
+    tolerance_ref: delivery_handoff_band
+    severity: blocker
+    cadence: event-driven
+    affected_workflows: [lease_up_first_period, market_rent_refresh]
+    remediation_runbook: runbooks/appfolio_onboarding.md::delivery_handoff
+
+  # -------------------------------------------------------------------------
+  # AppFolio <-> Dealpath (post-IC property setup landing)
+  # -------------------------------------------------------------------------
+
+  - check_id: af_recon_post_ic_property_setup_landing
+    sources: [appfolio_prod, dealpath_prod]
+    grain: deal
+    fields_compared:
+      appfolio: PropertyId assignment + GLPartnerCode link
+      dealpath: deal.status = closed + approval_request status
+    tolerance_ref: handoff_lag_band
+    severity: warning
+    cadence: weekly
+    affected_workflows: [acquisition_handoff, post_ic_property_setup]
+    remediation_runbook: runbooks/appfolio_onboarding.md::post_ic_property_setup
+
+  - check_id: af_recon_asset_identity
+    sources: [appfolio_prod, dealpath_prod]
+    grain: asset
+    fields_compared:
+      appfolio: PropertyId -> property_master_crosswalk -> canonical_id
+      dealpath: asset_id -> asset_crosswalk -> canonical_id
+    tolerance_ref: identity_match_band
+    severity: blocker
+    cadence: event-driven
+    affected_workflows: [acquisition_handoff]
+    remediation_runbook: runbooks/appfolio_onboarding.md::asset_identity_resolution

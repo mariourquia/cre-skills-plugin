@@ -9,10 +9,39 @@ axes:
 
   - slug: segment
     required: true
-    values: [middle_market, affordable, luxury]
+    values: [middle_market, luxury]
     default: null
     ask_prompt: |
-      What segment is this property (middle_market, affordable, luxury)?
+      What conventional market-positioning segment is this property (middle_market, luxury)?
+    note: |
+      Segment is market-positioning only. Regulated affordable housing is modeled as a
+      separate overlay family under overlays/regulatory/, reached via the
+      regulatory_program axis. A property may be middle_market (segment) AND lihtc
+      (regulatory_program) simultaneously — the two overlays compose. See
+      _core/BOUNDARIES.md. The legacy value `affordable` is accepted for one refinement
+      cycle as a migration alias that routes to regulatory_program=<ask>.
+    legacy_aliases:
+      affordable:
+        deprecated_in: 2026-04-15
+        replaced_by_axis: regulatory_program
+        behavior: ask_regulatory_program_and_set_segment_to_ask
+
+  - slug: regulatory_program
+    required: conditional
+    required_when: "property has any regulated unit per property master OR user invokes a compliance workflow"
+    values: [none, lihtc, hud_section_8, hud_202_811, usda_rd, state_program, mixed_income]
+    default: none
+    ask_prompt: |
+      Is this property subject to a regulatory housing program? One of:
+      none, lihtc, hud_section_8, hud_202_811, usda_rd, state_program, mixed_income.
+      Answer 'none' if this is a conventional property.
+    note: |
+      Regulatory overlays are additive. `none` is the default and means no overlays
+      under overlays/regulatory/ load. Any non-`none` value loads
+      overlays/regulatory/affordable/ plus the program-specific overlay under
+      overlays/regulatory/affordable/programs/{regulatory_program}/.
+      Conventional routes must never auto-set this to a non-`none` value — see
+      rules.yaml r012.
 
   - slug: form_factor
     required: true

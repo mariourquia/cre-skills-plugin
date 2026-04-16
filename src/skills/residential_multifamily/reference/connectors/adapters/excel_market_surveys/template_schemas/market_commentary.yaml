@@ -1,0 +1,59 @@
+# Template schema for market_commentary_file Excel drops.
+# Narrative commentary that accompanies the market_survey_workbook or
+# analyst_benchmark_pack. No direct canonical normalized schema alignment;
+# commentary rows land as annotations on market_rent_benchmark and
+# occupancy_benchmark records.
+
+status_tag: template
+template_slug: market_commentary
+canonical_reference_schema: reference/normalized/schemas/market_rent_benchmark.yaml
+canonical_ontology_object: market_commentary
+source_format: xlsx
+csv_sibling_format: csv
+expected_sheets:
+  - commentary_entries
+  - cover_metadata
+header_rows: 1
+filename_pattern: "^market_commentary__<region>__\\d{4}-\\d{2}-\\d{2}\\.(xlsx|csv)$"
+
+sheet_schemas:
+
+  commentary_entries:
+    columns:
+      - { name: market,                required: true,  type: string }
+      - { name: submarket,             required: false, type: string }
+      - { name: region,                required: false, type: string }
+      - { name: period,                required: true,  type: string, description: reporting period label (e.g., 2026-Q1) }
+      - { name: headline_topic,        required: true,  type: string, enum: [supply_pipeline, absorption, concessions, trade_out, occupancy, capital_markets, regulatory, weather_event, labor_market, insurance, tax, other] }
+      - { name: narrative,             required: true,  type: string, description: free-form commentary text }
+      - { name: supporting_data_refs,  required: false, type: string, description: comma-separated reference_ids or source_file+sheet_tab anchors }
+      - { name: author,                required: true,  type: string, description: named author, not a team slug }
+      - { name: confidence_band,       required: true,  type: string, enum: [low, medium, high] }
+      - { name: directional_call,      required: false, type: string, enum: [bullish, neutral, bearish, watchlist] }
+      - { name: as_of,                 required: true,  type: date }
+      - { name: source,                required: true,  type: string, description: origin document (broker memo, analyst call, internal model) }
+      - { name: source_basis,          required: true,  type: string, enum: [analyst_opinion, aggregated_sources, single_source, owner_direct] }
+      - { name: row_id,                required: true,  type: string }
+
+  cover_metadata:
+    columns:
+      - { name: commentary_version,  required: true, type: string }
+      - { name: analyst_name,        required: true, type: string }
+      - { name: reviewer,            required: true, type: string }
+      - { name: signed_off_date,     required: true, type: date }
+
+validation_rules:
+  - rule_id: mc_author_present
+    severity: blocker
+    description: author named (not anonymous, not a team slug)
+  - rule_id: mc_narrative_nonempty
+    severity: blocker
+    description: narrative text non-empty and not placeholder
+  - rule_id: mc_confidence_band_enum
+    severity: blocker
+    description: confidence_band in {low, medium, high}
+  - rule_id: mc_market_recognized
+    severity: blocker
+    description: market resolves via market_crosswalk
+
+allowed_markets_reference: reference/connectors/master_data/market_crosswalk.yaml

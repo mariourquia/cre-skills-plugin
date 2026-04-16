@@ -1,7 +1,7 @@
 ---
 name: Residential Multifamily Operating System
 slug: residential_multifamily
-version: 0.1.0
+version: 0.5.0
 status: draft
 category: residential_multifamily
 subsystem: residential_multifamily
@@ -37,6 +37,11 @@ references:
     - _core/approval_matrix.md
     - _core/guardrails.md
     - _core/alias_registry.yaml
+    - reference/connectors/README.md
+    - reference/connectors/_core/README.md
+    - reference/connectors/_core/workflow_activation_map.yaml
+    - reference/connectors/source_registry/source_registry.yaml
+    - reference/connectors/master_data/README.md
   writes: []
 metrics_used: []
 escalation_paths:

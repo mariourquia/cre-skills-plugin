@@ -1,0 +1,227 @@
+# Raw Sage Intacct payload contract (stub).
+#
+# Declares the shape of payloads as they arrive from Sage Intacct Web
+# Services per entity, prior to normalization. UPPERCASE field names
+# mirror the Intacct convention. Every row carries the canonical
+# provenance envelope injected at landing:
+#   source_name, source_type, source_date, extracted_at,
+#   extractor_version, source_row_id (populated from RECORDNO).
+#
+# Canonical GL entity contracts in ../../gl/schema.yaml remain the
+# source of truth. This file documents the raw shape only.
+
+status_tag: template
+
+provenance_envelope:
+  required_fields:
+    - source_name        # must equal sage_intacct_prod
+    - source_type        # must equal gl
+    - source_date        # ISO-8601 date of the payload landing
+    - extracted_at       # ISO-8601 datetime of the Intacct read
+    - extractor_version  # semver of the adapter extractor
+    - source_row_id      # Intacct RECORDNO (stable per record)
+
+entities:
+
+  chart_of_accounts:
+    description: |
+      Intacct Accounts object. One row per GL account in the chart.
+      Populated from the GET_LIST on ACCOUNT with full field selection.
+    source_object: ACCOUNT
+    primary_key: [RECORDNO]
+    required_raw_fields:
+      - { name: RECORDNO,       type: string, notes: Intacct stable id. }
+      - { name: GLACCOUNTNO,    type: string, notes: Chart-of-account code. }
+      - { name: ACCOUNTTITLE,   type: string, notes: Account label. }
+      - { name: ACCOUNT_TYPE,   type: string, notes: "Intacct category: Asset, Liability, Equity, Revenue, Expense." }
+      - { name: NORMAL_BALANCE, type: string, notes: Debit or Credit. }
+      - { name: STATUS,         type: string, notes: active or inactive. }
+    optional_raw_fields:
+      - { name: CATEGORY,         type: string, notes: Finer-grained category if configured. }
+      - { name: PARENTACCOUNTNO,  type: string, notes: Parent account code for rollup. }
+      - { name: CAPITALIZATION_FLAG, type: boolean, notes: Operator-configured flag to distinguish capex-bearing accounts. }
+      - { name: WHENCREATED,      type: datetime }
+      - { name: WHENMODIFIED,     type: datetime }
+
+  dimensions:
+    description: |
+      Composite object covering the five Intacct dimension master tables:
+      Entities, Locations, Departments, Projects, Classes. One row per
+      dimension record. DIMENSION_TYPE discriminates. Populated by
+      GET_LIST on each dimension object and union-typed at landing.
+    source_object: DIMENSION
+    primary_key: [DIMENSION_TYPE, DIMENSION_ID]
+    required_raw_fields:
+      - { name: DIMENSION_TYPE, type: string, notes: "One of: ENTITY, LOCATION, DEPARTMENT, PROJECT, CLASS." }
+      - { name: DIMENSION_ID,   type: string, notes: Dimension key (e.g., LOCATIONID, PROJECTID). }
+      - { name: DIMENSION_NAME, type: string, notes: Human-readable label. }
+      - { name: STATUS,         type: string, notes: active or inactive. }
+    optional_raw_fields:
+      - { name: PARENT_DIMENSION_ID, type: string, notes: Parent dimension for hierarchical rollups (entity parent, location parent, project parent). }
+      - { name: PROJECT_TYPE,        type: string, notes: "For PROJECTID rows: capex / opex / development / reserve-funded." }
+      - { name: PROJECT_STATUS,      type: string, notes: "For PROJECTID rows: planned / active / complete / cancelled." }
+      - { name: ENTITY_TYPE,         type: string, notes: "For ENTITYID rows: SPE / roll_up / corporate / holding." }
+      - { name: LOCATION_TYPE,       type: string, notes: "For LOCATIONID rows: property / regional_office / corporate." }
+      - { name: CLASS_TYPE,          type: string, notes: "For CLASSID rows: fund / portfolio / reporting_segment." }
+      - { name: WHENCREATED,         type: datetime }
+      - { name: WHENMODIFIED,        type: datetime }
+
+  journal_entries:
+    description: |
+      Intacct General Ledger journal header. One row per posted journal
+      batch. Lines are a child collection under ENTRIES. Populated via
+      GLBATCH GET_LIST with nested ENTRIES.
+    source_object: GLBATCH
+    primary_key: [RECORDNO]
+    required_raw_fields:
+      - { name: RECORDNO,     type: string, notes: Intacct batch id. }
+      - { name: BATCHNO,      type: string, notes: Operator-visible batch number. }
+      - { name: JOURNAL,      type: string, notes: "Journal code (e.g., GJ, CDJ, CRJ, APJ)." }
+      - { name: BATCH_DATE,   type: date,   notes: Posting date. }
+      - { name: PERIOD,       type: string, notes: Intacct reporting period label. }
+      - { name: STATE,        type: string, notes: Posted, Reversed, Open. }
+      - { name: CREATED_BY,   type: string, notes: Intacct user id of the poster. }
+    optional_raw_fields:
+      - { name: BATCH_TITLE,  type: string, notes: Free-form batch description. }
+      - { name: REVERSED,     type: boolean, notes: true if this batch has been reversed. }
+      - { name: REVERSAL_OF,  type: string, notes: RECORDNO of the original entry this reverses. }
+      - { name: SOURCE_MODULE, type: string, notes: "Origin: Manual, AP, AR, Order Entry, Imported." }
+      - { name: ENTRIES, type: array, notes: "Nested array of line entries; see actual_lines for line shape." }
+      - { name: WHENCREATED,  type: datetime }
+      - { name: WHENMODIFIED, type: datetime }
+
+  actual_lines:
+    description: |
+      Intacct GL detail lines. One row per posted line per journal batch.
+      Populated via GLENTRY GET_LIST with dimension selectors active.
+      This is the primary feed for canonical actual_line records.
+    source_object: GLENTRY
+    primary_key: [RECORDNO]
+    required_raw_fields:
+      - { name: RECORDNO,      type: string, notes: Intacct stable line id. }
+      - { name: BATCHNO,       type: string, notes: FK to journal_entries.BATCHNO. }
+      - { name: LINE_NO,       type: integer, notes: Line order within the batch. }
+      - { name: GLACCOUNTNO,   type: string, notes: FK to chart_of_accounts.GLACCOUNTNO. }
+      - { name: AMOUNT,        type: number, notes: Signed amount in source currency. }
+      - { name: POSTING_TYPE,  type: string, notes: Debit or Credit. }
+      - { name: BATCH_DATE,    type: date,   notes: Posting date. }
+      - { name: PERIOD,        type: string, notes: Intacct reporting period. }
+      - { name: CURRENCY,      type: string, notes: ISO currency code. }
+      - { name: STATE,         type: string, notes: Posted, Reversed. }
+    optional_raw_fields:
+      - { name: ENTITYID,          type: string, notes: Owning Intacct entity. }
+      - { name: LOCATIONID,        type: string, notes: Owning location (often the property site). }
+      - { name: DEPARTMENTID,      type: string, notes: Department dimension. }
+      - { name: PROJECTID,         type: string, notes: Project dimension for capex tie. }
+      - { name: CLASSID,           type: string, notes: Class dimension for fund / reporting slice. }
+      - { name: VENDORID,          type: string, notes: Vendor tie for AP-originated postings. }
+      - { name: CUSTOMERID,        type: string, notes: Customer tie if AR-originated. }
+      - { name: SERVICE_FROM,      type: date,   notes: Start of the service period (accrual allocation). }
+      - { name: SERVICE_TO,        type: date,   notes: End of the service period. }
+      - { name: MEMO,              type: string, notes: Line memo / description. }
+      - { name: REFERENCE,         type: string, notes: External reference (invoice number, etc.). }
+      - { name: REVERSAL,          type: boolean, notes: true if this is a reversal line. }
+      - { name: REVERSAL_OF,       type: string, notes: RECORDNO of the original line this reverses. }
+      - { name: APPROVAL_STATUS,   type: string, notes: "Pending, Approved, Rejected for workflow-controlled postings." }
+
+  budget_lines:
+    description: |
+      Intacct Budget Module line detail. One row per budget line per
+      account per dimension per period within a named budget version.
+      Populated via BUDGET / BUDGETDETAIL GET_LIST with dimension
+      selectors active.
+    source_object: BUDGETDETAIL
+    primary_key: [RECORDNO]
+    required_raw_fields:
+      - { name: RECORDNO,      type: string, notes: Intacct stable id. }
+      - { name: BUDGETID,      type: string, notes: Budget header id. }
+      - { name: BUDGETNAME,    type: string, notes: Human-readable version label. }
+      - { name: GLACCOUNTNO,   type: string, notes: FK to chart_of_accounts.GLACCOUNTNO. }
+      - { name: PERIOD,        type: string, notes: Intacct period label (monthly grain). }
+      - { name: AMOUNT,        type: number, notes: Budget amount in source currency. }
+      - { name: CURRENCY,      type: string, notes: ISO currency code. }
+      - { name: STATE,         type: string, notes: "Draft, Published, Approved, Retired." }
+    optional_raw_fields:
+      - { name: ENTITYID,         type: string }
+      - { name: LOCATIONID,       type: string }
+      - { name: DEPARTMENTID,     type: string }
+      - { name: PROJECTID,        type: string }
+      - { name: CLASSID,          type: string }
+      - { name: FISCAL_YEAR,      type: string, notes: Fiscal year label. }
+      - { name: BUILD_BASIS,      type: string, notes: "Operator-captured basis: psf, fixed, per_unit_month, percent_of_revenue." }
+      - { name: APPROVAL_STATE,   type: string, notes: Approval workflow state. }
+      - { name: APPROVED_BY,      type: string, notes: Intacct user id. }
+      - { name: APPROVED_AT,      type: datetime, notes: Approval datetime. }
+
+  forecast_lines:
+    description: |
+      Intacct Forecast Module line detail. One row per forecast line per
+      account per dimension per period within a named forecast version.
+      Forecast version is distinct from budget version; multiple
+      forecast vintages (as_of_date) are permitted.
+    source_object: FORECASTDETAIL
+    primary_key: [RECORDNO]
+    required_raw_fields:
+      - { name: RECORDNO,       type: string }
+      - { name: FORECASTID,     type: string, notes: Forecast header id. }
+      - { name: FORECASTNAME,   type: string, notes: Human-readable version label. }
+      - { name: GLACCOUNTNO,    type: string }
+      - { name: PERIOD,         type: string, notes: Intacct period label for the forecasted month. }
+      - { name: AS_OF_DATE,     type: date,   notes: Forecast vintage; when the forecast was set. }
+      - { name: AMOUNT,         type: number }
+      - { name: CURRENCY,       type: string }
+      - { name: STATE,          type: string, notes: "Draft, Published, Retired." }
+    optional_raw_fields:
+      - { name: ENTITYID,        type: string }
+      - { name: LOCATIONID,      type: string }
+      - { name: DEPARTMENTID,    type: string }
+      - { name: PROJECTID,       type: string }
+      - { name: CLASSID,         type: string }
+      - { name: FISCAL_YEAR,     type: string }
+      - { name: PRIOR_FORECASTID, type: string, notes: Pointer to prior vintage for delta. }
+      - { name: BUILD_BASIS,     type: string }
+
+  vendors:
+    description: |
+      Intacct Vendor master. One row per vendor.
+    source_object: VENDOR
+    primary_key: [RECORDNO]
+    required_raw_fields:
+      - { name: RECORDNO,   type: string }
+      - { name: VENDORID,   type: string, notes: Operator-facing vendor code. }
+      - { name: VENDORNAME, type: string }
+      - { name: STATUS,     type: string, notes: active or inactive. }
+    optional_raw_fields:
+      - { name: TAXID,                type: string, notes: Tax id. Tag restricted sensitivity at landing. }
+      - { name: W9_ON_FILE,           type: boolean }
+      - { name: INSURANCE_EXPIRY_DATE, type: date }
+      - { name: TERMNAME,             type: string, notes: Payment terms label. }
+      - { name: CURRENCY,             type: string }
+      - { name: ENTITYID,             type: string, notes: Scoping entity if vendor is entity-scoped. }
+      - { name: WHENCREATED,          type: datetime }
+      - { name: WHENMODIFIED,         type: datetime }
+
+  projects:
+    description: |
+      Intacct Project dimension records at the capex-project grain. This
+      is a specialization of the `dimensions` entity for DIMENSION_TYPE =
+      PROJECT; it is surfaced separately here because capex projects tie
+      to the canonical CapexProject ontology object.
+    source_object: PROJECT
+    primary_key: [RECORDNO]
+    required_raw_fields:
+      - { name: RECORDNO,    type: string }
+      - { name: PROJECTID,   type: string, notes: Operator-facing project code. }
+      - { name: PROJECTNAME, type: string }
+      - { name: PROJECT_TYPE, type: string, notes: "capex / opex / development / reserve-funded." }
+      - { name: STATUS,      type: string }
+    optional_raw_fields:
+      - { name: ENTITYID,        type: string }
+      - { name: LOCATIONID,      type: string, notes: Property tie if carried on the project record. }
+      - { name: CATEGORY,        type: string, notes: "component_replacement, value_add, amenity_upgrade, etc." }
+      - { name: FUNDING_SOURCE,  type: string, notes: "reserves, owner_capital_call, loan_draw, insurance_proceeds." }
+      - { name: BUDGET_AMOUNT,   type: number, notes: Approved budget in source currency. }
+      - { name: CONTINGENCY_PCT, type: number }
+      - { name: START_DATE,      type: date }
+      - { name: COMPLETION_DATE, type: date }
+      - { name: PARENT_PROJECTID, type: string, notes: Parent project for child-project rollups. }

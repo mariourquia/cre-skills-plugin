@@ -1,0 +1,798 @@
+# Manual Uploads entity contracts.
+# Conforms to reference/connectors/_schema/entity_contract.schema.yaml for
+# the entities: block. Template metadata (expected_file_format,
+# expected_header_pattern) lives in a sibling templates: block outside the
+# schema's scope to stay conformant (additionalProperties: false applies to
+# each entity contract, not the file as a whole).
+
+entities:
+  budget_file:
+    entity_name: budget_file
+    grain: one row per account code per property per budget year
+    time_basis: snapshot
+    primary_key:
+    - property_id
+    - account_code
+    - budget_year
+    required_fields:
+    - name: property_id
+      type: string
+      description: Property code
+      is_key: true
+    - name: account_code
+      type: string
+      description: GL account code
+      is_key: true
+    - name: budget_year
+      type: integer
+      description: Budget year (YYYY)
+      is_key: true
+    - name: budget_version
+      type: enum
+      description: Budget snapshot version
+      is_key: false
+      enum_values:
+      - draft
+      - approved
+      - reforecast_q1
+      - reforecast_q2
+      - reforecast_q3
+      - final
+    - name: annual_amount_cents
+      type: money_cents
+      description: Annual budgeted amount in cents
+      is_key: false
+      unit: cents_usd
+    optional_fields:
+    - name: period_split
+      type: string
+      description: Period-split method (even | seasonal | custom)
+    - name: notes
+      type: string
+      description: Budget line narrative
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - annual_budget_engine; variance_narrative_generator; gl.budget crosswalk
+  forecast_file:
+    entity_name: forecast_file
+    grain: one row per account code per property per forecast period
+    time_basis: snapshot
+    primary_key:
+    - property_id
+    - account_code
+    - forecast_period
+    required_fields:
+    - name: property_id
+      type: string
+      description: Property code
+      is_key: true
+    - name: account_code
+      type: string
+      description: GL account code
+      is_key: true
+    - name: forecast_period
+      type: string
+      description: Forecast period (YYYY-MM)
+      is_key: true
+    - name: forecast_amount_cents
+      type: money_cents
+      description: Forecast amount for the period in cents
+      is_key: false
+      unit: cents_usd
+    optional_fields:
+    - name: forecast_method
+      type: string
+      description: Method (trend | straight_line | scenario)
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - quarterly_investor_update; variance_narrative_generator
+  owner_report:
+    entity_name: owner_report
+    grain: one row per property per reporting period per section
+    time_basis: snapshot
+    primary_key:
+    - property_id
+    - report_period
+    - section_key
+    required_fields:
+    - name: property_id
+      type: string
+      description: Property code
+      is_key: true
+    - name: report_period
+      type: string
+      description: Reporting period (YYYY-MM)
+      is_key: true
+    - name: section_key
+      type: enum
+      description: Canonical section identifier
+      is_key: true
+      enum_values:
+      - executive_summary
+      - financial_summary
+      - operations_summary
+      - leasing_summary
+      - capex_summary
+      - risk_outlook
+    - name: body_markdown
+      type: string
+      description: Section body in markdown
+      is_key: false
+    optional_fields:
+    - name: approval_status
+      type: enum
+      description: Review state
+      enum_values:
+      - draft
+      - in_review
+      - approved
+      - rejected
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - quarterly_investor_update; monthly_review_pack roll-up
+  vendor_bid_tab:
+    entity_name: vendor_bid_tab
+    grain: one row per bidder per scope line per solicitation
+    time_basis: snapshot
+    primary_key:
+    - solicitation_id
+    - vendor_id
+    - scope_line_id
+    required_fields:
+    - name: solicitation_id
+      type: string
+      description: Solicitation / RFP identifier
+      is_key: true
+    - name: vendor_id
+      type: string
+      description: Bidder vendor id (FK to ap.vendor)
+      is_key: true
+    - name: scope_line_id
+      type: string
+      description: Scope line identifier
+      is_key: true
+    - name: bid_amount_cents
+      type: money_cents
+      description: Bid amount in cents
+      is_key: false
+      unit: cents_usd
+    - name: bid_date
+      type: date
+      description: Date bid submitted
+      is_key: false
+    optional_fields:
+    - name: property_id
+      type: string
+      description: Property scope
+    - name: leveled_adjustment_cents
+      type: money_cents
+      description: Adjustment applied during bid leveling
+      unit: cents_usd
+    - name: recommendation_flag
+      type: boolean
+      description: Recommended awardee flag
+    foreign_keys:
+    - field: vendor_id
+      references: vendor.vendor_id
+      on_missing: warn
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - construction_procurement_contracts_engine; vendor management
+  rent_survey:
+    entity_name: rent_survey
+    grain: one row per comp property per survey date
+    time_basis: snapshot
+    primary_key:
+    - comp_id
+    - survey_date
+    required_fields:
+    - name: comp_id
+      type: string
+      description: Comp property identifier
+      is_key: true
+    - name: survey_date
+      type: date
+      description: Date survey was conducted
+      is_key: true
+    - name: comp_name
+      type: string
+      description: Comp property name
+      is_key: false
+    - name: unit_type
+      type: string
+      description: Unit type label
+      is_key: false
+    - name: asking_rent_cents
+      type: money_cents
+      description: Asking rent in cents
+      is_key: false
+      unit: cents_usd
+    optional_fields:
+    - name: concession_summary
+      type: string
+      description: Concession description
+    - name: occupancy_reported_pct
+      type: number
+      description: Reported occupancy percent
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - comp_snapshot; rent_optimization_planner
+  market_comp_sheet:
+    entity_name: market_comp_sheet
+    grain: one row per comparable sale per reporting period
+    time_basis: snapshot
+    primary_key:
+    - comp_sale_id
+    required_fields:
+    - name: comp_sale_id
+      type: string
+      description: Comp sale identifier
+      is_key: true
+    - name: property_name
+      type: string
+      description: Sold property name
+      is_key: false
+    - name: sale_date
+      type: date
+      description: Sale date
+      is_key: false
+    - name: sale_price_cents
+      type: money_cents
+      description: Sale price in cents
+      is_key: false
+      unit: cents_usd
+    - name: unit_count
+      type: integer
+      description: Unit count at sale
+      is_key: false
+    optional_fields:
+    - name: cap_rate_bps
+      type: integer
+      description: Reported cap rate in basis points
+      unit: basis_points
+    - name: year_built
+      type: integer
+      description: Year built
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - comp_snapshot; market_memo_generator
+  approval_matrix_upload:
+    entity_name: approval_matrix_upload
+    grain: one row per approval row in the matrix
+    time_basis: state
+    primary_key:
+    - matrix_id
+    - row_id
+    required_fields:
+    - name: matrix_id
+      type: string
+      description: Matrix identifier (ties to property or portfolio scope)
+      is_key: true
+    - name: row_id
+      type: string
+      description: Row identifier within the matrix
+      is_key: true
+    - name: scope
+      type: string
+      description: Scope label (category of spend or action)
+      is_key: false
+    - name: threshold_cents
+      type: money_cents
+      description: Threshold amount in cents
+      is_key: false
+      unit: cents_usd
+    - name: approver_role
+      type: string
+      description: Approver role code
+      is_key: false
+    optional_fields:
+    - name: notes
+      type: string
+      description: Narrative notes
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - approval gating across AP, capex, construction workflows
+  property_list:
+    entity_name: property_list
+    grain: one row per property in the operator's portfolio
+    time_basis: state
+    primary_key:
+    - property_id
+    required_fields:
+    - name: property_id
+      type: string
+      description: Property code
+      is_key: true
+    - name: property_name
+      type: string
+      description: Operating name
+      is_key: false
+    - name: market
+      type: string
+      description: Market label
+      is_key: false
+    - name: unit_count
+      type: integer
+      description: Total unit count
+      is_key: false
+    optional_fields:
+    - name: submarket
+      type: string
+      description: Submarket label
+    - name: entity_id
+      type: string
+      description: Legal entity identifier
+    - name: status
+      type: enum
+      description: Portfolio status
+      enum_values:
+      - active
+      - under_construction
+      - under_contract
+      - disposed
+      - held_for_sale
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - property master reconciliation; portfolio_allocator
+  staffing_model_upload:
+    entity_name: staffing_model_upload
+    grain: one row per role per property in the staffing model
+    time_basis: snapshot
+    primary_key:
+    - property_id
+    - role_code
+    required_fields:
+    - name: property_id
+      type: string
+      description: Property code
+      is_key: true
+    - name: role_code
+      type: string
+      description: Canonical role code
+      is_key: true
+    - name: budgeted_fte
+      type: number
+      description: Budgeted FTE for the role at the property
+      is_key: false
+    optional_fields:
+    - name: notes
+      type: string
+      description: Model narrative
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - StaffingPlan build; hr_payroll.staffing_position reconciliation
+  capex_request_upload:
+    entity_name: capex_request_upload
+    grain: one row per capex request
+    time_basis: event
+    primary_key:
+    - request_id
+    required_fields:
+    - name: request_id
+      type: string
+      description: Request identifier
+      is_key: true
+    - name: property_id
+      type: string
+      description: Property code
+      is_key: false
+    - name: request_date
+      type: date
+      description: Date of request
+      is_key: false
+    - name: category
+      type: enum
+      description: Capex category
+      is_key: false
+      enum_values:
+      - roof
+      - hvac
+      - plumbing
+      - electrical
+      - unit_renovation
+      - amenity
+      - life_safety
+      - other
+    - name: requested_amount_cents
+      type: money_cents
+      description: Requested amount in cents
+      is_key: false
+      unit: cents_usd
+    optional_fields:
+    - name: justification
+      type: string
+      description: Request justification
+    - name: approval_status
+      type: enum
+      description: Review state
+      enum_values:
+      - draft
+      - submitted
+      - approved
+      - deferred
+      - rejected
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - capex_prioritizer; gl.capex_actual reconciliation
+  draw_package_upload:
+    entity_name: draw_package_upload
+    grain: one row per draw request per project
+    time_basis: event
+    primary_key:
+    - project_id
+    - draw_number
+    required_fields:
+    - name: project_id
+      type: string
+      description: Project identifier
+      is_key: true
+    - name: draw_number
+      type: integer
+      description: Sequential draw number
+      is_key: true
+    - name: draw_date
+      type: date
+      description: Draw request date
+      is_key: false
+    - name: draw_amount_cents
+      type: money_cents
+      description: Draw amount in cents
+      is_key: false
+      unit: cents_usd
+    - name: review_status
+      type: enum
+      description: Review state
+      is_key: false
+      enum_values:
+      - submitted
+      - under_review
+      - approved
+      - disbursed
+      - rejected
+    optional_fields:
+    - name: supporting_docs_count
+      type: integer
+      description: Count of supporting documents in the package
+    - name: property_id
+      type: string
+      description: Property scope
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - construction_project_command_center; gl.commitment reconciliation
+  monthly_review_pack:
+    entity_name: monthly_review_pack
+    grain: one row per property per month per pack section
+    time_basis: snapshot
+    primary_key:
+    - property_id
+    - report_period
+    - pack_section_key
+    required_fields:
+    - name: property_id
+      type: string
+      description: Property code
+      is_key: true
+    - name: report_period
+      type: string
+      description: Month (YYYY-MM)
+      is_key: true
+    - name: pack_section_key
+      type: enum
+      description: Pack section identifier
+      is_key: true
+      enum_values:
+      - summary
+      - financials
+      - operations
+      - leasing
+      - capex
+      - risk
+      - action_items
+    - name: body_markdown
+      type: string
+      description: Section body
+      is_key: false
+    optional_fields:
+    - name: approval_status
+      type: enum
+      description: Review state
+      enum_values:
+      - draft
+      - in_review
+      - approved
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - property_performance_dashboard; quarterly_investor_update
+  delinquency_report_upload:
+    entity_name: delinquency_report_upload
+    grain: one row per delinquent resident per reporting period
+    time_basis: snapshot
+    primary_key:
+    - property_id
+    - report_period
+    - resident_account_id
+    required_fields:
+    - name: property_id
+      type: string
+      description: Property code
+      is_key: true
+    - name: report_period
+      type: string
+      description: Reporting period (YYYY-MM)
+      is_key: true
+    - name: resident_account_id
+      type: string
+      description: Resident account id
+      is_key: true
+    - name: balance_cents
+      type: money_cents
+      description: Outstanding balance in cents
+      is_key: false
+      unit: cents_usd
+    - name: aging_bucket
+      type: enum
+      description: Aging bucket
+      is_key: false
+      enum_values:
+      - '1_7'
+      - '8_30'
+      - '31_60'
+      - '61_90'
+      - 91_plus
+    optional_fields:
+    - name: notes
+      type: string
+      description: Case notes
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - tenant_delinquency_workout; collections metrics
+  work_order_backlog_upload:
+    entity_name: work_order_backlog_upload
+    grain: one row per backlog work order per reporting period
+    time_basis: snapshot
+    primary_key:
+    - property_id
+    - report_period
+    - work_order_id
+    required_fields:
+    - name: property_id
+      type: string
+      description: Property code
+      is_key: true
+    - name: report_period
+      type: string
+      description: Reporting period (YYYY-MM)
+      is_key: true
+    - name: work_order_id
+      type: string
+      description: WO id
+      is_key: true
+    - name: priority
+      type: enum
+      description: Priority
+      is_key: false
+      enum_values:
+      - p1_safety
+      - p2_habitability
+      - p3_standard
+      - p4_cosmetic
+    - name: age_days
+      type: integer
+      description: Days open
+      is_key: false
+    optional_fields:
+    - name: assigned_role
+      type: string
+      description: Assigned role code
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - work_order_triage; building_systems_maintenance_manager
+  pm_scorecard_upload:
+    entity_name: pm_scorecard_upload
+    grain: one row per property manager per scoring period per category
+    time_basis: snapshot
+    primary_key:
+    - employee_id
+    - scoring_period
+    - score_category
+    required_fields:
+    - name: employee_id
+      type: string
+      description: PM employee id (FK to hr_payroll.employee)
+      is_key: true
+    - name: scoring_period
+      type: string
+      description: Scoring period (YYYY-QN or YYYY-MM)
+      is_key: true
+    - name: score_category
+      type: enum
+      description: Category of the scorecard row
+      is_key: true
+      enum_values:
+      - occupancy
+      - collections
+      - leasing_velocity
+      - resident_satisfaction
+      - variance_discipline
+      - safety_compliance
+      - overall
+    - name: score_value
+      type: number
+      description: Score value (0-100 scale)
+      is_key: false
+    optional_fields:
+    - name: commentary
+      type: string
+      description: Narrative commentary
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - property_performance_dashboard; tenant_retention_engine
+
+# Per-template metadata. Not part of the entity_contract schema; this block
+# is connector-local documentation.
+templates:
+  budget_file:
+    expected_file_format: csv
+    expected_header_pattern: 'property_id,account_code,budget_year,budget_version,annual_amount_usd,period_split,notes'
+    template_path: file_templates/budget_file_template.csv
+    companion_doc: file_templates/budget_file_template.md
+  forecast_file:
+    expected_file_format: csv
+    expected_header_pattern: 'property_id,account_code,forecast_period,forecast_amount_usd,forecast_method'
+    template_path: file_templates/forecast_file_template.csv
+  owner_report:
+    expected_file_format: markdown
+    expected_header_pattern: "# Owner Report - <property_id> - <report_period>\\n## <section_key>"
+    template_path: file_templates/owner_report_template.md
+  vendor_bid_tab:
+    expected_file_format: csv
+    expected_header_pattern: 'solicitation_id,vendor_id,scope_line_id,bid_amount_usd,bid_date,property_id,leveled_adjustment_usd,recommendation_flag'
+    template_path: file_templates/vendor_bid_tab_template.csv
+  rent_survey:
+    expected_file_format: csv
+    expected_header_pattern: 'comp_id,survey_date,comp_name,unit_type,asking_rent_usd,concession_summary,occupancy_reported_pct'
+    template_path: file_templates/rent_survey_template.csv
+  market_comp_sheet:
+    expected_file_format: csv
+    expected_header_pattern: 'comp_sale_id,property_name,sale_date,sale_price_usd,unit_count,cap_rate_pct,year_built'
+    template_path: file_templates/market_comp_sheet_template.csv
+  approval_matrix_upload:
+    expected_file_format: yaml
+    expected_header_pattern: "matrix_id:\\nrows:\\n  - row_id:\\n    scope:\\n    threshold_usd:\\n    approver_role:"
+    template_path: file_templates/approval_matrix_template.yaml
+  property_list:
+    expected_file_format: csv
+    expected_header_pattern: 'property_id,property_name,market,unit_count,submarket,entity_id,status'
+    template_path: file_templates/property_list_template.csv
+  staffing_model_upload:
+    expected_file_format: csv
+    expected_header_pattern: 'property_id,role_code,budgeted_fte,notes'
+    template_path: file_templates/staffing_model_template.csv
+  capex_request_upload:
+    expected_file_format: yaml
+    expected_header_pattern: "request_id:\\nproperty_id:\\nrequest_date:\\ncategory:\\nrequested_amount_usd:"
+    template_path: file_templates/capex_request_template.yaml
+  draw_package_upload:
+    expected_file_format: markdown
+    expected_header_pattern: "# Draw Package - <project_id> - <draw_number>\\n## Summary"
+    template_path: file_templates/draw_package_template.md
+  monthly_review_pack:
+    expected_file_format: markdown
+    expected_header_pattern: "# Monthly Review Pack - <property_id> - <report_period>\\n## <pack_section_key>"
+    template_path: file_templates/monthly_review_pack_template.md
+  delinquency_report_upload:
+    expected_file_format: csv
+    expected_header_pattern: 'property_id,report_period,resident_account_id,balance_usd,aging_bucket,notes'
+    template_path: file_templates/delinquency_report_template.csv
+  work_order_backlog_upload:
+    expected_file_format: csv
+    expected_header_pattern: 'property_id,report_period,work_order_id,priority,age_days,assigned_role'
+    template_path: file_templates/work_order_backlog_template.csv
+  pm_scorecard_upload:
+    expected_file_format: csv
+    expected_header_pattern: 'employee_id,scoring_period,score_category,score_value,commentary'
+    template_path: file_templates/pm_scorecard_template.csv

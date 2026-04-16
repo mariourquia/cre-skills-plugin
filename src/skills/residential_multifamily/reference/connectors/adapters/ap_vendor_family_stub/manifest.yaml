@@ -1,0 +1,53 @@
+# Adapter manifest for the generic accounts payable vendor family stub.
+# Conforms to reference/connectors/adapters/adapter_manifest.schema.yaml.
+
+adapter_id: ap_vendor_family_stub
+adapter_name: Generic AP Vendor Family Stub
+vendor_family: generic_ap_stub
+connector_domain: ap
+status: stub
+rollout_wave: wave_0
+description: |
+  Placeholder adapter over the canonical ap connector. Seeds operator
+  onboarding with common invoice, vendor, and approval-status
+  conventions. Canonical schema in ../../ap/ wins on any conflict.
+
+supported_source_systems:
+  - ap_generic_stub
+
+mapping_hints:
+  - { source_field_pattern: "vendor*id|supplier*id|payee*id",              canonical_field: vendor_id,            transform_hint: trim_string }
+  - { source_field_pattern: "vendor*name|supplier*name|payee*name",        canonical_field: vendor_name,          transform_hint: trim_string }
+  - { source_field_pattern: "invoice*id|inv*id|bill*id",                   canonical_field: invoice_id,           transform_hint: trim_string }
+  - { source_field_pattern: "invoice*number|inv*number|inv*no",            canonical_field: invoice_number,       transform_hint: trim_string }
+  - { source_field_pattern: "invoice*date|bill*date|doc*date",             canonical_field: invoice_date,         transform_hint: to_iso_date }
+  - { source_field_pattern: "due*date|pay*by*date",                        canonical_field: due_date,             transform_hint: to_iso_date }
+  - { source_field_pattern: "amount|net*amount|gross*amount|total",        canonical_field: amount_cents,         transform_hint: dollars_to_cents }
+  - { source_field_pattern: "tax|sales*tax|vat",                           canonical_field: tax_cents,            transform_hint: dollars_to_cents }
+  - { source_field_pattern: "freight|shipping",                            canonical_field: freight_cents,        transform_hint: dollars_to_cents }
+  - { source_field_pattern: "prop*code|property*id|job*code",              canonical_field: property_id,          transform_hint: trim_string }
+  - { source_field_pattern: "service*category|expense*category|cat",       canonical_field: service_category,     transform_hint: map_service_category }
+  - { source_field_pattern: "approval*status|approve*status|ap*status",    canonical_field: approval_status,      transform_hint: map_approval_status }
+  - { source_field_pattern: "credit*memo*flag|is*credit*memo",             canonical_field: is_credit_memo,       transform_hint: to_boolean }
+  - { source_field_pattern: "payment*ref|check*number|ach*ref",            canonical_field: payment_reference,    transform_hint: trim_string }
+  - { source_field_pattern: "agreement*id|contract*id",                    canonical_field: vendor_agreement_id,  transform_hint: trim_string }
+
+known_gotchas:
+  - duplicate vendors across legacy and current systems require the vendor_master_crosswalk to consolidate
+  - credit memos silently reverse posted invoices; join on invoice_number and watch for sign flips
+  - partial payments split across pay runs do not always roll up under a parent invoice_id
+  - shared contracts touching multiple properties need explicit per-property allocation rules
+  - missing property_id on invoices leaves them unallocated; flag and route to a manual allocation queue
+  - tax vs freight vs other fees collapse into the amount column in some exports; decompose per vendor rules
+  - insurance COI expiry flags block payment dispatch per the vendor insurance guardrail
+  - approval-status enums are operator-specific (submitted, in_review, approved, posted, paid, voided)
+
+reference_documentation:
+  - placeholder_link_to_vendor_master_crosswalk
+  - placeholder_link_to_approval_workflow
+
+author_metadata:
+  authored_by: residential_multifamily_subsystem
+  authored_role: finance_systems_team
+
+last_updated: "2026-04-15"

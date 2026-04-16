@@ -1,0 +1,19 @@
+# status: template
+# schema: reference/connectors/manual_uploads/schema.yaml entities.approval_matrix_upload
+matrix_id: amatrix_sample_001
+rows:
+  - row_id: row_01
+    scope: capex_request
+    threshold_usd: 25000.00
+    approver_role: regional_director
+    notes: illustrative threshold row
+  - row_id: row_02
+    scope: vendor_invoice
+    threshold_usd: 5000.00
+    approver_role: property_manager
+    notes: illustrative threshold row
+  - row_id: row_03
+    scope: lease_concession
+    threshold_usd: 2000.00
+    approver_role: regional_director
+    notes: illustrative threshold row

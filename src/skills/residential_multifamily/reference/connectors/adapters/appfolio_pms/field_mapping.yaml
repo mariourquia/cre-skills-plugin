@@ -1,0 +1,163 @@
+# AppFolio field-by-field mapping to canonical pms entities.
+# Applied on top of ../../pms/mapping.yaml. Canonical mapping wins on any
+# conflict. Transforms reference named functions documented in
+# reference/connectors/pms/mapping.yaml (and canonical helpers like
+# crosswalk_lookup, dollars_to_cents, to_iso_date, trim_string,
+# map_*_status, etc.).
+
+status_tag: template
+
+global_provenance:
+  - { source_field: source_name,       target_field: source_name,       transform: passthrough, required: true }
+  - { source_field: source_type,       target_field: source_type,       transform: passthrough, required: true }
+  - { source_field: source_date,       target_field: source_date,       transform: passthrough, required: true }
+  - { source_field: extracted_at,      target_field: extracted_at,      transform: passthrough, required: true }
+  - { source_field: extractor_version, target_field: extractor_version, transform: passthrough, required: true }
+  - { source_field: source_row_id,     target_field: source_row_id,     transform: passthrough, required: true }
+
+entities:
+
+  property:
+    mappings:
+      - { source_field: PropertyId,      target_field: property_id,          transform: crosswalk_lookup, required: true, crosswalk: property_master_crosswalk }
+      - { source_field: PropertyName,    target_field: property_name,        transform: trim_string,      required: true }
+      - { source_field: GLPartnerCode,   target_field: legal_entity_id,      transform: crosswalk_lookup, required: true, crosswalk: property_master_crosswalk }
+      - { source_field: UnitCount,       target_field: unit_count_total,     transform: to_integer,       required: true }
+      - { source_field: MarketLabel,     target_field: market,               transform: trim_string,      required: true }
+      - { source_field: SubmarketLabel,  target_field: submarket,            transform: trim_string,      required: false }
+      - { source_field: YearBuilt,       target_field: year_built,           transform: to_integer,       required: false }
+      - { source_field: YearRenovated,   target_field: year_renovated,       transform: to_integer,       required: false }
+      - { source_field: PropertyType,    target_field: property_type_label,  transform: trim_string,      required: false }
+
+  unit:
+    mappings:
+      - { source_field: UnitId,             target_field: unit_id,        transform: crosswalk_lookup,            required: true, crosswalk: unit_crosswalk }
+      - { source_field: PropertyId,         target_field: property_id,    transform: crosswalk_lookup,            required: true, crosswalk: property_master_crosswalk }
+      - { source_field: Bedrooms,           target_field: bedrooms,       transform: to_integer,                  required: true }
+      - { source_field: Bathrooms,          target_field: bathrooms,      transform: to_number,                   required: true }
+      - { source_field: SquareFeet,         target_field: nrsf,           transform: to_integer,                  required: true }
+      - { source_field: UnitStatus,         target_field: status,         transform: map_appfolio_unit_status,    required: true }
+      - { source_field: UnitTypeId,         target_field: unit_type_id,   transform: crosswalk_lookup,            required: false, crosswalk: unit_type_crosswalk }
+      - { source_field: Floor,              target_field: floor,          transform: to_integer,                  required: false }
+      - { source_field: MarketRent,         target_field: market_rent_monthly_cents, transform: dollars_to_cents, required: false }
+      - { source_field: OfflineReason,      target_field: status_reason,  transform: trim_string,                 required: false }
+      - { source_field: ExpectedReturnDate, target_field: expected_return_date, transform: to_iso_date,           required: false }
+
+  unit_type:
+    mappings:
+      - { source_field: UnitTypeId,     target_field: unit_type_id,  transform: crosswalk_lookup, required: true, crosswalk: unit_type_crosswalk }
+      - { source_field: PropertyId,     target_field: property_id,   transform: crosswalk_lookup, required: true, crosswalk: property_master_crosswalk }
+      - { source_field: FloorPlanName,  target_field: label,         transform: trim_string,      required: true }
+      - { source_field: Bedrooms,       target_field: bedrooms,      transform: to_integer,       required: true }
+      - { source_field: Bathrooms,      target_field: bathrooms,     transform: to_number,        required: true }
+      - { source_field: SquareFeet,     target_field: nrsf_typical,  transform: to_integer,       required: true }
+
+  lease:
+    mappings:
+      - { source_field: LeaseId,             target_field: lease_id,                 transform: crosswalk_lookup,         required: true, crosswalk: lease_crosswalk }
+      - { source_field: PropertyId,          target_field: property_id,              transform: crosswalk_lookup,         required: true, crosswalk: property_master_crosswalk }
+      - { source_field: UnitId,              target_field: unit_id,                  transform: crosswalk_lookup,         required: true, crosswalk: unit_crosswalk }
+      - { source_field: TenantId,            target_field: resident_account_id,      transform: crosswalk_lookup,         required: true, crosswalk: resident_account_crosswalk }
+      - { source_field: StartDate,           target_field: start_date,               transform: to_iso_date,              required: true }
+      - { source_field: EndDate,             target_field: end_date,                 transform: to_iso_date,              required: true }
+      - { source_field: MonthlyRent,         target_field: base_rent_monthly_cents,  transform: dollars_to_cents,         required: true }
+      - { source_field: Status,              target_field: status,                   transform: map_appfolio_lease_status, required: true }
+      - { source_field: LeaseRenewalStatus,  target_field: is_renewal,               transform: map_appfolio_renewal_flag, required: true }
+      - { source_field: TermMonths,          target_field: term_months,              transform: to_integer,               required: false }
+      - { source_field: ConcessionsTotal,    target_field: concessions_total_cents,  transform: dollars_to_cents,         required: false }
+      - { source_field: PriorLeaseId,        target_field: prior_lease_id,           transform: crosswalk_lookup,         required: false, crosswalk: lease_crosswalk }
+      - { source_field: TransferFromLeaseId, target_field: transfer_from_lease_id,   transform: crosswalk_lookup,         required: false, crosswalk: lease_crosswalk }
+      - { source_field: IsCorporateLease,    target_field: is_corporate,             transform: to_boolean,               required: false }
+
+  lease_event:
+    mappings:
+      - { source_field: EventId,     target_field: lease_event_id, transform: passthrough_with_namespace, required: true }
+      - { source_field: LeaseId,     target_field: lease_id,       transform: crosswalk_lookup,           required: true, crosswalk: lease_crosswalk }
+      - { source_field: EventType,   target_field: event_type,     transform: map_appfolio_event_type,    required: true }
+      - { source_field: EventDate,   target_field: event_date,     transform: to_iso_date,                required: true }
+      - { source_field: EventPayload, target_field: event_payload, transform: passthrough,                required: false }
+
+  resident_account:
+    mappings:
+      - { source_field: TenantId,       target_field: resident_account_id,      transform: crosswalk_lookup, required: true, crosswalk: resident_account_crosswalk }
+      - { source_field: TenantName,     target_field: primary_resident_name_ref, transform: pii_redact,      required: true }
+      - { source_field: CurrentBalance, target_field: ledger_balance_cents,     transform: dollars_to_cents, required: true }
+      - { source_field: Email,          target_field: email_hash,               transform: pii_hash,         required: false }
+      - { source_field: Phone,          target_field: phone_hash,               transform: pii_hash,         required: false }
+
+  charge:
+    mappings:
+      - { source_field: TenantChargeId,  target_field: charge_id,            transform: passthrough_with_namespace, required: true }
+      - { source_field: LeaseId,         target_field: lease_id,             transform: crosswalk_lookup,           required: true, crosswalk: lease_crosswalk }
+      - { source_field: TenantId,        target_field: resident_account_id,  transform: crosswalk_lookup,           required: true, crosswalk: resident_account_crosswalk }
+      - { source_field: ChargeType,      target_field: charge_type,          transform: map_appfolio_charge_type,   required: true }
+      - { source_field: ChargeDate,      target_field: charge_date,          transform: to_iso_date,                required: true }
+      - { source_field: Amount,          target_field: amount_cents,         transform: dollars_to_cents,           required: true }
+      - { source_field: Description,     target_field: notes,                transform: trim_string,                required: false }
+      - { source_field: OriginalChargeId, target_field: reversed_charge_id,  transform: passthrough_with_namespace, required: false }
+
+  payment:
+    mappings:
+      - { source_field: TenantPaymentId,    target_field: payment_id,              transform: passthrough_with_namespace, required: true }
+      - { source_field: TenantId,           target_field: resident_account_id,     transform: crosswalk_lookup,           required: true, crosswalk: resident_account_crosswalk }
+      - { source_field: PaymentDate,        target_field: payment_date,            transform: to_iso_date,                required: true }
+      - { source_field: Amount,             target_field: amount_cents,            transform: dollars_to_cents,           required: true }
+      - { source_field: TenderType,         target_field: tender_type,             transform: map_appfolio_tender_type,   required: true }
+      - { source_field: LeaseId,            target_field: lease_id,                transform: crosswalk_lookup,           required: false, crosswalk: lease_crosswalk }
+      - { source_field: AppliedToChargeIds, target_field: applied_to_charge_ids,   transform: passthrough,                required: false }
+
+  tenant_ledger:
+    mappings:
+      - { source_field: TenantId,         target_field: resident_account_id,  transform: crosswalk_lookup,              required: true, crosswalk: resident_account_crosswalk }
+      - { source_field: LeaseId,          target_field: lease_id,             transform: crosswalk_lookup,              required: true, crosswalk: lease_crosswalk }
+      - { source_field: AsOfDate,         target_field: as_of_date,           transform: to_iso_date,                   required: true }
+      - { source_field: CurrentBalance,   target_field: current_balance_cents, transform: dollars_to_cents,             required: true }
+      - { source_field: DelinquencyStage, target_field: stage,                transform: map_appfolio_delinquency_stage, required: true }
+
+  work_order:
+    mappings:
+      - { source_field: ServiceRequestId, target_field: work_order_id,   transform: passthrough_with_namespace, required: true }
+      - { source_field: PropertyId,       target_field: property_id,     transform: crosswalk_lookup,           required: true, crosswalk: property_master_crosswalk }
+      - { source_field: DateCreated,      target_field: reported_date,   transform: to_iso_date,                required: true }
+      - { source_field: Priority,         target_field: priority,        transform: map_appfolio_priority,      required: true }
+      - { source_field: WorkOrderStatus,  target_field: status,          transform: map_appfolio_wo_status,     required: true }
+      - { source_field: UnitId,           target_field: unit_id,         transform: crosswalk_lookup,           required: false, crosswalk: unit_crosswalk }
+      - { source_field: Category,         target_field: category,        transform: map_appfolio_wo_category,   required: false }
+      - { source_field: DateCompleted,    target_field: completed_date,  transform: to_iso_date,                required: false }
+      - { source_field: AssignedVendorId, target_field: vendor_id,       transform: crosswalk_lookup,           required: false, crosswalk: vendor_master_crosswalk }
+
+  lead:
+    mappings:
+      - { source_field: GuestCardId,    target_field: lead_id,         transform: passthrough_with_namespace, required: true }
+      - { source_field: PropertyId,     target_field: property_id,     transform: crosswalk_lookup,           required: true, crosswalk: property_master_crosswalk }
+      - { source_field: SourceChannel,  target_field: source_channel,  transform: trim_string,                required: true }
+      - { source_field: InquiryDate,    target_field: inquiry_date,    transform: to_iso_date,                required: true }
+      - { source_field: PipelineStage,  target_field: pipeline_stage,  transform: map_appfolio_funnel_stage,  required: true }
+      - { source_field: PreferredBedrooms, target_field: bedrooms_desired, transform: to_integer,             required: false }
+      - { source_field: MoveInTarget,   target_field: move_in_target,  transform: to_iso_date,                required: false }
+
+  tour:
+    mappings:
+      - { source_field: ShowingId,          target_field: tour_id,         transform: passthrough_with_namespace, required: true }
+      - { source_field: GuestCardId,        target_field: lead_id,         transform: passthrough_with_namespace, required: true }
+      - { source_field: ScheduledDateTime,  target_field: scheduled_date,  transform: to_iso_date,                required: true }
+      - { source_field: TourType,           target_field: tour_type,       transform: map_appfolio_tour_type,     required: true }
+      - { source_field: ConductedDateTime,  target_field: conducted_date,  transform: to_iso_date,                required: false }
+      - { source_field: Outcome,            target_field: outcome,         transform: map_appfolio_tour_outcome,  required: false }
+
+  application:
+    mappings:
+      - { source_field: ApplicationId,     target_field: application_id,    transform: passthrough_with_namespace, required: true }
+      - { source_field: GuestCardId,       target_field: lead_id,           transform: passthrough_with_namespace, required: true }
+      - { source_field: AppliedDate,       target_field: applied_date,      transform: to_iso_date,                required: true }
+      - { source_field: ApplicationStatus, target_field: approval_status,   transform: map_appfolio_app_status,    required: true }
+      - { source_field: PreferredUnitId,   target_field: unit_id_preferred, transform: crosswalk_lookup,           required: false, crosswalk: unit_crosswalk }
+
+  vendor:
+    mappings:
+      - { source_field: VendorId,             target_field: vendor_id,             transform: crosswalk_lookup,    required: true, crosswalk: vendor_master_crosswalk }
+      - { source_field: VendorName,           target_field: vendor_name,           transform: trim_string,         required: true }
+      - { source_field: Services,             target_field: services,              transform: passthrough,         required: false }
+      - { source_field: InsuranceExpiryDate,  target_field: insurance_expiry_date, transform: to_iso_date,         required: false }
+      - { source_field: W9OnFile,             target_field: w9_on_file,            transform: to_boolean,          required: false }
+      - { source_field: PreferredFlag,        target_field: preferred_flag,        transform: to_boolean,          required: false }

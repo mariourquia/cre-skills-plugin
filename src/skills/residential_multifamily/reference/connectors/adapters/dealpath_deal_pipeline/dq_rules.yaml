@@ -1,0 +1,96 @@
+# Dealpath-specific data quality rules.
+# Severity: blocker | warning | info.
+# Tolerance bands cite reference/normalized/schemas/reconciliation_tolerance_band.yaml; no hardcoded values.
+
+rules:
+
+  - rule_id: dp_freshness_deals
+    dimension: freshness
+    severity: blocker
+    description: Dealpath deal feed must land within expected_latency_minutes per source_registry.
+    expected: max(deal.extracted_at) >= now - source_registry.expected_latency_minutes
+    remediation: trigger runbooks/dealpath_common_issues.md::stale_feed
+
+  - rule_id: dp_completeness_required_fields
+    dimension: completeness
+    severity: blocker
+    description: Every deal record must carry deal_id, asset_id, deal_type, pipeline_stage, market.
+    expected: no nulls in required fields
+    remediation: route to master_data/unresolved_exceptions_queue.md
+
+  - rule_id: dp_completeness_ic_record
+    dimension: completeness
+    severity: blocker
+    description: Deals at stage ic_approved must have an ic_decision_date.
+    expected: stage = ic_approved IMPLIES ic_decision_date is not null
+    remediation: notify investments_lead
+
+  - rule_id: dp_conformance_stage_enum
+    dimension: conformance
+    severity: blocker
+    description: pipeline_stage must map to a canonical stage via map_dealpath_stage.
+    expected: stage IN canonical_stage_enum
+    remediation: extend map_dealpath_stage or escalate
+
+  - rule_id: dp_conformance_deal_type_enum
+    dimension: conformance
+    severity: blocker
+    description: deal_type must map to {acquisition, development, refi, recap, other}.
+    expected: deal_type IN canonical_deal_type_enum
+    remediation: extend map_dealpath_deal_type
+
+  - rule_id: dp_uniqueness_deal_id
+    dimension: uniqueness
+    severity: blocker
+    description: deal_id unique across active records.
+    expected: count(distinct deal_id) = count(deal_id) where status != deleted
+    remediation: dedupe via crosswalk
+
+  - rule_id: dp_referential_asset_present
+    dimension: consistency
+    severity: blocker
+    description: Every deal references a valid asset_id (dealpath asset master).
+    expected: deal.asset_id IN asset.id
+    remediation: investigate orphan deal
+
+  - rule_id: dp_handoff_lag
+    dimension: consistency
+    severity: warning
+    description: Closed deal lacking downstream property setup beyond handoff_lag_threshold_days flagged.
+    expected: closed_deal_lag_days <= handoff_lag_threshold_days (cite reconciliation_tolerance_band.yaml)
+    remediation: runbooks/dealpath_common_issues.md::closed_deal_no_setup
+
+  - rule_id: dp_handoff_dev_lag
+    dimension: consistency
+    severity: warning
+    description: IC-approved development deal lacking Procore project beyond dev_handoff_lag_threshold_days flagged.
+    expected: dev_handoff_lag_days <= dev_handoff_lag_threshold_days (cite reconciliation_tolerance_band.yaml)
+    remediation: runbooks/dealpath_common_issues.md::dev_handoff
+
+  - rule_id: dp_duplicate_asset_in_market
+    dimension: consistency
+    severity: warning
+    description: Duplicate asset name within the same market flagged for fuzzy match review.
+    expected: no duplicate (asset_name, market) pairs without manual_override
+    remediation: master_data/unresolved_exceptions_queue.md
+
+  - rule_id: dp_legacy_sparse_field
+    dimension: completeness
+    severity: info
+    description: Legacy deal records may carry sparse fields; tag confidence accordingly.
+    expected: legacy_deal IMPLIES confidence reduced to medium
+    remediation: annotate output with confidence flag
+
+  - rule_id: dp_renamed_after_approval
+    dimension: consistency
+    severity: warning
+    description: Deal renamed after ic_approved triggers change tracking.
+    expected: ic_approved deal name change logged to source_record_audit
+    remediation: audit_trail.md
+
+  - rule_id: dp_one_deal_multiple_projects
+    dimension: consistency
+    severity: warning
+    description: One Dealpath deal spawning multiple downstream projects/properties requires manual mapping.
+    expected: deal:property mapping is 1:1 unless manual_override = true
+    remediation: master_data/unresolved_exceptions_queue.md

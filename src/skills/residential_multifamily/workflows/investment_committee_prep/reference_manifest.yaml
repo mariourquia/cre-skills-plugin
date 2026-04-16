@@ -1,0 +1,63 @@
+pack_slug: investment_committee_prep
+reads:
+  - path: reference/connectors/adapters/dealpath_deal_pipeline/normalized_contract.yaml
+    category: other
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    notes: primary deal pipeline contract; Dealpath-authoritative pre-close
+  - path: reference/connectors/adapters/dealpath_deal_pipeline/dq_rules.yaml
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    notes: blocking dq rules evaluated before any IC-approved roll-up (dp_completeness_ic_record, dp_conformance_stage_enum, dp_freshness_deals)
+  - path: reference/connectors/deal_pipeline/schema.yaml
+    category: other
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    notes: canonical deal_pipeline schema; includes investment_committee_review and deal_milestone entities
+  - path: reference/connectors/master_data/asset_crosswalk.yaml
+    category: other
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    notes: resolves Dealpath asset_id to canonical asset_id
+  - path: reference/connectors/master_data/market_crosswalk.yaml
+    category: other
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    notes: resolves free-text market labels to canonical market
+  - path: reference/derived/role_kpi_targets.csv
+    category: occupancy_benchmark
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    notes: IC docket capacity bands and related targets
+  - path: reference/normalized/approval_threshold_defaults.csv
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    notes: condition-extension and waiver thresholds; LP-capital-coverage threshold
+  - path: reference/normalized/market_rents__{market}_mf.csv
+    category: market_rent_benchmark
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: use_prior_period
+    notes: market rent benchmark for comp context
+  - path: reference/normalized/rent_comp_evidence__{market}_mf.csv
+    category: market_rent_benchmark
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: use_prior_period
+    notes: rent comp evidence set; freshness checked against overlay policy
+  - path: reference/normalized/sale_comp_evidence__{market}_mf.csv
+    category: market_rent_benchmark
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: use_prior_period
+    notes: sale comp evidence set for acquisitions/recaps; freshness flagged
+writes: []

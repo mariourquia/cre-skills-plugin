@@ -1,0 +1,224 @@
+# Unit Crosswalk (starter set).
+# Conforms to crosswalk.schema.yaml.
+# Illustrates unit renumbering after renovation, unit split / merge, and a
+# unit taken offline and returned. See identity_resolution_framework.md
+# section 7.3 and 7.4.
+
+status_tag: sample
+
+rows:
+
+  # -----------------------------------------------------------------------
+  # Renumber case. Prior unit 301 at prop_cta_001 was relabeled 3A during
+  # the 2024 renovation. Canonical id did not change; prior row is closed.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: unit_cta_001_3101
+    source_system: east_region_pms
+    source_id: "301"
+    match_confidence: high
+    match_method: composite
+    effective_start: "2021-06-15"
+    effective_end: "2024-09-15"
+    survivorship_rule: unit_default
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2024-09-15"
+    notes: |
+      Historical row. Unit was labeled 301 prior to 2024 full-floor
+      renovation. Composite match uses property_canonical_id + unit_label
+      + bedroom_count.
+
+  - canonical_id: unit_cta_001_3101
+    source_system: east_region_pms
+    source_id: "3A"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2024-09-16"
+    survivorship_rule: unit_default
+    manual_override: true
+    override_reason: |
+      Post-renovation relabel carried out manually because the PMS did not
+      automatically emit a mapping row on renumber.
+    reviewer: regional_ops_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      Current row. Same canonical id as prior row. Historical lease and
+      work order records remain tied to the prior source_id.
+
+  # -----------------------------------------------------------------------
+  # Split case. Prior combined unit 204 at prop_rdu_004 was split into two
+  # units (204A, 204B) during the 2023 value-add. The prior canonical id
+  # is retired; two new canonical ids are opened.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: unit_rdu_004_2204_legacy
+    source_system: east_region_pms
+    source_id: "204"
+    match_confidence: high
+    match_method: composite
+    effective_start: "2023-02-01"
+    effective_end: "2023-08-14"
+    survivorship_rule: unit_default
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2023-08-14"
+    notes: |
+      Retired on split date. Historical lease 2023-02-01 to 2023-06-30
+      remains tied to this canonical id.
+
+  - canonical_id: unit_rdu_004_2204a
+    source_system: east_region_pms
+    source_id: "204A"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2023-08-15"
+    survivorship_rule: unit_default
+    manual_override: true
+    override_reason: |
+      Split created two physical units from one. Canonical id assignment
+      is irreversible; retroactive history is not reassigned.
+    reviewer: regional_ops_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      New unit post-split. prior_canonical_id references the legacy unit.
+    prior_canonical_id: unit_rdu_004_2204_legacy
+
+  - canonical_id: unit_rdu_004_2204b
+    source_system: east_region_pms
+    source_id: "204B"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2023-08-15"
+    survivorship_rule: unit_default
+    manual_override: true
+    override_reason: |
+      Split created two physical units from one.
+    reviewer: regional_ops_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      New unit post-split.
+    prior_canonical_id: unit_rdu_004_2204_legacy
+
+  # -----------------------------------------------------------------------
+  # Offline-and-returned case. Unit 111 at prop_cta_001 was marked "down"
+  # for extended structural repair. The canonical id is preserved; the
+  # crosswalk row is NOT closed on offline status; status is a property of
+  # the normalized unit record, not of the crosswalk. The row remains
+  # current and active throughout.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: unit_cta_001_1111
+    source_system: east_region_pms
+    source_id: "111"
+    match_confidence: high
+    match_method: composite
+    effective_start: "2021-06-15"
+    survivorship_rule: unit_default
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2026-03-31"
+    notes: |
+      Unit was on status=down from 2025-01-01 to 2025-06-30 for structural
+      repair. The crosswalk row is unchanged; status is tracked on the
+      normalized unit record, not the crosswalk row. Downstream occupancy
+      rollups exclude status=down per the canonical ontology.
+
+  # -----------------------------------------------------------------------
+  # Wave 5 — Yardi multi-role adapter integration. Voyager hunit values
+  # resolve via composite match against unit_code + propid; canonical ids
+  # are Yardi-scoped until classification_worksheet.md closes.
+  # Historical unit (YU_70201) carries effective_end tied to post-
+  # renovation retirement.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: unit_yd_70001
+    source_system: yardi_voyager_pms_stub
+    source_id: YU_70001
+    match_confidence: high
+    match_method: composite
+    effective_start: "2026-04-15"
+    survivorship_rule: unit_default
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration; yardi_primary_pms posture. Unit
+      resolved via composite match on property_canonical_id + unit_code +
+      bedroom_count. Provisional until classification closes.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager hunit YU_70001 at
+      YP_50001 (Maple Vista, unit 101). All unit attributes survive from
+      yardi_voyager_pms_stub per yardi_primary_pms posture.
+
+  - canonical_id: unit_yd_70002
+    source_system: yardi_voyager_pms_stub
+    source_id: YU_70002
+    match_confidence: high
+    match_method: composite
+    effective_start: "2026-04-15"
+    survivorship_rule: unit_default
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Notice unit at YP_50001.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager hunit YU_70002 at
+      YP_50001 (Maple Vista, unit 102).
+
+  - canonical_id: unit_yd_70003
+    source_system: yardi_voyager_pms_stub
+    source_id: YU_70003
+    match_confidence: high
+    match_method: composite
+    effective_start: "2026-04-15"
+    survivorship_rule: unit_default
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Vacant / make-ready unit at
+      YP_50001.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager hunit YU_70003 at
+      YP_50001 (Maple Vista, unit 205, 2BR).
+
+  - canonical_id: unit_yd_70101
+    source_system: yardi_voyager_pms_stub
+    source_id: YU_70101
+    match_confidence: high
+    match_method: composite
+    effective_start: "2026-04-15"
+    survivorship_rule: unit_default
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Offline unit (water damage) at
+      YP_50002.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager hunit YU_70101 at
+      YP_50002 (Harbor Crest, unit A-104). Offline status tracked on
+      normalized unit record, not crosswalk.
+
+  - canonical_id: unit_yd_70201_hist
+    source_system: yardi_legacy_export_stub
+    source_id: YU_70201
+    match_confidence: medium
+    match_method: manual
+    effective_start: "2026-04-15"
+    effective_end: "2024-07-01"
+    survivorship_rule: unit_default
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Historical-only unit retired
+      post-renovation (YP_50004 / Briarfield). Not joined to current
+      unit structure per
+      bounded_assumptions.yaml::historical_lease_unit_structure_drift.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager legacy hunit YU_70201
+      (unit LEGACY-305 pre-renovation). Preserved for historical lease
+      joins; excluded from current-period occupancy rollups.

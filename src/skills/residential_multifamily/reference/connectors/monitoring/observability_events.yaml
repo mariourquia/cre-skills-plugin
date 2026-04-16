@@ -1,0 +1,267 @@
+# Observability Events, Residential Multifamily Integration Layer
+#
+# The catalog of events emitted by the integration layer. Every event carries:
+#   event_id        : stable snake_case slug
+#   description     : one-sentence purpose
+#   standard_fields : minimum required fields on every emission
+#
+# Events feed alert policies (alert_policies.yaml) and downstream observability
+# (metrics and dashboards). No dollar or percent figures in prose.
+# Vendor-neutral; operators map event emission to their log, metric, or trace
+# surface of choice.
+
+status_tag: reference
+observability_events_version: "0.1.0"
+
+standard_fields_core:
+  - timestamp            # ISO-8601 UTC
+  - event_id             # matches an entry in this file
+  - source_id            # from source_registry/source_registry.yaml
+  - source_domain        # pms | gl | crm | ap | market_data | construction | hr_payroll | manual_uploads
+  - environment          # dev | stage | prod
+  - subsystem_version    # semver of the residential_multifamily subsystem release
+  - emitted_by           # role or system component id
+
+events:
+
+  - event_id: raw_file_landed
+    description: |
+      A raw file landed under reference/raw/<domain>/<YYYY>/<MM>/ and passed
+      (or failed) the landing guard.
+    standard_fields:
+      - as_of_date
+      - source_file_path
+      - record_count
+      - landing_status          # accepted | rejected
+      - rejection_reason        # required if status=rejected
+      - provenance_complete     # boolean
+
+  - event_id: normalization_started
+    description: |
+      A normalization job began for a landed file.
+    standard_fields:
+      - landing_ref
+      - entity_targets          # list of entity slugs
+
+  - event_id: normalization_succeeded
+    description: |
+      A normalization job completed and produced normalized records.
+    standard_fields:
+      - landing_ref
+      - entity_targets
+      - records_input
+      - records_output
+      - records_rejected
+      - normalization_version
+
+  - event_id: normalization_failed
+    description: |
+      A normalization job exited without promoting to normalized.
+    standard_fields:
+      - landing_ref
+      - entity_targets
+      - failure_step            # landing_guard | provenance | contract | mapping | identity | dedup | reconciliation
+      - failure_reason
+      - runbook_ref             # ../runbooks/failed_normalization_triage.md
+
+  - event_id: reconciliation_started
+    description: |
+      A reconciliation run began against a normalized artifact.
+    standard_fields:
+      - artifact_ref
+      - check_ids               # list of check_ids from ../qa/ and connector reconciliation_checks.yaml
+
+  - event_id: reconciliation_succeeded
+    description: |
+      A reconciliation run completed without a blocker failure. Warnings
+      may still be present.
+    standard_fields:
+      - artifact_ref
+      - pass_count
+      - warning_count
+      - blocker_count
+      - report_ref              # reconciliation_report.json path
+
+  - event_id: reconciliation_failed
+    description: |
+      A reconciliation run produced at least one blocker failure.
+    standard_fields:
+      - artifact_ref
+      - blocker_check_ids
+      - remediation_refs        # list of ../qa/<check>.yaml
+      - runbook_ref             # typically ../runbooks/failed_normalization_triage.md
+
+  - event_id: workflow_activated
+    description: |
+      A canonical workflow activated with the required inputs available.
+    standard_fields:
+      - workflow_slug           # from ../../workflows/
+      - scope                   # property | portfolio | market | portfolio_and_market
+      - primary_audience        # from tailoring/AUDIENCE_MAP.md
+      - inputs_freshness_band   # fresh | acceptable | stale
+      - confidence_band         # high | medium | low
+      - degraded_mode           # boolean
+
+  - event_id: workflow_blocked
+    description: |
+      A canonical workflow could not activate because required inputs are
+      missing or failing.
+    standard_fields:
+      - workflow_slug
+      - scope
+      - primary_audience
+      - blocking_exceptions     # list of exception category slugs
+      - minimum_viable_data_ref # ../rollout/minimum_viable_data.md
+
+  - event_id: approval_request_opened
+    description: |
+      An ApprovalRequest was opened for a gated action.
+    standard_fields:
+      - approval_request_id
+      - gate_category           # row number from _core/approval_matrix.md
+      - action_summary          # what the action will do (no dollar figures)
+      - target_object_type
+      - target_object_id
+      - approvers               # named roles, not people
+
+  - event_id: approval_request_resolved
+    description: |
+      An ApprovalRequest reached a terminal status.
+    standard_fields:
+      - approval_request_id
+      - outcome                 # approved | denied | cancelled | expired
+      - resolver_role
+      - notes
+
+  - event_id: manual_override_applied
+    description: |
+      A human override of an auto-resolution was applied after approval.
+    standard_fields:
+      - override_type           # property_mapping | vendor_dedup | account_mapping | enum_mapping | approval_override
+      - target_object_type
+      - target_object_id
+      - approval_request_id
+      - effective_start
+      - effective_end
+      - justification
+
+  - event_id: benchmark_refresh_started
+    description: |
+      A benchmark refresh cycle has begun.
+    standard_fields:
+      - benchmark_slug
+      - scope
+      - refresh_cycle
+
+  - event_id: benchmark_refresh_published
+    description: |
+      A refreshed benchmark was published to reference/derived/.
+    standard_fields:
+      - benchmark_slug
+      - scope
+      - prior_version
+      - new_version
+      - confidence_band
+      - drift_summary           # qualitative: within | out_of_tolerance
+
+  - event_id: benchmark_refresh_rolled_back
+    description: |
+      A published benchmark was rolled back to a prior snapshot.
+    standard_fields:
+      - benchmark_slug
+      - scope
+      - bad_version
+      - restored_version
+      - approval_request_id
+      - root_cause_tag
+
+  - event_id: confidence_downgrade
+    description: |
+      A normalized artifact or benchmark was marked with a lower confidence
+      band than its prior state.
+    standard_fields:
+      - target_slug
+      - scope
+      - prior_band
+      - new_band
+      - reason_tag
+
+  - event_id: exception_opened
+    description: |
+      An exception entered the queue.
+    standard_fields:
+      - exception_id
+      - category                # from _core/exception_taxonomy.md (planned)
+      - severity
+      - routing_audience
+      - runbook_ref
+
+  - event_id: exception_closed
+    description: |
+      An exception was closed with documented remediation.
+    standard_fields:
+      - exception_id
+      - closeout_reason
+      - remediation_summary
+      - root_cause_tag
+
+  - event_id: alert_muted
+    description: |
+      An alert was suppressed per a declared mute policy.
+    standard_fields:
+      - alert_id
+      - mute_policy_reason
+      - window_start
+      - window_end
+
+  - event_id: registry_status_transition
+    description: |
+      A source in source_registry.yaml transitioned between
+      planned, stubbed, active, degraded, deprecated.
+    standard_fields:
+      - from_status
+      - to_status
+      - reason
+      - approval_request_id     # for active -> deprecated and deprecated -> removed
+
+  - event_id: cutover_parallel_run_step
+    description: |
+      A parallel-run reconciliation step has executed during manual-to-system
+      cutover.
+    standard_fields:
+      - manual_source_id
+      - system_source_id
+      - window_start
+      - window_end
+      - comparison_summary      # tie | system_better | manual_better | divergent
+
+  - event_id: deprecation_dual_run_step
+    description: |
+      A dual-run reconciliation step has executed during connector deprecation.
+    standard_fields:
+      - deprecating_source_id
+      - replacement_source_id
+      - window_start
+      - window_end
+      - comparison_summary
+
+  - event_id: fair_housing_containment_triggered
+    description: |
+      A fair-housing-sensitive incident entered containment. This event is
+      emitted to restricted observability destinations only.
+    standard_fields:
+      - affected_entity_types
+      - affected_source_ids
+      - containment_actions     # halt_workflow | quarantine_records | legal_review_opened
+      - runbook_ref             # ../runbooks/fair_housing_sensitive_flag.md
+
+  - event_id: slo_breach
+    description: |
+      An SLO breached its qualitative band per slo_definitions.md and the
+      overlay's configured thresholds.
+    standard_fields:
+      - slo_id
+      - prior_band
+      - new_band
+      - window
+      - driver_tag              # optional root-cause tag

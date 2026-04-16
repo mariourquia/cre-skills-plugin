@@ -1,0 +1,298 @@
+entities:
+  lead_interaction:
+    entity_name: lead_interaction
+    grain: one row per prospect interaction touch
+    time_basis: event
+    primary_key:
+    - interaction_id
+    required_fields:
+    - name: interaction_id
+      type: string
+      description: Stable interaction id
+      is_key: true
+    - name: lead_id
+      type: string
+      description: FK to pms.lead
+      is_key: false
+    - name: interaction_date
+      type: datetime
+      description: Interaction timestamp
+      is_key: false
+    - name: channel
+      type: enum
+      description: Channel used
+      is_key: false
+      enum_values:
+      - email
+      - phone
+      - text
+      - portal_msg
+      - walk_in
+      - virtual_tour
+      - in_person_tour
+      - chat
+      - other
+    - name: direction
+      type: enum
+      description: Inbound vs outbound
+      is_key: false
+      enum_values:
+      - inbound
+      - outbound
+    optional_fields:
+    - name: agent_id
+      type: string
+      description: Agent who handled interaction
+    - name: outcome
+      type: enum
+      description: Outcome
+      enum_values:
+      - reply_received
+      - no_response
+      - tour_scheduled
+      - applied
+      - lost
+    - name: notes
+      type: string
+      description: Sanitized free text; never protected class
+    foreign_keys:
+    - field: lead_id
+      references: pms.lead.lead_id
+      on_missing: warn
+    null_handling:
+    - field: notes
+      behavior: default_to_null
+      notes: protected-class scan runs before landing
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - lead-source ROI; leasing funnel SLA
+  campaign_source:
+    entity_name: campaign_source
+    grain: one row per campaign or attribution source
+    time_basis: state
+    primary_key:
+    - campaign_id
+    required_fields:
+    - name: campaign_id
+      type: string
+      description: Campaign id
+      is_key: true
+    - name: campaign_label
+      type: string
+      description: Operator-facing label
+      is_key: false
+    - name: medium
+      type: enum
+      description: Media channel
+      is_key: false
+      enum_values:
+      - ils
+      - paid_search
+      - paid_social
+      - organic_search
+      - direct
+      - referral
+      - broker
+      - resident_referral
+      - outdoor
+      - email
+      - other
+    optional_fields:
+    - name: start_date
+      type: date
+      description: Campaign start
+    - name: end_date
+      type: date
+      description: Campaign end (null = ongoing)
+    - name: spend_cents
+      type: money_cents
+      description: Campaign spend in cents
+      unit: cents_usd
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - cost-per-lead; cost-per-lease; leasing-strategy-marketing-planner
+  resident_communication:
+    entity_name: resident_communication
+    grain: one row per communication sent to a resident
+    time_basis: event
+    primary_key:
+    - communication_id
+    required_fields:
+    - name: communication_id
+      type: string
+      description: Stable id
+      is_key: true
+    - name: resident_account_id
+      type: string
+      description: FK to resident account
+      is_key: false
+    - name: communication_date
+      type: datetime
+      description: Timestamp
+      is_key: false
+    - name: channel
+      type: enum
+      description: Channel
+      is_key: false
+      enum_values:
+      - email
+      - text
+      - portal_msg
+      - door_hang
+      - certified_mail
+      - phone
+      - other
+    - name: purpose
+      type: enum
+      description: Purpose code
+      is_key: false
+      enum_values:
+      - renewal
+      - rent_reminder
+      - delinquency
+      - maintenance_update
+      - community_event
+      - policy_update
+      - satisfaction_survey
+      - other
+    optional_fields:
+    - name: template_ref
+      type: string
+      description: Pointer to template used
+    - name: response_received
+      type: boolean
+      description: True if resident replied
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - tenant-retention-engine; resident satisfaction metrics
+  service_request:
+    entity_name: service_request
+    grain: one row per non-maintenance service request
+    time_basis: state
+    primary_key:
+    - service_request_id
+    required_fields:
+    - name: service_request_id
+      type: string
+      description: Stable id
+      is_key: true
+    - name: resident_account_id
+      type: string
+      description: FK to resident account
+      is_key: false
+    - name: request_type
+      type: enum
+      description: Request type
+      is_key: false
+      enum_values:
+      - amenity_booking
+      - concierge
+      - package
+      - parking
+      - access
+      - noise_complaint
+      - other
+    - name: created_date
+      type: datetime
+      description: Creation timestamp
+      is_key: false
+    - name: status
+      type: enum
+      description: Status
+      is_key: false
+      enum_values:
+      - open
+      - in_progress
+      - resolved
+      - closed
+      - cancelled
+    optional_fields:
+    - name: resolved_date
+      type: datetime
+      description: Resolution timestamp
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - property-operations-admin; tenant-event-planner
+  follow_up_task:
+    entity_name: follow_up_task
+    grain: one row per agent-queued follow-up task
+    time_basis: state
+    primary_key:
+    - task_id
+    required_fields:
+    - name: task_id
+      type: string
+      description: Stable id
+      is_key: true
+    - name: related_lead_id
+      type: string
+      description: FK to lead
+      is_key: false
+    - name: due_date
+      type: date
+      description: SLA deadline
+      is_key: false
+    - name: task_type
+      type: enum
+      description: Task type
+      is_key: false
+      enum_values:
+      - call_back
+      - email
+      - tour_confirm
+      - application_follow_up
+      - renewal_outreach
+      - other
+    - name: status
+      type: enum
+      description: Status
+      is_key: false
+      enum_values:
+      - open
+      - snoozed
+      - completed
+      - cancelled
+    optional_fields:
+    - name: assigned_to
+      type: string
+      description: Assigned agent id
+    foreign_keys:
+    - field: related_lead_id
+      references: pms.lead.lead_id
+      on_missing: warn
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - extracted_at
+    - extractor_version
+    - source_row_id
+    dependents:
+    - leasing funnel SLA dashboards

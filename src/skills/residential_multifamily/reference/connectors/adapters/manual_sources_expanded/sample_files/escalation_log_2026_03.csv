@@ -1,0 +1,7 @@
+event_id,source_pack,kind,severity,opened_at,routed_to,status
+esc_2026_0034,monthly_property_operating_review_pin_nas_007,financial_threshold,high,2026-03-11T14:22:00Z,asset_mgmt_director,resolved
+esc_2026_0035,third_party_manager_scorecard_review_wat_rdu_004,reporting_gap,medium,2026-03-18T09:10:00Z,asset_mgmt_director,open
+esc_2026_0036,capital_project_intake_ash_roof,financial_threshold,high,2026-03-22T16:45:00Z,cfo_finance_leader,open
+esc_2026_0037,delinquency_playbook_oak_atl_011,legal,medium,2026-03-25T11:30:00Z,general_counsel,under_review
+esc_2026_0038,preventive_maintenance_wat_rdu_004,safety,critical,2026-03-27T07:55:00Z,regional_ops_director,resolved
+esc_2026_0039,variance_narrative_pin_nas_007,policy_exception,low,2026-03-29T17:05:00Z,regional_portfolio_lead,resolved

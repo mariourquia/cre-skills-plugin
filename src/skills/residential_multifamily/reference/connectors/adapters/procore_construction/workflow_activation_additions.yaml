@@ -1,0 +1,192 @@
+# Procore adapter — workflow activation fragment.
+# Merged into _core/workflow_activation_map.yaml. Documents Procore's role
+# (primary, contributing, audit) per workflow, the canonical objects Procore
+# supplies, which DQ/recon checks block the workflow, and the expected
+# partial-mode behavior when Procore is unavailable.
+
+procore_role: primary_for_construction_domain
+
+activates_existing_workflows:
+
+  - workflow: bid_leveling_procurement_review
+    role: primary
+    objects_supplied:
+      - capex_project
+      - estimate_line_item
+      - bid_package
+      - commitment
+    blocking_issues:
+      - pc_freshness_commitments
+      - pc_completeness_commitment_required
+      - pc_uniqueness_commitment_id
+    partial_mode_behavior: |
+      Feed not current — surface leveled-bid output with a staleness banner
+      and last-known commitment set; do not recommend award.
+    human_approvals_required:
+      - approval: bid_award
+        authority: construction_lead + owner_rep
+        subject: recommended_award_vendor
+        matrix_ref: _core/approval_matrix.md
+
+  - workflow: change_order_review
+    role: primary
+    objects_supplied:
+      - change_order
+      - commitment
+      - schedule_milestone
+    blocking_issues:
+      - pc_freshness_change_orders
+      - pc_completeness_change_order_required
+      - pc_consistency_co_sum_vs_revised
+      - pc_recon_co_approved_vs_invoice_posted
+    partial_mode_behavior: |
+      If change_order feed is stale but commitment feed current, show
+      commitment state only; mark CO section as not-current. If CO vs
+      invoice recon fails, block approvals outside policy override.
+    human_approvals_required:
+      - approval: change_order_approved
+        authority: owner_rep + construction_lead
+        subject: cost_delta_threshold_exceeded
+        matrix_ref: _core/approval_matrix.md
+
+  - workflow: construction_meeting_prep_and_action_tracking
+    role: primary
+    objects_supplied:
+      - capex_project
+      - schedule_milestone
+      - change_order
+      - draw_request
+      - punch_item
+    blocking_issues:
+      - pc_freshness_projects
+      - pc_consistency_schedule_baseline_preserved
+    partial_mode_behavior: |
+      Run on last-known snapshot; mark meeting pack as stale; require
+      operator confirmation before issuing action items.
+    human_approvals_required: []
+
+  - workflow: cost_to_complete_review
+    role: primary
+    objects_supplied:
+      - commitment
+      - change_order
+      - draw_request
+      - estimate_line_item
+    blocking_issues:
+      - pc_consistency_commitment_overdrawn
+      - pc_consistency_co_sum_vs_revised
+      - pc_consistency_draw_cost_vs_total
+      - pc_recon_commitment_vs_posted_spend
+    partial_mode_behavior: |
+      If Intacct capex_actual feed stale, use Procore-side paid_to_date as
+      proxy and mark actuals as last-known-Procore; cost-to-complete
+      computation continues with a low-confidence flag.
+    human_approvals_required: []
+
+  - workflow: draw_package_review
+    role: primary
+    objects_supplied:
+      - draw_request
+      - commitment
+      - change_order
+      - schedule_milestone
+    blocking_issues:
+      - pc_freshness_draws
+      - pc_completeness_draw_required
+      - pc_consistency_draw_cost_vs_total
+      - pc_recon_draw_approved_vs_cash_funded
+    partial_mode_behavior: |
+      Draw feed stale — show last-known draw with operator note; require
+      manual confirmation of current-period amount before submission.
+    human_approvals_required:
+      - approval: draw_approved
+        authority: owner_rep + lender_rep
+        subject: draw_amount
+        matrix_ref: _core/approval_matrix.md
+
+  - workflow: schedule_risk_review
+    role: primary
+    objects_supplied:
+      - schedule_milestone
+      - change_order
+    blocking_issues:
+      - pc_consistency_schedule_baseline_preserved
+      - pc_recon_schedule_baseline_preserved
+    partial_mode_behavior: |
+      Schedule feed stale — render prior snapshot with staleness banner;
+      slippage flag computed against prior forecast only.
+    human_approvals_required: []
+
+  - workflow: capex_estimate_generation
+    role: contributing
+    objects_supplied:
+      - estimate_line_item
+      - commitment
+    blocking_issues:
+      - pc_recon_estimate_vs_material_reference
+    partial_mode_behavior: |
+      Use Excel material_cost_reference as primary when Procore feed is
+      stale; estimate output flagged as benchmark-only.
+    human_approvals_required: []
+
+  - workflow: capital_project_intake_and_prioritization
+    role: contributing
+    objects_supplied:
+      - capex_project
+      - estimate_line_item
+    blocking_issues:
+      - pc_recon_dealpath_dev_handoff_to_procore
+    partial_mode_behavior: |
+      Projects not yet opened in Procore listed as pending intake; do not
+      include in prioritization scoring until Procore shell exists.
+    human_approvals_required: []
+
+proposes_new_workflows:
+
+  - workflow: development_pipeline_tracking
+    role: primary
+    objects_supplied:
+      - capex_project
+      - development_project
+      - schedule_milestone
+      - change_order
+      - draw_request
+      - commitment
+    cadence: weekly
+    audience:
+      - development_lead
+      - construction_lead
+      - investments_lead
+    blocking_issues:
+      - pc_recon_procore_project_has_dealpath_anchor
+      - pc_recon_dealpath_dev_handoff_to_procore
+      - pc_consistency_schedule_baseline_preserved
+    partial_mode_behavior: |
+      When Dealpath feed stale, fall back to Procore-only view; pipeline
+      report flagged for missing IC context.
+    human_approvals_required: []
+
+  - workflow: delivery_handoff
+    role: primary
+    objects_supplied:
+      - construction_project
+      - schedule_milestone
+      - punch_item
+      - commitment
+    cadence: event_driven
+    audience:
+      - construction_lead
+      - regional_ops_director
+      - asset_mgmt_director
+      - finance_systems_team
+    blocking_issues:
+      - pc_recon_project_to_property_delivery_handoff
+      - pc_consistency_schedule_baseline_preserved
+    partial_mode_behavior: |
+      Handoff event paused if delivery recon fails; asset onboarding
+      workflow waits for block resolution; no partial handoff allowed.
+    human_approvals_required:
+      - approval: delivery_handoff_accepted
+        authority: regional_ops_director + asset_mgmt_director
+        subject: property_setup_trigger
+        matrix_ref: _core/approval_matrix.md

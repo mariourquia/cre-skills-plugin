@@ -1,0 +1,130 @@
+# Source registry FRAGMENT for Excel market surveys + analyst benchmark packs.
+# One source_id per file family for traceability. Merged into source_registry.yaml.
+
+records:
+
+  - source_id: excel_rent_comp_weekly
+    source_name: Excel Weekly Rent Comp Survey
+    source_domain: market_data
+    vendor_family: excel_benchmark_family
+    ingestion_mode: shared_drive
+    environment: prod
+    cadence: weekly
+    data_owner: asset_mgmt_analyst_team
+    business_owner: asset_mgmt_director
+    technical_owner: data_platform_team
+    credential_method: shared_drive_placeholder
+    object_coverage:
+      - rent_comp
+      - market_rent_benchmark
+    expected_latency_minutes: 10080
+    known_limitations:
+      - hidden tabs may carry working data not for ingest
+      - merged cells require pre-processing
+      - analyst formulas must be value-resolved before extract
+      - missing as_of_date triggers blocker
+      - duplicate comp rows possible
+      - luxury comps may contaminate middle_market sheets
+    pii_classification: low
+    financial_sensitivity: moderate
+    legal_sensitivity: low
+    status: active
+    rollout_wave: wave_4
+    last_validated_at: "2026-04-15"
+    notes: |
+      File-based intake under adapters/excel_market_surveys/. Treated as
+      first-class production input. Analyst sign-off required. Staleness
+      window enforced via dq_rule excel_freshness.
+
+  - source_id: excel_concession_tracker_monthly
+    source_name: Excel Monthly Concession Tracker
+    source_domain: market_data
+    vendor_family: excel_benchmark_family
+    ingestion_mode: shared_drive
+    environment: prod
+    cadence: monthly
+    data_owner: asset_mgmt_analyst_team
+    business_owner: asset_mgmt_director
+    technical_owner: data_platform_team
+    credential_method: shared_drive_placeholder
+    object_coverage:
+      - concession_benchmark
+    expected_latency_minutes: 43200
+    known_limitations:
+      - submarket naming may use broker convention
+      - concessions sometimes booked as percent, sometimes as months free
+    pii_classification: low
+    financial_sensitivity: moderate
+    legal_sensitivity: low
+    status: active
+    rollout_wave: wave_4
+
+  - source_id: excel_capex_cost_library
+    source_name: Excel Quarterly Capex Cost Library
+    source_domain: market_data
+    vendor_family: excel_benchmark_family
+    ingestion_mode: shared_drive
+    environment: prod
+    cadence: quarterly
+    data_owner: construction_lead
+    business_owner: development_lead
+    technical_owner: data_platform_team
+    credential_method: shared_drive_placeholder
+    object_coverage:
+      - material_cost_reference
+      - turn_cost_reference
+    expected_latency_minutes: 129600
+    known_limitations:
+      - reviewer sign-off required (high-impact file)
+      - vendor rate cards may need separate sheet
+    pii_classification: low
+    financial_sensitivity: moderate
+    legal_sensitivity: low
+    status: active
+    rollout_wave: wave_4
+
+  - source_id: excel_staffing_benchmark_quarterly
+    source_name: Excel Quarterly Staffing Benchmark
+    source_domain: market_data
+    vendor_family: excel_benchmark_family
+    ingestion_mode: shared_drive
+    environment: prod
+    cadence: quarterly
+    data_owner: regional_ops_director
+    business_owner: vp_property_management
+    technical_owner: data_platform_team
+    credential_method: shared_drive_placeholder
+    object_coverage:
+      - staffing_position
+    expected_latency_minutes: 129600
+    known_limitations:
+      - role definitions vary across markets
+      - salary bands sometimes stored as range strings
+    pii_classification: low
+    financial_sensitivity: moderate
+    legal_sensitivity: low
+    status: active
+    rollout_wave: wave_4
+
+  - source_id: excel_labor_rate_quarterly
+    source_name: Excel Quarterly Labor Rate Sheet
+    source_domain: market_data
+    vendor_family: excel_benchmark_family
+    ingestion_mode: shared_drive
+    environment: prod
+    cadence: quarterly
+    data_owner: construction_lead
+    business_owner: development_lead
+    technical_owner: data_platform_team
+    credential_method: shared_drive_placeholder
+    object_coverage:
+      - labor_rate_reference
+    expected_latency_minutes: 129600
+    known_limitations:
+      - market-level granularity sometimes coarser than canonical
+      - trades may not align 1:1 with internal taxonomy
+    pii_classification: low
+    financial_sensitivity: moderate
+    legal_sensitivity: low
+    status: active
+    rollout_wave: wave_4

@@ -1,0 +1,205 @@
+# Manual Overrides (structured queue of human-override decisions).
+# Each entry records an override of the default survivorship or match logic
+# on a specific crosswalk row. Overrides name an approver, a reason, and an
+# expiration date. When an override expires, the default survivorship applies
+# again unless the override is renewed by a new entry here.
+#
+# Overrides do not change the crosswalk row itself; they sit alongside it and
+# the survivorship engine consults this file before applying rules. An
+# override that has been expired or retired is kept for audit; it is not
+# deleted.
+
+status_tag: sample
+
+overrides:
+
+  - override_id: ovr_prop_cta_002_pms_migration
+    crosswalk_file: property_master_crosswalk.yaml
+    canonical_id: prop_cta_002
+    source_system: east_region_pms
+    source_id: P1184
+    override_type: manual_match
+    override_reason: |
+      Property code assignment after migration was done by hand against the
+      legacy PMS extract; automated match cannot verify stability until the
+      first full reconciliation window completes.
+    approver: regional_ops_director
+    approved_at: "2025-03-01"
+    expires_at: "2026-09-01"
+    renewal_policy: |
+      Automatically expires 2026-09-01 unless a rolling reconciliation window
+      confirms identity stability. Renewals are new entries in this file.
+    notes: |
+      Pairs with the corresponding property_master_crosswalk row.
+
+  - override_id: ovr_unit_cta_001_3101_relabel
+    crosswalk_file: unit_crosswalk.yaml
+    canonical_id: unit_cta_001_3101
+    source_system: east_region_pms
+    source_id: "3A"
+    override_type: manual_match
+    override_reason: |
+      Post-renovation relabel carried out manually because the PMS did not
+      automatically emit a mapping row on renumber.
+    approver: regional_ops_director
+    approved_at: "2024-09-16"
+    expires_at: "2025-09-16"
+    renewal_policy: |
+      Expired 2025-09-16 per operator review and confirmed as stable; not
+      renewed. Override entry retained for audit only.
+    notes: |
+      Override has expired and is now inactive. The underlying crosswalk row
+      remains current because the mapping was confirmed during the review
+      window.
+
+  - override_id: ovr_vendor_v_00412_rename
+    crosswalk_file: vendor_master_crosswalk.yaml
+    canonical_id: vendor_v_00412
+    source_system: accounts_payable_primary
+    source_id: AP-ELEC-881
+    override_type: manual_match
+    override_reason: |
+      Tax id continuity across the rename confirmed by AP; manual override
+      to preserve canonical id.
+    approver: ap_manager
+    approved_at: "2025-01-01"
+    expires_at: "2027-01-01"
+    renewal_policy: |
+      Two-year expiration. The survivorship of legal name is switched from
+      "latest effective AP row" to "row with tax id continuity flag true".
+    notes: |
+      Underlies the two AP rows in vendor_master_crosswalk.yaml for the
+      rename case.
+
+  - override_id: ovr_vendor_v_00554_alias_consol
+    crosswalk_file: vendor_master_crosswalk.yaml
+    canonical_id: vendor_v_00554
+    source_system: accounts_payable_primary
+    source_id: AP-HVAC-2310
+    override_type: manual_match
+    override_reason: |
+      Alias consolidation done manually to avoid fragmented vendor spend
+      history in aging reports.
+    approver: ap_manager
+    approved_at: "2022-01-01"
+    expires_at: null
+    renewal_policy: |
+      Permanent. Review cadence is annual at the vendor_master_default
+      survivorship audit.
+    notes: |
+      Permanent override. Reviewed 2026-03-31 as part of the vendor master
+      annual audit; no changes.
+
+  - override_id: ovr_capex_rdu_004_parent_child_split
+    crosswalk_file: capex_project_crosswalk.yaml
+    canonical_id: capex_rdu_004_roof_2025
+    source_system: corporate_gl
+    source_id: "21-4501-RDU-ROOF"
+    override_type: field_survivorship
+    override_reason: |
+      GL parent code 21-4501-RDU does not split into child accounts; the
+      child classification is carried manually at the crosswalk layer for
+      downstream project-level reporting.
+    approver: corporate_controller
+    approved_at: "2025-02-01"
+    expires_at: "2027-02-01"
+    renewal_policy: |
+      Two-year expiration. Renewal contingent on whether the GL workflow
+      for capex child splits is automated before expiration.
+    notes: |
+      Applies equivalently to the other two component splits
+      (capex_rdu_004_hvac_2025, capex_rdu_004_plumb_2025); one override
+      entry per canonical id is recorded separately in this file.
+
+  - override_id: ovr_capex_rdu_004_hvac_split
+    crosswalk_file: capex_project_crosswalk.yaml
+    canonical_id: capex_rdu_004_hvac_2025
+    source_system: corporate_gl
+    source_id: "21-4501-RDU-HVAC"
+    override_type: field_survivorship
+    override_reason: |
+      Same parent-child carve-out as the roof override; same policy.
+    approver: corporate_controller
+    approved_at: "2025-02-01"
+    expires_at: "2027-02-01"
+    renewal_policy: |
+      Same as the roof override.
+    notes: |
+      Sibling record to ovr_capex_rdu_004_parent_child_split.
+
+  - override_id: ovr_draw_rdu_004_hvac_dr002_resubmit
+    crosswalk_file: draw_request_crosswalk.yaml
+    canonical_id: draw_rdu_004_hvac_2025_dr_002
+    source_system: construction_tracker_primary
+    source_id: P-CR-HVAC-001-DR-002b
+    override_type: manual_match
+    override_reason: |
+      Same economic draw resubmitted with updated supporting docs; same
+      canonical id preserved to keep commitment + CO + draw reconciliation
+      clean.
+    approver: construction_manager
+    approved_at: "2025-06-27"
+    expires_at: "2026-06-27"
+    renewal_policy: |
+      Single-year expiration. Override is retired when the resubmission
+      lifecycle is fully complete and the reconciliation check has passed
+      for three consecutive cycles.
+    notes: |
+      Pairs with the draw_request_crosswalk row.
+
+  - override_id: ovr_employee_e_00441_contractor_flag
+    crosswalk_file: employee_crosswalk.yaml
+    canonical_id: employee_e_00441
+    source_system: hr_payroll_primary
+    source_id: HRIS-C-00441
+    override_type: routing_classification
+    override_reason: |
+      Record is a 1099 contractor embedded in the HRIS export. Manual
+      flagging to ensure downstream payroll rollup routes through
+      expense_contract_labor, not expense_payroll.
+    approver: hr_director
+    approved_at: "2024-08-01"
+    expires_at: null
+    renewal_policy: |
+      Permanent while the HRIS export comingles employees and contractors.
+      Retired automatically when the HRIS adds a dedicated employment type
+      field to its export.
+    notes: |
+      Restricted PII classification applies to the underlying HRIS record.
+
+  - override_id: ovr_employee_e_00112_rehire
+    crosswalk_file: employee_crosswalk.yaml
+    canonical_id: employee_e_00112
+    source_system: hr_payroll_primary
+    source_id: HRIS-00112
+    override_type: manual_match
+    override_reason: |
+      Rehire. Same HRIS id reused by the operator's payroll system; same
+      canonical id preserved to keep historical and current payroll
+      attribution continuous. Separation gap retained in notes.
+    approver: hr_director
+    approved_at: "2025-02-03"
+    expires_at: "2027-02-03"
+    renewal_policy: |
+      Two-year expiration. Renewal not required if no second separation
+      event occurs; override is retired administratively on expiration.
+    notes: |
+      Pairs with the rehire row in employee_crosswalk.yaml.
+
+  - override_id: ovr_employee_e_00337_tracker_link
+    crosswalk_file: employee_crosswalk.yaml
+    canonical_id: employee_e_00337
+    source_system: construction_tracker_primary
+    source_id: CT-USER-00337
+    override_type: manual_match
+    override_reason: |
+      Construction tracker user id was assigned independently by the
+      tracker admin; manual match against HRIS record to link
+      superintendent activity to payroll attribution.
+    approver: construction_manager
+    approved_at: "2023-09-01"
+    expires_at: null
+    renewal_policy: |
+      Permanent while tracker admin issues user ids independent of HRIS.
+    notes: |
+      Pairs with the employee_e_00337 rows.

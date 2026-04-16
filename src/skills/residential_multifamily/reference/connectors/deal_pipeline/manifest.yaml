@@ -1,0 +1,43 @@
+# Deal-pipeline connector manifest (vendor-neutral stub).
+# Added in wave 4 to carry pre-close deal / IC / key-date tracking.
+# Canonical base (ontology, metrics, routing axes) is unchanged; this domain
+# extends the integration layer only.
+connector_id: deal_pipeline
+connector_kind: deal_pipeline
+version: 0.1.0
+status: stub
+owner: residential_multifamily_subsystem
+vendor_neutral: true
+description: |
+  Investment deal pipeline feed. Pre-close tracking for acquisition,
+  development, recapitalization, and refinance deals. Captures deal stage
+  history, investment-committee milestones, key dates (LOI, PSA, DD,
+  financing, close, delivery), deal-team assignments, high-level financial
+  placeholders (acquisition price, development budget, financing terms),
+  and handoff seed records to downstream property management, accounting,
+  and construction systems. Source of truth for pipeline state until close;
+  becomes secondary after close (AppFolio / Intacct / Procore take over).
+entities:
+  - deal
+  - deal_stage
+  - deal_milestone
+  - investment_committee_review
+  - deal_key_date
+  - deal_team_assignment
+  - deal_financing_placeholder
+  - deal_asset_placeholder
+provenance_fields_required:
+  - source_name
+  - source_type
+  - source_date
+  - extracted_at
+  - extractor_version
+  - source_row_id
+handshake:
+  auth_kind: api_key
+  access_pattern: pull_scheduled
+  notes: |
+    Stub. Placeholder for vendor-neutral adapter. No live credentials.
+    Expected cadence is daily for pre-close pipeline; on_demand after close
+    until the deal closes down in the source system.
+contact: operator_placeholder

@@ -1,0 +1,107 @@
+# Data-quality rules for the hr_payroll connector.
+# Six dimensions: freshness, completeness, conformance, consistency,
+# uniqueness, referential. Each rule has an id, kind, severity,
+# target_entity, rule, and remediation.
+
+rules:
+  - id: hr_freshness_pay_period
+    kind: freshness
+    severity: blocker
+    target_entity: payroll_line
+    rule: max(days_since(pay_period_end)) <= 14 for any normalized landing
+    remediation: |
+      Late payroll feed breaks variance narratives and payroll_per_unit
+      metrics. Either the vendor export lagged or the connector's
+      scheduled pull is stale. Re-run the pull and escalate if the
+      vendor feed itself is late.
+
+  - id: hr_freshness_staffing_plan
+    kind: freshness
+    severity: warning
+    target_entity: staffing_position
+    rule: max(days_since(source_date)) <= 30 on any staffing_position landing
+    remediation: |
+      Staffing plan more than a month stale will misstate vacancy and
+      fill-rate metrics. Operator refreshes the StaffingPlan export.
+
+  - id: hr_completeness_required_columns
+    kind: completeness
+    severity: blocker
+    target_entity: all
+    rule: |
+      all required_fields declared in schema.yaml are non-null in every
+      normalized record.
+    remediation: See qa/null_critical_field.yaml.
+
+  - id: hr_conformance_role_code
+    kind: conformance
+    severity: blocker
+    target_entity: staffing_position
+    rule: role_code in master_data/role_catalog.yaml canonical role set
+    remediation: |
+      Unknown role_code either reflects a new role (add to role_catalog
+      and re-land) or a data-entry error. Do not silently bucket.
+
+  - id: hr_conformance_enum_values
+    kind: conformance
+    severity: blocker
+    target_entity: all
+    rule: |
+      every enum field resolves to a declared enum value per the entity
+      contract in schema.yaml.
+    remediation: |
+      Unmapped enum values are rejected at landing. Operator either
+      extends the enum in schema.yaml (with subsystem-owner review) or
+      corrects the source feed.
+
+  - id: hr_consistency_employee_id_stable
+    kind: consistency
+    severity: warning
+    target_entity: employee
+    rule: |
+      employee_id must not change for the same underlying person across
+      feeds (verified via crosswalk). Rehire-with-new-id is tracked
+      separately and requires operator-confirmed crosswalk update.
+    remediation: |
+      employee_id instability inflates new-hire counts and deflates
+      retention metrics. Audit the crosswalk.
+
+  - id: hr_uniqueness_no_duplicate_payroll_per_period
+    kind: uniqueness
+    severity: blocker
+    target_entity: payroll_line
+    rule: |
+      no duplicate (employee_id, pay_period_end, earnings_type) tuple in
+      a given landing.
+    remediation: |
+      Duplicate payroll lines double-count payroll-per-unit. Dedup per
+      mapping.yaml.dedup_rule; if the source routinely emits duplicates,
+      escalate to the operator.
+
+  - id: hr_uniqueness_employee_id_per_landing
+    kind: uniqueness
+    severity: blocker
+    target_entity: employee
+    rule: no duplicate employee_id in a given landing.
+    remediation: See qa/duplicate_id.yaml.
+
+  - id: hr_referential_property_id_exists
+    kind: referential
+    severity: blocker
+    target_entity: payroll_line, overtime_line, property_assignment, staffing_position
+    rule: |
+      property_id (when non-null and not a reserved sentinel) resolves
+      to a row in the property master.
+    remediation: |
+      Dangling property_id signals either a newly-onboarded property
+      not yet in the master or a typo. Resolve via the property master
+      crosswalk.
+
+  - id: hr_referential_employee_id_exists
+    kind: referential
+    severity: blocker
+    target_entity: role_assignment, property_assignment, payroll_line, overtime_line, employee_vs_contractor_flag
+    rule: employee_id resolves to a row in employee for the same landing
+    remediation: |
+      Dangling employee_id indicates an out-of-order landing or a
+      missing HR-master record. Land HR master first, then payroll.

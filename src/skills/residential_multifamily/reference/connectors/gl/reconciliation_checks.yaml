@@ -1,0 +1,264 @@
+checks:
+- check_id: gl_record_count
+  check_kind: record_count
+  severity: blocker
+  description: Raw row count minus rejects equals normalized row count.
+  inputs:
+  - reference/raw/gl/<YYYY>/<MM>/<source>__<as_of>.*
+  - reference/normalized/gl_<entity>__<scope>.csv
+  expected_invariant: count(raw) - count(rejected) == count(normalized)
+  remediation: See qa/record_count.yaml.
+- check_id: gl_duplicate_primary_key
+  check_kind: duplicate_id
+  severity: blocker
+  description: No duplicate primary keys across actual, budget, forecast, commitment,
+    capex_actual.
+  inputs:
+  - reference/normalized/gl_actual__<scope>.csv
+  - reference/normalized/gl_budget__<scope>.csv
+  expected_invariant: count(distinct pk) == count(records)
+  remediation: See qa/duplicate_id.yaml.
+- check_id: gl_budget_actual_alignment
+  check_kind: budget_actual
+  severity: blocker
+  description: Budget totals and actual totals reconcile to source ledger trial balance.
+  inputs:
+  - reference/normalized/gl_budget__<scope>.csv
+  - reference/normalized/gl_actual__<scope>.csv
+  - reference/normalized/gl_chart_of_accounts__<scope>.csv
+  expected_invariant: sum(budget) == source_budget_header_total AND sum(actual) ==
+    source_trial_balance_total
+  tolerance:
+    absolute: 0
+    relative_percent: 0.01
+  remediation: See qa/budget_actual_alignment.yaml.
+- check_id: gl_account_mapping_completeness
+  check_kind: null_critical
+  severity: warning
+  description: Every posted account used in actuals or budget has at least one active
+    account_mapping entry.
+  inputs:
+  - reference/normalized/gl_actual__<scope>.csv
+  - reference/normalized/gl_account_mapping__<scope>.csv
+  expected_invariant: for each distinct account_id in actual/budget, exists mapping
+    with effective window covering period
+  remediation: 'Operator must map every posted account to a canonical slug before
+    variance
+
+    narratives or dashboards can aggregate reliably.
+
+    '
+- check_id: gl_missing_property_mapping
+  check_kind: null_critical
+  severity: blocker
+  description: Every gl_actual, gl_budget, and gl_forecast row carries a property_id
+    that resolves to pms.property, or is tagged corporate_overhead = true with an
+    allocation rule.
+  inputs:
+  - reference/normalized/gl_actual__<scope>.csv
+  - reference/normalized/gl_budget__<scope>.csv
+  - reference/normalized/gl_forecast__<scope>.csv
+  - reference/normalized/pms_property__<scope>.csv
+  expected_invariant: 'for each row: property_id IN pms.property.property_id OR corporate_overhead
+    = true AND allocation_rule_ref IS NOT NULL'
+  remediation: 'GL rows without a property mapping silently distort per-property
+
+    NOI. Operator assigns property_id or tags corporate with an allocation
+
+    rule before re-landing.
+
+    '
+- check_id: gl_mixed_entity_property_accounting_flagged
+  check_kind: null_critical
+  severity: warning
+  description: When one legal entity_id appears with more than one property_id across
+    gl_actual, the landing flags the entity as a multi-property entity and requires
+    an allocation basis for shared costs.
+  inputs:
+  - reference/normalized/gl_actual__<scope>.csv
+  - reference/connectors/master_data/property_crosswalk.yaml
+  expected_invariant: 'for each entity_id that appears with count(distinct property_id)
+    > 1: master_data/property_crosswalk.yaml declares entity_id as multi_property
+    AND carries allocation_basis in (unit_count, square_footage, revenue, direct)'
+  remediation: 'A legal entity that books costs against several properties must have
+
+    an explicit allocation basis so shared costs split consistently. Operator
+
+    registers the basis in master_data/property_crosswalk.yaml.
+
+    '
+- check_id: gl_late_accrual_tagged
+  check_kind: date_coverage
+  severity: warning
+  description: Accrual postings with posting_date more than the late_accrual_threshold_days
+    after the period close are flagged late_accrual = true.
+  inputs:
+  - reference/normalized/gl_actual__<scope>.csv
+  - reference/connectors/gl/manifest.yaml
+  expected_invariant: 'for each gl_actual row with accrual_flag = true: posting_date
+    - period_close_date <= late_accrual_threshold_days declared in gl/manifest.yaml
+    OR late_accrual_flag = true'
+  remediation: 'Late accruals are allowed but should be tagged so monthly close
+
+    reports disclose them. Operator sets the flag at landing.
+
+    '
+- check_id: gl_duplicate_export_row_dedup
+  check_kind: duplicate_id
+  severity: warning
+  description: Duplicate export artifacts for the same (property_id, account_id, period)
+    across source feeds are collapsed per the dedup tie-breaker; any residual duplicates
+    are flagged.
+  inputs:
+  - reference/normalized/gl_actual__<scope>.csv
+  expected_invariant: count(distinct (property_id, account_id, period, amount_cents,
+    source_row_id)) == count(rows) per (property_id, account_id, period) after dedup
+  remediation: 'Residual duplicates after dedup indicate that two source feeds
+
+    reported the same posting with different amount_cents. Operator picks
+
+    the source of truth and registers a source_rank in manifest.yaml.
+
+    '
+- check_id: gl_account_rename_history
+  check_kind: null_critical
+  severity: warning
+  description: Accounts that appear in historical postings but not in the current
+    chart_of_accounts carry a rename_to pointer or an inactive flag; mapping preserves
+    the historical canonical_account_slug.
+  inputs:
+  - reference/normalized/gl_chart_of_accounts__<scope>.csv
+  - reference/normalized/gl_account_mapping__<scope>.csv
+  expected_invariant: 'for each account_id in historical gl_actual but NOT in current
+    chart_of_accounts: exists account_mapping row with effective window covering the
+    historical period AND rename_to OR inactive flag set'
+  remediation: 'Renamed accounts break time-series variance unless both names map
+
+    to the same canonical slug. Operator records the rename_to pointer in
+
+    account_mapping and keeps effective windows current.
+
+    '
+- check_id: gl_forecast_version_conflict_flagged
+  check_kind: date_coverage
+  severity: warning
+  description: Two forecast vintages (as_of_date) for the same (property_id, account_id,
+    period) are allowed but must carry distinct forecast_version labels; identical
+    values with same as_of_date are treated as duplicates.
+  inputs:
+  - reference/normalized/gl_forecast__<scope>.csv
+  expected_invariant: 'for each (property_id, account_id, period, as_of_date): count(distinct
+    forecast_version) == count(rows) OR rows match on amount_cents within tolerance'
+  remediation: 'Conflicting forecast values at the same vintage indicate either a
+
+    double-publish or a late-overwrite. Operator picks the vintage-of-record
+
+    or adds a distinct forecast_version label.
+
+    '
+- check_id: gl_capex_coded_as_opex_exception
+  check_kind: null_critical
+  severity: warning
+  description: Postings classified to an opex account but matching a capex project
+    via capex_project_id require an exception flag and operator sign-off.
+  inputs:
+  - reference/normalized/gl_actual__<scope>.csv
+  - reference/normalized/gl_chart_of_accounts__<scope>.csv
+  - reference/normalized/gl_capex_actual__<scope>.csv
+  expected_invariant: 'for each gl_actual row where capex_project_id IS NOT NULL AND
+    account.account_type = expense: capex_as_opex_exception_flag = true AND approver_user_id
+    IS NOT NULL'
+  remediation: 'Capex posted to opex understates NOI and overstates variances. Operator
+
+    moves the posting to a capex account or documents the exception with a
+
+    sign-off.
+
+    '
+- check_id: gl_opex_coded_as_capex_exception
+  check_kind: null_critical
+  severity: warning
+  description: Postings classified to a capex account but without a capex_project_id
+    are flagged for review; capitalization thresholds are referenced from org overlay.
+  inputs:
+  - reference/normalized/gl_capex_actual__<scope>.csv
+  - reference/normalized/gl_chart_of_accounts__<scope>.csv
+  - overlays/org/<org_id>/overlay.yaml
+  expected_invariant: 'for each gl_capex_actual row: capex_project_id IS NOT NULL
+    AND amount_cents >= capitalization_threshold_cents declared in overlays/org/<org_id>/overlay.yaml
+    OR carries a capitalization_exception_flag'
+  remediation: 'Expensing below the capitalization threshold is allowed but must
+
+    be flagged. Operator reviews each flagged row.
+
+    '
+- check_id: gl_manual_adjustment_out_of_band_flagged
+  check_kind: null_critical
+  severity: warning
+  description: Manual adjusting journal entries exceeding the reasonableness band
+    referenced in org overlay require a narrative and approver.
+  inputs:
+  - reference/normalized/gl_actual__<scope>.csv
+  - overlays/org/<org_id>/overlay.yaml
+  expected_invariant: 'for each gl_actual row where source_subtype = manual_journal
+    AND amount_cents > manual_journal_reasonableness_cents declared in overlays/org/<org_id>/overlay.yaml:
+    narrative IS NOT NULL AND approver_user_id IS NOT NULL'
+  remediation: 'Large manual journals without narrative and approver leave the
+
+    close audit-vulnerable. Operator captures narrative and approver per
+
+    the org matrix.
+
+    '
+- check_id: gl_close_period_metadata_consistency
+  check_kind: null_critical
+  severity: warning
+  description: Every gl_actual row for a closed period carries consistent close_status
+    metadata and a close_lock_timestamp.
+  inputs:
+  - reference/normalized/gl_actual__<scope>.csv
+  expected_invariant: 'for each (property_id, period) where close_status = closed:
+    close_lock_timestamp IS NOT NULL AND all rows for that (property_id, period) share
+    the same close_status'
+  remediation: 'Inconsistent close metadata within a period indicates a half-closed
+
+    ledger. Operator finalizes the close and re-lands.
+
+    '
+- check_id: gl_inter_property_consolidation_aligned
+  check_kind: budget_actual
+  severity: warning
+  description: Consolidated portfolio-level sums of gl_actual equal the sum of individual
+    property gl_actual rows within tolerance.
+  inputs:
+  - reference/normalized/gl_actual__<scope>.csv
+  - reference/normalized/gl_chart_of_accounts__<scope>.csv
+  expected_invariant: 'for each period and canonical_account_slug: sum(gl_actual.amount_cents
+    across properties) == portfolio_consolidation_total within tolerance'
+  tolerance:
+    absolute: 0
+    relative_percent: 0.01
+  remediation: 'A variance between property-level sums and the portfolio consolidation
+
+    indicates either a missing property or a corporate-overhead row misallocated.
+
+    Operator reconciles before promotion.
+
+    '
+- check_id: gl_fx_currency_normalized_if_applicable
+  check_kind: null_critical
+  severity: blocker
+  description: When gl_actual rows arrive with a non-USD source currency, each row
+    carries source_currency and fx_rate_to_usd resolving to a reference registry;
+    normalized amount_cents is in USD.
+  inputs:
+  - reference/normalized/gl_actual__<scope>.csv
+  - reference/connectors/master_data/fx_rate_registry.yaml
+  expected_invariant: 'for each gl_actual row where source_currency != USD: fx_rate_to_usd
+    IS NOT NULL AND fx_rate_to_usd IN fx_rate_registry at the as_of_date AND amount_cents
+    is the USD-normalized value'
+  remediation: 'Non-USD postings without an fx rate cannot be consolidated. Operator
+
+    registers the rate in fx_rate_registry and re-normalizes.
+
+    '

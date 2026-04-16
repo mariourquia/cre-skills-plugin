@@ -1,0 +1,170 @@
+# Bounded assumptions under which the GraySail placeholder operates.
+# Each assumption is explicit, bounded, and carries a remediation path.
+# No assumption is allowed to silently become load-bearing.
+
+status_tag: sample
+
+assumptions:
+
+  - id: role_hypothesis_sop_knowledge_store
+    assumption: |
+      GraySail is an SOP / policy knowledge store, not a transactional
+      system of record for operating objects (Property, Lease, Charge,
+      BudgetLine, CapexProject, WorkOrder).
+    confidence: medium_high
+    evidence_basis: |
+      Multiple external architecture documents consistently describe
+      GraySail as holding SOPs and policy content and list it alongside
+      transactional systems (AppFolio, Dealpath, Procore, Sage Intacct)
+      without assigning it transactional responsibility.
+    blast_radius_if_wrong: |
+      If GraySail is actually transactional, the source-of-truth matrix
+      for one or more canonical objects is wrong, and a downstream
+      workflow may be quietly ignoring an authoritative source.
+    remediation_if_wrong: |
+      Run classification_worksheet.md Section 1 again; fork the adapter
+      into a domain-specific slug (e.g., graysail_approval_policies under
+      manual_uploads, or graysail_service_catalog under ap); update
+      source_of_truth_matrix.md; issue a reconciliation check for every
+      object whose source-of-truth assignment changes.
+
+  - id: domain_fallback_manual_uploads
+    assumption: |
+      manual_uploads is the safest canonical domain for GraySail until
+      ingestion mode is confirmed.
+    confidence: medium
+    evidence_basis: |
+      The adapter manifest schema enum for connector_domain does not
+      include a knowledge_source or sop_store value. manual_uploads is
+      the catch-all for operator- and manager-submitted file content,
+      which is the loosest-fit description of GraySail content.
+    blast_radius_if_wrong: |
+      If GraySail exposes a real API, treating it as manual_uploads
+      means the adapter under-specifies ingestion and may slow the
+      rollout that follows.
+    remediation_if_wrong: |
+      Promote to a dedicated knowledge_source domain once the canonical
+      ontology supports one (see open_questions_and_risks.md); fork the
+      adapter into graysail_api under the new domain; update
+      workflow_relevance_map.yaml.
+
+  - id: no_canonical_object_coverage
+    assumption: |
+      GraySail does not carry canonical operating objects today. The
+      adapter ships with NO canonical-object coverage.
+    confidence: high
+    evidence_basis: |
+      Repo evidence shows no integration footprint. External evidence
+      describes GraySail as a knowledge store. Until canonical-object
+      carriage is confirmed, assuming none is safer than assuming any.
+    blast_radius_if_wrong: |
+      Low. Assuming zero coverage means workflows will not depend on
+      GraySail output; if GraySail turns out to carry canonical objects,
+      the impact is missed coverage, not contaminated data.
+    remediation_if_wrong: |
+      Add object_coverage to source_registry_entry.yaml; refactor
+      workflow_relevance_map.yaml to upgrade dependencies from
+      blocked_until_classified to required; add reconciliation checks
+      that tie GraySail output to primary sources.
+
+  - id: no_ontology_extension_by_placeholder
+    assumption: |
+      The canonical _core/ontology.md is NOT extended by this placeholder.
+      Any need for new objects (document_reference, policy_record,
+      sop_record, approval_matrix_row) is surfaced as an open question.
+    confidence: high
+    evidence_basis: |
+      Canonical base is immutable per _core/BOUNDARIES.md. Adapters do
+      not introduce canonical objects. Wave 4 cross-cutting docs carry
+      the open-questions ledger.
+    blast_radius_if_wrong: |
+      None for the placeholder. If a consumer needs new canonical
+      objects before the placeholder is classified, the consumer is in
+      the wrong layer (canonical ontology changes go through the
+      canonical change-control flow, not the adapter layer).
+    remediation_if_wrong: |
+      Do not relax this assumption. If a genuine ontology extension is
+      needed, open a canonical change-control entry in
+      open_questions_and_risks.md and route through the _core/
+      change-control flow.
+
+  - id: confidentiality_posture_unknown
+    assumption: |
+      GraySail content is treated as confidential at a moderate-to-
+      restricted posture until classification finalizes the sensitivity
+      tier.
+    confidence: medium
+    evidence_basis: |
+      SOP / policy stores commonly contain proprietary operational
+      policy and occasionally regulatory-program guidance. Without
+      operator confirmation, assuming higher sensitivity avoids a
+      premature relaxation of PII / legal controls.
+    blast_radius_if_wrong: |
+      If GraySail is actually public-policy level content, the adapter
+      may over-restrict access during rollout. Cost is friction, not
+      data harm.
+    remediation_if_wrong: |
+      Run classification_worksheet.md Section 4; update
+      pii_classification, financial_sensitivity, legal_sensitivity on
+      source_registry_entry.yaml; issue sign-off from compliance_risk if
+      sensitivity tier decreases.
+
+  - id: no_live_credential_method
+    assumption: |
+      The placeholder carries credential_method: none. No real
+      credentialing is attempted, proposed, or stored.
+    confidence: high
+    evidence_basis: |
+      No operator has declared a credential method; the adapter reads
+      nothing; the _core security posture forbids secrets in this layer.
+    blast_radius_if_wrong: |
+      None in the placeholder state. If classification proposes an API
+      path, credential_method moves to oauth_placeholder or
+      api_key_placeholder in the forked adapter's registry entry, not
+      here.
+    remediation_if_wrong: |
+      Add credential_method to the forked adapter's source_registry
+      entry once ingestion mode is confirmed; rotate through the secrets
+      workflow declared in the subsystem security runbook.
+
+  - id: rollout_wave_gated
+    assumption: |
+      GraySail rollout belongs to Wave 4C (post-classification) per
+      ../../../_core/stack_wave4/stack_rollout_wave4.md. Wave 4A and 4B
+      must not consume GraySail output.
+    confidence: high
+    evidence_basis: |
+      Classification is unresolved; Wave 4A and 4B depend on confirmed
+      systems (Dealpath, AppFolio, Sage Intacct, Excel, Procore).
+    blast_radius_if_wrong: |
+      If GraySail turns out to be a low-risk document export usable
+      earlier, rollout sequencing loses a small acceleration opportunity.
+    remediation_if_wrong: |
+      Promote GraySail to an earlier wave only after the classification
+      worksheet, source-of-truth matrix update, and sensitivity triage
+      complete together. No wave promotion without full classification.
+
+  - id: workflow_non_dependency_default
+    assumption: |
+      No canonical workflow currently depends on GraySail. Any workflow
+      that appears to need SOP guidance is documented in
+      workflow_relevance_map.yaml as blocked_until_classified and
+      degrades gracefully without GraySail.
+    confidence: medium_high
+    evidence_basis: |
+      Review of ../../../_core/workflow_activation_map.yaml shows no
+      GraySail dependency declared. External documents describe an SOP
+      agent that would consume GraySail, but that agent is not a
+      canonical workflow in this subsystem.
+    blast_radius_if_wrong: |
+      If an undocumented workflow already treats GraySail as a source,
+      a user-facing gap in guidance could emerge during Wave 4C.
+    remediation_if_wrong: |
+      Complete classification_worksheet.md Section 5; add explicit
+      GraySail references to workflow_activation_map.yaml only after the
+      operator confirms the dependency; update blocked_workflows.md.
+
+review_cadence: quarterly
+next_review_at: "2026-07-15"
+owner_role: data_platform_team
+accountability_chain: [data_platform_team, executive]

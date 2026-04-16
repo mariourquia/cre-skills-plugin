@@ -1,0 +1,21 @@
+# Property-master unit count vs PMS.
+check_id: unit_count_reconciliation
+check_kind: unit_count
+severity: blocker
+description: |
+  Unit count in the PMS `unit` entity must equal unit_count_total from the
+  property master for each property_id.
+inputs:
+  - reference/normalized/pms_unit__<scope>.csv
+  - reference/normalized/pms_property__<scope>.csv
+expected_invariant: |
+  for each property_id:
+    count(pms.unit where property_id = P) == pms.property[P].unit_count_total
+tolerance:
+  absolute: 0
+  relative_percent: 0.0
+remediation: |
+  Delta typically indicates a down unit, employee unit, or model unit not
+  being emitted by the PMS, or a stale property master. Reconcile with the
+  operator; adjust unit_count_rentable vs unit_count_total if the delta is
+  model/employee/down.

@@ -1,0 +1,5 @@
+property_id,account_code,forecast_period,forecast_amount_usd,forecast_method
+sample_property_one,4100_gross_potential_rent,2026-05,200000.00,trend
+sample_property_one,5100_payroll,2026-05,30000.00,straight_line
+# status: template
+# schema: reference/connectors/manual_uploads/schema.yaml entities.forecast_file

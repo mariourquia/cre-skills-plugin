@@ -1,0 +1,146 @@
+# mapping_override_log.schema.yaml
+#
+# JSON Schema (draft 2020-12) for a mapping override log entry. Entries are
+# append-only. See lineage.md for prose.
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "residential_multifamily/reference/connectors/_core/mapping_override_log.schema.yaml"
+title: "Mapping Override Log Entry"
+description: >
+  A record of a non-default mapping rule applied to a specific source field
+  in a specific connector (optionally a specific vendor variant).
+type: object
+additionalProperties: false
+
+required:
+  - override_id
+  - mapping_path
+  - source_field
+  - override_rule
+  - requested_by
+  - approved_by
+  - effective_start
+  - effective_end
+  - reason
+  - affected_rows_estimate
+  - rollback_plan
+
+properties:
+
+  override_id:
+    type: string
+    description: Unique override identifier.
+    pattern: "^mo_[0-9]{4}_[0-9]{2}_[0-9]{2}_[a-z][a-z0-9_]*_[0-9]{5}$"
+
+  mapping_path:
+    type: string
+    description: Repo-relative path of the mapping.yaml the override applies to.
+    pattern: "^reference/connectors/(pms|gl|crm|ap|market_data|construction|hr_payroll|manual_uploads)(/vendors/[a-z0-9_]+)?/mapping\\.yaml$"
+
+  source_field:
+    type: string
+    description: The source-side field name the override targets.
+    minLength: 1
+
+  canonical_field:
+    type: string
+    description: Optional canonical field name reached by the override.
+    pattern: "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$"
+
+  override_rule:
+    type: object
+    additionalProperties: false
+    description: The non-default rule applied.
+    required: [transform_rule]
+    properties:
+      transform_rule:
+        type: string
+        enum:
+          - pass_through
+          - trim
+          - canonicalize_text_identifier
+          - canonicalize_text_display
+          - date_parse
+          - datetime_parse_to_utc
+          - currency_parse_to_base
+          - enum_map
+          - boolean_map
+          - numeric_coerce
+          - integer_coerce
+          - split_paired_state_column
+          - identity_resolve_reference
+          - derive_from_expression
+      mapping:
+        type: object
+        description: Explicit source-to-canonical value mapping for enum_map/boolean_map overrides.
+        additionalProperties:
+          oneOf:
+            - type: string
+            - type: boolean
+            - type: number
+            - type: "null"
+      source_format:
+        type: string
+      source_tz:
+        type: string
+      precision:
+        type: integer
+        minimum: 0
+      expression_name:
+        type: string
+        pattern: "^[a-z][a-z0-9_]*$"
+      resolver:
+        type: object
+
+  requested_by:
+    type: string
+    description: Slug of the agent or role that requested the override.
+    pattern: "^[a-z][a-z0-9_]*$"
+
+  approved_by:
+    type: string
+    description: Slug of the approver.
+    pattern: "^[a-z][a-z0-9_]*$"
+
+  effective_start:
+    type: string
+    format: date-time
+    description: UTC timestamp the override takes effect.
+
+  effective_end:
+    oneOf:
+      - type: "null"
+      - type: string
+        format: date-time
+    description: >
+      UTC timestamp the override stops applying. Null means open-ended;
+      overrides SHOULD have a sunset date and be reviewed.
+
+  reason:
+    type: string
+    description: Short explanation of why the override is needed.
+    minLength: 1
+    maxLength: 2000
+
+  affected_rows_estimate:
+    type: integer
+    minimum: 0
+    description: >
+      Estimate of rows that flow through the override per typical run. Used
+      to size the review burden and rollback impact.
+
+  rollback_plan:
+    type: string
+    description: How to reverse the override if needed.
+    minLength: 1
+    maxLength: 2000
+
+  related_change_log_ref:
+    type: string
+    description: Optional path to a change log entry that motivated the override.
+    pattern: "^reference/connectors/.+/(change_log|source_schema_change_log)\\.(md|yaml)$"
+
+  status:
+    type: string
+    enum: [proposed, active, retired, rolled_back, sample, illustrative]
+    description: Lifecycle status of the override.

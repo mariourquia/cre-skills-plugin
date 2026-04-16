@@ -1,0 +1,347 @@
+# File Family Registry for the Manual Sources Expanded adapter.
+# One record per recognized manual file family. Each entry captures:
+#   - family_id            snake_case slug
+#   - family_name          human-readable label
+#   - expected_format      xlsx | csv | pdf | email_table
+#   - expected_headers     canonical header list (template v1)
+#   - delivery_channel     sftp | shared_drive | email | portal
+#   - cadence              monthly | quarterly | event_driven | ad_hoc | weekly | annual
+#   - provenance_required  fields the landing helper MUST capture
+#   - staleness_threshold_days   numeric staleness tolerance (cite
+#                                 reference/normalized/schemas/reconciliation_tolerance_band.yaml)
+#   - target_canonical_object    canonical object slug from _core/ontology.md
+#
+# This registry is the SINGLE source of the families the adapter recognizes.
+# Anything landed outside this registry routes to _rejected/ with an
+# unknown_family reason.
+#
+# Numeric thresholds live here rather than inline in prose per _core/DESIGN_RULES.md.
+
+status_tag: template
+schema_version: "0.1.0"
+
+file_families:
+
+  - family_id: tpm_submission_monthly_report
+    family_name: Third-Party Manager Monthly Scorecard Submission
+    expected_format: csv
+    expected_headers:
+      - property_code
+      - period
+      - occupancy_physical
+      - occupancy_economic
+      - collections_rate
+      - delinquency_balance
+      - narrative_summary
+      - submitted_by
+      - submitted_date
+      - signed_off
+    delivery_channel: shared_drive
+    cadence: monthly
+    provenance_required:
+      - source_file
+      - sheet_tab
+      - as_of_date
+      - submitted_by
+      - received_at
+      - row_id
+    staleness_threshold_days: 10
+    target_canonical_object: tpm_scorecard
+    notes: Lag beyond staleness_threshold_days flags tpm_submission_lag per dq_rules.yaml::msx_tpm_submission_lag.
+
+  - family_id: tpm_submission_quarterly_report
+    family_name: Third-Party Manager Quarterly Narrative Pack
+    expected_format: xlsx
+    expected_headers:
+      - property_code
+      - quarter
+      - kpi_bundle_ref
+      - narrative_pack_ref
+      - prepared_by
+      - reviewed_by
+      - submitted_date
+      - signed_off
+    delivery_channel: shared_drive
+    cadence: quarterly
+    provenance_required:
+      - source_file
+      - sheet_tab
+      - as_of_date
+      - submitted_by
+      - reviewer
+      - received_at
+      - row_id
+    staleness_threshold_days: 30
+    target_canonical_object: tpm_scorecard
+    notes: Quarterly pack contributes narrative commentary used by executive_operating_summary_generation.
+
+  - family_id: operator_owner_report
+    family_name: Operator Monthly Owner Report
+    expected_format: xlsx
+    expected_headers:
+      - property_code
+      - period
+      - revenue_actual
+      - opex_actual
+      - noi_actual
+      - budget_variance_summary
+      - operational_notes
+      - prepared_by
+      - submitted_date
+      - signed_off
+    delivery_channel: email
+    cadence: monthly
+    provenance_required:
+      - source_file
+      - sheet_tab
+      - as_of_date
+      - submitted_by
+      - received_at
+      - row_id
+    staleness_threshold_days: 15
+    target_canonical_object: owner_report_bundle
+    notes: Naming conventions drift; runbook covers filename normalization.
+
+  - family_id: operator_variance_narrative
+    family_name: Operator Variance Narrative Worksheet
+    expected_format: csv
+    expected_headers:
+      - property_code
+      - period
+      - account_code
+      - budget
+      - actual
+      - variance_amount
+      - variance_pct
+      - driver_category
+      - narrative
+      - author
+      - reviewed_by
+    delivery_channel: shared_drive
+    cadence: monthly
+    provenance_required:
+      - source_file
+      - sheet_tab
+      - as_of_date
+      - submitted_by
+      - reviewer
+      - received_at
+      - row_id
+    staleness_threshold_days: 20
+    target_canonical_object: variance_explanation
+    notes: Manual is primary source for variance_explanation per source_of_truth_matrix.md.
+
+  - family_id: bid_tab_construction
+    family_name: Bid Tab Workbook (Construction Scope)
+    expected_format: xlsx
+    expected_headers:
+      - project_code
+      - scope_description
+      - bidder_name
+      - base_bid
+      - alt_1
+      - alt_2
+      - qualifications
+      - exclusions
+      - leveling_notes
+      - recommended_award
+      - recommendation_rationale
+      - approver_required
+    delivery_channel: shared_drive
+    cadence: event_driven
+    provenance_required:
+      - source_file
+      - sheet_tab
+      - as_of_date
+      - analyst_name
+      - reviewer
+      - received_at
+      - row_id
+    staleness_threshold_days: 60
+    target_canonical_object: bid_comparison
+    notes: Manual bid tab is secondary until Procore bid_package covers; reconciles Manual vs Procore.
+
+  - family_id: bid_tab_services
+    family_name: Bid Tab Workbook (Services/Ops Contracts)
+    expected_format: xlsx
+    expected_headers:
+      - service_scope
+      - property_code
+      - bidder_name
+      - annual_bid
+      - coverage_terms
+      - qualifications
+      - exclusions
+      - leveling_notes
+      - recommended_award
+      - recommendation_rationale
+      - approver_required
+    delivery_channel: shared_drive
+    cadence: event_driven
+    provenance_required:
+      - source_file
+      - sheet_tab
+      - as_of_date
+      - analyst_name
+      - reviewer
+      - received_at
+      - row_id
+    staleness_threshold_days: 60
+    target_canonical_object: bid_comparison
+    notes: Services bid tabs cover landscaping, janitorial, trash, pest control.
+
+  - family_id: approval_matrix_threshold_set
+    family_name: Approval Matrix Threshold Set
+    expected_format: xlsx
+    expected_headers:
+      - action_type
+      - tier_1_threshold
+      - tier_2_threshold
+      - tier_3_threshold
+      - tier_1_approver
+      - tier_2_approver
+      - tier_3_approver
+      - effective_start
+      - effective_end
+      - change_log_ref
+    delivery_channel: shared_drive
+    cadence: quarterly
+    provenance_required:
+      - source_file
+      - sheet_tab
+      - as_of_date
+      - submitted_by
+      - reviewer
+      - received_at
+      - row_id
+    staleness_threshold_days: 100
+    target_canonical_object: approval_threshold_policy
+    notes: Effective-dating required; retroactive changes routed to msx_effective_dating check.
+
+  - family_id: approval_matrix_authority_change
+    family_name: Approval Matrix Authority Change Log
+    expected_format: csv
+    expected_headers:
+      - change_log_id
+      - change_type
+      - affected_action_type
+      - prior_approver
+      - new_approver
+      - effective_start
+      - rationale
+      - approved_by
+      - approved_date
+    delivery_channel: email
+    cadence: event_driven
+    provenance_required:
+      - source_file
+      - sheet_tab
+      - as_of_date
+      - submitted_by
+      - received_at
+      - row_id
+    staleness_threshold_days: 30
+    target_canonical_object: approval_threshold_policy
+    notes: Each row references the parent threshold_set change_log_ref.
+
+  - family_id: vendor_award_recommendation
+    family_name: Vendor Award Recommendation Memo
+    expected_format: pdf
+    expected_headers:
+      - memo_id
+      - project_code
+      - scope_description
+      - recommended_vendor
+      - award_amount
+      - rationale
+      - approver_required
+      - approved_by
+      - approved_date
+    delivery_channel: email
+    cadence: event_driven
+    provenance_required:
+      - source_file
+      - as_of_date
+      - submitted_by
+      - received_at
+      - row_id
+    staleness_threshold_days: 30
+    target_canonical_object: approval_request
+    notes: PDF memo extracted via structured key-value parse; header list is the logical structure.
+
+  - family_id: escalation_log
+    family_name: Escalation Log
+    expected_format: csv
+    expected_headers:
+      - event_id
+      - source_pack
+      - kind
+      - severity
+      - opened_at
+      - routed_to
+      - status
+    delivery_channel: shared_drive
+    cadence: monthly
+    provenance_required:
+      - source_file
+      - sheet_tab
+      - as_of_date
+      - submitted_by
+      - received_at
+      - row_id
+    staleness_threshold_days: 10
+    target_canonical_object: escalation_event
+    notes: Manual is primary source for escalation_event per source_of_truth_matrix.md.
+
+  - family_id: operator_payroll_summary
+    family_name: Operator Property-Level Payroll Summary
+    expected_format: xlsx
+    expected_headers:
+      - property_code
+      - period
+      - role_slug
+      - headcount_fte
+      - gross_wages
+      - benefits_burden
+      - payroll_taxes
+      - total_labor_cost
+      - prepared_by
+    delivery_channel: shared_drive
+    cadence: monthly
+    provenance_required:
+      - source_file
+      - sheet_tab
+      - as_of_date
+      - submitted_by
+      - received_at
+      - row_id
+    staleness_threshold_days: 20
+    target_canonical_object: staffing_position
+    notes: Manual is primary for staffing_position when no hr_payroll feed; secondary when hr_payroll landed.
+
+  - family_id: manual_property_correction
+    family_name: Manual Property Data Correction
+    expected_format: csv
+    expected_headers:
+      - object_type
+      - object_id
+      - field_changed
+      - prior_value
+      - new_value
+      - rationale
+      - requested_by
+      - approver
+      - approved_date
+    delivery_channel: email
+    cadence: event_driven
+    provenance_required:
+      - source_file
+      - sheet_tab
+      - as_of_date
+      - submitted_by
+      - reviewer
+      - received_at
+      - row_id
+    staleness_threshold_days: 7
+    target_canonical_object: source_record_audit
+    notes: Manual corrections without an approver block per dq_rules.yaml::msx_correction_requires_approver.

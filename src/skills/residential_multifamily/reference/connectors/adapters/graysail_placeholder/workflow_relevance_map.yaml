@@ -1,0 +1,186 @@
+# GraySail workflow relevance map (placeholder).
+# Declares which canonical workflows MIGHT depend on GraySail content once
+# classification is confirmed. Every entry is blocked_until_classified.
+# Until a dependency is confirmed through classification_worksheet.md
+# Section 5, no workflow may treat GraySail as authoritative.
+#
+# Slugs match workflows/<slug>/ directories and
+# reference/connectors/_core/workflow_activation_map.yaml.
+
+status_tag: sample
+
+global_rules:
+  default_dependency_status: blocked_until_classified
+  canonical_override_rule: |
+    Every entry below is a CANDIDATE dependency. Actual activation rules
+    live in ../../_core/workflow_activation_map.yaml and MUST NOT be
+    updated until classification confirms the dependency. This file is
+    advisory only.
+  non_destructive_rule: |
+    No workflow silently lights up on GraySail availability. Activation
+    requires explicit operator confirmation through the classification
+    worksheet followed by a canonical change-control entry.
+
+candidate_dependencies:
+
+  - workflow_slug: monthly_property_operating_review
+    hypothesis: |
+      SOP guidance for operating-scorecard interpretation (what counts as
+      a material variance, which remediation steps to recommend, how to
+      phrase concession commentary) could live in GraySail.
+    confidence: low
+    blocked_until_classified: true
+    fallback_if_graysail_absent: |
+      Workflow already runs without GraySail today. Narrative follows
+      the canonical metrics contract in _core/metrics.md and the
+      variance-explanation schema in gl/. No degradation.
+
+  - workflow_slug: monthly_asset_management_review
+    hypothesis: |
+      SOP guidance for asset-level commentary framing, watchlist review
+      posture, and hold/sell recommendation language could reside in
+      GraySail.
+    confidence: low
+    blocked_until_classified: true
+    fallback_if_graysail_absent: |
+      Workflow runs without GraySail today. Commentary defers to the
+      canonical asset_watchlist_score definition. No degradation.
+
+  - workflow_slug: quarterly_portfolio_review
+    hypothesis: |
+      SOP guidance for portfolio-level narrative structure (executive
+      summary format, risk-language conventions) could reside in
+      GraySail.
+    confidence: low
+    blocked_until_classified: true
+    fallback_if_graysail_absent: |
+      Portfolio review composes from same-store cohort + market rollup
+      per canonical contracts. No degradation if GraySail is absent.
+
+  - workflow_slug: executive_operating_summary_generation
+    hypothesis: |
+      Executive-tone prescriptions and approved phrasing conventions
+      could live in GraySail.
+    confidence: low
+    blocked_until_classified: true
+    fallback_if_graysail_absent: |
+      Summary follows the _core/metrics.md and
+      _core/audience_contracts.md posture today. No degradation.
+
+  - workflow_slug: third_party_manager_scorecard_review
+    hypothesis: |
+      TPM oversight posture and escalation playbooks are plausible SOP
+      content.
+    confidence: medium
+    blocked_until_classified: true
+    fallback_if_graysail_absent: |
+      Oversight runs off the PMA in overlays/org/ and the
+      third_party_manager_oversight.md spec. No degradation. If GraySail
+      turns out to hold the oversight SOPs, those SOPs would augment,
+      not replace, the PMA-driven configuration.
+
+  - workflow_slug: vendor_dispatch_sla_review
+    hypothesis: |
+      Vendor SLA definitions, response-time bands, and service-category
+      policies could live in GraySail rather than (or in addition to)
+      the ap / vendor_agreement store.
+    confidence: medium
+    blocked_until_classified: true
+    fallback_if_graysail_absent: |
+      Workflow runs on canonical VendorAgreement records in ap/. If
+      GraySail is later confirmed as a secondary source for SLA
+      language, ap retains primary authority and GraySail feeds
+      reconciliation commentary only.
+
+  - workflow_slug: delinquency_collections
+    hypothesis: |
+      Collections-call scripts, fair-housing-compliant resident
+      communication policies, and escalation playbooks are plausible SOP
+      content.
+    confidence: medium
+    blocked_until_classified: true
+    fallback_if_graysail_absent: |
+      Workflow runs off the delinquency_case schema and the fair-housing
+      controls in _core/security/. No degradation. Compliance posture is
+      a canonical concern and cannot be outsourced to GraySail.
+
+  - workflow_slug: move_in_administration
+    hypothesis: |
+      Move-in checklist SOPs and welcome-package policies are plausible
+      SOP content.
+    confidence: medium
+    blocked_until_classified: true
+    fallback_if_graysail_absent: |
+      Workflow runs off the move_in_event schema. No degradation.
+
+  - workflow_slug: move_out_administration
+    hypothesis: |
+      Move-out inspection SOPs and deposit-refund policies are plausible
+      SOP content.
+    confidence: medium
+    blocked_until_classified: true
+    fallback_if_graysail_absent: |
+      Workflow runs off the move_out_event schema. No degradation.
+
+  - workflow_slug: owner_approval_routing
+    hypothesis: |
+      Approval-matrix rules in GraySail could complement
+      _core/approval_matrix.md if the operator holds approval policies
+      in GraySail rather than in the canonical overlay.
+    confidence: medium_high
+    blocked_until_classified: true
+    fallback_if_graysail_absent: |
+      Canonical approval_matrix.md and overlays/org/*/approval_matrix
+      remain authoritative. If GraySail turns out to hold approval
+      rules, it becomes a SECONDARY source that feeds reconciliation
+      checks against the canonical approval matrix, not an override.
+
+  - workflow_slug: change_order_review
+    hypothesis: |
+      Construction change-order SOPs and owner-approval playbooks could
+      live in GraySail.
+    confidence: low_medium
+    blocked_until_classified: true
+    fallback_if_graysail_absent: |
+      Workflow runs off canonical change_order schema in construction/.
+      No degradation.
+
+  - workflow_slug: capital_project_intake_and_prioritization
+    hypothesis: |
+      Capex intake SOPs and prioritization rubrics could live in
+      GraySail.
+    confidence: low_medium
+    blocked_until_classified: true
+    fallback_if_graysail_absent: |
+      Workflow runs off canonical capex_project intake schema. No
+      degradation.
+
+candidate_new_workflows:
+  # Workflows that would exist only because GraySail exists. These are
+  # NOT in the canonical 27 today. Their inclusion is surfaced as an open
+  # question in ../../../_core/stack_wave4/open_questions_and_risks.md.
+
+  - proposed_workflow_slug: sop_guidance_lookup
+    hypothesis: |
+      Role-aware retrieval over GraySail content; grounds a workflow-
+      guidance agent.
+    canonical_status: not_in_canonical_27
+    blocked_until_classified: true
+
+  - proposed_workflow_slug: policy_exception_review
+    hypothesis: |
+      Structured review when a workflow outcome deviates from GraySail
+      policy; routes through owner_approval_routing.
+    canonical_status: not_in_canonical_27
+    blocked_until_classified: true
+
+  - proposed_workflow_slug: role_onboarding_playbook
+    hypothesis: |
+      Role-based onboarding driven by GraySail SOPs.
+    canonical_status: not_in_canonical_27
+    blocked_until_classified: true
+
+open_questions_cross_reference:
+  - see ../../../_core/stack_wave4/open_questions_and_risks.md for the
+    canonical change-control entries that govern ontology and workflow
+    extensions triggered by GraySail classification.

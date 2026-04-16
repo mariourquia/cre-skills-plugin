@@ -1,0 +1,39 @@
+pack_slug: executive_pipeline_summary
+pack_type: workflow
+priority: 12
+triggers:
+  explicit_phrases:
+    - "executive pipeline summary"
+    - "board pipeline summary"
+    - "monthly pipeline summary"
+    - "IC docket summary"
+    - "capital deployment pace update"
+    - "pipeline concentration check"
+    - "declined deal hit rate"
+    - "top-of-funnel sourcing health"
+    - "JV partner concentration"
+    - "geographic concentration pipeline"
+    - "segment concentration pipeline"
+  implicit_signals:
+    - "month close"
+    - "board calendar approaching"
+    - "IC calendar approaching (forward 90-day docket active)"
+    - "Dealpath stage transition volume crosses overlay band"
+    - "Procore commitment exposure crosses overlay band"
+    - "concentration threshold crossed (market / segment / JV partner)"
+    - "capital deployment pace ytd drifts below target band"
+    - "material debt-market shift flagged"
+required_axes:
+  - asset_class
+  - segment
+  - audience
+  - org_id
+  - period
+optional_axes:
+  - role
+  - fund_id
+  - output_type
+  - market
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

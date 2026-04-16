@@ -1,5 +1,11 @@
 # Affordable Segment: Divergence from Middle-Market
 
+> @deprecated 2026-04-15. Content has moved to
+> `overlays/regulatory/affordable/DIVERGENCE.md`. This file remains for one
+> refinement cycle for backward compatibility and is scheduled for removal in
+> the 2026-Q3 refinement pass. See `DEPRECATED.md` in this directory for the
+> migration notice.
+
 Status: stub. This overlay is not deepened in Phase 1. This file enumerates how the
 affordable segment is expected to differ from `middle_market` so future depth can be
 built without rework.

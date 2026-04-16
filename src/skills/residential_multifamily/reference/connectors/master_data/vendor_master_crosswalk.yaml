@@ -1,0 +1,221 @@
+# Vendor Master Crosswalk (starter set).
+# Conforms to crosswalk.schema.yaml.
+# Illustrates duplicate vendor alias consolidation across AP and the
+# construction tracker, a vendor rename with tax id continuity, and a
+# contractor with split AP / COI records. See identity_resolution_framework.md
+# section 7.5.
+
+status_tag: sample
+
+rows:
+
+  # -----------------------------------------------------------------------
+  # Vendor duplicate across AP and construction tracker. Same subcontractor
+  # listed separately. Composite match on tax_id_last_four + services.
+  # Survivorship names AP as survivor for legal name and tax id;
+  # construction tracker as survivor for trade classification.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: vendor_v_00217
+    source_system: accounts_payable_primary
+    source_id: AP-CONC-3221
+    match_confidence: high
+    match_method: composite
+    effective_start: "2022-06-01"
+    survivorship_rule: vendor_master_default
+    manual_override: false
+    reviewer: ap_manager
+    last_validated_at: "2026-03-31"
+    notes: |
+      AP row. Legal name "Concrete Solutions of the Carolinas LLC" survives
+      from this row per survivorship rule vendor_master_default.
+
+  - canonical_id: vendor_v_00217
+    source_system: construction_tracker_primary
+    source_id: V00217
+    match_confidence: high
+    match_method: composite
+    effective_start: "2022-06-01"
+    survivorship_rule: vendor_master_default
+    manual_override: false
+    reviewer: construction_manager
+    last_validated_at: "2026-03-31"
+    notes: |
+      Construction tracker row. Trade classification (structural concrete)
+      survives from this row.
+
+  # -----------------------------------------------------------------------
+  # Vendor rename. Same legal entity changed its trading name but retained
+  # its tax id. Prior row is closed with effective_end; new row is opened
+  # with the new name. Canonical id is unchanged.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: vendor_v_00412
+    source_system: accounts_payable_primary
+    source_id: AP-ELEC-881
+    match_confidence: high
+    match_method: composite
+    effective_start: "2020-01-01"
+    effective_end: "2024-12-31"
+    survivorship_rule: vendor_master_default
+    manual_override: false
+    reviewer: ap_manager
+    last_validated_at: "2024-12-31"
+    notes: |
+      Historical row. Legal name "Ridge Electric Services Inc". Vendor
+      renamed effective 2025-01-01; tax id unchanged.
+
+  - canonical_id: vendor_v_00412
+    source_system: accounts_payable_primary
+    source_id: AP-ELEC-881
+    match_confidence: high
+    match_method: manual
+    effective_start: "2025-01-01"
+    survivorship_rule: vendor_master_default
+    manual_override: true
+    override_reason: |
+      Tax id continuity across the rename confirmed by AP; manual override
+      to preserve canonical id.
+    reviewer: ap_manager
+    last_validated_at: "2026-03-31"
+    notes: |
+      Current row. New legal name "Ridge Power Systems LLC".
+
+  - canonical_id: vendor_v_00412
+    source_system: insurance_coi_intake
+    source_id: COI-RIDGE-2026
+    match_confidence: medium
+    match_method: manual
+    effective_start: "2025-01-15"
+    survivorship_rule: vendor_master_default
+    manual_override: false
+    reviewer: compliance_analyst
+    last_validated_at: "2026-03-31"
+    notes: |
+      COI row. COI retention schedule is ad-hoc; match was reviewed manually
+      against the AP row. Insurance expiry date survives from this row.
+
+  # -----------------------------------------------------------------------
+  # Legacy-alias consolidation. Same vendor appeared under three ids in
+  # the AP system across the life of the vendor. All three AP ids map to
+  # one canonical vendor. No prior_canonical_id; the three AP rows are
+  # peers, not a chain.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: vendor_v_00554
+    source_system: accounts_payable_primary
+    source_id: AP-HVAC-2211
+    match_confidence: medium
+    match_method: fuzzy
+    effective_start: "2019-04-01"
+    effective_end: "2021-12-31"
+    survivorship_rule: vendor_master_default
+    manual_override: false
+    reviewer: ap_manager
+    last_validated_at: "2021-12-31"
+    notes: |
+      Legacy AP alias. Name and address are near-match with later rows;
+      fuzzy match to canonical id confirmed after reviewer sign-off.
+
+  - canonical_id: vendor_v_00554
+    source_system: accounts_payable_primary
+    source_id: AP-HVAC-2310
+    match_confidence: high
+    match_method: manual
+    effective_start: "2022-01-01"
+    survivorship_rule: vendor_master_default
+    manual_override: true
+    override_reason: |
+      Alias consolidation done manually to avoid fragmented vendor spend
+      history in aging reports.
+    reviewer: ap_manager
+    last_validated_at: "2026-03-31"
+    notes: |
+      Current primary AP alias. Legal name "Tri-State HVAC Services Inc".
+
+  # -----------------------------------------------------------------------
+  # Wave 5 — Yardi multi-role adapter integration. Voyager hvendor rows
+  # consolidated against Intacct tax_id and Procore construction vendor
+  # records; survivorship is role-scoped: intacct wins on tax_id, yardi
+  # wins on service dispatch, procore wins on construction commitments.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: vendor_yd_60001
+    source_system: yardi_voyager_pms_stub
+    source_id: YV_60001
+    match_confidence: high
+    match_method: composite
+    effective_start: "2026-04-15"
+    survivorship_rule: vendor_master_default
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Composite match on
+      tax_id_last_four + services against sage_intacct_prod vendor
+      INT_VEND_001 and construction_tracker_primary vendor PROC_VEND_017.
+      Service dispatch survives from yardi_voyager_pms_stub per
+      yardi_multi_role survivorship rule.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Yardi Voyager service dispatch row.
+
+  - canonical_id: vendor_yd_60001
+    source_system: sage_intacct_prod
+    source_id: INT_VEND_001
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: vendor_master_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Intacct vendor row. Tax id
+      survives from this row per yardi_multi_role survivorship rule.
+
+  - canonical_id: vendor_yd_60001
+    source_system: construction_tracker_primary
+    source_id: PROC_VEND_017
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: vendor_master_default
+    manual_override: false
+    reviewer: construction_manager
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Procore vendor row. Construction
+      commitments survive from this row per yardi_multi_role survivorship
+      rule.
+
+  - canonical_id: vendor_yd_60002
+    source_system: yardi_voyager_pms_stub
+    source_id: YV_60002
+    match_confidence: high
+    match_method: composite
+    effective_start: "2026-04-15"
+    survivorship_rule: vendor_master_default
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Composite match on tax_id
+      against sage_intacct_prod vendor INT_VEND_002; no Procore pairing
+      (non-construction vendor).
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Yardi Voyager service dispatch row
+      for non-construction vendor.
+
+  - canonical_id: vendor_yd_60002
+    source_system: sage_intacct_prod
+    source_id: INT_VEND_002
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: vendor_master_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Intacct vendor row. Tax id
+      survives from this row per yardi_multi_role survivorship rule.

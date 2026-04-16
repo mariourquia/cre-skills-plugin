@@ -1,0 +1,335 @@
+# Yardi field-by-field mapping to canonical pms / gl / crm entities.
+# Applied on top of ../../pms/mapping.yaml and ../../gl/mapping.yaml.
+# Canonical mapping wins on any conflict. Transforms reference named
+# functions documented in reference/connectors/pms/mapping.yaml and
+# canonical helpers (crosswalk_lookup, dollars_to_cents, to_iso_date,
+# trim_string, map_*_status, etc.) plus Yardi-specific helpers
+# (t_code_decode, map_yardi_*, map_yardi_chargecode_property_scoped).
+#
+# The `requires_classification` flag marks mappings whose behavior
+# depends on the operator-confirmed Yardi role in
+# classification_worksheet.md Dimension 1.
+
+status_tag: template
+
+global_provenance:
+  - { source_field: source_name,       target_field: source_name,       transform: passthrough, required: true }
+  - { source_field: source_type,       target_field: source_type,       transform: passthrough, required: true }
+  - { source_field: source_sub_system, target_field: source_sub_system, transform: passthrough, required: true }
+  - { source_field: source_date,       target_field: source_date,       transform: passthrough, required: true }
+  - { source_field: extracted_at,      target_field: extracted_at,      transform: passthrough, required: true }
+  - { source_field: extractor_version, target_field: extractor_version, transform: passthrough, required: true }
+  - { source_field: source_row_id,     target_field: source_row_id,     transform: passthrough, required: true }
+
+entities:
+
+  property:
+    sub_system: voyager_pms
+    requires_classification: true
+    mappings:
+      - { source_field: propid,         target_field: property_id,           transform: crosswalk_lookup,    required: true,  crosswalk: property_master_crosswalk }
+      - { source_field: scode,          target_field: property_code,         transform: trim_string,         required: false }
+      - { source_field: property_name,  target_field: property_name,         transform: trim_string,         required: true }
+      - { source_field: legal_entity,   target_field: legal_entity_id,       transform: crosswalk_lookup,    required: true,  crosswalk: property_master_crosswalk }
+      - { source_field: book_id,        target_field: book_id,               transform: trim_string,         required: false }
+      - { source_field: unit_count,     target_field: unit_count_total,      transform: to_integer,          required: true }
+      - { source_field: market_label,   target_field: market,                transform: trim_string,         required: true }
+      - { source_field: submarket_label, target_field: submarket,            transform: trim_string,         required: false }
+      - { source_field: year_built,     target_field: year_built,            transform: to_integer,          required: false }
+      - { source_field: year_renovated, target_field: year_renovated,        transform: to_integer,          required: false }
+      - { source_field: property_type,  target_field: property_type_label,   transform: trim_string,         required: false }
+
+  building:
+    sub_system: voyager_pms
+    requires_classification: true
+    mappings:
+      - { source_field: propid,          target_field: property_id,    transform: crosswalk_lookup, required: true,  crosswalk: property_master_crosswalk }
+      - { source_field: building_code,   target_field: building_id,    transform: crosswalk_lookup, required: true,  crosswalk: building_crosswalk }
+      - { source_field: building_label,  target_field: building_label, transform: trim_string,      required: true }
+      - { source_field: stories,         target_field: stories,        transform: to_integer,       required: true }
+      - { source_field: unit_count,      target_field: unit_count,     transform: to_integer,       required: false }
+      - { source_field: nrsf,            target_field: nrsf,           transform: to_integer,       required: false }
+
+  unit:
+    sub_system: voyager_pms
+    requires_classification: true
+    mappings:
+      - { source_field: hunit,             target_field: unit_id,     transform: crosswalk_lookup,         required: true,  crosswalk: unit_crosswalk }
+      - { source_field: propid,            target_field: property_id, transform: crosswalk_lookup,         required: true,  crosswalk: property_master_crosswalk }
+      - { source_field: unit_code,         target_field: unit_label,  transform: trim_string,              required: true }
+      - { source_field: floorplan,         target_field: unit_type_id, transform: crosswalk_lookup,        required: false, crosswalk: unit_type_crosswalk }
+      - { source_field: bedrooms,          target_field: bedrooms,    transform: to_integer,               required: true }
+      - { source_field: bathrooms,         target_field: bathrooms,   transform: to_number,                required: true }
+      - { source_field: sqft,              target_field: nrsf,        transform: to_integer,               required: true }
+      - { source_field: unit_status,       target_field: status,      transform: map_yardi_unit_status,    required: true }
+      - { source_field: floor,             target_field: floor,       transform: to_integer,               required: false }
+      - { source_field: market_rent,       target_field: market_rent_monthly_cents, transform: dollars_to_cents, required: false }
+      - { source_field: offline_reason,    target_field: status_reason, transform: trim_string,            required: false }
+      - { source_field: expected_return_date, target_field: expected_return_date, transform: to_iso_date,  required: false }
+      - { source_field: effective_end_date, target_field: effective_end_date, transform: to_iso_date,     required: false }
+
+  floor_plan:
+    sub_system: voyager_pms
+    requires_classification: true
+    mappings:
+      - { source_field: fpcode,        target_field: unit_type_id, transform: crosswalk_lookup, required: true,  crosswalk: unit_type_crosswalk }
+      - { source_field: propid,        target_field: property_id,  transform: crosswalk_lookup, required: true,  crosswalk: property_master_crosswalk }
+      - { source_field: plan_name,     target_field: label,        transform: trim_string,      required: true }
+      - { source_field: bedrooms,      target_field: bedrooms,     transform: to_integer,       required: true }
+      - { source_field: bathrooms,     target_field: bathrooms,    transform: to_number,        required: true }
+      - { source_field: typical_sqft,  target_field: nrsf_typical, transform: to_integer,       required: true }
+      - { source_field: unit_count,    target_field: unit_count,   transform: to_integer,       required: false }
+
+  lease:
+    sub_system: voyager_pms
+    requires_classification: true
+    mappings:
+      - { source_field: hlease,             target_field: lease_id,                 transform: crosswalk_lookup,         required: true,  crosswalk: lease_crosswalk }
+      - { source_field: propid,             target_field: property_id,              transform: crosswalk_lookup,         required: true,  crosswalk: property_master_crosswalk }
+      - { source_field: hunit,              target_field: unit_id,                  transform: crosswalk_lookup,         required: true,  crosswalk: unit_crosswalk }
+      - { source_field: hten,               target_field: resident_account_id,      transform: crosswalk_lookup,         required: true,  crosswalk: resident_account_crosswalk }
+      - { source_field: tcode,              target_field: tcode_decoded,            transform: t_code_decode,            required: true }
+      - { source_field: lease_from,         target_field: start_date,               transform: to_iso_date,              required: true }
+      - { source_field: lease_to,           target_field: end_date,                 transform: to_iso_date,              required: true }
+      - { source_field: monthly_rent,       target_field: base_rent_monthly_cents,  transform: dollars_to_cents,         required: true }
+      - { source_field: lease_status,       target_field: status,                   transform: map_yardi_lease_status,   required: true }
+      - { source_field: is_renewal,         target_field: is_renewal,               transform: map_yardi_renewal_flag,   required: true }
+      - { source_field: term_months,        target_field: term_months,              transform: to_integer,               required: false }
+      - { source_field: concessions_total,  target_field: concessions_total_cents,  transform: dollars_to_cents,         required: false }
+      - { source_field: prior_hlease,       target_field: prior_lease_id,           transform: crosswalk_lookup,         required: false, crosswalk: lease_crosswalk }
+      - { source_field: transfer_from_hlease, target_field: transfer_from_lease_id, transform: crosswalk_lookup,         required: false, crosswalk: lease_crosswalk }
+      - { source_field: is_corporate_lease, target_field: is_corporate,             transform: to_boolean,               required: false }
+      - { source_field: effective_end_date, target_field: effective_end_date,       transform: to_iso_date,              required: false }
+
+  lease_event:
+    sub_system: voyager_pms
+    requires_classification: true
+    mappings:
+      - { source_field: event_id,     target_field: lease_event_id, transform: passthrough_with_namespace, required: true }
+      - { source_field: hlease,       target_field: lease_id,       transform: crosswalk_lookup,           required: true, crosswalk: lease_crosswalk }
+      - { source_field: event_type,   target_field: event_type,     transform: map_yardi_event_type,       required: true }
+      - { source_field: event_date,   target_field: event_date,     transform: to_iso_date,                required: true }
+      - { source_field: event_payload, target_field: event_payload, transform: passthrough,                required: false }
+
+  notice:
+    sub_system: voyager_pms
+    requires_classification: true
+    target_canonical: LeaseEvent
+    mappings:
+      - { source_field: notice_id,    target_field: lease_event_id, transform: passthrough_with_namespace, required: true }
+      - { source_field: hlease,       target_field: lease_id,       transform: crosswalk_lookup,           required: true, crosswalk: lease_crosswalk }
+      - { source_field: notice_type,  target_field: event_type,     transform: map_yardi_notice_type_to_event_type, required: true }
+      - { source_field: notice_date,  target_field: event_date,     transform: to_iso_date,                required: true }
+
+  resident_account:
+    sub_system: voyager_pms
+    requires_classification: true
+    mappings:
+      - { source_field: hten,          target_field: resident_account_id,      transform: crosswalk_lookup, required: true, crosswalk: resident_account_crosswalk }
+      - { source_field: tcode,         target_field: tcode_decoded,            transform: t_code_decode,    required: true }
+      - { source_field: primary_name,  target_field: primary_resident_name_ref, transform: pii_redact,      required: true }
+      - { source_field: resident_status, target_field: resident_status,        transform: map_yardi_resident_status, required: true }
+      - { source_field: current_balance, target_field: ledger_balance_cents,   transform: dollars_to_cents, required: true }
+      - { source_field: email,         target_field: email_hash,               transform: pii_hash,         required: false }
+      - { source_field: phone,         target_field: phone_hash,               transform: pii_hash,         required: false }
+
+  charge:
+    sub_system: voyager_pms
+    requires_classification: true
+    mappings:
+      - { source_field: charge_id,       target_field: charge_id,            transform: passthrough_with_namespace,             required: true }
+      - { source_field: hlease,          target_field: lease_id,             transform: crosswalk_lookup,                       required: true, crosswalk: lease_crosswalk }
+      - { source_field: hten,            target_field: resident_account_id,  transform: crosswalk_lookup,                       required: true, crosswalk: resident_account_crosswalk }
+      - { source_field: charge_code,     target_field: charge_type,          transform: map_yardi_chargecode_property_scoped,   required: true, notes: PROPERTY-SCOPED decode; global decode is incorrect }
+      - { source_field: post_date,       target_field: post_date,            transform: to_iso_date,                            required: true }
+      - { source_field: month,           target_field: charge_date,          transform: to_iso_month_to_date,                   required: true, notes: accrual month used for canonical charge_date; post_date preserved for audit }
+      - { source_field: amount,          target_field: amount_cents,         transform: dollars_to_cents,                       required: true }
+      - { source_field: description,     target_field: notes,                transform: trim_string,                            required: false }
+      - { source_field: recovery_code,   target_field: recovery_code,        transform: trim_string,                            required: false, notes: residential portfolios suppress non-null; commercial/mixed preserve }
+      - { source_field: reversed_charge_id, target_field: reversed_charge_id, transform: passthrough_with_namespace,            required: false }
+      - { source_field: adjustment_source, target_field: adjustment_source,  transform: map_yardi_adjustment_source,             required: false }
+      - { source_field: posted_by_user_id, target_field: posted_by_user_id,  transform: passthrough,                            required: false }
+
+  payment:
+    sub_system: voyager_pms
+    requires_classification: true
+    mappings:
+      - { source_field: receipt_id,        target_field: payment_id,              transform: passthrough_with_namespace, required: true }
+      - { source_field: hten,              target_field: resident_account_id,     transform: crosswalk_lookup,           required: true, crosswalk: resident_account_crosswalk }
+      - { source_field: receipt_date,      target_field: payment_date,            transform: to_iso_date,                required: true }
+      - { source_field: amount,            target_field: amount_cents,            transform: dollars_to_cents,           required: true }
+      - { source_field: tender,            target_field: tender_type,             transform: map_yardi_tender_type,      required: true }
+      - { source_field: hlease,            target_field: lease_id,                transform: crosswalk_lookup,           required: false, crosswalk: lease_crosswalk }
+      - { source_field: applied_to_charges, target_field: applied_to_charge_ids,  transform: passthrough,                required: false }
+      - { source_field: payment_status,    target_field: payment_status,          transform: map_yardi_payment_status,   required: false }
+      - { source_field: post_month,        target_field: post_month,              transform: to_iso_month,               required: false }
+
+  delinquency_case:
+    sub_system: voyager_pms
+    requires_classification: true
+    mappings:
+      - { source_field: hten,                 target_field: resident_account_id,  transform: crosswalk_lookup, required: true, crosswalk: resident_account_crosswalk }
+      - { source_field: hlease,               target_field: lease_id,             transform: crosswalk_lookup, required: true, crosswalk: lease_crosswalk }
+      - { source_field: stage,                target_field: stage,                transform: map_yardi_delinquency_stage, required: true }
+      - { source_field: stage_entered_date,   target_field: stage_entered_date,   transform: to_iso_date,      required: true }
+      - { source_field: current_balance,      target_field: current_balance_cents, transform: dollars_to_cents, required: true }
+
+  vendor:
+    sub_system: voyager_pms
+    requires_classification: true
+    mappings:
+      - { source_field: hvendor,                target_field: vendor_id,             transform: crosswalk_lookup, required: true, crosswalk: vendor_master_crosswalk }
+      - { source_field: vendor_code,            target_field: vendor_code,           transform: trim_string,      required: false }
+      - { source_field: vendor_name,            target_field: vendor_name,           transform: trim_string,      required: true }
+      - { source_field: services,               target_field: services,              transform: passthrough,      required: false }
+      - { source_field: insurance_expiry_date,  target_field: insurance_expiry_date, transform: to_iso_date,      required: false }
+      - { source_field: w9_on_file,             target_field: w9_on_file,            transform: to_boolean,       required: false }
+      - { source_field: tax_id_hash,            target_field: tax_id_hash,           transform: passthrough,      required: false, notes: plaintext never persisted; hashed at landing }
+
+  work_order:
+    sub_system: voyager_pms
+    requires_classification: true
+    mappings:
+      - { source_field: workorder_id,   target_field: work_order_id,   transform: passthrough_with_namespace, required: true }
+      - { source_field: propid,         target_field: property_id,     transform: crosswalk_lookup,           required: true, crosswalk: property_master_crosswalk }
+      - { source_field: date_created,   target_field: reported_date,   transform: to_iso_date,                required: true }
+      - { source_field: priority,       target_field: priority,        transform: map_yardi_priority,         required: true }
+      - { source_field: wo_status,      target_field: status,          transform: map_yardi_wo_status,        required: true }
+      - { source_field: hunit,          target_field: unit_id,         transform: crosswalk_lookup,           required: false, crosswalk: unit_crosswalk }
+      - { source_field: category,       target_field: category,        transform: map_yardi_wo_category,      required: false }
+      - { source_field: date_completed, target_field: completed_date,  transform: to_iso_date,                required: false }
+      - { source_field: assigned_vendor, target_field: vendor_id,      transform: crosswalk_lookup,           required: false, crosswalk: vendor_master_crosswalk }
+
+  # --- GL side ---
+
+  account:
+    sub_system: voyager_gl
+    requires_classification: true
+    mappings:
+      - { source_field: account_code,  target_field: gl_account_code,   transform: crosswalk_lookup, required: true,  crosswalk: account_crosswalk }
+      - { source_field: account_name,  target_field: gl_account_name,   transform: trim_string,      required: true }
+      - { source_field: account_type,  target_field: gl_account_type,   transform: map_yardi_account_type, required: true }
+      - { source_field: is_operating,  target_field: is_operating,      transform: to_boolean,       required: false }
+      - { source_field: is_capex,      target_field: is_capex,          transform: to_boolean,       required: false }
+      - { source_field: parent_account, target_field: parent_account,   transform: crosswalk_lookup, required: false, crosswalk: account_crosswalk }
+      - { source_field: roll_up_code,  target_field: roll_up_code,      transform: trim_string,      required: false }
+
+  budget_line:
+    sub_system: voyager_gl
+    requires_classification: true
+    mappings:
+      - { source_field: propid,          target_field: property_id,   transform: crosswalk_lookup, required: true, crosswalk: property_master_crosswalk }
+      - { source_field: account_code,    target_field: gl_account_code, transform: crosswalk_lookup, required: true, crosswalk: account_crosswalk }
+      - { source_field: period,          target_field: period,        transform: to_iso_month,     required: true }
+      - { source_field: budget_version,  target_field: budget_version, transform: trim_string,      required: true }
+      - { source_field: amount,          target_field: amount_cents,  transform: dollars_to_cents, required: true }
+
+  actual_line:
+    sub_system: voyager_gl
+    requires_classification: true
+    mappings:
+      - { source_field: propid,        target_field: property_id,     transform: crosswalk_lookup, required: true, crosswalk: property_master_crosswalk }
+      - { source_field: account_code,  target_field: gl_account_code, transform: crosswalk_lookup, required: true, crosswalk: account_crosswalk }
+      - { source_field: period,        target_field: period,          transform: to_iso_month,     required: true, notes: accrual month is canonical period }
+      - { source_field: book_id,       target_field: book_id,         transform: trim_string,      required: true }
+      - { source_field: amount,        target_field: amount_cents,    transform: dollars_to_cents, required: true }
+      - { source_field: post_date,     target_field: post_date,       transform: to_iso_date,      required: false, notes: preserved for audit; not used for period attribution unless operator overrides }
+      - { source_field: journal_ref,   target_field: journal_ref,     transform: trim_string,      required: false }
+
+  forecast_line:
+    sub_system: voyager_gl
+    requires_classification: true
+    mappings:
+      - { source_field: propid,            target_field: property_id,     transform: crosswalk_lookup, required: true, crosswalk: property_master_crosswalk }
+      - { source_field: account_code,      target_field: gl_account_code, transform: crosswalk_lookup, required: true, crosswalk: account_crosswalk }
+      - { source_field: period,            target_field: period,          transform: to_iso_month,     required: true }
+      - { source_field: forecast_version,  target_field: forecast_version, transform: trim_string,     required: true }
+      - { source_field: amount,            target_field: amount_cents,    transform: dollars_to_cents, required: true }
+
+  # --- construction support (secondary; Procore usually primary) ---
+
+  job_cost:
+    sub_system: voyager_construction_support
+    requires_classification: true
+    target_canonical: CapexProject
+    mappings:
+      - { source_field: propid,        target_field: property_id,      transform: crosswalk_lookup, required: true, crosswalk: property_master_crosswalk }
+      - { source_field: job_id,        target_field: capex_project_id, transform: crosswalk_lookup, required: true, crosswalk: capex_project_crosswalk }
+      - { source_field: account_code,  target_field: gl_account_code,  transform: crosswalk_lookup, required: true, crosswalk: account_crosswalk }
+      - { source_field: period,        target_field: period,           transform: to_iso_month,     required: true }
+      - { source_field: amount,        target_field: amount_cents,     transform: dollars_to_cents, required: true }
+
+  # --- rentcafe leasing (blocked until rentcafe scope confirmed) ---
+
+  lead:
+    sub_system: rentcafe_leasing
+    requires_classification: true
+    access_gated: rentcafe_scope_confirmed
+    mappings:
+      - { source_field: guest_id,       target_field: lead_id,         transform: passthrough_with_namespace, required: true }
+      - { source_field: propid,         target_field: property_id,     transform: crosswalk_lookup,           required: true, crosswalk: property_master_crosswalk }
+      - { source_field: source_channel, target_field: source_channel,  transform: trim_string,                required: true }
+      - { source_field: inquiry_date,   target_field: inquiry_date,    transform: to_iso_date,                required: true }
+      - { source_field: pipeline_stage, target_field: pipeline_stage,  transform: map_yardi_funnel_stage,     required: true }
+      - { source_field: preferred_bedrooms, target_field: bedrooms_desired, transform: to_integer,            required: false }
+      - { source_field: move_in_target, target_field: move_in_target,  transform: to_iso_date,                required: false }
+
+  tour:
+    sub_system: rentcafe_leasing
+    requires_classification: true
+    access_gated: rentcafe_scope_confirmed
+    mappings:
+      - { source_field: tour_id,     target_field: tour_id,        transform: passthrough_with_namespace, required: true }
+      - { source_field: guest_id,    target_field: lead_id,        transform: passthrough_with_namespace, required: true }
+      - { source_field: scheduled_at, target_field: scheduled_date, transform: to_iso_date,               required: true }
+      - { source_field: tour_type,   target_field: tour_type,      transform: map_yardi_tour_type,       required: true }
+      - { source_field: conducted_at, target_field: conducted_date, transform: to_iso_date,              required: false }
+      - { source_field: outcome,     target_field: outcome,        transform: map_yardi_tour_outcome,    required: false }
+
+  application:
+    sub_system: rentcafe_leasing
+    requires_classification: true
+    access_gated: rentcafe_scope_confirmed
+    mappings:
+      - { source_field: application_id,  target_field: application_id,    transform: passthrough_with_namespace, required: true }
+      - { source_field: guest_id,        target_field: lead_id,           transform: passthrough_with_namespace, required: true }
+      - { source_field: propid,          target_field: property_id,       transform: crosswalk_lookup,           required: true, crosswalk: property_master_crosswalk }
+      - { source_field: applied_date,    target_field: applied_date,      transform: to_iso_date,                required: true }
+      - { source_field: app_status,      target_field: approval_status,   transform: map_yardi_app_status,       required: true }
+      - { source_field: preferred_hunit, target_field: unit_id_preferred, transform: crosswalk_lookup,           required: false, crosswalk: unit_crosswalk }
+      - { source_field: screening_result, target_field: screening_result, transform: map_yardi_screening_result, required: false }
+      - { source_field: decided_date,    target_field: decided_date,      transform: to_iso_date,                required: false }
+
+  # --- data connect warehouse (secondary reporting-domain feed) ---
+
+  dc_fact_charge:
+    sub_system: data_connect_warehouse
+    requires_classification: true
+    target_canonical: Charge
+    notes: same mapping as voyager_pms.charge; see entities.charge. DC replicates Voyager. Reconciliation only; do not double-ingest.
+
+  dc_fact_gl_actual:
+    sub_system: data_connect_warehouse
+    requires_classification: true
+    target_canonical: ActualLine
+    notes: same mapping as voyager_gl.actual_line; see entities.actual_line. DC replicates Voyager. Reconciliation only; do not double-ingest.
+
+  dc_dim_unit_effective:
+    sub_system: data_connect_warehouse
+    requires_classification: true
+    target_canonical: Unit
+    mappings:
+      - { source_field: hunit,                target_field: unit_id,              transform: crosswalk_lookup, required: true, crosswalk: unit_crosswalk }
+      - { source_field: propid,               target_field: property_id,          transform: crosswalk_lookup, required: true, crosswalk: property_master_crosswalk }
+      - { source_field: effective_start_date, target_field: effective_start_date, transform: to_iso_date,      required: true }
+      - { source_field: effective_end_date,   target_field: effective_end_date,   transform: to_iso_date,      required: false }
+      - { source_field: unit_code,            target_field: unit_label,           transform: trim_string,      required: true }
+      - { source_field: sqft,                 target_field: nrsf,                 transform: to_integer,       required: true }
+
+  # --- report export files ---
+
+  report_export_record:
+    sub_system: report_export_files
+    requires_classification: true
+    target_canonical: varies_by_template
+    notes: routes to canonical objects per column_map registered in master_data/report_export_templates. Unregistered templates rejected by rule yd_conformance_report_columns.

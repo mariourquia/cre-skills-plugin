@@ -1,0 +1,58 @@
+# Adapter manifest for the generic ERP/GL vendor family stub.
+# Conforms to reference/connectors/adapters/adapter_manifest.schema.yaml.
+
+adapter_id: gl_vendor_family_stub
+adapter_name: Generic ERP/GL Vendor Family Stub
+vendor_family: generic_erp_stub
+connector_domain: gl
+status: stub
+rollout_wave: wave_0
+description: |
+  Placeholder adapter over the canonical gl connector. Seeds operator
+  onboarding with common chart-of-accounts, journal-description, and
+  posting-date conventions seen across mid-market ERPs. Canonical
+  schema in ../../gl/ wins on any conflict.
+
+supported_source_systems:
+  - gl_generic_stub
+
+mapping_hints:
+  - { source_field_pattern: "acct|gl*account|account*code|account*number", canonical_field: account_slug,            transform_hint: map_account_slug }
+  - { source_field_pattern: "acct*segment|segment*value",                  canonical_field: account_segment,          transform_hint: trim_string }
+  - { source_field_pattern: "journal*id|je*id|entry*id",                   canonical_field: journal_id,               transform_hint: trim_string }
+  - { source_field_pattern: "journal*line|je*line|line*no",                canonical_field: journal_line_id,          transform_hint: trim_string }
+  - { source_field_pattern: "journal*desc|memo|description",               canonical_field: memo,                     transform_hint: trim_string }
+  - { source_field_pattern: "post*date|posting*date|effective*date",       canonical_field: posting_date,             transform_hint: to_iso_date }
+  - { source_field_pattern: "operating*month|period|acct*period",          canonical_field: operating_month,          transform_hint: to_iso_month }
+  - { source_field_pattern: "debit|dr*amt",                                canonical_field: debit_cents,              transform_hint: dollars_to_cents }
+  - { source_field_pattern: "credit|cr*amt",                               canonical_field: credit_cents,             transform_hint: dollars_to_cents }
+  - { source_field_pattern: "net*amount|amount|net_amt",                   canonical_field: amount_cents,             transform_hint: dollars_to_cents }
+  - { source_field_pattern: "budget*version|version*tag|scenario*tag",     canonical_field: budget_version,           transform_hint: trim_string }
+  - { source_field_pattern: "accrual*flag|accrual*code",                   canonical_field: is_accrual,               transform_hint: to_boolean }
+  - { source_field_pattern: "prop*code|property*id|entity*code",           canonical_field: property_id,              transform_hint: trim_string }
+  - { source_field_pattern: "consol*entity|parent*entity|reporting*entity", canonical_field: consolidating_entity_id, transform_hint: trim_string }
+  - { source_field_pattern: "capex*proj|project*code|capital*project",     canonical_field: capex_project_id,         transform_hint: trim_string }
+  - { source_field_pattern: "cost*code|cost*center|csi*division",          canonical_field: cost_code,                transform_hint: trim_string }
+  - { source_field_pattern: "vendor*id|supplier*id",                       canonical_field: vendor_id,                transform_hint: trim_string }
+  - { source_field_pattern: "budget*amount|bud_amt|planned",               canonical_field: budget_amount_cents,      transform_hint: dollars_to_cents }
+  - { source_field_pattern: "forecast*amount|forecast_amt",                canonical_field: forecast_amount_cents,    transform_hint: dollars_to_cents }
+
+known_gotchas:
+  - multi-entity consolidation rolls inflate totals if the reporting-entity column is ignored; filter or dedup per consolidation layer
+  - account-rename history is typically untracked inside the ERP; the account_crosswalk captures historical slugs
+  - late accruals often land in the wrong operating_month; reconcile posting_date vs operating_month before variance analysis
+  - capex items miscoded as opex and vice versa; confirm against the capex_project crosswalk
+  - budget versions change mid-year (initial, reforecast, outlook); always carry budget_version through
+  - chart-of-accounts variants range from 5-digit flat to 7-digit segmented; pick map_account_slug at the right granularity
+  - journal descriptions contain free-form text; do not parse for structure
+  - reversing entries appear twice in exports; require sign-flip handling
+
+reference_documentation:
+  - placeholder_link_to_internal_account_crosswalk
+  - placeholder_link_to_gl_close_calendar
+
+author_metadata:
+  authored_by: residential_multifamily_subsystem
+  authored_role: finance_systems_team
+
+last_updated: "2026-04-15"

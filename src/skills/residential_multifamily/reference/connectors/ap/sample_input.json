@@ -1,0 +1,106 @@
+{
+  "vendor": [
+    {
+      "v_id": "vend_sample_001",
+      "v_name": "Sample HVAC Co",
+      "w9_flag": true,
+      "services": [
+        "hvac",
+        "preventive_mx"
+      ],
+      "coi_expiry": "2026-12-31",
+      "preferred": true,
+      "source_name": "sample_feed",
+      "source_type": "ap",
+      "source_date": "2026-04-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "vend_sample_001"
+    }
+  ],
+  "invoice": [
+    {
+      "inv_id": "inv_sample_001",
+      "v_id": "vend_sample_001",
+      "prop_id": "prop_demo_001",
+      "inv_date": "2026-04-05",
+      "amt_usd": 1200,
+      "inv_status": "in_review",
+      "po_ref": "po_sample_001",
+      "contract_ref": "ctr_sample_001",
+      "due_dt": "2026-05-05",
+      "source_name": "sample_feed",
+      "source_type": "ap",
+      "source_date": "2026-04-05",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "inv_sample_001"
+    }
+  ],
+  "contract": [
+    {
+      "contract_id": "ctr_sample_001",
+      "vendor_id": "vend_sample_001",
+      "pricing_model": "unit_rate",
+      "term_start": "2026-01-01",
+      "term_end": "2026-12-31",
+      "property_id": "prop_demo_001",
+      "scope_summary": "sample scope",
+      "contract_total_cents": 5000000,
+      "source_name": "sample_feed",
+      "source_type": "ap",
+      "source_date": "2026-01-01",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "ctr_sample_001"
+    }
+  ],
+  "commitment": [
+    {
+      "commitment_id": "ap_cmt_sample_001",
+      "vendor_id": "vend_sample_001",
+      "contract_id": "ctr_sample_001",
+      "committed_amount_cents": 5000000,
+      "invoiced_to_date_cents": 120000,
+      "paid_to_date_cents": 0,
+      "status": "open",
+      "source_name": "sample_feed",
+      "source_type": "ap",
+      "source_date": "2026-04-05",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "ap_cmt_sample_001"
+    }
+  ],
+  "purchase_order": [
+    {
+      "po_id": "po_sample_001",
+      "vendor_id": "vend_sample_001",
+      "po_date": "2026-04-03",
+      "amount_cents": 120000,
+      "status": "issued",
+      "property_id": "prop_demo_001",
+      "source_name": "sample_feed",
+      "source_type": "ap",
+      "source_date": "2026-04-03",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "po_sample_001"
+    }
+  ],
+  "payment_status": [
+    {
+      "invoice_id": "inv_sample_001",
+      "payment_status": "unpaid",
+      "status_date": "2026-04-05",
+      "check_number": null,
+      "paid_amount_cents": 0,
+      "source_name": "sample_feed",
+      "source_type": "ap",
+      "source_date": "2026-04-05",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "pay_inv_sample_001"
+    }
+  ]
+}

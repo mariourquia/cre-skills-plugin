@@ -1,0 +1,94 @@
+# Adapter manifest for AppFolio property management system (PMS).
+# Conforms to reference/connectors/adapters/adapter_manifest.schema.yaml.
+# Live adapter is NOT running. Status: stub. Live credential methods are
+# declared in the companion source_registry_entry.yaml fragment only.
+
+adapter_id: appfolio_pms
+adapter_name: AppFolio Property Management Adapter
+vendor_family: appfolio_family
+connector_domain: pms
+status: stub
+rollout_wave: wave_4
+description: |
+  Vendor-specific adapter that specializes the canonical pms connector for
+  AppFolio Property Management. Primary source of truth for unit roster,
+  lease, charge, payment, work order (Service Request), vendor directory,
+  tenant ledger, and leasing-funnel objects.
+
+  Secondary source for property and vendor master (Intacct retains
+  accounting-side truth for legal_entity_id, vendor tax id, and GL
+  posting). Canonical schema under ../../pms/ wins on any conflict.
+
+  Downstream consumers: monthly_property_operating_review,
+  lead_to_lease_funnel_review, vendor_dispatch_sla_review,
+  work_order_triage, renewal_retention, move_in_administration,
+  move_out_administration, delinquency_collections,
+  third_party_manager_scorecard_review.
+
+supported_source_systems:
+  - appfolio_prod
+
+mapping_hints:
+  - { source_field_pattern: "PropertyId",                    canonical_field: property_id,                 transform_hint: crosswalk_lookup }
+  - { source_field_pattern: "PropertyName",                  canonical_field: property_name,               transform_hint: trim_string }
+  - { source_field_pattern: "GLPartnerCode",                 canonical_field: legal_entity_id,             transform_hint: crosswalk_lookup }
+  - { source_field_pattern: "UnitId|UnitNumber",             canonical_field: unit_id,                     transform_hint: crosswalk_lookup }
+  - { source_field_pattern: "Bedrooms|BedroomCount",         canonical_field: bedrooms,                    transform_hint: to_integer }
+  - { source_field_pattern: "Bathrooms|BathroomCount",       canonical_field: bathrooms,                   transform_hint: to_number }
+  - { source_field_pattern: "SquareFeet|SquareFootage",      canonical_field: nrsf,                        transform_hint: to_integer }
+  - { source_field_pattern: "UnitStatus|OccupancyStatus",    canonical_field: status,                      transform_hint: map_appfolio_unit_status }
+  - { source_field_pattern: "LeaseId",                       canonical_field: lease_id,                    transform_hint: crosswalk_lookup }
+  - { source_field_pattern: "StartDate|LeaseStartDate",      canonical_field: start_date,                  transform_hint: to_iso_date }
+  - { source_field_pattern: "EndDate|LeaseEndDate",          canonical_field: end_date,                    transform_hint: to_iso_date }
+  - { source_field_pattern: "MonthlyRent|BaseRent",          canonical_field: base_rent_monthly_cents,     transform_hint: dollars_to_cents }
+  - { source_field_pattern: "LeaseRenewalStatus|IsRenewal",  canonical_field: is_renewal,                  transform_hint: map_appfolio_renewal_flag }
+  - { source_field_pattern: "MoveInDate",                    canonical_field: event_date_move_in,          transform_hint: to_iso_date }
+  - { source_field_pattern: "MoveOutDate|NoticeMoveOutDate", canonical_field: event_date_move_out,         transform_hint: to_iso_date }
+  - { source_field_pattern: "TenantId",                      canonical_field: resident_account_id,         transform_hint: crosswalk_lookup }
+  - { source_field_pattern: "TenantName",                    canonical_field: primary_resident_name_ref,   transform_hint: pii_redact }
+  - { source_field_pattern: "ChargeId|TenantChargeId",       canonical_field: charge_id,                   transform_hint: trim_string }
+  - { source_field_pattern: "ChargeType|ChargeCode",         canonical_field: charge_type,                 transform_hint: map_appfolio_charge_type }
+  - { source_field_pattern: "ChargeDate|PostedDate",         canonical_field: charge_date,                 transform_hint: to_iso_date }
+  - { source_field_pattern: "Amount|ChargeAmount",           canonical_field: amount_cents,                transform_hint: dollars_to_cents }
+  - { source_field_pattern: "PaymentId|TenantPaymentId",     canonical_field: payment_id,                  transform_hint: trim_string }
+  - { source_field_pattern: "PaymentDate|PostedDate",        canonical_field: payment_date,                transform_hint: to_iso_date }
+  - { source_field_pattern: "TenderType|PaymentMethod",      canonical_field: tender_type,                 transform_hint: map_appfolio_tender_type }
+  - { source_field_pattern: "ServiceRequestId|WorkOrderId",  canonical_field: work_order_id,               transform_hint: trim_string }
+  - { source_field_pattern: "Priority",                      canonical_field: priority,                    transform_hint: map_appfolio_priority }
+  - { source_field_pattern: "DateCreated|ReportedDate",      canonical_field: reported_date,               transform_hint: to_iso_date }
+  - { source_field_pattern: "DateCompleted|CompletionDate",  canonical_field: completed_date,              transform_hint: to_iso_date }
+  - { source_field_pattern: "WorkOrderStatus|RequestStatus", canonical_field: status,                      transform_hint: map_appfolio_wo_status }
+  - { source_field_pattern: "VendorId|VendorCode",           canonical_field: vendor_id,                   transform_hint: crosswalk_lookup }
+  - { source_field_pattern: "VendorName|CompanyName",        canonical_field: vendor_name,                 transform_hint: trim_string }
+  - { source_field_pattern: "GuestCardId|LeadId",            canonical_field: lead_id,                     transform_hint: trim_string }
+  - { source_field_pattern: "ShowingId|TourId",              canonical_field: tour_id,                     transform_hint: trim_string }
+  - { source_field_pattern: "ApplicationId",                 canonical_field: application_id,              transform_hint: trim_string }
+  - { source_field_pattern: "ApplicationStatus|AppStatus",   canonical_field: approval_status,             transform_hint: map_appfolio_app_status }
+
+known_gotchas:
+  - AppFolio PropertyId is numeric and stable, but GL Partner splits create multiple GL views of one operating property; property_master_crosswalk resolves
+  - unit offline status surfaces as two distinct codes (Offline vs Down) with operator-specific meanings; must be normalized through map_appfolio_unit_status
+  - AppFolio does not carry a native TurnProject object; turns are inferred from (move_out lease_event, make_ready work_orders, move_in lease_event) sequences on a unit
+  - future leases (StartDate > today) arrive in the same Lease feed as active leases; Preleased flag is derived, not native
+  - transferred residents carry a new LeaseId but retain TenantId; the prior lease must be closed with a lease_terminated event before the new lease is counted
+  - multiple applicants for the same unit resolve to a single lease but AppFolio retains separate ApplicationIds per co-applicant; join via the resident crosswalk
+  - manually adjusted balances in tenant ledger (AdjustmentType = ManualAdjustment) look like normal charges; flag via AdjustmentSource
+  - reversed charges have NegativeAmount + OriginalChargeId reference; always preserve the link
+  - work orders created and closed within the same extract window lose close date in some date-range exports; rely on WorkOrderStatus and re-extract
+  - concession tracking is informal in AppFolio; concessions ride on ChargeType = Credit or Concession and must be summed separately
+  - property codes in AppFolio PropertyName drift from Intacct entity names; reconcile via property_master_crosswalk
+  - AppFolio portfolio hierarchy (Portfolio > GL Partner > Property) does not align 1:1 with operator ownership entity hierarchy
+  - eviction status is not distinct from delinquency stage in native AppFolio; derive EvictionFiled / EvictionJudgment via DelinquencyStage enum mapping
+  - vendor directory contains duplicates across GL partners; dedup via vendor_master_crosswalk
+
+reference_documentation:
+  - placeholder_link_to_appfolio_api_documentation
+  - placeholder_link_to_appfolio_property_manager_export_guide
+  - placeholder_link_to_internal_pms_taxonomy_reference
+  - placeholder_link_to_intacct_property_crosswalk_guide
+
+author_metadata:
+  authored_by: residential_multifamily_subsystem
+  authored_role: data_platform_team
+
+last_updated: "2026-04-15"

@@ -1,0 +1,99 @@
+pack_slug: executive_pipeline_summary
+reads:
+  - path: reference/connectors/_core/stack_wave4/source_of_truth_matrix.md
+    category: stack_handoff_specification
+    expected_schema_version: "wave_4_authoritative"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: wave_4_current
+  - path: reference/connectors/adapters/dealpath_deal_pipeline/normalized_contract.yaml
+    category: adapter_contract
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: last_updated_within_staleness_window
+  - path: reference/connectors/adapters/dealpath_deal_pipeline/reconciliation_rules.md
+    category: adapter_reconciliation
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: last_updated_within_staleness_window
+  - path: reference/connectors/adapters/dealpath_deal_pipeline/runbooks/dealpath_common_issues.md
+    category: adapter_runbook
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: proceed_with_default
+    as_of_expectation: last_updated_within_staleness_window
+  - path: reference/connectors/adapters/dealpath_deal_pipeline/dq_rules.yaml
+    category: adapter_dq_rules
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: last_updated_within_staleness_window
+  - path: reference/connectors/adapters/procore_construction/reconciliation_checks.yaml
+    category: adapter_reconciliation
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: last_updated_within_staleness_window
+  - path: reference/connectors/adapters/procore_construction/runbooks/procore_common_issues.md
+    category: adapter_runbook
+    expected_schema_version: "0.1.0"
+    required: false
+    fallback_behavior: proceed_with_default
+    as_of_expectation: last_updated_within_staleness_window
+  - path: reference/connectors/adapters/sage_intacct_gl/reconciliation_rules.md
+    category: adapter_reconciliation
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: last_updated_within_staleness_window
+  - path: reference/connectors/master_data/asset_crosswalk.yaml
+    category: crosswalk
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: last_validated_within_staleness_window
+  - path: reference/connectors/master_data/market_crosswalk.yaml
+    category: crosswalk
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: last_validated_within_staleness_window
+  - path: reference/connectors/master_data/dev_project_crosswalk.yaml
+    category: crosswalk
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: last_validated_within_staleness_window
+  - path: reference/connectors/master_data/capex_project_crosswalk.yaml
+    category: crosswalk
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: last_validated_within_staleness_window
+  - path: reference/normalized/schemas/reconciliation_tolerance_band.yaml
+    category: tolerance_band_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: current
+  - path: reference/normalized/approval_threshold_defaults.csv
+    category: approval_threshold_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: current
+  - path: reference/derived/portfolio_concentration_targets.csv
+    category: portfolio_concentration_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: current
+  - path: reference/derived/role_kpi_targets.csv
+    category: occupancy_benchmark
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+    as_of_expectation: current
+writes: []

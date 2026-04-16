@@ -1,0 +1,170 @@
+# lineage_manifest.schema.yaml
+#
+# JSON Schema (draft 2020-12) for a lineage manifest record. One manifest is
+# emitted per transformation event (normalization or derivation). Manifests
+# are append-only. See lineage.md for the prose specification.
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "residential_multifamily/reference/connectors/_core/lineage_manifest.schema.yaml"
+title: "Lineage Manifest"
+description: >
+  Canonical index that ties a transformation run to its inputs and outputs.
+  Consumed by audit tooling, reconciliation checks, and exception routing.
+type: object
+additionalProperties: false
+
+required:
+  - manifest_id
+  - produced_by
+  - produced_at
+  - source_system_or_file
+  - extraction_timestamp
+  - as_of_date
+  - normalized_version
+  - transformation_version
+  - reference_assumptions_used
+  - notes
+
+properties:
+
+  manifest_id:
+    type: string
+    description: Unique manifest identifier.
+    pattern: "^lm_[0-9]{4}_[0-9]{2}_[0-9]{2}_[a-z][a-z0-9_]*_[0-9]{5}$"
+
+  produced_by:
+    type: string
+    description: Slug of the producer.
+    enum:
+      - "pass:raw_to_normalized"
+      - "pass:recompute_derived"
+      - "correction:manual"
+      - "correction:rollback"
+
+  produced_at:
+    type: string
+    format: date-time
+    description: UTC timestamp at which the manifest was produced.
+
+  source_system_or_file:
+    type: string
+    description: >
+      Canonical reference to the source. Pattern
+      "<connector_domain>://<source_name>" for system feeds; pattern
+      "manual_uploads://<template_slug>/<source_label>" for file drops.
+    pattern: "^(pms|gl|crm|ap|market_data|construction|hr_payroll|manual_uploads)://[a-z0-9][a-z0-9_/]*$"
+
+  extraction_timestamp:
+    type: string
+    format: date-time
+    description: UTC timestamp of the source extraction event.
+
+  as_of_date:
+    type: string
+    format: date
+    description: Effective date of the data the manifest covers.
+
+  normalized_version:
+    description: Required for normalization manifests; null for derived-only.
+    oneOf:
+      - type: "null"
+      - type: string
+        pattern: "^[a-z][a-z0-9-]*-[0-9]+\\.[0-9]+\\.[0-9]+$"
+
+  transformation_version:
+    description: Required for derived manifests; null for normalization-only.
+    oneOf:
+      - type: "null"
+      - type: string
+        pattern: "^[a-z][a-z0-9-]*-[0-9]+\\.[0-9]+\\.[0-9]+$"
+
+  reference_assumptions_used:
+    type: array
+    description: Reference files cited by the transformation; may be empty.
+    items:
+      type: object
+      additionalProperties: false
+      required: [path, as_of, confidence]
+      properties:
+        path:
+          type: string
+          description: Repo-relative path of the reference file.
+          pattern: "^reference/(raw|normalized|derived|archives)/.+$"
+        as_of:
+          type: string
+          format: date
+          description: Effective date of the reference file at the time of the transformation.
+        confidence:
+          type: string
+          enum: [low, medium, high]
+
+  approver_metadata:
+    description: Approver block for transformations that required human approval.
+    oneOf:
+      - type: "null"
+      - type: object
+        additionalProperties: false
+        required: [approver_id, approval_event_id, approved_at]
+        properties:
+          approver_id:
+            type: string
+            description: Reference into overlays/org/<org_id>/approvers.yaml.
+            pattern: "^[a-z][a-z0-9_]*$"
+          approval_event_id:
+            type: string
+            description: Unique id of the approval event.
+            pattern: "^ae_[0-9]{4}_[0-9]{2}_[0-9]{2}_[a-z][a-z0-9_]*_[0-9]{5}$"
+          approved_at:
+            type: string
+            format: date-time
+          approval_context:
+            type: string
+            description: Short free-text context for the approval.
+          threshold_path:
+            type: string
+            description: Path to the threshold definition that was applied.
+
+  file_checksum:
+    description: SHA-256 checksum of the raw landing artifact, when applicable.
+    oneOf:
+      - type: "null"
+      - type: string
+        pattern: "^[a-f0-9]{64}$"
+
+  mapping_checksum:
+    description: SHA-256 of the mapping.yaml in force at run time, when applicable.
+    oneOf:
+      - type: "null"
+      - type: string
+        pattern: "^[a-f0-9]{64}$"
+
+  schema_checksum:
+    description: SHA-256 of the schema.yaml in force at run time, when applicable.
+    oneOf:
+      - type: "null"
+      - type: string
+        pattern: "^[a-f0-9]{64}$"
+
+  transformation_recipe_checksum:
+    description: SHA-256 of the derived-recipe definition; required for derived manifests.
+    oneOf:
+      - type: "null"
+      - type: string
+        pattern: "^[a-f0-9]{64}$"
+
+  derived_from_manifest_ids:
+    description: Array of upstream manifest ids for derived manifests.
+    type: array
+    items:
+      type: string
+      pattern: "^lm_[0-9]{4}_[0-9]{2}_[0-9]{2}_[a-z][a-z0-9_]*_[0-9]{5}$"
+
+  notes:
+    type: string
+    description: Short free-text notes.
+    maxLength: 1000
+
+  status:
+    type: string
+    description: Optional status tag for sample records.
+    enum: [sample, illustrative, approved]

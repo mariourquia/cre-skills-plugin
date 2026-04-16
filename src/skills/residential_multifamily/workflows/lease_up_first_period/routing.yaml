@@ -1,0 +1,40 @@
+pack_slug: lease_up_first_period
+pack_type: workflow
+priority: 18
+triggers:
+  explicit_phrases:
+    - "lease-up review"
+    - "lease-up scorecard"
+    - "lease-up tracker"
+    - "lease-up pace"
+    - "monthly lease-up review"
+    - "ramp vs underwriting"
+    - "NOI ramp check"
+    - "concession depth vs market"
+    - "first-renewal readiness"
+    - "equity-call schedule"
+  implicit_signals:
+    - "property lifecycle enters lease_up"
+    - "within lease-up window 6-18 months post-delivery"
+    - "stabilization_pace_vs_plan breaches band"
+    - "concession_rate above lease-up overlay ceiling"
+    - "lender reporting calendar event approaching"
+    - "fund equity-call milestone approaching"
+    - "first-renewal T60 window opens for lease-up-executed lease"
+required_axes:
+  - asset_class
+  - segment
+  - form_factor
+  - lifecycle_stage
+  - management_mode
+  - market
+  - property_id
+optional_axes:
+  - role
+  - org_id
+  - loan_id
+  - fund_id
+  - output_type
+fallback_behavior:
+  missing_required_axis: ask_user
+  missing_optional_axis: proceed_with_default

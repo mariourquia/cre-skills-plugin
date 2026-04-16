@@ -1,0 +1,177 @@
+{
+  "deal": [
+    {
+      "deal_id": "deal_sample_001",
+      "deal_name": "Sample Acquisition Deal Alpha",
+      "deal_type": "acquisition",
+      "pipeline_stage": "under_dd",
+      "status": "active",
+      "deal_created_date": "2026-02-01",
+      "asset_placeholder_id": "asset_ph_sample_001",
+      "market_label": "sample_msa_a",
+      "submarket_label": "sample_submarket_a",
+      "strategy_tag": "value_add",
+      "source_channel": "broker",
+      "broker_name": "sample_broker_firm",
+      "seller_entity_label": "sample_seller_llc",
+      "source_name": "sample_feed",
+      "source_type": "deal_pipeline",
+      "source_date": "2026-04-15",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "deal_sample_001"
+    },
+    {
+      "deal_id": "deal_sample_002",
+      "deal_name": "Sample Development Deal Beta",
+      "deal_type": "development",
+      "pipeline_stage": "ic_review",
+      "status": "active",
+      "deal_created_date": "2025-11-15",
+      "asset_placeholder_id": "asset_ph_sample_002",
+      "market_label": "sample_msa_b",
+      "submarket_label": "sample_submarket_b",
+      "strategy_tag": "development",
+      "source_channel": "off_market_relationship",
+      "source_name": "sample_feed",
+      "source_type": "deal_pipeline",
+      "source_date": "2026-04-15",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "deal_sample_002"
+    }
+  ],
+  "deal_stage": [
+    {
+      "deal_stage_id": "ds_sample_001",
+      "deal_id": "deal_sample_001",
+      "pipeline_stage": "under_loi",
+      "entered_date": "2026-02-05",
+      "exited_date": "2026-02-22",
+      "stage_reason": "loi_executed",
+      "source_name": "sample_feed",
+      "source_type": "deal_pipeline",
+      "source_date": "2026-04-15",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "ds_sample_001"
+    },
+    {
+      "deal_stage_id": "ds_sample_002",
+      "deal_id": "deal_sample_001",
+      "pipeline_stage": "under_psa",
+      "entered_date": "2026-02-22",
+      "exited_date": "2026-03-10",
+      "stage_reason": "psa_executed",
+      "source_name": "sample_feed",
+      "source_type": "deal_pipeline",
+      "source_date": "2026-04-15",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "ds_sample_002"
+    }
+  ],
+  "deal_milestone": [
+    {
+      "milestone_id": "ms_sample_001",
+      "deal_id": "deal_sample_002",
+      "milestone_type": "ic_scheduled",
+      "milestone_date": "2026-04-10",
+      "ic_review_id": "ic_sample_001",
+      "notes": "sample pre-ic package circulated",
+      "source_name": "sample_feed",
+      "source_type": "deal_pipeline",
+      "source_date": "2026-04-15",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "ms_sample_001"
+    }
+  ],
+  "investment_committee_review": [
+    {
+      "ic_review_id": "ic_sample_001",
+      "deal_id": "deal_sample_002",
+      "review_status": "scheduled",
+      "scheduled_date": "2026-04-22",
+      "decision_date": null,
+      "source_name": "sample_feed",
+      "source_type": "deal_pipeline",
+      "source_date": "2026-04-15",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "ic_sample_001"
+    }
+  ],
+  "deal_key_date": [
+    {
+      "deal_key_date_id": "dkd_sample_001",
+      "deal_id": "deal_sample_001",
+      "date_kind": "expected_close",
+      "target_date": "2026-05-30",
+      "actual_date": null,
+      "source_name": "sample_feed",
+      "source_type": "deal_pipeline",
+      "source_date": "2026-04-15",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "dkd_sample_001"
+    }
+  ],
+  "deal_team_assignment": [
+    {
+      "assignment_id": "asg_sample_001",
+      "deal_id": "deal_sample_001",
+      "role": "lead_analyst",
+      "assignee_label": "role_analyst_placeholder",
+      "source_name": "sample_feed",
+      "source_type": "deal_pipeline",
+      "source_date": "2026-04-15",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "asg_sample_001"
+    }
+  ],
+  "deal_financing_placeholder": [
+    {
+      "financing_placeholder_id": "fin_sample_001",
+      "deal_id": "deal_sample_001",
+      "tranche_kind": "senior_debt",
+      "placeholder_status": "indicative",
+      "target_leverage_bps": 6500,
+      "source_name": "sample_feed",
+      "source_type": "deal_pipeline",
+      "source_date": "2026-04-15",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "fin_sample_001"
+    }
+  ],
+  "deal_asset_placeholder": [
+    {
+      "asset_placeholder_id": "asset_ph_sample_001",
+      "placeholder_name": "Sample Asset Alpha Placeholder",
+      "asset_type": "multifamily_midrise",
+      "market_label": "sample_msa_a",
+      "submarket_label": "sample_submarket_a",
+      "source_name": "sample_feed",
+      "source_type": "deal_pipeline",
+      "source_date": "2026-04-15",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "asset_ph_sample_001"
+    },
+    {
+      "asset_placeholder_id": "asset_ph_sample_002",
+      "placeholder_name": "Sample Asset Beta Placeholder",
+      "asset_type": "multifamily_garden",
+      "market_label": "sample_msa_b",
+      "submarket_label": "sample_submarket_b",
+      "source_name": "sample_feed",
+      "source_type": "deal_pipeline",
+      "source_date": "2026-04-15",
+      "extracted_at": "2026-04-15T10:00:00Z",
+      "extractor_version": "0.1.0",
+      "source_row_id": "asset_ph_sample_002"
+    }
+  ]
+}

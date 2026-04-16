@@ -1,0 +1,117 @@
+# Asset crosswalk
+# Conforms to crosswalk.schema.yaml.
+# Created in wave 4 for Dealpath as primary source for canonical asset.
+# Sample rows below are illustrative (status: sample). Live rows added per
+# adapter onboarding.
+
+status_tag: sample
+
+rows:
+
+  - canonical_id: asset_riverwood_acq
+    source_system: dealpath_prod
+    source_id: "DP-A-2026-004"
+    match_confidence: high
+    match_method: exact
+    effective_start: "2026-02-15"
+    survivorship_rule: dealpath_primary_for_asset_pre_close
+    manual_override: false
+    reviewer: investments_lead
+    last_validated_at: "2026-04-15"
+    notes: Sample row; pre-close acquisition deal in Charlotte submarket.
+
+  - canonical_id: asset_oakdale_dev
+    source_system: dealpath_prod
+    source_id: "DP-A-2026-007"
+    match_confidence: high
+    match_method: exact
+    effective_start: "2026-01-08"
+    survivorship_rule: dealpath_primary_for_asset_pre_close
+    manual_override: false
+    reviewer: investments_lead
+    last_validated_at: "2026-04-15"
+    notes: Sample row; development deal split into 2 phases post-IC.
+
+  - canonical_id: asset_marlin_pointe
+    source_system: dealpath_prod
+    source_id: "DP-A-2025-031"
+    match_confidence: high
+    match_method: exact
+    effective_start: "2025-09-22"
+    effective_end: "2026-03-31"
+    survivorship_rule: dealpath_primary_for_asset_pre_close
+    manual_override: false
+    reviewer: investments_lead
+    last_validated_at: "2026-04-15"
+    notes: Sample row; closed acquisition; post-close ownership transferred to AppFolio + Intacct.
+
+  # -----------------------------------------------------------------------
+  # Wave 5 — Yardi multi-role adapter integration. Dealpath wins pre-close;
+  # Yardi is primary post-close operating system. See
+  # adapters/yardi_multi_role/crosswalk_additions.yaml::asset_crosswalk.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: asset_yd_50001
+    source_system: dealpath_prod
+    source_id: ASSET_MVST
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: dealpath_primary_for_asset_pre_close
+    manual_override: false
+    reviewer: investments_lead
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Dealpath asset row for Maple Vista
+      (YP_50001). Dealpath wins pre-close; Yardi primary post-close
+      operating per yardi_multi_role survivorship rule.
+
+  - canonical_id: asset_yd_50001
+    source_system: yardi_voyager_pms_stub
+    source_id: YP_50001
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: dealpath_primary_for_asset_pre_close
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Post-close operating row. Yardi
+      wins post-close operating per yardi_multi_role survivorship rule.
+      Provisional until classification_worksheet.md closes.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager propid row paired with
+      Dealpath asset ASSET_MVST.
+
+  - canonical_id: asset_yd_50002
+    source_system: dealpath_prod
+    source_id: ASSET_HRCR
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: dealpath_primary_for_asset_pre_close
+    manual_override: false
+    reviewer: investments_lead
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Dealpath asset row for Harbor
+      Crest (YP_50002). Dealpath pre-close; Yardi post-close operating.
+
+  - canonical_id: asset_yd_50002
+    source_system: yardi_voyager_pms_stub
+    source_id: YP_50002
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: dealpath_primary_for_asset_pre_close
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Yardi_primary_pms_and_gl posture
+      (no AppFolio footprint). Yardi wins post-close operating.
+      Provisional until classification_worksheet.md closes.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager propid row paired with
+      Dealpath asset ASSET_HRCR.

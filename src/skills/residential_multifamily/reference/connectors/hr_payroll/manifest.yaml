@@ -1,0 +1,56 @@
+# HR / Payroll / Staffing connector manifest (vendor-neutral stub).
+# Conforms to reference/connectors/_schema/connector_manifest.schema.yaml.
+#
+# Authoring notes (kept inside description because manifest schema forbids
+# additional top-level properties):
+#   - rollout_wave: 2
+#   - connector_kind is constrained to the schema enum
+#     [pms, gl, crm, ap, market_data, construction]. Closest semantic match
+#     for HR/payroll is `ap` because payroll lines land as disbursements in
+#     the chart-of-accounts and flow through the same approval chain as
+#     vendor payables. Flag: if a future schema revision adds an
+#     `hr_payroll` kind, update this manifest.
+#   - auth_kind placeholder is `sftp` (nearest to an sftp_key_placeholder);
+#     access_pattern is `pull_scheduled` for pull_cadence semantics.
+#   - vendor_neutral: no vendor code, no credentials, no live hostnames.
+connector_id: hr_payroll
+connector_kind: hr_payroll
+version: 0.1.0
+status: stub
+owner: residential_multifamily_subsystem
+vendor_neutral: true
+description: |
+  HR, payroll, and staffing feed. Operational source for employee identity
+  stubs (PII-minimized), staffing positions, role assignments, property
+  assignments, vacancy status, payroll lines, overtime lines, and
+  employee-versus-contractor flags. Normalizes into the canonical
+  StaffingPlan and BudgetLine objects via crosswalks; no canonical
+  Employee object exists in this subsystem, so employee rows are
+  reference-only records anchoring payroll lines and position fills.
+  rollout_wave: 2.
+entities:
+  - employee
+  - staffing_position
+  - role_assignment
+  - property_assignment
+  - vacancy_status
+  - payroll_line
+  - overtime_line
+  - employee_vs_contractor_flag
+provenance_fields_required:
+  - source_name
+  - source_type
+  - source_date
+  - extracted_at
+  - extractor_version
+  - source_row_id
+handshake:
+  auth_kind: sftp
+  access_pattern: pull_scheduled
+  notes: |
+    Stub. Placeholder is sftp_key_placeholder in operator docs; the
+    schema enum pins this to `sftp`. Pull cadence is pull_scheduled
+    (weekly or per-pay-period). Vendor adapter replaces with native
+    auth (api_key or oauth2 for cloud payroll platforms, sftp for
+    on-prem or legacy batch exports). Rollout wave 2.
+contact: operator_placeholder

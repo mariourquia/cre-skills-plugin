@@ -1,0 +1,526 @@
+# Richer per-entity field mapping template for the market_data connector.
+rent_comp:
+  fields:
+  - canonical_field: comp_observation_id
+    source_field: observation_id
+    source_description: Stable observation id from source
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: comp_observation_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: observation anchor
+  - canonical_field: comp_property_id
+    source_field: property_id
+    source_description: Comp property id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: comp_property_id resolves via comp_property_crosswalk
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: cross-source property dedup anchor
+  - canonical_field: market
+    source_field: market
+    source_description: Market label
+    transform_rule: map_market
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: market IN market_gazetteer.markets
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: market-scoped aggregation
+  - canonical_field: as_of_date
+    source_field: observed_at
+    source_description: Observation as-of date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: as_of_date <= today
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: freshness filter basis
+  - canonical_field: unit_type_label
+    source_field: unit_type
+    source_description: Unit type label
+    transform_rule: map_unit_type_label
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: unit_type_label IN canonical unit_type_harmonization
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: unit-type segmentation
+  - canonical_field: asking_rent_monthly_cents
+    source_field: asking_rent_usd
+    source_description: Asking rent in dollars
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: asking_rent_monthly_cents > 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: primary comp observation
+  - canonical_field: submarket
+    source_field: submarket
+    source_description: Submarket label
+    transform_rule: map_submarket
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: submarket IN gazetteer[market].submarkets when non-null OR submarket_unknown
+      = true
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: submarket-scoped aggregation
+  - canonical_field: nrsf
+    source_field: nrsf
+    source_description: NRSF of the unit type
+    transform_rule: to_integer
+    type_cast_rule: integer
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: nrsf IS NULL OR nrsf > 0
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: rent-per-sf comp derivation
+  - canonical_field: concessions_weeks
+    source_field: concessions_weeks
+    source_description: Concessions in weeks
+    transform_rule: to_number
+    type_cast_rule: number
+    null_handling: default_to_null
+    default_rule: 0
+    validation_rule: concessions_weeks IS NULL OR concessions_weeks >= 0
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: effective-rent computation input
+concession_observation:
+  fields:
+  - canonical_field: concession_observation_id
+    source_field: observation_id
+    source_description: Stable observation id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: concession_observation_id unique
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: observation anchor
+  - canonical_field: comp_property_id
+    source_field: property_id
+    source_description: Comp property id
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: comp_property_id resolves via comp_property_crosswalk
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK via crosswalk
+  - canonical_field: market
+    source_field: market
+    source_description: Market
+    transform_rule: map_market
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: market IN market_gazetteer.markets
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: market-scoped aggregation
+  - canonical_field: as_of_date
+    source_field: observed_at
+    source_description: Observation as-of
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: as_of_date <= today
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: freshness filter basis
+  - canonical_field: concession_type
+    source_field: concession_type
+    source_description: Concession kind
+    transform_rule: map_concession_type
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: concession_type IN canonical_enum(market_data.concession_observation.concession_type)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: concession decoding
+  - canonical_field: concession_magnitude
+    source_field: magnitude
+    source_description: Magnitude in natural unit of concession_type
+    transform_rule: to_number
+    type_cast_rule: number
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: concession_magnitude >= 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: decoded via canonical formula to concession_weeks_equivalent
+  - canonical_field: submarket
+    source_field: submarket
+    source_description: Submarket
+    transform_rule: map_submarket
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: submarket resolves via gazetteer when non-null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: submarket-scoped aggregation
+  - canonical_field: lease_term_required_months
+    source_field: term_required
+    source_description: Term required to earn the concession
+    transform_rule: to_integer
+    type_cast_rule: integer
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: lease_term_required_months IS NULL OR lease_term_required_months
+      > 0
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: concession comparability pivot
+occupancy_benchmark:
+  fields:
+  - canonical_field: market
+    source_field: market
+    source_description: Market
+    transform_rule: map_market
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: market IN market_gazetteer.markets
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: FK via gazetteer
+  - canonical_field: submarket
+    source_field: submarket
+    source_description: Submarket (empty string if market-only)
+    transform_rule: map_submarket
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: ''
+    validation_rule: submarket IN gazetteer[market].submarkets OR ''
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: submarket-scoped aggregation
+  - canonical_field: as_of_date
+    source_field: observed_at
+    source_description: Observation date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: as_of_date <= today
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: freshness filter
+  - canonical_field: physical_occupancy_percent
+    source_field: physical_occ_pct
+    source_description: Physical occupancy percent
+    transform_rule: to_number
+    type_cast_rule: number
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: physical_occupancy_percent within plausible band declared in
+      segment overlay
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: primary benchmark
+  - canonical_field: leased_occupancy_percent
+    source_field: leased_occ_pct
+    source_description: Leased occupancy percent
+    transform_rule: to_number
+    type_cast_rule: number
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: leased_occupancy_percent within plausible band when non-null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: leased-vs-physical gap analysis
+  - canonical_field: economic_occupancy_percent
+    source_field: econ_occ_pct
+    source_description: Economic occupancy percent
+    transform_rule: to_number
+    type_cast_rule: number
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: economic_occupancy_percent within plausible band when non-null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: collections-adjusted occupancy
+payroll_reference:
+  fields:
+  - canonical_field: role_slug
+    source_field: role
+    source_description: Canonical role slug
+    transform_rule: map_role_slug
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: role_slug IN canonical role registry
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: role FK
+  - canonical_field: market
+    source_field: market
+    source_description: Market
+    transform_rule: map_market
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: market IN market_gazetteer.markets
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: geography pivot
+  - canonical_field: as_of_date
+    source_field: observed_at
+    source_description: Observation date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: as_of_date <= today
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: freshness filter
+  - canonical_field: base_salary_annual_cents
+    source_field: base_salary_usd
+    source_description: Base salary annual
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: base_salary_annual_cents > 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: primary payroll benchmark
+  - canonical_field: bonus_target_annual_cents
+    source_field: bonus_target_usd
+    source_description: Bonus target annual
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: bonus_target_annual_cents IS NULL OR bonus_target_annual_cents
+      >= 0
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: total-comp computation
+  - canonical_field: burden_rate_percent
+    source_field: burden_pct
+    source_description: Benefits and burden rate
+    transform_rule: to_number
+    type_cast_rule: number
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: burden_rate_percent IS NULL OR burden_rate_percent >= 0
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: fully-loaded cost calculation
+labor_reference:
+  fields:
+  - canonical_field: trade
+    source_field: trade
+    source_description: Trade label
+    transform_rule: map_trade
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: trade IN canonical trade registry
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: trade FK
+  - canonical_field: market
+    source_field: market
+    source_description: Market
+    transform_rule: map_market
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: market IN market_gazetteer.markets
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: geography pivot
+  - canonical_field: as_of_date
+    source_field: observed_at
+    source_description: Observation date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: as_of_date <= today
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: freshness filter
+  - canonical_field: hourly_rate_cents
+    source_field: hourly_rate_usd
+    source_description: Blended hourly rate
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: hourly_rate_cents > 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: labor cost benchmark
+  - canonical_field: rate_type
+    source_field: rate_type
+    source_description: Rate type
+    transform_rule: map_rate_type
+    type_cast_rule: enum
+    null_handling: default_to_null
+    default_rule: blended
+    validation_rule: rate_type IN canonical_enum(market_data.labor_reference.rate_type)
+      when non-null
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: journeyman vs blended vs prevailing comparison
+material_reference:
+  fields:
+  - canonical_field: material_slug
+    source_field: material
+    source_description: Material slug
+    transform_rule: map_material_slug
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: material_slug IN canonical material taxonomy
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: material taxonomy FK
+  - canonical_field: region
+    source_field: region
+    source_description: Regional scope
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: region IN canonical region registry
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: region pivot
+  - canonical_field: as_of_date
+    source_field: observed_at
+    source_description: Observation date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: as_of_date <= today
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: freshness filter
+  - canonical_field: unit
+    source_field: unit_of_measure
+    source_description: Unit of measure
+    transform_rule: map_uom
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: unit IN (sf, ea, lf, cy, ton, hr, lot)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: takeoff application pivot
+  - canonical_field: unit_cost_cents
+    source_field: unit_cost_usd
+    source_description: Unit cost
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: unit_cost_cents > 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: material-cost benchmark
+  - canonical_field: notes
+    source_field: notes
+    source_description: Source notes
+    transform_rule: trim_string
+    type_cast_rule: string
+    null_handling: default_to_null
+    default_rule: null
+    validation_rule: optional
+    required_for_load: false
+    required_for_kpi: false
+    provenance_note: display
+utility_reference:
+  fields:
+  - canonical_field: market
+    source_field: market
+    source_description: Market
+    transform_rule: map_market
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: market IN market_gazetteer.markets
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: market FK
+  - canonical_field: form_factor
+    source_field: form_factor
+    source_description: Form factor (garden, mid_rise, high_rise)
+    transform_rule: map_form_factor
+    type_cast_rule: string
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: form_factor IN (garden, mid_rise, high_rise)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: form-factor pivot
+  - canonical_field: utility_type
+    source_field: utility
+    source_description: Utility type
+    transform_rule: map_utility_type
+    type_cast_rule: enum
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: utility_type IN canonical_enum(market_data.utility_reference.utility_type)
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: utility-type pivot
+  - canonical_field: as_of_date
+    source_field: observed_at
+    source_description: Observation date
+    transform_rule: to_iso_date
+    type_cast_rule: date
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: as_of_date <= today
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: freshness filter
+  - canonical_field: cost_per_unit_per_month_cents
+    source_field: cost_per_unit_usd
+    source_description: Cost per unit per month in dollars
+    transform_rule: dollars_to_cents
+    type_cast_rule: money_cents
+    null_handling: reject_record
+    default_rule: none
+    validation_rule: cost_per_unit_per_month_cents > 0
+    required_for_load: true
+    required_for_kpi: true
+    provenance_note: utility benchmark anchor
+  - canonical_field: net_of_rubs
+    source_field: net_of_rubs
+    source_description: Net of RUBS recovery
+    transform_rule: to_boolean
+    type_cast_rule: boolean
+    null_handling: default_to_null
+    default_rule: false
+    validation_rule: net_of_rubs IN (true, false)
+    required_for_load: false
+    required_for_kpi: true
+    provenance_note: gross-vs-net display

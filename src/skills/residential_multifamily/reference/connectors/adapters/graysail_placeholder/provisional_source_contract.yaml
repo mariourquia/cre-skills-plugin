@@ -1,0 +1,143 @@
+# Provisional source contract for GraySail.
+# Intentionally abstract. No shape is committed to; placeholder entity
+# envelopes exist so test harness and future fork have a target skeleton.
+# Canonical-object coverage is NOT claimed by this file. All entities
+# below describe document-like records that would exist IF GraySail turns
+# out to be a knowledge store (the current classification hypothesis).
+
+status_tag: stub
+schema_version: "0.0.1-provisional"
+classification_status: pending
+
+# Placeholder entities. None map to canonical operating objects.
+# Each entity carries explicit "classification_pending" markers so a
+# downstream reader cannot mistake the shape for a committed contract.
+
+entities:
+
+  sop_document_placeholder:
+    description: |
+      Placeholder shape for a standard operating procedure or policy
+      document record in GraySail. Exact field set and types are NOT
+      committed to. Every field is optional pending classification.
+    classification_pending: true
+    grain_hypothesis: one_record_per_document_version
+    identity_hypothesis: sop_id + version
+    field_placeholders:
+      - name: sop_id
+        type_hypothesis: string
+        required: classification_pending
+        description: placeholder identifier for the SOP or policy document
+      - name: sop_title
+        type_hypothesis: string
+        required: classification_pending
+        description: human-readable title
+      - name: version
+        type_hypothesis: string
+        required: classification_pending
+        description: version label or number
+      - name: effective_date
+        type_hypothesis: iso_date
+        required: classification_pending
+        description: effective date of the version
+      - name: owner_role
+        type_hypothesis: string
+        required: classification_pending
+        description: role accountable for the SOP content
+      - name: applicable_audience
+        type_hypothesis: string
+        required: classification_pending
+        description: audience slug the SOP applies to
+      - name: workflow_reference
+        type_hypothesis: string
+        required: classification_pending
+        description: optional pointer to a workflow slug in workflows/
+      - name: supersedes_sop_id
+        type_hypothesis: string
+        required: classification_pending
+        description: optional pointer to a superseded SOP
+      - name: document_body
+        type_hypothesis: document_or_pointer_to_document
+        required: classification_pending
+        description: the document content or a pointer to it; shape TBD
+    source_of_truth_claim: none_until_classified
+    reconciliation_with_other_sources: deferred_until_classified
+
+  policy_record_placeholder:
+    description: |
+      Placeholder shape for a structured policy record, if GraySail turns
+      out to hold any. Example candidates: approval-matrix rows,
+      service-level definitions, fair-housing guidance entries. Shape is
+      NOT committed to.
+    classification_pending: true
+    grain_hypothesis: one_record_per_policy_entry
+    identity_hypothesis: policy_id
+    field_placeholders:
+      - name: policy_id
+        type_hypothesis: string
+        required: classification_pending
+      - name: policy_category
+        type_hypothesis: string
+        required: classification_pending
+        description: e.g., approval_matrix, service_level_agreement, onboarding_playbook
+      - name: policy_body
+        type_hypothesis: string_or_structured
+        required: classification_pending
+      - name: effective_date
+        type_hypothesis: iso_date
+        required: classification_pending
+      - name: applicable_property_set
+        type_hypothesis: string_list_or_query
+        required: classification_pending
+      - name: applicable_role_set
+        type_hypothesis: string_list
+        required: classification_pending
+    source_of_truth_claim: none_until_classified
+    reconciliation_with_other_sources: deferred_until_classified
+
+  knowledge_fragment_placeholder:
+    description: |
+      Placeholder for free-form knowledge fragments (FAQ entries, training
+      snippets, onboarding tips). Retained in case GraySail content is not
+      document-shaped but finer-grained.
+    classification_pending: true
+    grain_hypothesis: one_record_per_fragment
+    identity_hypothesis: fragment_id
+    field_placeholders:
+      - name: fragment_id
+        type_hypothesis: string
+        required: classification_pending
+      - name: fragment_text
+        type_hypothesis: string
+        required: classification_pending
+      - name: tags
+        type_hypothesis: string_list
+        required: classification_pending
+      - name: applicable_audience
+        type_hypothesis: string
+        required: classification_pending
+    source_of_truth_claim: none_until_classified
+    reconciliation_with_other_sources: deferred_until_classified
+
+# Provenance envelope — always applied to placeholder rows. Mirrors the
+# six-field provenance declared in ../../../INGESTION.md so the stub
+# payload can still pass envelope checks even though the content is not
+# canonical.
+provenance_envelope_required:
+  - source_name: graysail_placeholder_stub
+  - source_type: manual_uploads
+  - source_date: iso_date_required
+  - extracted_at: iso_datetime_required
+  - extractor_version: "0.0.0-stub"
+  - source_row_id: string_required
+
+# Explicit non-contract disclaimers.
+non_contract_notes:
+  - This file is not a source contract in the canonical sense of
+    reference/connectors/<domain>/sample_input.json; it is a sketch held
+    in place of one so the adapter directory is not empty.
+  - Any starter-stage advancement replaces this file with a real source
+    contract written against sanitized sample exports from the operator.
+  - Any field above may be removed, renamed, or replaced without a
+    schema change to the canonical subsystem; the fields are not
+    canonical.

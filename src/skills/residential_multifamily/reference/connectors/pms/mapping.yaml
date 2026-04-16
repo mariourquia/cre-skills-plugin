@@ -1,0 +1,55 @@
+# PMS mapping template — raw source column → normalized column.
+# Vendor-neutral. Entries marked "TODO" must be filled in when a vendor adapter
+# is forked. Two entities (property, lease) are filled in as worked examples.
+
+property:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [property_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: false
+  fields:
+    - { source_column: prop_id,              normalized_column: property_id,          transform: trim_string,   required: true }
+    - { source_column: prop_name,            normalized_column: property_name,        transform: trim_string,   required: true }
+    - { source_column: total_units,          normalized_column: unit_count_total,     transform: to_integer,    required: true }
+    - { source_column: rentable_units,       normalized_column: unit_count_rentable,  transform: to_integer,    required: true }
+    - { source_column: market_label,         normalized_column: market,               transform: trim_string,   required: true }
+    - { source_column: submkt,               normalized_column: submarket,            transform: trim_string,   required: false }
+    - { source_column: yr_built,             normalized_column: year_built,           transform: to_integer,    required: false }
+    - { source_column: yr_reno,              normalized_column: year_renovated,       transform: to_integer,    required: false }
+
+lease:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [lease_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: true
+  fields:
+    - { source_column: lease_id,             normalized_column: lease_id,              transform: trim_string,       required: true }
+    - { source_column: prop_id,              normalized_column: property_id,           transform: trim_string,       required: true }
+    - { source_column: unit_id,              normalized_column: unit_id,               transform: trim_string,       required: true }
+    - { source_column: resident_id,          normalized_column: resident_account_id,   transform: trim_string,       required: true }
+    - { source_column: lease_start,          normalized_column: start_date,            transform: to_iso_date,       required: true }
+    - { source_column: lease_end,            normalized_column: end_date,              transform: to_iso_date,       required: true }
+    - { source_column: base_rent_usd,        normalized_column: base_rent_monthly_cents, transform: dollars_to_cents, required: true }
+    - { source_column: lease_status,         normalized_column: status,                transform: map_lease_status,  required: true }
+    - { source_column: term_months,          normalized_column: term_months,           transform: to_integer,        required: false }
+    - { source_column: concessions_usd,      normalized_column: concessions_total_cents, transform: dollars_to_cents, required: false }
+    - { source_column: is_renewal_flag,      normalized_column: is_renewal,            transform: to_boolean,        required: false }
+    - { source_column: prior_lease,          normalized_column: prior_lease_id,        transform: trim_string,       required: false }
+
+unit:           { status: TODO, note: "map per vendor" }
+lease_event:    { status: TODO, note: "map per vendor" }
+charge:         { status: TODO, note: "map per vendor" }
+payment:        { status: TODO, note: "map per vendor" }
+delinquency_case: { status: TODO, note: "map per vendor" }
+lead:           { status: TODO, note: "map per vendor" }
+tour:           { status: TODO, note: "map per vendor" }
+application:    { status: TODO, note: "map per vendor" }
+renewal_offer:  { status: TODO, note: "map per vendor" }
+work_order:     { status: TODO, note: "map per vendor" }
+turn:           { status: TODO, note: "map per vendor" }

@@ -1,0 +1,279 @@
+# Sage Intacct reconciliation checks.
+# Per-adapter check_id prefix: ic_recon_.
+# Each check cites its tolerance band by name from
+# reference/normalized/schemas/reconciliation_tolerance_band.yaml; no
+# numeric thresholds are hardcoded here. Cross-stack matrix ids from
+# _core/stack_wave4/stack_reconciliation_matrix.md are preserved where
+# they exist.
+
+status_tag: template
+
+checks:
+
+  # ---------------------------------------------------------------------------
+  # Intacct <-> AppFolio
+  # ---------------------------------------------------------------------------
+
+  - check_id: ic_recon_cash_to_accrual_revenue
+    cross_stack_id: recon_af_collections_vs_intacct_revenue
+    sources: [sage_intacct_gl, appfolio_pms]
+    grain: property_id, period
+    tolerance_band: revenue_basis_band
+    frequency: monthly
+    severity: warning
+    affected_workflows:
+      - monthly_property_operating_review
+      - monthly_asset_management_review
+    remediation_runbook: runbooks/sage_intacct_common_issues.md::cash_accrual_drift
+    description: |
+      Compares Intacct posted revenue (accrual) to AppFolio cash receipt
+      roll-up for the same property and operating_month. After close, drift
+      inside band is silent_audit; outside band degrades confidence.
+
+  - check_id: ic_recon_vendor_three_way
+    cross_stack_id: recon_vendor_three_way
+    sources: [sage_intacct_gl, appfolio_pms, procore_construction]
+    grain: vendor_id
+    tolerance_band: identity_match_band
+    frequency: weekly
+    severity: warning
+    affected_workflows:
+      - vendor_dispatch_sla_review
+      - change_order_review
+      - owner_approval_routing
+    remediation_runbook: runbooks/sage_intacct_common_issues.md::vendor_crosswalk_mismatch
+    description: |
+      Three-way vendor identity match: Intacct (tax id, legal name, terms),
+      AppFolio (AP invoice lifecycle), Procore (insurance expiry, trade).
+      Uses identity_match_band; escalates after vendor_three_way_resolution_band.
+
+  - check_id: ic_recon_property_dim_present
+    cross_stack_id: recon_af_property_list_vs_intacct_dim
+    sources: [sage_intacct_gl, appfolio_pms]
+    grain: property_id
+    tolerance_band: n/a_presence_check
+    frequency: weekly
+    severity: blocker
+    affected_workflows:
+      - monthly_property_operating_review
+    remediation_runbook: runbooks/sage_intacct_common_issues.md::property_dim_missing
+    description: |
+      Every AppFolio PropertyId must resolve to an Intacct LOCATIONID or
+      ENTITYID via property_master_crosswalk. Missing mapping is a blocker.
+
+  # ---------------------------------------------------------------------------
+  # Intacct <-> Procore
+  # ---------------------------------------------------------------------------
+
+  - check_id: ic_recon_capex_commitment_vs_posted
+    cross_stack_id: recon_pc_costs_vs_intacct_capex
+    sources: [sage_intacct_gl, procore_construction]
+    grain: capex_project_id, period
+    tolerance_band: capex_posting_band
+    frequency: weekly
+    severity: warning_escalates_to_blocker
+    affected_workflows:
+      - cost_to_complete_review
+      - draw_package_review
+      - capex_spend_vs_plan
+    remediation_runbook: runbooks/sage_intacct_common_issues.md::capex_posting_drift
+    description: |
+      Sum of Procore approved commitments (plus approved COs) minus Intacct
+      posted capex spend per canonical capex_project_id must be within
+      capex_posting_band. Outside band is warning; aged beyond
+      co_posting_lag_band becomes blocker.
+
+  - check_id: ic_recon_capex_project_dim_handshake
+    sources: [sage_intacct_gl, procore_construction]
+    grain: capex_project_id
+    tolerance_band: n/a_presence_check
+    frequency: weekly
+    severity: blocker
+    affected_workflows:
+      - capital_project_intake_and_prioritization
+    remediation_runbook: runbooks/sage_intacct_common_issues.md::capex_project_unmapped
+    description: |
+      Every active Procore capex project must have an Intacct PROJECTID row
+      with project_dim_lock_status in {open, locked}. Missing is a blocker.
+
+  - check_id: ic_recon_co_pending_vs_posted
+    cross_stack_id: recon_pc_co_pending_vs_posted
+    sources: [sage_intacct_gl, procore_construction]
+    grain: change_order_id
+    tolerance_band: co_posting_lag_band
+    frequency: weekly
+    severity: warning_escalates_to_blocker
+    affected_workflows:
+      - change_order_review
+      - draw_package_review
+    remediation_runbook: runbooks/sage_intacct_common_issues.md::co_posting_lag
+    description: |
+      Approved CO in Procore must hit Intacct within co_posting_lag_band.
+      Delay beyond band escalates to blocker.
+
+  - check_id: ic_recon_draw_vs_posted
+    cross_stack_id: recon_pc_draw_vs_posted
+    sources: [sage_intacct_gl, procore_construction]
+    grain: draw_request_id
+    tolerance_band: draw_posting_lag_band
+    frequency: weekly
+    severity: warning_escalates_to_blocker
+    affected_workflows:
+      - draw_package_review
+    remediation_runbook: runbooks/sage_intacct_common_issues.md::draw_posting_lag
+    description: |
+      Approved draw in Procore must hit Intacct within draw_posting_lag_band.
+
+  # ---------------------------------------------------------------------------
+  # Intacct <-> HR/Payroll
+  # ---------------------------------------------------------------------------
+
+  - check_id: ic_recon_payroll_entity_attribution
+    cross_stack_id: recon_staffing_benchmark_vs_actual
+    sources: [sage_intacct_gl, hr_payroll]
+    grain: property_id, pay_period
+    tolerance_band: staffing_drift_band
+    frequency: monthly
+    severity: warning
+    affected_workflows:
+      - monthly_property_operating_review
+      - budget_build
+    remediation_runbook: runbooks/sage_intacct_common_issues.md::payroll_entity_drift
+    description: |
+      Sum of HR/Payroll payroll_line by canonical property_id must match sum
+      of Intacct actual_line for payroll accounts (5010/5020) by resolved
+      property_id within staffing_drift_band.
+
+  - check_id: ic_recon_labor_classification
+    cross_stack_id: recon_labor_rate_vs_payroll
+    sources: [sage_intacct_gl, hr_payroll, excel_market_surveys]
+    grain: property_id, role_slug, quarter
+    tolerance_band: labor_rate_drift_band
+    frequency: quarterly
+    severity: warning
+    affected_workflows:
+      - budget_build
+      - capex_estimate_generation
+    remediation_runbook: runbooks/sage_intacct_common_issues.md::labor_classification_drift
+    description: |
+      Employee vs contractor classification: W-2 records must post to
+      expense_payroll; 1099 records must post to expense_contract_labor.
+      Labor rate drift vs Excel benchmark within labor_rate_drift_band.
+
+  # ---------------------------------------------------------------------------
+  # Intacct <-> Manual
+  # ---------------------------------------------------------------------------
+
+  - check_id: ic_recon_variance_narrative_coverage
+    sources: [sage_intacct_gl, manual_sources_expanded]
+    grain: property_id, canonical_account_slug, period
+    tolerance_band: variance_narrative_required_band
+    frequency: monthly
+    severity: warning_escalates_to_blocker
+    affected_workflows:
+      - monthly_property_operating_review
+      - executive_operating_summary_generation
+    remediation_runbook: runbooks/sage_intacct_common_issues.md::variance_narrative_missing
+    description: |
+      When abs(actual - budget) exceeds variance_narrative_required_band,
+      variance_explanation.narrative must be present. Missing narrative is
+      warning; after variance_narrative_deadline_band past close it becomes
+      blocker.
+
+  - check_id: ic_recon_manual_budget_fallback_attestation
+    cross_stack_id: recon_tpm_file_submission_lag
+    sources: [sage_intacct_gl, manual_sources_expanded]
+    grain: property_id, budget_version
+    tolerance_band: tpm_submission_band
+    frequency: quarterly
+    severity: warning_escalates_to_blocker
+    affected_workflows:
+      - budget_build
+      - reforecast
+    remediation_runbook: runbooks/sage_intacct_common_issues.md::manual_budget_fallback
+    description: |
+      For properties sourcing budget_line from manual spreadsheet instead of
+      Intacct Budget Module, attestation must arrive within tpm_submission_band.
+
+  # ---------------------------------------------------------------------------
+  # Intacct <-> Dealpath
+  # ---------------------------------------------------------------------------
+
+  - check_id: ic_recon_post_close_entity_setup
+    cross_stack_id: recon_dp_approved_vs_setup
+    sources: [sage_intacct_gl, dealpath_deal_pipeline]
+    grain: deal_id, asset_id
+    tolerance_band: handoff_lag_band
+    frequency: event_driven
+    severity: warning_escalates_to_blocker
+    affected_workflows:
+      - acquisition_handoff
+      - post_ic_property_setup
+    remediation_runbook: runbooks/sage_intacct_common_issues.md::post_close_entity_setup
+    description: |
+      Closed Dealpath deal must have Intacct ENTITYID or LOCATIONID provisioned
+      within handoff_lag_band. Missing entity is warning; aged beyond band is
+      blocker on acquisition_handoff.
+
+  # ---------------------------------------------------------------------------
+  # Intacct-internal
+  # ---------------------------------------------------------------------------
+
+  - check_id: ic_recon_unmapped_account
+    cross_stack_id: recon_intacct_unmapped_account
+    sources: [sage_intacct_gl]
+    grain: account_id
+    tolerance_band: n/a_presence_check
+    frequency: daily
+    severity: blocker
+    affected_workflows:
+      - monthly_property_operating_review
+      - monthly_asset_management_review
+      - reforecast
+    remediation_runbook: runbooks/sage_intacct_common_issues.md::unmapped_account
+    description: |
+      Every active GLACCOUNTNO referenced in actual_line or budget_line must
+      resolve via account_crosswalk to a canonical_account_slug.
+
+  - check_id: ic_recon_capex_opex_misclass
+    cross_stack_id: recon_capex_to_opex_misclass
+    sources: [sage_intacct_gl]
+    grain: actual_line
+    tolerance_band: account_class_band
+    frequency: monthly
+    severity: warning
+    affected_workflows:
+      - monthly_asset_management_review
+      - capex_spend_vs_plan
+    remediation_runbook: runbooks/sage_intacct_common_issues.md::capex_opex_misclass
+    description: |
+      Capex account without PROJECTID, or opex account with PROJECTID tied
+      to a capex_family project, flagged for reclassification.
+
+  - check_id: ic_recon_manual_journal_attribution
+    cross_stack_id: recon_manual_journal_property_attribution
+    sources: [sage_intacct_gl]
+    grain: journal_id
+    tolerance_band: n/a_presence_check
+    frequency: weekly
+    severity: warning_escalates_to_blocker
+    affected_workflows:
+      - monthly_property_operating_review
+    remediation_runbook: runbooks/sage_intacct_common_issues.md::manual_journal_attrib
+    description: |
+      Manual top-side journals with SOURCE_MODULE=Manual must carry either
+      LOCATIONID or ENTITYID. Unattributed rows become blocker after close.
+
+  - check_id: ic_recon_period_reopen_drift
+    sources: [sage_intacct_gl]
+    grain: period, property_id
+    tolerance_band: period_reopen_lag_band
+    frequency: weekly
+    severity: warning_escalates_to_blocker
+    affected_workflows:
+      - monthly_property_operating_review
+      - executive_operating_summary_generation
+    remediation_runbook: runbooks/sage_intacct_common_issues.md::period_reopen_drift
+    description: |
+      Reopened period with new postings must produce updated reporting within
+      period_reopen_lag_band; aged beyond band blocks monthly workflows.

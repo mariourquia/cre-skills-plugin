@@ -1,0 +1,283 @@
+checks:
+- check_id: ap_record_count
+  check_kind: record_count
+  severity: blocker
+  description: Raw row count minus rejects equals normalized row count.
+  inputs:
+  - reference/raw/ap/<YYYY>/<MM>/<source>__<as_of>.*
+  - reference/normalized/ap_<entity>__<scope>.csv
+  expected_invariant: count(raw) - count(rejected) == count(normalized)
+  remediation: See qa/record_count.yaml.
+- check_id: ap_duplicate_primary_key
+  check_kind: duplicate_id
+  severity: blocker
+  description: No duplicate PKs across vendor, invoice, contract, commitment, purchase_order,
+    payment_status.
+  inputs:
+  - reference/normalized/ap_vendor__<scope>.csv
+  - reference/normalized/ap_invoice__<scope>.csv
+  - reference/normalized/ap_contract__<scope>.csv
+  - reference/normalized/ap_commitment__<scope>.csv
+  - reference/normalized/ap_purchase_order__<scope>.csv
+  - reference/normalized/ap_payment_status__<scope>.csv
+  expected_invariant: count(distinct pk) == count(records)
+  remediation: See qa/duplicate_id.yaml.
+- check_id: ap_invoice_vendor_fk
+  check_kind: null_critical
+  severity: blocker
+  description: Every invoice.vendor_id resolves to an ap.vendor record.
+  inputs:
+  - reference/normalized/ap_invoice__<scope>.csv
+  - reference/normalized/ap_vendor__<scope>.csv
+  expected_invariant: for each invoice, vendor_id IN ap.vendor.vendor_id
+  remediation: "Orphan vendor_id blocks the landing. Reconcile with operator \u2014\
+    \ add the\nvendor to the master or correct the invoice.\n"
+- check_id: ap_commitment_invoice_cap
+  check_kind: commitment_draw
+  severity: blocker
+  description: For each commitment, invoiced_to_date must not exceed committed_amount
+    plus any approved change orders.
+  inputs:
+  - reference/normalized/ap_commitment__<scope>.csv
+  - reference/normalized/construction_change_order__<scope>.csv
+  expected_invariant: 'invoiced_to_date_cents <= committed_amount_cents
+
+    + sum(approved change orders on same commitment)
+
+    '
+  remediation: 'Overdraw indicates an unapproved CO being invoiced against; hold the
+
+    invoice and escalate per approval matrix.
+
+    '
+- check_id: ap_coi_expiry_gate
+  check_kind: null_critical
+  severity: blocker
+  description: Vendors dispatched to safety-critical work must have insurance_expiry_date
+    > today.
+  inputs:
+  - reference/normalized/ap_vendor__<scope>.csv
+  expected_invariant: for safety-critical service vendors, insurance_expiry_date >
+    today
+  remediation: See coi-compliance-checker skill; block dispatch until COI refreshed.
+- check_id: ap_vendor_duplicate_detection
+  check_kind: duplicate_id
+  severity: warning
+  description: Probable duplicate vendors surfaced by normalized-name and tax-id composite
+    match.
+  inputs:
+  - reference/normalized/ap_vendor__<scope>.csv
+  - reference/connectors/master_data/vendor_crosswalk.yaml
+  expected_invariant: 'for each (normalized_vendor_name_hash, tax_id_hash) tuple where
+    both are present: at most one active vendor_id OR the redundant vendor_ids carry
+    a merged_into pointer in master_data/vendor_crosswalk.yaml'
+  remediation: 'Candidate duplicates are queued to the operator for merge review.
+
+    Survivor vendor_id is declared in master_data/vendor_crosswalk.yaml;
+
+    redundant vendor_ids must carry merged_into = survivor_vendor_id and
+
+    inactive = true before re-landing.
+
+    '
+- check_id: ap_merged_vendor_survivorship
+  check_kind: null_critical
+  severity: blocker
+  description: Every non-survivor vendor row carries a merged_into pointer to an active
+    survivor vendor_id; no open invoice or commitment may reference a non-survivor
+    vendor_id.
+  inputs:
+  - reference/normalized/ap_vendor__<scope>.csv
+  - reference/normalized/ap_invoice__<scope>.csv
+  - reference/normalized/ap_commitment__<scope>.csv
+  - reference/connectors/master_data/vendor_crosswalk.yaml
+  expected_invariant: 'for each vendor flagged is_merged = true: merged_into IS NOT
+    NULL AND merged_into IN ap.vendor.vendor_id AND no ap.invoice or ap.commitment
+    with status IN (received, in_review, approved, open, partial) references the non-survivor
+    vendor_id'
+  remediation: 'A merged vendor with open obligations leaves AP aging misattributed.
+
+    Operator retires the non-survivor vendor_id only after all open obligations
+
+    are reassigned to the survivor in master_data/vendor_crosswalk.yaml.
+
+    '
+- check_id: ap_invoice_credit_memo_handled
+  check_kind: null_critical
+  severity: warning
+  description: Credit-memo invoices (amount_cents < 0) must carry a reference to the
+    original invoice_id they offset.
+  inputs:
+  - reference/normalized/ap_invoice__<scope>.csv
+  expected_invariant: 'for each invoice where amount_cents < 0: related_invoice_id
+    IS NOT NULL AND related_invoice_id IN ap.invoice.invoice_id'
+  remediation: 'A credit memo without a reference to the original invoice breaks
+
+    vendor-ledger reconciliation. Operator links the credit memo to the
+
+    offset invoice or documents the standalone credit reason before re-landing.
+
+    '
+- check_id: ap_partial_payment_traceable
+  check_kind: null_critical
+  severity: warning
+  description: Every payment_status row marked partial must trace the cumulative paid
+    amount across all payment events to match paid_amount_cents.
+  inputs:
+  - reference/normalized/ap_payment_status__<scope>.csv
+  - reference/normalized/ap_invoice__<scope>.csv
+  expected_invariant: 'for each payment_status where payment_status = paid OR payment_status
+    = scheduled with non-null paid_amount_cents: paid_amount_cents == sum(underlying
+    payment events for invoice_id) AND paid_amount_cents <= invoice.amount_cents'
+  remediation: 'Partial payments that do not reconcile to the invoice balance leave
+
+    aging distorted. Operator resequences payment events or corrects the
+
+    running paid_amount_cents before re-landing.
+
+    '
+- check_id: ap_invoice_property_assignment_required
+  check_kind: null_critical
+  severity: blocker
+  description: Every non-corporate invoice carries a property_id; corporate-overhead
+    invoices are flagged with corporate_overhead = true and carry an allocation_rule
+    reference.
+  inputs:
+  - reference/normalized/ap_invoice__<scope>.csv
+  - reference/normalized/pms_property__<scope>.csv
+  expected_invariant: 'for each invoice: property_id IN pms.property.property_id OR
+    corporate_overhead = true AND allocation_rule_ref IS NOT NULL'
+  remediation: 'Invoices without a property assignment silently distort per-property
+
+    opex. Operator assigns property_id or flags corporate_overhead with an
+
+    allocation_rule_ref before re-landing.
+
+    '
+- check_id: ap_shared_contract_multi_property_allowed
+  check_kind: null_critical
+  severity: warning
+  description: Contracts with property_id = null (org-wide) must carry an allocation_rule_ref;
+    contracts with a single property_id must not appear with charges allocated across
+    multiple properties unless an explicit override is declared.
+  inputs:
+  - reference/normalized/ap_contract__<scope>.csv
+  - reference/normalized/ap_invoice__<scope>.csv
+  expected_invariant: 'for each contract where property_id IS NULL: allocation_rule_ref
+    IS NOT NULL; for each contract where property_id IS NOT NULL: every invoice referencing
+    the contract uses that property_id OR carries a shared_contract_override = true
+    flag with a documented rule'
+  remediation: 'A shared contract without an allocation rule leaves CAM and corporate
+
+    allocations ambiguous. Operator registers the allocation rule (square
+
+    footage, unit count, or direct) before re-landing.
+
+    '
+- check_id: ap_duplicate_invoice_by_vendor_and_invoice_number
+  check_kind: duplicate_id
+  severity: blocker
+  description: No two invoices share (vendor_id, vendor_invoice_number) after normalization.
+  inputs:
+  - reference/normalized/ap_invoice__<scope>.csv
+  expected_invariant: count(distinct (vendor_id, normalized_vendor_invoice_number))
+    == count(records where vendor_invoice_number IS NOT NULL)
+  remediation: 'Same vendor, same invoice number, two invoice_id rows is almost
+
+    always a double-entry. Hold the landing and reconcile with the operator
+
+    before promoting.
+
+    '
+- check_id: ap_invoice_date_vs_service_period_sanity
+  check_kind: date_coverage
+  severity: warning
+  description: invoice_date is within a plausible window of the service period end
+    date for time-and-materials and unit-rate contracts.
+  inputs:
+  - reference/normalized/ap_invoice__<scope>.csv
+  - reference/normalized/ap_contract__<scope>.csv
+  expected_invariant: 'for each invoice matched to a contract with pricing_model IN
+    (time_materials, unit_rate): invoice_date is within the plausible_lag_window_days
+    referenced in overlays/org/<org_id>/overlay.yaml of the service period end'
+  remediation: 'An invoice dated far outside the service-period window usually
+
+    reflects late billing or back-dating. Operator confirms with the vendor
+
+    and either corrects the invoice_date or records the reason.
+
+    '
+- check_id: ap_vendor_insurance_expiry_flag
+  check_kind: date_coverage
+  severity: warning
+  description: Vendor insurance_expiry_date within the warning lookahead window flags
+    the vendor for COI refresh.
+  inputs:
+  - reference/normalized/ap_vendor__<scope>.csv
+  expected_invariant: 'for each vendor where insurance_expiry_date IS NOT NULL: insurance_expiry_date
+    > today + warning_lookahead_days defined in overlays/org/<org_id>/overlay.yaml'
+  remediation: 'A vendor whose insurance expires soon should be locked out of new
+
+    dispatch assignments. Operator requests the refreshed COI and updates
+
+    the record before re-landing.
+
+    '
+- check_id: ap_contract_burn_down_consistency
+  check_kind: commitment_draw
+  severity: warning
+  description: For each fixed-total contract, invoiced_to_date across invoices referencing
+    the contract does not exceed contract_total_cents.
+  inputs:
+  - reference/normalized/ap_contract__<scope>.csv
+  - reference/normalized/ap_invoice__<scope>.csv
+  expected_invariant: 'for each contract where contract_total_cents IS NOT NULL AND
+    pricing_model IN (lump_sum, retainer): sum(invoice.amount_cents where invoice.contract_id
+    = contract.contract_id) <= contract_total_cents'
+  remediation: 'Invoicing above a fixed contract total indicates either a missing
+
+    change order or a contract-total update that was not captured in the
+
+    AP feed. Escalate to the operator before promoting.
+
+    '
+- check_id: ap_purchase_order_balance_tracks
+  check_kind: commitment_draw
+  severity: warning
+  description: PO balance remaining derived from invoices matched to the PO matches
+    the PO record's implied remaining balance.
+  inputs:
+  - reference/normalized/ap_purchase_order__<scope>.csv
+  - reference/normalized/ap_invoice__<scope>.csv
+  expected_invariant: 'for each purchase_order where status IN (issued, partial):
+    amount_cents - sum(invoice.amount_cents where invoice.po_id = po_id) >= 0'
+  remediation: 'PO overdraw indicates either a missing PO amendment or an invoice
+
+    tagged to the wrong PO. Operator reconciles via the three-way match
+
+    before re-landing.
+
+    '
+- check_id: ap_ap_to_gl_payable_alignment
+  check_kind: budget_actual
+  severity: blocker
+  description: Open AP balance totals per property per period reconcile to the GL
+    AP payable account balance.
+  inputs:
+  - reference/normalized/ap_invoice__<scope>.csv
+  - reference/normalized/ap_payment_status__<scope>.csv
+  - reference/normalized/gl_actual__<scope>.csv
+  - reference/normalized/gl_account_mapping__<scope>.csv
+  expected_invariant: 'for each (property_id, period): sum(invoice.amount_cents -
+    paid_to_date_cents where status NOT IN (voided)) == gl_actual balance on canonical_account_slug
+    = ap_payable at period close'
+  tolerance:
+    absolute: 0
+    relative_percent: 0.01
+  remediation: 'An AP versus GL variance indicates either late accrual, a missing
+
+    account mapping, or a void not propagated. Operator reconciles the
+
+    close before promotion.
+
+    '

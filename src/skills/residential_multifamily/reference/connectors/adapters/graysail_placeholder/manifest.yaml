@@ -1,0 +1,87 @@
+# Adapter manifest for GraySail — classification pending clarification.
+# Conforms to reference/connectors/adapters/adapter_manifest.schema.yaml.
+#
+# GraySail is referenced in external architecture documents as the company's
+# internal SOP / policy knowledge store. It sits alongside AppFolio,
+# Dealpath, Procore, and Sage Intacct in the systems-of-record listing.
+# Repo evidence disambiguates ROLE (SOP / policy knowledge store) but not
+# TECHNICAL SHAPE (ingestion mode, API availability, structured-export
+# format, canonical-object coverage). The adapter therefore ships as a
+# bounded placeholder; see classification_worksheet.md for required
+# follow-up evidence.
+#
+# Safest-fallback domain choice: manual_uploads. SOP content flows into
+# the subsystem as documents and policy references; it does not carry
+# canonical operating objects (Lease, Charge, BudgetLine, etc.) on its own.
+# If future operator confirmation reveals GraySail exports structured
+# records or exposes an API, the adapter is forked into a renamed slug
+# and the domain is reassessed. See runbooks/graysail_classification_path.md.
+#
+# Status: stub. Live credential method declared only in the companion
+# source_registry_entry.yaml fragment, and even there as none pending
+# clarification. No secrets, no live data, no canonical writes.
+
+adapter_id: graysail_placeholder
+adapter_name: GraySail SOP Knowledge Store Placeholder Adapter
+vendor_family: graysail_family
+connector_domain: manual_uploads
+status: stub
+rollout_wave: wave_4_gated
+description: |
+  Placeholder adapter for GraySail. Repo-external documents identify
+  GraySail as the company's SOP / policy knowledge store and list it
+  alongside AppFolio, Dealpath, Procore, and Sage Intacct as a system of
+  record. No repo-internal adapter, sample, or integration contract
+  exists yet, and the technical shape (API, SFTP export, manual document
+  drop, structured extract) is undetermined.
+
+  The adapter therefore ships as a bounded placeholder mapped to the
+  manual_uploads domain. It does not read live data, does not write to
+  canonical, and does not make claims about any canonical operating
+  object. It exists to:
+
+    1. Surface GraySail in the adapter inventory so workflows can declare
+       blocked-until-classified dependency where relevant.
+    2. Hold a classification worksheet the operator can fill out to
+       finalize the role, ingestion mode, and canonical-object coverage.
+    3. Document bounded assumptions under which the stub operates so a
+       future fork cannot silently drift.
+
+  Downstream consumers: none until classification is confirmed. A future
+  SOP / policy-guidance workflow (not yet in the canonical 27-workflow
+  set) would consume this adapter's output as a retrieval corpus, not as
+  an operating-data source. See workflow_relevance_map.yaml for the
+  candidate workflows blocked-until-classified.
+
+supported_source_systems:
+  - graysail_placeholder_stub
+
+mapping_hints:
+  - { source_field_pattern: "sop_id|policy_id|document_id",         canonical_field: document_reference_id,     transform_hint: trim_string,    notes: "placeholder; canonical document_reference_id is NOT yet in _core/ontology.md — surfaced as an open question, see open_questions_and_risks.md" }
+  - { source_field_pattern: "sop_title|policy_title|document_title", canonical_field: document_title,           transform_hint: trim_string,    notes: "placeholder; not yet in canonical ontology" }
+  - { source_field_pattern: "version|rev|revision",                  canonical_field: document_version,         transform_hint: trim_string,    notes: "placeholder; not yet in canonical ontology" }
+  - { source_field_pattern: "effective_date|published_date",         canonical_field: effective_date,           transform_hint: to_iso_date,    notes: "canonical field exists on several objects; applies here to the SOP record only" }
+  - { source_field_pattern: "owner|owner_role|accountable_role",     canonical_field: policy_owner_role,        transform_hint: trim_string,    notes: "placeholder; not yet in canonical ontology" }
+  - { source_field_pattern: "applicable_role|audience",              canonical_field: applicable_audience,      transform_hint: trim_string,    notes: "placeholder; may map to the 8-audience routing after classification" }
+  - { source_field_pattern: "workflow|process|sop_domain",           canonical_field: workflow_reference,       transform_hint: trim_string,    notes: "placeholder; would reference workflow_slug values in workflows/" }
+  - { source_field_pattern: "related_policy|supersedes|superseded_by", canonical_field: related_document_ref,    transform_hint: trim_string,    notes: "placeholder; document graph relations are not in canonical ontology" }
+
+known_gotchas:
+  - classification is unresolved; every mapping hint above is illustrative only and will be revisited once the operator confirms GraySail's role, ingestion mode, and export shape — see classification_worksheet.md
+  - GraySail content appears to be documents or policy records, not operating transactions; do not treat this adapter as a Property, Lease, Charge, Payment, BudgetLine, CapexProject, or WorkOrder source until disproven by evidence
+  - if GraySail is later revealed to also carry vendor, contract, or service-category reference data, that is a SEPARATE adapter scope (likely in ap or manual_uploads) and should not be grafted onto this placeholder silently
+  - workflows that reference SOP guidance (currently none in the canonical 27) must not hard-depend on this adapter until status advances past stub
+  - adapter writes no data to canonical; do not compose this adapter into reconciliation checks or derived metrics — see dq_rules.yaml for the minimal DQ surface
+  - SOP / policy content may contain proprietary or legally sensitive language; classification must include a sensitivity review before any live sample lands — see bounded_assumptions.yaml (assumption confidentiality_posture)
+  - the canonical ontology does not yet include a document_reference, policy_record, or sop_record object; any adapter fork that needs one must surface the ontology extension as an open question rather than inventing the shape
+
+reference_documentation:
+  - placeholder_link_to_graysail_operator_interview
+  - placeholder_link_to_graysail_role_classification_worksheet
+  - placeholder_link_to_sop_retrieval_agent_design
+
+author_metadata:
+  authored_by: residential_multifamily_subsystem
+  authored_role: data_platform_team
+
+last_updated: "2026-04-15"

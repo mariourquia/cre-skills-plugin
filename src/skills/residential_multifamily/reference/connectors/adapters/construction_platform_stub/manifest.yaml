@@ -1,0 +1,56 @@
+# Adapter manifest for the generic construction platform stub.
+# Conforms to reference/connectors/adapters/adapter_manifest.schema.yaml.
+
+adapter_id: construction_platform_stub
+adapter_name: Generic Construction Platform Stub
+vendor_family: generic_construction_stub
+connector_domain: construction
+status: stub
+rollout_wave: wave_1
+description: |
+  Placeholder adapter over the canonical construction connector. Seeds
+  operator onboarding with project, cost-code, commitment, change-order,
+  draw, and retention conventions. Canonical schema in
+  ../../construction/ wins on any conflict.
+
+supported_source_systems:
+  - construction_generic_stub
+
+mapping_hints:
+  - { source_field_pattern: "project*id|job*id|capex*proj",                canonical_field: capex_project_id,       transform_hint: trim_string }
+  - { source_field_pattern: "project*name|job*name",                       canonical_field: project_name,           transform_hint: trim_string }
+  - { source_field_pattern: "prop*code|property*id",                       canonical_field: property_id,            transform_hint: trim_string }
+  - { source_field_pattern: "cost*code|cost*center|budget*code",           canonical_field: cost_code,              transform_hint: trim_string }
+  - { source_field_pattern: "csi*division|csi*section|csi*code",           canonical_field: csi_code,               transform_hint: trim_string }
+  - { source_field_pattern: "commitment*id|contract*id|po*id",             canonical_field: commitment_id,          transform_hint: trim_string }
+  - { source_field_pattern: "commitment*amount|contract*amount|po*amount", canonical_field: commitment_amount_cents, transform_hint: dollars_to_cents }
+  - { source_field_pattern: "vendor*id|sub*id|contractor*id",              canonical_field: vendor_id,              transform_hint: trim_string }
+  - { source_field_pattern: "change*order*id|co*id|co*number",             canonical_field: change_order_id,        transform_hint: trim_string }
+  - { source_field_pattern: "co*status|change*order*status",               canonical_field: change_order_status,    transform_hint: map_change_order_status }
+  - { source_field_pattern: "co*amount|change*order*amount",               canonical_field: change_order_amount_cents, transform_hint: dollars_to_cents }
+  - { source_field_pattern: "draw*id|pay*app*id|requisition*id",           canonical_field: draw_request_id,        transform_hint: trim_string }
+  - { source_field_pattern: "draw*amount|pay*app*amount|requisition*amount", canonical_field: draw_amount_cents,    transform_hint: dollars_to_cents }
+  - { source_field_pattern: "retention*amount|retainage",                  canonical_field: retention_amount_cents, transform_hint: dollars_to_cents }
+  - { source_field_pattern: "budget*version|budget*revision",              canonical_field: budget_version,         transform_hint: trim_string }
+  - { source_field_pattern: "milestone*date|schedule*date",                canonical_field: milestone_date,         transform_hint: to_iso_date }
+  - { source_field_pattern: "contingency*owner|contingency*contractor",    canonical_field: contingency_type,       transform_hint: map_contingency_type }
+
+known_gotchas:
+  - multiple budget versions in flight simultaneously (original, current, approved-with-COs); always carry budget_version
+  - owner vs contractor contingency commingled in commitment lines; split via map_contingency_type
+  - pending vs approved change orders are often both exported; filter by change_order_status before running variance
+  - draw timing lags actual work by weeks; do not use draw_amount as a completed-work proxy
+  - rehab expense miscoded as construction capex and vice versa; confirm against cost_code and CSI mapping
+  - retention holdbacks released at substantial completion; reconcile retention_amount against commitment_amount at close-out
+  - commitment amounts change silently when COs post; always join commitments to COs for current amount
+  - owner-contractor id mismatch across construction and GL systems; resolve via capex_project_crosswalk
+
+reference_documentation:
+  - placeholder_link_to_capex_project_crosswalk
+  - placeholder_link_to_csi_division_reference
+
+author_metadata:
+  authored_by: residential_multifamily_subsystem
+  authored_role: capital_projects_team
+
+last_updated: "2026-04-15"

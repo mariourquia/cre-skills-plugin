@@ -1,0 +1,6 @@
+csi_division,csi_section,line_item,line_item_slug,capex_category,unit_basis,market,region,segment,property_form,low,typical,high,currency,escalation_assumption,typical_useful_life_years,source_basis,source,as_of,row_id
+07,07 31 13,Shingle roof replacement 30yr,roof_replace_shingle,building_envelope,dollars_per_sf,Charlotte,southeast,middle_market,garden,4.25,5.10,6.40,USD,0.035,25,engineered_estimate,GC_bid_ATL_Q4_2025,2026-01-31,ccl_0001
+09,09 65 19,Luxury vinyl plank flooring 6mm,lvp_flooring_6mm,unit_interior_classic,dollars_per_sf,Charlotte,southeast,middle_market,garden,3.15,3.85,4.75,USD,0.030,12,vendor_bid,PO-CLT-2026-11,2026-01-31,ccl_0002
+11,11 30 00,Kitchen appliance package classic,unit_kitchen_package_classic,unit_interior_classic,dollars_per_unit,Charlotte,southeast,middle_market,garden,2250,2600,3100,USD,0.040,15,contracted_unit_price,MSA-appliances-2026,2026-01-31,ccl_0003
+02,02 71 19,Parking lot mill and overlay,parking_lot_mill_overlay,site_hardscape,dollars_per_sf,Charlotte,southeast,middle_market,garden,2.85,3.35,4.10,USD,0.025,15,historical_actual,actual_avg_2023-2025,2026-01-31,ccl_0004
+13,13 11 00,Pool resurface plaster,pool_resurface,amenity,dollars_per_sf,Charlotte,southeast,middle_market,garden,6.50,7.75,9.40,USD,0.030,10,vendor_bid,PO-CLT-POOL-2026,2026-01-31,ccl_0005

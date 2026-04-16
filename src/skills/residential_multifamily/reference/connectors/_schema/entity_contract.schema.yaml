@@ -1,0 +1,178 @@
+# Entity Contract Schema
+# Applies to every entity declaration inside reference/connectors/<domain>/schema.yaml.
+# A connector's schema.yaml is a mapping whose keys are entity names and whose
+# values conform to this schema.
+
+$schema: https://json-schema.org/draft/2020-12/schema
+title: EntityContract
+type: object
+required:
+  - entity_name
+  - grain
+  - time_basis
+  - primary_key
+  - required_fields
+  - provenance_fields
+properties:
+  entity_name:
+    type: string
+    pattern: "^[a-z][a-z0-9_]*$"
+    description: snake_case entity slug. Must match the mapping key in schema.yaml.
+  grain:
+    type: string
+    description: One-sentence description of what a single record represents
+      (e.g., "one row per lease per property").
+  time_basis:
+    type: string
+    enum:
+      - event
+      - state
+      - snapshot
+    description: |
+      event  = record captures a point-in-time happening (LeaseEvent, Payment, ChangeOrder).
+      state  = record captures a currently-valid state (Lease.status, Unit.status).
+      snapshot = record captures an as-of snapshot (rent roll, T-12 line).
+  primary_key:
+    type: array
+    minItems: 1
+    description: Field names forming the PK. Each must appear in required_fields.
+    items:
+      type: string
+  required_fields:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      required:
+        - name
+        - type
+        - description
+        - is_key
+      properties:
+        name:
+          type: string
+          pattern: "^[a-z][a-z0-9_]*$"
+        type:
+          type: string
+          enum:
+            - string
+            - integer
+            - number
+            - boolean
+            - date
+            - datetime
+            - enum
+            - money_cents
+            - object
+            - array
+        description:
+          type: string
+        is_key:
+          type: boolean
+          description: True if field is part of the primary key.
+        enum_values:
+          type: array
+          items:
+            type: string
+        unit:
+          type: string
+          description: Optional unit hint (e.g., "cents_usd", "percent_basis_points").
+      additionalProperties: false
+  optional_fields:
+    type: array
+    items:
+      type: object
+      required:
+        - name
+        - type
+        - description
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        description:
+          type: string
+        enum_values:
+          type: array
+          items:
+            type: string
+        unit:
+          type: string
+      additionalProperties: false
+  foreign_keys:
+    type: array
+    description: Cross-entity references. `references` names another entity + field.
+    items:
+      type: object
+      required:
+        - field
+        - references
+      properties:
+        field:
+          type: string
+        references:
+          type: string
+          description: "Target in the form <entity>.<field> (e.g., lease.lease_id)."
+        on_missing:
+          type: string
+          enum:
+            - reject
+            - warn
+            - allow_null
+      additionalProperties: false
+  null_handling:
+    type: array
+    description: Per-field null behavior for sensitive or ambiguous fields.
+    items:
+      type: object
+      required:
+        - field
+        - behavior
+      properties:
+        field:
+          type: string
+        behavior:
+          type: string
+          enum:
+            - reject_record
+            - default_to_null
+            - escalate_missing
+            - infer_from_fk
+        notes:
+          type: string
+      additionalProperties: false
+  status_convention:
+    type: object
+    description: For entities with a status field, names the canonical enum and transitions.
+    properties:
+      field:
+        type: string
+      values:
+        type: array
+        items:
+          type: string
+      allowed_transitions:
+        type: array
+        items:
+          type: string
+          description: "Form: 'from_state -> to_state'."
+    additionalProperties: false
+  provenance_fields:
+    type: array
+    minItems: 1
+    items:
+      type: string
+      enum:
+        - source_name
+        - source_type
+        - source_date
+        - extracted_at
+        - extractor_version
+        - source_row_id
+  dependents:
+    type: array
+    description: Informational — downstream metrics / workflows / templates.
+    items:
+      type: string
+additionalProperties: false

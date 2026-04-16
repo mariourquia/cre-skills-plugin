@@ -1,0 +1,52 @@
+overlay_id: regulatory.affordable.hud_202_811
+overlay_kind: regulatory.program
+parent_overlay: regulatory.affordable
+status: stub
+scope:
+  regulatory_program: hud_202_811
+authoring_notes: |
+  Program overlay for HUD Section 202 (supportive housing for elderly) and
+  Section 811 (supportive housing for persons with disabilities). Carries
+  program-specific eligibility (age, disability), required resident-services
+  programming, and PRAC / PRA subsidy mechanics where applicable.
+
+  Phase 1 ships architecture only. Subsidy contract instances and required
+  services catalogs live in reference tables populated in Phase 2.
+
+overrides:
+  - target_kind: screening_policy
+    target_ref: overlays/regulatory/_shared/eligibility_and_certification.md
+    override_value:
+      screening_policy_ref: overlays/regulatory/affordable/programs/hud_202_811/overlay.yaml
+    reason: |
+      202 requires elderly-age eligibility verification; 811 requires
+      disability documentation per HUD rules. Both layer on top of the
+      parent-overlay eligibility gates without replacing them.
+  - target_kind: service_standard
+    target_ref: overlays/segments/middle_market/service_standards.md
+    override_value:
+      service_standard_ref: overlays/regulatory/affordable/programs/hud_202_811/overlay.yaml
+    reason: |
+      Service standard adds required resident-services programming
+      (case-management coordination for 811, service coordinator staffing
+      for 202) not present in conventional segments.
+  - target_kind: staffing_ratio
+    target_ref: _core/taxonomy.md#role.service_coordinator
+    override_value:
+      staffing_ratio_ref: overlays/regulatory/affordable/programs/hud_202_811/overlay.yaml
+    reason: |
+      Service coordinator staffing ratio is program-required. The concrete
+      ratio lives in the org approval matrix; this overlay anchors the role.
+
+adds:
+  - added_kind: metric
+    slug: service_coordination_program_fidelity
+    definition_ref: overlays/regulatory/affordable/programs/hud_202_811/overlay.yaml
+  - added_kind: checklist_item
+    slug: disability_documentation_811
+    definition_ref: overlays/regulatory/affordable/programs/hud_202_811/overlay.yaml
+
+approvers:
+  - director_of_operations
+  - compliance_lead
+  - legal_counsel

@@ -24,6 +24,8 @@ properties:
       - org
       - policy
       - property
+      - regulatory
+      - regulatory.program
   scope:
     type: object
     description: What the overlay applies to.
@@ -36,6 +38,12 @@ properties:
       submarket: { type: string }
       org_id: { type: string }
       property_id: { type: string }
+      regulatory_program:
+        oneOf:
+          - type: string
+          - type: array
+            items: { type: string }
+      jurisdiction: { type: string }
   overrides:
     type: array
     description: Each override cites the canonical target and the new value.
@@ -91,4 +99,10 @@ properties:
     type: array
     items:
       type: string
+  status:
+    type: string
+    enum: [stub, draft, deep, deprecated, template]
+  parent_overlay:
+    type: string
+    description: overlay_id of the parent overlay this one extends; used by program-level overlays under a regulatory family.
 additionalProperties: false

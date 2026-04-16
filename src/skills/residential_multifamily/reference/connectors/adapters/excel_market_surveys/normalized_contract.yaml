@@ -1,0 +1,365 @@
+# Excel market surveys -> canonical normalized contract.
+# Every Excel template (rent_comp, market_survey_workbook, analyst_benchmark_pack,
+# concession_tracker, labor_rate, material_price, vendor_rate_card, turn_cost_library,
+# capex_cost_library, schedule_assumption, market_commentary) lands in a canonical
+# object. Each object lists canonical field names matching _core/ontology.md and
+# the normalized schema under reference/normalized/schemas/.
+#
+# Canonical schemas win on conflict. Adapter-side fields are advisory.
+
+status_tag: template
+
+mappings:
+
+  rent_comp:
+    canonical_object: MarketComp
+    canonical_normalized_schema: reference/normalized/schemas/rent_comp.yaml
+    precedence: primary
+    primary_authority: excel_market_surveys
+    notes: |
+      Excel is primary for rent_comp per _core/stack_wave4/source_of_truth_matrix.md.
+      AppFolio lease trade-out is secondary and used only for calibration, not
+      for comp intake.
+    primary_key:
+      excel_field: comp_id
+      canonical_field: reference_id
+      transform: passthrough_with_namespace(excel_rent_comp_weekly)
+    required_canonical_fields:
+      - reference_id
+      - category
+      - scope
+      - value
+      - unit
+      - scenario
+      - source_name
+      - source_type
+      - source_date
+      - as_of_date
+      - confidence
+      - status
+      - proposed_by
+      - comp_property_name
+      - unit_type_label
+      - unit_beds
+    canonical_field_set:
+      - reference_id
+      - category
+      - scope.market
+      - scope.submarket
+      - scope.segment
+      - scope.property_form
+      - scope.property_class
+      - scope.vintage_year
+      - comp_property_name
+      - unit_type_label
+      - unit_beds
+      - unit_baths
+      - unit_sf
+      - asking_rent
+      - effective_rent
+      - concession_months
+      - occupancy_reported
+      - distance_miles
+      - as_of_date
+      - source_date
+      - source_name
+      - source_type
+      - confidence
+      - status
+      - proposed_by
+    as_of_required: true
+
+  market_rent_benchmark:
+    canonical_object: RentBenchmark
+    canonical_normalized_schema: reference/normalized/schemas/market_rent_benchmark.yaml
+    precedence: primary
+    primary_authority: excel_market_surveys
+    notes: |
+      Analyst benchmark pack + market survey workbook are primary for
+      market_rent_benchmark.
+    primary_key:
+      excel_field: row_id
+      canonical_field: reference_id
+      transform: passthrough_with_namespace(excel_analyst_benchmark_pack)
+    canonical_field_set:
+      - reference_id
+      - category
+      - scope.market
+      - scope.submarket
+      - scope.segment
+      - scope.property_form
+      - scope.property_class
+      - unit_type_label
+      - unit_beds
+      - unit_baths
+      - unit_sf_avg
+      - value
+      - unit
+      - rent_per_sf
+      - sample_size_properties
+      - trailing_3mo_change_pct
+      - confidence
+      - as_of_date
+    as_of_required: true
+
+  concession_benchmark:
+    canonical_object: ConcessionBenchmark
+    canonical_normalized_schema: reference/normalized/schemas/concession_benchmark.yaml
+    precedence: primary
+    primary_authority: excel_market_surveys
+    notes: |
+      concession_tracker_monthly and the concession_summary tab of the
+      market_survey_workbook are primary.
+    primary_key:
+      excel_field: row_id
+      canonical_field: reference_id
+      transform: passthrough_with_namespace(excel_concession_tracker_monthly)
+    canonical_field_set:
+      - reference_id
+      - category
+      - scope.market
+      - scope.submarket
+      - scope.segment
+      - scope.property_form
+      - scope.lifecycle_stage
+      - lease_term_months
+      - concession_months_offered
+      - pct_comps_offering
+      - avg_concession_dollars
+      - new_lease_trade_out_avg
+      - value
+      - unit
+      - as_of_date
+      - confidence
+    as_of_required: true
+
+  occupancy_benchmark:
+    canonical_object: OccupancyBenchmark
+    canonical_normalized_schema: reference/normalized/schemas/occupancy_benchmark.yaml
+    precedence: primary
+    primary_authority: excel_market_surveys
+    notes: |
+      occupancy_summary tab of market_survey_workbook + occupancy_benchmarks tab
+      of analyst_benchmark_pack.
+    primary_key:
+      excel_field: row_id
+      canonical_field: reference_id
+      transform: passthrough_with_namespace(excel_market_survey_workbook)
+    canonical_field_set:
+      - reference_id
+      - category
+      - scope.market
+      - scope.submarket
+      - scope.segment
+      - scope.property_form
+      - scope.lifecycle_stage
+      - metric_slug
+      - value
+      - band_low
+      - band_high
+      - peer_median
+      - unit
+      - as_of_date
+      - confidence
+    as_of_required: true
+
+  labor_rate_reference:
+    canonical_object: LaborRateReference
+    canonical_normalized_schema: reference/normalized/schemas/labor_rate.yaml
+    precedence: primary
+    primary_authority: excel_market_surveys
+    notes: |
+      Excel labor_rate_quarterly is primary. HR payroll adapter retains
+      internal payroll truth; the Excel labor_rate_reference is the market
+      benchmark, not the paid rate.
+    primary_key:
+      excel_field: row_id
+      canonical_field: reference_id
+      transform: passthrough_with_namespace(excel_labor_rate_quarterly)
+    canonical_field_set:
+      - reference_id
+      - category
+      - scope.market
+      - scope.region
+      - scope.segment
+      - trade_slug
+      - labor_tier
+      - rate_type
+      - value
+      - unit
+      - as_of_date
+      - confidence
+    as_of_required: true
+
+  material_cost_reference:
+    canonical_object: MaterialCostReference
+    canonical_normalized_schema: reference/normalized/schemas/material_cost.yaml
+    precedence: primary
+    primary_authority: excel_market_surveys
+    notes: |
+      Excel material_price_sheet is primary. Intacct purchase history is
+      secondary, used to calibrate and reconcile.
+    primary_key:
+      excel_field: row_id
+      canonical_field: reference_id
+      transform: passthrough_with_namespace(excel_material_price_sheet)
+    canonical_field_set:
+      - reference_id
+      - category
+      - scope.region
+      - scope.market
+      - scope.segment
+      - scope.sku_tier
+      - material_slug
+      - material_category
+      - value
+      - unit
+      - trailing_12mo_change_pct
+      - as_of_date
+      - confidence
+    as_of_required: true
+
+  turn_cost_reference:
+    canonical_object: UnitTurnCostReference
+    canonical_normalized_schema: reference/normalized/schemas/unit_turn_cost.yaml
+    precedence: primary
+    primary_authority: excel_market_surveys
+    notes: |
+      Excel turn_cost_library is primary. AppFolio realized turn cost is the
+      actual; recon detects drift between library and actuals.
+    primary_key:
+      excel_field: row_id
+      canonical_field: reference_id
+      transform: passthrough_with_namespace(excel_turn_cost_library)
+    canonical_field_set:
+      - reference_id
+      - category
+      - scope.market
+      - scope.region
+      - scope.segment
+      - scope.property_form
+      - turn_scope
+      - unit_type_label
+      - included_scope_items
+      - target_make_ready_days
+      - value
+      - unit
+      - as_of_date
+      - confidence
+    as_of_required: true
+
+  vendor_rate:
+    canonical_object: VendorRate
+    canonical_normalized_schema: reference/normalized/schemas/vendor_rate.yaml
+    precedence: primary
+    primary_authority: excel_market_surveys
+    notes: |
+      Excel vendor_rate_card is primary for contracted rates. Intacct AP
+      invoice is the actual transaction; recon detects invoice-vs-rate drift.
+    primary_key:
+      excel_field: row_id
+      canonical_field: reference_id
+      transform: passthrough_with_namespace(excel_vendor_rate_card)
+    canonical_field_set:
+      - reference_id
+      - category
+      - scope.market
+      - scope.region
+      - scope.segment
+      - vendor_name
+      - vendor_id
+      - service_slug
+      - service_category
+      - contract_term_months
+      - value
+      - unit
+      - as_of_date
+      - confidence
+    as_of_required: true
+
+  market_commentary:
+    canonical_object: MarketCommentaryAnnotation
+    canonical_normalized_schema: reference/normalized/schemas/market_rent_benchmark.yaml
+    precedence: primary
+    primary_authority: excel_market_surveys
+    notes: |
+      Commentary is a first-class annotation rather than a quantitative
+      benchmark; fields land alongside the referenced benchmark rows.
+    primary_key:
+      excel_field: row_id
+      canonical_field: annotation_id
+      transform: passthrough_with_namespace(excel_market_commentary_file)
+    canonical_field_set:
+      - annotation_id
+      - scope.market
+      - scope.submarket
+      - period
+      - headline_topic
+      - narrative
+      - supporting_data_refs
+      - author
+      - confidence_band
+      - directional_call
+      - as_of_date
+      - source_name
+      - source_type
+    as_of_required: true
+
+  schedule_assumption:
+    canonical_object: ConstructionDurationAssumption
+    canonical_normalized_schema: reference/normalized/schemas/construction_duration_assumption.yaml
+    precedence: primary
+    primary_authority: excel_market_surveys
+    notes: |
+      Excel schedule_assumption_sheet is primary. Procore baselines provide
+      per-project reality; recon detects drift between assumptions and
+      actuals.
+    primary_key:
+      excel_field: row_id
+      canonical_field: reference_id
+      transform: passthrough_with_namespace(excel_schedule_assumption_sheet)
+    canonical_field_set:
+      - reference_id
+      - category
+      - scope.market
+      - scope.region
+      - scope.segment
+      - scope.property_form
+      - scope.project_size_band
+      - milestone_slug
+      - milestone_category
+      - value
+      - unit
+      - as_of_date
+      - confidence
+    as_of_required: true
+
+  capex_cost_reference:
+    canonical_object: CapexLineItemAssumption
+    canonical_normalized_schema: reference/normalized/schemas/capex_line_item.yaml
+    precedence: primary
+    primary_authority: excel_market_surveys
+    notes: |
+      Excel capex_cost_library is primary. Intacct posted capex spend and
+      Procore commitments + actuals provide calibration and drift detection.
+    primary_key:
+      excel_field: row_id
+      canonical_field: reference_id
+      transform: passthrough_with_namespace(excel_capex_cost_library)
+    canonical_field_set:
+      - reference_id
+      - category
+      - scope.market
+      - scope.region
+      - scope.segment
+      - scope.property_form
+      - scope.lifecycle_stage
+      - line_item_slug
+      - capex_category
+      - assembly_basis
+      - typical_useful_life_years
+      - value
+      - unit
+      - as_of_date
+      - confidence
+    as_of_required: true

@@ -1,0 +1,5 @@
+solicitation_id,vendor_id,scope_line_id,bid_amount_usd,bid_date,property_id,leveled_adjustment_usd,recommendation_flag
+rfp_sample_001,vendor_sample_001,scope_line_001,45000.00,2026-04-05,sample_property_one,-500.00,true
+rfp_sample_001,vendor_sample_002,scope_line_001,47500.00,2026-04-05,sample_property_one,,false
+# status: template
+# schema: reference/connectors/manual_uploads/schema.yaml entities.vendor_bid_tab

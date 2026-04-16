@@ -1,0 +1,16 @@
+property_code,period,role_slug,headcount_fte,gross_wages,benefits_burden,payroll_taxes,total_labor_cost,prepared_by
+ASH-CLT-001,2026-03,property_manager,1.00,5800.00,1392.00,481.40,7673.40,J. Osei
+ASH-CLT-001,2026-03,assistant_manager,1.00,4100.00,984.00,340.30,5424.30,J. Osei
+ASH-CLT-001,2026-03,leasing_consultant,1.00,3400.00,816.00,282.20,4498.20,J. Osei
+ASH-CLT-001,2026-03,maintenance_lead,1.00,4800.00,1152.00,398.40,6350.40,J. Osei
+ASH-CLT-001,2026-03,maintenance_tech,1.50,5100.00,1224.00,423.30,6747.30,J. Osei
+WAT-RDU-004,2026-03,property_manager,1.00,5500.00,1320.00,456.50,7276.50,L. Mbeki
+WAT-RDU-004,2026-03,leasing_consultant,1.00,3300.00,792.00,273.90,4365.90,L. Mbeki
+WAT-RDU-004,2026-03,maintenance_tech,2.00,6400.00,1536.00,531.20,8467.20,L. Mbeki
+OAK-ATL-011,2026-03,property_manager,1.00,6000.00,1440.00,498.00,7938.00,A. Strand
+OAK-ATL-011,2026-03,leasing_consultant,1.00,3500.00,840.00,290.50,4630.50,A. Strand
+OAK-ATL-011,2026-03,maintenance_tech,2.00,6800.00,1632.00,564.40,8996.40,A. Strand
+PIN-NAS-007,2026-03,property_manager,1.00,5700.00,1368.00,473.10,7541.10,A. Strand
+PIN-NAS-007,2026-03,leasing_consultant,0.50,1700.00,408.00,141.10,2249.10,A. Strand
+RIV-PHX-002,2026-03,property_manager,1.00,5900.00,1416.00,489.70,7805.70,D. Patel
+RIV-PHX-002,2026-03,maintenance_tech,1.50,4950.00,1188.00,410.85,6548.85,D. Patel

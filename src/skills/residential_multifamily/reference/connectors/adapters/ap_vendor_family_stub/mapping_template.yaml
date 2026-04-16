@@ -1,0 +1,57 @@
+# Mapping template for the generic AP vendor family stub.
+# Applied on top of reference/connectors/ap/mapping.yaml.
+
+status_tag: template
+
+vendor:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [vendor_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: vendor_id,        normalized_column: vendor_id,      transform: trim_string, required: true }
+    - { source_column: vendor_name,      normalized_column: vendor_name,    transform: trim_string, required: true }
+    - { source_column: vendor_status,    normalized_column: status,         transform: trim_string, required: true }
+    - { source_column: coi_expiry,       normalized_column: insurance_expiry_date, transform: to_iso_date, required: false }
+
+vendor_agreement:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [vendor_agreement_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: agreement_id,     normalized_column: vendor_agreement_id, transform: trim_string,        required: true }
+    - { source_column: vendor_id,        normalized_column: vendor_id,           transform: trim_string,        required: true }
+    - { source_column: service_category, normalized_column: service_category,    transform: map_service_category, required: true }
+    - { source_column: effective_date,   normalized_column: effective_date,      transform: to_iso_date,        required: false }
+
+charge:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [invoice_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: invoice_id,       normalized_column: invoice_id,       transform: trim_string,          required: true }
+    - { source_column: vendor_id,        normalized_column: vendor_id,        transform: trim_string,          required: true }
+    - { source_column: invoice_number,   normalized_column: invoice_number,   transform: trim_string,          required: true }
+    - { source_column: invoice_date,     normalized_column: invoice_date,     transform: to_iso_date,          required: true }
+    - { source_column: due_date,         normalized_column: due_date,         transform: to_iso_date,          required: false }
+    - { source_column: amount,           normalized_column: amount_cents,     transform: dollars_to_cents,     required: true }
+    - { source_column: tax,              normalized_column: tax_cents,        transform: dollars_to_cents,     required: false }
+    - { source_column: freight,          normalized_column: freight_cents,    transform: dollars_to_cents,     required: false }
+    - { source_column: prop_code,        normalized_column: property_id,      transform: trim_string,          required: true }
+    - { source_column: service_category, normalized_column: service_category, transform: map_service_category, required: true }
+    - { source_column: approval_status,  normalized_column: approval_status,  transform: map_approval_status,  required: true }
+    - { source_column: is_credit_memo,   normalized_column: is_credit_memo,   transform: to_boolean,           required: false }
+
+payment:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [payment_id]
+    tie_breaker: latest_extracted_at_wins
+  fields:
+    - { source_column: payment_ref,      normalized_column: payment_id,       transform: trim_string,      required: true }
+    - { source_column: invoice_id,       normalized_column: invoice_id,       transform: trim_string,      required: true }
+    - { source_column: payment_date,     normalized_column: payment_date,     transform: to_iso_date,      required: true }
+    - { source_column: amount,           normalized_column: amount_cents,     transform: dollars_to_cents, required: true }
+    - { source_column: tender,           normalized_column: tender_type,      transform: trim_string,      required: true }

@@ -1,0 +1,116 @@
+# Market crosswalk
+# Conforms to crosswalk.schema.yaml.
+# Created in wave 4. Excel benchmark files use broker-naming conventions for
+# markets; AppFolio and internal references use canonical slugs from
+# reference/normalized/markets/. This crosswalk reconciles them.
+
+status_tag: sample
+
+rows:
+
+  - canonical_id: market_atlanta_mf
+    source_system: excel_rent_comp_weekly
+    source_id: "Atlanta MSA"
+    match_confidence: high
+    match_method: exact
+    effective_start: "2025-01-01"
+    survivorship_rule: appfolio_authoritative_for_internal_naming
+    manual_override: false
+    reviewer: asset_mgmt_director
+    last_validated_at: "2026-04-15"
+    notes: Sample row; broker uses MSA name; canonical slug snake_case.
+
+  - canonical_id: market_charlotte_mf
+    source_system: excel_rent_comp_weekly
+    source_id: "Charlotte-Concord-Gastonia"
+    match_confidence: high
+    match_method: exact
+    effective_start: "2025-01-01"
+    survivorship_rule: appfolio_authoritative_for_internal_naming
+    manual_override: false
+    reviewer: asset_mgmt_director
+    last_validated_at: "2026-04-15"
+    notes: Sample row; broker uses MSA full name.
+
+  - canonical_id: market_atlanta_mf
+    source_system: appfolio_prod
+    source_id: "ATL"
+    match_confidence: high
+    match_method: exact
+    effective_start: "2025-01-01"
+    survivorship_rule: appfolio_authoritative_for_internal_naming
+    manual_override: false
+    reviewer: regional_ops_director
+    last_validated_at: "2026-04-15"
+    notes: Sample row; AppFolio uses 3-letter code.
+
+  - canonical_id: market_dallas_mf
+    source_system: dealpath_prod
+    source_id: "Dallas-Fort Worth"
+    match_confidence: medium
+    match_method: fuzzy
+    effective_start: "2025-01-01"
+    survivorship_rule: appfolio_authoritative_for_internal_naming
+    manual_override: false
+    reviewer: investments_lead
+    last_validated_at: "2026-04-15"
+    notes: Sample row; Dealpath uses MSA hyphenated name.
+
+  # -----------------------------------------------------------------------
+  # Wave 5 — Yardi multi-role adapter integration. Yardi market labels
+  # are operator-declared strings on the property record (market_label).
+  # Canonical market ids follow the same snake_case convention as other
+  # rows. Survivorship is operator_declared.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: market_sample_one
+    source_system: yardi_voyager_pms_stub
+    source_id: "sample_market_one"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: appfolio_authoritative_for_internal_naming
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Yardi market label taken from
+      Voyager property.market_label; operator_declared survivorship.
+      Provisional until classification_worksheet.md closes.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager market label sample_market_one
+      (covers Maple Vista YP_50001 and Briarfield YP_50004).
+
+  - canonical_id: market_sample_two
+    source_system: yardi_voyager_pms_stub
+    source_id: "sample_market_two"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: appfolio_authoritative_for_internal_naming
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Yardi market label taken from
+      Voyager property.market_label; operator_declared survivorship.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager market label sample_market_two
+      (covers Harbor Crest YP_50002).
+
+  - canonical_id: market_sample_three
+    source_system: yardi_voyager_pms_stub
+    source_id: "sample_market_three"
+    match_confidence: high
+    match_method: manual
+    effective_start: "2026-04-15"
+    survivorship_rule: appfolio_authoritative_for_internal_naming
+    manual_override: true
+    override_reason: |
+      Wave-5 Yardi adapter integration. Yardi market label taken from
+      Voyager property.market_label; operator_declared survivorship.
+    reviewer: data_platform_team
+    last_validated_at: "2026-04-15"
+    notes: |
+      provenance: wave_5_yardi_adapter. Voyager market label sample_market_three
+      (covers Lantern Flats YP_50003).

@@ -1,0 +1,103 @@
+# Change Order Crosswalk (starter set).
+# Conforms to crosswalk.schema.yaml.
+# Illustrates change order identity across construction tracking and GL,
+# including the common lag between tracker approval and GL posting.
+
+status_tag: sample
+
+rows:
+
+  # -----------------------------------------------------------------------
+  # Standard approved change order on the prop_cta_001 renovation.
+  # Construction tracker approved and GL posted same day.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: co_cta_001_ren_2024_co_001
+    source_system: construction_tracker_primary
+    source_id: P-REN-001-CO-001
+    match_confidence: high
+    match_method: exact
+    effective_start: "2024-06-18"
+    survivorship_rule: change_order_default
+    manual_override: false
+    reviewer: construction_manager
+    last_validated_at: "2026-03-31"
+    notes: |
+      Tracker row. Owner-directed scope addition for upgraded flooring.
+      Approved 2024-06-18.
+
+  - canonical_id: co_cta_001_ren_2024_co_001
+    source_system: corporate_gl
+    source_id: GL-CO-CTA001-001
+    match_confidence: high
+    match_method: manual
+    effective_start: "2024-06-18"
+    survivorship_rule: change_order_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2026-03-31"
+    notes: |
+      GL row. Posted same day with the tracker CO id embedded in the
+      suffix. Identity resolved by manual mapping at first posting and
+      retained.
+
+  # -----------------------------------------------------------------------
+  # Change order approved in tracker but not yet posted to GL.
+  # Tracker row exists; GL row absent until the owner countersign lands.
+  # Illustrates the "pending GL posting" state.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: co_rdu_004_roof_2025_co_003
+    source_system: construction_tracker_primary
+    source_id: P-CR-ROOF-001-CO-003
+    match_confidence: high
+    match_method: exact
+    effective_start: "2025-05-20"
+    survivorship_rule: change_order_default
+    manual_override: false
+    reviewer: construction_manager
+    last_validated_at: "2026-03-31"
+    notes: |
+      Tracker row. Approved 2025-05-20. GL posting pending owner
+      countersign; GL row will be added when the posting arrives. Until
+      then, reconciliation shows a tracker-GL delta; the commitment +
+      change order + draw reconciliation check (../qa/
+      commitment_change_order_draw.yaml) will report the gap.
+
+  # -----------------------------------------------------------------------
+  # Change order with retroactive adjustment. Tracker CO was revised after
+  # initial approval to correct a scope addition. The canonical id is the
+  # same; the crosswalk row is NOT closed; the revision is a change to
+  # the underlying record, captured in change_log.md and the tracker's
+  # own revision history. The crosswalk row's last_validated_at is bumped.
+  # -----------------------------------------------------------------------
+
+  - canonical_id: co_atl_007a_amenity_2025_co_002
+    source_system: construction_tracker_primary
+    source_id: P-AMEN-ATL-009-CO-002
+    match_confidence: high
+    match_method: exact
+    effective_start: "2025-07-01"
+    survivorship_rule: change_order_default
+    manual_override: false
+    reviewer: construction_manager
+    last_validated_at: "2025-09-12"
+    notes: |
+      Tracker row. CO was initially approved 2025-07-01 for a lesser
+      scope, then revised on 2025-09-12. Revision is captured in
+      change_log.md; crosswalk row remains open with the updated
+      last_validated_at.
+
+  - canonical_id: co_atl_007a_amenity_2025_co_002
+    source_system: corporate_gl
+    source_id: GL-CO-ATL007A-002
+    match_confidence: high
+    match_method: manual
+    effective_start: "2025-07-15"
+    survivorship_rule: change_order_default
+    manual_override: false
+    reviewer: corporate_controller
+    last_validated_at: "2025-09-20"
+    notes: |
+      GL row. Follow-on correcting entry posted after the tracker revision.
+      Initial post 2025-07-15, correcting entry 2025-09-20.

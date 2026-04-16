@@ -1,0 +1,290 @@
+# Exception Routing, Residential Multifamily Integration Layer
+#
+# Maps every category in _core/exception_taxonomy.md (planned) to:
+#   - default_route      : ordered list of audiences and functional roles
+#   - severity_floor     : minimum severity the category may carry
+#   - escalation_chain   : sequential tiers invoked when dwell time exceeds
+#                          the tier's SLA
+#   - dwell_time_sla     : qualitative band per tier
+#   - always_escalate_to : audiences that must be notified regardless of tier
+#
+# Numerics live in overlays/org/<org_id>/. This file carries qualitative
+# bands only.
+#
+# All audiences align with tailoring/AUDIENCE_MAP.md. Functional roles
+# (on_call_ops, legal_counsel, data_owner, business_owner, technical_owner,
+# compliance_officer) are layered in where they are named responders rather
+# than audiences.
+
+status_tag: reference
+exception_routing_version: "0.1.0"
+
+categories:
+
+  dq_blocker:
+    description: |
+      A reconciliation or contract check of severity=blocker failed. The
+      landing cannot promote to normalized. Downstream workflows are blocked.
+    default_route:
+      - on_call_ops
+      - data_owner
+      - technical_owner
+    severity_floor: critical
+    dwell_time_sla: immediate_response
+    escalation_chain:
+      - tier: tier_1
+        audiences: [on_call_ops, data_owner, technical_owner]
+        dwell_time_sla: immediate_response
+      - tier: tier_2
+        audiences: [business_owner, primary_consumer_audience]
+        dwell_time_sla: same_business_day
+      - tier: tier_3
+        audiences: [finance_reporting, asset_mgmt]
+        dwell_time_sla: next_business_day
+      - tier: tier_4
+        audiences: [executive]
+        dwell_time_sla: next_business_week
+    always_escalate_to: []
+
+  dq_warning:
+    description: |
+      A reconciliation check of severity=warning failed. The landing
+      proceeded; the mismatch is logged.
+    default_route:
+      - data_owner
+      - on_call_ops
+    severity_floor: warning
+    dwell_time_sla: same_business_week
+    escalation_chain:
+      - tier: tier_1
+        audiences: [data_owner]
+        dwell_time_sla: same_business_week
+      - tier: tier_2
+        audiences: [business_owner]
+        dwell_time_sla: next_business_week
+      - tier: tier_3
+        audiences: [finance_reporting]
+        dwell_time_sla: next_monthly_review
+    always_escalate_to: []
+
+  reconciliation_mismatch:
+    description: |
+      Two or more sources disagree on the same canonical object (for example,
+      pms and gl disagree on rent roll vs ledger totals).
+    default_route:
+      - on_call_ops
+      - data_owner
+      - finance_reporting
+    severity_floor: warning
+    dwell_time_sla: same_business_day
+    escalation_chain:
+      - tier: tier_1
+        audiences: [on_call_ops, data_owner]
+        dwell_time_sla: same_business_day
+      - tier: tier_2
+        audiences: [finance_reporting, business_owner]
+        dwell_time_sla: next_business_day
+      - tier: tier_3
+        audiences: [asset_mgmt]
+        dwell_time_sla: next_business_week
+      - tier: tier_4
+        audiences: [executive]
+        dwell_time_sla: next_monthly_review
+    always_escalate_to: []
+
+  identity_unresolved:
+    description: |
+      A record cannot be resolved against master data (property, unit,
+      account, vendor, employee, or other canonical identity).
+    default_route:
+      - on_call_ops
+      - data_owner
+    severity_floor: warning
+    dwell_time_sla: same_business_week
+    escalation_chain:
+      - tier: tier_1
+        audiences: [on_call_ops, data_owner]
+        dwell_time_sla: same_business_week
+      - tier: tier_2
+        audiences: [asset_mgmt, regional_ops, finance_reporting]
+        dwell_time_sla: next_business_week
+      - tier: tier_3
+        audiences: [compliance_risk]
+        dwell_time_sla: next_monthly_review
+    always_escalate_to: []
+
+  schema_drift:
+    description: |
+      The upstream source schema changed and the connector contract no
+      longer matches. May or may not be downstream-impacting.
+    default_route:
+      - on_call_ops
+      - technical_owner
+      - data_owner
+    severity_floor: critical
+    dwell_time_sla: immediate_response
+    escalation_chain:
+      - tier: tier_1
+        audiences: [on_call_ops, technical_owner, data_owner]
+        dwell_time_sla: immediate_response
+      - tier: tier_2
+        audiences: [business_owner]
+        dwell_time_sla: same_business_day
+      - tier: tier_3
+        audiences: [finance_reporting, asset_mgmt]
+        dwell_time_sla: next_business_day
+      - tier: tier_4
+        audiences: [executive]
+        dwell_time_sla: next_business_week
+    always_escalate_to: []
+
+  stale_source:
+    description: |
+      The feed arrived but is stale, or it did not arrive at all within the
+      cadence plus tolerance.
+    default_route:
+      - on_call_ops
+      - data_owner
+    severity_floor: warning
+    dwell_time_sla: same_business_day
+    escalation_chain:
+      - tier: tier_1
+        audiences: [on_call_ops, data_owner]
+        dwell_time_sla: same_business_day
+      - tier: tier_2
+        audiences: [business_owner, primary_consumer_audience]
+        dwell_time_sla: next_business_day
+      - tier: tier_3
+        audiences: [finance_reporting, asset_mgmt]
+        dwell_time_sla: next_business_week
+      - tier: tier_4
+        audiences: [compliance_risk]
+        dwell_time_sla: next_monthly_review
+    always_escalate_to: []
+
+  mapping_override_pending:
+    description: |
+      A mapping override has been proposed and is awaiting approval.
+    default_route:
+      - data_owner
+      - business_owner
+    severity_floor: info
+    dwell_time_sla: same_business_week
+    escalation_chain:
+      - tier: tier_1
+        audiences: [data_owner, business_owner]
+        dwell_time_sla: same_business_week
+      - tier: tier_2
+        audiences: [finance_reporting, asset_mgmt]
+        dwell_time_sla: next_business_week
+    always_escalate_to: []
+
+  approval_override_pending:
+    description: |
+      An approval-gated action is waiting for an approval request to land.
+    default_route:
+      - approvers_for_gate
+    severity_floor: warning
+    dwell_time_sla: gate_specific_per_approval_matrix
+    escalation_chain:
+      - tier: tier_1
+        audiences: [approvers_for_gate]
+        dwell_time_sla: gate_specific_per_approval_matrix
+      - tier: tier_2
+        audiences: [finance_reporting, asset_mgmt]
+        dwell_time_sla: next_business_day
+      - tier: tier_3
+        audiences: [executive]
+        dwell_time_sla: next_business_week
+    always_escalate_to: []
+
+  manual_correction_required:
+    description: |
+      An upstream record is wrong and the fix must be made at the source,
+      not in the integration layer.
+    default_route:
+      - data_owner
+      - business_owner
+    severity_floor: warning
+    dwell_time_sla: same_business_week
+    escalation_chain:
+      - tier: tier_1
+        audiences: [data_owner, business_owner]
+        dwell_time_sla: same_business_week
+      - tier: tier_2
+        audiences: [technical_owner, finance_reporting]
+        dwell_time_sla: next_business_week
+    always_escalate_to: []
+
+  policy_violation:
+    description: |
+      An automated action would cross an approval floor or an overlay
+      policy constraint.
+    default_route:
+      - on_call_ops
+      - approvers_for_gate
+      - finance_reporting
+      - asset_mgmt
+    severity_floor: critical
+    dwell_time_sla: immediate_response
+    escalation_chain:
+      - tier: tier_1
+        audiences: [on_call_ops, approvers_for_gate]
+        dwell_time_sla: immediate_response
+      - tier: tier_2
+        audiences: [finance_reporting, asset_mgmt]
+        dwell_time_sla: same_business_day
+      - tier: tier_3
+        audiences: [executive]
+        dwell_time_sla: next_business_day
+      - tier: tier_4
+        audiences: [legal_counsel]
+        dwell_time_sla: next_business_week
+    always_escalate_to: []
+
+  fair_housing_sensitive:
+    description: |
+      A fair-housing-sensitive field, pattern, or decision has been
+      detected. Containment is immediate; broadcast channels are not used.
+    default_route:
+      - compliance_risk
+      - legal_counsel
+    severity_floor: critical
+    dwell_time_sla: immediate_response
+    escalation_chain:
+      - tier: tier_1
+        audiences: [compliance_risk, legal_counsel]
+        dwell_time_sla: immediate_response
+      - tier: tier_2
+        audiences: [executive]
+        dwell_time_sla: same_business_day
+    always_escalate_to: [compliance_risk, legal_counsel, executive]
+
+  legal_sensitive:
+    description: |
+      A legal-sensitive field, document, or decision has been detected
+      outside a permitted destination.
+    default_route:
+      - legal_counsel
+      - compliance_risk
+    severity_floor: critical
+    dwell_time_sla: immediate_response
+    escalation_chain:
+      - tier: tier_1
+        audiences: [legal_counsel, compliance_risk]
+        dwell_time_sla: immediate_response
+      - tier: tier_2
+        audiences: [executive]
+        dwell_time_sla: same_business_day
+    always_escalate_to: [legal_counsel, compliance_risk, executive]
+
+# Alias: primary_consumer_audience is resolved per source to the audience
+# whose workflows most directly depend on the source:
+#   pms, crm             -> regional_ops and site_ops and asset_mgmt
+#   gl, ap, manual_uploads (finance-adjacent) -> finance_reporting
+#   market_data          -> asset_mgmt and finance_reporting
+#   construction         -> construction and development and asset_mgmt
+#   hr_payroll           -> regional_ops and finance_reporting
+#
+# Alias: approvers_for_gate is resolved to the role list named in the
+# matching row of _core/approval_matrix.md for the gated action.

@@ -1,0 +1,158 @@
+# Yardi reconciliation checks — machine-readable companion to reconciliation_rules.md.
+# check_id prefix: yd_recon_
+# Tolerance bands cite reference/normalized/schemas/reconciliation_tolerance_band.yaml;
+# no hardcoded numeric thresholds.
+
+status_tag: sample
+
+checks:
+
+  - check_id: yd_recon_yardi_vs_appfolio_overlap
+    paired_sources: [yardi_voyager_stub, appfolio_prod]
+    grain: (property_id, period)
+    fields_compared:
+      - unit_count_active_rentable
+      - gross_potential_rent_cents
+      - occupied_unit_count
+      - leased_unit_count
+      - billed_rent_cents
+      - collected_rent_cents
+      - concessions_applied_cents
+    tolerance_reference: reference/normalized/schemas/reconciliation_tolerance_band.yaml::cutover_overlap_band
+    severity: warning
+    blocks_if_outside_band: true
+    applies_if: cutover_dual_run_active
+    remediation_runbook: runbooks/yardi_migration_to_appfolio.md::dual_run_window
+
+  - check_id: yd_recon_yardi_vs_intacct_gl_parallel
+    paired_sources: [yardi_voyager_stub, intacct_prod]
+    grain: (property_id, gl_account_code, period, book_id=accrual)
+    fields_compared:
+      - amount_cents
+    tolerance_reference: reference/normalized/schemas/reconciliation_tolerance_band.yaml::gl_parallel_band
+    severity: warning
+    blocks_if_outside_band: true
+    applies_if: yardi_plus_intacct_posture
+    remediation_runbook: runbooks/yardi_common_issues.md::posting_vs_accrual
+
+  - check_id: yd_recon_yardi_charge_vs_intacct_revenue
+    paired_sources: [yardi_voyager_stub, intacct_prod]
+    grain: (property_id, period, charge_type)
+    fields_compared:
+      - charged_total_cents
+      - collected_total_cents
+    tolerance_reference: reference/normalized/schemas/reconciliation_tolerance_band.yaml::revenue_basis_band
+    severity: warning
+    blocks_if_outside_band: true
+    remediation_runbook: runbooks/yardi_common_issues.md::posting_vs_accrual
+
+  - check_id: yd_recon_yardi_jobcost_vs_procore
+    paired_sources: [yardi_voyager_stub, procore_prod]
+    grain: (capex_project_id, period)
+    fields_compared:
+      - posted_jobcost_cents
+      - committed_cents
+    tolerance_reference: reference/normalized/schemas/reconciliation_tolerance_band.yaml::procore_yardi_jobcost_band
+    severity: warning
+    blocks_if_outside_band: false
+    applies_if: yardi_job_cost_module_in_use
+    remediation_runbook: runbooks/yardi_common_issues.md::procore_yardi_jobcost_drift
+
+  - check_id: yd_recon_dealpath_to_yardi_handoff
+    paired_sources: [dealpath_prod, yardi_voyager_stub]
+    grain: (deal_id, property_id)
+    fields_compared:
+      - deal_close_date_actual
+      - yardi_property_setup_date
+    tolerance_reference: reference/normalized/schemas/reconciliation_tolerance_band.yaml::handoff_lag_band
+    severity: warning
+    blocks_if_outside_band: true
+    remediation_runbook: runbooks/yardi_onboarding.md::post_ic_property_setup
+
+  - check_id: yd_recon_yardi_vs_excel_rent_comp
+    paired_sources: [yardi_voyager_stub, excel_market_surveys]
+    grain: (submarket, unit_type, period)
+    fields_compared:
+      - market_rent_per_sf
+    tolerance_reference: reference/normalized/schemas/reconciliation_tolerance_band.yaml::comp_drift_band
+    severity: warning
+    blocks_if_outside_band: false
+    remediation_runbook: runbooks/benchmark_refresh.md::submarket_drift
+
+  - check_id: yd_recon_rentcafe_vs_voyager_lead_state
+    paired_sources: [yardi_rentcafe_stub, yardi_voyager_stub]
+    grain: (lead_id, as_of_date)
+    fields_compared:
+      - pipeline_stage
+      - applicant_resident_state
+    tolerance_reference: reference/normalized/schemas/reconciliation_tolerance_band.yaml::rentcafe_to_voyager_latency_band
+    severity: warning
+    blocks_if_outside_band: false
+    applies_if: rentcafe_scope_confirmed
+    remediation_runbook: runbooks/yardi_common_issues.md::rentcafe_voyager_drift
+
+  - check_id: yd_recon_data_connect_vs_voyager_charges
+    paired_sources: [yardi_data_connect_stub, yardi_voyager_stub]
+    grain: (charge_id)
+    fields_compared:
+      - amount_cents
+      - month
+    tolerance_reference: reference/normalized/schemas/reconciliation_tolerance_band.yaml::data_connect_lag_band
+    severity: warning
+    blocks_if_outside_band: false
+    remediation_runbook: runbooks/yardi_common_issues.md::data_connect_lag
+
+  - check_id: yd_recon_data_connect_vs_voyager_gl_actuals
+    paired_sources: [yardi_data_connect_stub, yardi_voyager_stub]
+    grain: (property_id, gl_account_code, period, book_id)
+    fields_compared:
+      - amount_cents
+    tolerance_reference: reference/normalized/schemas/reconciliation_tolerance_band.yaml::data_connect_lag_band
+    severity: warning
+    blocks_if_outside_band: false
+    remediation_runbook: runbooks/yardi_common_issues.md::data_connect_lag
+
+  - check_id: yd_recon_vendor_three_way_with_yardi
+    paired_sources: [yardi_voyager_stub, intacct_prod, procore_prod]
+    grain: (vendor_id)
+    fields_compared:
+      - vendor_name
+      - tax_id_hash
+      - insurance_expiry_date
+      - services
+    tolerance_reference: reference/normalized/schemas/reconciliation_tolerance_band.yaml::identity_match_band
+    severity: warning
+    blocks_if_outside_band: false
+    remediation_runbook: runbooks/yardi_common_issues.md::vendor_crosswalk_mismatch
+
+  - check_id: yd_recon_property_code_resolves_on_crosswalk
+    paired_sources: [yardi_voyager_stub]
+    grain: (propid)
+    fields_compared:
+      - property_master_crosswalk.property_id
+    tolerance_reference: reference/normalized/schemas/reconciliation_tolerance_band.yaml::identity_match_band
+    severity: blocker
+    blocks_if_outside_band: true
+    remediation_runbook: runbooks/yardi_onboarding.md::property_crosswalk_seed
+
+  - check_id: yd_recon_post_vs_accrual_drift
+    paired_sources: [yardi_voyager_stub]
+    grain: (charge_id)
+    fields_compared:
+      - post_date
+      - month
+    tolerance_reference: reference/normalized/schemas/reconciliation_tolerance_band.yaml::post_vs_accrual_band
+    severity: warning
+    blocks_if_outside_band: false
+    remediation_runbook: runbooks/yardi_common_issues.md::posting_vs_accrual
+
+  - check_id: yd_recon_historical_lease_unit_effective_date
+    paired_sources: [yardi_voyager_stub, yardi_data_connect_stub]
+    grain: (lease_id, unit_id)
+    fields_compared:
+      - unit.effective_end_date
+      - lease.effective_end_date
+    tolerance_reference: reference/normalized/schemas/reconciliation_tolerance_band.yaml::identity_match_band
+    severity: warning
+    blocks_if_outside_band: false
+    remediation_runbook: runbooks/yardi_common_issues.md::historical_unit_structure

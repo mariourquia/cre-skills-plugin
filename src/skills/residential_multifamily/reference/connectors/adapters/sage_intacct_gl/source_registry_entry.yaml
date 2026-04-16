@@ -1,0 +1,43 @@
+# Source registry FRAGMENT for Sage Intacct GL.
+# Will be merged into source_registry/source_registry.yaml.
+
+records:
+
+  - source_id: sage_intacct_prod
+    source_name: Sage Intacct General Ledger Production
+    source_domain: gl
+    vendor_family: sage_intacct_family
+    ingestion_mode: api
+    environment: prod
+    cadence: daily
+    data_owner: corporate_controller
+    business_owner: finance_director
+    technical_owner: finance_systems_team
+    credential_method: oauth_placeholder
+    object_coverage:
+      - chart_of_account
+      - dimension
+      - journal_entry
+      - actual_line
+      - budget_line
+      - forecast_line
+      - variance_explanation
+      - vendor
+      - capex_project
+    expected_latency_minutes: 240
+    known_limitations:
+      - properties may roll to shared legal entities; multi-dim resolution required
+      - one property may use multiple dimensions across periods
+      - account names change over time; account_crosswalk effective-dating required
+      - manual journals may have incomplete property attribution
+      - capex coded to opex (and vice versa) requires periodic recon
+      - inter-entity postings and eliminations need separate treatment
+    pii_classification: low
+    financial_sensitivity: restricted
+    legal_sensitivity: high
+    status: stubbed
+    rollout_wave: wave_4
+    notes: |
+      Primary GL source. Survives conflicts with AppFolio for posted actuals
+      after close period. See adapters/sage_intacct_gl/ for COA crosswalk
+      build, dimension mapping, and reconciliation rules.

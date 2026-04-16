@@ -1,0 +1,42 @@
+# Market data mapping template.
+
+rent_comp:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [comp_observation_id]
+    tie_breaker: latest_source_date_wins
+  as_of_handling:
+    carry_field: as_of_date
+    allow_backfill: true
+  fields:
+    - { source_column: obs_id,        normalized_column: comp_observation_id,      transform: trim_string,      required: true }
+    - { source_column: comp_prop,     normalized_column: comp_property_id,         transform: trim_string,      required: true }
+    - { source_column: mkt,           normalized_column: market,                   transform: trim_string,      required: true }
+    - { source_column: as_of,         normalized_column: as_of_date,               transform: to_iso_date,      required: true }
+    - { source_column: ut_label,      normalized_column: unit_type_label,          transform: trim_string,      required: true }
+    - { source_column: asking_usd,    normalized_column: asking_rent_monthly_cents, transform: dollars_to_cents, required: true }
+    - { source_column: submkt,        normalized_column: submarket,                transform: trim_string,      required: false }
+    - { source_column: nrsf,          normalized_column: nrsf,                     transform: to_integer,       required: false }
+    - { source_column: conc_wk,       normalized_column: concessions_weeks,        transform: to_number,        required: false }
+
+occupancy_benchmark:
+  source_format: [csv]
+  dedup_rule:
+    keys: [market, submarket, as_of_date]
+    tie_breaker: latest_source_date_wins
+  as_of_handling:
+    carry_field: as_of_date
+    allow_backfill: true
+  fields:
+    - { source_column: mkt,      normalized_column: market,                      transform: trim_string, required: true }
+    - { source_column: submkt,   normalized_column: submarket,                   transform: default_empty_string, required: true }
+    - { source_column: as_of,    normalized_column: as_of_date,                  transform: to_iso_date, required: true }
+    - { source_column: phys_occ, normalized_column: physical_occupancy_percent,  transform: to_number,   required: true }
+    - { source_column: leas_occ, normalized_column: leased_occupancy_percent,    transform: to_number,   required: false }
+    - { source_column: econ_occ, normalized_column: economic_occupancy_percent,  transform: to_number,   required: false }
+
+concession_observation: { status: TODO, note: "map per vendor" }
+payroll_reference:      { status: TODO, note: "map per vendor" }
+labor_reference:        { status: TODO, note: "map per vendor" }
+material_reference:     { status: TODO, note: "map per vendor" }
+utility_reference:      { status: TODO, note: "map per vendor" }

@@ -1,0 +1,108 @@
+# PMS data-quality rules.
+# Each rule addresses one of the DQ dimensions: freshness, completeness,
+# conformance, consistency, uniqueness, referential_integrity, reasonableness.
+rules:
+- rule_id: pms_freshness_rent_roll
+  dimension: freshness
+  severity: blocker
+  description: Rent roll snapshot is no older than the max-age days declared in
+    pms/manifest.yaml.
+  expected: max(pms.unit.as_of_date) >= today - rent_roll_max_age_days declared
+    in pms/manifest.yaml
+  remediation: Operator re-lands the rent roll per the declared cadence; if the
+    cadence changes, update the manifest.
+- rule_id: pms_freshness_payments
+  dimension: freshness
+  severity: blocker
+  description: Payment feed is no older than the payments-cadence days declared
+    in pms/manifest.yaml.
+  expected: max(pms.payment.payment_date) >= today - payment_feed_max_age_days
+    declared in pms/manifest.yaml
+  remediation: Payment feeds usually land nightly. A freshness gap blocks
+    aging-sensitive workflows (delinquency_collections).
+- rule_id: pms_completeness_required_fields
+  dimension: completeness
+  severity: blocker
+  description: Every required field in pms/schema.yaml is non-null in the
+    normalized landing.
+  expected: for each entity and required_field, count(null) == 0
+  remediation: A silent null in a required field usually indicates a mapping
+    gap; operator fixes mapping.yaml and re-lands.
+- rule_id: pms_conformance_enum_values
+  dimension: conformance
+  severity: blocker
+  description: Every enum-typed field carries a value in its canonical enum
+    from pms/schema.yaml.
+  expected: for each enum field, value IS NULL OR value IN canonical_enum
+  remediation: Unmapped source enum values are rejected at landing. Operator
+    extends mapping.yaml; never bucket to other silently.
+- rule_id: pms_consistency_lease_vs_unit_status
+  dimension: consistency
+  severity: blocker
+  description: Unit.status transitions are consistent with the latest lease
+    status on the unit.
+  expected: for each unit where occupied, there exists a lease with status IN
+    (in_effect, notice) AND unit.current_lease_id == that lease_id
+  remediation: Inconsistent unit-lease status usually indicates a stale lease
+    event or a missing move_in event. Operator reconciles.
+- rule_id: pms_uniqueness_primary_keys
+  dimension: uniqueness
+  severity: blocker
+  description: No duplicate primary keys across any PMS entity after dedup.
+  expected: count(distinct pk) == count(records) per entity
+  remediation: See qa/duplicate_id.yaml.
+- rule_id: pms_referential_integrity_lease_unit
+  dimension: referential_integrity
+  severity: blocker
+  description: Every lease.unit_id resolves to a pms.unit row.
+  expected: for each lease, unit_id IN pms.unit.unit_id within the same
+    property_id
+  remediation: An orphan unit_id typically means the unit was decommissioned
+    without closing the lease. Operator reconciles.
+- rule_id: pms_referential_integrity_charge_lease
+  dimension: referential_integrity
+  severity: warning
+  description: Every charge.lease_id resolves to a pms.lease row; orphans warn
+    only (historical charges for closed leases are allowed).
+  expected: for each charge, lease_id IN pms.lease.lease_id OR charge is
+    flagged historical
+  remediation: Historical charges for closed leases are allowed with flag;
+    other orphans require operator reconciliation.
+- rule_id: pms_reasonableness_rent_vs_nrsf
+  dimension: reasonableness
+  severity: warning
+  description: Base rent per NRSF for an active lease is within the plausible
+    band declared in overlays/segments/<segment>/overlay.yaml for the
+    property's segment, submarket, and unit type.
+  expected: base_rent_monthly_cents / nrsf within the plausible band referenced
+    in the active segment overlay
+  remediation: Out-of-band rents indicate either a data-entry error, a legacy
+    below-market lease, or a concession-laden effective rent. Operator confirms.
+- rule_id: pms_reasonableness_term_months
+  dimension: reasonableness
+  severity: warning
+  description: Lease term_months is within the plausible band for the segment
+    referenced in overlays/segments/<segment>/overlay.yaml.
+  expected: term_months IS NULL OR term_months IN the plausible range for the
+    active segment
+  remediation: Terms outside the plausible range (e.g., 2-month corporate or
+    60-month fixed) require an explicit reason flag.
+- rule_id: pms_conformance_status_transitions
+  dimension: conformance
+  severity: warning
+  description: Unit.status, lease.status, and work_order.status transitions
+    follow the allowed_transitions lists declared in pms/schema.yaml.
+  expected: for each entity status field, observed transition sequence IS IN
+    allowed_transitions OR carries a transition_exception_flag
+  remediation: Unexpected transitions signal either data entry gaps or a
+    legitimate exception. Operator documents.
+- rule_id: pms_consistency_household_identity
+  dimension: consistency
+  severity: warning
+  description: Residents linked to a household in resident_crosswalk are
+    consistently tagged with the same household_id across leases.
+  expected: for each canonical_resident_id, household_id IS CONSISTENT across
+    all active leases
+  remediation: A resident split across two household_ids usually reflects a
+    household change (divorce, cohabitation). Operator confirms and updates
+    the crosswalk with a transition note.

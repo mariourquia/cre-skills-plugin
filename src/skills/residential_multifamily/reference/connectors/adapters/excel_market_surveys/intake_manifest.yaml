@@ -1,0 +1,209 @@
+# Intake manifest for the Excel Market Surveys adapter.
+# One record per file family. Lists drop location, cadence, filename
+# pattern, template schema ref, required reviewer, staleness threshold,
+# and required provenance fields. Numeric staleness values live here
+# rather than inline in prose.
+
+status_tag: template
+schema_version: "0.1.0"
+
+file_families:
+
+  - family_slug: rent_comp_weekly
+    description: |
+      Weekly rent comp refresh for each active submarket. One workbook per
+      submarket or per region; tabs per comp property.
+    drop_location: shared_drive://market_data/rent_comp_weekly/<region>/<submarket>/
+    cadence: weekly
+    file_pattern: "^rent_comp_weekly__<submarket>__\\d{4}-\\d{2}-\\d{2}\\.xlsx$"
+    template_schema_ref: template_schemas/rent_comp_template.yaml
+    required_reviewer: research_analyst
+    optional_reviewer: regional_ops_director
+    staleness_threshold_days: 10
+    provenance_required_fields: [source_file, sheet_tab, as_of_date, analyst_name, extracted_at, row_id]
+    downstream_workflows: [market_rent_refresh, rent_comp_intake]
+    normalized_category: rent_comp
+
+  - family_slug: concession_tracker_monthly
+    description: |
+      Monthly concession tracker. Rows per comp property; one tab per
+      submarket or per region. Tracks concession_months_offered, share of
+      comps offering, average concession dollars.
+    drop_location: shared_drive://market_data/concession_tracker_monthly/<region>/
+    cadence: monthly
+    file_pattern: "^concession_tracker__<region>__\\d{4}-\\d{2}\\.xlsx$"
+    template_schema_ref: template_schemas/concession_tracker_template.yaml
+    required_reviewer: leasing_director
+    staleness_threshold_days: 40
+    provenance_required_fields: [source_file, sheet_tab, as_of_date, analyst_name, extracted_at, row_id]
+    downstream_workflows: [market_rent_refresh, renewal_retention, budget_build]
+    normalized_category: concession_benchmark
+
+  - family_slug: market_survey_workbook
+    description: |
+      Analyst-authored market survey workbook. Multiple tabs per
+      workbook: rent_summary, occupancy_summary, concession_summary,
+      property_detail, commentary. Quarterly cadence.
+    drop_location: shared_drive://market_data/market_survey_workbook/<region>/
+    cadence: quarterly
+    file_pattern: "^market_survey__<region>__\\d{4}-Q\\d\\.xlsx$"
+    template_schema_ref: template_schemas/market_survey_workbook_template.yaml
+    required_reviewer: research_analyst
+    optional_reviewer: investments_director
+    staleness_threshold_days: 100
+    provenance_required_fields: [source_file, sheet_tab, as_of_date, analyst_name, reviewer, extracted_at, row_id]
+    downstream_workflows: [market_rent_refresh, rent_comp_intake, quarterly_portfolio_review]
+    normalized_category: rent_benchmark
+
+  - family_slug: analyst_benchmark_pack
+    description: |
+      Cross-market analyst benchmark pack. Rent_benchmark +
+      occupancy_benchmark + concession_benchmark rolled up by market,
+      submarket, segment, property_form, unit_type. Quarterly cadence.
+    drop_location: shared_drive://market_data/analyst_benchmark_pack/
+    cadence: quarterly
+    file_pattern: "^analyst_benchmark_pack__\\d{4}-Q\\d\\.xlsx$"
+    template_schema_ref: template_schemas/analyst_benchmark_pack_template.yaml
+    required_reviewer: investments_director
+    optional_reviewer: research_analyst
+    staleness_threshold_days: 100
+    provenance_required_fields: [source_file, sheet_tab, as_of_date, analyst_name, reviewer, extracted_at, row_id]
+    downstream_workflows: [market_rent_refresh, quarterly_portfolio_review, reforecast]
+    normalized_category: rent_benchmark
+
+  - family_slug: staffing_benchmark
+    description: |
+      Staffing benchmark sheet. FTE ratios by role, segment, property_form,
+      property_size_band, management_mode. Monthly or quarterly refresh
+      depending on operator cadence.
+    drop_location: shared_drive://benchmarks/staffing_benchmark/
+    cadence: monthly
+    file_pattern: "^staffing_benchmark__\\d{4}-\\d{2}\\.xlsx$"
+    template_schema_ref: template_schemas/staffing_benchmark_template.yaml
+    required_reviewer: hr_director
+    optional_reviewer: regional_ops_director
+    staleness_threshold_days: 40
+    provenance_required_fields: [source_file, sheet_tab, as_of_date, analyst_name, reviewer, extracted_at, row_id]
+    downstream_workflows: [budget_build, reforecast]
+    normalized_category: staffing_benchmark
+
+  - family_slug: labor_rate_quarterly
+    description: |
+      Labor rate sheet by market, trade, labor_tier, rate_type. Quarterly
+      cadence. High-impact: flows into capex estimate generation, unit
+      turn cost library, and budget build.
+    drop_location: shared_drive://benchmarks/labor_rate/
+    cadence: quarterly
+    file_pattern: "^labor_rate__<market>__\\d{4}-Q\\d\\.xlsx$"
+    template_schema_ref: template_schemas/labor_rate_sheet_template.yaml
+    required_reviewer: capital_projects_team
+    optional_reviewer: hr_director
+    staleness_threshold_days: 100
+    provenance_required_fields: [source_file, sheet_tab, as_of_date, analyst_name, reviewer, extracted_at, row_id]
+    downstream_workflows: [capex_estimate_generation, budget_build, capital_project_intake_and_prioritization]
+    normalized_category: labor_rate
+
+  - family_slug: material_price_sheet
+    description: |
+      Material cost sheet by region, material_slug, sku_tier. Monthly or
+      quarterly refresh depending on commodity volatility.
+    drop_location: shared_drive://benchmarks/material_price/
+    cadence: monthly
+    file_pattern: "^material_price__<region>__\\d{4}-\\d{2}\\.xlsx$"
+    template_schema_ref: template_schemas/material_price_sheet_template.yaml
+    required_reviewer: capital_projects_team
+    staleness_threshold_days: 40
+    provenance_required_fields: [source_file, sheet_tab, as_of_date, analyst_name, extracted_at, row_id]
+    downstream_workflows: [capex_estimate_generation, budget_build]
+    normalized_category: material_cost
+
+  - family_slug: vendor_rate_card
+    description: |
+      Vendor rate card workbook. One tab per vendor; rows per service_slug
+      with contract_term_months and unit of measure. On-event cadence
+      (renegotiation) plus annual refresh.
+    drop_location: shared_drive://procurement/vendor_rate_cards/
+    cadence: on_demand
+    file_pattern: "^vendor_rate_card__<vendor_slug>__\\d{4}-\\d{2}-\\d{2}\\.xlsx$"
+    template_schema_ref: template_schemas/vendor_rate_card_template.yaml
+    required_reviewer: procurement_lead
+    staleness_threshold_days: 380
+    provenance_required_fields: [source_file, sheet_tab, as_of_date, analyst_name, reviewer, extracted_at, row_id]
+    downstream_workflows: [vendor_dispatch_sla_review, budget_build, capex_estimate_generation]
+    normalized_category: vendor_rate
+
+  - family_slug: turn_cost_library
+    description: |
+      Turn cost library by turn_scope, segment, property_form, unit_type.
+      Quarterly refresh. Derived from labor_rate + material_cost +
+      vendor_rate but stored as an approved bundle.
+    drop_location: shared_drive://benchmarks/turn_cost_library/
+    cadence: quarterly
+    file_pattern: "^turn_cost_library__<region>__\\d{4}-Q\\d\\.xlsx$"
+    template_schema_ref: template_schemas/turn_cost_library_template.yaml
+    required_reviewer: regional_ops_director
+    staleness_threshold_days: 100
+    provenance_required_fields: [source_file, sheet_tab, as_of_date, analyst_name, reviewer, extracted_at, row_id]
+    downstream_workflows: [unit_turn_make_ready, budget_build, reforecast]
+    normalized_category: unit_turn_cost
+
+  - family_slug: capex_cost_library
+    description: |
+      Capex library line items by line_item_slug, segment, property_form,
+      lifecycle_stage. Quarterly refresh. High-impact: flows into capex
+      estimate generation and capital project intake.
+    drop_location: shared_drive://benchmarks/capex_cost_library/
+    cadence: quarterly
+    file_pattern: "^capex_cost_library__<region>__\\d{4}-Q\\d\\.xlsx$"
+    template_schema_ref: template_schemas/capex_cost_library_template.yaml
+    required_reviewer: development_director
+    optional_reviewer: capital_projects_team
+    staleness_threshold_days: 100
+    provenance_required_fields: [source_file, sheet_tab, as_of_date, analyst_name, reviewer, extracted_at, row_id]
+    downstream_workflows: [capex_estimate_generation, capital_project_intake_and_prioritization, budget_build, reforecast]
+    normalized_category: capex_line_item
+
+  - family_slug: schedule_assumption_sheet
+    description: |
+      Construction schedule assumption sheet. Milestone durations by
+      property_form, project_size_band, market. Annual or on-event refresh.
+    drop_location: shared_drive://benchmarks/schedule_assumption/
+    cadence: on_demand
+    file_pattern: "^schedule_assumption__\\d{4}\\.xlsx$"
+    template_schema_ref: template_schemas/schedule_assumption_template.yaml
+    required_reviewer: development_director
+    staleness_threshold_days: 380
+    provenance_required_fields: [source_file, sheet_tab, as_of_date, analyst_name, reviewer, extracted_at, row_id]
+    downstream_workflows: [capital_project_intake_and_prioritization, schedule_risk_review]
+    normalized_category: construction_duration_assumption
+
+  - family_slug: market_commentary_file
+    description: |
+      Market commentary file. Narrative notes, slide-deck-style exports,
+      or short memos. Attached to a specific market survey workbook or
+      analyst benchmark pack. No periodic cadence.
+    drop_location: shared_drive://market_data/market_commentary/
+    cadence: on_demand
+    file_pattern: "^market_commentary__<region>__\\d{4}-\\d{2}-\\d{2}\\.xlsx$"
+    template_schema_ref: template_schemas/market_commentary_template.yaml
+    required_reviewer: investments_director
+    staleness_threshold_days: 190
+    provenance_required_fields: [source_file, sheet_tab, as_of_date, analyst_name, extracted_at, row_id]
+    downstream_workflows: [quarterly_portfolio_review, executive_operating_summary_generation]
+    normalized_category: market_commentary
+
+  - family_slug: asset_specific_comp_pack
+    description: |
+      Asset-specific comp pack used in underwriting a specific property.
+      One workbook per subject asset; tabs per comp with adjustment grid.
+      On-event cadence (triggered by an underwriting request).
+    drop_location: shared_drive://deals/<deal_slug>/comp_packs/
+    cadence: on_demand
+    file_pattern: "^asset_comp_pack__<deal_slug>__\\d{4}-\\d{2}-\\d{2}\\.xlsx$"
+    template_schema_ref: template_schemas/rent_comp_template.yaml
+    required_reviewer: research_analyst
+    optional_reviewer: investments_director
+    staleness_threshold_days: 45
+    provenance_required_fields: [source_file, sheet_tab, as_of_date, analyst_name, extracted_at, row_id]
+    downstream_workflows: [rent_comp_intake]
+    normalized_category: rent_comp
