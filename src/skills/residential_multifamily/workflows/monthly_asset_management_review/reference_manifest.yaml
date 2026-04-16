@@ -46,3 +46,14 @@ reads:
     required: true
     fallback_behavior: refuse
 writes: []
+
+# Period-seal gating: see _core/final_marked_workflows.yaml#period_grade_workflows
+# and _core/schemas/period_seal.yaml. Test: test_period_seal_gating.
+required_period_seal:
+  minimum_close_status: soft_close
+  requires_close_lock_timestamp: false
+  as_of_required: true
+  rationale: |
+    Asset-manager-level monthly review. Same audience posture as
+    monthly_property_operating_review; soft_close floor prevents
+    variance analysis on draft books.

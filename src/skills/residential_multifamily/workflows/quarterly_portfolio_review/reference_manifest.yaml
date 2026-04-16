@@ -31,3 +31,15 @@ reads:
     required: true
     fallback_behavior: refuse
 writes: []
+
+# Period-seal gating: see _core/final_marked_workflows.yaml#period_grade_workflows
+# and _core/schemas/period_seal.yaml. Test: test_period_seal_gating.
+required_period_seal:
+  minimum_close_status: hard_close
+  requires_close_lock_timestamp: true
+  as_of_required: true
+  rationale: |
+    Quarterly LP letter body reuses numbers from this workflow
+    verbatim. Hard_close is the earliest state where the GL matches
+    what the LP audit will see — running against soft-closed books
+    risks material restatement after publication.

@@ -44,4 +44,28 @@ properties:
         write_mode:
           type: string
           enum: [append, upsert, replace, propose_then_approve]
+  required_period_seal:
+    type: object
+    description: |
+      Period-seal gate for period-grade financial workflows. See
+      _core/final_marked_workflows.yaml#period_grade_workflows and
+      _core/schemas/period_seal.yaml. Enforced by test_period_seal_gating.
+    required: [minimum_close_status, as_of_required]
+    additionalProperties: false
+    properties:
+      minimum_close_status:
+        type: string
+        enum: [draft, soft_close, hard_close, locked]
+      requires_close_lock_timestamp:
+        type: boolean
+        default: false
+      as_of_required:
+        type: boolean
+      required_version_fields:
+        type: array
+        items:
+          type: string
+          enum: [budget_version, reforecast_version]
+      rationale:
+        type: string
 additionalProperties: false
