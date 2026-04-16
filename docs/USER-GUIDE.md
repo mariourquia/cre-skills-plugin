@@ -83,7 +83,7 @@ Specialist Agents
 Output: Reports, verdicts, handoff data for downstream pipelines
 ```
 
-### The 10 Pipelines + PM Sub-Pipeline
+### Pipelines + PM Sub-Pipeline
 
 | Pipeline | What It Does | Triggered By |
 |----------|-------------|-------------|
@@ -126,27 +126,27 @@ Investment Strategy ──▶ Research Intelligence ──▶ Fund Management
 
 ### Acquisition Pipeline (~45-90 minutes)
 
-1. **Phase 1: Due Diligence** (7 agents, parallel)
+1. **Phase 1: Due Diligence** (parallel agents)
    - Rent roll analysis, OpEx review, physical inspection, market study, environmental, title, tenant credit
    - Agents research market data via web search
    - You'll see log entries as each agent completes
    - **Output:** DD report with red flags and data gaps
 
-2. **Phase 2: Underwriting** (3 agents, sequential)
+2. **Phase 2: Underwriting** (sequential agents)
    - Financial model → 27 scenario analysis → IC memo
    - Depends on DD data
    - **Output:** Base case model, sensitivity matrix, Investment Committee memo
 
-3. **Phase 3: Financing** (3 agents, sequential)
+3. **Phase 3: Financing** (sequential agents)
    - Lender outreach → quote comparison → term sheet
    - **Output:** Recommended financing terms
 
-4. **Phase 4: Legal** (6 agents, partially parallel with Phase 2-3)
+4. **Phase 4: Legal** (partially parallel with Phases 2-3)
    - PSA review, title/survey, estoppels, insurance, loan docs, transfer docs
    - Can start when DD is 80%+ complete
    - **Output:** Legal readiness assessment
 
-5. **Phase 5: Closing** (2 agents, sequential)
+5. **Phase 5: Closing** (sequential agents)
    - Closing checklist → funds flow memo
    - Requires all prior phases
    - **Output:** Closing readiness, Go/No-Go verdict
@@ -176,7 +176,7 @@ Once launched, the hold period runs as a lifecycle:
 
 3. **Phase 3: Quarterly Monitoring** (recurring every quarter, ~20 min per cycle)
    - Performance vs budget, tenant health, market conditions, covenant compliance
-   - **This is the heartbeat.** Every quarter, 4 agents analyze the property.
+   - **This is the heartbeat.** Every quarter, a team of agents analyzes the property.
    - **Output:** Quarterly report with verdict: ON_TRACK / WATCH / INTERVENE / EXIT_TRIGGER
 
 4. **Phases 4-6: Triggered as needed**
@@ -411,21 +411,20 @@ Data gaps reduce the confidence score but don't stop the pipeline unless the gap
 
 ---
 
-## Agent Counts
+## Pipelines and Orchestrators
 
-| Pipeline | Agents | Orchestrator |
-|----------|--------|-------------|
-| Acquisition | 21 | master-orchestrator |
-| Hold Period | 21 | asset-management-orchestrator |
-| PM Operations | 28 | pm-orchestrator-lead |
-| Disposition | 14 | disposition-orchestrator |
-| Capital Stack | 12 | capital-stack-orchestrator |
-| Fund Management | 22 | fund-management-orchestrator |
-| Development | 18 | development-orchestrator |
-| Portfolio Management | 11 | portfolio-management-orchestrator |
-| Investment Strategy | 10 | investment-strategy-orchestrator |
-| Research Intelligence | 10 | research-intelligence-orchestrator |
-| LP Intelligence | 11 | lp-intelligence-orchestrator |
-| **Total** | **178** | **11 orchestrators** |
+| Pipeline | Orchestrator |
+|----------|-------------|
+| Acquisition | master-orchestrator |
+| Hold Period | asset-management-orchestrator |
+| PM Operations | pm-orchestrator-lead |
+| Disposition | disposition-orchestrator |
+| Capital Stack | capital-stack-orchestrator |
+| Fund Management | fund-management-orchestrator |
+| Development | development-orchestrator |
+| Portfolio Management | portfolio-management-orchestrator |
+| Investment Strategy | investment-strategy-orchestrator |
+| Research Intelligence | research-intelligence-orchestrator |
+| LP Intelligence | lp-intelligence-orchestrator |
 
-Plus 3 PM platform adapters (Yardi, AppFolio, RealPage) and a challenge layer orchestrator.
+Plus PM platform adapters (Yardi, AppFolio, RealPage) and a challenge-layer orchestrator.

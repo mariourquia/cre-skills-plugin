@@ -2,7 +2,7 @@
 
 ## What is this project?
 
-CRE Skills Plugin is a structured knowledge base of 113 institutional-grade commercial real estate skills, 54 expert agents, 12 Python calculators, and 10 orchestrator pipelines. It plugs into Claude Code (CLI) via the plugin system and into Claude Desktop via a local MCP server. It is NOT a Claude Desktop marketplace plugin. Install it with the DMG/EXE installer or the Claude Code CLI -- not by pasting a URL into "Add marketplace."
+CRE Skills Plugin is a structured knowledge base of institutional-grade commercial real estate skills, expert agents, Python calculators, and orchestrator pipelines (current counts: see the README's Key Stats). It plugs into Claude Code (CLI) via the plugin system and into Claude Desktop via a local MCP server. It is NOT a Claude Desktop marketplace plugin. Install it with the DMG/EXE installer or the Claude Code CLI -- not by pasting a URL into "Add marketplace."
 
 ---
 
@@ -10,8 +10,8 @@ CRE Skills Plugin is a structured knowledge base of 113 institutional-grade comm
 
 | If you use... | Install via... | What you get |
 |---|---|---|
-| **Claude Code (CLI)** | `claude plugin install` or DMG/EXE installer | Full plugin: 113 skills, 54 agents, 6 workflow chains, 10 orchestrators, 11 slash commands, SessionStart hook, telemetry |
-| **Claude Desktop (app)** | DMG (macOS) or EXE (Windows) installer | MCP server with 21 tools for routing, skill detail, workspace management, feedback |
+| **Claude Code (CLI)** | `claude plugin install` or DMG/EXE installer | Full plugin: skills, agents, workflow chains, orchestrators, slash commands, SessionStart hook, telemetry |
+| **Claude Desktop (app)** | DMG (macOS) or EXE (Windows) installer | MCP server with tools for routing, skill detail, workspace management, feedback |
 | **Cowork** | Download `cre-skills-cowork.zip` from the latest [GitHub Release](https://github.com/mariourquia/cre-skills-plugin/releases/latest) | Stripped plugin: skills + agents + commands (no MCP server, no orchestrators, no calculators). Uses the same SKILL.md format recognized by Claude Code and Cowork. |
 
 ---
@@ -31,7 +31,7 @@ Whether you run the DMG (macOS) or the EXE (Windows), the installer performs the
 1. **Detects** which Claude surfaces are installed (Claude Code, Claude Desktop, or both).
 2. **Copies** the plugin source (`src/`) to the Claude plugin cache directory.
 3. **Creates** `.claude-plugin/plugin.json` in the cache directory (not in the repo).
-4. **Registers the MCP server** in Claude Desktop's config file (`claude_desktop_config.json`) so Desktop can call the 21 CRE tools.
+4. **Registers the MCP server** in Claude Desktop's config file (`claude_desktop_config.json`) so Desktop can call the CRE tools.
 5. **Creates** `~/.cre-skills/` for user data (config, brand guidelines, workspaces, telemetry, feedback).
 
 No data leaves your machine. No API keys are required. The MCP server runs locally via Node.js.
@@ -40,7 +40,7 @@ No data leaves your machine. No API keys are required. The MCP server runs local
 
 ## What shows up in Claude Desktop
 
-After installing and restarting Claude Desktop, the plugin appears as an **MCP server** named `cre-skills` in Settings > Developer > MCP Servers. It exposes 21 tools that Claude can call automatically when you describe a CRE task in plain language.
+After installing and restarting Claude Desktop, the plugin appears as an **MCP server** named `cre-skills` in Settings > Developer > MCP Servers. It exposes tools that Claude can call automatically when you describe a CRE task in plain language.
 
 You will NOT see slash commands (like `/cre-skills:cre-route`) in Claude Desktop. Slash commands are a Claude Code feature. In Desktop, you interact through natural conversation and Claude routes to the right skill via the MCP tools behind the scenes.
 
@@ -49,7 +49,7 @@ You will NOT see slash commands (like `/cre-skills:cre-route`) in Claude Desktop
 | Tool | Purpose |
 |------|---------|
 | `cre_route` | Routes your prompt to the matching CRE skill |
-| `cre_list_skills` | Browse and filter the 113 skills |
+| `cre_list_skills` | Browse and filter all skills |
 | `cre_skill_detail` | Read the full structured process for any skill |
 | `cre_workspace_create` | Start a persistent workspace for a deal or asset |
 | `cre_workspace_get` | Resume a workspace from a prior session |
@@ -62,7 +62,7 @@ You do not need to call these by name. Just describe what you need -- "screen th
 
 ## How orchestrators and workspace skills work
 
-**Orchestrators** coordinate multiple skills into end-to-end pipelines. For example, the `acquisition` orchestrator runs due diligence, underwriting, financing, legal, closing, and challenge phases in sequence and produces a GO / CONDITIONAL / NO-GO verdict. There are 10 orchestrators covering acquisitions, dispositions, development, fund management, portfolio oversight, and more.
+**Orchestrators** coordinate multiple skills into end-to-end pipelines. For example, the `acquisition` orchestrator runs due diligence, underwriting, financing, legal, closing, and challenge phases in sequence and produces a GO / CONDITIONAL / NO-GO verdict. Pipelines cover acquisitions, dispositions, development, fund management, portfolio oversight, and more.
 
 Orchestrators are available in Claude Code via `/cre-skills:orchestrate <pipeline>`. They are NOT available in Claude Desktop or Cowork -- Desktop users can still access the individual skills that make up each pipeline, just not the automated multi-phase orchestration.
 

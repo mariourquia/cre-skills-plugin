@@ -317,11 +317,11 @@ Run the health check:
 Expected output (healthy):
 
 ```
-  PASS  113 skill directories all have SKILL.md
-  PASS  247 reference files all non-empty
-  PASS  12 Python calculators are syntactically valid
+  PASS  all skill directories have SKILL.md
+  PASS  reference files all non-empty
+  PASS  Python calculators are syntactically valid
   PASS  src/hooks/hooks.json is valid JSON
-  PASS  All 3 Node.js hook scripts parse correctly
+  PASS  all Node.js hook scripts parse correctly
   PASS  ~/.cre-skills exists and is writable
 ```
 

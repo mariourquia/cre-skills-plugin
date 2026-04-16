@@ -68,21 +68,29 @@ class TestCountConsistency(unittest.TestCase):
 
     @unittest.skipUnless(HAS_YAML, 'PyYAML not installed')
     def test_catalog_counts_match_plugin_description(self):
+        """If plugin.json description cites numeric counts, they must match
+        the catalog. The description is expected to be count-free by policy,
+        so this test passes vacuously when the regex finds no claims, and
+        fails the moment a hardcoded count reappears and drifts.
+        """
         plugin = load_plugin_json()
         catalog = load_catalog()
         self.assertIsNotNone(catalog, 'catalog.yaml missing')
         counts = catalog_counts(catalog)
         desc = plugin['description']
 
-        claimed = {
-            'skill': int(re.search(r'(\d+)\s+institutional-grade CRE skills', desc).group(1)),
-            'agent': int(re.search(r'(\d+)\s+expert subagents', desc).group(1)),
-            'calculator': int(re.search(r'(\d+)\s+Python calculators', desc).group(1)),
-            'orchestrator': int(re.search(r'(\d+)\s+orchestrator pipelines', desc).group(1)),
-            'workflow': int(re.search(r'(\d+)\s+workflow chains', desc).group(1)),
+        patterns = {
+            'skill': r'(\d+)\s+institutional-grade CRE skills',
+            'agent': r'(\d+)\s+expert subagents',
+            'calculator': r'(\d+)\s+Python calculators',
+            'orchestrator': r'(\d+)\s+orchestrator pipelines',
+            'workflow': r'(\d+)\s+workflow chains',
         }
-
-        for t, claimed_count in claimed.items():
+        for t, pat in patterns.items():
+            m = re.search(pat, desc)
+            if m is None:
+                continue
+            claimed_count = int(m.group(1))
             self.assertEqual(
                 counts[t], claimed_count,
                 f"plugin.json claims {claimed_count} {t}s; catalog has {counts[t]}"
@@ -90,9 +98,14 @@ class TestCountConsistency(unittest.TestCase):
 
     @unittest.skipUnless(HAS_YAML, 'PyYAML not installed')
     def test_reference_file_count_matches_claim(self):
+        """If plugin.json description claims a reference-file count, it must
+        match the filesystem. Passes vacuously when no such claim is present."""
         plugin = load_plugin_json()
         desc = plugin['description']
-        claimed = int(re.search(r'(\d+)\s+reference files', desc).group(1))
+        m = re.search(r'(\d+)\s+reference files', desc)
+        if m is None:
+            return
+        claimed = int(m.group(1))
         actual = 0
         for root, _, files in os.walk(os.path.join(SRC_DIR, 'skills')):
             if os.path.basename(os.path.dirname(root)) == 'references' or os.path.basename(root) == 'references':
