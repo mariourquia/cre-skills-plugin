@@ -51,3 +51,14 @@ reads:
     required: true
     fallback_behavior: refuse
 writes: []
+
+# Period-seal gating: see _core/final_marked_workflows.yaml#period_grade_workflows
+# and _core/schemas/period_seal.yaml. Test: test_period_seal_gating.
+required_period_seal:
+  minimum_close_status: soft_close
+  requires_close_lock_timestamp: false
+  as_of_required: true
+  rationale: |
+    Annual budget construction relies on YTD actuals to ground the
+    prior-period baseline. Draft books mislead the base; soft_close
+    is the floor.

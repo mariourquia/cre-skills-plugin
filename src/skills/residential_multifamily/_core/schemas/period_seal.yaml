@@ -1,0 +1,70 @@
+# Period-seal metadata schema
+#
+# A "period seal" is the close-state contract a period-level financial
+# workflow relies on. Workflows that produce period-grade output (monthly
+# operating review, reforecast, quarterly LP letter, executive summary)
+# MUST NOT proceed against draft or unclosed general-ledger data. This
+# schema describes the minimum context every such workflow requires at
+# the point of execution.
+#
+# Consumers:
+#   - reference_manifest.yaml#required_period_seal (declarative contract)
+#   - test_period_seal_gating.py (CI enforcement)
+#   - runtime resolvers, when they read this structure from an overlay
+
+schema_version: "0.1.0"
+$schema: http://json-schema.org/draft-07/schema#
+type: object
+additionalProperties: false
+required:
+  - as_of
+  - close_status
+properties:
+  as_of:
+    type: string
+    format: date
+    description: |
+      Period-end date the workflow is run for (YYYY-MM-DD). For monthly
+      reviews, last day of the month. For quarterly, last day of the
+      quarter. Refuse if missing — there is no sensible default.
+  close_status:
+    type: string
+    enum: [draft, soft_close, hard_close, locked]
+    description: |
+      Ordered close state of the GL for the as_of period.
+      draft: entries still being posted / adjusted.
+      soft_close: accrual entries complete, no material reclassifications
+        expected. Acceptable for internal monthly operating review.
+      hard_close: books closed, JEs locked by controller. Required for
+        lender, LP, and board-facing output.
+      locked: hard_close plus post-close audit or tax sign-off. Required
+        for annual / audited artifacts.
+  close_lock_timestamp:
+    type: string
+    format: date-time
+    description: |
+      ISO-8601 timestamp when close_status was last advanced. Required
+      whenever close_status >= hard_close so the audit trail ties the
+      seal to a specific controller action.
+  budget_version:
+    type: string
+    pattern: "^v[0-9]+(\\.[0-9]+){0,2}(-[a-z0-9]+)?$"
+    description: |
+      Version identifier of the approved budget used for variance
+      computation. Required for reforecast and budget_build variance
+      outputs. A missing version means the budget-vs-actual delta is
+      ungrounded and the workflow MUST refuse.
+  reforecast_version:
+    type: string
+    pattern: "^v[0-9]+(\\.[0-9]+){0,2}(-[a-z0-9]+)?$"
+    description: |
+      Version identifier of the latest approved reforecast, if the
+      workflow compares actuals to reforecast rather than to the
+      original budget. Mutually compatible with budget_version.
+
+# Ordering used by close_status_at_least() in the test harness.
+close_status_order:
+  - draft
+  - soft_close
+  - hard_close
+  - locked

@@ -1,6 +1,6 @@
 # CRE Skills Plugin -- Installation Guide
 
-Version 4.1.2 | Apache 2.0 License
+Version 4.2.0 | Apache 2.0 License
 
 > **Do not use "Add marketplace" in Claude Desktop with this repo URL.** This is not a marketplace plugin. Pasting this URL into Claude Desktop's "Add marketplace" dialog will produce a validation error. Use the installer or CLI method below. See [WHAT-TO-USE-WHEN.md](WHAT-TO-USE-WHEN.md) for the full explanation.
 
@@ -12,11 +12,11 @@ The fastest way to get started on any platform.
 
 ### macOS
 
-Download [`cre-skills-v4.1.2.dmg`](https://github.com/mariourquia/cre-skills-plugin/releases/latest), open it, and double-click **CRE Skills Installer**. The installer auto-detects Claude Desktop, Claude Code, or both.
+Download [`cre-skills-v4.2.0.dmg`](https://github.com/mariourquia/cre-skills-plugin/releases/latest), open it, and double-click **CRE Skills Installer**. The installer auto-detects Claude Desktop, Claude Code, or both.
 
 ### Windows
 
-Download [`cre-skills-v4.1.2-setup.exe`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) and run the wizard. No admin privileges required. SmartScreen may warn you -- click "More info" > "Run anyway".
+Download [`cre-skills-v4.2.0-setup.exe`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) and run the wizard. No admin privileges required. SmartScreen may warn you -- click "More info" > "Run anyway".
 
 After either installer finishes, restart Claude Desktop or start a new Claude Code session.
 
@@ -179,7 +179,7 @@ chmod +x ~/.claude/plugins/cre-skills-plugin/src/calculators/*.py
 
 For Claude Desktop users, the DMG is the simplest path.
 
-1. Download `cre-skills-v4.1.2.dmg` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
+1. Download `cre-skills-v4.2.0.dmg` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
 2. Open the DMG.
 3. Double-click "CRE Skills Installer".
 4. Follow the Terminal prompts. The installer detects Claude Code and Claude Desktop and configures each automatically.
@@ -189,7 +189,7 @@ For Claude Desktop users, the DMG is the simplest path.
 
 For Windows users with Claude Code CLI or Claude Desktop.
 
-1. Download `cre-skills-v4.1.2-setup.exe` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
+1. Download `cre-skills-v4.2.0-setup.exe` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
 2. Run the installer. Windows SmartScreen may show a warning -- click "More info" then "Run anyway" (the installer is not yet code-signed).
 3. Follow the wizard. Default install location: `%APPDATA%\cre-skills-plugin`.
 4. The installer automatically detects Claude Code and Claude Desktop and configures each.

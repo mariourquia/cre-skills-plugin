@@ -12,7 +12,7 @@
       "name": "cre-skills",
       "source": ".",
       "description": "112 institutional-grade CRE skills covering deal screening, underwriting, structuring, due diligence, capital markets, market research, asset management, leasing, investor relations, development, disposition, sourcing, tax, ESG, portfolio strategy, and daily operations. 54 expert subagents, 12 Python calculators, 6 workflow chains, 10 orchestrator pipelines.",
-      "version": "4.1.2",
+      "version": "4.2.0",
       "category": "finance",
       "keywords": [
         "commercial-real-estate",
