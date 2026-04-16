@@ -1,0 +1,117 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: ImplementationActionQueue
+type: object
+required:
+  - schema_version
+  - business
+  - technical
+  - data
+  - reporting
+  - controls
+  - dependencies
+properties:
+  schema_version:
+    type: string
+  business:
+    type: array
+    items:
+      type: object
+      required: [description, owner, due_date, priority, blocking_dependency]
+      properties:
+        description:
+          type: string
+        owner:
+          type: string
+        due_date:
+          type: string
+        priority:
+          type: string
+        blocking_dependency:
+          type: string
+      additionalProperties: false
+  technical:
+    type: array
+    items:
+      type: object
+      required: [description, owner, due_date, priority, blocking_dependency]
+      properties:
+        description:
+          type: string
+        owner:
+          type: string
+        due_date:
+          type: string
+        priority:
+          type: string
+        blocking_dependency:
+          type: string
+      additionalProperties: false
+  data:
+    type: array
+    items:
+      type: object
+      required: [description, owner, due_date, priority, blocking_dependency]
+      properties:
+        description:
+          type: string
+        owner:
+          type: string
+        due_date:
+          type: string
+        priority:
+          type: string
+        blocking_dependency:
+          type: string
+      additionalProperties: false
+  reporting:
+    type: array
+    items:
+      type: object
+      required: [description, owner, due_date, priority, blocking_dependency]
+      properties:
+        description:
+          type: string
+        owner:
+          type: string
+        due_date:
+          type: string
+        priority:
+          type: string
+        blocking_dependency:
+          type: string
+      additionalProperties: false
+  controls:
+    type: array
+    items:
+      type: object
+      required: [description, owner, due_date, priority, blocking_dependency]
+      properties:
+        description:
+          type: string
+        owner:
+          type: string
+        due_date:
+          type: string
+        priority:
+          type: string
+        blocking_dependency:
+          type: string
+      additionalProperties: false
+  dependencies:
+    type: array
+    items:
+      type: object
+      required: [description, owner, due_date, priority, blocking_dependency]
+      properties:
+        description:
+          type: string
+        owner:
+          type: string
+        due_date:
+          type: string
+        priority:
+          type: string
+        blocking_dependency:
+          type: string
+      additionalProperties: false
+additionalProperties: false

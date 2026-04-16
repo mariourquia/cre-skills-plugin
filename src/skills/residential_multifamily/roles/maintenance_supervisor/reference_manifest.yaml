@@ -10,7 +10,7 @@ reads:
     expected_schema_version: "0.1.0"
     required: true
     fallback_behavior: refuse
-  - path: reference/normalized/vendor_rate_card__{market}_mf.csv
+  - path: reference/normalized/vendor_rate_cards__{market}.csv
     category: vendor_rate_card
     expected_schema_version: "0.1.0"
     required: true

@@ -29,7 +29,7 @@ references:
     - reference/normalized/debt_rate_reference__{product}.csv
     - reference/normalized/variance_materiality_policy.csv
     - reference/derived/same_store_set.csv
-    - reference/derived/watchlist_scoring.yaml
+    - reference/normalized/watchlist_scoring.yaml
     - reference/derived/role_kpi_targets.csv
     - reference/derived/budget_attainment_history.csv
     - reference/derived/forecast_accuracy_history.csv

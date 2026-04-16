@@ -1,0 +1,42 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: ImplementationSourceInstance
+type: object
+required:
+  - schema_version
+  - records
+properties:
+  schema_version:
+    type: string
+  records:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      required:
+        - environment_name
+        - instance_scope
+        - entities_or_properties_covered
+        - business_unit_or_region
+        - module_differences
+        - known_caveats
+        - tenant_or_workspace_placeholder
+        - deployment_notes
+      properties:
+        environment_name:
+          type: string
+        instance_scope:
+          type: string
+        entities_or_properties_covered:
+          type: string
+        business_unit_or_region:
+          type: string
+        module_differences:
+          type: string
+        known_caveats:
+          type: string
+        tenant_or_workspace_placeholder:
+          type: string
+        deployment_notes:
+          type: string
+      additionalProperties: false
+additionalProperties: false
