@@ -2,7 +2,9 @@
 
 ## [Unreleased]
 
-### Added (plugin v4.2.0 — hardening pass 2 close 2026-04-16)
+## [4.2.0] - 2026-04-16
+
+### Added (plugin v4.2.0 — hardening pass 2 close)
 - **Sealed-close gating (Obj 5).** New `_core/schemas/period_seal.yaml` canonicalizes close_status ordering (`draft < soft_close < hard_close < locked`) and the `as_of` / `close_lock_timestamp` / `budget_version` / `reforecast_version` fields. `_core/final_marked_workflows.yaml` gains a `period_grade_workflows` registry enumerating six slugs with their minimum close-status floor. Six workflow `reference_manifest.yaml` files (`executive_operating_summary_generation`, `quarterly_portfolio_review`, `monthly_property_operating_review`, `monthly_asset_management_review`, `reforecast`, `budget_build`) declare `required_period_seal`. `tests/test_period_seal_gating.py` (5 tests) enforces the contract.
 - **Finance placeholder scanner (Obj 6).** New `_core/reference_data_integrity.md` documents the rule: placeholder tokens (`TBD`, `TODO`, `FIXME`, `XXX`, `PLACEHOLDER`, `TKTK`) in any reference CSV read by a final-marked workflow require an explicit placeholder label. `tests/test_finance_placeholder_scanner.py` (4 tests) runs on every CSV read by the final-marked manifests.
 - **Executive output contract (Obj 8).** New `_core/executive_output_contract.md` defines verdict-first structure, source-class labels (`[operator]` / `[derived]` / `[benchmark]` / `[overlay]` / `[placeholder]`), and refusal-artifact shape for final-marked output. Four final-marked SKILL.md files (executive operating summary, IC prep, quarterly portfolio review, executive pipeline summary) reference the contract; the canonical example (`executive_operating_summary_generation/examples/ex01_*.md`) demonstrates the full pattern. `tests/test_executive_output_contract.py` (4 tests) enforces the references and the canonical example shape.
@@ -11,8 +13,25 @@
 ### Changed (plugin v4.2.0)
 - `residential_multifamily` subsystem: `status: draft` → `status: beta_rc`, version `0.5.0` → `0.6.0`.
 - `.claude-plugin/plugin.json` version `4.1.2` → `4.2.0`.
-- README "Release Maturity" downgrade `Experimental` → `Beta RC`; Known Limitations refreshed to reflect period-seal and executive-output-contract coverage.
+- `.claude-plugin/marketplace.json` plugin version `4.1.2` → `4.2.0`.
+- `src/catalog/catalog.yaml` plugin_version `4.1.2` → `4.2.0`.
+- README "Release Maturity" row for residential_multifamily downgraded `Experimental` → `Beta RC`; Known Limitations refreshed to reflect period-seal and executive-output-contract coverage.
 - `docs/implementation_hardening_status.md` Obj 5 / 6 / 8 flipped from `deferred pass 2` to `done (pass 2)`; test totals updated (423 → 436 passing).
+- Installer scripts (`scripts/Install.ps1`, `scripts/install.sh`, `Install.command`) fallback version strings bumped to 4.2.0.
+- Docs (`docs/INSTALL.md`, `docs/install-guide.md`, `docs/install-desktop.md`, `CONTRIBUTING.md`, `PRIVACY.md`) version banners and examples bumped to v4.2.0.
+- `src/hooks/telemetry-init.mjs` default-config version and upgrade-backfill threshold bumped to 4.2.0.
+
+### Fixed (plugin v4.2.0)
+- `tests/test_catalog_claim_integrity.py::test_build_artifact_hook_prompts_match_catalog` now passes vacuously when the `builds/` directory is absent (fresh clones and CI). Previously asserted presence unconditionally, failing the test outside developer environments.
+- `.gitleaks.toml` allowlists `src/skills/*/workflows/*/tools/test_*.py` so deliberate fake-secret fixtures in TUI scrubbing tests do not register as real secrets.
+
+### Removed (plugin v4.2.0)
+- Stale `docs/plans/build-system-refactor.md` and `docs/plans/residential-multifamily-refinement-2026-04-15.md` (completed-plan docs per release-hygiene validator).
+
+### Security notes (plugin v4.2.0)
+- All 4 hardening-pass-2 commits + 2 release-hygiene fixup commits signed via 1Password SSH (ED25519).
+- Gitleaks, semgrep-cloud-platform/scan, secrets-scan all green on PR #31 (24/24 CI checks).
+- No new dependencies added in this release.
 
 
 ### Added (residential_multifamily v0.5.0 - wave-5 stack completion + Yardi 2026-04-15)
