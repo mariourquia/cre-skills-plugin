@@ -33,7 +33,7 @@ references:
     - reference/normalized/approval_threshold_defaults.csv
     - reference/derived/role_kpi_targets.csv
     - reference/derived/same_store_set.csv
-    - reference/derived/watchlist_scoring.yaml
+    - reference/normalized/watchlist_scoring.yaml
     - reference/normalized/insurance_program__portfolio.csv
     - reference/normalized/property_tax_parameters__{market}.csv
   writes: []
