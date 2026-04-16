@@ -52,4 +52,10 @@ paths = [
   '''node_modules/''',
   '''\.venv/''',
   '''__pycache__/''',
+  # Workflow-tool TUI self-tests deliberately embed fake secret-shaped
+  # strings (Bearer tokens, api_key=, password=) as fixtures to verify
+  # the TUI's secret-redaction code paths. The tests themselves assert
+  # the secrets are scrubbed from emitted artifacts; scanning them as
+  # real secrets produces false positives.
+  '''src/skills/[^/]+/workflows/[^/]+/tools/test_[^/]+\.py$''',
 ]
