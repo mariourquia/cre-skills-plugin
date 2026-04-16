@@ -1,8 +1,30 @@
 [tool.pytest.ini_options]
-testpaths = ["src/skills/residential_multifamily/tests"]
+# Paths pytest collects tests from. Kept narrow on purpose:
+#
+#   - `src/skills/residential_multifamily/tests` — the canonical skill-wide
+#     test suite (routing, manifests, governance, approvals, tailoring
+#     contract checks).
+#   - `src/skills/residential_multifamily/tailoring/tools` — the TUI runtime
+#     self-tests. Previously not collected by default, which hid pre-existing
+#     gaps (e.g. question-bank doc triggers without matching catalog entries).
+#
+# Intentionally excluded:
+#
+#   - `src/skills/residential_multifamily/workflows/implementation_intake_signoff_builder/tests`
+#   - `src/skills/residential_multifamily/workflows/implementation_intake_signoff_builder/tools`
+#     Wave-5 in-progress pack; its content-contract tests (and TUI parser)
+#     assume a different question_bank shape (`modes:` vs `interview_modes:`,
+#     a missing per-question `mode:` field). Tracked as a known limitation in
+#     docs/implementation_hardening_status.md (Obj 4 blocker) and must be
+#     reconciled before this path joins the default test run.
+testpaths = [
+  "src/skills/residential_multifamily/tests",
+  "src/skills/residential_multifamily/tailoring/tools",
+]
 pythonpath = [
   "src/skills/residential_multifamily/tests",
   "src/skills/residential_multifamily/reference/connectors",
   "src/skills/residential_multifamily/reference/connectors/adapters",
+  "src/skills/residential_multifamily/tailoring/tools",
 ]
 addopts = "-ra"

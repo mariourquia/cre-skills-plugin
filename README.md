@@ -28,7 +28,33 @@
 
 # CRE Skills Plugin
 
-A Claude plugin delivering **113 institutional-grade commercial real estate skills** covering the full investment lifecycle -- deal sourcing, screening, underwriting, structuring, due diligence, capital markets, market research, asset management, leasing, investor relations, development, disposition, tax planning, ESG, portfolio strategy, and daily property operations. Each skill includes structured process logic, reference documents, chain connections to other skills, and Python calculators for precise quantitative output. Deploy as a plugin in Claude Code, Claude Desktop, or Claude.ai and get an entire CRE PE shop in your terminal.
+A Claude plugin delivering **113 commercial real estate skills** covering the full investment lifecycle -- deal sourcing, screening, underwriting, structuring, due diligence, capital markets, market research, asset management, leasing, investor relations, development, disposition, tax planning, ESG, portfolio strategy, and daily property operations. Each skill includes structured process logic, reference documents, chain connections to other skills, and Python calculators for precise quantitative output. Deploys as a plugin in Claude Code (CLI or Desktop Code tab) or as a local MCP server for Claude Desktop Chat tab. See [Release Maturity](#release-maturity) below for status by surface.
+
+## Release Maturity
+
+This release is an **internal beta / controlled release candidate**. Most top-level skills (1:1 with a single `src/skills/<slug>/SKILL.md`) are self-contained and usable today. The residential multifamily subsystem and several install surfaces are held to a higher fail-closed bar and are labeled below.
+
+| Surface / component | Status | What this means |
+|---|---|---|
+| Top-level skills (112 of 113) | Deployed | Runnable today. Expected behavior per SKILL.md. |
+| `residential_multifamily` subsystem (1 of 113) | **Experimental (v0.5.0)** | Routing core + 36 workflows + 16 roles are architected and tested, but the subsystem ships with placeholder org overlays. All `reference/` files are tagged `sample / starter / illustrative / placeholder`. Decision-grade use requires an org onboarding pass (tailoring interview) to supply real data. Final-marked outputs (executive, IC, quarterly portfolio, executive pipeline) fail closed when required inputs are absent. |
+| Orchestrators (10) | Template / semi-manual | The ten orchestrators are phase + agent + verdict **templates**. There is no autonomous engine that sequences phases, polls agents, or aggregates verdicts without Claude acting as conductor. Treat as structured prompts, not fire-and-forget pipelines. |
+| Marketplace install | Supported (CLI) | `claude plugin marketplace add` from Claude Code CLI. Claude Desktop's "Add marketplace" dialog is **not** supported — this repo does not expose a manifest at that URL. See [docs/WHAT-TO-USE-WHEN.md](docs/WHAT-TO-USE-WHEN.md). |
+| macOS DMG / Windows EXE installer | Supported | Smoke-tested by `scripts/installer_smoke_test.py` (fresh install). |
+| Cowork ZIP import | Partial | Skills + agents + commands only. Hooks, MCP tools, orchestrators, calculators are not part of the Cowork surface. |
+| Manual MCP config (Claude Desktop Chat tab) | Supported | `.mcp.json` + `mcp-server.mjs`; 19 operational MCP tools (+ 2 organizational aliases). |
+| Codex / Gemini / Grok / Manus portable ZIP | Experimental | Skills ship as SKILL.md files. CLI-specific registration, calculator execution, and orchestrator support are **not tested** on these surfaces. |
+
+**Upgrade, uninstall/reinstall, and corrupted-config recovery** paths do not currently have automated smoke tests. The existing smoke tests exercise fresh-install only. See [docs/install_smoke_test_matrix.md](docs/install_smoke_test_matrix.md) for the full coverage matrix and gaps.
+
+## Known Limitations
+
+- The `residential_multifamily` subsystem is `status: experimental`. Every reference file ships as sample/starter/illustrative/placeholder. Final-marked workflows (executive, IC, quarterly, pipeline summary) declare `fallback_behavior: refuse` on required inputs — they fail closed rather than proceed with stale data — but non-final workflows will proceed with starter data tagged in their confidence banners. Do not treat any output as decision-grade until an org overlay has been applied.
+- Six regulatory/affordable compliance workflows (`compliance_calendar_review`, `income_certification_cycle`, `rent_limit_test`, `agency_reporting_prep`, `file_audit_prep`, `recertification_batch`) are **phase-1 scaffolding** — the router recognizes them and the overlay slots exist, but no workflow pack implements them yet. The routing rule `r011_regulatory_workflow_explicit` is gated behind an explicit `regulatory_program` axis and `rent_limits` / `income_limits` reference files; missing references refuse the match.
+- The **tailoring TUI** (`src/skills/residential_multifamily/tailoring/tools/tailoring_tui.py`) has a documented capability matrix in [docs/tailoring_capability_matrix.md](docs/tailoring_capability_matrix.md). Conflict surfacing across audiences is now surfaced (not silently collapsed). Approval-floor checks, canonical-definition-redefinition refusal, and preview-bundle YAML emission are **not yet implemented**; the matrix tracks each.
+- **Orchestrator pipelines are templates, not autonomous engines.** `/cre-skills:orchestrate` loads phase + agent + verdict schemas; it relies on Claude to actually sequence the work. Verdict aggregation (GO/CONDITIONAL/KILL), phase checkpoint resume, and cross-phase evidence threading are not in code.
+- **Windows installer** defends against UTF-8 BOM edge cases in PowerShell 5.1 but does not currently halt on missing Node/Python/npm prerequisites. Update Claude Code before install (older versions have MCP path issues on Windows).
+- **Codex / Gemini / Grok / Manus** install targets are advertised via the portable ZIP but are not in the CI smoke-test matrix. Treat as experimental.
 
 ## Key Stats
 
@@ -57,7 +83,7 @@ A Claude plugin delivering **113 institutional-grade commercial real estate skil
 
 **Feedback system**: `/cre-skills:send-feedback` and `/cre-skills:report-problem` with automatic redaction, optional remote submission (ask_each_time mode), and retry outbox for failed sends.
 
-**112 skills, 54 agents, 12 calculators, 11 commands**: Full counts after prior additions (construction estimator, PM orchestrator, space planning) plus catalog, MCP server, workspace skills, and skill customization.
+**113 skills, 54 agents, 12 calculators, 11 commands**: Full counts after prior additions (construction estimator, PM orchestrator, space planning) plus catalog, MCP server, workspace skills, and skill customization.
 
 See [CHANGELOG.md](CHANGELOG.md) for full history.
 
