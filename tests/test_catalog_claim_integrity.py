@@ -63,15 +63,21 @@ _README_EXACT_NUMBERED_BOLD = re.compile(r"\*\*(\d{2,4})\*\*")
 
 
 def test_readme_prose_skill_count_matches_catalog() -> None:
+    """If README prose cites a skill count, it must match the catalog.
+
+    README prose is expected to be count-free by policy; only the
+    auto-generated CATALOG:STATS block should contain the numeric table.
+    This test passes vacuously when no prose count is present, and fails
+    the moment a hardcoded prose count reappears and drifts from reality.
+    """
     actual = _actual_skill_count()
     readme = _REPO_ROOT / "README.md"
     claims = _scan_text_for_count(readme, _README_SKILL_CLAIMS)
-    assert claims, "README.md has no skill-count claim to verify"
     drift = sorted({c for c in claims if c != actual})
     assert not drift, (
-        f"README.md contains skill-count claim(s) {drift} that disagree with "
-        f"catalog ({actual}). Fix the prose to match the catalog or regenerate "
-        f"docs via scripts/catalog-generate.py."
+        f"README.md contains prose skill-count claim(s) {drift} that disagree "
+        f"with catalog ({actual}). Either remove the prose count (preferred) "
+        f"or regenerate surfaces via scripts/catalog-generate.py."
     )
 
 

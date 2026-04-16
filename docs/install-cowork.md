@@ -71,7 +71,7 @@ To prevent unexpected changes from affecting active workflows, pin the plugin to
 
 ## Configuring Which Skills Are Enabled
 
-The plugin ships with all 113 skills active by default. For teams that only use a subset (e.g., an acquisitions team that does not need construction management skills), you can scope the active skills.
+The plugin ships with all skills active by default. For teams that only use a subset (e.g., an acquisitions team that does not need construction management skills), you can scope the active skills.
 
 ### Option A: Registry-Based Filtering
 
@@ -98,9 +98,9 @@ Edit `src/routing/CRE-ROUTING.md` in your fork to remove categories or skills th
 For organizations with distinct groups (acquisitions, asset management, development), maintain separate forks with only the relevant skills:
 
 ```
-cre-skills-plugin-acquisitions/    # 25 skills: screening, underwriting, DD, closing
-cre-skills-plugin-asset-mgmt/     # 20 skills: NOI, capex, leasing, budgets
-cre-skills-plugin-development/    # 15 skills: proformas, entitlements, construction
+cre-skills-plugin-acquisitions/    # acquisitions subset: screening, underwriting, DD, closing
+cre-skills-plugin-asset-mgmt/     # asset-management subset: NOI, capex, leasing, budgets
+cre-skills-plugin-development/    # development subset: proformas, entitlements, construction
 ```
 
 Each fork uses the same plugin structure but with a trimmed `src/skills/` directory and routing index.

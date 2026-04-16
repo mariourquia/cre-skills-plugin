@@ -28,7 +28,7 @@
 
 # CRE Skills Plugin
 
-A Claude plugin delivering **113 commercial real estate skills** covering the full investment lifecycle -- deal sourcing, screening, underwriting, structuring, due diligence, capital markets, market research, asset management, leasing, investor relations, development, disposition, tax planning, ESG, portfolio strategy, and daily property operations. Each skill includes structured process logic, reference documents, chain connections to other skills, and Python calculators for precise quantitative output. Deploys as a plugin in Claude Code (CLI or Desktop Code tab) or as a local MCP server for Claude Desktop Chat tab. See [Release Maturity](#release-maturity) below for status by surface.
+A Claude plugin delivering a large library of **commercial real estate skills** covering the full investment lifecycle -- deal sourcing, screening, underwriting, structuring, due diligence, capital markets, market research, asset management, leasing, investor relations, development, disposition, tax planning, ESG, portfolio strategy, and daily property operations. Each skill includes structured process logic, reference documents, chain connections to other skills, and Python calculators for precise quantitative output. Deploys as a plugin in Claude Code (CLI or Desktop Code tab) or as a local MCP server for Claude Desktop Chat tab. See [Key Stats](#key-stats) for current counts and [Release Maturity](#release-maturity) for status by surface.
 
 ## Release Maturity
 
@@ -36,13 +36,13 @@ This release is an **internal beta / controlled release candidate**. Most top-le
 
 | Surface / component | Status | What this means |
 |---|---|---|
-| Top-level skills (112 of 113) | Deployed | Runnable today. Expected behavior per SKILL.md. |
-| `residential_multifamily` subsystem (1 of 113) | **Beta RC (v0.6.0)** | Routing core + 36 workflows + 16 roles are architected and tested. Subsystem ships with placeholder org overlays; all `reference/` files are tagged `sample / starter / illustrative / placeholder`. Decision-grade use requires an org onboarding pass (tailoring interview) to supply real data. Final-marked outputs (executive, IC, quarterly portfolio, executive pipeline) fail closed when required inputs are absent, enforce a period-seal gate (`close_status`, `close_lock_timestamp`, `budget_version`), and must follow the [executive output contract](src/skills/residential_multifamily/_core/executive_output_contract.md) (verdict-first + source-class labels + refusal artifacts). |
-| Orchestrators (10) | Template / semi-manual | The ten orchestrators are phase + agent + verdict **templates**. There is no autonomous engine that sequences phases, polls agents, or aggregates verdicts without Claude acting as conductor. Treat as structured prompts, not fire-and-forget pipelines. |
+| Top-level skills (all but one) | Deployed | Runnable today. Expected behavior per SKILL.md. |
+| `residential_multifamily` subsystem | **Beta RC (v0.6.0)** | Routing core plus workflows and roles are architected and tested. Subsystem ships with placeholder org overlays; all `reference/` files are tagged `sample / starter / illustrative / placeholder`. Decision-grade use requires an org onboarding pass (tailoring interview) to supply real data. Final-marked outputs (executive, IC, quarterly portfolio, executive pipeline) fail closed when required inputs are absent, enforce a period-seal gate (`close_status`, `close_lock_timestamp`, `budget_version`), and must follow the [executive output contract](src/skills/residential_multifamily/_core/executive_output_contract.md) (verdict-first + source-class labels + refusal artifacts). |
+| Orchestrators | Template / semi-manual | Orchestrators are phase + agent + verdict **templates**. There is no autonomous engine that sequences phases, polls agents, or aggregates verdicts without Claude acting as conductor. Treat as structured prompts, not fire-and-forget pipelines. |
 | Marketplace install | Supported (CLI) | `claude plugin marketplace add` from Claude Code CLI. Claude Desktop's "Add marketplace" dialog is **not** supported — this repo does not expose a manifest at that URL. See [docs/WHAT-TO-USE-WHEN.md](docs/WHAT-TO-USE-WHEN.md). |
 | macOS DMG / Windows EXE installer | Supported | Smoke-tested by `scripts/installer_smoke_test.py` (fresh install). |
 | Cowork ZIP import | Partial | Skills + agents + commands only. Hooks, MCP tools, orchestrators, calculators are not part of the Cowork surface. |
-| Manual MCP config (Claude Desktop Chat tab) | Supported | `.mcp.json` + `mcp-server.mjs`; 19 operational MCP tools (+ 2 organizational aliases). |
+| Manual MCP config (Claude Desktop Chat tab) | Supported | `.mcp.json` + `mcp-server.mjs`; operational MCP tools with organizational aliases. |
 | Codex / Gemini / Grok / Manus portable ZIP | Experimental | Skills ship as SKILL.md files. CLI-specific registration, calculator execution, and orchestrator support are **not tested** on these surfaces. |
 
 **Upgrade, uninstall/reinstall, and corrupted-config recovery** paths do not currently have automated smoke tests. The existing smoke tests exercise fresh-install only. See [docs/install_smoke_test_matrix.md](docs/install_smoke_test_matrix.md) for the full coverage matrix and gaps.
@@ -81,17 +81,15 @@ Upcoming work is tracked in [`docs/ROADMAP.md`](docs/ROADMAP.md) — phased from
 
 **Hardening pass 2 close**: `residential_multifamily` subsystem moves from `status: draft` (v0.5.0) to `status: beta_rc` (v0.6.0). Three deferred objectives close: sealed-close gating (Obj 5) pins period-grade workflows behind a declared `close_status` floor; a finance-critical placeholder scanner (Obj 6) rejects un-labeled TBD/PLACEHOLDER rows in every CSV read by a final-marked workflow; an executive output contract (Obj 8) requires verdict-first structure + source-class labels on every numeric cell. +13 tests (total 436). See `CHANGELOG.md` for the full v4.2.0 entry.
 
-**Catalog-driven architecture**: Single source of truth (`src/catalog/catalog.yaml`, 203 items). Every public surface -- README stats, plugin.json, hooks prompt, routing table, registry -- is generated from the catalog. CI catches drift.
+**Catalog-driven architecture**: Single source of truth (`src/catalog/catalog.yaml`). Every public surface -- README stats, plugin.json, hooks prompt, routing table, registry -- is generated from the catalog. CI catches drift.
 
-**MCP server**: Zero-dependency MCP server (`src/mcp-server.mjs`) with 21 tools for Claude Desktop support. macOS DMG and Windows .exe installers auto-detect Claude Code and Claude Desktop.
+**MCP server**: Zero-dependency MCP server (`src/mcp-server.mjs`) for Claude Desktop support. macOS DMG and Windows .exe installers auto-detect Claude Code and Claude Desktop.
 
-**7 workspace skills**: deal-intake, lease-strategy-papering, asset-ops-cockpit, capital-projects-development, fund-lp-reporting, navigator, plugin-admin. Persistent workspace state for cross-session continuity.
+**Workspace skills**: deal-intake, lease-strategy-papering, asset-ops-cockpit, capital-projects-development, fund-lp-reporting, navigator, plugin-admin. Persistent workspace state for cross-session continuity.
 
 **Feedback system**: `/cre-skills:send-feedback` and `/cre-skills:report-problem` with automatic redaction, optional remote submission (ask_each_time mode), and retry outbox for failed sends.
 
-**113 skills, 54 agents, 12 calculators, 11 commands**: Full counts after prior additions (construction estimator, PM orchestrator, space planning) plus catalog, MCP server, workspace skills, and skill customization.
-
-See [CHANGELOG.md](CHANGELOG.md) for full history.
+Current counts live in [Key Stats](#key-stats) above; it is regenerated from the catalog by CI. See [CHANGELOG.md](CHANGELOG.md) for full history.
 
 ---
 
@@ -103,11 +101,11 @@ This repo is a self-contained Claude marketplace. Choose the install method that
 
 | Method | Best for | What you get |
 |--------|----------|-------------|
-| **Marketplace install** | Claude Code users (CLI or Desktop Code tab) | Full: 113 skills, 54 agents, 11 commands, hooks, 21 MCP tools |
+| **Marketplace install** | Claude Code users (CLI or Desktop Code tab) | Full: skills, agents, commands, hooks, MCP tools |
 | **macOS DMG** | Non-technical macOS users | Full plugin + Claude Desktop MCP registration |
 | **Windows EXE** | Non-technical Windows users | Full plugin + Claude Desktop MCP registration |
 | **Cowork upload** | Cowork tab users | Skills, agents, commands (no hooks/orchestrators) |
-| **Manual config** | Chat tab only (MCP tools) | 21 MCP tools via claude_desktop_config.json |
+| **Manual config** | Chat tab only (MCP tools) | MCP tools via claude_desktop_config.json |
 
 ### Marketplace Install (recommended)
 
@@ -120,7 +118,7 @@ claude plugin install cre-skills@cre-skills
 
 Or interactively: type `/plugin` in Claude Code, select **Add plugin**, and search for `cre-skills`.
 
-This gives you 113 skills, 54 agents, 11 commands, hooks, and 21 MCP tools.
+This gives you the full set of skills, agents, commands, hooks, and MCP tools.
 
 ### Installer (macOS DMG / Windows EXE)
 
@@ -153,15 +151,15 @@ Claude Desktop has three tabs. Each provides different capabilities:
 | | Code Tab | Chat Tab | Cowork Tab |
 |---|---|---|---|
 | **Install method** | Marketplace or installer | Installer (MCP config) | Cowork plugin import |
-| **113 skills** | Yes, via `/cre-skills:*` | No (21 MCP tools instead) | Yes, via `/` commands |
-| **54 agents** | Yes, auto-invoked | No | Yes, as sub-agents |
+| **Skills** | Yes, via `/cre-skills:*` | No (MCP tools instead) | Yes, via `/` commands |
+| **Agents** | Yes, auto-invoked | No | Yes, as sub-agents |
 | **Skill routing** | `/cre-skills:cre-route` | `cre_route` MCP tool | Manual |
 | **Orchestrators** | `/cre-skills:orchestrate` | Not available | Not available |
 | **Workspace** | Yes | Yes (MCP tools) | No |
 | **Hooks** | Yes (session start/stop) | No | No |
 | **Customization** | Yes | Yes (MCP tools) | No |
 
-**Code tab** gives the full experience. **Chat tab** gives 21 MCP tools. **Cowork tab** gives skills and agents without hooks or orchestrators.
+**Code tab** gives the full experience. **Chat tab** gives MCP tools. **Cowork tab** gives skills and agents without hooks or orchestrators.
 
 ### Verify Installation
 
@@ -277,7 +275,7 @@ Raleigh NC, $42M asking, 2018 vintage, 93% occupied, $2.6M NOI, rents 12% below 
 
 ## Skill Categories
 
-### By Category (16 subcategories, 113 skills)
+### By Category
 
 | # | Category | Count | Key Skills |
 |---|----------|-------|------------|
@@ -344,7 +342,7 @@ See `src/orchestrators/README.md` for full documentation.
 
 ## Expert Agents
 
-54 expert agents across 13 categories, each with a distinct analytical perspective.
+Expert agents across multiple categories, each with a distinct analytical perspective.
 
 | Category | Count | Agents |
 |----------|-------|--------|
@@ -498,11 +496,11 @@ cre-skills-plugin/
         references/          # Supporting reference documents (.md and .yaml)
     agents/
       _index.md              # Agent roster and team compositions
-      <agent>.md             # 54 expert agent definitions (flat directory)
+      <agent>.md             # expert agent definitions (flat directory)
     orchestrators/
       engine/                # Pipeline engine schema and handoff registry
-      configs/               # 10 orchestrator JSON configurations
-      prompts/               # 16 orchestrator prompt files
+      configs/               # orchestrator JSON configurations
+      prompts/               # orchestrator prompt files
       challenge-layer/       # Post-pipeline adversarial review config
       investor-profiles/     # 8 investor profiles + strategy matrix
       schemas/               # Disagreement and reversal trigger schemas

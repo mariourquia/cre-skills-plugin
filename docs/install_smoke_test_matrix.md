@@ -24,10 +24,10 @@ Legend:
 
 ## Automated tests that back the matrix
 
-- `scripts/verify-install.sh` — post-install checks for Claude Code marketplace installs. 8 checks (plugin registered, 113 SKILL.md files, 247 reference files non-empty, Python calculators parse, `hooks.json` valid, Node hook scripts parse, `~/.cre-skills/` writable, `config.json` valid if present).
-- `scripts/installer_smoke_test.py` — post-install checks for Claude Desktop (DMG + EXE). 6 checks (plugin cache, `installed_plugins.json`, `settings.json` `enabledPlugins` key, `claude_desktop_config.json` `mcpServers` key, `mcp-server.mjs` passes `node --check`, version consistency source ↔ cache ↔ registry).
-- `tests/test_plugin_integrity.py` (root pytest suite) — 24 test cases covering catalog ≟ filesystem, MCP server, hook scripts, calculators, command list.
-- `tests/test_installer_hardening.py` — 7 test cases covering PowerShell 5.1 UTF-8 BOM handling, Node `process.argv` indices, `PostToolUse` hook scope.
+- `scripts/verify-install.sh` — post-install checks for Claude Code marketplace installs (plugin registered, SKILL.md files present, reference files non-empty, Python calculators parse, `hooks.json` valid, Node hook scripts parse, `~/.cre-skills/` writable, `config.json` valid if present).
+- `scripts/installer_smoke_test.py` — post-install checks for Claude Desktop (DMG + EXE): plugin cache, `installed_plugins.json`, `settings.json` `enabledPlugins` key, `claude_desktop_config.json` `mcpServers` key, `mcp-server.mjs` passes `node --check`, version consistency source ↔ cache ↔ registry.
+- `tests/test_plugin_integrity.py` (root pytest suite) — covers catalog ≟ filesystem, MCP server, hook scripts, calculators, command list.
+- `tests/test_installer_hardening.py` — covers PowerShell 5.1 UTF-8 BOM handling, Node `process.argv` indices, `PostToolUse` hook scope.
 - `tests/test_release_hygiene.py` — no-binary-artifacts + release-notes coverage.
 - `tests/test_e2e_skill_calculator.py` — end-to-end execution of one representative skill + calculator (`deal-quick-screen`).
 - `tests/test_orchestrator_integrity.py` — orchestrator JSON schemas load + parse (does **not** exercise orchestrator execution).

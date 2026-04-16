@@ -237,17 +237,15 @@ def update_plugin_json(counts: dict, dry_run: bool = False) -> bool:
     original = json.dumps(data, indent=2)
 
     data["description"] = (
-        f"{counts['skills']} institutional-grade CRE skills covering ~97% of commercial "
-        f"real estate workflow steps. Deal screening, underwriting, structuring, due "
-        f"diligence, capital markets, market research, asset management, leasing, investor "
-        f"relations, development, disposition, sourcing, tax, ESG, portfolio strategy, and "
-        f"daily operations. Includes Monte Carlo simulation, SEC Reg D compliance, property "
-        f"management ops, deal attribution tracking, 1031 pipeline management, distribution "
-        f"notice generation, fund-raise LP negotiation tracking, and emerging manager "
-        f"evaluation. {counts['agents']} expert subagents, {counts['reference_files']} "
-        f"reference files, {counts['calculators']} Python calculators, "
-        f"{counts['workflows']} workflow chains, {counts['orchestrators']} orchestrator "
-        f"pipelines, and orchestrator integration for multi-agent acquisition pipelines."
+        "Institutional-grade CRE skills library covering the full investment lifecycle: "
+        "deal screening, underwriting, structuring, due diligence, capital markets, market "
+        "research, asset management, leasing, investor relations, development, disposition, "
+        "sourcing, tax, ESG, portfolio strategy, and daily operations. Includes Monte Carlo "
+        "simulation, SEC Reg D compliance, property management ops, deal attribution "
+        "tracking, 1031 pipeline management, distribution notice generation, fund-raise LP "
+        "negotiation tracking, and emerging manager evaluation. Ships expert subagents, "
+        "Python calculators, workflow chains, and orchestrator pipelines for multi-agent "
+        "acquisition workflows."
     )
 
     updated = json.dumps(data, indent=2)

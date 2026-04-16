@@ -18,7 +18,7 @@ roadmap issue body points here.
 - `src/orchestrators/engine/data-contract-validator.mjs` — per-phase
   contract validation.
 - `src/orchestrators/engine/agent-loader.mjs` — agent registry.
-- `src/orchestrators/configs/*.json` — 10 pipeline configs (acquisition,
+- `src/orchestrators/configs/*.json` — pipeline configs (acquisition,
   capital-stack, development, disposition, fund-management,
   hold-period, investment-strategy, lp-intelligence,
   portfolio-management, research-intelligence).
@@ -44,7 +44,7 @@ days later.
 in this commit). Keys:
 
 - `deal_id` (string, UUID or operator slug)
-- `pipeline` (string, one of 10 orchestrator ids)
+- `pipeline` (string, one of the orchestrator ids declared in `src/orchestrators/configs/`)
 - `variant` (string, optional — e.g. `value_add`, `core_plus`)
 - `phase_history` (array of completed phase outcomes)
 - `current_phase` (string)
