@@ -83,8 +83,8 @@ When a skill graduates to `status: stable`:
 1. Remove the preview banner section from SKILL.md.
 2. Remove the preview stamp from the output template.
 3. Update `docs/ROADMAP.md` to reflect graduation.
-4. Update `docs/implementation_hardening_status.md` with the graduation date
-   and the evidence trail (tests added, external-operator shakedown, overlay
+4. Note the graduation in `CHANGELOG.md` under the next release, with
+   the evidence trail (tests added, external-operator shakedown, overlay
    doc complete).
 
 Graduation is a governance event; don't skip it to ship.
