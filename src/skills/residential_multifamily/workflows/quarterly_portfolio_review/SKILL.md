@@ -97,6 +97,17 @@ Roll the monthly AM outputs into a quarterly portfolio view. Narrative, not tran
 | Board packet draft | `operating_review` | |
 | Investor / LP draft | `memo` | |
 
+## Output contract
+
+Final-marked output MUST follow `_core/executive_output_contract.md`:
+verdict-first block (recommendation, 3-bullet rationale, confidence,
+materiality, next action), source-class labels on every numeric cell
+(`[operator]` / `[derived]` / `[benchmark]` / `[overlay]` /
+`[placeholder]`), and refusal-artifact shape when a required reference
+is absent. Period-seal gate: `required_period_seal.minimum_close_status
+= hard_close` (see `reference_manifest.yaml`); this workflow refuses
+if close_status is soft or draft at run time.
+
 ## Required context
 
 Asset_class, segment, market concentration, loan context.

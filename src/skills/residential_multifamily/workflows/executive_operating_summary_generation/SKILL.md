@@ -109,6 +109,18 @@ This pack is flagship-depth. It is the last stop before any final-marked submiss
 | Approval request bundle | list | rows 14 / 15 / 16 |
 | Confidence banner | banner | all references surfaced |
 
+## Output contract
+
+Final-marked output MUST follow `_core/executive_output_contract.md`:
+verdict-first block (recommendation, 3-bullet rationale, confidence,
+materiality, next action), source-class labels on every numeric cell
+(`[operator]` / `[derived]` / `[benchmark]` / `[overlay]` /
+`[placeholder]`), and refusal-artifact shape when a required reference
+input is absent. See the worked example at
+`examples/ex01_executive_operating_summary_generation.md` for the
+canonical structure. Any `[placeholder]`-tagged cell blocks the
+approval-request bundle (rows 14 / 15 / 16).
+
 ## Required context
 
 Asset_class, segment, audience (board / LP / lender / internal), org, period. Audience governs template and approval row.

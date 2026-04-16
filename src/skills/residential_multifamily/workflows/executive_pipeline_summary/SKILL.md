@@ -188,6 +188,16 @@ narrative + dashboard and an opened approval request.
 | Approval request | object | row 16 (board) or row 17 (IC) opened on final |
 | Confidence banner | banner | reference `as_of_date` + `status` + sample-tag surfacing |
 
+## Output contract
+
+Final-marked output MUST follow `_core/executive_output_contract.md`:
+verdict-first block (recommendation, 3-bullet rationale, confidence,
+materiality, next action), source-class labels on every numeric cell
+(`[operator]` / `[derived]` / `[benchmark]` / `[overlay]` /
+`[placeholder]`), and refusal-artifact shape when a required reference
+is absent. Any `[placeholder]`-tagged cell blocks board / IC approval
+request assembly (rows 16 / 17).
+
 ## Required context
 
 Asset_class, segment (one or many), audience (`board`, `ic`, `internal_executive`),

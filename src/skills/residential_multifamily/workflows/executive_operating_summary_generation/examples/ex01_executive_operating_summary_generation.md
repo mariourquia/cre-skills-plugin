@@ -57,3 +57,42 @@ References: watchlist_scoring@2026-03-31 (starter), same_store_set@2026-03-31 (s
 board_packet_template@2026-03-31 (starter), role_kpi_targets@2026-03-31 (starter).
 External-use notation on any sample-tagged reference.
 ```
+
+## Verdict-first output sample (conforms to `_core/executive_output_contract.md`)
+
+### Verdict
+
+- **Recommendation:** Proceed with Q1 board submission as drafted; add one covenant-watch addendum for Loan L-202.
+- **Rationale:**
+  1. Same-store NOI growth 3.8% YoY `[derived]` — ahead of the 3.2% `[benchmark]` portfolio target and the 3.0% `[overlay]` board floor.
+  2. Watchlist movers limited to two assets, both already in AM action plans; aggregate exposure $4.2M `[derived]`.
+  3. Covenant cushion on Loan L-202 compressed to 1.18x DSCR `[operator]` vs. 1.15x `[overlay]` floor — flag but not breach.
+- **Confidence:** medium (watchlist_scoring and same_store_set are starter-tagged; board_packet_template is org-overlaid).
+- **Materiality:** $14.3M YTD NOI `[derived]`; $92M fund NAV movement quarter-over-quarter.
+- **Next action:** CFO to sign L-202 covenant-watch addendum and attach before the 2026-05-01 board meeting.
+
+### Source-class legend
+
+| Tag              | Meaning in this output                                                 |
+|------------------|------------------------------------------------------------------------|
+| `[operator]`     | Entered by a human operator in PMS, GL, or lender portal               |
+| `[derived]`      | Computed from other cells by this workflow or a feeder workflow        |
+| `[benchmark]`    | From `reference/normalized/` or `reference/derived/` file              |
+| `[overlay]`      | From an `overlays/<org_or_loan_or_market>/` file at runtime            |
+| `[placeholder]`  | Illustrative; BLOCKS final submission                                  |
+
+### Evidence tables (excerpt)
+
+| Metric                     | Value            | Source         |
+|----------------------------|------------------|----------------|
+| Same-store NOI growth YoY  | 3.8%             | `[derived]`    |
+| Portfolio target NOI growth| 3.2%             | `[benchmark]`  |
+| Board floor NOI growth     | 3.0%             | `[overlay]`    |
+| Aggregate watchlist exposure | $4.2M          | `[derived]`    |
+| Loan L-202 DSCR            | 1.18x            | `[operator]`   |
+| Loan L-202 DSCR floor      | 1.15x            | `[overlay]`    |
+
+If any cell in the production version of this table is labeled
+`[placeholder]`, the board-submission approval request (row 16) MUST
+NOT be assembled — the workflow refuses per
+`_core/executive_output_contract.md#rule-2`.
