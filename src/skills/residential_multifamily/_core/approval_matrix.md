@@ -61,19 +61,61 @@ The following automatically escalate to executive review regardless of dollar:
 - Any action that would be visible to LPs, lenders, regulators, or the press.
 - Any deviation from a policy that has been reviewed by legal within the last 12 months.
 
+## Canonical status vocabulary
+
+The approval lifecycle has exactly ONE canonical vocabulary. Both the
+`approval_request.status` field (in `_core/schemas/approval_request.yaml`) and
+the audit log `outcome` field use the same enum:
+
+```
+pending, approved, approved_with_conditions, denied, expired, withdrawn
+```
+
+Legacy vocabulary (`opened`, `executed`, `cancelled`) is retired.
+
+- `opened` was an informal label for newly created requests. It maps to `pending`.
+- `executed` was an informal label for "approval has been used to gate an
+  action." This is now a distinct log event (see "Execution audit", below)
+  and NOT an approval status. An approval_request remains `approved`
+  throughout its lifetime; the action it authorizes is logged separately.
+- `cancelled` maps to `withdrawn` (the requester abandoned the request).
+
+## Stale-approval guard (subject_object_version_hash)
+
+Approvals are bound to a specific version of the subject artifact via
+`subject_object_version_hash` (SHA-256 of the canonical JSON serialization
+of the artifact at the time the approval was requested). When a gated
+action is executed, the runtime:
+
+1. recomputes the content hash of the artifact referenced by
+   `subject_object_type` + `subject_object_id`;
+2. compares against the approval_request's `subject_object_version_hash`;
+3. refuses the action if they do not match, and opens a new approval_request
+   for the new artifact version.
+
+This closes the silent-reuse hole where an artifact (e.g. a change order or
+capex project) could be mutated after approval and before execution.
+
 ## Logging
 
-Every gated action attempt produces an entry in the subsystem's `approval_audit_log.jsonl` (schema below), regardless of outcome. Tests verify tail consistency (no dangling `pending`, no actions executed without matching `approved` entry).
+Every gated action attempt produces an entry in the subsystem's
+`approval_audit_log.jsonl` (schema below), regardless of outcome. Tests
+verify tail consistency (no dangling `pending`, no actions executed without
+matching `approved` entry whose version hash matches the artifact hash at
+execution time).
 
 ```yaml
 # approval_audit_log entry shape
 timestamp: 2026-04-15T14:23:05Z
 action_id: <ulid>
+event: [request_created | decision_recorded | execution_attempted | execution_completed | request_expired]
 subject_object_type: <see approval_request schema>
 subject_object_id: <string>
+subject_object_version_hash: <sha256 hex digest>   # required on decision_recorded and execution_attempt
 actor: <agent or human id>
 gate_category: <row # from table above>
-outcome: [opened | approved | denied | executed | cancelled | expired]
+approval_request_status: [pending | approved | approved_with_conditions | denied | expired | withdrawn]
 approval_request_id: <ulid>
+execution_outcome: [authorized | refused_stale_hash | refused_missing_approval | refused_other]  # only on execution_attempt / execution_completed
 notes: <optional>
 ```
