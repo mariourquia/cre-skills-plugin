@@ -1,0 +1,54 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: ImplementationCrosswalkRules
+type: object
+required:
+  - schema_version
+  - records
+properties:
+  schema_version:
+    type: string
+  records:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      required:
+        - canonical_entity
+        - source_system
+        - source_object
+        - source_id_field
+        - source_name_field
+        - preferred_match_key
+        - fallback_match_key
+        - manual_override_rule
+        - effective_date_rule
+        - owner_of_mapping
+        - approval_required
+        - exception_path
+      properties:
+        canonical_entity:
+          type: string
+        source_system:
+          type: string
+        source_object:
+          type: string
+        source_id_field:
+          type: string
+        source_name_field:
+          type: string
+        preferred_match_key:
+          type: string
+        fallback_match_key:
+          type: string
+        manual_override_rule:
+          type: string
+        effective_date_rule:
+          type: string
+        owner_of_mapping:
+          type: string
+        approval_required:
+          type: string
+        exception_path:
+          type: string
+      additionalProperties: false
+additionalProperties: false

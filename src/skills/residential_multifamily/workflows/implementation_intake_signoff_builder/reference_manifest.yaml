@@ -1,0 +1,195 @@
+pack_slug: implementation_intake_signoff_builder
+reads:
+  - path: workflows/implementation_intake_signoff_builder/question_bank.yaml
+    category: interview_question_bank
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: workflows/implementation_intake_signoff_builder/evidence_model.yaml
+    category: evidence_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: workflows/implementation_intake_signoff_builder/interview_modes.md
+    category: interview_mode_definition
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: workflows/implementation_intake_signoff_builder/workflows.md
+    category: workflow_definition
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: workflows/implementation_intake_signoff_builder/schemas/source_inventory_schema.yaml
+    category: schema
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: workflows/implementation_intake_signoff_builder/schemas/source_instance_schema.yaml
+    category: schema
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: workflows/implementation_intake_signoff_builder/schemas/export_field_inventory_schema.yaml
+    category: schema
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: workflows/implementation_intake_signoff_builder/schemas/credentials_model_schema.yaml
+    category: schema
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: workflows/implementation_intake_signoff_builder/schemas/crosswalk_rules_schema.yaml
+    category: schema
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: workflows/implementation_intake_signoff_builder/schemas/source_of_truth_schema.yaml
+    category: schema
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: workflows/implementation_intake_signoff_builder/schemas/reporting_calendar_schema.yaml
+    category: schema
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: workflows/implementation_intake_signoff_builder/schemas/blocker_log_schema.yaml
+    category: schema
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: workflows/implementation_intake_signoff_builder/schemas/assumptions_log_schema.yaml
+    category: schema
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: workflows/implementation_intake_signoff_builder/schemas/decision_log_schema.yaml
+    category: schema
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: workflows/implementation_intake_signoff_builder/schemas/evidence_item_schema.yaml
+    category: schema
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: workflows/implementation_intake_signoff_builder/schemas/signoff_packet_schema.yaml
+    category: schema
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: workflows/implementation_intake_signoff_builder/schemas/action_queue_schema.yaml
+    category: schema
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: workflows/implementation_intake_signoff_builder/schemas/session_state_schema.yaml
+    category: schema
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: workflows/implementation_intake_signoff_builder/templates/implementation_intake_packet_template.md
+    category: template
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: workflows/implementation_intake_signoff_builder/templates/signoff_packet_template.md
+    category: template
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: workflows/implementation_intake_signoff_builder/templates/action_queue_template.md
+    category: template
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: tailoring/AUDIENCE_MAP.md
+    category: audience_model
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: tailoring/MISSING_DOC_MATRIX.md
+    category: missing_doc_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/connectors/source_registry/source_registry.yaml
+    category: source_registry
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/connectors/source_registry/implementation_inventory.md
+    category: source_inventory_reference
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/connectors/_core/config_overlay_interaction.md
+    category: canonical_base_protection
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/connectors/_core/third_party_manager_oversight.md
+    category: third_party_manager_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/connectors/master_data/identity_resolution_framework.md
+    category: identity_resolution_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/connectors/master_data/survivorship_rules.md
+    category: survivorship_policy
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: refuse
+  - path: reference/connectors/adapters/appfolio_pms/manifest.yaml
+    category: adapter_contract
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: proceed_with_default
+  - path: reference/connectors/adapters/sage_intacct_gl/manifest.yaml
+    category: adapter_contract
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: proceed_with_default
+  - path: reference/connectors/adapters/procore_construction/manifest.yaml
+    category: adapter_contract
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: proceed_with_default
+  - path: reference/connectors/adapters/dealpath_deal_pipeline/manifest.yaml
+    category: adapter_contract
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: proceed_with_default
+  - path: reference/connectors/adapters/graysail_placeholder/manifest.yaml
+    category: adapter_contract
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: proceed_with_default
+  - path: reference/connectors/adapters/yardi_multi_role/manifest.yaml
+    category: adapter_contract
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: proceed_with_default
+  - path: reference/connectors/adapters/manual_sources_expanded/manifest.yaml
+    category: adapter_contract
+    expected_schema_version: "0.1.0"
+    required: true
+    fallback_behavior: proceed_with_default
+writes:
+  - path: workflows/implementation_intake_signoff_builder/sessions/{engagement_id}/{session_id}.yaml
+    category: session_state
+    write_mode: upsert
+  - path: workflows/implementation_intake_signoff_builder/sessions/{engagement_id}/{session_id}__preview.md
+    category: preview_packet
+    write_mode: replace
+  - path: workflows/implementation_intake_signoff_builder/sessions/{engagement_id}/{session_id}__leader_signoff.md
+    category: signoff_packet
+    write_mode: replace
+  - path: workflows/implementation_intake_signoff_builder/sessions/{engagement_id}/{session_id}__action_queue.md
+    category: action_queue
+    write_mode: replace

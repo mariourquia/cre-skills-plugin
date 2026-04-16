@@ -1,0 +1,40 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: ImplementationAssumptionsLog
+type: object
+required:
+  - schema_version
+  - assumptions
+properties:
+  schema_version:
+    type: string
+  assumptions:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      required:
+        - assumption_id
+        - statement
+        - why_assumed
+        - impacted_area
+        - current_confidence
+        - evidence_needed_to_resolve
+        - risk_if_wrong
+      properties:
+        assumption_id:
+          type: string
+        statement:
+          type: string
+        why_assumed:
+          type: string
+        impacted_area:
+          type: string
+        current_confidence:
+          type: string
+          enum: [low, medium, high]
+        evidence_needed_to_resolve:
+          type: string
+        risk_if_wrong:
+          type: string
+      additionalProperties: false
+additionalProperties: false

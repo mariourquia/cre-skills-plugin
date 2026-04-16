@@ -1,0 +1,48 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: ImplementationSourceOfTruth
+type: object
+required:
+  - schema_version
+  - records
+properties:
+  schema_version:
+    type: string
+  records:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      required:
+        - subject_area
+        - primary_source
+        - secondary_source
+        - fallback_source
+        - historical_source_if_any
+        - disagreement_rule
+        - timestamp_precedence_rule
+        - effective_date_rule
+        - blocking_exception_rule
+        - confidence_impact_rule
+      properties:
+        subject_area:
+          type: string
+        primary_source:
+          type: string
+        secondary_source:
+          type: string
+        fallback_source:
+          type: string
+        historical_source_if_any:
+          type: string
+        disagreement_rule:
+          type: string
+        timestamp_precedence_rule:
+          type: string
+        effective_date_rule:
+          type: string
+        blocking_exception_rule:
+          type: string
+        confidence_impact_rule:
+          type: string
+      additionalProperties: false
+additionalProperties: false

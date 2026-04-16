@@ -1,0 +1,60 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: ImplementationSourceInventory
+type: object
+required:
+  - schema_version
+  - records
+properties:
+  schema_version:
+    type: string
+  records:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      required:
+        - system_name
+        - system_family
+        - business_role
+        - in_scope_modules
+        - portfolio_or_region_coverage
+        - status
+        - primary_or_secondary_role
+        - source_of_truth_candidate
+        - business_owner
+        - admin_or_contact
+        - notes
+        - evidence_status
+      properties:
+        system_name:
+          type: string
+        system_family:
+          type: string
+        business_role:
+          type: string
+        in_scope_modules:
+          type: array
+          items:
+            type: string
+          minItems: 1
+        portfolio_or_region_coverage:
+          type: string
+        status:
+          type: string
+          enum: [active, partial, planned, legacy, historical]
+        primary_or_secondary_role:
+          type: string
+          enum: [primary, secondary, supporting]
+        source_of_truth_candidate:
+          type: string
+          enum: [yes, no, mixed]
+        business_owner:
+          type: string
+        admin_or_contact:
+          type: string
+        notes:
+          type: string
+        evidence_status:
+          type: string
+      additionalProperties: false
+additionalProperties: false

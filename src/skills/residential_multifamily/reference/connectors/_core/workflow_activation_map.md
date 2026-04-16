@@ -24,6 +24,23 @@ cited: `pms`, `gl`, `crm`, `ap`, `market_data`, `construction`, `hr_payroll`,
   alignment, stale capex snapshot.
 - Human-gated: none by default; the summary is a read-out, not a decision.
 
+## Audience: implementation_sponsor
+
+### implementation_intake_signoff_builder
+
+- Needs: the real source inventory plus whatever evidence exists from `pms`,
+  `gl`, `construction`, `deal_pipeline`, and `manual_uploads`. It can begin
+  before every artifact is attached, but it must label the gaps.
+- Partial mode: produce the intake packet and leader sign-off draft with
+  explicit assumptions, blockers, missing evidence, and reduced confidence.
+  Do not present the packet as execution-ready until the named blockers and
+  approvals are explicit.
+- Confidence warnings: missing sample exports, unresolved source-of-truth
+  conflicts, file-only third-party-manager evidence, missing approver
+  identity, or any secret-storage refusal event.
+- Human-gated: implementation scope sign-off, access provisioning sign-off,
+  crosswalk approval, and final leader sign-off packet approval.
+
 ## Audience: regional_ops
 
 ### monthly_property_operating_review

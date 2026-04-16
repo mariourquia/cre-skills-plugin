@@ -1,6 +1,6 @@
 # workflow_activation_map.yaml
 #
-# Machine-readable dependency table for the 27 canonical workflows. Keyed by
+# Machine-readable dependency table for the canonical workflows. Keyed by
 # workflow_slug. Consumers: activation gate in the orchestration layer,
 # reconciliation and exception routing, skill manifest linting.
 #
@@ -182,6 +182,42 @@ workflows:
       and cite the gap in narrative.
     example_output_type: executive_summary_markdown
     human_approvals_required: []
+
+  implementation_intake_signoff_builder:
+    required_domains: [pms, gl, construction, deal_pipeline, manual_uploads]
+    required_normalized_objects:
+      - Property
+      - Unit
+      - Lease
+      - Vendor
+      - BudgetLine
+      - ForecastLine
+      - CapexProject
+      - DrawRequest
+      - ApprovalRequest
+    required_derived:
+      - approval_threshold_policy
+    optional_enrichment:
+      - market_rent_benchmark
+      - occupancy_benchmark
+      - staffing_plan
+    minimum_confidence: low
+    blocking_issues:
+      - missing_sample_export_for_required_source
+      - source_of_truth_conflict_open
+      - approver_identity_unresolved
+      - secret_storage_attempt
+    partial_mode_behavior: >
+      produce the intake packet and leader sign-off draft with explicit
+      assumptions, blockers, and reduced confidence labels. Do not mark the
+      packet execution-ready until load-bearing evidence gaps and approvals are
+      named.
+    example_output_type: implementation_signoff_markdown
+    human_approvals_required:
+      - implementation_scope_signoff
+      - access_provisioning_signoff
+      - crosswalk_approval
+      - leader_signoff_packet_approval
 
   lead_to_lease_funnel_review:
     required_domains: [crm, pms]

@@ -1,0 +1,62 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: ImplementationExportFieldInventory
+type: object
+required:
+  - schema_version
+  - records
+properties:
+  schema_version:
+    type: string
+  records:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      required:
+        - file_or_export_name
+        - source_system
+        - object_family
+        - tab_or_sheet_name
+        - actual_column_name
+        - business_meaning
+        - datatype
+        - sample_value
+        - required_or_optional
+        - null_behavior
+        - known_quirks
+        - transformation_need
+        - evidence_source
+        - missing_status
+      properties:
+        file_or_export_name:
+          type: string
+        source_system:
+          type: string
+        object_family:
+          type: string
+        tab_or_sheet_name:
+          type: string
+        actual_column_name:
+          type: string
+        business_meaning:
+          type: string
+        datatype:
+          type: string
+        sample_value:
+          type: string
+        required_or_optional:
+          type: string
+          enum: [required, optional]
+        null_behavior:
+          type: string
+        known_quirks:
+          type: string
+        transformation_need:
+          type: string
+        evidence_source:
+          type: string
+        missing_status:
+          type: string
+          enum: [present, missing, blocked, conflicting]
+      additionalProperties: false
+additionalProperties: false

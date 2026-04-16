@@ -1,0 +1,1320 @@
+version: "0.1.0"
+question_bank_slug: implementation_intake_signoff
+
+interview_modes:
+  - mode_id: executive_overview
+    label: Executive Overview
+    sections:
+      - objective_scope
+      - confirmed_and_assumed
+      - blockers_and_risks
+      - decisions_and_approvals
+      - recommendation_signoff
+  - mode_id: source_by_source_implementation_discovery
+    label: Source-By-Source Implementation Discovery
+    sections:
+      - source_inventory
+      - source_instances
+      - access_model
+  - mode_id: field_level_export_and_file_inventory
+    label: Field-Level Export And File Inventory
+    sections:
+      - exports_and_files
+      - field_semantics
+  - mode_id: crosswalk_and_identity_mapping
+    label: Crosswalk And Identity Mapping
+    sections:
+      - crosswalk_rules
+      - source_of_truth
+  - mode_id: reporting_calendar_and_sla
+    label: Reporting Calendar And SLA
+    sections:
+      - reporting_calendar
+      - approvals_controls
+  - mode_id: approval_and_controls
+    label: Approval And Controls
+    sections:
+      - approvals_controls
+      - recommendation_signoff
+  - mode_id: missing_doc_chase
+    label: Missing-Doc Chase
+    sections:
+      - blockers_and_risks
+      - exports_and_files
+  - mode_id: signoff_packaging
+    label: Sign-Off Packaging
+    sections:
+      - confirmed_and_assumed
+      - blockers_and_risks
+      - decisions_and_approvals
+      - recommendation_signoff
+  - mode_id: exception_resolution
+    label: Exception Resolution
+    sections:
+      - crosswalk_rules
+      - source_of_truth
+      - blockers_and_risks
+
+questions:
+  - question_id: exec_objective
+    section: objective_scope
+    category: source inventory
+    audience:
+      - coo_operations_leader
+      - cfo_finance_leader
+      - portfolio_manager
+      - reporting_finance_ops_lead
+    trigger_condition:
+      modes_any:
+        - executive_overview
+        - signoff_packaging
+    prerequisite_questions: []
+    question_text: What implementation outcome needs to be true before leadership should authorize build execution?
+    why_this_matters: It anchors scope, sequencing, readiness, and the sign-off recommendation.
+    expected_answer_type: paragraph
+    evidence_requested:
+      - board memo
+      - project charter
+      - implementation brief
+    severity_if_unanswered: critical
+    confidence_effect:
+      confirmed_by_document: high
+      confirmed_verbal: medium
+      assumed: low
+    related_objects:
+      - implementation_objective
+    related_outputs:
+      - implementation_intake_packet
+      - leader_signoff_pack
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules:
+        - when_answer_present: true
+          enqueue_question_ids:
+            - exec_scope_systems
+            - exec_scope_environments
+
+  - question_id: exec_scope_systems
+    section: objective_scope
+    category: source inventory
+    audience:
+      - coo_operations_leader
+      - cfo_finance_leader
+      - implementation_pm
+      - technology_systems_admin
+    trigger_condition:
+      modes_any:
+        - executive_overview
+        - source_by_source_implementation_discovery
+      requires_answers_all:
+        - exec_objective
+    prerequisite_questions:
+      - exec_objective
+    question_text: Which actual source systems, workbooks, shared drives, and report packs are in scope for this implementation?
+    why_this_matters: The implementation cannot start until the real system inventory is explicit.
+    expected_answer_type: multi_select
+    evidence_requested:
+      - source inventory
+      - org chart
+      - property list
+    severity_if_unanswered: critical
+    confidence_effect:
+      confirmed_by_document: high
+      confirmed_verbal: medium
+      missing: none
+    related_objects:
+      - system_inventory
+    related_outputs:
+      - source_inventory_register
+      - implementation_intake_packet
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules:
+        - when_answer_contains_any:
+            - appfolio
+          enqueue_question_ids:
+            - sys_appfolio_scope
+        - when_answer_contains_any:
+            - sage_intacct
+          enqueue_question_ids:
+            - sys_intacct_scope
+        - when_answer_contains_any:
+            - procore
+          enqueue_question_ids:
+            - sys_procore_scope
+        - when_answer_contains_any:
+            - dealpath
+          enqueue_question_ids:
+            - sys_dealpath_scope
+        - when_answer_contains_any:
+            - graysail
+          enqueue_question_ids:
+            - sys_graysail_scope
+        - when_answer_contains_any:
+            - yardi
+          enqueue_question_ids:
+            - sys_yardi_legacy_scope
+
+  - question_id: exec_scope_environments
+    section: objective_scope
+    category: environment and access
+    audience:
+      - implementation_pm
+      - technology_systems_admin
+      - reporting_finance_ops_lead
+    trigger_condition:
+      modes_any:
+        - executive_overview
+        - source_by_source_implementation_discovery
+      requires_answers_all:
+        - exec_scope_systems
+    prerequisite_questions:
+      - exec_scope_systems
+    question_text: Which environments or instances are actually covered, including sandbox, production, legacy, and file-only submissions?
+    why_this_matters: Build readiness depends on the real environment path, not a generic system label.
+    expected_answer_type: record_list
+    evidence_requested:
+      - system access screenshot
+      - environment list
+      - tenant or workspace inventory
+    severity_if_unanswered: high
+    confidence_effect:
+      confirmed_by_screenshot: high
+      confirmed_verbal: medium
+      assumed: low
+    related_objects:
+      - source_instance
+    related_outputs:
+      - source_instance_register
+      - implementation_intake_packet
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules:
+        - when_answer_present: true
+          enqueue_question_ids:
+            - management_access_path
+
+  - question_id: management_access_path
+    section: source_instances
+    category: environment and access
+    audience:
+      - implementation_pm
+      - third_party_manager_oversight_lead
+      - technology_systems_admin
+    trigger_condition:
+      modes_any:
+        - source_by_source_implementation_discovery
+        - approval_and_controls
+      roles_any:
+        - implementation_pm
+        - third_party_manager_oversight_lead
+        - technology_systems_admin
+    prerequisite_questions:
+      - exec_scope_environments
+    question_text: For the systems in scope, is the owner operating with direct system access, file-only submissions, or a mixed access model?
+    why_this_matters: It determines confidence, missing-doc expectations, and which third-party manager questions should load.
+    expected_answer_type: single_select
+    evidence_requested:
+      - access request tracker
+      - system admin confirmation
+      - PMA or manager reporting appendix
+    severity_if_unanswered: high
+    confidence_effect:
+      confirmed_by_document: high
+      confirmed_verbal: medium
+      inferred: low
+    related_objects:
+      - access_model
+    related_outputs:
+      - credentials_and_access_model_packet
+      - assumptions_and_confidence_log
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules:
+        - when_answer_equals: file_only_submission
+          enqueue_question_ids:
+            - tpm_submission_channel
+            - tpm_calendar_alignment
+        - when_answer_equals: mixed_direct_and_file_only
+          enqueue_question_ids:
+            - tpm_submission_channel
+            - tpm_calendar_alignment
+
+  - question_id: sys_appfolio_scope
+    section: source_inventory
+    category: source inventory
+    audience:
+      - implementation_pm
+      - technology_systems_admin
+      - reporting_finance_ops_lead
+    trigger_condition:
+      modes_any:
+        - source_by_source_implementation_discovery
+      systems_any:
+        - appfolio
+    prerequisite_questions:
+      - exec_scope_systems
+    question_text: For AppFolio, which modules, properties, and regions are actually in scope, and which owner or admin is accountable for the environment?
+    why_this_matters: AppFolio often gets named broadly even when module coverage and property coverage differ by region.
+    expected_answer_type: record_list
+    evidence_requested:
+      - AppFolio screenshot
+      - property list
+      - sample monthly owner report
+    severity_if_unanswered: high
+    confidence_effect:
+      confirmed_by_export: high
+      confirmed_by_screenshot: high
+      confirmed_verbal: medium
+    related_objects:
+      - source_inventory
+      - source_instance
+    related_outputs:
+      - source_inventory_register
+      - source_instance_register
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules:
+        - when_answer_present: true
+          enqueue_question_ids:
+            - access_export_methods
+
+  - question_id: sys_intacct_scope
+    section: source_inventory
+    category: environment and access
+    audience:
+      - cfo_finance_leader
+      - reporting_finance_ops_lead
+      - technology_systems_admin
+    trigger_condition:
+      modes_any:
+        - source_by_source_implementation_discovery
+      systems_any:
+        - sage_intacct
+    prerequisite_questions:
+      - exec_scope_systems
+    question_text: For Sage Intacct, which books, entities, dimensions, and close outputs are in scope, and who owns the export and approval path?
+    why_this_matters: Intacct scope frequently differs between legal entity, reporting entity, and management-reporting use.
+    expected_answer_type: record_list
+    evidence_requested:
+      - chart of accounts
+      - entity list
+      - dimension export
+    severity_if_unanswered: high
+    confidence_effect:
+      confirmed_by_export: high
+      confirmed_by_document: high
+      confirmed_verbal: medium
+    related_objects:
+      - source_inventory
+      - reporting_entity
+    related_outputs:
+      - source_inventory_register
+      - credentials_and_access_model_packet
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules:
+        - when_answer_present: true
+          enqueue_question_ids:
+            - field_dictionary_location
+
+  - question_id: sys_procore_scope
+    section: source_inventory
+    category: development and construction reporting
+    audience:
+      - development_manager
+      - construction_manager
+      - implementation_pm
+    trigger_condition:
+      modes_any:
+        - source_by_source_implementation_discovery
+      systems_any:
+        - procore
+    prerequisite_questions:
+      - exec_scope_systems
+    question_text: For Procore, which projects, cost objects, and approval paths are in scope, and which environments or company accounts must be supported?
+    why_this_matters: Construction implementations fail when project scope and company-account scope are left ambiguous.
+    expected_answer_type: record_list
+    evidence_requested:
+      - project list
+      - draw package sample
+      - Procore company screenshot
+    severity_if_unanswered: high
+    confidence_effect:
+      confirmed_by_export: high
+      confirmed_by_screenshot: high
+      confirmed_verbal: medium
+    related_objects:
+      - construction_project
+      - capex_project
+    related_outputs:
+      - source_inventory_register
+      - source_instance_register
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules:
+        - when_answer_present: true
+          enqueue_question_ids:
+            - development_construction_pack
+
+  - question_id: sys_dealpath_scope
+    section: source_inventory
+    category: development and construction reporting
+    audience:
+      - development_manager
+      - asset_manager
+      - implementation_pm
+    trigger_condition:
+      modes_any:
+        - source_by_source_implementation_discovery
+      systems_any:
+        - dealpath
+    prerequisite_questions:
+      - exec_scope_systems
+    question_text: For Dealpath, which deal stages, projects, approvals, and handoff rules are in scope, and who owns the pipeline fields that downstream workflows will depend on?
+    why_this_matters: Dealpath is often treated as a strategy tool even when it feeds live implementation handoffs and approvals.
+    expected_answer_type: record_list
+    evidence_requested:
+      - deal list
+      - investment committee pack
+      - pipeline field screenshot
+    severity_if_unanswered: medium
+    confidence_effect:
+      confirmed_by_document: high
+      confirmed_by_screenshot: high
+      confirmed_verbal: medium
+    related_objects:
+      - deal
+      - development_project
+    related_outputs:
+      - source_inventory_register
+      - decision_log
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules: []
+
+  - question_id: sys_graysail_scope
+    section: source_inventory
+    category: benchmark updates
+    audience:
+      - asset_manager
+      - reporting_finance_ops_lead
+      - implementation_pm
+    trigger_condition:
+      modes_any:
+        - source_by_source_implementation_discovery
+      systems_any:
+        - graysail
+    prerequisite_questions:
+      - exec_scope_systems
+    question_text: What does GraySail actually provide in this implementation, how often is it refreshed, and who owns the benchmark file or workbook?
+    why_this_matters: Benchmark tools are often described vaguely and then show up late as a hidden reporting dependency.
+    expected_answer_type: record_list
+    evidence_requested:
+      - benchmark files
+      - sample regional review pack
+      - benchmark refresh calendar
+    severity_if_unanswered: medium
+    confidence_effect:
+      confirmed_by_document: high
+      confirmed_verbal: medium
+      assumed: low
+    related_objects:
+      - benchmark_series
+    related_outputs:
+      - source_inventory_register
+      - reporting_calendar_and_sla_register
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules:
+        - when_answer_present: true
+          enqueue_question_ids:
+            - benchmark_update_process
+
+  - question_id: sys_yardi_legacy_scope
+    section: source_inventory
+    category: source inventory
+    audience:
+      - implementation_pm
+      - reporting_finance_ops_lead
+      - third_party_manager_oversight_lead
+    trigger_condition:
+      modes_any:
+        - source_by_source_implementation_discovery
+      systems_any:
+        - yardi
+    prerequisite_questions:
+      - exec_scope_systems
+    question_text: If Yardi is still used for a legacy subset, which properties, reports, or historical records stay on Yardi, and what is the current delivery method?
+    why_this_matters: Legacy Yardi scope is one of the most common hidden blockers in mixed-system environments.
+    expected_answer_type: record_list
+    evidence_requested:
+      - Yardi export sample
+      - property list
+      - legacy reporting pack
+    severity_if_unanswered: high
+    confidence_effect:
+      confirmed_by_export: high
+      confirmed_verbal: medium
+      assumed: low
+    related_objects:
+      - source_inventory
+      - historical_source
+    related_outputs:
+      - source_inventory_register
+      - assumptions_and_confidence_log
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules:
+        - when_answer_present: true
+          enqueue_question_ids:
+            - field_sample_exports
+
+  - question_id: access_credentials_model
+    section: access_model
+    category: environment and access
+    audience:
+      - technology_systems_admin
+      - implementation_pm
+      - cfo_finance_leader
+    trigger_condition:
+      modes_any:
+        - source_by_source_implementation_discovery
+        - approval_and_controls
+    prerequisite_questions:
+      - management_access_path
+    question_text: What is the credentials and access model for each in-scope source, including owner, provisioning method, approvals required, and legal or security constraints?
+    why_this_matters: Build execution depends on the provisioning path and approval owner, not just on technical feasibility.
+    expected_answer_type: record_list
+    evidence_requested:
+      - access request template
+      - approval matrix
+      - security review note
+    severity_if_unanswered: critical
+    confidence_effect:
+      confirmed_by_document: high
+      confirmed_verbal: medium
+      missing: none
+    related_objects:
+      - credentials_model
+    related_outputs:
+      - credentials_and_access_model_packet
+      - approvals_and_controls_summary
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules:
+        - when_answer_present: true
+          enqueue_question_ids:
+            - approval_access_and_provisioning
+
+  - question_id: access_export_methods
+    section: access_model
+    category: exports and files
+    audience:
+      - implementation_pm
+      - technology_systems_admin
+      - reporting_finance_ops_lead
+    trigger_condition:
+      modes_any:
+        - source_by_source_implementation_discovery
+        - field_level_export_and_file_inventory
+      requires_answers_all:
+        - sys_appfolio_scope
+    prerequisite_questions:
+      - sys_appfolio_scope
+    question_text: "For each in-scope source, what is the actual delivery method for usable data: API, scheduled export, SFTP, shared drive, manual spreadsheet, or emailed pack?"
+    why_this_matters: Export readiness drives integration design, file handling, and blocker severity.
+    expected_answer_type: record_list
+    evidence_requested:
+      - export schedule screenshot
+      - CSV extracts
+      - Excel workbooks
+      - PDFs of report packs
+    severity_if_unanswered: high
+    confidence_effect:
+      confirmed_by_export: high
+      confirmed_by_screenshot: high
+      confirmed_verbal: medium
+    related_objects:
+      - data_access_model
+    related_outputs:
+      - credentials_and_access_model_packet
+      - export_and_field_inventory
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules:
+        - when_answer_contains_any:
+            - manual_export
+            - spreadsheet
+            - emailed_pack
+          enqueue_question_ids:
+            - field_sample_exports
+
+  - question_id: field_sample_exports
+    section: exports_and_files
+    category: exports and files
+    audience:
+      - implementation_pm
+      - data_analytics_lead
+      - reporting_finance_ops_lead
+    trigger_condition:
+      modes_any:
+        - field_level_export_and_file_inventory
+        - missing_doc_chase
+      systems_any:
+        - appfolio
+        - sage_intacct
+        - yardi
+        - manual_spreadsheet
+    prerequisite_questions:
+      - access_export_methods
+    question_text: Which actual sample exports, workbooks, PDFs, or report packs have been received for each in-scope object family?
+    why_this_matters: Field-level implementation is impossible without actual artifacts to inspect.
+    expected_answer_type: file_inventory
+    evidence_requested:
+      - CSV extracts
+      - Excel workbooks
+      - PDFs of report packs
+      - sample monthly owner reports
+      - sample regional review packs
+    severity_if_unanswered: critical
+    confidence_effect:
+      confirmed_by_export: high
+      confirmed_by_document: high
+      missing: none
+    related_objects:
+      - export_field_inventory
+      - evidence_item
+    related_outputs:
+      - export_and_field_inventory
+      - missing_docs_and_blockers_log
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules:
+        - when_answer_missing_or_empty: true
+          enqueue_question_ids:
+            - blocker_missing_docs
+
+  - question_id: field_dictionary_location
+    section: field_semantics
+    category: field names and semantics
+    audience:
+      - data_analytics_lead
+      - reporting_finance_ops_lead
+      - technology_systems_admin
+    trigger_condition:
+      modes_any:
+        - field_level_export_and_file_inventory
+        - missing_doc_chase
+      systems_any:
+        - sage_intacct
+        - appfolio
+        - procore
+        - yardi
+    prerequisite_questions:
+      - field_sample_exports
+    question_text: Do actual field dictionaries, tab guides, chart-of-accounts mappings, or workbook instructions exist, and where are they maintained?
+    why_this_matters: A sample file without field semantics still leaves implementation assumptions unresolved.
+    expected_answer_type: document_request
+    evidence_requested:
+      - field dictionaries
+      - chart of accounts
+      - workbook instructions
+    severity_if_unanswered: high
+    confidence_effect:
+      confirmed_by_document: high
+      confirmed_verbal: medium
+      missing: none
+    related_objects:
+      - export_field_inventory
+      - account
+    related_outputs:
+      - export_and_field_inventory
+      - missing_docs_and_blockers_log
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules:
+        - when_answer_missing_or_empty: true
+          enqueue_question_ids:
+            - blocker_missing_docs
+
+  - question_id: crosswalk_property_resolution
+    section: crosswalk_rules
+    category: crosswalk rules
+    audience:
+      - data_analytics_lead
+      - implementation_pm
+      - asset_manager
+    trigger_condition:
+      modes_any:
+        - crosswalk_and_identity_mapping
+        - exception_resolution
+    prerequisite_questions:
+      - exec_scope_systems
+    question_text: What is the approved property and reporting-entity matching rule across AppFolio, Intacct, Procore, Dealpath, GraySail, Yardi, and any manual packs?
+    why_this_matters: Property identity is usually the first point of implementation failure and reporting contradiction.
+    expected_answer_type: mapping_rule
+    evidence_requested:
+      - property list
+      - entity list
+      - crosswalk sheets
+    severity_if_unanswered: critical
+    confidence_effect:
+      confirmed_by_document: high
+      confirmed_verbal: medium
+      conflicting: none
+    related_objects:
+      - property
+      - reporting_entity
+      - market
+      - submarket
+    related_outputs:
+      - crosswalk_and_source_of_truth_register
+      - assumptions_and_confidence_log
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules:
+        - when_answer_conflicting: true
+          enqueue_question_ids:
+            - exception_conflict_resolution
+
+  - question_id: crosswalk_vendor_resolution
+    section: crosswalk_rules
+    category: crosswalk rules
+    audience:
+      - data_analytics_lead
+      - reporting_finance_ops_lead
+      - construction_manager
+    trigger_condition:
+      modes_any:
+        - crosswalk_and_identity_mapping
+        - exception_resolution
+      systems_any:
+        - sage_intacct
+        - procore
+        - appfolio
+    prerequisite_questions:
+      - exec_scope_systems
+    question_text: What is the approved vendor and invoice matching rule, including preferred key, fallback key, override path, and owner of the mapping?
+    why_this_matters: Vendor and invoice identity errors create finance, AP, and construction reporting breaks very quickly.
+    expected_answer_type: mapping_rule
+    evidence_requested:
+      - vendor list
+      - vendor master
+      - invoice extract
+    severity_if_unanswered: high
+    confidence_effect:
+      confirmed_by_document: high
+      assumed: low
+      conflicting: none
+    related_objects:
+      - vendor
+      - invoice
+      - account
+    related_outputs:
+      - crosswalk_and_source_of_truth_register
+      - decision_log
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules: []
+
+  - question_id: source_truth_revenue_and_occupancy
+    section: source_of_truth
+    category: source-of-truth
+    audience:
+      - reporting_finance_ops_lead
+      - asset_manager
+      - implementation_pm
+    trigger_condition:
+      modes_any:
+        - crosswalk_and_identity_mapping
+        - signoff_packaging
+    prerequisite_questions:
+      - crosswalk_property_resolution
+    question_text: For rent, occupancy, lease status, and delinquency, which system is primary, which is secondary, and how do you resolve disagreement?
+    why_this_matters: Leadership sign-off needs explicit source-of-truth rules for the numbers that will drive decisions.
+    expected_answer_type: record_list
+    evidence_requested:
+      - source-of-truth matrix
+      - sample monthly owner report
+      - report reconciliation note
+    severity_if_unanswered: critical
+    confidence_effect:
+      confirmed_by_document: high
+      confirmed_verbal: medium
+      conflicting: none
+    related_objects:
+      - lease
+      - resident_or_household_placeholder
+      - reporting_entity
+    related_outputs:
+      - crosswalk_and_source_of_truth_register
+      - leader_signoff_pack
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules:
+        - when_answer_conflicting: true
+          enqueue_question_ids:
+            - exception_conflict_resolution
+
+  - question_id: source_truth_capex_and_development
+    section: source_of_truth
+    category: source-of-truth
+    audience:
+      - development_manager
+      - construction_manager
+      - reporting_finance_ops_lead
+    trigger_condition:
+      modes_any:
+        - crosswalk_and_identity_mapping
+        - signoff_packaging
+      systems_any:
+        - procore
+        - dealpath
+        - sage_intacct
+    prerequisite_questions:
+      - sys_procore_scope
+    question_text: For development project, construction project, capex project, draw request, and budget-versus-actual reporting, which source is primary and how is disagreement resolved?
+    why_this_matters: Mixed development and operating environments need an explicit rule before build or reporting can be trusted.
+    expected_answer_type: record_list
+    evidence_requested:
+      - project list
+      - draw package sample
+      - reconciliation note
+    severity_if_unanswered: high
+    confidence_effect:
+      confirmed_by_document: high
+      confirmed_by_export: high
+      conflicting: none
+    related_objects:
+      - development_project
+      - construction_project
+      - capex_project
+      - deal
+    related_outputs:
+      - crosswalk_and_source_of_truth_register
+      - leader_signoff_pack
+    skip_logic:
+      skip_if_context_values:
+        - field: systems_in_scope
+          excludes_all:
+            - procore
+            - dealpath
+    follow_up_logic:
+      rules:
+        - when_answer_conflicting: true
+          enqueue_question_ids:
+            - exception_conflict_resolution
+
+  - question_id: reporting_calendar_close
+    section: reporting_calendar
+    category: reporting calendar
+    audience:
+      - cfo_finance_leader
+      - controller_finance_lead
+      - reporting_finance_ops_lead
+    trigger_condition:
+      modes_any:
+        - reporting_calendar_and_sla
+        - signoff_packaging
+    prerequisite_questions:
+      - exec_scope_systems
+    question_text: What are the actual monthly close timing, owner reporting deadline, forecast refresh cadence, and benchmark refresh cadence for this implementation?
+    why_this_matters: Reporting cadence controls the timing assumptions for exports, reconciliation, and executive review.
+    expected_answer_type: schedule_table
+    evidence_requested:
+      - reporting calendar
+      - monthly owner report
+      - benchmark files
+    severity_if_unanswered: high
+    confidence_effect:
+      confirmed_by_document: high
+      confirmed_verbal: medium
+      assumed: low
+    related_objects:
+      - reporting_calendar
+      - benchmark_series
+    related_outputs:
+      - reporting_calendar_and_sla_register
+      - leader_signoff_pack
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules: []
+
+  - question_id: reporting_calendar_exec_reviews
+    section: reporting_calendar
+    category: reporting calendar
+    audience:
+      - coo_operations_leader
+      - asset_manager
+      - regional_manager
+    trigger_condition:
+      modes_any:
+        - reporting_calendar_and_sla
+        - signoff_packaging
+    prerequisite_questions:
+      - reporting_calendar_close
+    question_text: What are the actual weekly and monthly operating review cadences, executive review cadence, delinquency review cadence, and escalation SLA for late inputs?
+    why_this_matters: These operating rhythms determine the real delivery windows and owner expectations for downstream workflows.
+    expected_answer_type: schedule_table
+    evidence_requested:
+      - reporting calendar
+      - sample regional review pack
+      - sample monthly owner report
+    severity_if_unanswered: medium
+    confidence_effect:
+      confirmed_by_document: high
+      confirmed_verbal: medium
+      assumed: low
+    related_objects:
+      - reporting_calendar
+    related_outputs:
+      - reporting_calendar_and_sla_register
+      - action_queue
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules: []
+
+  - question_id: approval_access_and_provisioning
+    section: approvals_controls
+    category: approvals and controls
+    audience:
+      - technology_systems_admin
+      - implementation_pm
+      - cfo_finance_leader
+    trigger_condition:
+      modes_any:
+        - approval_and_controls
+        - signoff_packaging
+      requires_answers_all:
+        - access_credentials_model
+    prerequisite_questions:
+      - access_credentials_model
+    question_text: Who approves system access, who provisions it, what is the escalation path, and what lead time should the implementation plan assume?
+    why_this_matters: Access delays are one of the highest-probability causes of implementation schedule failure.
+    expected_answer_type: record_list
+    evidence_requested:
+      - approval matrix
+      - org chart
+      - access request template
+    severity_if_unanswered: critical
+    confidence_effect:
+      confirmed_by_document: high
+      confirmed_verbal: medium
+      missing: none
+    related_objects:
+      - approval_matrix
+    related_outputs:
+      - credentials_and_access_model_packet
+      - leader_signoff_pack
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules:
+        - when_answer_missing_or_empty: true
+          enqueue_question_ids:
+            - blocker_missing_docs
+
+  - question_id: approval_mapping_and_manual_override
+    section: approvals_controls
+    category: approvals and controls
+    audience:
+      - data_analytics_lead
+      - reporting_finance_ops_lead
+      - asset_manager
+    trigger_condition:
+      modes_any:
+        - approval_and_controls
+        - signoff_packaging
+    prerequisite_questions:
+      - crosswalk_property_resolution
+    question_text: Who approves crosswalk changes, manual overrides, benchmark updates, final reports, and financially material output changes?
+    why_this_matters: Mapping logic, overrides, and report changes need named decision owners before a build team can automate safely.
+    expected_answer_type: record_list
+    evidence_requested:
+      - approval matrix
+      - org chart
+      - benchmark policy
+    severity_if_unanswered: high
+    confidence_effect:
+      confirmed_by_document: high
+      confirmed_verbal: medium
+      assumed: low
+    related_objects:
+      - approval_matrix
+      - manual_override_rule
+    related_outputs:
+      - leader_signoff_pack
+      - action_queue
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules: []
+
+  - question_id: tpm_submission_channel
+    section: source_instances
+    category: third-party manager reporting
+    audience:
+      - third_party_manager_oversight_lead
+      - asset_manager
+      - implementation_pm
+    trigger_condition:
+      modes_any:
+        - source_by_source_implementation_discovery
+        - reporting_calendar_and_sla
+        - exception_resolution
+      management_modes_any:
+        - third_party_managed
+        - owner_oversight
+    prerequisite_questions:
+      - management_access_path
+    question_text: When the owner does not have direct system access, what files, report packs, templates, and attestations does the third-party manager actually submit?
+    why_this_matters: File-only manager reporting can support the implementation, but only if the packet shape, timing, and ownership are explicit.
+    expected_answer_type: file_inventory
+    evidence_requested:
+      - sample monthly owner report
+      - sample regional review pack
+      - manager submission calendar
+    severity_if_unanswered: high
+    confidence_effect:
+      confirmed_by_document: medium
+      confirmed_verbal: low
+      missing: none
+    related_objects:
+      - third_party_manager
+      - reporting_entity
+    related_outputs:
+      - source_inventory_register
+      - assumptions_and_confidence_log
+    skip_logic:
+      skip_if_answer_values:
+        - question_id: management_access_path
+          equals_any:
+            - direct_owner_access
+    follow_up_logic:
+      rules:
+        - when_answer_missing_or_empty: true
+          enqueue_question_ids:
+            - blocker_missing_docs
+
+  - question_id: tpm_calendar_alignment
+    section: reporting_calendar
+    category: third-party manager reporting
+    audience:
+      - third_party_manager_oversight_lead
+      - asset_manager
+      - regional_manager
+    trigger_condition:
+      modes_any:
+        - reporting_calendar_and_sla
+        - exception_resolution
+      management_modes_any:
+        - third_party_managed
+        - owner_oversight
+    prerequisite_questions:
+      - tpm_submission_channel
+    question_text: Do the owner calendar and the manager submission calendar align, and if not, who owns the gap and what is the late-threshold escalation path?
+    why_this_matters: Misaligned calendars create false assumptions about when data will be usable.
+    expected_answer_type: record_list
+    evidence_requested:
+      - PMA reporting appendix
+      - reporting calendar
+      - escalation matrix
+    severity_if_unanswered: medium
+    confidence_effect:
+      confirmed_by_document: medium
+      confirmed_verbal: low
+      assumed: low
+    related_objects:
+      - third_party_manager
+      - reporting_calendar
+    related_outputs:
+      - reporting_calendar_and_sla_register
+      - action_queue
+    skip_logic:
+      skip_if_answer_values:
+        - question_id: management_access_path
+          equals_any:
+            - direct_owner_access
+    follow_up_logic:
+      rules: []
+
+  - question_id: development_construction_pack
+    section: source_inventory
+    category: development and construction reporting
+    audience:
+      - development_manager
+      - construction_manager
+      - implementation_pm
+    trigger_condition:
+      modes_any:
+        - source_by_source_implementation_discovery
+        - field_level_export_and_file_inventory
+      systems_any:
+        - procore
+        - dealpath
+    prerequisite_questions:
+      - sys_procore_scope
+    question_text: Which actual development and construction artifacts are available now, including project list, draw packages, cost reports, milestone logs, and handoff approvals?
+    why_this_matters: Procore and Dealpath only help implementation when the real file and approval surfaces are explicit.
+    expected_answer_type: file_inventory
+    evidence_requested:
+      - project list
+      - draw package sample
+      - cost report workbook
+      - approval document
+    severity_if_unanswered: medium
+    confidence_effect:
+      confirmed_by_export: high
+      confirmed_by_document: high
+      missing: none
+    related_objects:
+      - development_project
+      - construction_project
+      - capex_project
+    related_outputs:
+      - export_and_field_inventory
+      - missing_docs_and_blockers_log
+    skip_logic:
+      skip_if_context_values:
+        - field: systems_in_scope
+          excludes_all:
+            - procore
+            - dealpath
+    follow_up_logic:
+      rules: []
+
+  - question_id: benchmark_update_process
+    section: approvals_controls
+    category: benchmark updates
+    audience:
+      - asset_manager
+      - reporting_finance_ops_lead
+      - implementation_pm
+    trigger_condition:
+      modes_any:
+        - reporting_calendar_and_sla
+        - approval_and_controls
+        - signoff_packaging
+      systems_any:
+        - graysail
+        - excel_market_surveys
+    prerequisite_questions:
+      - sys_graysail_scope
+    question_text: Who owns benchmark updates, what evidence supports each refresh, who approves the change, and what happens when the workbook is late or incomplete?
+    why_this_matters: Benchmark inputs often drive executive reporting but sit outside source-native systems unless ownership is explicit.
+    expected_answer_type: record_list
+    evidence_requested:
+      - benchmark files
+      - benchmark refresh calendar
+      - approval matrix
+    severity_if_unanswered: medium
+    confidence_effect:
+      confirmed_by_document: high
+      confirmed_verbal: medium
+      assumed: low
+    related_objects:
+      - benchmark_series
+    related_outputs:
+      - reporting_calendar_and_sla_register
+      - leader_signoff_pack
+    skip_logic:
+      skip_if_context_values:
+        - field: systems_in_scope
+          excludes_all:
+            - graysail
+            - excel_market_surveys
+    follow_up_logic:
+      rules: []
+
+  - question_id: blocker_missing_docs
+    section: blockers_and_risks
+    category: blocker resolution
+    audience:
+      - implementation_pm
+      - reporting_finance_ops_lead
+      - third_party_manager_oversight_lead
+    trigger_condition:
+      modes_any:
+        - missing_doc_chase
+        - signoff_packaging
+        - exception_resolution
+    prerequisite_questions: []
+    question_text: Which load-bearing artifacts are still missing, who owes them, when were they requested, and what work is blocked until they arrive?
+    why_this_matters: Missing-doc tracking is the difference between a real intake packet and a vague status update.
+    expected_answer_type: record_list
+    evidence_requested:
+      - request tracker
+      - missing file list
+      - follow-up log
+    severity_if_unanswered: critical
+    confidence_effect:
+      confirmed_by_document: high
+      confirmed_verbal: medium
+      missing: none
+    related_objects:
+      - blocker_log
+    related_outputs:
+      - missing_docs_and_blockers_log
+      - action_queue
+      - leader_signoff_pack
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules: []
+
+  - question_id: exception_conflict_resolution
+    section: blockers_and_risks
+    category: blocker resolution
+    audience:
+      - implementation_pm
+      - data_analytics_lead
+      - executive_sponsor
+    trigger_condition:
+      modes_any:
+        - exception_resolution
+        - signoff_packaging
+    prerequisite_questions: []
+    question_text: Where do facts conflict today, who must decide, what evidence exists on each side, and what is the downstream risk if the conflict stays open?
+    why_this_matters: Conflict needs an owner and decision path before implementation can proceed safely.
+    expected_answer_type: record_list
+    evidence_requested:
+      - mapping file
+      - reconciliation note
+      - approval document
+    severity_if_unanswered: high
+    confidence_effect:
+      conflicting: none
+      confirmed_by_document: high
+      confirmed_verbal: medium
+    related_objects:
+      - decision_log
+      - blocker_log
+    related_outputs:
+      - decision_log
+      - leader_signoff_pack
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules: []
+
+  - question_id: signoff_decisions_requested
+    section: decisions_and_approvals
+    category: approvals and controls
+    audience:
+      - coo_operations_leader
+      - cfo_finance_leader
+      - implementation_sponsor
+    trigger_condition:
+      modes_any:
+        - signoff_packaging
+        - executive_overview
+    prerequisite_questions:
+      - blocker_missing_docs
+    question_text: Which decisions need leadership now so the build team does not stall on scope, source-of-truth, crosswalk ownership, or reporting cadence?
+    why_this_matters: The sign-off packet needs explicit decisions requested, not implied asks.
+    expected_answer_type: record_list
+    evidence_requested:
+      - decision memo
+      - blocker log
+    severity_if_unanswered: critical
+    confidence_effect:
+      confirmed_by_document: high
+      confirmed_verbal: medium
+      assumed: low
+    related_objects:
+      - decision_log
+    related_outputs:
+      - leader_signoff_pack
+      - action_queue
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules: []
+
+  - question_id: signoff_approvals_requested
+    section: decisions_and_approvals
+    category: approvals and controls
+    audience:
+      - coo_operations_leader
+      - cfo_finance_leader
+      - implementation_sponsor
+    trigger_condition:
+      modes_any:
+        - signoff_packaging
+        - executive_overview
+    prerequisite_questions:
+      - signoff_decisions_requested
+    question_text: Which approvals are being requested now, including access approvals, mapping approvals, benchmark approvals, and final implementation sign-off?
+    why_this_matters: Leadership needs to know exactly what approval they are being asked to give and what remains outside the current approval ask.
+    expected_answer_type: record_list
+    evidence_requested:
+      - approval matrix
+      - access request tracker
+      - sign-off draft
+    severity_if_unanswered: critical
+    confidence_effect:
+      confirmed_by_document: high
+      confirmed_verbal: medium
+      assumed: low
+    related_objects:
+      - approval_matrix
+    related_outputs:
+      - leader_signoff_pack
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules: []
+
+  - question_id: signoff_owner_dates
+    section: recommendation_signoff
+    category: approvals and controls
+    audience:
+      - implementation_pm
+      - coo_operations_leader
+      - cfo_finance_leader
+    trigger_condition:
+      modes_any:
+        - signoff_packaging
+    prerequisite_questions:
+      - signoff_approvals_requested
+    question_text: What are the owner assignments and target dates for each blocked item, requested decision, and requested approval?
+    why_this_matters: A sign-off packet without named owners and dates is not execution-ready.
+    expected_answer_type: record_list
+    evidence_requested:
+      - action list
+      - owner roster
+      - implementation plan
+    severity_if_unanswered: critical
+    confidence_effect:
+      confirmed_by_document: high
+      confirmed_verbal: medium
+      assumed: low
+    related_objects:
+      - action_queue
+    related_outputs:
+      - leader_signoff_pack
+      - action_queue
+    skip_logic:
+      skip_if_answered: true
+    follow_up_logic:
+      rules: []

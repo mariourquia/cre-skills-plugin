@@ -1,0 +1,185 @@
+schema_version: "0.1.0"
+engagement_id: sunrise_owner_oversight_q2_2026
+session_id: sunrise_owner_oversight_q2_2026__leadership_packet
+version: "0.1.0"
+status: pending leadership review
+current_mode: signoff_packaging
+progress:
+  completion_percent: 78
+  current_section: recommendation_signoff
+  answered_questions: 18
+  total_questions: 23
+context:
+  role: implementation_pm
+  management_mode: owner_oversight
+  systems_in_scope:
+    - appfolio
+    - sage_intacct
+    - procore
+    - dealpath
+    - graysail
+    - yardi
+    - third_party_manager_submission
+  environments_in_scope:
+    - appfolio_prod_east
+    - intacct_prod
+    - procore_prod
+    - dealpath_prod
+    - graysail_workbook_drop
+    - yardi_legacy_export
+answers:
+  exec_objective:
+    value: Prepare a build-ready implementation packet for owner oversight operations, finance, construction, pipeline, benchmark refresh, and legacy reporting.
+    evidence_status: confirmed_by_document
+  exec_scope_systems:
+    value:
+      - appfolio
+      - sage_intacct
+      - procore
+      - dealpath
+      - graysail
+      - yardi
+      - third_party_manager_submission
+    evidence_status: confirmed_by_document
+  exec_scope_environments:
+    value:
+      - appfolio_prod_east
+      - intacct_prod
+      - procore_prod
+      - dealpath_prod
+      - graysail_workbook_drop
+      - yardi_legacy_export
+    evidence_status: confirmed_by_screenshot
+  management_access_path:
+    value: mixed_direct_and_file_only
+    evidence_status: confirmed_by_document
+  sys_appfolio_scope:
+    value: East-region production environment covers operating properties and unit, lease, charge, payment, and work-order modules.
+    evidence_status: confirmed_by_export
+  sys_intacct_scope:
+    value: Production entity and location exports cover owner reporting and close, but dimension semantics are still incomplete.
+    evidence_status: confirmed_by_document
+  sys_procore_scope:
+    value: Production Procore company covers active capital and development projects, but draw export layout still needs review.
+    evidence_status: confirmed_by_screenshot
+  sys_dealpath_scope:
+    value: Dealpath production is in scope for deal approvals, pipeline status, and development handoff context.
+    evidence_status: confirmed_verbal
+  sys_graysail_scope:
+    value: GraySail is believed to support market survey benchmarking, pending workbook confirmation.
+    evidence_status: assumed
+  sys_yardi_legacy_scope:
+    value: Yardi remains in scope for a limited legacy property subset and monthly rent-roll support.
+    evidence_status: confirmed_verbal
+  access_credentials_model:
+    value: Access is provisioned through owner IT and finance systems, with no direct credential capture in the packet.
+    evidence_status: confirmed_by_document
+  access_export_methods:
+    value: AppFolio exports are direct, Intacct is scheduled export, Procore is screenshot plus pending export, Yardi is manual workbook, and TPM data is report-pack based.
+    evidence_status: confirmed_by_export
+  field_sample_exports:
+    value: AppFolio sample received, Yardi legacy sample received, Intacct COA workbook received, Procore draw screenshot received.
+    evidence_status: confirmed_by_export
+  field_dictionary_location:
+    value: Intacct field dictionary and dimension logic are still missing.
+    evidence_status: blocked
+  crosswalk_property_resolution:
+    value: AppFolio property code is preferred for operating assets, with Intacct reporting entity as fallback.
+    evidence_status: confirmed_by_document
+  crosswalk_vendor_resolution:
+    value: Vendor matching rule exists in draft only and still needs finance approval.
+    evidence_status: assumed
+  source_truth_revenue_and_occupancy:
+    value: AppFolio is primary for revenue, occupancy, lease status, and delinquency. Intacct is secondary for reported finance views.
+    evidence_status: confirmed_by_artifact
+  source_truth_capex_and_development:
+    value: Procore is primary for construction status and draw workflow, Dealpath is primary for pipeline approvals, and Intacct is primary for posted financial actuals.
+    evidence_status: conflicting
+  reporting_calendar_close:
+    value: Monthly close, owner reporting, and benchmark refresh timing are documented.
+    evidence_status: confirmed_by_document
+  reporting_calendar_exec_reviews:
+    value: Weekly delinquency and regional reviews occur before the executive operating review each month.
+    evidence_status: confirmed_verbal
+  approval_access_and_provisioning:
+    value: Access approvals route through owner IT for systems and through finance leadership for Intacct exports.
+    evidence_status: confirmed_by_document
+  approval_mapping_and_manual_override:
+    value: Crosswalk changes require finance and data approval, while benchmark changes require asset management review.
+    evidence_status: confirmed_by_document
+  tpm_submission_channel:
+    value: Third-party manager submits a monthly owner pack and ad hoc variance backup through shared drive and email.
+    evidence_status: confirmed_by_document
+  tpm_calendar_alignment:
+    value: Manager packets land after owner close in one region, creating a recurring lag risk.
+    evidence_status: confirmed_verbal
+evidence_items:
+  - evidence_id: ev_appfolio_unit_export
+    source_system: appfolio
+    received_from: Sunrise PM systems admin
+    validation_status: reviewed_sufficient
+  - evidence_id: ev_intacct_coa_workbook
+    source_system: sage_intacct
+    received_from: Controller
+    validation_status: reviewed_incomplete
+  - evidence_id: ev_procore_draw_screenshot
+    source_system: procore
+    received_from: Construction manager
+    validation_status: received_not_reviewed
+  - evidence_id: ev_tpm_monthly_pack
+    source_system: third_party_manager_submission
+    received_from: Third-party manager
+    validation_status: reviewed_incomplete
+blockers:
+  - blocker_id: blk_001
+    description: Intacct field dictionary for dimension and reporting-entity mapping has not been provided.
+    severity: critical
+    impacted_area: field_semantics
+    owner: Controller
+    requested_from: Intacct admin
+    date_requested: "2026-04-08"
+    follow_up_due: "2026-04-18"
+    status: open
+  - blocker_id: blk_002
+    description: Yardi legacy reporting-entity mapping conflicts with the owner reporting hierarchy.
+    severity: high
+    impacted_area: crosswalk_and_source_of_truth
+    owner: Data lead
+    requested_from: Legacy systems analyst
+    date_requested: "2026-04-09"
+    follow_up_due: "2026-04-16"
+    status: blocked
+assumptions:
+  - assumption_id: asm_001
+    statement: GraySail is the benchmark source for market survey refresh.
+    why_assumed: The workbook owner has been named verbally but not evidenced.
+    impacted_area: benchmark_refresh
+    current_confidence: low
+    evidence_needed_to_resolve: Workbook plus owner and refresh calendar.
+    risk_if_wrong: Benchmark logic may point to the wrong source.
+decisions_requested:
+  - Confirm the final source-of-truth owner for development and capex reporting between Procore, Dealpath, and Intacct.
+  - Confirm whether Yardi legacy reporting remains in scope after the next close cycle.
+  - Confirm the acceptable fallback when TPM backup arrives after owner close.
+approvals_requested:
+  - Approve access provisioning path for Intacct export delivery.
+  - Approve the initial property and reporting-entity crosswalk rule.
+  - Approve conditional build readiness pending the named blockers.
+top_risks:
+  - Intacct field semantics remain incomplete, which can stall mapping and report design.
+  - Yardi legacy identity conflicts can break property-level rollups if not resolved before build.
+  - File-only third-party manager reporting lowers confidence and can miss owner deadlines.
+owners_and_dates:
+  - owner: Controller
+    role: Finance owner
+    due_date: "2026-04-18"
+    item: Provide Intacct field dictionary and reporting-entity mapping guide.
+  - owner: Data lead
+    role: Data contract owner
+    due_date: "2026-04-16"
+    item: Resolve Yardi legacy reporting-entity conflict.
+  - owner: TPM oversight lead
+    role: Owner oversight lead
+    due_date: "2026-04-17"
+    item: Obtain missing delinquency backup and attestation from the third-party manager.
+recommendation: Approve build readiness with conditions only after the Intacct field dictionary, Yardi conflict decision, and TPM backup are closed or explicitly waived.
