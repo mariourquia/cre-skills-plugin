@@ -18,9 +18,8 @@ Conventions:
 ## Current release: v4.2.0 (2026-04-16)
 
 Internal-beta hardening close. `residential_multifamily` at `beta_rc`
-(v0.6.0). See `docs/releases/v4.2.0-release-notes.md` and
-`docs/implementation_hardening_status.md`. Remaining-pass-2 deferred items
-moved into v4.3 below.
+(v0.6.0). See `docs/releases/v4.2.0-release-notes.md`.
+Remaining-pass-2 deferred items moved into v4.3 below.
 
 ---
 

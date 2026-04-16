@@ -89,9 +89,8 @@ This is an intentional exception, not a drift.
 - `conftest.py` explicitly asserts `SUBSYS.name == "residential_multifamily"`.
 - `src/catalog/catalog.yaml` registers the skill with `id: residential_multifamily`.
 - A rename to `residential-multifamily` would require updating the assertion, the
-  catalog, and every doc that names the path. It is tracked as a standalone ticket in
-  `session_state/NEXT_SESSION_PROMPT.md` and is NOT executed during the 2026-04-15
-  refinement pass.
+  catalog, and every doc that names the path. It is tracked as a standalone ticket
+  and is deferred until a dedicated rename pass.
 
 All new skill directories created elsewhere in the repo continue to use `kebab-case`.
 

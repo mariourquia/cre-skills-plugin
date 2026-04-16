@@ -16,7 +16,7 @@
 - `.claude-plugin/marketplace.json` plugin version `4.1.2` → `4.2.0`.
 - `src/catalog/catalog.yaml` plugin_version `4.1.2` → `4.2.0`.
 - README "Release Maturity" row for residential_multifamily downgraded `Experimental` → `Beta RC`; Known Limitations refreshed to reflect period-seal and executive-output-contract coverage.
-- `docs/implementation_hardening_status.md` Obj 5 / 6 / 8 flipped from `deferred pass 2` to `done (pass 2)`; test totals updated (423 → 436 passing).
+- Implementation hardening Obj 5 / 6 / 8 flipped from `deferred pass 2` to `done (pass 2)`; test totals ratcheted up.
 - Installer scripts (`scripts/Install.ps1`, `scripts/install.sh`, `Install.command`) fallback version strings bumped to 4.2.0.
 - Docs (`docs/INSTALL.md`, `docs/install-guide.md`, `docs/install-desktop.md`, `CONTRIBUTING.md`, `PRIVACY.md`) version banners and examples bumped to v4.2.0.
 - `src/hooks/telemetry-init.mjs` default-config version and upgrade-backfill threshold bumped to 4.2.0.
@@ -85,7 +85,7 @@
 
 ### Migration notes (residential_multifamily v0.4.0)
 - Wave 4 is purely additive. No canonical `_core/` object, metric, workflow, or routing axis was modified. Adding the `deal_pipeline` source domain extends the integration layer enum; not a canonical-base change.
-- Several adapters carry incomplete content from this pass (sample data partial, some runbooks pending, reconciliation_rules.md / edge_cases.md / crosswalk_additions.yaml fragments not yet authored for every adapter). Tracked in `_core/stack_wave4/open_questions_and_risks.md` and `session_state/NEXT_SESSION_PROMPT.md`.
+- Several adapters carry incomplete content from this pass (sample data partial, some runbooks pending, reconciliation_rules.md / edge_cases.md / crosswalk_additions.yaml fragments not yet authored for every adapter). Tracked in `_core/stack_wave4/open_questions_and_risks.md`.
 - Surfaces canonical extensions required for full sub-wave 4B operations: (1) `commitment` ontology object (Procore primary entity), (2) proposed new workflows (`pipeline_review`, `pre_close_deal_tracking`, `development_pipeline_tracking`, `acquisition_handoff`, `executive_pipeline_summary`, `investment_committee_prep`, `post_ic_property_setup`, `lease_up_first_period`, `delivery_handoff`).
 - GraySail integration deferred behind `runbooks/graysail_classification_path.md` workflow; sub-wave 4C blocked until completion.
 
@@ -112,7 +112,7 @@
 
 ### Migration notes (residential_multifamily v0.3.0)
 - Integration-layer work extends `reference/connectors/` rather than creating a parallel `integrations/` tree. This preserves the existing BOUNDARIES.md layer contract. No canonical `_core/` object, metric, workflow, or routing axis was redefined.
-- Directory rename `residential_multifamily` -> `residential-multifamily` is still deferred to a dedicated pass; tracked in `session_state/NEXT_SESSION_PROMPT.md`.
+- Directory rename `residential_multifamily` -> `residential-multifamily` is still deferred to a dedicated pass.
 
 ### Added (residential_multifamily v0.2.0 - refinement pass 2026-04-15)
 - `overlays/regulatory/` overlay family — regulated affordable housing split into its own family, separate from conventional market-positioning segments. Starter stubs for 6 programs (lihtc, hud_section_8, hud_202_811, usda_rd, state_program, mixed_income) plus 9 shared compliance surfaces (eligibility, income limits, rent limits, UA, recertification, compliance calendar, agency reporting, file audit, escalation sensitivity). No program-specific schedules populated; architecture only.
@@ -140,7 +140,7 @@
 ### Migration notes (residential_multifamily)
 - Any `reference_manifest.yaml` reading `overlays/segments/affordable/` should update the path to `overlays/regulatory/affordable/`. Old path continues to resolve for one cycle.
 - Any callsite using axis value `segment: affordable` should set `segment` to `middle_market` or `luxury` (conventional positioning) and set `regulatory_program` to the relevant program (or `none`). The router detects the legacy value and prompts.
-- The residential multifamily subsystem directory is NOT renamed to `residential-multifamily` in this pass. Tracked for a dedicated ticket; see `session_state/NEXT_SESSION_PROMPT.md`.
+- The residential multifamily subsystem directory is NOT renamed to `residential-multifamily` in this pass. Tracked for a dedicated ticket.
 - Skill status remains `draft`; no top-level plugin version bump. The `residential_multifamily` catalog entry is re-synchronized to `status: draft` (was `stable` — mismatch with SKILL.md fixed).
 
 ### Added

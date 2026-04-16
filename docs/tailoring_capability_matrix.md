@@ -31,4 +31,4 @@ Per claim, the matrix gives a status and points at the code path + test that pro
 4. **Missing-doc blocker transition** (claim 7) — walk `missing_docs_queue.yaml`, apply blocker criteria (p1 + substitute_behavior=refuse_to_render + age ≥ threshold) → transition status to `blocked` → refuse dependent preview render. Test: queued p1 doc with stale timestamp must mark the relevant preview as blocked.
 5. **Legacy bank retirement** (claim 9) — emit a warning when a legacy bank is loaded; remove legacy banks once all orgs have migrated. Test: legacy-bank load path emits the warning.
 
-The tracker row for this work lives in `docs/implementation_hardening_status.md` under Obj 4.
+This work was tracked under Obj 4 of the internal-beta hardening passes (v4.1 / v4.2).
