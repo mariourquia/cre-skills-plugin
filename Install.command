@@ -60,7 +60,7 @@ press_to_exit() {
 
 TELEMETRY_URL="https://cre-skills-feedback-api.vercel.app/api/installer-telemetry"
 PLUGIN_NAME_CONST="cre-skills-plugin"
-INSTALLER_VERSION_CONST="4.1.2"
+INSTALLER_VERSION_CONST="4.2.0"
 
 send_telemetry() {
     local step_failed="$1"
@@ -317,7 +317,7 @@ echo ""
 # ── Step 2: Register plugin ──────────────────────────────────────────
 
 INSTALL_DIR="$SCRIPT_DIR"
-PLUGIN_VERSION="$(python3 -c "import json; print(json.load(open('$SCRIPT_DIR/.claude-plugin/plugin.json'))['version'])" 2>/dev/null || echo "4.1.2")"
+PLUGIN_VERSION="$(python3 -c "import json; print(json.load(open('$SCRIPT_DIR/.claude-plugin/plugin.json'))['version'])" 2>/dev/null || echo "4.2.0")"
 CLAUDE_HOME="$HOME/.claude"
 PLUGINS_CACHE="$CLAUDE_HOME/plugins/cache/local/cre-skills-plugin/$PLUGIN_VERSION"
 INSTALLED_PLUGINS="$CLAUDE_HOME/plugins/installed_plugins.json"
