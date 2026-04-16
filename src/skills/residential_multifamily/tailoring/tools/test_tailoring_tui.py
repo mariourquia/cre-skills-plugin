@@ -229,6 +229,118 @@ class DiffComputationTests(unittest.TestCase):
         self.assertEqual(diff, [])
 
 
+class ConflictSurfacingTests(unittest.TestCase):
+    """Ensures compute_diff does not silently collapse multi-audience conflicts.
+
+    When two audiences (banks) ask questions whose target_overlay_ref points
+    at the same overlay key, and both are answered, a conflict between their
+    answers MUST be surfaced on the DiffEntry (not hidden behind whichever
+    came first alphabetically).
+    """
+
+    def _make_two_bank_shared_target(self) -> dict[str, ttui.Bank]:
+        key = "overlay.yaml#approval_matrix.threshold_disbursement_1"
+        q_coo = ttui.Question(
+            id="coo_001",
+            bank_slug="coo",
+            question_text="coo threshold?",
+            purpose="",
+            answer_type="numeric",
+            target_overlay_ref=key,
+        )
+        q_cfo = ttui.Question(
+            id="cfo_001",
+            bank_slug="cfo",
+            question_text="cfo threshold?",
+            purpose="",
+            answer_type="numeric",
+            target_overlay_ref=key,
+        )
+        coo = ttui.Bank(
+            bank_slug="coo", audience="coo", version="0.1.0", questions=[q_coo]
+        )
+        cfo = ttui.Bank(
+            bank_slug="cfo", audience="cfo", version="0.1.0", questions=[q_cfo]
+        )
+        return {"coo": coo, "cfo": cfo}
+
+    def _make_session(
+        self, answers: dict[str, dict]
+    ) -> ttui.Session:
+        return ttui.Session(
+            org_id="orgx",
+            session_id="sess1",
+            audiences_scheduled=["coo", "cfo"],
+            answers=answers,
+        )
+
+    def test_agreeing_sources_do_not_mark_conflict(self) -> None:
+        banks = self._make_two_bank_shared_target()
+        # Both COO and CFO answer the same threshold with the same value.
+        session = self._make_session(
+            {
+                "coo_001": {"value": 25000, "skipped": False, "pending_doc": False},
+                "cfo_001": {"value": 25000, "skipped": False, "pending_doc": False},
+            }
+        )
+        proposed = ttui.build_proposed_overlay(session, banks, {})
+        diff = ttui.compute_diff({}, proposed, session, banks)
+
+        self.assertEqual(len(diff), 1)
+        entry = diff[0]
+        self.assertFalse(entry.has_conflict, "agreement must not flag conflict")
+        # Both sources still recorded so preview renderers can show audience agreement.
+        self.assertEqual(len(entry.conflicting_sources), 1)
+        self.assertTrue(
+            entry.conflicting_sources[0]["agrees_with_proposed"],
+            "agreeing source must carry agrees_with_proposed=True",
+        )
+
+    def test_disagreeing_sources_mark_conflict_and_record_other(self) -> None:
+        banks = self._make_two_bank_shared_target()
+        # COO says 25000, CFO says 30000 — these disagree.
+        session = self._make_session(
+            {
+                "coo_001": {"value": 25000, "skipped": False, "pending_doc": False},
+                "cfo_001": {"value": 30000, "skipped": False, "pending_doc": False},
+            }
+        )
+        proposed = ttui.build_proposed_overlay(session, banks, {})
+        diff = ttui.compute_diff({}, proposed, session, banks)
+
+        self.assertEqual(len(diff), 1)
+        entry = diff[0]
+        self.assertTrue(
+            entry.has_conflict,
+            "multi-audience disagreement must surface has_conflict=True",
+        )
+        # Deterministic-first wins: 'cfo_001' < 'coo_001' alphabetically,
+        # so CFO's 30000 is chosen; COO's 25000 is the conflicting source.
+        self.assertEqual(entry.interview_source["bank_slug"], "cfo")
+        self.assertEqual(entry.proposed_value, 30000)
+        self.assertEqual(len(entry.conflicting_sources), 1)
+        other = entry.conflicting_sources[0]
+        self.assertEqual(other["bank_slug"], "coo")
+        self.assertEqual(other["answer_value"], 25000)
+        self.assertFalse(other["agrees_with_proposed"])
+
+    def test_lone_source_has_no_conflict(self) -> None:
+        banks = self._make_two_bank_shared_target()
+        # Only COO answers; CFO question is untouched.
+        session = self._make_session(
+            {
+                "coo_001": {"value": 25000, "skipped": False, "pending_doc": False},
+            }
+        )
+        proposed = ttui.build_proposed_overlay(session, banks, {})
+        diff = ttui.compute_diff({}, proposed, session, banks)
+
+        self.assertEqual(len(diff), 1)
+        entry = diff[0]
+        self.assertFalse(entry.has_conflict)
+        self.assertEqual(entry.conflicting_sources, [])
+
+
 class QueueAppendTests(unittest.TestCase):
     def test_append_missing_doc(self) -> None:
         queue = {"schema_version": "0.1.0", "entries": []}

@@ -25,7 +25,7 @@ references:
   reads:
     - reference/normalized/preventive_maintenance_intervals__middle_market.csv
     - reference/normalized/turn_cost_library__middle_market.csv
-    - reference/normalized/vendor_rate_card__{market}_mf.csv
+    - reference/normalized/vendor_rate_cards__{market}.csv
     - reference/normalized/approval_threshold_defaults.csv
     - reference/normalized/staffing_ratios__middle_market.csv
     - reference/derived/role_kpi_targets.csv

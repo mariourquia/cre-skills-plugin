@@ -50,7 +50,7 @@ reads:
     expected_schema_version: "0.1.0"
     required: false
     fallback_behavior: ask_user
-  - path: reference/derived/watchlist_scoring.yaml
+  - path: reference/normalized/watchlist_scoring.yaml
     category: watchlist_scoring
     expected_schema_version: "0.1.0"
     required: true

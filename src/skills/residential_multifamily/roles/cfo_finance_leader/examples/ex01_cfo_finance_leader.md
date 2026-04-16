@@ -23,7 +23,7 @@
 
 - `reference/normalized/approval_threshold_defaults.csv`
 - `reference/normalized/covenant_calculation_library.csv`
-- `reference/derived/watchlist_scoring.yaml`
+- `reference/normalized/watchlist_scoring.yaml`
 - `reference/derived/budget_attainment_history.csv`
 - `reference/derived/forecast_accuracy_history.csv`
 
