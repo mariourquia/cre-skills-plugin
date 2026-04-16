@@ -456,6 +456,33 @@ class DiffEntry:
     approver_role: str | None
     approval_matrix_row: int | None
     rationale: str
+    # Other (bank_slug, question_id, answer_value) triples that also have a
+    # usable answer but were not chosen as the source of truth for this key.
+    # When any conflicting_sources[*].answer_value differs from
+    # proposed_value, the entry represents a SURFACED CONFLICT; the preview
+    # renderer and tests rely on this field to avoid silent collapse.
+    conflicting_sources: list[dict[str, Any]] = field(default_factory=list)
+    # True iff at least one conflicting source produced an answer that
+    # disagrees with proposed_value after both are normalized for comparison.
+    has_conflict: bool = False
+
+
+def _normalize_for_compare(value: Any) -> Any:
+    """Normalize answer shapes for conflict detection.
+
+    Interview answers can carry either a primitive `value` or a structured
+    `values` mapping. Treat None, missing, or empty-string as "no answer."
+    Everything else is compared by equality after collapsing wrapping
+    dicts that use {"value": X} as the canonical container.
+    """
+    if value is None:
+        return None
+    if isinstance(value, dict):
+        if "value" in value:
+            return value["value"]
+        # structured answer without a plain value; compare the whole dict
+        return {k: v for k, v in value.items() if k not in ("answered_at", "audience")}
+    return value
 
 
 def compute_diff(
@@ -467,8 +494,17 @@ def compute_diff(
 ) -> list[DiffEntry]:
     """
     Walk proposed keys and produce diff entries for added/modified keys.
+
     Each entry carries interview source metadata derived from the session's
     answer that populated that overlay key.
+
+    When multiple audiences (for example COO and CFO) answer questions that
+    target the same overlay key, the deterministic-first source is chosen
+    as the proposed value. Any other source with a usable but DIFFERENT
+    answer is recorded on `conflicting_sources` and `has_conflict=True`.
+    This prevents silent collapse and lets downstream code (preview
+    renderer, approval-floor check, tests) surface the disagreement for
+    human review instead of discarding it.
     """
     approver_rules = approver_rules or default_approver_rules()
     entries: list[DiffEntry] = []
@@ -489,21 +525,40 @@ def compute_diff(
                 )
 
     for key_path, sources in sorted(target_to_questions.items()):
-        # Choose the first source that has a usable answer.
-        chosen: tuple[str, str] | None = None
+        # Collect every candidate source with a usable answer.
+        usable: list[tuple[str, str, Any]] = []
         for candidate in sorted(sources):
             bank_slug, question_id = candidate
             answer = session.answers.get(question_id)
             if answer and not answer.get("skipped") and not answer.get("pending_doc"):
-                chosen = candidate
-                break
-        if chosen is None:
+                usable.append((bank_slug, question_id, answer))
+        if not usable:
             continue
-        bank_slug, question_id = chosen
+        # Deterministic-first chosen source; others become conflict candidates.
+        chosen_bank, chosen_qid, chosen_answer = usable[0]
         proposed_value = _get_by_dotted_path(proposed, key_path)
         prior_value = _get_by_dotted_path(current, key_path)
         if proposed_value == prior_value:
             continue
+
+        conflicting_sources: list[dict[str, Any]] = []
+        has_conflict = False
+        chosen_norm = _normalize_for_compare(chosen_answer)
+        for other_bank, other_qid, other_answer in usable[1:]:
+            other_norm = _normalize_for_compare(other_answer)
+            # Record every non-chosen usable source on the diff so the
+            # preview renderer can reproduce the full audience view.
+            conflicting_sources.append(
+                {
+                    "bank_slug": other_bank,
+                    "question_id": other_qid,
+                    "answer_value": other_norm,
+                    "agrees_with_proposed": (other_norm == chosen_norm),
+                }
+            )
+            if other_norm != chosen_norm:
+                has_conflict = True
+
         rule = _match_approver_rule(key_path, approver_rules)
         entries.append(
             DiffEntry(
@@ -511,16 +566,18 @@ def compute_diff(
                 prior_value=prior_value,
                 proposed_value=proposed_value,
                 interview_source={
-                    "bank_slug": bank_slug,
-                    "question_id": question_id,
+                    "bank_slug": chosen_bank,
+                    "question_id": chosen_qid,
                 },
                 approver_role=rule["approver_role"] if rule else None,
                 approval_matrix_row=rule["approval_matrix_row"] if rule else None,
                 rationale=rule["rationale_template"].format(
-                    bank=bank_slug, qid=question_id
+                    bank=chosen_bank, qid=chosen_qid
                 ) if rule else (
-                    f"From {bank_slug} interview question {question_id}."
+                    f"From {chosen_bank} interview question {chosen_qid}."
                 ),
+                conflicting_sources=conflicting_sources,
+                has_conflict=has_conflict,
             )
         )
     return entries

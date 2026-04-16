@@ -27,7 +27,7 @@
 - `reference/normalized/cap_rate_benchmarks__{market}_mf.csv`
 - `reference/normalized/debt_rate_reference__{product}.csv`
 - `reference/derived/same_store_set.csv`
-- `reference/derived/watchlist_scoring.yaml`
+- `reference/normalized/watchlist_scoring.yaml`
 - `reference/derived/portfolio_concentration_targets.csv`
 - `reference/derived/role_kpi_targets.csv`
 

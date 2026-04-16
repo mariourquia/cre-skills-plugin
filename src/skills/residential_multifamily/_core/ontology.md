@@ -574,6 +574,104 @@ Alias for a canonical metric. See `_core/metrics.md`. Every KPI displayed in a t
 
 ---
 
+## Deal / Asset / DealMilestone / DealKeyDate
+
+**Context.** These four objects appear in `reference/connectors/_core/workflow_activation_map.yaml` as `required_normalized_objects` for pipeline workflows (`pipeline_review`, `pre_close_deal_tracking`, `investment_committee_prep`, `post_ic_property_setup`, `acquisition_handoff`, `development_pipeline_tracking`, `executive_pipeline_summary`). They live in the **deal-pipeline domain**, which is upstream of — and intentionally separate from — the operating ontology (`Property`, `Unit`, `Lease`, etc.) that dominates the rest of this file.
+
+**Source of record.** The `reference/connectors/adapters/dealpath_deal_pipeline/` adapter is the canonical contract. Field-level schemas live in `reference/connectors/deal_pipeline/schema.yaml`. This section documents the four objects at the ontology level so pipeline workflow manifests are not referencing undefined types.
+
+### Deal
+
+**Description.** A potential acquisition, disposition, or recap transaction moving through a pipeline stage.
+
+**Keys.** `deal_id` (string, adapter-scoped; resolved to a canonical `deal_id` via `reference/connectors/master_data/asset_crosswalk.yaml` once the deal reaches IC).
+
+**Key fields.**
+
+| Field | Type | Req | Notes |
+|---|---|---|---|
+| `deal_id` | string | required | canonical ID. |
+| `deal_name` | string | required | operating label. |
+| `deal_type` | enum | required | `acquisition, disposition, recap, refinance, joint_venture`. |
+| `stage` | enum | required | `sourcing, initial_screen, loi_in, under_contract, ic_review, ic_approved, closing, closed, dead`. |
+| `target_close_date` | date | optional | used by `pre_close_deal_tracking`. |
+| `market` | string | required | foreign key to `reference/normalized/markets/`. |
+| `asset_id` | string | optional | pointer to `Asset` once identified (may be null in `sourcing`). |
+| `owner_rep` | string | required | internal deal lead; routes escalations. |
+| `source_of_truth_contract` | string | required | which adapter owns the deal record (typically `dealpath_deal_pipeline`). |
+
+**Parents.** None. A Deal is a root object in the pipeline domain.
+
+**Children.** `DealMilestone[]`, `DealKeyDate[]`.
+
+**Null handling.** A null `asset_id` is expected in pre-IC stages. A null `target_close_date` blocks `pre_close_deal_tracking` from scheduling closing-checklist countdown.
+
+### Asset
+
+**Description.** The underlying asset a deal touches. For a single-property acquisition this is 1:1 with `Property`. For a portfolio deal or a ground-up development Asset is a container that resolves to zero or more `Property` records over time.
+
+**Keys.** `asset_id` (string, owner-scoped; globally unique within an org overlay).
+
+**Key fields.**
+
+| Field | Type | Req | Notes |
+|---|---|---|---|
+| `asset_id` | string | required | canonical ID. |
+| `asset_name` | string | required | operating label. |
+| `asset_kind` | enum | required | `single_property, portfolio, development_site, recap_target`. |
+| `property_ids` | string[] | optional | resolved once the Deal closes and Property records are created. Null in pre-close Deals. |
+| `market` | string | required | market scope. |
+| `source_of_truth_contract` | string | required | adapter owning the Asset record. |
+
+**Parents.** None.
+
+**Children.** `Property[]` (populated at or after close).
+
+**Null handling.** `property_ids` is null until the crosswalk runs (typically at `ic_approved` or at `closed` for dispositions). Workflows that read `property_ids` must handle null as "not yet resolved."
+
+### DealMilestone
+
+**Description.** A discrete deal-pipeline event with an explicit status transition — e.g. first LOI received, exclusivity granted, hard money deposited, IC-approved, closed.
+
+**Keys.** `deal_milestone_id` (string, scoped to the owning `deal_id`).
+
+**Key fields.**
+
+| Field | Type | Req | Notes |
+|---|---|---|---|
+| `deal_milestone_id` | string | required | canonical ID. |
+| `deal_id` | string | required | parent Deal. |
+| `milestone_type` | enum | required | `loi_first, loi_accepted, psa_executed, hard_money_deposited, ic_review, ic_approved, ic_conditioned, ic_declined, closing_scheduled, closed, dead`. |
+| `occurred_at` | datetime | required | event timestamp. |
+| `notes` | string | optional | |
+
+**Parents.** `Deal`.
+
+**Children.** None.
+
+### DealKeyDate
+
+**Description.** A forward-looking deadline tracked for a deal — typically contract or regulatory (inspection period end, financing contingency end, target close).
+
+**Keys.** `deal_key_date_id` (string, scoped to the owning `deal_id`).
+
+**Key fields.**
+
+| Field | Type | Req | Notes |
+|---|---|---|---|
+| `deal_key_date_id` | string | required | canonical ID. |
+| `deal_id` | string | required | parent Deal. |
+| `date_kind` | enum | required | `inspection_period_end, financing_contingency_end, psa_signed, hard_money_release, target_close, go_hard_date, earn_out_trigger, other`. |
+| `due_date` | date | required | |
+| `status` | enum | required | `pending, met, missed, waived, rescheduled`. |
+| `owner` | string | required | internal responsible party. |
+
+**Parents.** `Deal`.
+
+**Children.** None.
+
+---
+
 ## OrgOverlay / PolicyOverlay / MarketOverlay
 
 **Description.** Structured overrides to canonical thresholds, defaults, and references.

@@ -52,8 +52,13 @@ reads:
     category: market_rent_benchmark
     expected_schema_version: "0.1.0"
     required: true
-    fallback_behavior: use_prior_period
-    notes: rent comp evidence set; freshness checked against overlay policy
+    fallback_behavior: refuse
+    notes: |
+      rent comp evidence set; freshness checked against overlay policy. IC memos
+      produce capital-commitment decisions; when no current rent comp evidence
+      exists for the subject market the workflow MUST refuse. A prior-period
+      roll-forward would silently present stale comp evidence as live, which is
+      forbidden for final-marked workflows (_core/final_marked_workflows.yaml).
   - path: reference/normalized/sale_comp_evidence__{market}_mf.csv
     category: market_rent_benchmark
     expected_schema_version: "0.1.0"

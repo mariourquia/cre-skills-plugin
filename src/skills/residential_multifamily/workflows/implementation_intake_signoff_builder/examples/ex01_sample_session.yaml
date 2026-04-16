@@ -1,0 +1,83 @@
+schema_version: "0.1.0"
+engagement_id: beacon_southeast_onboarding
+session_id: 20260415_beacon_impl_01
+org_id: beacon_residential
+selected_modes:
+  - executive_summary_mode
+  - source_by_source_onboarding_mode
+  - field_level_export_mode
+  - crosswalk_and_mapping_mode
+  - reporting_calendar_mode
+  - approvals_and_controls_mode
+  - missing_docs_chase_mode
+  - final_signoff_packaging_mode
+answers:
+  exec_001:
+    value: |
+      Beacon Residential is onboarding AppFolio, Sage Intacct, and Procore for a
+      14-property Southeast portfolio. The current objective is to confirm source-of-record,
+      export evidence, reporting cadence, and approval ownership before integration build.
+    evidence_status: confirmed
+    evidence_detail: verbal
+  exec_002:
+    value:
+      - source_id: appfolio_southeast
+        system_name: AppFolio Property Manager
+        business_purpose: Property operations, rent roll, leasing, work orders, delinquency
+        in_scope_modules: [accounting, leasing, maintenance, resident_portal]
+        lifecycle_status: active
+        source_role: system_of_record
+        owner: regional_ops
+        admin_contact: appfolio_admin@beacon.example
+        export_api_availability: scheduled_export
+        export_delivery_methods: [csv_export, sftp_drop]
+        instance_count: 1
+        environment_details: Production instance covering all Southeast assets
+        portfolio_coverage: 14 Southeast multifamily properties
+        module_variance_notes: Georgia portfolio uses applicant screening add-on; Florida does not
+        source_caveats: Some legal notices remain free text
+        credential_pattern: sftp_key_placeholder
+        secrets_owner: IT systems
+        approval_requirements: [IT access approval, regional ops signoff]
+        sample_files_available: true
+        sandbox_available: false
+        refresh_cadence: daily
+        latency_expectation: Next-morning export availability
+        evidence_status: confirmed
+        evidence_detail: file
+        blocker_notes: ""
+        notes: Monthly delinquency pack is manual today
+        confidence: high
+      - source_id: sage_intacct_corp
+        system_name: Sage Intacct
+        business_purpose: General ledger, budget, forecast, entity reporting
+        in_scope_modules: [gl, ap, dimensions, budgeting]
+        lifecycle_status: active
+        source_role: system_of_record
+        owner: finance_systems
+        admin_contact: intacct_admin@beacon.example
+        export_api_availability: api
+        export_delivery_methods: [api]
+        instance_count: 1
+        environment_details: Corporate production tenant
+        portfolio_coverage: Entire corporate and property portfolio
+        module_variance_notes: Construction projects tracked separately in Procore
+        source_caveats: Forecast export naming still being standardized
+        credential_pattern: oauth_placeholder
+        secrets_owner: finance_systems
+        approval_requirements: [finance systems approval]
+        sample_files_available: true
+        sandbox_available: true
+        refresh_cadence: daily
+        latency_expectation: Four-hour batch lag for budgets and forecasts
+        evidence_status: confirmed
+        evidence_detail: screenshot
+        blocker_notes: Need final API scope approval for project dimension endpoint
+        notes: Budget template changes each forecast cycle
+        confidence: medium
+    evidence_status: confirmed
+    evidence_detail: file
+  sign_002:
+    value: approved with conditions
+    evidence_status: confirmed
+    evidence_detail: verbal

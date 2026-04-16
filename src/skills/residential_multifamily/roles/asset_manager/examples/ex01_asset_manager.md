@@ -34,7 +34,7 @@
 - `reference/normalized/market_rents__charlotte_mf.csv`
 - `reference/normalized/cap_rate_benchmarks__charlotte_mf.csv`
 - `reference/normalized/operating_expense_benchmarks__charlotte_mf.csv`
-- `reference/derived/watchlist_scoring.yaml`
+- `reference/normalized/watchlist_scoring.yaml`
 - `reference/derived/role_kpi_targets.csv`
 - `reference/derived/same_store_set.csv`
 - `reference/normalized/approval_threshold_defaults.csv`

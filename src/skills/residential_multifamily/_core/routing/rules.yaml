@@ -42,6 +42,7 @@ rules:
       workflow_hint:
         - workflows/third_party_manager_scorecard_review
         - workflows/owner_approval_routing
+        - workflows/implementation_intake_signoff_builder
 
   - id: r004_development_manager
     conditions:
@@ -64,7 +65,7 @@ rules:
         - workflows/bid_leveling_procurement_review
         - workflows/change_order_review
         - workflows/draw_package_review
-        - workflows/construction_meeting_prep
+        - workflows/construction_meeting_prep_and_action_tracking
 
   - id: r006_estimator_preconstruction
     conditions:
@@ -85,6 +86,7 @@ rules:
         - workflows/reforecast
         - workflows/monthly_property_operating_review
         - workflows/quarterly_portfolio_review
+        - workflows/implementation_intake_signoff_builder
 
   - id: r008_executive
     conditions:
@@ -94,6 +96,7 @@ rules:
       workflow_hint:
         - workflows/executive_operating_summary_generation
         - workflows/quarterly_portfolio_review
+        - workflows/implementation_intake_signoff_builder
 
   - id: r009_direct_workflow
     conditions:

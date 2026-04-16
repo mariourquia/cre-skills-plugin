@@ -22,7 +22,7 @@
 ## Expected references
 
 - `reference/derived/same_store_set.csv`
-- `reference/derived/watchlist_scoring.yaml`
+- `reference/normalized/watchlist_scoring.yaml`
 - `reference/derived/role_kpi_targets.csv`
 - `reference/normalized/approval_threshold_defaults.csv`
 

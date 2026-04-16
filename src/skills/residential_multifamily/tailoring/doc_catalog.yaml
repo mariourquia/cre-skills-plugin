@@ -194,3 +194,161 @@ documents:
       - overlay.yaml#regional.playbook_ref
     notes: |
       Links role packs to the operator's existing SOPs rather than canonical starter templates.
+
+  # -----------------------------------------------------------------
+  # Docs referenced by the 8-audience question banks (compliance_risk,
+  # executive, finance_reporting, site_ops). Added to close the
+  # missing_doc_triggers -> catalog resolution test.
+  # -----------------------------------------------------------------
+
+  - doc_slug: regulatory_program_participation_list
+    doc_title: List of regulatory programs the portfolio participates in (LIHTC, HUD, state programs, mixed-income)
+    typical_format: xlsx
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#regulatory.programs_participated
+    notes: |
+      Gates whether the regulatory overlay family loads. An empty list keeps
+      the regulatory overlay inactive by default.
+
+  - doc_slug: fair_housing_training_policy
+    doc_title: Fair housing and anti-discrimination training policy
+    typical_format: pdf
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#compliance.fair_housing_training_cadence
+    notes: |
+      Documents site-staff training cadence and records where attestations live.
+
+  - doc_slug: screening_policy_document
+    doc_title: Applicant screening policy (criteria, adverse-action procedures)
+    typical_format: pdf
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#compliance.screening_policy_ref
+    notes: |
+      Used when applicant-screening overrides differ from the canonical
+      middle-market starter.
+
+  - doc_slug: vawa_policy
+    doc_title: Violence Against Women Act (VAWA) accommodation and confidentiality policy
+    typical_format: pdf
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#compliance.vawa_policy_ref
+    notes: |
+      Governs emergency transfers and confidentiality protections; referenced by
+      the compliance_risk audience.
+
+  - doc_slug: emergency_response_playbook
+    doc_title: Site emergency response playbook (fire, storm, active threat, loss of utilities)
+    typical_format: pdf
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#site_ops.emergency_response_playbook_ref
+    notes: |
+      Referenced by site_ops and compliance_risk; informs crisis-response
+      drafting.
+
+  - doc_slug: portfolio_segmentation_policy
+    doc_title: Portfolio segmentation policy (stabilized vs. value-add vs. development cohorts)
+    typical_format: pdf
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#executive.portfolio_segmentation_ref
+    notes: |
+      Informs how the executive audience groups properties for reporting.
+
+  - doc_slug: approval_matrix_policy
+    doc_title: Executive approval-matrix policy (narrative, as distinct from the threshold workbook)
+    typical_format: pdf
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#approval_matrix.policy_narrative_ref
+    notes: |
+      Narrative complement to the `approval_matrix` workbook. Executive-level
+      rationale for thresholds and escalations.
+
+  - doc_slug: risk_tolerance_policy
+    doc_title: Risk tolerance and escalation policy
+    typical_format: pdf
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#executive.risk_tolerance_ref
+    notes: |
+      Guides escalation flags on watchlist score and variance commentary.
+
+  - doc_slug: investor_reporting_cadence
+    doc_title: Investor / LP reporting cadence and deliverables list
+    typical_format: pdf
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#reporting.investor_cadence_ref
+    notes: |
+      Referenced by executive and finance_reporting audiences.
+
+  - doc_slug: chart_of_accounts
+    doc_title: Chart of accounts (general ledger structure)
+    typical_format: xlsx
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#finance.coa_ref
+    notes: |
+      Canonical chart of accounts. Used by finance_reporting audience and the
+      budget/reforecast workflows. Distinct from `chart_of_accounts_mapping`,
+      which records the crosswalk from the operator's COA to the
+      subsystem-canonical COA.
+
+  - doc_slug: variance_policy
+    doc_title: Variance explanation policy (materiality thresholds, required-narrative triggers)
+    typical_format: pdf
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#finance.variance_policy_ref
+    notes: |
+      Drives the materiality bands used by variance narrative generation.
+
+  - doc_slug: lender_reporting_cadence
+    doc_title: Lender reporting cadence (draws, covenant certificates, property performance)
+    typical_format: pdf
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#reporting.lender_cadence_ref
+    notes: |
+      Drives the lender deliverable schedule. Referenced by finance_reporting.
+
+  - doc_slug: staffing_schedule_template
+    doc_title: Site staffing schedule template (roles, coverage, PTO policy)
+    typical_format: xlsx
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#site_ops.staffing_schedule_ref
+    notes: |
+      Referenced by site_ops audience; governs coverage expectations.
+
+  - doc_slug: work_order_sop
+    doc_title: Work order SOP (intake, triage, dispatch, closeout)
+    typical_format: pdf
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#site_ops.work_order_sop_ref
+    notes: |
+      Referenced by site_ops audience; anchors work order triage workflow.
+
+  - doc_slug: unit_turn_sop
+    doc_title: Unit turn / make-ready SOP (timelines, cost allocation, QC)
+    typical_format: pdf
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#site_ops.unit_turn_sop_ref
+    notes: |
+      Referenced by site_ops audience; anchors unit turn workflow.
+
+  - doc_slug: site_operating_manual
+    doc_title: Site operating manual (opening/closing procedures, emergency contacts, vendor contacts)
+    typical_format: pdf
+    ingest_handler: manual
+    overlay_keys_filled:
+      - overlay.yaml#site_ops.site_operating_manual_ref
+    notes: |
+      Site-level SOP binder referenced by site_ops audience.

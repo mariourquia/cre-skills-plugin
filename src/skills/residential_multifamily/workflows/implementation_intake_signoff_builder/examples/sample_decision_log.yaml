@@ -1,0 +1,31 @@
+schema_version: "0.1.0"
+decisions:
+  - decision_id: dec_001
+    topic: Property and reporting-entity master
+    decision: AppFolio property code will be the preferred match key for operating assets, with Intacct reporting entity as the fallback for finance-only records.
+    decision_owner: CFO
+    date: "2026-04-12"
+    evidence_basis: Reviewed AppFolio unit export, Intacct entity list, and owner reporting packet.
+    impacted_sources:
+      - appfolio
+      - sage_intacct
+      - yardi
+    impacted_workflows:
+      - implementation_intake_signoff_builder
+      - monthly_property_operating_review
+    downstream_risk: Legacy Yardi records still need a manual bridge until the sunset list is confirmed.
+    follow_up_required: Yes. Data lead to issue the bridge list and sunset tracker.
+  - decision_id: dec_002
+    topic: Third-party manager evidence posture
+    decision: File-only third-party manager reporting is acceptable for phase-one intake, but sign-off cannot move to approved status until delinquency backup and field semantics are attached.
+    decision_owner: COO
+    date: "2026-04-13"
+    evidence_basis: Reviewed TPM monthly owner pack and current PMA reporting appendix.
+    impacted_sources:
+      - third_party_manager_submission
+      - shared_drive
+    impacted_workflows:
+      - implementation_intake_signoff_builder
+      - third_party_manager_scorecard_review
+    downstream_risk: Confidence remains reduced for any metric that relies on the missing backup.
+    follow_up_required: Yes. TPM oversight lead to obtain the missing backup and attestation.

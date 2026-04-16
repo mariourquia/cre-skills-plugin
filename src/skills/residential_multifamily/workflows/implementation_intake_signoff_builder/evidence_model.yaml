@@ -1,0 +1,100 @@
+version: "0.1.0"
+model_slug: implementation_intake_evidence
+
+answer_status:
+  allowed:
+    - confirmed_by_artifact
+    - confirmed_by_screenshot
+    - confirmed_by_export
+    - confirmed_by_document
+    - confirmed_verbal
+    - inferred
+    - assumed
+    - missing
+    - blocked
+    - conflicting
+  confirmation_rule: >
+    An answer may move to any confirmed status only when the supporting evidence item is
+    explicitly referenced and its review status is at least reviewed_sufficient or the
+    sponsor accepts confirmed_verbal explicitly.
+  downgrade_rule: >
+    Third-party-manager-submitted files, stale exports, and incomplete evidence lower
+    confidence even when the answer is otherwise specific.
+
+validation_status:
+  allowed:
+    - received_not_reviewed
+    - reviewed_incomplete
+    - reviewed_sufficient
+    - conflicting_with_prior
+
+coverage_level:
+  allowed:
+    - single_property
+    - multi_property_partial
+    - portfolio_full
+    - system_partial
+    - system_full
+
+evidence_type:
+  allowed:
+    - export_sample
+    - screenshot
+    - report_pack
+    - spreadsheet_template
+    - field_dictionary
+    - org_document
+    - approval_document
+    - calendar_document
+    - mapping_file
+    - verbally_confirmed_note
+
+confidence_weighting:
+  confirmed_by_artifact: 1.00
+  confirmed_by_export: 0.95
+  confirmed_by_document: 0.95
+  confirmed_by_screenshot: 0.90
+  confirmed_verbal: 0.70
+  inferred: 0.50
+  assumed: 0.30
+  missing: 0.00
+  blocked: 0.00
+  conflicting: 0.10
+  third_party_manager_penalty: 0.15
+  reviewed_incomplete_penalty: 0.15
+  received_not_reviewed_penalty: 0.10
+
+evidence_item:
+  required_fields:
+    - evidence_id
+    - evidence_type
+    - file_name_or_reference
+    - source_system
+    - object_family
+    - date_received
+    - received_from
+    - validation_status
+    - coverage_level
+    - related_questions
+    - related_outputs
+    - notes
+
+evidence_rules:
+  - rule_id: no_silent_assumption_upgrade
+    rule: >
+      `assumed`, `inferred`, `missing`, `blocked`, and `conflicting` answers may not be
+      changed to a confirmed status unless a related evidence item is attached explicitly.
+  - rule_id: no_secret_storage
+    rule: >
+      Evidence may reference the existence of credentials, approval emails, or ticket ids,
+      but it may not store actual passwords, tokens, API keys, bearer strings, or private
+      secrets.
+  - rule_id: conflicting_evidence_requires_exception_mode
+    rule: >
+      When a reviewed evidence item conflicts with a previously reviewed item for the same
+      subject, the answer status becomes conflicting and the workflow enters exception
+      resolution.
+  - rule_id: tpm_evidence_is_valid_but_lower_confidence
+    rule: >
+      A third-party-manager-submitted report pack can support intake, but it does not
+      receive the same confidence as a source-native system export without corroboration.

@@ -26,7 +26,7 @@ references:
     - reference/normalized/approval_threshold_defaults.csv
     - reference/normalized/ops_sop_library__middle_market.csv
     - reference/derived/same_store_set.csv
-    - reference/derived/watchlist_scoring.yaml
+    - reference/normalized/watchlist_scoring.yaml
     - reference/derived/role_kpi_targets.csv
     - reference/derived/portfolio_concentration_targets.csv
   writes: []

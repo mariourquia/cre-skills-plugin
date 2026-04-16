@@ -1,0 +1,108 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: ImplementationIntakeSessionState
+type: object
+required:
+  - schema_version
+  - engagement_id
+  - session_id
+  - version
+  - status
+  - current_mode
+  - progress
+  - context
+  - answers
+  - evidence_items
+  - blockers
+  - assumptions
+  - decisions_requested
+  - approvals_requested
+  - top_risks
+  - owners_and_dates
+  - recommendation
+properties:
+  schema_version:
+    type: string
+  engagement_id:
+    type: string
+  session_id:
+    type: string
+  version:
+    type: string
+  status:
+    type: string
+  current_mode:
+    type: string
+  progress:
+    type: object
+    required: [completion_percent, current_section, answered_questions, total_questions]
+    properties:
+      completion_percent:
+        type: integer
+      current_section:
+        type: string
+      answered_questions:
+        type: integer
+      total_questions:
+        type: integer
+    additionalProperties: false
+  context:
+    type: object
+    required: [role, management_mode, systems_in_scope, environments_in_scope]
+    properties:
+      role:
+        type: string
+      management_mode:
+        type: string
+      systems_in_scope:
+        type: array
+        items:
+          type: string
+      environments_in_scope:
+        type: array
+        items:
+          type: string
+    additionalProperties: false
+  answers:
+    type: object
+  evidence_items:
+    type: array
+    items:
+      type: object
+  blockers:
+    type: array
+    items:
+      type: object
+  assumptions:
+    type: array
+    items:
+      type: object
+  decisions_requested:
+    type: array
+    items:
+      type: string
+  approvals_requested:
+    type: array
+    items:
+      type: string
+  top_risks:
+    type: array
+    items:
+      type: string
+  owners_and_dates:
+    type: array
+    items:
+      type: object
+      required: [owner, role, due_date, item]
+      properties:
+        owner:
+          type: string
+        role:
+          type: string
+        due_date:
+          type: string
+        item:
+          type: string
+      additionalProperties: false
+  recommendation:
+    type: string
+additionalProperties: false

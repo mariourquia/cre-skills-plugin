@@ -40,6 +40,28 @@ properties:
       - other
   subject_object_id:
     type: string
+  subject_object_version_hash:
+    type: string
+    description: |
+      Content hash of the subject object AT THE TIME THE APPROVAL WAS REQUESTED.
+      This binds the approval to a specific version of the artifact. When a
+      gated action is executed, the runtime MUST recompute the hash of the
+      current artifact and refuse to treat the approval as valid if the hash
+      has changed. Prevents silent reuse of an approval against a later,
+      mutated version of the same subject_object_id.
+
+      Required for any approval_request whose status is `approved` or
+      `approved_with_conditions`. MAY be absent while status is `pending` if
+      the request is still being drafted, but MUST be populated before any
+      approver decision is recorded.
+    pattern: "^[a-f0-9]{64}$"
+  subject_object_version_hash_algo:
+    type: string
+    enum: [sha256]
+    description: |
+      Hash algorithm used for subject_object_version_hash. Currently only
+      sha256 is supported. Explicit field so future migrations stay
+      self-describing.
   action_proposed:
     type: string
   rationale:
