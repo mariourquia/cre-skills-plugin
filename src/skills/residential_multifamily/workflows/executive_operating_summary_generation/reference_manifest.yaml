@@ -36,3 +36,15 @@ reads:
     required: true
     fallback_behavior: refuse
 writes: []
+
+# Period-seal gating: see _core/final_marked_workflows.yaml#period_grade_workflows
+# and _core/schemas/period_seal.yaml. Test: test_period_seal_gating.
+required_period_seal:
+  minimum_close_status: hard_close
+  requires_close_lock_timestamp: true
+  as_of_required: true
+  rationale: |
+    Consumed by board, LP, and lender audiences. Running this against
+    soft-closed books risks publishing numbers that get materially
+    restated after close entries post — directly contradicting the
+    reconcilability expectation of the audience.
