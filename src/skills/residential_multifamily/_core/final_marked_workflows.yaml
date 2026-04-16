@@ -1,0 +1,106 @@
+# Final-marked workflows
+#
+# A "final-marked" workflow produces a decision-grade deliverable whose
+# audience extends beyond internal operators — executive/board, investment
+# committee, lenders, or LPs. Final outputs MUST fail closed when required
+# reference inputs are absent. They MUST NOT silently proceed with illustrative,
+# starter, or sample data dressed as operating fact.
+#
+# Enforcement: test_final_marked_workflow_discipline (in tests/) asserts that
+# every final-marked workflow's reference_manifest.yaml declares
+# `fallback_behavior: refuse` on every `required: true` read. No
+# `proceed_with_default`, no `use_portfolio_average`, no `use_prior_period` on
+# required reads for final-marked workflows.
+#
+# Adding a workflow here is a governance action. Removing one is a downgrade
+# that must be justified in the change log.
+
+schema_version: "0.1.0"
+status: approved
+
+# ---------------------------------------------------------------------------
+# Classification rubric
+# ---------------------------------------------------------------------------
+# final-marked if the primary consumer of the output is one of:
+#   - executive_committee, C-suite, or board
+#   - investment_committee (IC memo)
+#   - lender (bank report, covenant certificate)
+#   - limited_partner (LP quarterly letter, LP pitch)
+# Not final-marked (operating or tactical) if the primary consumer is:
+#   - an internal operator (PM, RM, AM) for day-to-day decisions
+#   - an engagement-setup user (tailoring, implementation onboarding)
+#   - a research/ingest step that feeds other workflows
+
+final_marked_workflows:
+
+  executive_operating_summary_generation:
+    audience: [executive_committee, board, investor, lender]
+    downgrade_forbidden_reason: |
+      Board and lender reports produced from this workflow are used in
+      investor capital calls, covenant certificates, and executive committee
+      decisions. Proceeding with starter or illustrative data in a final
+      output would misrepresent operating reality to external stakeholders.
+
+  investment_committee_prep:
+    audience: [investment_committee]
+    downgrade_forbidden_reason: |
+      IC memos drive capital commitment decisions. Using market rent comp
+      placeholders or missing rent-roll data in an IC output would mislead
+      committee members about the deal's underwriting premise.
+
+  quarterly_portfolio_review:
+    audience: [executive_committee, limited_partner, board]
+    downgrade_forbidden_reason: |
+      Quarterly portfolio memos are frequently reproduced verbatim in LP
+      letters and board packets. Proceeding with an unresolved same-store
+      cohort or watchlist definition would produce an artifact whose
+      numbers cannot be reconciled by the audience.
+
+  executive_pipeline_summary:
+    audience: [executive_committee, investment_committee]
+    downgrade_forbidden_reason: |
+      Pipeline summaries feed executive and IC capital-allocation discussion.
+      Missing pipeline-register inputs or unresolved deal ontology would
+      cause the summary to under- or over-represent committed capital.
+
+# ---------------------------------------------------------------------------
+# Operating-grade workflows (NOT final-marked)
+# ---------------------------------------------------------------------------
+# These produce internal operating artifacts. Fail-closed behavior is still
+# preferred but not strictly required on every input. Informational only.
+
+operating_grade_workflows:
+  - monthly_property_operating_review
+  - monthly_asset_management_review
+  - third_party_manager_scorecard_review
+  - owner_approval_routing
+  - lead_to_lease_funnel_review
+  - renewal_retention
+  - move_in_administration
+  - move_out_administration
+  - delinquency_collections
+  - capital_project_intake_and_prioritization
+  - capex_estimate_generation
+  - schedule_risk_review
+  - cost_to_complete_review
+  - change_order_review
+  - draw_package_review
+  - bid_leveling_procurement_review
+  - construction_meeting_prep_and_action_tracking
+  - vendor_dispatch_sla_review
+  - unit_turn_make_ready
+  - work_order_triage
+  - budget_build
+  - reforecast
+  - market_rent_refresh
+  - rent_comp_intake
+  - pipeline_review
+  - pre_close_deal_tracking
+  - acquisition_handoff
+  - post_ic_property_setup
+  - delivery_handoff
+  - development_pipeline_tracking
+  - lease_up_first_period
+
+setup_grade_workflows:
+  - implementation_intake_signoff_builder
