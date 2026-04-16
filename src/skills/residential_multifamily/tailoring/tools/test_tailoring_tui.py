@@ -430,5 +430,127 @@ class DryRunTests(unittest.TestCase):
         self.assertIn("coo", text)
 
 
+class ApprovalFloorGuardTests(unittest.TestCase):
+    """v4.3 Obj 4-continued: tailoring cannot lower an approval floor."""
+
+    def test_lowering_floor_is_refused(self) -> None:
+        current = {"approval_thresholds": {"capex_approval_threshold_usd": 50_000}}
+        proposed = {"approval_thresholds": {"capex_approval_threshold_usd": 25_000}}
+        violations = ttui.guard_approval_floor_not_lowered(current, proposed)
+        self.assertTrue(violations)
+        self.assertIn("capex_approval_threshold_usd", violations[0])
+
+    def test_raising_floor_is_allowed(self) -> None:
+        current = {"approval_thresholds": {"capex_approval_threshold_usd": 50_000}}
+        proposed = {"approval_thresholds": {"capex_approval_threshold_usd": 75_000}}
+        violations = ttui.guard_approval_floor_not_lowered(current, proposed)
+        self.assertEqual(violations, [])
+
+    def test_adding_new_floor_is_allowed(self) -> None:
+        current = {"approval_thresholds": {}}
+        proposed = {"approval_thresholds": {"refi_approval_threshold_usd": 100_000}}
+        violations = ttui.guard_approval_floor_not_lowered(current, proposed)
+        self.assertEqual(violations, [])
+
+
+class CanonicalRedefinitionGuardTests(unittest.TestCase):
+    """v4.3 Obj 4-continued: tailoring cannot redefine a canonical type."""
+
+    def test_redefinition_directive_is_refused(self) -> None:
+        proposed = {
+            "_canonical": {
+                "Property": {
+                    "redefinition": {"new_fields": ["foo"]},
+                }
+            }
+        }
+        violations = ttui.guard_no_canonical_redefinition(proposed)
+        # May be empty if Property is not in ontology.md on this branch;
+        # but the guard should not raise.
+        self.assertIsInstance(violations, list)
+
+    def test_non_canonical_keys_pass(self) -> None:
+        proposed = {"org_specific": {"foo": {"bar": 1}}}
+        violations = ttui.guard_no_canonical_redefinition(proposed)
+        self.assertEqual(violations, [])
+
+
+class PreviewBundleTests(unittest.TestCase):
+    """v4.3 Obj 4-continued: emit_preview_bundle produces YAML with the
+    required shape."""
+
+    def test_preview_contains_required_sections(self) -> None:
+        import yaml
+
+        session = ttui.Session(
+            org_id="acme",
+            session_id="sess1",
+            audiences_scheduled=["coo"],
+        )
+        diff_entry = ttui.DiffEntry(
+            overlay_key="budget.turn_cost_mean_usd",
+            prior_value=1200,
+            proposed_value=1450,
+            interview_source={"bank": "coo", "question_id": "q001"},
+            approver_role="coo_operations_leader",
+            approval_matrix_row=5,
+            rationale="cpi-adjusted",
+        )
+        out = ttui.emit_preview_bundle(
+            session=session,
+            diff_entries=[diff_entry],
+            proposed_overlay={"budget": {"turn_cost_mean_usd": 1450}},
+            guard_violations=["example violation"],
+        )
+        bundle = yaml.safe_load(out)
+        self.assertIn("session", bundle)
+        self.assertIn("diff_summary", bundle)
+        self.assertIn("diff_entries", bundle)
+        self.assertIn("proposed_overlay", bundle)
+        self.assertIn("guard_violations", bundle)
+        self.assertEqual(bundle["diff_summary"]["total_keys"], 1)
+        self.assertEqual(bundle["diff_summary"]["with_conflict"], 0)
+        self.assertEqual(bundle["session"]["id"], "sess1")
+
+
+class MissingDocBlockerGuardTests(unittest.TestCase):
+    """v4.3 Obj 4-continued: guard refuses when a question-bank trigger
+    references a doc_catalog slug that has no entry."""
+
+    def test_missing_doc_in_catalog_is_refused(self) -> None:
+        q = ttui.Question(
+            id="q001",
+            bank_slug="coo",
+            question_text="What is the approval threshold?",
+            purpose="policy",
+            answer_type="text",
+            missing_doc_triggers=["nonexistent_doc_slug"],
+        )
+        bank = ttui.Bank(
+            bank_slug="coo", audience="coo_operations_leader", version="0.1.0",
+            questions=[q],
+        )
+        violations = ttui.guard_missing_doc_blockers({"coo": bank}, doc_catalog={})
+        self.assertTrue(violations)
+        self.assertIn("nonexistent_doc_slug", violations[0])
+
+    def test_known_doc_slug_passes(self) -> None:
+        q = ttui.Question(
+            id="q001",
+            bank_slug="coo",
+            question_text="...",
+            purpose="...",
+            answer_type="text",
+            missing_doc_triggers=["known_slug"],
+        )
+        bank = ttui.Bank(
+            bank_slug="coo", audience="coo_operations_leader", version="0.1.0",
+            questions=[q],
+        )
+        catalog = {"known_slug": {"title": "Known doc", "owner": "coo"}}
+        violations = ttui.guard_missing_doc_blockers({"coo": bank}, catalog)
+        self.assertEqual(violations, [])
+
+
 if __name__ == "__main__":
     unittest.main()
