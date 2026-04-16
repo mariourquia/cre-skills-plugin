@@ -26,7 +26,7 @@ function defaultConfig() {
     },
     anonymousId: randomUUID(),
     firstRunComplete: false,
-    version: '4.1.2',
+    version: '4.2.0',
   };
 }
 
@@ -56,9 +56,9 @@ function main() {
     writeConfig(config);
   }
 
-  // Backfill: update version marker for existing installs upgrading to v4.1.x
-  if (config.version && config.version < '4.1.2') {
-    config.version = '4.1.2';
+  // Backfill: update version marker for existing installs upgrading to v4.2.x
+  if (config.version && config.version < '4.2.0') {
+    config.version = '4.2.0';
     writeConfig(config);
   }
 

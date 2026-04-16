@@ -5,9 +5,13 @@
 **Work-tree frozen:** 2026-04-16 (awaiting 1Password unlock before commit/PR/merge/push)
 **Target:** Truthful, test-backed internal beta / controlled release candidate
 
-**Test totals:** 375 baseline → 423 passing (+48 net new). Breakdown:
+**Test totals (pass 1 close):** 375 baseline → 423 passing (+48 net new). Breakdown:
 - `src/skills/residential_multifamily/tests/` + `src/skills/residential_multifamily/tailoring/tools/`: 301 passing (was 257)
 - `tests/` (repo-root): 122 passing (was 118)
+
+**Test totals (pass 2 close):** 423 → 436 passing (+13 net new from Obj 5 + Obj 6 + Obj 8). Breakdown:
+- `src/skills/residential_multifamily/tests/` + `tailoring/tools/`: 314 passing (+13: 5 period_seal, 4 placeholder scanner, 4 executive output contract)
+- `tests/` (repo-root): 122 (unchanged)
 
 ## Ground Rules
 
@@ -28,10 +32,10 @@
 | 2   | Reference manifest + required-path repair                   | done (pass 1) | lead         | final_marked governance added; IC/exec fail-closed enforced; watchlist/vendor aligned |
 | 3   | Governance & state canonicalization                         | done          | lead         | canonical approval vocab + version_hash binding + 8 tests; legacy retired inline      |
 | 4   | Tailoring runtime truthfulness                              | done (pass 1) | lead         | conflict surfacing impl + 3 tests; 16 doc catalog entries; capability matrix doc      |
-| 5   | Operational realism & evidence trail                        | deferred pass 2 | lead       | see Findings; final-marked fail-closed is live, close-lock gating deferred            |
-| 6   | Finance/controller readiness                                | deferred pass 2 | lead       | see Findings; placeholder scanner deferred, final-marked refuse covers critical path  |
+| 5   | Operational realism & evidence trail                        | done (pass 2) | lead         | period_seal schema + registry + 6 workflow manifests + 5 tests (test_period_seal_gating) |
+| 6   | Finance/controller readiness                                | done (pass 2) | lead         | reference_data_integrity.md + scanner + 4 tests; final-marked refs placeholder-clean   |
 | 7   | Ontology & data-contract integrity                          | done          | lead         | Deal/Asset/DealMilestone/DealKeyDate added + 2 tests; ontology->workflow check live   |
-| 8   | Executive output integrity                                  | deferred pass 2 | lead       | see Findings; verdict-first restructure deferred, source-class labels present in examples |
+| 8   | Executive output integrity                                  | done (pass 2) | lead         | executive_output_contract.md + 4 tests; 4 final-marked SKILLs reference contract; canonical example carries verdict-first + full source-class tags |
 | 9   | Regulatory/affordable route gating                          | done          | lead         | scaffolding slugs explicit in alias_registry; r011/r012 rules already gate            |
 | 10  | Runtime truthfulness outside residential_multifamily        | done (pass 1) | lead         | README + install matrix + capability matrix downgrade overstated claims               |
 | 11  | Cross-platform install/upgrade QA                           | done (pass 1) | lead         | install_smoke_test_matrix.md documents each surface + gaps; new tests not added this pass |
@@ -108,6 +112,28 @@ _(Subagents append structured findings below this line, grouped by objective ID.
 - `docs/install_smoke_test_matrix.md` published. Each surface x scenario is labeled `covered` / `manual` / `gap` with the backing test path. Known gaps listed with concrete next-test proposals.
 - No new install smoke tests added in this pass; that is the explicit scope of Obj 11 pass 2.
 
+### Obj 5 — sealed-close gating (pass 2)
+
+- New `_core/schemas/period_seal.yaml` canonicalizes close_status ordering (`draft < soft_close < hard_close < locked`), `as_of`, `close_lock_timestamp`, `budget_version`, `reforecast_version`.
+- New `period_grade_workflows` section in `_core/final_marked_workflows.yaml` enumerates the 6 slugs that MUST declare a period seal, with minimum_close_status floors and rationale:
+  - `hard_close + close_lock_timestamp`: `executive_operating_summary_generation`, `quarterly_portfolio_review`.
+  - `soft_close`: `monthly_property_operating_review`, `monthly_asset_management_review`, `reforecast` (+`budget_version`), `budget_build`.
+- Six workflow `reference_manifest.yaml` files gain `required_period_seal` blocks aligned with the registry.
+- `_core/schemas/reference_manifest.yaml` extended to admit the new top-level field (schema validation no longer rejects it).
+- `tests/test_period_seal_gating.py` — 5 tests covering registry non-empty, schema-harness ordering match, registry-to-manifest conformance, stray-declaration detection, hard-close implies close_lock_timestamp.
+
+### Obj 6 — placeholder / TBD scanner (pass 2)
+
+- New `_core/reference_data_integrity.md` documents the rule: a reference row containing a placeholder token (`TBD`, `TODO`, `FIXME`, `XXX`, `PLACEHOLDER`, `TKTK`) in any column MUST also carry an explicit placeholder label (`status=placeholder|tbd|todo|deferred`, `confidence=placeholder|low_placeholder`, `source_type=placeholder`, `placeholder=true`, or `placeholder_row=true`).
+- `tests/test_finance_placeholder_scanner.py` — 4 tests: scanner flags unlabeled placeholders, accepts labeled ones, ignores real rows, and scans every CSV read by a final-marked workflow manifest. Current final-marked reference data is clean under the scanner.
+
+### Obj 8 — executive output integrity (pass 2)
+
+- New `_core/executive_output_contract.md` defines the three rules for final-marked output: verdict-first block (recommendation / rationale / confidence / materiality / next action), source-class labels on every numeric cell (`[operator]` / `[derived]` / `[benchmark]` / `[overlay]` / `[placeholder]`), and refusal-artifact shape when a required input is absent.
+- Four final-marked workflow SKILL.md files (`executive_operating_summary_generation`, `investment_committee_prep`, `quarterly_portfolio_review`, `executive_pipeline_summary`) gained a `## Output contract` section referencing the doc.
+- The canonical example (`executive_operating_summary_generation/examples/ex01_*.md`) now carries a verdict-first block and a legend + evidence table demonstrating all five source classes.
+- `tests/test_executive_output_contract.py` — 4 tests: contract doc exists with all three rules; every final-marked SKILL references the contract; at least one example demonstrates the full source-class tag set; canonical example contains verdict markers.
+
 ### Obj 12 — catalog claim integrity
 
 - Fixed README prose "112 skills" → "113" (one stale claim in narrative despite the generated stats table being correct). Same fix in 3 build-artifact hook prompts (`builds/claude-code/`, `builds/portable/`, `builds/desktop/` hooks.json; and routing CRE-ROUTING.md where referenced).
@@ -169,9 +195,9 @@ Resolution path on the user side: open 1Password desktop, authenticate, confirm 
 
 `src/skills/residential_multifamily/workflows/implementation_intake_signoff_builder/tests/test_content_contract.py` and `tools/test_intake_signoff_tui.py` fail due to a mismatch between the question bank shape (`interview_modes:`) and what the content-contract test + TUI parser expect (`modes:` + per-question `mode:` field). These tests predate this pass (wave-5 in-progress). The hardening pyproject intentionally excludes those paths from the default pytest collection and documents the exclusion inline. Reconciling requires a decision on the canonical question-bank shape, which is out of scope for this pass.
 
-### Obj 5, 6, 8 — deferred to pass 2
+### Obj 5, 6, 8 — resolved (pass 2, 2026-04-16)
 
-Operational evidence gating (close_status / close_lock_timestamp / budget_version / reforecast_version / as_of), placeholder scanners for finance-critical refs, and verdict-first restructuring of executive output templates are substantive implementation changes that need their own session. The audits in this pass document the gaps; the `final_marked_workflows.yaml` governance file already provides the fail-closed contract that the final-output workflows honor declaratively.
+All three are now done. See the Obj 5 / 6 / 8 Findings entries above for artifacts and tests. The deferred list in the "Planned pass-2 work" section below is now reduced to Obj 2b, Obj 4 continued, and Obj 11 continued — none of which block internal-release posture.
 
 ## Release Limitations (Final)
 

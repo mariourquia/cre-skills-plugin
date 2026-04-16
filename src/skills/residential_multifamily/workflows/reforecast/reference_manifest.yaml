@@ -46,3 +46,16 @@ reads:
     required: true
     fallback_behavior: refuse
 writes: []
+
+# Period-seal gating: see _core/final_marked_workflows.yaml#period_grade_workflows
+# and _core/schemas/period_seal.yaml. Test: test_period_seal_gating.
+required_period_seal:
+  minimum_close_status: soft_close
+  requires_close_lock_timestamp: false
+  as_of_required: true
+  required_version_fields: [budget_version]
+  rationale: |
+    Reforecast compares YTD actuals against the approved budget; a
+    missing budget_version means the variance delta is ungrounded.
+    Soft_close YTD actuals are acceptable because the workflow output
+    is itself a new forecast version, not an audited fact.

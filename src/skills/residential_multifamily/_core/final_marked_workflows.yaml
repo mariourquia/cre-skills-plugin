@@ -104,3 +104,71 @@ operating_grade_workflows:
 
 setup_grade_workflows:
   - implementation_intake_signoff_builder
+
+# ---------------------------------------------------------------------------
+# Period-grade workflows
+# ---------------------------------------------------------------------------
+# Workflows that produce period-level financial output (monthly operating
+# review, reforecast, quarterly LP letter, executive summary). These MUST
+# declare `required_period_seal` in their reference_manifest.yaml with a
+# minimum close_status appropriate to the audience.
+#
+# Enforcement: test_period_seal_gating asserts that every slug listed here
+# has a required_period_seal block with minimum_close_status >= the
+# declared floor, and that as_of is required.
+#
+# Ordering: draft < soft_close < hard_close < locked (see
+# _core/schemas/period_seal.yaml#close_status_order).
+
+period_grade_workflows:
+
+  executive_operating_summary_generation:
+    minimum_close_status: hard_close
+    requires_close_lock_timestamp: true
+    rationale: |
+      Consumed by board, LP, and lender audiences. Running this against
+      soft-closed books risks publishing numbers that get materially
+      restated after close entries post — directly contradicting the
+      reconcilability expectation of the audience.
+
+  quarterly_portfolio_review:
+    minimum_close_status: hard_close
+    requires_close_lock_timestamp: true
+    rationale: |
+      Quarterly LP letter body reuses numbers from this workflow
+      verbatim. Hard_close is the earliest state where the GL matches
+      what the LP audit will see.
+
+  monthly_property_operating_review:
+    minimum_close_status: soft_close
+    requires_close_lock_timestamp: false
+    rationale: |
+      Internal operating review for PM / RM / AM. Soft_close is
+      sufficient — accruals done, no material JEs expected — but draft
+      is not: variance interpretation on draft books produces false
+      operational signal.
+
+  monthly_asset_management_review:
+    minimum_close_status: soft_close
+    requires_close_lock_timestamp: false
+    rationale: |
+      Same audience posture as monthly_property_operating_review but
+      with asset-manager-level aggregation.
+
+  reforecast:
+    minimum_close_status: soft_close
+    requires_close_lock_timestamp: false
+    required_version_fields: [budget_version]
+    rationale: |
+      Reforecast compares YTD actuals against the approved budget; a
+      missing budget_version means the variance delta is ungrounded.
+      Soft_close YTD actuals are acceptable because the workflow output
+      is itself a new forecast version, not an audited fact.
+
+  budget_build:
+    minimum_close_status: soft_close
+    requires_close_lock_timestamp: false
+    rationale: |
+      Annual budget construction relies on YTD actuals to ground the
+      prior-period baseline. Draft books mislead the base; soft_close
+      is the floor.

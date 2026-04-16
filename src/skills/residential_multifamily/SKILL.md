@@ -1,8 +1,8 @@
 ---
 name: Residential Multifamily Operating System
 slug: residential_multifamily
-version: 0.5.0
-status: draft
+version: 0.6.0
+status: beta_rc
 category: residential_multifamily
 subsystem: residential_multifamily
 pack_type: router

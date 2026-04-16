@@ -119,6 +119,17 @@ Deliver a clean, auditable IC packet that lets the committee make the decision. 
 | Minute-ready condition-log draft | `checklist` | post-decision template for the IC secretary |
 | Confidence banner | banner | adapter `as_of_date`, DQ outcomes, overlay `status` tags, comp freshness |
 
+## Output contract
+
+Final-marked output MUST follow `_core/executive_output_contract.md`:
+verdict-first block (recommendation, 3-bullet rationale, confidence,
+materiality, next action), source-class labels on every numeric cell
+(`[operator]` / `[derived]` / `[benchmark]` / `[overlay]` /
+`[placeholder]`), and refusal-artifact shape when a required reference
+input is absent. Any `[placeholder]`-tagged cell blocks IC packet
+assembly (the workflow refuses per `reference_manifest.yaml#reads`
+`fallback_behavior: refuse` on `rent_comp_evidence`).
+
 ## Required context
 
 `asset_class=residential_multifamily`. Scope: one IC cycle, either by declared `ic_meeting_date` or by `next_ic` per overlay. Per-deal grain requires `deal_id` (or all deals at `ic_review` within prep window). `org_id` required for IC-member roster and approval-threshold bands. `market` is deal-level; the pack handles multi-market dockets. `fund_id` required if LP-capital check is scoped by fund (most cycles).

@@ -26,3 +26,15 @@ reads:
     required: true
     fallback_behavior: refuse
 writes: []
+
+# Period-seal gating: see _core/final_marked_workflows.yaml#period_grade_workflows
+# and _core/schemas/period_seal.yaml. Test: test_period_seal_gating.
+required_period_seal:
+  minimum_close_status: soft_close
+  requires_close_lock_timestamp: false
+  as_of_required: true
+  rationale: |
+    Internal operating review for PM / RM / AM. Soft_close is
+    sufficient — accruals done, no material JEs expected — but draft
+    is not: variance interpretation on draft books produces false
+    operational signal.
