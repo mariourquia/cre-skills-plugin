@@ -227,3 +227,34 @@ reserved_slots:
     - StaffingRoster
     - ResidentCommunication
     - ComplianceAttestation
+
+# Workflow alias registry.
+# An alias is a non-canonical name that resolves to a canonical workflow slug.
+# Every alias must point to a canonical workflow directory name. The
+# test_workflow_slug_registry test fails if any alias target is not canonical,
+# and if any routing reference uses a slug that is not canonical, not
+# scaffolding, and not in this alias table.
+workflow_aliases: {}
+
+# Workflows that are intentionally referenced before their workflow packs exist
+# on disk. These slugs must be named in routing.yaml or similar structural files
+# because the router needs to recognize them as planned, but the workflow pack
+# itself is scaffolding and attempting to run it MUST fail closed (see
+# _core/routing/rules.yaml, rule r011_regulatory_workflow_explicit).
+#
+# DO NOT add a slug here just because it's broken. Add it only when the routing
+# system intentionally declares a placeholder for a gated, not-yet-built flow.
+workflow_scaffolding_slugs:
+  # Regulatory / affordable compliance workflows (rule r011). Phase 1
+  # scaffolding only. Gated behind regulatory_program != none and refuse-to-run
+  # when the referenced rent_limits / income_limits files are absent.
+  - agency_reporting_prep
+  - compliance_calendar_review
+  - file_audit_prep
+  - income_certification_cycle
+  - recertification_batch
+  - rent_limit_test
+  # Tailoring interview - a special-purpose mode not implemented as a workflow
+  # pack (see rule r010_tailoring_interview). The tailoring TUI is the entry
+  # point; it is not a workflow directory under workflows/.
+  - tailoring_interview
