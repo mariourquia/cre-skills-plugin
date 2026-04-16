@@ -56,6 +56,10 @@ This release is an **internal beta / controlled release candidate**. Most top-le
 - **Windows installer** defends against UTF-8 BOM edge cases in PowerShell 5.1 but does not currently halt on missing Node/Python/npm prerequisites. Update Claude Code before install (older versions have MCP path issues on Windows).
 - **Codex / Gemini / Grok / Manus** install targets are advertised via the portable ZIP but are not in the CI smoke-test matrix. Treat as experimental.
 
+## Roadmap
+
+Upcoming work is tracked in [`docs/ROADMAP.md`](docs/ROADMAP.md) — phased from v4.3 (near-term hardening), through v4.4 (agent orchestration upgrade) and v5.0 (real-world data integration), to v6.0 (domain completeness). A separate enterprise track covers SOC 2, RBAC, licensing, and team collaboration. Preview / staging mode for `status: beta_rc` and `status: experimental` skills is documented at [`docs/PREVIEW_MODE.md`](docs/PREVIEW_MODE.md).
+
 ## Key Stats
 
 <!-- CATALOG:STATS:START -->

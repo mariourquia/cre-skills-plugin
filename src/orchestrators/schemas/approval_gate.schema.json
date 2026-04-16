@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/mariourquia/cre-skills-plugin/blob/main/src/orchestrators/schemas/approval_gate.schema.json",
+  "title": "Orchestrator approval gate",
+  "description": "Human-in-the-loop gate. When an orchestrator phase declares one, the executor halts until the gate is cleared in the deal state file. See docs/orchestrator-v0-design.md section 2.",
+  "type": "object",
+  "required": [
+    "gate_id",
+    "required_approvers",
+    "approval_matrix_row",
+    "status",
+    "created_at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "gate_id": {
+      "type": "string",
+      "description": "Unique gate id within a pipeline run.",
+      "pattern": "^[a-z][a-z0-9_.-]{0,128}$"
+    },
+    "required_approvers": {
+      "type": "array",
+      "description": "Role names that must sign off before status can move to approved/approved_with_conditions.",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "approval_matrix_row": {
+      "type": "integer",
+      "description": "Row in approval_matrix.md that authorizes this gate.",
+      "minimum": 1
+    },
+    "evidence_required": {
+      "type": "array",
+      "description": "Artifacts that must be produced before the gate can clear.",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "approved_with_conditions",
+        "denied",
+        "expired"
+      ]
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "approved_at": { "type": "string", "format": "date-time" },
+    "approved_by": { "type": "string" },
+    "conditions_text": { "type": "string" },
+    "denial_reason": { "type": "string" },
+    "evidence_hashes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": { "type": "string" },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        }
+      }
+    }
+  }
+}

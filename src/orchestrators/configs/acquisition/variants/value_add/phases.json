@@ -1,0 +1,23 @@
+{
+  "variant": "value_add",
+  "description": "Phase-weight overrides for value-add acquisitions. Underwriting and legal carry more weight because execution risk is concentrated there.",
+  "phase_weight_overrides": {
+    "due-diligence": 0.25,
+    "underwriting": 0.30,
+    "financing": 0.20,
+    "legal": 0.15,
+    "closing": 0.10
+  },
+  "added_approval_gates": [
+    {
+      "gate_id": "value_add.capex_plan_sign_off",
+      "phase": "underwriting",
+      "required_approvers": ["asset_manager", "cfo_finance_leader"],
+      "approval_matrix_row": 5,
+      "evidence_required": [
+        "capex_budget_by_line_item.csv",
+        "vendor_rate_card_comparison.md"
+      ]
+    }
+  ]
+}

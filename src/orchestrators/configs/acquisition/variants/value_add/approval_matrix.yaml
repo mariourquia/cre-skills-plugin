@@ -1,0 +1,30 @@
+# Approval-floor overrides for the value_add acquisition variant.
+# Merged over the base approval matrix at runtime. Any threshold not
+# listed here inherits the base value.
+#
+# Rationale: value-add deals carry more execution risk on capex and
+# change orders, so the approval floor is lower than the base core_plus
+# default. Operators raising a deal to executive review sooner catches
+# budget overruns before they compound.
+
+variant: value_add
+
+overrides:
+  capex_approval_threshold_usd: 100000        # base: 250000
+  change_order_approval_threshold_usd: 50000  # base: 150000
+  emergency_spend_threshold_usd: 25000        # base: 75000
+  refi_approval_threshold_usd: 500000         # base: 1000000
+
+added_rows:
+  - row: 99
+    category: value_add_capex_plan
+    audience: [asset_manager, cfo_finance_leader]
+    scope: "Every capex project line > $25K in a value_add deal"
+    approval_type: request_approval
+    evidence_required:
+      - capex_budget_by_line_item.csv
+      - vendor_rate_card_comparison.md
+    notes: |
+      Value-add thesis depends on capex execution. Approving each
+      line > $25K catches scope creep before the renovation package
+      closes.
