@@ -1,0 +1,89 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/mariourquia/cre-skills-plugin/blob/main/src/orchestrators/schemas/deal_state.schema.json",
+  "title": "Deal-scoped orchestrator state",
+  "description": "Persistent state for a single deal under a pipeline run. Lives at ~/.claude/cre-skills/deals/<deal_id>/state.json. See docs/orchestrator-v0-design.md section 1.",
+  "type": "object",
+  "required": [
+    "deal_id",
+    "pipeline",
+    "phase_history",
+    "current_phase",
+    "verdicts_by_phase",
+    "approval_gate_log",
+    "created_at",
+    "updated_at",
+    "run_id"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "deal_id": {
+      "type": "string",
+      "description": "UUID or operator-supplied slug. Stable across sessions.",
+      "pattern": "^[A-Za-z0-9_.-]{1,128}$"
+    },
+    "pipeline": {
+      "type": "string",
+      "enum": [
+        "acquisition",
+        "capital-stack",
+        "development",
+        "disposition",
+        "fund-management",
+        "hold-period",
+        "investment-strategy",
+        "lp-intelligence",
+        "portfolio-management",
+        "research-intelligence"
+      ]
+    },
+    "variant": {
+      "type": "string",
+      "description": "Variant slug, e.g. value_add or core_plus. Optional.",
+      "pattern": "^[a-z][a-z0-9_]{0,64}$"
+    },
+    "phase_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["phase_id", "started_at", "completed_at", "verdict"],
+        "properties": {
+          "phase_id": { "type": "string" },
+          "started_at": { "type": "string", "format": "date-time" },
+          "completed_at": { "type": "string", "format": "date-time" },
+          "verdict": {
+            "type": "string",
+            "enum": ["PROCEED", "CONDITIONAL", "KILL", "AWAITING_APPROVAL", "REFUSED"]
+          },
+          "rationale": { "type": "string" }
+        }
+      }
+    },
+    "current_phase": {
+      "type": "string",
+      "description": "Phase id currently executing or blocked."
+    },
+    "verdicts_by_phase": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["verdict", "timestamp"],
+        "properties": {
+          "verdict": {
+            "type": "string",
+            "enum": ["PROCEED", "CONDITIONAL", "KILL", "AWAITING_APPROVAL", "REFUSED"]
+          },
+          "timestamp": { "type": "string", "format": "date-time" },
+          "rationale": { "type": "string" }
+        }
+      }
+    },
+    "approval_gate_log": {
+      "type": "array",
+      "items": { "$ref": "approval_gate.schema.json" }
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "run_id": { "type": "string" }
+  }
+}

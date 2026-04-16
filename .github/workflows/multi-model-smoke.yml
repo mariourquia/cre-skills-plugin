@@ -1,0 +1,49 @@
+name: Multi-Model Smoke
+
+# v4.3 addition. Exercises a small set of high-surface-area skills
+# against multiple Claude model IDs on a manual trigger so a model
+# upgrade cannot silently break downstream output parsers. Runs on
+# workflow_dispatch only — requires ANTHROPIC_API_KEY as a repo
+# secret. Not wired to pushes / PRs to keep API spend predictable.
+
+on:
+  workflow_dispatch:
+    inputs:
+      models:
+        description: 'Comma-separated model IDs (leave blank for default set)'
+        required: false
+        default: ''
+      skills:
+        description: 'Comma-separated skill slugs (leave blank for default set)'
+        required: false
+        default: ''
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run smoke invocations
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          MODELS_INPUT: ${{ github.event.inputs.models }}
+          SKILLS_INPUT: ${{ github.event.inputs.skills }}
+        run: |
+          set -e
+          ARGS=()
+          if [ -n "$MODELS_INPUT" ]; then
+            FIRST_MODEL=$(printf '%s' "$MODELS_INPUT" | cut -d, -f1)
+            ARGS+=(--model "$FIRST_MODEL")
+          fi
+          if [ -n "$SKILLS_INPUT" ]; then
+            ARGS+=(--skills "$SKILLS_INPUT")
+          fi
+          bash scripts/smoke_skill_invocation.sh "${ARGS[@]}"
