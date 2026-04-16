@@ -14,9 +14,9 @@
 #   - `src/skills/residential_multifamily/workflows/implementation_intake_signoff_builder/tools`
 #     Wave-5 in-progress pack; its content-contract tests (and TUI parser)
 #     assume a different question_bank shape (`modes:` vs `interview_modes:`,
-#     a missing per-question `mode:` field). Tracked as a known limitation in
-#     docs/implementation_hardening_status.md (Obj 4 blocker) and must be
-#     reconciled before this path joins the default test run.
+#     a missing per-question `mode:` field). Known limitation (tailoring
+#     runtime Obj 4 blocker) that must be reconciled before this path joins
+#     the default test run.
 testpaths = [
   "src/skills/residential_multifamily/tests",
   "src/skills/residential_multifamily/tailoring/tools",

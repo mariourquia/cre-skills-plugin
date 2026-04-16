@@ -103,7 +103,7 @@ blocking_issues, partial_mode_behavior, human_approvals_required.
 ### 12. Adapter sample data completeness
 
 - **Risk**: Several adapters have only partial sample_raw/ coverage (missing entities); sample_normalized/ may not exist for some.
-- **Mitigation**: enumerate gaps in `session_state/wave4_completeness.md`; assign per next session.
+- **Mitigation**: enumerate gaps during the next wave-4 completeness pass and assign per adapter.
 - **Owner**: data_platform_team
 
 ### 13. Source registry merge risk
