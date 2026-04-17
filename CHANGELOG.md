@@ -2,6 +2,30 @@
 
 ## [Unreleased]
 
+### Added (v4.4, orchestrator engine — PR C of 3)
+- **Calculator bridge (design doc section 3).** New
+  `src/orchestrators/engine/calculator-bridge.mjs` spawns
+  `scripts/calculator-invoker.py` on demand to resolve phase
+  `tool_calls`. Surfaces the invoker's structured error envelopes
+  (`validation_errors`, unknown-calculator `error` field) via a
+  typed `CalculatorBridgeError` before falling through to a generic
+  exit-code error.
+- Executor now honors `tool_calls` declared on a phase: invokes
+  each, logs per-call success/failure to stdout, and attaches
+  parsed results to the phase result under a `tool_results` key
+  (keyed by the `as` alias or `tool` slug). Emits
+  `calculator_invoked` / `calculator_failed` audit events when
+  running under `--deal-id`.
+- New `--config-path <path>` flag on the executor lets test
+  fixtures and ad-hoc pipelines bypass the registry lookup.
+  `--pipeline` is now optional when `--config-path` is set
+  (pipeline id derived from `orchestratorId`).
+- `tests/test_orchestrator_calculator_bridge.py` (4 tests). A tiny
+  Node driver (`tests/harness_calculator_bridge.mjs`) exercises the
+  bridge directly for success, unknown-slug, and validation-error
+  paths; an E2E test wires a minimal fixture pipeline through the
+  executor and asserts `calculator_invoked` in the audit log.
+
 ### Added (v4.4, orchestrator engine — PR B of 3)
 - **Variant loader (design doc section 4).** New
   `src/orchestrators/engine/variant-loader.mjs` resolves
