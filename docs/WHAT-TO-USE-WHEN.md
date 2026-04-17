@@ -2,7 +2,14 @@
 
 ## What is this project?
 
-CRE Skills Plugin is a structured knowledge base of institutional-grade commercial real estate skills, expert agents, Python calculators, and orchestrator pipelines (current counts: see the README's Key Stats). It plugs into Claude Code (CLI) via the plugin system and into Claude Desktop via a local MCP server. It is NOT a Claude Desktop marketplace plugin. Install it with the DMG/EXE installer or the Claude Code CLI -- not by pasting a URL into "Add marketplace."
+CRE Skills Plugin is a structured knowledge base of institutional-grade commercial real estate skills, expert agents, Python calculators, and orchestrator pipelines (current counts: see the README's Key Stats). It installs as:
+
+- a Claude Code plugin (core supported; CLI marketplace or local `--plugin-dir`),
+- a local MCP server for the Claude Desktop Chat tab (core companion; DMG/EXE installer),
+- a stripped plugin import for the Cowork tab (reduced secondary),
+- a portable skill export for Codex / Gemini / Grok / Manus (experimental, no CI coverage).
+
+See [`../README.md#release-maturity`](../README.md#release-maturity) for the support-tier table.
 
 ---
 
@@ -10,17 +17,21 @@ CRE Skills Plugin is a structured knowledge base of institutional-grade commerci
 
 | If you use... | Install via... | What you get |
 |---|---|---|
-| **Claude Code (CLI)** | `claude plugin install` or DMG/EXE installer | Full plugin: skills, agents, workflow chains, orchestrators, slash commands, SessionStart hook, telemetry |
-| **Claude Desktop (app)** | DMG (macOS) or EXE (Windows) installer | MCP server with tools for routing, skill detail, workspace management, feedback |
-| **Cowork** | Download `cre-skills-cowork.zip` from the latest [GitHub Release](https://github.com/mariourquia/cre-skills-plugin/releases/latest) | Stripped plugin: skills + agents + commands (no MCP server, no orchestrators, no calculators). Uses the same SKILL.md format recognized by Claude Code and Cowork. |
+| **Claude Code (CLI or Desktop Code tab)** | `claude plugin marketplace add mariourquia/cre-skills-plugin` + `claude plugin install cre-skills@cre-skills` | Full plugin: skills, agents, workflow chains, orchestrators, slash commands, SessionStart hook, telemetry |
+| **Claude Desktop Chat tab** | DMG (macOS) or EXE (Windows) installer from the [releases page](https://github.com/mariourquia/cre-skills-plugin/releases/latest) | Local MCP server with tools for routing, skill detail, workspace management, feedback |
+| **Cowork tab** | Download `cre-skills-cowork.zip` from the [releases page](https://github.com/mariourquia/cre-skills-plugin/releases/latest), upload via Customize > Browse plugins | Skills + agents + commands only. No MCP server, no orchestrators, no calculators. |
+| **Codex / Gemini / Grok / Manus / other agents** | Download `cre-skills-portable.zip`, extract `skills/` into your agent's skills directory | Experimental. Ships SKILL.md files only. CLI-specific registration, calculator execution, and orchestrator support are not tested on these surfaces. |
 
 ---
 
-## Do NOT paste this repo URL into "Add marketplace"
+## CLI marketplace vs Claude Desktop Chat tab "Add marketplace"
 
-Claude Desktop has an "Add marketplace" dialog that expects a specific manifest structure (`marketplace.json`). This repo does not have one and will never have one. Pasting `https://github.com/mariourquia/cre-skills-plugin` into that dialog will produce a validation error.
+These are two different surfaces. Only one is supported by this repo.
 
-**The correct install path for Claude Desktop is the DMG or EXE installer from the GitHub Releases page.** The installer copies plugin files to the right location and registers the MCP server in Claude Desktop's config file automatically.
+- **Claude Code CLI marketplace** (supported): `claude plugin marketplace add mariourquia/cre-skills-plugin` reads `.claude-plugin/marketplace.json` from this repo and registers it as a marketplace. The CLI then installs the `cre-skills` plugin from that marketplace with `claude plugin install cre-skills@cre-skills`. This works in the Claude Code CLI and in the Claude Desktop **Code tab** (which uses Claude Code under the hood).
+- **Claude Desktop Chat tab "Add marketplace" dialog** (NOT supported): the Chat tab has its own "Add marketplace" dialog. Pasting `https://github.com/mariourquia/cre-skills-plugin` into that dialog will produce a validation error. The correct install path for the Chat tab is the DMG or EXE installer below -- it registers a local MCP server in `claude_desktop_config.json`, which is how the Chat tab gets plugin tools.
+
+If in doubt: if you are using the Claude Code CLI or the Desktop Code tab, use marketplace. If you are using the Desktop Chat tab, use the installer.
 
 ---
 

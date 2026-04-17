@@ -1,16 +1,16 @@
 # Tests
 
-Structural integrity tests for the CRE Skills Plugin. These validate plugin layout, file presence, and syntax -- not behavioral correctness (skills are markdown-based, not executable code).
+Structural and functional integrity tests for the CRE Skills Plugin. Most tests validate plugin layout, catalog parity, hook/script syntax, reference data integrity, and release hygiene. A smaller set exercises individual calculators and orchestrator state machines.
 
 ## Requirements
 
 - Python 3.10+
-- Node.js 18+ (for hook script syntax checks)
+- Node.js 18+ (for hook script syntax checks and calculator-bridge smoke tests)
 - `pytest` (`pip install pytest`)
 
-No other dependencies required. The test suite uses only the Python standard library plus `pytest`.
+No other runtime dependencies. The Python suite uses only the standard library plus `pytest`; the Node test harnesses used by a few orchestrator tests live under `tests/harness_*.mjs` and require no npm install.
 
-## Running Tests
+## Running the test suite
 
 From the repo root:
 
@@ -18,26 +18,37 @@ From the repo root:
 python -m pytest tests/ -v
 ```
 
-To run a single test class:
+Run a single test module:
 
 ```bash
-python -m pytest tests/test_plugin_integrity.py::TestPluginStructure -v
+python -m pytest tests/test_plugin_integrity.py -v
 ```
 
-## What Is Tested
+Run the residential_multifamily subsystem suite:
 
-| Test | Description |
-|------|-------------|
-| `test_plugin_json_valid` | `plugin.json` parses as valid JSON, version is 4.0.0, license is Apache-2.0 |
-| `test_all_skills_have_skillmd` | Every directory under `src/skills/` contains a `SKILL.md` |
-| `test_hooks_json_valid` | `src/hooks/hooks.json` parses as valid JSON and has a `hooks` key |
-| `test_hook_scripts_syntax` | All `.mjs` files in `src/hooks/` pass `node --check` |
-| `test_python_calculators_syntax` | All `.py` files in `src/calculators/` are syntactically valid Python |
-| `test_required_files_exist` | Root-level required files are present (LICENSE, NOTICE, README.md, etc.) |
-| `test_agents_index_exists` | `src/agents/_index.md` exists |
-| `test_routing_index_exists` | `src/routing/CRE-ROUTING.md` exists |
-| `test_skill_count_matches_plugin_json` | At least 88 `SKILL.md` files exist across skill directories |
+```bash
+python -m pytest src/skills/residential_multifamily/tests/ -v
+```
+
+## What is tested
+
+The suite covers (non-exhaustive; regenerate this list with `ls tests/test_*.py`):
+
+| Area | Representative tests |
+|------|----------------------|
+| Plugin manifest and structure | `test_plugin_integrity.py`, `test_required_files_exist` |
+| Catalog / filesystem parity | `test_canonical_consistency.py`, `test_catalog_claim_integrity.py` |
+| Release hygiene | `test_release_hygiene.py`, `test_release_version_parity.py` |
+| Hook script syntax | `test_plugin_integrity.py::TestHookScripts` |
+| Python calculators (syntax + behavior) | `test_plugin_integrity.py::TestCalculators`, `test_e2e_skill_calculator.py` |
+| MCP server | `test_plugin_integrity.py::TestMcpServer` |
+| Orchestrator engine | `test_orchestrator_integrity.py`, `test_orchestrator_deal_state.py`, `test_orchestrator_gates_variants.py`, `test_orchestrator_calculator_bridge.py` |
+| Installer hardening (Windows BOM, argv, hook scope) | `test_installer_hardening.py` |
+| residential_multifamily subsystem | `src/skills/residential_multifamily/tests/` |
+| Sealed-close gating (v4.2.0 Obj 5) | `test_period_seal_gating.py` |
+| Finance placeholder scanner (v4.2.0 Obj 6) | `test_finance_placeholder_scanner.py` |
+| Executive output contract (v4.2.0 Obj 8) | `test_executive_output_contract.py` |
 
 ## CI
 
-These same tests run automatically on every push and pull request to `main` via `.github/workflows/ci.yml`, across Python 3.10/3.11/3.12 and Node 18/20/22.
+The same suite runs on every push and pull request to `main` via `.github/workflows/ci.yml`, across Python 3.10/3.11/3.12 and Node 18/20/22.

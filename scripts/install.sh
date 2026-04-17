@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install.sh -- Single-command installer for the CRE Skills Plugin v4.0.0
+# install.sh -- Single-command installer for the CRE Skills Plugin v4.2.0
 #
 # Usage (remote):
 #   curl -fsSL https://raw.githubusercontent.com/mariourquia/cre-skills-plugin/main/scripts/install.sh | bash
@@ -40,7 +40,7 @@ print_banner() {
  | |    |  _  /|  __|   ___) | . \| | | \__ \
  | |____|_| \_\|_|____ |____/|_|\_\_|_|_|___/
   \_____|      |______|
-   Plugin v4.0.0 -- 112 skills, 54 agents, 6 workflows
+   Plugin v4.2.0 -- 113 skills, 54 agents, 6 workflows
 
 BANNER
   printf "${RESET}"
@@ -407,7 +407,7 @@ print_success() {
   printf "${GREEN}${BOLD}"
   cat << 'SUCCESS'
   ============================================
-       CRE Skills Plugin v4.0.0 -- Installed
+       CRE Skills Plugin v4.2.0 -- Installed
   ============================================
 SUCCESS
   printf "${RESET}"
@@ -425,7 +425,7 @@ SUCCESS
   printf "  ${DIM}/cre-skills:cre-route generate an IC memo${RESET}\n"
   printf "  ${DIM}/cre-skills:cre-route normalize this T-12${RESET}\n"
   echo ""
-  printf "  ${BOLD}Skill Categories (112 skills)${RESET}\n"
+  printf "  ${BOLD}Skill Categories (113 skills)${RESET}\n"
   echo ""
   printf "  Deal Pipeline      Screening, underwriting, DD, closing\n"
   printf "  Capital Markets    Loan sizing, cap stack, debt monitoring, refi\n"
