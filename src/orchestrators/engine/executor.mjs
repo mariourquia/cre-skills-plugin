@@ -26,6 +26,12 @@ import {
   isPhaseAlreadyResolved,
 } from './deal-state.mjs';
 import { appendEvent as appendAuditEvent } from './audit-log.mjs';
+import {
+  loadVariantOverlay,
+  applyVariantOverlay,
+  variantExists,
+} from './variant-loader.mjs';
+import { evaluatePhaseGates } from './approval-gate.mjs';
 
 // ---------------------------------------------------------------------------
 // CLI arg parsing
@@ -356,6 +362,16 @@ function aggregatePipelineVerdict(phaseResults, config) {
   const verdictValues = config.checkpointConfig?.verdictValues || {};
   const results = Array.from(phaseResults.values());
 
+  // Any AWAITING_APPROVAL -> AWAITING_APPROVAL (pipeline paused, not killed)
+  if (results.some(r => r.verdict === 'AWAITING_APPROVAL')) {
+    const paused = results.filter(r => r.verdict === 'AWAITING_APPROVAL').map(r => r.phaseId);
+    return {
+      verdict: 'AWAITING_APPROVAL',
+      reason: `Awaiting human approval on: ${paused.join(', ')}`,
+      verdictValues,
+    };
+  }
+
   // Any KILL / FAILED phase -> KILL
   if (results.some(r => r.verdict === 'KILL' || r.verdict === 'FAILED')) {
     return { verdict: 'KILL', reason: 'One or more phases returned KILL or FAILED', verdictValues };
@@ -484,8 +500,22 @@ async function main() {
     console.error(`Pipeline config not found: ${configPath}`);
     process.exit(1);
   }
-  const config = loadJSON(configPath);
+  let config = loadJSON(configPath);
   console.log(`Loaded pipeline: ${config.orchestratorId} v${config.version}`);
+
+  // Variant overlay (v4.4, design doc section 4). When --strategy
+  // matches a variant dir under configs/<pipeline>/variants/, apply
+  // its weight overrides and added approval gates.
+  if (args.strategy && variantExists(pluginRoot, args.pipeline, args.strategy)) {
+    const overlay = loadVariantOverlay(pluginRoot, args.pipeline, args.strategy);
+    config = applyVariantOverlay(config, overlay);
+    console.log(`Applied variant overlay: ${args.strategy}`);
+  } else if (args.strategy) {
+    console.log(
+      `No variant directory at configs/${args.pipeline}/variants/${args.strategy} — ` +
+      `--strategy treated as a threshold-merge hint only.`,
+    );
+  }
 
   // Load thresholds
   const thresholdsPath = join(pluginRoot, 'orchestrators', 'thresholds.json');
@@ -633,6 +663,64 @@ async function main() {
       });
     }
 
+    // Approval gates: if this phase declares any, evaluate against
+    // deal state BEFORE agent dispatch. Blocks the pipeline with
+    // AWAITING_APPROVAL until an operator runs approve-gate.mjs.
+    if (persistentMode && (phase.approval_gates || []).length > 0) {
+      const gateEval = evaluatePhaseGates(phase, dealState);
+      for (const gate of gateEval.newlyOpened) {
+        appendAuditEvent({
+          event: 'gate_opened',
+          actor: 'executor',
+          deal_id: args.dealId,
+          run_id: dealState.run_id,
+          phase_id: phase.phaseId,
+          gate_id: gate.gate_id,
+          approval_matrix_row: gate.approval_matrix_row,
+        });
+      }
+      if (gateEval.blocked) {
+        const blockedGateIds = gateEval.blockingGates.map((g) => g.gate_id).join(', ');
+        console.log(
+          `\n[HALT] Phase "${phase.phaseId}" awaits approval on gate(s): ${blockedGateIds}`,
+        );
+        const haltResult = {
+          phaseId: phase.phaseId,
+          phaseName: phase.name,
+          verdict: 'AWAITING_APPROVAL',
+          verdictDetail: {
+            verdict: 'AWAITING_APPROVAL',
+            blocking_gates: blockedGateIds,
+          },
+          agentCount: (phase.agents || []).length,
+          completedAgents: 0,
+          outputs: {},
+          timestamp: new Date().toISOString(),
+        };
+        phaseResults.set(phase.phaseId, haltResult);
+        writeCheckpoint(sessionId, phase.phaseId, haltResult);
+        recordPhaseVerdict(
+          dealState,
+          phase.phaseId,
+          'AWAITING_APPROVAL',
+          `blocking_gates: ${blockedGateIds}`,
+        );
+        writeState(dealState);
+        appendAuditEvent({
+          event: 'phase_blocked',
+          actor: 'executor',
+          deal_id: args.dealId,
+          run_id: dealState.run_id,
+          phase_id: phase.phaseId,
+          verdict: 'AWAITING_APPROVAL',
+          blocking_gates: blockedGateIds,
+        });
+        break;
+      }
+      // State was mutated by evaluatePhaseGates.openGateIfAbsent; persist.
+      writeState(dealState);
+    }
+
     const result = executePhase(phase, sessionId, pluginRoot, evaluateVerdictFn, effectiveThresholds, phaseResults);
     phaseResults.set(phase.phaseId, result);
 
@@ -715,6 +803,8 @@ async function main() {
     });
   }
 
+  // Exit 0 on PROCEED / CONDITIONAL / AWAITING_APPROVAL, 1 on KILL.
+  // AWAITING_APPROVAL is a pause, not a failure.
   process.exit(pipelineVerdict.verdict === 'KILL' ? 1 : 0);
 }
 
