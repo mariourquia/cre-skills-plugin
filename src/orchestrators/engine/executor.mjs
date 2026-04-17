@@ -17,6 +17,16 @@ import { join, dirname, resolve } from 'node:path';
 import { homedir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 
+import {
+  initState,
+  readState,
+  writeState,
+  recordPhaseStart,
+  recordPhaseVerdict,
+  isPhaseAlreadyResolved,
+} from './deal-state.mjs';
+import { appendEvent as appendAuditEvent } from './audit-log.mjs';
+
 // ---------------------------------------------------------------------------
 // CLI arg parsing
 // ---------------------------------------------------------------------------
@@ -28,6 +38,7 @@ function parseArgs(argv) {
     strategy: null,
     dryRun: false,
     resume: null,
+    dealId: null,
     skipChallenge: false,
     noHandoff: false,
   };
@@ -39,6 +50,7 @@ function parseArgs(argv) {
     if (a === '--strategy' && argv[i + 1]) { args.strategy = argv[++i]; continue; }
     if (a === '--dry-run') { args.dryRun = true; continue; }
     if (a === '--resume' && argv[i + 1]) { args.resume = argv[++i]; continue; }
+    if (a === '--deal-id' && argv[i + 1]) { args.dealId = argv[++i]; continue; }
     if (a === '--skip-challenge') { args.skipChallenge = true; continue; }
     if (a === '--no-handoff') { args.noHandoff = true; continue; }
   }
@@ -310,6 +322,33 @@ function executePhase(phase, sessionId, pluginRoot, evaluateVerdictFn, threshold
 }
 
 // ---------------------------------------------------------------------------
+// Verdict normalization for persistent state
+// ---------------------------------------------------------------------------
+
+function normalizeVerdictForState(verdict) {
+  // deal_state.schema.json accepts: PROCEED, CONDITIONAL, KILL,
+  // AWAITING_APPROVAL, REFUSED. The executor uses a slightly wider
+  // vocabulary (COMPLETED, BLOCKED, FAILED) for phase-local purposes.
+  switch (verdict) {
+    case 'PROCEED':
+    case 'COMPLETED':
+      return 'PROCEED';
+    case 'CONDITIONAL':
+      return 'CONDITIONAL';
+    case 'KILL':
+    case 'BLOCKED':
+    case 'FAILED':
+      return 'KILL';
+    case 'AWAITING_APPROVAL':
+      return 'AWAITING_APPROVAL';
+    case 'REFUSED':
+      return 'REFUSED';
+    default:
+      return 'CONDITIONAL';
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Pipeline verdict aggregation
 // ---------------------------------------------------------------------------
 
@@ -429,7 +468,8 @@ async function main() {
     console.error('  --investor-type <type>     Investor type override');
     console.error('  --strategy <strategy>      Investment strategy override');
     console.error('  --dry-run                  Print execution plan and exit');
-    console.error('  --resume <sessionId>       Resume from checkpoints');
+    console.error('  --deal-id <id>             Persist deal-scoped state and audit log (v4.4)');
+    console.error('  --resume <sessionId>       Legacy checkpoint-only resume');
     console.error('  --skip-challenge           Skip the challenge layer');
     console.error('  --no-handoff               Skip cross-chain handoffs');
     process.exit(1);
@@ -497,7 +537,52 @@ async function main() {
 
   // Session setup
   const sessionId = args.resume || randomUUID();
-  console.log(`\nSession: ${sessionId}${args.resume ? ' (resumed)' : ''}`);
+  const persistentMode = Boolean(args.dealId);
+  console.log(
+    `\nSession: ${sessionId}${args.resume ? ' (resumed)' : ''}` +
+    (persistentMode ? ` | deal_id: ${args.dealId}` : ''),
+  );
+
+  // Persistent deal state (only when --deal-id is provided)
+  let dealState = null;
+  if (persistentMode) {
+    const firstPhaseId = sortedPhases[0]?.phaseId || '';
+    const existing = readState(args.dealId);
+    if (existing) {
+      if (existing.pipeline !== args.pipeline) {
+        console.error(
+          `[ERROR] Deal "${args.dealId}" was initialized with pipeline "${existing.pipeline}" ` +
+          `but --pipeline ${args.pipeline} was passed. Refusing to mix pipelines for one deal.`,
+        );
+        process.exit(3);
+      }
+      dealState = existing;
+      console.log(`[RESUME] Loaded existing deal state (run_id=${dealState.run_id}).`);
+      appendAuditEvent({
+        event: 'resume_started',
+        actor: 'executor',
+        deal_id: args.dealId,
+        run_id: dealState.run_id,
+      });
+    } else {
+      dealState = initState({
+        dealId: args.dealId,
+        pipeline: args.pipeline,
+        variant: args.strategy || undefined,
+        currentPhase: firstPhaseId,
+        runId: sessionId,
+      });
+      writeState(dealState);
+      appendAuditEvent({
+        event: 'pipeline_started',
+        actor: 'executor',
+        deal_id: args.dealId,
+        run_id: dealState.run_id,
+        pipeline: args.pipeline,
+        variant: args.strategy || null,
+      });
+    }
+  }
 
   // Load verdict evaluator
   const evaluateVerdictFn = await loadVerdictEvaluator(pluginRoot);
@@ -506,8 +591,28 @@ async function main() {
   const phaseResults = new Map();
 
   for (const phase of sortedPhases) {
-    // If resuming, check for existing checkpoint
-    if (args.resume) {
+    // Persistent-mode resume: skip phases already resolved.
+    if (persistentMode && isPhaseAlreadyResolved(dealState, phase.phaseId)) {
+      const prior = dealState.verdicts_by_phase[phase.phaseId];
+      console.log(
+        `\n[RESUME] Skipping already-resolved phase: ${phase.phaseId} ` +
+        `(verdict: ${prior.verdict})`,
+      );
+      phaseResults.set(phase.phaseId, {
+        phaseId: phase.phaseId,
+        phaseName: phase.name,
+        verdict: prior.verdict,
+        verdictDetail: { verdict: prior.verdict, resumed: true },
+        agentCount: (phase.agents || []).length,
+        completedAgents: (phase.agents || []).length,
+        outputs: {},
+        timestamp: prior.timestamp,
+      });
+      continue;
+    }
+
+    // Legacy checkpoint-only resume.
+    if (args.resume && !persistentMode) {
       const existing = readCheckpoint(sessionId, phase.phaseId);
       if (existing && (existing.verdict === 'PROCEED' || existing.verdict === 'COMPLETED')) {
         console.log(`\n[RESUME] Skipping completed phase: ${phase.phaseId} (verdict: ${existing.verdict})`);
@@ -516,16 +621,58 @@ async function main() {
       }
     }
 
+    if (persistentMode) {
+      recordPhaseStart(dealState, phase.phaseId);
+      writeState(dealState);
+      appendAuditEvent({
+        event: 'phase_started',
+        actor: 'executor',
+        deal_id: args.dealId,
+        run_id: dealState.run_id,
+        phase_id: phase.phaseId,
+      });
+    }
+
     const result = executePhase(phase, sessionId, pluginRoot, evaluateVerdictFn, effectiveThresholds, phaseResults);
     phaseResults.set(phase.phaseId, result);
 
-    // Write checkpoint
+    // Write checkpoint (legacy side-car, preserved for back-compat).
     const cpPath = writeCheckpoint(sessionId, phase.phaseId, result);
     console.log(`  Checkpoint: ${cpPath}`);
+
+    // Persist deal state + audit event.
+    if (persistentMode) {
+      const normalizedVerdict = normalizeVerdictForState(result.verdict);
+      recordPhaseVerdict(
+        dealState,
+        phase.phaseId,
+        normalizedVerdict,
+        result.verdictDetail?.reason || '',
+      );
+      writeState(dealState);
+      appendAuditEvent({
+        event: 'phase_completed',
+        actor: 'executor',
+        deal_id: args.dealId,
+        run_id: dealState.run_id,
+        phase_id: phase.phaseId,
+        verdict: normalizedVerdict,
+      });
+    }
 
     // If phase verdict is KILL or FAILED, halt pipeline
     if (result.verdict === 'KILL' || result.verdict === 'FAILED') {
       console.log(`\n[HALT] Phase "${phase.phaseId}" returned ${result.verdict}. Pipeline terminated.`);
+      if (persistentMode) {
+        appendAuditEvent({
+          event: 'pipeline_halted',
+          actor: 'executor',
+          deal_id: args.dealId,
+          run_id: dealState.run_id,
+          phase_id: phase.phaseId,
+          verdict: result.verdict,
+        });
+      }
       break;
     }
   }
@@ -557,6 +704,16 @@ async function main() {
 
   // Print summary
   printSummary(pipelineVerdict, phaseResults, sessionId, config);
+
+  if (persistentMode && dealState) {
+    appendAuditEvent({
+      event: 'pipeline_completed',
+      actor: 'executor',
+      deal_id: args.dealId,
+      run_id: dealState.run_id,
+      verdict: pipelineVerdict.verdict,
+    });
+  }
 
   process.exit(pipelineVerdict.verdict === 'KILL' ? 1 : 0);
 }
