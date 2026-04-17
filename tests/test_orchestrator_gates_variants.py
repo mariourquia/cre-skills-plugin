@@ -125,6 +125,9 @@ class ApprovalGateBlocksThenClears(unittest.TestCase):
         )
         self.assertIn("awaits approval on gate(s)", proc1.stdout)
         self.assertIn("value_add.capex_plan_sign_off", proc1.stdout)
+        # Summary must report a pause, not a kill, on AWAITING_APPROVAL.
+        self.assertIn("Pipeline paused, awaiting human approval", proc1.stdout)
+        self.assertNotIn("Deal is not viable at current terms", proc1.stdout)
 
         state = json.loads((self.deal_path() / "state.json").read_text())
         self.assertEqual(

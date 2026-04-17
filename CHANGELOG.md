@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Fixed (v4.4, orchestrator engine)
+- Executor summary now prints a "paused, awaiting human approval"
+  line for `AWAITING_APPROVAL` pipelines instead of falling through
+  to the `KILL`-style "Pipeline terminated. Deal is not viable at
+  current terms." message. Exit code (`0`) and pipeline verdict were
+  already correct; only the summary text was mis-branched.
+
 ### Added (v4.4, orchestrator engine — PR C of 3)
 - **Calculator bridge (design doc section 3).** New
   `src/orchestrators/engine/calculator-bridge.mjs` spawns
