@@ -467,6 +467,8 @@ function printSummary(pipelineVerdict, phaseResults, sessionId, config) {
     console.log('Pipeline cleared. Ready for downstream handoff.');
   } else if (pipelineVerdict.verdict === 'CONDITIONAL') {
     console.log('Pipeline conditionally cleared. Review conditions before proceeding.');
+  } else if (pipelineVerdict.verdict === 'AWAITING_APPROVAL') {
+    console.log('Pipeline paused, awaiting human approval. Resume after gate(s) are approved.');
   } else {
     console.log('Pipeline terminated. Deal is not viable at current terms.');
   }
