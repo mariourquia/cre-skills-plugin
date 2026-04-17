@@ -2,6 +2,26 @@
 
 ## [Unreleased]
 
+### Added (v4.4, orchestrator engine — PR A of 3)
+- **Persistent deal-scoped state (design doc section 1).** New
+  `src/orchestrators/engine/deal-state.mjs` loads, writes (atomic via
+  `.tmp`+rename), and mutates `<home>/.claude/cre-skills/deals/<deal_id>/state.json`
+  against the schema shipped in the v4.4 scaffold. Executor gains
+  `--deal-id <id>`: first run initializes state, subsequent runs
+  resume from `verdicts_by_phase` and skip already-resolved phases.
+  Mismatched `--pipeline` + existing deal refuses (exit 3).
+- **Human-in-the-loop audit log (design doc section 5).** New
+  `src/orchestrators/engine/audit-log.mjs` appends newline-delimited
+  JSON events to `<dealDir>/audit_log.jsonl`. Append-only invariant:
+  never reads-and-rewrites. Every orchestrator event (pipeline_started,
+  phase_started/completed, pipeline_halted/completed, resume_started)
+  carries `timestamp`, `event`, `actor`, `deal_id`, `run_id`.
+- `tests/test_orchestrator_deal_state.py` (5 tests) covers roundtrip,
+  resume, pipeline-mismatch refusal, audit append-only (SHA-256 prefix
+  check), and back-compat (omitting `--deal-id` creates no deal dir).
+- Omitting `--deal-id` keeps the pre-v4.4 ephemeral session flow
+  unchanged — no existing behavior regresses.
+
 ## [4.2.0] - 2026-04-16
 
 ### Added (plugin v4.2.0 — hardening pass 2 close)
