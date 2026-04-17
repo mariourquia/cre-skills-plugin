@@ -541,7 +541,10 @@ cre-skills-plugin/
     uninstall.sh           # Clean removal with data preservation
     verify-install.sh      # 7-check health report
   registry.yaml            # Skill registry with metadata and chain mappings
-  tests/                   # 9 structural integrity tests (pytest)
+  tests/                   # pytest suite: structural integrity, catalog parity,
+                           # release hygiene, docs/surface/version parity, MCP server,
+                           # orchestrator engine (deal state, gates, calculator bridge),
+                           # installer hardening, and end-to-end calculator exec
 ```
 
 ---

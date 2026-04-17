@@ -1,6 +1,16 @@
 # Installation Guide
 
-No coding experience required. Choose the method that matches your setup.
+No coding experience required. Choose the method that matches your setup. See also [docs/WHAT-TO-USE-WHEN.md](WHAT-TO-USE-WHEN.md) for a comparison across supported surfaces and [docs/COMPATIBILITY.md](COMPATIBILITY.md) for the component matrix.
+
+## Support tiers at a glance
+
+| Surface | Tier | Canonical install |
+|---|---|---|
+| Claude Code plugin (CLI or Desktop Code tab) | Core supported | `claude plugin marketplace add mariourquia/cre-skills-plugin && claude plugin install cre-skills@cre-skills` |
+| Claude Desktop Chat tab via local MCP | Core companion | DMG (macOS) or EXE (Windows) installer from the release page |
+| Cowork tab | Reduced secondary | `cre-skills-cowork.zip` from the release page, uploaded via Customize > Browse plugins |
+| Codex / Gemini / Grok / Manus / other agents | Experimental | `cre-skills-portable.zip` extracted into the agent's skills directory (no CI smoke tests on these surfaces -- treat as experimental) |
+| `residential_multifamily` subsystem | Beta RC (v0.6.0) | Ships with every surface above; requires org overlay for decision-grade use (see [Release Maturity](../README.md#release-maturity)) |
 
 ## Quickest Install (non-technical users)
 
@@ -19,7 +29,7 @@ Then paste your deal details. The 113 CRE skills are ready to use.
 > **Important:** On Windows, update Claude Code to the latest version first.
 > Open PowerShell and run: `npm i -g @anthropic-ai/claude-code@latest`
 
-> **Do not use "Add marketplace" in Claude Desktop with this repo URL.** This is not a marketplace plugin. Use the installer or CLI method below instead. See [WHAT-TO-USE-WHEN.md](WHAT-TO-USE-WHEN.md) for details.
+> **Do not paste this repo URL into Claude Desktop Chat tab's "Add marketplace" dialog.** Chat tab's Add marketplace is a separate surface and is not supported by this repo. The Claude Code CLI marketplace (`claude plugin marketplace add ...`) IS supported and is the canonical CLI install path. See [WHAT-TO-USE-WHEN.md](WHAT-TO-USE-WHEN.md) for the distinction.
 
 ---
 
@@ -27,26 +37,26 @@ Then paste your deal details. The 113 CRE skills are ready to use.
 
 ### Claude Code
 
-### One-liner (recommended)
+### Marketplace install (recommended)
 
 ```bash
-claude plugin install --repo mariourquia/cre-skills-plugin
+claude plugin marketplace add mariourquia/cre-skills-plugin
+claude plugin install cre-skills@cre-skills
 ```
 
-### From Release Artifact
+This path uses the Claude Code CLI plugin marketplace backed by `.claude-plugin/marketplace.json` in this repo. It is the same flow referenced by the published release notes. Claude Desktop's Chat tab "Add marketplace" dialog is a different surface and is **not** supported by this repo.
 
-1. Download `cre-skills-claude-code.zip` from the latest [GitHub Release](https://github.com/mariourquia/cre-skills-plugin/releases)
-2. Unzip and install:
-   ```bash
-   unzip cre-skills-claude-code.zip -d cre-skills-plugin
-   claude plugin install --dir cre-skills-plugin
-   ```
-3. Verify:
-   ```bash
-   claude --plugin-dir cre-skills-plugin -p "list available CRE skills"
-   ```
+<details>
+<summary>Advanced: alternative install methods</summary>
 
-### From Source (development)
+**From release artifact (offline-friendly):**
+
+```bash
+unzip cre-skills-claude-code.zip -d cre-skills-plugin
+claude --plugin-dir cre-skills-plugin
+```
+
+**From source (development):**
 
 ```bash
 git clone https://github.com/mariourquia/cre-skills-plugin.git
@@ -55,6 +65,8 @@ claude --plugin-dir .
 ```
 
 Symlinks in the repo root point to `src/`, so the plugin loads correctly from the repo root.
+
+</details>
 
 ### Verification (Claude Code)
 
@@ -72,7 +84,7 @@ Symlinks in the repo root point to `src/`, so the plugin loads correctly from th
 
 ### macOS -- DMG Installer
 
-1. Download [`cre-skills-v4.2.0.dmg`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) from the latest release.
+1. Download [`cre-skills-plugin-v4.2.0.dmg`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) from the latest release.
 2. Open the DMG in Finder.
 3. Double-click **CRE Skills Installer**.
 4. A Terminal window opens -- follow the prompts (no commands to type).
@@ -80,7 +92,7 @@ Symlinks in the repo root point to `src/`, so the plugin loads correctly from th
 
 ### Windows -- EXE Installer
 
-1. Download [`cre-skills-v4.2.0-setup.exe`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) from the latest release.
+1. Download [`cre-skills-plugin-v4.2.0-setup.exe`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) from the latest release.
 2. Run the installer. Windows SmartScreen may warn you -- click **More info**, then **Run anyway** (the installer is not code-signed yet).
 3. Follow the wizard. Default location: `%APPDATA%\cre-skills-plugin`.
 4. Restart Claude Desktop.
@@ -247,11 +259,12 @@ cosign verify-blob --certificate cre-skills-*.cert \
 
 - Start a **new** conversation. The SessionStart hook only fires at conversation start.
 - Confirm the plugin appears as Active: `claude plugin list`
-- If not listed: `claude plugin add /path/to/cre-skills-plugin`
+- If not listed: `claude plugin marketplace add mariourquia/cre-skills-plugin && claude plugin install cre-skills@cre-skills`
+- Or run from a local checkout: `claude --plugin-dir /path/to/cre-skills-plugin`
 
-### "claude plugin add" not found
+### "claude plugin marketplace" not found
 
-Your CLI version may predate the `plugin` subcommand. Use:
+Your CLI version may predate the `plugin marketplace` subcommand. Use:
 
 ```bash
 claude --plugin-dir /path/to/cre-skills-plugin

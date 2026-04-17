@@ -12,38 +12,36 @@ The fastest way to get started on any platform.
 
 ### macOS
 
-Download [`cre-skills-v4.2.0.dmg`](https://github.com/mariourquia/cre-skills-plugin/releases/latest), open it, and double-click **CRE Skills Installer**. The installer auto-detects Claude Desktop, Claude Code, or both.
+Download [`cre-skills-plugin-v4.2.0.dmg`](https://github.com/mariourquia/cre-skills-plugin/releases/latest), open it, and double-click **CRE Skills Installer**. The installer auto-detects Claude Desktop, Claude Code, or both.
 
 ### Windows
 
-Download [`cre-skills-v4.2.0-setup.exe`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) and run the wizard. No admin privileges required. SmartScreen may warn you -- click "More info" > "Run anyway".
+Download [`cre-skills-plugin-v4.2.0-setup.exe`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) and run the wizard. No admin privileges required. SmartScreen may warn you -- click "More info" > "Run anyway".
 
 After either installer finishes, restart Claude Desktop or start a new Claude Code session.
 
 ---
 
-## Alternative: Claude Code CLI
+## Alternative: Claude Code CLI marketplace
 
-For developers who prefer the command line:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/mariourquia/cre-skills-plugin/main/scripts/install.sh | bash
-```
-
-Or add directly:
+For Claude Code users (CLI or Desktop Code tab). This is the canonical CLI install:
 
 ```bash
-claude plugin add github:mariourquia/cre-skills-plugin
+claude plugin marketplace add mariourquia/cre-skills-plugin
+claude plugin install cre-skills@cre-skills
 ```
+
+This is the same flow the release notes reference. The "marketplace" here is the Claude Code CLI plugin marketplace -- **not** the "Add marketplace" dialog in Claude Desktop Chat tab (that path is not supported by this repo, see [WHAT-TO-USE-WHEN.md](WHAT-TO-USE-WHEN.md)).
 
 ## Local Development / Testing
 
 ```bash
 git clone https://github.com/mariourquia/cre-skills-plugin.git
-claude plugin add --plugin-dir ./cre-skills-plugin
+cd cre-skills-plugin
+claude --plugin-dir .
 ```
 
-Changes to src/skills/ and src/commands/ take effect immediately without reinstalling.
+Changes to `src/skills/` and `src/commands/` take effect immediately without reinstalling.
 
 ---
 
@@ -142,13 +140,14 @@ git clone https://github.com/mariourquia/cre-skills-plugin.git ~/.claude/plugins
 ### Step 2: Register with Claude Code
 
 ```bash
-claude plugin add ~/.claude/plugins/cre-skills-plugin
+claude --plugin-dir ~/.claude/plugins/cre-skills-plugin
 ```
 
-Or, if `claude plugin add` is not yet available in your CLI version:
+For the marketplace-backed flow:
 
 ```bash
-claude --plugin-dir ~/.claude/plugins/cre-skills-plugin
+claude plugin marketplace add mariourquia/cre-skills-plugin
+claude plugin install cre-skills@cre-skills
 ```
 
 To load the plugin automatically in every session, add the `plugin-dir` to your Claude Code settings file (`~/.claude/settings.json`):
@@ -179,7 +178,7 @@ chmod +x ~/.claude/plugins/cre-skills-plugin/src/calculators/*.py
 
 For Claude Desktop users, the DMG is the simplest path.
 
-1. Download `cre-skills-v4.2.0.dmg` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
+1. Download `cre-skills-plugin-v4.2.0.dmg` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
 2. Open the DMG.
 3. Double-click "CRE Skills Installer".
 4. Follow the Terminal prompts. The installer detects Claude Code and Claude Desktop and configures each automatically.
@@ -189,7 +188,7 @@ For Claude Desktop users, the DMG is the simplest path.
 
 For Windows users with Claude Code CLI or Claude Desktop.
 
-1. Download `cre-skills-v4.2.0-setup.exe` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
+1. Download `cre-skills-plugin-v4.2.0-setup.exe` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
 2. Run the installer. Windows SmartScreen may show a warning -- click "More info" then "Run anyway" (the installer is not yet code-signed).
 3. Follow the wizard. Default install location: `%APPDATA%\cre-skills-plugin`.
 4. The installer automatically detects Claude Code and Claude Desktop and configures each.
@@ -249,14 +248,19 @@ There is no separate VS Code extension or JetBrains plugin.
 
 ### What Changed
 
-| Area | v1.0.0 | v2.0.0 | v3.0.0 | v4.0.0 |
-|------|--------|--------|--------|--------|
-| Skills | 80 | 99 | 105 | 112 |
-| License | MIT | Apache 2.0 | Apache 2.0 | Apache 2.0 |
-| Hooks | SessionStart | SessionStart + PostToolUse + Stop | Same | Same |
-| Calculators | 0 | 11 | 11 | 12 |
-| Commands | 3 | 7 | 9 | 11 |
-| Source layout | flat (root) | flat (root) | flat (root) | `src/` directory |
+| Area | v1.0.0 | v2.0.0 | v3.0.0 | v4.0.0 | v4.2.0 |
+|------|--------|--------|--------|--------|--------|
+| Skills | 80 | 99 | 105 | 112 | 113 |
+| Agents | -- | -- | -- | 54 | 54 |
+| License | MIT | Apache 2.0 | Apache 2.0 | Apache 2.0 | Apache 2.0 |
+| Hooks | SessionStart | SessionStart + PostToolUse + Stop | Same | Same | Same |
+| Calculators | 0 | 11 | 11 | 12 | 12 |
+| Commands | 3 | 7 | 9 | 11 | 11 |
+| Source layout | flat (root) | flat (root) | flat (root) | `src/` directory | `src/` directory |
+| MCP server | -- | -- | -- | added (Desktop Chat tab) | same |
+| Catalog | -- | -- | -- | added (`src/catalog/catalog.yaml`) | same |
+
+v4.1.x adds marketplace install + release asset parity (DMG, EXE, desktop zip, portable zip, cosign signing). v4.2.0 closes residential_multifamily hardening pass 2 (sealed-close gating, finance-critical placeholder scanner, executive output contract).
 
 ### License Change Notice
 
@@ -283,7 +287,7 @@ curl -fsSL https://raw.githubusercontent.com/mariourquia/cre-skills-plugin/main/
 ```bash
 cd /path/to/cre-skills-plugin
 git pull --ff-only origin main
-claude plugin add .
+claude --plugin-dir .
 ```
 
 Your `~/.cre-skills/` data (config, brand guidelines, telemetry, feedback) is never touched by `git pull`. It is safe.
@@ -339,11 +343,12 @@ Machine-readable output for CI:
 
 - Start a **new** conversation. The SessionStart hook only fires at conversation start.
 - Confirm the plugin appears as Active: `claude plugin list`
-- If not listed: `claude plugin add /path/to/cre-skills-plugin`
+- If not listed: `claude plugin marketplace add mariourquia/cre-skills-plugin && claude plugin install cre-skills@cre-skills`
+- Or run from a local checkout: `claude --plugin-dir /path/to/cre-skills-plugin`
 
-### "claude plugin add" not found
+### "claude plugin marketplace" not found
 
-Your CLI version may predate the `plugin` subcommand. Use:
+Your CLI version may predate the `plugin marketplace` subcommand. Use:
 
 ```bash
 claude --plugin-dir /path/to/cre-skills-plugin

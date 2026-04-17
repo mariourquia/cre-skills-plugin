@@ -391,17 +391,19 @@ jobs:
           cat >> /tmp/release-notes.md << 'INSTALL'
           ## Install
 
-          **Marketplace (recommended):**
+          **Claude Code marketplace (recommended -- CLI or Desktop Code tab):**
           ```
           claude plugin marketplace add mariourquia/cre-skills-plugin
-          claude plugin install cre-skills@cre-skills-plugin
+          claude plugin install cre-skills@cre-skills
           ```
 
-          **Installer:** Download the DMG (macOS) or EXE (Windows) from the assets below.
+          **Claude Desktop Chat tab:** Download the DMG (macOS) or EXE (Windows) installer from the assets below. Do not paste this repo URL into Desktop Chat's "Add marketplace" dialog -- that surface is not supported by this repo.
 
-          **Cowork:** Download `cre-skills-cowork.zip` and upload via Customize > Browse plugins.
+          **Cowork tab:** Download cre-skills-cowork.zip and upload via Customize > Browse plugins.
 
-          See [docs/INSTALL.md](https://github.com/mariourquia/cre-skills-plugin/blob/main/docs/INSTALL.md) for all install methods.
+          **Experimental (Codex / Gemini / Grok / Manus):** Download cre-skills-portable.zip and extract skills/ into your agent's skills directory. No CI smoke tests on these surfaces.
+
+          See [docs/INSTALL.md](https://github.com/mariourquia/cre-skills-plugin/blob/main/docs/INSTALL.md) for all install methods and [docs/WHAT-TO-USE-WHEN.md](https://github.com/mariourquia/cre-skills-plugin/blob/main/docs/WHAT-TO-USE-WHEN.md) for the CLI vs Desktop Chat distinction.
 
           INSTALL
 
