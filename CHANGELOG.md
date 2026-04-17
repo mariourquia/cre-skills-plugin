@@ -2,6 +2,38 @@
 
 ## [Unreleased]
 
+### Added (v4.4, orchestrator engine — PR B of 3)
+- **Variant loader (design doc section 4).** New
+  `src/orchestrators/engine/variant-loader.mjs` resolves
+  `src/orchestrators/configs/<pipeline>/variants/<variant>/phases.json`
+  and overlays it onto the base config. Applies
+  `phase_weight_overrides` and merges `added_approval_gates` into the
+  target phase's `approval_gates` array. Unknown phase-id overrides
+  raise — authoring bugs fail loudly, not silently. Unknown variant
+  slug (no directory) is tolerated with a log line.
+- **Typed approval gates (design doc section 2).** New
+  `src/orchestrators/engine/approval-gate.mjs` evaluates any gate
+  declared on the current phase against `dealState.approval_gate_log`.
+  First encounter opens the gate as `pending` and fires
+  `gate_opened` audit event. Any gate with status `pending|denied|expired`
+  blocks the phase with verdict `AWAITING_APPROVAL`; agents do not
+  dispatch. Executor exits 0 on AWAITING_APPROVAL (pipeline paused,
+  not killed).
+- **Out-of-band gate clearance.** New CLI
+  `src/orchestrators/engine/approve-gate.mjs` flips a gate record to
+  `approved`, `approved_with_conditions`, `denied`, or `expired`,
+  persists state, and appends the matching audit event
+  (`gate_approved`, `gate_approved_with_conditions`, `gate_denied`,
+  `gate_expired`). Kept separate from `executor.mjs` so the executor
+  never approves its own gates.
+- Executor applies the variant overlay after config load when
+  `--strategy` matches a variant directory. Pipeline-level verdict
+  vocabulary extended with `AWAITING_APPROVAL`.
+- `tests/test_orchestrator_gates_variants.py` (3 tests). Covers
+  weight override (underwriting 0.2 → 0.3 in dry run), unknown
+  variant tolerated, and the full block→approve→resume→complete
+  cycle with audit append-only verification across the approval.
+
 ### Added (v4.4, orchestrator engine — PR A of 3)
 - **Persistent deal-scoped state (design doc section 1).** New
   `src/orchestrators/engine/deal-state.mjs` loads, writes (atomic via
