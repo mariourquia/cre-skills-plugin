@@ -32,6 +32,7 @@ import {
   variantExists,
 } from './variant-loader.mjs';
 import { evaluatePhaseGates } from './approval-gate.mjs';
+import { invokeToolCalls } from './calculator-bridge.mjs';
 
 // ---------------------------------------------------------------------------
 // CLI arg parsing
@@ -40,6 +41,7 @@ import { evaluatePhaseGates } from './approval-gate.mjs';
 function parseArgs(argv) {
   const args = {
     pipeline: null,
+    configPath: null,
     investorType: null,
     strategy: null,
     dryRun: false,
@@ -52,6 +54,7 @@ function parseArgs(argv) {
   for (let i = 2; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--pipeline' && argv[i + 1]) { args.pipeline = argv[++i]; continue; }
+    if (a === '--config-path' && argv[i + 1]) { args.configPath = argv[++i]; continue; }
     if (a === '--investor-type' && argv[i + 1]) { args.investorType = argv[++i]; continue; }
     if (a === '--strategy' && argv[i + 1]) { args.strategy = argv[++i]; continue; }
     if (a === '--dry-run') { args.dryRun = true; continue; }
@@ -239,7 +242,7 @@ function runHandoffRouter(pipelineVerdict, crossChainHandoffs) {
 // Phase execution
 // ---------------------------------------------------------------------------
 
-function executePhase(phase, sessionId, pluginRoot, evaluateVerdictFn, thresholds, phaseResults) {
+function executePhase(phase, sessionId, pluginRoot, evaluateVerdictFn, thresholds, phaseResults, toolResults) {
   const phaseId = phase.phaseId;
   console.log(`\n====== Phase: ${phase.name} (${phaseId}) [weight: ${phase.weight}] ======`);
 
@@ -321,6 +324,7 @@ function executePhase(phase, sessionId, pluginRoot, evaluateVerdictFn, threshold
     agentCount: agents.length,
     completedAgents: Object.values(agentOutputs).filter(o => o.status === 'COMPLETED').length,
     outputs: agentOutputs,
+    tool_results: toolResults || {},
     timestamp: new Date().toISOString(),
   };
 
@@ -477,10 +481,11 @@ function printSummary(pipelineVerdict, phaseResults, sessionId, config) {
 async function main() {
   const args = parseArgs(process.argv);
 
-  if (!args.pipeline) {
+  if (!args.pipeline && !args.configPath) {
     console.error('Usage: node executor.mjs --pipeline <name> [options]');
     console.error('Options:');
-    console.error('  --pipeline <name>          Pipeline config name (required)');
+    console.error('  --pipeline <name>          Pipeline config name (required unless --config-path)');
+    console.error('  --config-path <path>       Absolute path to a pipeline config (test fixtures / custom pipelines)');
     console.error('  --investor-type <type>     Investor type override');
     console.error('  --strategy <strategy>      Investment strategy override');
     console.error('  --dry-run                  Print execution plan and exit');
@@ -494,14 +499,20 @@ async function main() {
   const pluginRoot = resolvePluginRoot();
   console.log(`Plugin root: ${pluginRoot}`);
 
-  // Load pipeline config
-  const configPath = join(pluginRoot, 'orchestrators', 'configs', `${args.pipeline}.json`);
+  // Load pipeline config. --config-path overrides the registry lookup
+  // for test fixtures and for experimenting with custom pipelines.
+  const configPath = args.configPath
+    ? args.configPath
+    : join(pluginRoot, 'orchestrators', 'configs', `${args.pipeline}.json`);
   if (!existsSync(configPath)) {
     console.error(`Pipeline config not found: ${configPath}`);
     process.exit(1);
   }
   let config = loadJSON(configPath);
   console.log(`Loaded pipeline: ${config.orchestratorId} v${config.version}`);
+  // When --config-path was used without --pipeline, derive pipeline
+  // id from the config itself for the downstream audit/state code.
+  if (!args.pipeline) args.pipeline = config.orchestratorId;
 
   // Variant overlay (v4.4, design doc section 4). When --strategy
   // matches a variant dir under configs/<pipeline>/variants/, apply
@@ -664,8 +675,9 @@ async function main() {
     }
 
     // Approval gates: if this phase declares any, evaluate against
-    // deal state BEFORE agent dispatch. Blocks the pipeline with
-    // AWAITING_APPROVAL until an operator runs approve-gate.mjs.
+    // deal state BEFORE agent dispatch or tool calls. Blocks the
+    // pipeline with AWAITING_APPROVAL until an operator runs
+    // approve-gate.mjs.
     if (persistentMode && (phase.approval_gates || []).length > 0) {
       const gateEval = evaluatePhaseGates(phase, dealState);
       for (const gate of gateEval.newlyOpened) {
@@ -721,7 +733,43 @@ async function main() {
       writeState(dealState);
     }
 
-    const result = executePhase(phase, sessionId, pluginRoot, evaluateVerdictFn, effectiveThresholds, phaseResults);
+    // Tool calls (v4.4, design doc section 3). Phases may declare a
+    // `tool_calls` list; the calculator bridge invokes each and feeds
+    // the results to agent dispatch via executePhase.
+    const toolResults = {};
+    if ((phase.tool_calls || []).length > 0) {
+      const bridgeOut = invokeToolCalls(phase, { pluginRoot });
+      Object.assign(toolResults, bridgeOut.results);
+      for (const alias of Object.keys(bridgeOut.results)) {
+        console.log(`  TOOL: ${alias} ok`);
+        if (persistentMode) {
+          appendAuditEvent({
+            event: 'calculator_invoked',
+            actor: 'executor',
+            deal_id: args.dealId,
+            run_id: dealState.run_id,
+            phase_id: phase.phaseId,
+            alias,
+          });
+        }
+      }
+      for (const err of bridgeOut.errors) {
+        console.log(`  TOOL: ${err.alias} FAILED — ${err.error.message}`);
+        if (persistentMode) {
+          appendAuditEvent({
+            event: 'calculator_failed',
+            actor: 'executor',
+            deal_id: args.dealId,
+            run_id: dealState.run_id,
+            phase_id: phase.phaseId,
+            alias: err.alias,
+            error: err.error.message,
+          });
+        }
+      }
+    }
+
+    const result = executePhase(phase, sessionId, pluginRoot, evaluateVerdictFn, effectiveThresholds, phaseResults, toolResults);
     phaseResults.set(phase.phaseId, result);
 
     // Write checkpoint (legacy side-car, preserved for back-compat).
