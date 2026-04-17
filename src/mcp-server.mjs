@@ -62,6 +62,24 @@ const SKILLS_DIR = join(__dirname, "skills");
 const WORKSPACE_DIR = join(homedir(), ".cre-skills", "workspaces");
 const CONFIG_DIR = join(homedir(), ".cre-skills");
 
+// Resolve plugin version from .claude-plugin/plugin.json (installed or repo layout)
+// so the feedback payload and MCP SERVER_INFO track the real plugin version.
+const PLUGIN_VERSION = (() => {
+  for (const candidate of [
+    join(__dirname, ".claude-plugin", "plugin.json"),
+    join(__dirname, "..", ".claude-plugin", "plugin.json"),
+  ]) {
+    if (existsSync(candidate)) {
+      try {
+        return JSON.parse(readFileSync(candidate, "utf-8")).version || "unknown";
+      } catch {
+        // fall through to next candidate
+      }
+    }
+  }
+  return "unknown";
+})();
+
 // ---------------------------------------------------------------------------
 // Catalog
 // ---------------------------------------------------------------------------
@@ -239,7 +257,7 @@ function toolSendFeedback(args) {
     submission_id: `fb_${randomUUID().replace(/-/g, "").slice(0, 16)}`,
     submission_type: args.type || "general",
     timestamp: new Date().toISOString(),
-    plugin_version: "4.0.0",
+    plugin_version: PLUGIN_VERSION,
     message: (args.message || "").slice(0, 5000),
     rating: args.rating || null,
     severity: args.severity || null,
@@ -698,7 +716,7 @@ const TOOL_HANDLERS = {
 
 const SERVER_INFO = {
   name: "cre-skills",
-  version: "4.0.0",
+  version: PLUGIN_VERSION,
 };
 
 const CAPABILITIES = {

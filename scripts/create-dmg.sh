@@ -370,10 +370,11 @@ cat > "$STAGING_DIR/$DMG_NAME/README.txt" << README
     ║                                                  ║
     ╚══════════════════════════════════════════════════╝
 
-    Alternative: CLI install
-      claude plugin install --file /path/to/cre-skills-plugin
+    Alternative: Claude Code CLI (marketplace)
+      claude plugin marketplace add mariourquia/cre-skills-plugin
+      claude plugin install cre-skills@cre-skills
 
-    112 skills | 54 agents | 6 workflow chains | 12 calculators
+    113 skills | 54 agents | 6 workflow chains | 12 calculators
     Deal sourcing, underwriting, capital markets, leasing,
     asset management, investor relations, and more.
 

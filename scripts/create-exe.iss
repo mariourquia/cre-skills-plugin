@@ -47,7 +47,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Messages]
 WelcomeLabel1=CRE Skills Plugin for Claude
-WelcomeLabel2=This will install the CRE Skills Plugin v{#AppVersion} on your computer.%n%n112 institutional-grade CRE skills covering deal sourcing, underwriting, capital markets, leasing, asset management, investor relations, development, and more.%n%nClaude Code: 112 skills, 54 agents, hooks, commands.%nClaude Desktop: 21 MCP tools (route, workspace, feedback, customize).%n%nApache License 2.0
+WelcomeLabel2=This will install the CRE Skills Plugin v{#AppVersion} on your computer.%n%n113 institutional-grade CRE skills covering deal sourcing, underwriting, capital markets, leasing, asset management, investor relations, development, and more.%n%nClaude Code: 113 skills, 54 agents, hooks, commands.%nClaude Desktop: 21 MCP tools (route, workspace, feedback, customize).%n%nApache License 2.0
 
 ; ──────────────────────────────────────────────────────────────────────
 ; Files -- explicit whitelist (no .git, dist, .local, tests, etc.)

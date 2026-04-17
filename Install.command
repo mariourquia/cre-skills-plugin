@@ -164,8 +164,8 @@ cat << 'HEADER'
 HEADER
 printf "${RESET}"
 
-printf "${BLUE}  Plugin Installer v4.0.0${RESET}\n"
-printf "${DIM}  112 skills | 54 agents | 8 MCP tools | 6 workflow chains${RESET}\n"
+printf "${BLUE}  Plugin Installer v4.2.0${RESET}\n"
+printf "${DIM}  113 skills | 54 agents | 8 MCP tools | 6 workflow chains${RESET}\n"
 echo ""
 
 # ── Timing and structured telemetry tracking ────────────────────────
@@ -464,7 +464,7 @@ MCP_OK="false"
 
 VERIFY_FAILS=0
 green "  Verification:"
-echo "    Skills: $SKILL_COUNT (expected 112)"
+echo "    Skills: $SKILL_COUNT (expected 113)"
 echo "    Agents: $AGENT_COUNT (expected 54)"
 echo "    MCP server: $MCP_OK"
 
@@ -507,13 +507,13 @@ printf "  ${BOLD}Quick Start${RESET}\n"
 echo ""
 printf "  ${CYAN}/cre-skills:cre-route${RESET}         Route any CRE task to the right skill\n"
 printf "  ${CYAN}/cre-skills:deal-intake${RESET}       Start a deal workspace\n"
-printf "  ${CYAN}/cre-skills:navigator${RESET}         Browse all 112 skills\n"
+printf "  ${CYAN}/cre-skills:navigator${RESET}         Browse all 113 skills\n"
 printf "  ${CYAN}/cre-skills:cre-agents${RESET}        List 54 expert agents\n"
 echo ""
 
 printf "  ${BOLD}Where It Works${RESET}\n"
 echo ""
-printf "  ${GREEN}Claude Code${RESET}     112 skills + 54 agents + hooks\n"
+printf "  ${GREEN}Claude Code${RESET}     113 skills + 54 agents + hooks\n"
 printf "  ${GREEN}Claude Desktop${RESET}  8 MCP tools (route, list, workspace, feedback)\n"
 echo ""
 

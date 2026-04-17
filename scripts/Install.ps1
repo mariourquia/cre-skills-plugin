@@ -252,7 +252,7 @@ Write-Host "" -ForegroundColor Cyan
 Write-Host "  Commercial Real Estate Skills for Claude" -ForegroundColor Cyan
 
 Write-Blue  "  Plugin Installer v4.2.0"
-Write-Dim   "  112 skills | 54 agents | 6 workflow chains"
+Write-Dim   "  113 skills | 54 agents | 6 workflow chains"
 Write-Host  ""
 
 # ── Verify plugin files exist ───────────────────────────────────────
@@ -380,7 +380,8 @@ if (-not $HasNode) {
     exit 1
 }
 
-# Detect python version and source
+# Detect python version and source + warn with remediation if absent
+$PythonOk = $false
 try {
     $pyCmd = Get-Command python3 -ErrorAction SilentlyContinue
     if (-not $pyCmd) { $pyCmd = Get-Command python -ErrorAction SilentlyContinue }
@@ -391,8 +392,25 @@ try {
         elseif ($pySource -match 'chocolatey') { $PythonSource = "chocolatey" }
         elseif ($pySource -match 'winget|scoop') { $PythonSource = "winget" }
         else { $PythonSource = "system" }
+
+        # Parse major.minor — the calculators need 3.10+
+        if ($PythonVersion -match '^(\d+)\.(\d+)') {
+            $pyMajor = [int]$Matches[1]
+            $pyMinor = [int]$Matches[2]
+            if ($pyMajor -ge 3 -and $pyMinor -ge 10) {
+                $PythonOk = $true
+                Write-Green "  Python $PythonVersion found ($PythonSource)"
+            }
+        }
     }
 } catch {}
+
+if (-not $PythonOk) {
+    Write-Yellow "  Python 3.10+ not found. The 12 calculator scripts under src/calculators/ will not run until Python is installed."
+    Write-Dim   "  Install: winget install Python.Python.3.12  (or download from python.org)"
+    Write-Dim   "  Skills + MCP server + workspace features continue to work without Python."
+    Add-EdgeCase "python_missing"
+}
 
 # Detect node version and source
 try {
@@ -405,6 +423,29 @@ try {
         else { $NodeSource = "system" }
     }
 } catch {}
+
+# Detect npm. npm ships with the Node.js installer so this should be present when
+# Node is; the explicit check catches partial installs and lets us surface a clean
+# remediation path for users who might want to re-install Claude Code via npm.
+$NpmOk = $false
+try {
+    $npmCmd = Get-Command npm -ErrorAction SilentlyContinue
+    if (-not $npmCmd) {
+        $npmShim = Join-Path $env:APPDATA "npm\npm.cmd"
+        if (Test-Path $npmShim) { $npmCmd = @{ Source = $npmShim } }
+    }
+    if ($npmCmd) {
+        $NpmOk = $true
+        Write-Green "  npm found: $($npmCmd.Source)"
+    }
+} catch {}
+
+if (-not $NpmOk) {
+    Write-Yellow "  npm not found. This is unusual if Node.js is installed (they ship together)."
+    Write-Dim   "  To (re-)install Node.js + npm: winget install OpenJS.NodeJS.LTS"
+    Write-Dim   "  Without npm you cannot update Claude Code via ``npm i -g @anthropic-ai/claude-code@latest``."
+    Add-EdgeCase "npm_missing"
+}
 
 # At least one must exist
 if (-not $HasClaudeCode -and -not $HasClaudeDesktop -and -not $HasClaudeHome) {
@@ -704,7 +745,7 @@ $verifyFails = 0
 $cacheSkills = Join-Path $PluginCachePath "skills"
 if (Test-Path $cacheSkills) {
     $skillCount = (Get-ChildItem $cacheSkills -Directory -ErrorAction SilentlyContinue | Measure-Object).Count
-    Write-Green "  Skills: $skillCount (expected 112)"
+    Write-Green "  Skills: $skillCount (expected 113)"
 } else {
     Write-Red "  Plugin cache missing skills directory: $cacheSkills"
     $verifyFails++
@@ -824,7 +865,7 @@ Write-Host ""
 
 Write-Bold "  What's Included"
 Write-Host ""
-Write-Host "  112 skills across 18 categories" -ForegroundColor Green
+Write-Host "  113 skills across 18 categories" -ForegroundColor Green
 Write-Host "   54 expert agents (Pension Fund, PE, REIT, Risk Mgr, ...)" -ForegroundColor Green
 Write-Host "    6 workflow chains (Acquisition, Capital Stack, Hold, ...)" -ForegroundColor Green
 Write-Host ""
