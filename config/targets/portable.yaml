@@ -11,6 +11,11 @@ skills:
     - status
     - category
     - targets
+  exclude_skills:
+    # residential_multifamily ships only via Claude Code / Desktop surfaces;
+    # its overlay contract is not portable-safe. Pinned by
+    # tests/install_smoke/test_portable_zip.py::PORTABLE_EXCLUDED_SKILL_SLUGS.
+    - residential_multifamily
 
 agents:
   required_fields:

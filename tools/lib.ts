@@ -19,6 +19,7 @@ export interface TargetProfile {
   skills: {
     allowed_frontmatter: string[] | "all";
     strip_fields: string[];
+    exclude_skills?: string[];
   };
   agents: {
     required_fields: string[];

@@ -29,7 +29,12 @@ export function normalizeSkills(target: TargetName, profile: TargetProfile): Nor
     .filter((d) => d.isDirectory())
     .map((d) => d.name);
 
+  const excluded = new Set(profile.skills.exclude_skills ?? []);
+
   for (const slug of skillDirs) {
+    if (excluded.has(slug)) {
+      continue;
+    }
     const skillSrc = resolve(srcSkills, slug);
     const skillOut = resolve(outSkills, slug);
     mkdirSync(skillOut, { recursive: true });
