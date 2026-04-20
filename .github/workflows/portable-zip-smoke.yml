@@ -1,0 +1,48 @@
+name: Portable ZIP Smoke
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/package/package-portable.ts'
+      - 'tools/package/shared.ts'
+      - 'tools/build.ts'
+      - 'tools/build-target.ts'
+      - 'tools/lib.ts'
+      - 'tools/normalize/**'
+      - 'config/targets/portable.yaml'
+      - 'src/skills/**'
+      - 'tests/install_smoke/test_portable_zip.py'
+      - '.github/workflows/portable-zip-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  portable-zip-smoke:
+    name: Portable ZIP structural smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+
+      - name: Install tool deps (tsx + packaging libs)
+        working-directory: tools
+        run: npm ci || npm install
+
+      - name: Build portable target
+        run: npx --prefix tools tsx tools/build.ts --target portable
+
+      - name: Package portable ZIP
+        run: npx --prefix tools tsx tools/package/package-portable.ts
+
+      - name: Run portable ZIP structural smoke test
+        run: python -m pytest tests/install_smoke/test_portable_zip.py -v

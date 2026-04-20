@@ -9,7 +9,7 @@ No coding experience required. Choose the method that matches your setup. See al
 | Claude Code plugin (CLI or Desktop Code tab) | Core supported | `claude plugin marketplace add mariourquia/cre-skills-plugin && claude plugin install cre-skills@cre-skills` |
 | Claude Desktop Chat tab via local MCP | Core companion | DMG (macOS) or EXE (Windows) installer from the release page |
 | Cowork tab | Reduced secondary | `cre-skills-cowork.zip` from the release page, uploaded via Customize > Browse plugins |
-| Codex / Gemini / Grok / Manus / other agents | Experimental | `cre-skills-portable.zip` extracted into the agent's skills directory (no CI smoke tests on these surfaces -- treat as experimental) |
+| Codex / Gemini / Grok / Manus / other agents | Experimental | `cre-skills-portable.zip` extracted into the agent's skills directory. CI runs a structural smoke test (`tests/install_smoke/test_portable_zip.py`) that validates ZIP layout, skills-tree mirroring, frontmatter contract, and runtime-file exclusion -- but **not** cross-runtime invocation. Treat as experimental until you verify loading on your specific runtime. |
 | `residential_multifamily` subsystem | Beta RC (v0.6.0) | Ships with every surface above; requires org overlay for decision-grade use (see [Release Maturity](../README.md#release-maturity)) |
 
 ## Quickest Install (non-technical users)

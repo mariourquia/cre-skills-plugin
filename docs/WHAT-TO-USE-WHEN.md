@@ -20,7 +20,7 @@ See [`../README.md#release-maturity`](../README.md#release-maturity) for the sup
 | **Claude Code (CLI or Desktop Code tab)** | `claude plugin marketplace add mariourquia/cre-skills-plugin` + `claude plugin install cre-skills@cre-skills` | Full plugin: skills, agents, workflow chains, orchestrators, slash commands, SessionStart hook, telemetry |
 | **Claude Desktop Chat tab** | DMG (macOS) or EXE (Windows) installer from the [releases page](https://github.com/mariourquia/cre-skills-plugin/releases/latest) | Local MCP server with tools for routing, skill detail, workspace management, feedback |
 | **Cowork tab** | Download `cre-skills-cowork.zip` from the [releases page](https://github.com/mariourquia/cre-skills-plugin/releases/latest), upload via Customize > Browse plugins | Skills + agents + commands only. No MCP server, no orchestrators, no calculators. |
-| **Codex / Gemini / Grok / Manus / other agents** | Download `cre-skills-portable.zip`, extract `skills/` into your agent's skills directory | Experimental. Ships SKILL.md files only. CLI-specific registration, calculator execution, and orchestrator support are not tested on these surfaces. |
+| **Codex / Gemini / Grok / Manus / other agents** | Download `cre-skills-portable.zip`, extract `skills/` into your agent's skills directory | Experimental. Ships SKILL.md files only. A structural smoke test (`tests/install_smoke/test_portable_zip.py` + the `Portable ZIP Smoke` workflow) validates the ZIP layout, skills-tree mirroring, and frontmatter contract — but **cross-runtime invocation** (the skill actually loading and running inside Codex / Gemini / Grok / Manus) is not tested. Treat as unsupported until you verify it yourself on your runtime. |
 
 ---
 
