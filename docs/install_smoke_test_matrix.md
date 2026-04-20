@@ -20,7 +20,7 @@ Legend:
 | **Manual MCP config (Claude Desktop Chat tab)** | covered — `test_plugin_integrity.py::TestMcpServer` (initialize, tools list, routing) + `node --check` on `mcp-server.mjs` | manual | manual | gap | partial (JSON parse check only) | `claude_desktop_config.json` hand-edit; 19 operational tools + 2 aliases |
 | **`install.sh` one-liner** | partial — platform detection + dep checks run but no post-install assertion | gap | gap | gap | partial (checks Python 3, Node 18+, npm, git) | Darwin / Linux / WSL |
 | **Local dev via `claude --plugin-dir`** | covered (implicit via `verify-install.sh`) | n/a (just re-pull) | n/a | n/a | n/a | symlink resolution |
-| **Portable ZIP for Codex / Gemini / Grok / Manus** | gap | gap | gap | gap | gap | advertised via `docs/INSTALL.md`; ships SKILL.md files but no CLI-specific registration, calculator execution, or orchestrator test has been run on these surfaces |
+| **Portable ZIP for Codex / Gemini / Grok / Manus** | structural — `tests/install_smoke/test_portable_zip.py` + `.github/workflows/portable-zip-smoke.yml` | gap | gap | gap | gap | structural coverage only: ZIP opens, skills tree matches source (minus the portable-excluded `residential_multifamily` subsystem), frontmatter contract is honored, and MCP / orchestrator / Python-calculator runtime files are absent. Cross-runtime invocation (a CLI like Codex / Gemini / Grok / Manus actually loading and running a skill from the extracted ZIP) remains a **gap** until a cross-CLI harness lands — see the Known Gaps section below. |
 
 ## Automated tests that back the matrix
 
@@ -32,6 +32,7 @@ Legend:
 - `tests/test_e2e_skill_calculator.py` — end-to-end execution of one representative skill + calculator (`deal-quick-screen`).
 - `tests/test_orchestrator_integrity.py` — orchestrator JSON schemas load + parse (does **not** exercise orchestrator execution).
 - `tests/test_canonical_consistency.py` — catalog matches filesystem.
+- `tests/install_smoke/test_portable_zip.py` (+ `.github/workflows/portable-zip-smoke.yml`) — structural smoke on the packaged `dist/cre-skills-portable.zip`: openable, skills tree mirrors `src/skills/` minus the portable-excluded `residential_multifamily` subsystem, each extracted `SKILL.md` carries the portable frontmatter contract (`name` + `description`; `slug` / `status` / `version` are stripped by design), no MCP server, no orchestrator runtime, no Python calculators leaked. Cross-runtime invocation is an explicit xfail until a cross-CLI harness exists.
 
 ## Known gaps and proposed next tests
 
@@ -42,7 +43,7 @@ These are intentionally listed as limitations rather than fixed in this pass:
 3. **Windows prereq halt** — `Install.ps1` currently logs dependency versions but does not halt with a remediation step when Node/Python/npm are missing from `%PATH%`. Target: add explicit `Fail-If-Missing` with install instructions.
 4. **Cowork ZIP schema validator** — `scripts/cowork-schema-validator.py` (proposed). Validates SKILL.md format, agent YAML shape, command markdown for Cowork's stripped field set.
 5. **Uninstall smoke test** — verify plugin removed from registry, `claude_desktop_config.json` `mcpServers` entry removed, user data in `~/.cre-skills/` preserved.
-6. **Portable-ZIP cross-CLI smoke test** — spin up Codex / Gemini / Grok / Manus in a container, install the portable ZIP, confirm at least one skill loads and calculator execution works (or documents it is unsupported).
+6. **Portable-ZIP cross-CLI smoke test** — structural coverage landed in v4.3 (`tests/install_smoke/test_portable_zip.py`), but actually spinning up Codex / Gemini / Grok / Manus in a container and confirming at least one skill loads (or documenting it as unsupported) still requires a cross-CLI harness. Structural ≠ cross-runtime — that gap remains open.
 7. **Hook execution smoke test** — spawn `telemetry-init.mjs` via Node; confirm `~/.cre-skills/config.json` created; trigger a Read tool event; confirm `telemetry.jsonl` appended.
 
 Any item in this section is a release caveat, not a blocker — surfaces with open gaps are labeled in [README Release Maturity](../README.md#release-maturity) so users can make an informed choice.

@@ -12,7 +12,7 @@
       "name": "cre-skills",
       "source": ".",
       "description": "Institutional-grade CRE skills library covering deal screening, underwriting, structuring, due diligence, capital markets, market research, asset management, leasing, investor relations, development, disposition, sourcing, tax, ESG, portfolio strategy, and daily operations. Includes expert subagents, Python calculators, workflow chains, and orchestrator pipelines.",
-      "version": "4.2.0",
+      "version": "4.3.0",
       "category": "finance",
       "keywords": [
         "commercial-real-estate",

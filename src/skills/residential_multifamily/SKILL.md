@@ -1,8 +1,8 @@
 ---
 name: Residential Multifamily Operating System
 slug: residential_multifamily
-version: 0.6.0
-status: beta_rc
+version: 1.0.0-rc1
+status: stable_pending_shakedown
 category: residential_multifamily
 subsystem: residential_multifamily
 pack_type: router
@@ -65,12 +65,13 @@ You are the entry-point router for the residential multifamily subsystem. A user
 
 ## Release maturity
 
-- **Status:** beta_rc
-- **Preview mode:** active — output from this subsystem's workflows carries a `PREVIEW / STAGING` banner and is not eligible for board, IC, LP, or lender use without a human reviewer explicitly acknowledging the stamp. See `docs/PREVIEW_MODE.md` for the contract.
+- **Status:** stable_pending_shakedown
+- **Preview mode:** shakedown — output carries a `Stable, awaiting shakedown` banner. Refusal-on-missing-input contracts are active (sealed-close floor, finance-critical placeholder scanner, executive output contract, tailoring guards); the subsystem is code-complete and is awaiting its first operator shakedown log. Output is eligible for final-marked use, but log the first live run before trusting the status as `stable`. See `docs/PREVIEW_MODE.md` for the contract.
 - **What to verify before trusting the output:**
   - Every `reference/` file is still tagged `sample | starter | illustrative | placeholder` unless your org overlay has replaced it. Do not treat an un-overlaid output as operating fact.
   - Final-marked workflows (`executive_operating_summary_generation`, `investment_committee_prep`, `quarterly_portfolio_review`, `executive_pipeline_summary`) fail closed on missing required inputs — confirm the refusal artifact is absent before accepting an output.
   - Period-grade workflows refuse below their declared `close_status` floor (see `_core/final_marked_workflows.yaml#period_grade_workflows`). Confirm `as_of` and `close_status` were validated.
+  - No operator shakedown log has been recorded yet. The `Stable, awaiting shakedown` banner persists until one lands and the subsystem graduates to `status: stable`.
 
 ## When to activate
 

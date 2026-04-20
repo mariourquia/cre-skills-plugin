@@ -353,6 +353,10 @@ def validate_stale_versions() -> list[str]:
         "docs/install-guide.md",   # migration comparison table
         "docs/MIGRATION.md",       # migration guide references source version by design
         "TASK_STATE.md",           # release-prep working doc; cites prior tag for baseline context
+        "tests/README.md",         # documents when specific test modules landed (v4.2.0 Obj 5/6/8, etc.)
+        "README.md",               # release-maturity table cites RMF subsystem version (v1.0.0-rc1)
+        "docs/ROADMAP.md",         # current-release block cites RMF subsystem version (v1.0.0-rc1)
+        "CONTRIBUTING.md",         # release-process example cites tag-to-push format
     }
 
     scan_extensions = {".md", ".json", ".mjs", ".sh", ".ps1", ".iss", ".yml"}

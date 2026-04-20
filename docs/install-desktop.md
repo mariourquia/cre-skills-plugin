@@ -2,13 +2,17 @@
 
 This guide is for Claude Desktop users on macOS and Windows. If you use Claude Code CLI, see the [main install guide](install-guide.md).
 
-> **Do not paste this repo URL into Claude Desktop's "Add marketplace" dialog.** This is not a marketplace plugin. The correct path for Claude Desktop is the DMG (macOS) or EXE (Windows) installer below. See [WHAT-TO-USE-WHEN.md](WHAT-TO-USE-WHEN.md) for details.
+<!-- CANONICAL-CAVEAT:desktop-marketplace START -->
+> **Do not paste this repo URL into Claude Desktop Chat tab's "Add marketplace" dialog.** Chat tab's "Add marketplace" is a separate surface and is **not supported by this repo** — pasting `https://github.com/mariourquia/cre-skills-plugin` there will produce a validation error. The canonical Chat tab install path is the DMG (macOS) or EXE (Windows) installer, which registers a local MCP server via `claude_desktop_config.json`. The Claude Code CLI marketplace (`claude plugin marketplace add mariourquia/cre-skills-plugin` followed by `claude plugin install cre-skills@cre-skills`) **is** supported and is the canonical CLI install path; it also works in the Desktop **Code** tab (which uses Claude Code under the hood).
+<!-- CANONICAL-CAVEAT:desktop-marketplace END -->
+
+See [WHAT-TO-USE-WHEN.md](WHAT-TO-USE-WHEN.md) for the source of this caveat.
 
 ---
 
 ## macOS
 
-Download [`cre-skills-plugin-v4.2.0.dmg`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) from the latest release.
+Download [`cre-skills-plugin-v4.3.0.dmg`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) from the latest release.
 
 1. Open the DMG in Finder
 2. Double-click **CRE Skills Installer**
@@ -22,7 +26,7 @@ The installer:
 
 ## Windows
 
-Download [`cre-skills-plugin-v4.2.0-setup.exe`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) from the latest release.
+Download [`cre-skills-plugin-v4.3.0-setup.exe`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) from the latest release.
 
 1. Run the installer. Windows SmartScreen may warn you -- click **More info**, then **Run anyway** (the installer is not code-signed yet; you can verify the SHA256 checksum from the release page)
 2. Follow the wizard. Default location: `%APPDATA%\cre-skills-plugin`

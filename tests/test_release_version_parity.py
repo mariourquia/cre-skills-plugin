@@ -291,20 +291,102 @@ def test_installer_advertised_skill_count_matches_filesystem(script: str) -> Non
 # ---------------------------------------------------------------------------
 
 
-def test_v4_2_0_release_notes_frontmatter_is_honest() -> None:
-    """Frontmatter ``status`` in docs/releases/v4.2.0-release-notes.md must be
-    one of ``pending`` (pre-tag) or ``released`` (post-tag).
+@pytest.mark.parametrize("rel_path", [
+    "docs/releases/v4.2.0-release-notes.md",
+    "docs/releases/v4.3.0-release-notes.md",
+])
+def test_release_notes_frontmatter_is_honest(rel_path: str) -> None:
+    """Frontmatter ``status`` in release-notes files must be ``pending``
+    (pre-tag) or ``released`` (post-tag).
 
-    During release hardening the file said ``status: released`` before the tag
-    actually existed, which made the file claim something it could not guarantee.
+    During release hardening a file said ``status: released`` before the tag
+    actually existed, which made the file claim something it could not
+    guarantee. This parameterized test pins that contract per release.
     """
-    path = REPO_ROOT / "docs" / "releases" / "v4.2.0-release-notes.md"
-    assert path.exists(), "v4.2.0 release notes missing"
+    path = REPO_ROOT / rel_path
+    assert path.exists(), f"{rel_path} missing"
     text = _read(path)
     match = re.search(r"^status:\s*(\w+)", text, re.M)
-    assert match, "v4.2.0 release notes have no 'status:' line in frontmatter"
+    assert match, f"{rel_path} has no 'status:' line in frontmatter"
     status = match.group(1).lower()
     assert status in {"pending", "released"}, (
-        f"v4.2.0 release notes frontmatter status is {status!r}; expected "
+        f"{rel_path} frontmatter status is {status!r}; expected "
         f"'pending' (pre-tag) or 'released' (post-tag)."
+    )
+
+
+# ---------------------------------------------------------------------------
+# 7. Canonical Desktop marketplace caveat parity
+# ---------------------------------------------------------------------------
+
+# The canonical source of the "Chat tab's 'Add marketplace' is not supported"
+# caveat is ``docs/WHAT-TO-USE-WHEN.md``. Every install surface listed below
+# must carry the same block verbatim between the START / END sentinels so the
+# guidance cannot silently diverge. If the canonical wording needs to change,
+# edit the source first and then regenerate the duplicates — this test fails
+# on drift rather than masking it.
+
+_CANONICAL_CAVEAT_SOURCE = REPO_ROOT / "docs" / "WHAT-TO-USE-WHEN.md"
+_CANONICAL_CAVEAT_SURFACES = (
+    "README.md",
+    "docs/INSTALL.md",
+    "docs/install-guide.md",
+    "docs/install-desktop.md",
+    "docs/install-cowork.md",
+)
+_CAVEAT_START = "<!-- CANONICAL-CAVEAT:desktop-marketplace START -->"
+_CAVEAT_END = "<!-- CANONICAL-CAVEAT:desktop-marketplace END -->"
+
+
+def _extract_canonical_caveat(path: Path) -> str:
+    """Extract the text between the canonical-caveat sentinels.
+
+    Returns the block body (between START and END markers, exclusive of the
+    sentinels themselves). Raises AssertionError if the sentinels are missing
+    or out of order.
+    """
+    text = _read(path)
+    try:
+        start = text.index(_CAVEAT_START) + len(_CAVEAT_START)
+        end = text.index(_CAVEAT_END, start)
+    except ValueError as exc:
+        raise AssertionError(
+            f"{path.relative_to(REPO_ROOT)}: canonical-caveat sentinels not "
+            f"found or out of order ({exc})."
+        ) from exc
+    return text[start:end].strip()
+
+
+def test_canonical_caveat_source_is_nonempty() -> None:
+    """``docs/WHAT-TO-USE-WHEN.md`` carries the canonical block body."""
+    body = _extract_canonical_caveat(_CANONICAL_CAVEAT_SOURCE)
+    assert body, "canonical caveat body in WHAT-TO-USE-WHEN.md is empty"
+    # Load-bearing phrases the downstream surfaces MUST preserve verbatim.
+    for phrase in (
+        'Do not paste this repo URL into Claude Desktop Chat tab',
+        'not supported by this repo',
+        "canonical Chat tab install path",
+        "Claude Code CLI marketplace",
+        "claude plugin install cre-skills@cre-skills",
+    ):
+        assert phrase in body, (
+            f"canonical caveat missing load-bearing phrase: {phrase!r}"
+        )
+
+
+@pytest.mark.parametrize("surface", _CANONICAL_CAVEAT_SURFACES)
+def test_canonical_caveat_duplicated_verbatim(surface: str) -> None:
+    """Each install surface carries the canonical caveat byte-for-byte.
+
+    If this fails, re-sync the drifting surface against
+    ``docs/WHAT-TO-USE-WHEN.md`` — do not edit the copies in isolation.
+    """
+    path = REPO_ROOT / surface
+    assert path.exists(), f"install surface missing: {surface}"
+    source_body = _extract_canonical_caveat(_CANONICAL_CAVEAT_SOURCE)
+    surface_body = _extract_canonical_caveat(path)
+    assert surface_body == source_body, (
+        f"{surface}: canonical-caveat body drifts from "
+        f"docs/WHAT-TO-USE-WHEN.md. Re-sync the block verbatim. "
+        f"\n--- source ---\n{source_body}\n--- {surface} ---\n{surface_body}"
     )
