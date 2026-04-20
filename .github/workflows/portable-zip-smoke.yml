@@ -38,6 +38,9 @@ jobs:
         working-directory: tools
         run: npm ci || npm install
 
+      - name: Install Python test dependencies
+        run: pip install pytest pyyaml
+
       - name: Build portable target
         run: npx --prefix tools tsx tools/build.ts --target portable
 
