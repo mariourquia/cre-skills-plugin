@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install.sh -- Single-command installer for the CRE Skills Plugin v4.2.0
+# install.sh -- Single-command installer for the CRE Skills Plugin v4.3.0
 #
 # Usage (remote):
 #   curl -fsSL https://raw.githubusercontent.com/mariourquia/cre-skills-plugin/main/scripts/install.sh | bash
@@ -40,7 +40,7 @@ print_banner() {
  | |    |  _  /|  __|   ___) | . \| | | \__ \
  | |____|_| \_\|_|____ |____/|_|\_\_|_|_|___/
   \_____|      |______|
-   Plugin v4.2.0 -- 113 skills, 54 agents, 6 workflows
+   Plugin v4.3.0 -- 113 skills, 54 agents, 6 workflows
 
 BANNER
   printf "${RESET}"
@@ -282,7 +282,7 @@ install_plugin() {
 
   local claude_home="$HOME/.claude"
   local plugin_version
-  plugin_version="$(python3 -c "import json; print(json.load(open('$INSTALL_DIR/.claude-plugin/plugin.json'))['version'])" 2>/dev/null || echo "4.2.0")"
+  plugin_version="$(python3 -c "import json; print(json.load(open('$INSTALL_DIR/.claude-plugin/plugin.json'))['version'])" 2>/dev/null || echo "4.3.0")"
   local plugins_cache="$claude_home/plugins/cache/local/cre-skills-plugin/$plugin_version"
   local installed_file="$claude_home/plugins/installed_plugins.json"
   local settings_file="$claude_home/settings.json"
@@ -407,7 +407,7 @@ print_success() {
   printf "${GREEN}${BOLD}"
   cat << 'SUCCESS'
   ============================================
-       CRE Skills Plugin v4.2.0 -- Installed
+       CRE Skills Plugin v4.3.0 -- Installed
   ============================================
 SUCCESS
   printf "${RESET}"

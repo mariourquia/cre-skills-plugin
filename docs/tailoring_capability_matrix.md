@@ -25,10 +25,23 @@ Per claim, the matrix gives a status and points at the code path + test that pro
 
 ## Deliberate next steps (tracked but not done in this pass)
 
-1. **Preview-bundle YAML emission** (claim 4) — add `_export_preview_bundle()` that writes `sessions/{org_id}/{session_id}__preview.yaml` with the six `DIFF_APPROVAL_PREVIEW.md` sections. Test: round-trip read-after-write + structural schema check.
-2. **Approval-floor check** (claim 5) — load `_core/approval_matrix.md` + `overlays/org/_defaults/thresholds.yaml`; for every diff entry whose `approval_matrix_row` is set, compare `proposed_value` against the canonical floor; refuse and surface the floor in the diff. Test: synthetic diff with a lowered threshold must produce a refusal.
-3. **Canonical-definition redefinition refusal** (claim 6) — load frozen fields from `_core/metrics.yaml` and refuse any overlay write targeting them. Test: synthetic question attempting to rewrite `numerator` must produce a `REDEFINITION_ATTEMPT`.
-4. **Missing-doc blocker transition** (claim 7) — walk `missing_docs_queue.yaml`, apply blocker criteria (p1 + substitute_behavior=refuse_to_render + age ≥ threshold) → transition status to `blocked` → refuse dependent preview render. Test: queued p1 doc with stale timestamp must mark the relevant preview as blocked.
-5. **Legacy bank retirement** (claim 9) — emit a warning when a legacy bank is loaded; remove legacy banks once all orgs have migrated. Test: legacy-bank load path emits the warning.
+Tailoring Pass 2 Objective 4 is **closed as of v4.3**. Claims 4, 5, 6, and
+7 (preview-bundle emission, approval-floor guard, canonical-redefinition
+refusal, missing-doc blocker) are all Implemented, with tests listed in
+the matrix above. Remaining items are open follow-ups that are intentionally
+scoped outside Obj 4:
 
-This work was tracked under Obj 4 of the internal-beta hardening passes (v4.1 / v4.2).
+1. **Legacy bank retirement** (claim 9) — emit a warning when a legacy bank
+   is loaded; remove legacy banks once all orgs have migrated. Test:
+   legacy-bank load path emits the warning. Status: **Partial** (banks
+   retained for the legacy-retention window per `AUDIENCE_MAP.md`); graduation
+   depends on org migration completion.
+2. **Role-based bank filtering** (claim 1 follow-up) — `load_question_banks()`
+   currently loads all banks; add explicit filtering by the asker's role so
+   an audience that does not need a given bank does not see it in the
+   preview. Status: unscoped; tracked in `docs/ROADMAP.md` under
+   "Post-v4.3 open items".
+
+Objective 4 closure: all four originally-deferred items landed in v4.3.
+The subsystem graduated to `status: stable_pending_shakedown` in the same
+release; see `docs/releases/v4.3.0-release-notes.md`.

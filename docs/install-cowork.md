@@ -24,7 +24,7 @@ In your team's Claude Code settings (typically managed via your organization's c
     {
       "name": "cre-skills",
       "source": "github:mariourquia/cre-skills-plugin",
-      "version": "4.2.0",
+      "version": "4.3.0",
       "enabled": true
     }
   ]
@@ -54,7 +54,7 @@ To prevent unexpected changes from affecting active workflows, pin the plugin to
 ```json
 {
   "source": "github:mariourquia/cre-skills-plugin",
-  "version": "4.2.0"
+  "version": "4.3.0"
 }
 ```
 
@@ -140,7 +140,7 @@ For organizations using managed Claude Desktop deployments, include the plugin p
     {
       "name": "cre-skills",
       "source": "github:mariourquia/cre-skills-plugin",
-      "version": "4.2.0",
+      "version": "4.3.0",
       "autoEnable": true,
       "allowDisable": false
     }

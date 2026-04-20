@@ -291,21 +291,26 @@ def test_installer_advertised_skill_count_matches_filesystem(script: str) -> Non
 # ---------------------------------------------------------------------------
 
 
-def test_v4_2_0_release_notes_frontmatter_is_honest() -> None:
-    """Frontmatter ``status`` in docs/releases/v4.2.0-release-notes.md must be
-    one of ``pending`` (pre-tag) or ``released`` (post-tag).
+@pytest.mark.parametrize("rel_path", [
+    "docs/releases/v4.2.0-release-notes.md",
+    "docs/releases/v4.3.0-release-notes.md",
+])
+def test_release_notes_frontmatter_is_honest(rel_path: str) -> None:
+    """Frontmatter ``status`` in release-notes files must be ``pending``
+    (pre-tag) or ``released`` (post-tag).
 
-    During release hardening the file said ``status: released`` before the tag
-    actually existed, which made the file claim something it could not guarantee.
+    During release hardening a file said ``status: released`` before the tag
+    actually existed, which made the file claim something it could not
+    guarantee. This parameterized test pins that contract per release.
     """
-    path = REPO_ROOT / "docs" / "releases" / "v4.2.0-release-notes.md"
-    assert path.exists(), "v4.2.0 release notes missing"
+    path = REPO_ROOT / rel_path
+    assert path.exists(), f"{rel_path} missing"
     text = _read(path)
     match = re.search(r"^status:\s*(\w+)", text, re.M)
-    assert match, "v4.2.0 release notes have no 'status:' line in frontmatter"
+    assert match, f"{rel_path} has no 'status:' line in frontmatter"
     status = match.group(1).lower()
     assert status in {"pending", "released"}, (
-        f"v4.2.0 release notes frontmatter status is {status!r}; expected "
+        f"{rel_path} frontmatter status is {status!r}; expected "
         f"'pending' (pre-tag) or 'released' (post-tag)."
     )
 

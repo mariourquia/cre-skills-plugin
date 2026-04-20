@@ -12,7 +12,7 @@ See [WHAT-TO-USE-WHEN.md](WHAT-TO-USE-WHEN.md) for the source of this caveat.
 
 ## macOS
 
-Download [`cre-skills-plugin-v4.2.0.dmg`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) from the latest release.
+Download [`cre-skills-plugin-v4.3.0.dmg`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) from the latest release.
 
 1. Open the DMG in Finder
 2. Double-click **CRE Skills Installer**
@@ -26,7 +26,7 @@ The installer:
 
 ## Windows
 
-Download [`cre-skills-plugin-v4.2.0-setup.exe`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) from the latest release.
+Download [`cre-skills-plugin-v4.3.0-setup.exe`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) from the latest release.
 
 1. Run the installer. Windows SmartScreen may warn you -- click **More info**, then **Run anyway** (the installer is not code-signed yet; you can verify the SHA256 checksum from the release page)
 2. Follow the wizard. Default location: `%APPDATA%\cre-skills-plugin`

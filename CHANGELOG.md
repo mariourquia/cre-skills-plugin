@@ -2,6 +2,65 @@
 
 ## [Unreleased]
 
+v4.4 orchestrator-engine items continue below under their original
+"v4.4, orchestrator engine" headings. They are in-flight and will roll
+into the v4.4 entry when that release lands.
+
+## [4.3.0] - 2026-04-20
+
+### Graduated (residential_multifamily)
+
+- `residential_multifamily` subsystem: `status: beta_rc` (v0.6.0) → `status: stable_pending_shakedown` (v1.0.0-rc1). Code complete, refusal-on-missing-input contracts active; subsystem awaits the first operator shakedown log before graduation to `status: stable`. SKILL.md Release maturity section now carries a `Stable, awaiting shakedown` banner instead of the PREVIEW / STAGING stamp — per `docs/PREVIEW_MODE.md`, shakedown status does not layer a second final-marked refusal on top of the existing contract machinery.
+
+### Closed (tailoring Pass 2 — Objective 4)
+
+Four items previously listed as **Not implemented** in `docs/tailoring_capability_matrix.md` are all **Implemented** and tested on `main`:
+
+- Approval-floor refusal (`guard_approval_floor_not_lowered`): tailoring cannot lower an approval threshold below the canonical floor in `_core/approval_matrix.md`. `ApprovalFloorGuardTests` (3 tests).
+- Canonical-definition redefinition refusal (`guard_no_canonical_redefinition`): any overlay write targeting a frozen metric field produces a `REDEFINITION_ATTEMPT`. `CanonicalRedefinitionGuardTests` (2 tests).
+- Preview-bundle YAML emission (`emit_preview_bundle`): writes `tailoring/sessions/<org_id>/<session_id>__preview.yaml` with session / diff_summary / diff_entries / proposed_overlay / guard_violations sections. `PreviewBundleTests`.
+- Missing-doc blocker (`guard_missing_doc_blockers`): refuses to render a preview when any question-bank trigger references a `doc_catalog.yaml` slug with no entry. `MissingDocBlockerGuardTests` (2 tests).
+
+Capability-matrix doc now reflects Obj 4 closure; open follow-ups (legacy-bank retirement, role-based bank filtering) are tracked out of Obj 4.
+
+### Added (preview-mode gate)
+
+- `tests/test_preview_mode_gate.py` (repo-wide): walks every `src/skills/**/SKILL.md`, admits the three preview sub-statuses (`experimental`, `beta_rc`, `stable_pending_shakedown`), enforces the required Release maturity markers, and fails on banner-text drift per sub-status.
+- `src/skills/residential_multifamily/tests/test_preview_mode_gate.py` (subsystem): extended to admit `stable_pending_shakedown`, pin the `Stable, awaiting shakedown` banner, and refuse silent re-import of the `PREVIEW / STAGING` stamp language in a shakedown-status skill.
+
+### Added (portable ZIP structural smoke)
+
+- `tests/install_smoke/test_portable_zip.py`: structural smoke on `dist/cre-skills-portable.zip`. Validates ZIP opens cleanly, the skills/ tree mirrors `src/skills/` minus the portable-excluded `residential_multifamily` subsystem, each extracted `SKILL.md` carries the portable frontmatter contract (`name` + `description`; `slug`/`status`/`version` are stripped by design per `config/targets/portable.yaml`), and no MCP server / orchestrator / Python calculator leaks into the artifact.
+- `.github/workflows/portable-zip-smoke.yml`: pull_request (relevant packaging paths) + workflow_dispatch. Builds the portable target, packages the ZIP, runs the smoke test.
+- Cross-runtime invocation on Codex / Gemini / Grok / Manus remains an explicit xfail — structural != cross-runtime.
+
+### Added (canonical Desktop marketplace caveat)
+
+- `docs/WHAT-TO-USE-WHEN.md` is the source of truth; the caveat paragraph is wrapped in `<!-- CANONICAL-CAVEAT:desktop-marketplace START/END -->` sentinels.
+- Duplicated verbatim into `README.md`, `docs/INSTALL.md`, `docs/install-guide.md`, `docs/install-desktop.md`, `docs/install-cowork.md`.
+- `tests/test_release_version_parity.py` gains `test_canonical_caveat_source_is_nonempty` and parameterized `test_canonical_caveat_duplicated_verbatim` — byte-level drift fails CI.
+- `docs/INSTALL.md` adds an explicit FAQ entry explaining why Chat tab's "Add marketplace" rejects the repo URL and what the correct install path is per surface.
+
+### Changed (v4.3.0)
+
+- `docs/PREVIEW_MODE.md`: defines `stable_pending_shakedown` as a sub-status. Tabulates the four sub-statuses (experimental / beta_rc / stable_pending_shakedown / stable) with banner + final-marked-refusal semantics per status. Documents the three-step graduation path.
+- `docs/ROADMAP.md`: current-release block flips to v4.3.0. v4.3 "Near-term hardening" items are closed; remaining items moved to a post-v4.3 open-items block. Tailoring Pass 2 Obj 4 no longer listed as open.
+- `docs/tailoring_capability_matrix.md`: "Deliberate next steps" block rewritten to reflect Obj 4 closure; only legacy-bank retirement and role-based bank filtering remain.
+- `docs/install_smoke_test_matrix.md`: Portable ZIP "Fresh install" cell flipped from `gap` to `structural`, with cross-runtime invocation explicitly still listed as a gap.
+- `README.md`: Release Maturity table, Known Limitations, What's New section all updated for v4.3.0 and RMF graduation.
+- `.claude-plugin/plugin.json` version `4.2.0` → `4.3.0`.
+- `.claude-plugin/marketplace.json` plugin version `4.2.0` → `4.3.0`.
+- `src/catalog/catalog.yaml` plugin_version `4.2.0` → `4.3.0`.
+- Installer scripts (`scripts/Install.ps1`, `scripts/install.sh`, `Install.command`) fallback version strings and banners bumped to 4.3.0.
+- Docs (`docs/INSTALL.md`, `docs/install-guide.md`, `docs/install-desktop.md`, `docs/install-cowork.md`) DMG/EXE filenames and version strings bumped to v4.3.0.
+- `src/hooks/telemetry-init.mjs` default-config version and upgrade-backfill threshold bumped to 4.3.0.
+
+### Removed (v4.3.0)
+
+- `README.md` and `docs/install_smoke_test_matrix.md` no longer frame the residential_multifamily subsystem as unfinished near-term hardening — the pass-2 deferred items all close in this release.
+
+### Historical: v4.4, orchestrator engine (in-flight)
+
 ### Fixed (v4.4, orchestrator engine)
 - Executor summary now prints a "paused, awaiting human approval"
   line for `AWAITING_APPROVAL` pipelines instead of falling through

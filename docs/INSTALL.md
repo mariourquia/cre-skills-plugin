@@ -88,7 +88,7 @@ Symlinks in the repo root point to `src/`, so the plugin loads correctly from th
 
 ### macOS -- DMG Installer
 
-1. Download [`cre-skills-plugin-v4.2.0.dmg`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) from the latest release.
+1. Download [`cre-skills-plugin-v4.3.0.dmg`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) from the latest release.
 2. Open the DMG in Finder.
 3. Double-click **CRE Skills Installer**.
 4. A Terminal window opens -- follow the prompts (no commands to type).
@@ -96,7 +96,7 @@ Symlinks in the repo root point to `src/`, so the plugin loads correctly from th
 
 ### Windows -- EXE Installer
 
-1. Download [`cre-skills-plugin-v4.2.0-setup.exe`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) from the latest release.
+1. Download [`cre-skills-plugin-v4.3.0-setup.exe`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) from the latest release.
 2. Run the installer. Windows SmartScreen may warn you -- click **More info**, then **Run anyway** (the installer is not code-signed yet).
 3. Follow the wizard. Default location: `%APPDATA%\cre-skills-plugin`.
 4. Restart Claude Desktop.

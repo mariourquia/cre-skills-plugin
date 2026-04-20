@@ -1,6 +1,6 @@
 # CRE Skills Plugin -- Installation Guide
 
-Version 4.2.0 | Apache 2.0 License
+Version 4.3.0 | Apache 2.0 License
 
 <!-- CANONICAL-CAVEAT:desktop-marketplace START -->
 > **Do not paste this repo URL into Claude Desktop Chat tab's "Add marketplace" dialog.** Chat tab's "Add marketplace" is a separate surface and is **not supported by this repo** — pasting `https://github.com/mariourquia/cre-skills-plugin` there will produce a validation error. The canonical Chat tab install path is the DMG (macOS) or EXE (Windows) installer, which registers a local MCP server via `claude_desktop_config.json`. The Claude Code CLI marketplace (`claude plugin marketplace add mariourquia/cre-skills-plugin` followed by `claude plugin install cre-skills@cre-skills`) **is** supported and is the canonical CLI install path; it also works in the Desktop **Code** tab (which uses Claude Code under the hood).
@@ -16,11 +16,11 @@ The fastest way to get started on any platform.
 
 ### macOS
 
-Download [`cre-skills-plugin-v4.2.0.dmg`](https://github.com/mariourquia/cre-skills-plugin/releases/latest), open it, and double-click **CRE Skills Installer**. The installer auto-detects Claude Desktop, Claude Code, or both.
+Download [`cre-skills-plugin-v4.3.0.dmg`](https://github.com/mariourquia/cre-skills-plugin/releases/latest), open it, and double-click **CRE Skills Installer**. The installer auto-detects Claude Desktop, Claude Code, or both.
 
 ### Windows
 
-Download [`cre-skills-plugin-v4.2.0-setup.exe`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) and run the wizard. No admin privileges required. SmartScreen may warn you -- click "More info" > "Run anyway".
+Download [`cre-skills-plugin-v4.3.0-setup.exe`](https://github.com/mariourquia/cre-skills-plugin/releases/latest) and run the wizard. No admin privileges required. SmartScreen may warn you -- click "More info" > "Run anyway".
 
 After either installer finishes, restart Claude Desktop or start a new Claude Code session.
 
@@ -182,7 +182,7 @@ chmod +x ~/.claude/plugins/cre-skills-plugin/src/calculators/*.py
 
 For Claude Desktop users, the DMG is the simplest path.
 
-1. Download `cre-skills-plugin-v4.2.0.dmg` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
+1. Download `cre-skills-plugin-v4.3.0.dmg` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
 2. Open the DMG.
 3. Double-click "CRE Skills Installer".
 4. Follow the Terminal prompts. The installer detects Claude Code and Claude Desktop and configures each automatically.
@@ -192,7 +192,7 @@ For Claude Desktop users, the DMG is the simplest path.
 
 For Windows users with Claude Code CLI or Claude Desktop.
 
-1. Download `cre-skills-plugin-v4.2.0-setup.exe` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
+1. Download `cre-skills-plugin-v4.3.0-setup.exe` from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest).
 2. Run the installer. Windows SmartScreen may show a warning -- click "More info" then "Run anyway" (the installer is not yet code-signed).
 3. Follow the wizard. Default install location: `%APPDATA%\cre-skills-plugin`.
 4. The installer automatically detects Claude Code and Claude Desktop and configures each.
@@ -252,19 +252,20 @@ There is no separate VS Code extension or JetBrains plugin.
 
 ### What Changed
 
-| Area | v1.0.0 | v2.0.0 | v3.0.0 | v4.0.0 | v4.2.0 |
-|------|--------|--------|--------|--------|--------|
-| Skills | 80 | 99 | 105 | 112 | 113 |
-| Agents | -- | -- | -- | 54 | 54 |
-| License | MIT | Apache 2.0 | Apache 2.0 | Apache 2.0 | Apache 2.0 |
-| Hooks | SessionStart | SessionStart + PostToolUse + Stop | Same | Same | Same |
-| Calculators | 0 | 11 | 11 | 12 | 12 |
-| Commands | 3 | 7 | 9 | 11 | 11 |
-| Source layout | flat (root) | flat (root) | flat (root) | `src/` directory | `src/` directory |
-| MCP server | -- | -- | -- | added (Desktop Chat tab) | same |
-| Catalog | -- | -- | -- | added (`src/catalog/catalog.yaml`) | same |
+| Area | v1.0.0 | v2.0.0 | v3.0.0 | v4.0.0 | v4.2.0 | v4.3.0 |
+|------|--------|--------|--------|--------|--------|--------|
+| Skills | 80 | 99 | 105 | 112 | 113 | 113 |
+| Agents | -- | -- | -- | 54 | 54 | 54 |
+| License | MIT | Apache 2.0 | Apache 2.0 | Apache 2.0 | Apache 2.0 | Apache 2.0 |
+| Hooks | SessionStart | SessionStart + PostToolUse + Stop | Same | Same | Same | Same |
+| Calculators | 0 | 11 | 11 | 12 | 12 | 12 |
+| Commands | 3 | 7 | 9 | 11 | 11 | 11 |
+| Source layout | flat (root) | flat (root) | flat (root) | `src/` directory | `src/` directory | `src/` directory |
+| MCP server | -- | -- | -- | added (Desktop Chat tab) | same | same |
+| Catalog | -- | -- | -- | added (`src/catalog/catalog.yaml`) | same | same |
+| residential_multifamily | -- | -- | -- | -- | beta_rc (0.6.0) | stable_pending_shakedown (1.0.0-rc1) |
 
-v4.1.x adds marketplace install + release asset parity (DMG, EXE, desktop zip, portable zip, cosign signing). v4.2.0 closes residential_multifamily hardening pass 2 (sealed-close gating, finance-critical placeholder scanner, executive output contract).
+v4.1.x adds marketplace install + release asset parity (DMG, EXE, desktop zip, portable zip, cosign signing). v4.2.0 closes residential_multifamily hardening pass 2 (sealed-close gating, finance-critical placeholder scanner, executive output contract). v4.3.0 graduates `residential_multifamily` to `stable_pending_shakedown`, closes Tailoring Pass 2 Obj 4 (approval-floor guard, canonical-redefinition refusal, preview-bundle emission, missing-doc blocker), adds portable-ZIP structural smoke coverage, and canonicalizes the Desktop marketplace caveat.
 
 ### License Change Notice
 

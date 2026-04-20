@@ -1,6 +1,6 @@
 # Release Checklist
 
-Use this checklist before publishing a new version. See also [`docs/install_smoke_test_matrix.md`](install_smoke_test_matrix.md) for the test-coverage matrix and the v4.2.0 release-engineer notes at [`docs/releases/v4.2.0-release-notes.md`](releases/v4.2.0-release-notes.md) for the template.
+Use this checklist before publishing a new version. See also [`docs/install_smoke_test_matrix.md`](install_smoke_test_matrix.md) for the test-coverage matrix and the v4.3.0 release-engineer notes at [`docs/releases/v4.3.0-release-notes.md`](releases/v4.3.0-release-notes.md) for the template.
 
 ## Pre-release (repo state)
 

@@ -37,24 +37,24 @@ This release is an **internal beta / controlled release candidate**. Most top-le
 | Surface / component | Status | What this means |
 |---|---|---|
 | Top-level skills (all but one) | Deployed | Runnable today. Expected behavior per SKILL.md. |
-| `residential_multifamily` subsystem | **Beta RC (v0.6.0)** | Routing core plus workflows and roles are architected and tested. Subsystem ships with placeholder org overlays; all `reference/` files are tagged `sample / starter / illustrative / placeholder`. Decision-grade use requires an org onboarding pass (tailoring interview) to supply real data. Final-marked outputs (executive, IC, quarterly portfolio, executive pipeline) fail closed when required inputs are absent, enforce a period-seal gate (`close_status`, `close_lock_timestamp`, `budget_version`), and must follow the [executive output contract](src/skills/residential_multifamily/_core/executive_output_contract.md) (verdict-first + source-class labels + refusal artifacts). |
+| `residential_multifamily` subsystem | **Stable, awaiting shakedown (v1.0.0-rc1)** | Code-complete. Routing core, workflows, roles, tailoring guards (approval-floor / canonical-redefinition / preview-bundle / missing-doc blocker), and refusal-on-missing-input contracts are all active and under test. Subsystem still ships with placeholder org overlays; decision-grade use requires an org onboarding pass (tailoring interview) to supply real data. Final-marked outputs fail closed when required inputs are absent, enforce a period-seal gate (`close_status`, `close_lock_timestamp`, `budget_version`), and must follow the [executive output contract](src/skills/residential_multifamily/_core/executive_output_contract.md). Graduation to `status: stable` is gated on the first operator shakedown log — see [PREVIEW_MODE.md](docs/PREVIEW_MODE.md) for the contract. |
 | Orchestrators | Template / semi-manual | Orchestrators are phase + agent + verdict **templates**. There is no autonomous engine that sequences phases, polls agents, or aggregates verdicts without Claude acting as conductor. Treat as structured prompts, not fire-and-forget pipelines. |
 | Marketplace install | Supported (CLI) | `claude plugin marketplace add` from Claude Code CLI. Claude Desktop's "Add marketplace" dialog is **not** supported — this repo does not expose a manifest at that URL. See [docs/WHAT-TO-USE-WHEN.md](docs/WHAT-TO-USE-WHEN.md). |
 | macOS DMG / Windows EXE installer | Supported | Smoke-tested by `scripts/installer_smoke_test.py` (fresh install). |
 | Cowork ZIP import | Partial | Skills + agents + commands only. Hooks, MCP tools, orchestrators, calculators are not part of the Cowork surface. |
 | Manual MCP config (Claude Desktop Chat tab) | Supported | `.mcp.json` + `mcp-server.mjs`; operational MCP tools with organizational aliases. |
-| Codex / Gemini / Grok / Manus portable ZIP | Experimental | Skills ship as SKILL.md files. CLI-specific registration, calculator execution, and orchestrator support are **not tested** on these surfaces. |
+| Codex / Gemini / Grok / Manus portable ZIP | Experimental (structural CI) | Skills ship as SKILL.md files. A structural smoke test (`tests/install_smoke/test_portable_zip.py` + the `Portable ZIP Smoke` workflow) validates ZIP layout, skills-tree mirroring, frontmatter contract, and runtime-file exclusion. **Cross-runtime invocation** (the skill actually loading and running inside Codex / Gemini / Grok / Manus) is not tested. Treat as experimental. |
 
 **Upgrade, uninstall/reinstall, and corrupted-config recovery** paths do not currently have automated smoke tests. The existing smoke tests exercise fresh-install only. See [docs/install_smoke_test_matrix.md](docs/install_smoke_test_matrix.md) for the full coverage matrix and gaps.
 
 ## Known Limitations
 
-- The `residential_multifamily` subsystem is `status: beta_rc` (v0.6.0). Every reference file ships as sample/starter/illustrative/placeholder. Final-marked workflows (executive, IC, quarterly, pipeline summary) declare `fallback_behavior: refuse` on required inputs — they fail closed rather than proceed with stale data — and period-grade workflows (monthly operating review, reforecast, quarterly portfolio review, executive operating summary, budget build) additionally refuse if the GL is not at the declared `close_status` floor (`soft_close` or `hard_close`). Non-final operating workflows will proceed with starter data tagged in their confidence banners. Do not treat any output as decision-grade until an org overlay has been applied.
+- The `residential_multifamily` subsystem is `status: stable_pending_shakedown` (v1.0.0-rc1). Code complete; refusal-on-missing-input contracts active. Every reference file still ships as sample/starter/illustrative/placeholder — decision-grade use requires an org overlay. Final-marked workflows (executive, IC, quarterly, pipeline summary) declare `fallback_behavior: refuse` on required inputs — they fail closed rather than proceed with stale data — and period-grade workflows additionally refuse if the GL is not at the declared `close_status` floor (`soft_close` or `hard_close`). Graduation to `status: stable` is gated on the first operator shakedown log (see [PREVIEW_MODE.md](docs/PREVIEW_MODE.md)); until then, output carries a `Stable, awaiting shakedown` banner.
 - Six regulatory/affordable compliance workflows (`compliance_calendar_review`, `income_certification_cycle`, `rent_limit_test`, `agency_reporting_prep`, `file_audit_prep`, `recertification_batch`) are **phase-1 scaffolding** — the router recognizes them and the overlay slots exist, but no workflow pack implements them yet. The routing rule `r011_regulatory_workflow_explicit` is gated behind an explicit `regulatory_program` axis and `rent_limits` / `income_limits` reference files; missing references refuse the match.
-- The **tailoring TUI** (`src/skills/residential_multifamily/tailoring/tools/tailoring_tui.py`) has a documented capability matrix in [docs/tailoring_capability_matrix.md](docs/tailoring_capability_matrix.md). Conflict surfacing across audiences is now surfaced (not silently collapsed). Approval-floor checks, canonical-definition-redefinition refusal, and preview-bundle YAML emission are **not yet implemented**; the matrix tracks each.
-- **Orchestrator pipelines are templates, not autonomous engines.** `/cre-skills:orchestrate` loads phase + agent + verdict schemas; it relies on Claude to actually sequence the work. Verdict aggregation (GO/CONDITIONAL/KILL), phase checkpoint resume, and cross-phase evidence threading are not in code.
+- The **tailoring TUI** (`src/skills/residential_multifamily/tailoring/tools/tailoring_tui.py`) has a documented capability matrix in [docs/tailoring_capability_matrix.md](docs/tailoring_capability_matrix.md). As of v4.3, Tailoring Pass 2 Obj 4 is closed: conflict surfacing, approval-floor guard, canonical-definition-redefinition refusal, preview-bundle YAML emission, and missing-doc blocker are all **Implemented**. Open follow-ups (legacy-bank retirement, role-based bank filtering) are tracked in the matrix.
+- **Orchestrator pipelines** are transitioning from templates to a lightweight runtime (v4.4 in-flight). Current `/cre-skills:orchestrate` invokes the engine for pipelines that declare a config; deal-state persistence, typed approval gates, and a calculator bridge have landed. Verdict aggregation across phases and autonomous challenge-layer resolution remain in progress.
 - **Windows installer** defends against UTF-8 BOM edge cases in PowerShell 5.1 but does not currently halt on missing Node/Python/npm prerequisites. Update Claude Code before install (older versions have MCP path issues on Windows).
-- **Codex / Gemini / Grok / Manus** install targets are advertised via the portable ZIP but are not in the CI smoke-test matrix. Treat as experimental.
+- **Codex / Gemini / Grok / Manus** portable ZIP has structural CI coverage in v4.3 (`tests/install_smoke/test_portable_zip.py`), but cross-runtime invocation is not tested. Treat as experimental on those surfaces.
 
 ## Roadmap
 
@@ -77,7 +77,21 @@ Upcoming work is tracked in [`docs/ROADMAP.md`](docs/ROADMAP.md) — phased from
 
 ---
 
-## What's New in v4.2.0
+## What's New in v4.3.0
+
+**Residential multifamily graduates to `stable_pending_shakedown`**: the subsystem moves from `status: beta_rc` (v0.6.0) to `status: stable_pending_shakedown` (v1.0.0-rc1). Tailoring Pass 2 Objective 4 closes — approval-floor guard, canonical-redefinition refusal, preview-bundle YAML emission, and missing-doc blocker are all active (previously listed as Not implemented). Code-complete; awaiting the first operator shakedown log before graduation to `status: stable`. See `docs/PREVIEW_MODE.md` for the contract.
+
+**Portable ZIP structural smoke**: `tests/install_smoke/test_portable_zip.py` and the `Portable ZIP Smoke` workflow validate ZIP layout, skills-tree mirroring, frontmatter contract, and runtime-file exclusion. Cross-runtime invocation remains an explicit gap.
+
+**Canonical Desktop marketplace caveat**: the "Chat tab's 'Add marketplace' is not supported" guidance is now pinned verbatim across `README.md`, `docs/INSTALL.md`, `docs/install-guide.md`, `docs/install-desktop.md`, `docs/install-cowork.md`, with a parity assertion in `tests/test_release_version_parity.py`. `docs/WHAT-TO-USE-WHEN.md` is the source of truth.
+
+**Preview-mode gate is live repo-wide**: `tests/test_preview_mode_gate.py` walks every `SKILL.md` under `src/skills/` and enforces the Release maturity section + banner for each preview sub-status (`experimental`, `beta_rc`, `stable_pending_shakedown`). The residential_multifamily subsystem has its own stricter counterpart under the subsystem tests.
+
+See `CHANGELOG.md` for the full v4.3.0 entry.
+
+---
+
+## What's Landed in v4.2.0
 
 **Hardening pass 2 close**: `residential_multifamily` subsystem moves from `status: draft` (v0.5.0) to `status: beta_rc` (v0.6.0). Three deferred objectives close: sealed-close gating (Obj 5) pins period-grade workflows behind a declared `close_status` floor; a finance-critical placeholder scanner (Obj 6) rejects un-labeled TBD/PLACEHOLDER rows in every CSV read by a final-marked workflow; an executive output contract (Obj 8) requires verdict-first structure + source-class labels on every numeric cell. +13 tests (total 436). See `CHANGELOG.md` for the full v4.2.0 entry.
 

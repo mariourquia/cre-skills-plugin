@@ -1,12 +1,12 @@
 # CRE Skills Registry
 # GENERATED from catalog/catalog.yaml — do not edit manually
 # Run: python scripts/catalog-generate.py
-# Generated: 2026-04-15
+# Generated: 2026-04-20
 # Total Skills: 113
 
 metadata:
   version: "2.0"
-  generated: "2026-04-15"
+  generated: "2026-04-20"
   total_skills: 113
   source: catalog/catalog.yaml
 
@@ -1045,7 +1045,7 @@ skills:
   name: Residential Multifamily Operating System
   category: cross-cutting
   priority: P1
-  status: experimental
+  status: deployed
   chains_to: []
   chains_from: []
 - slug: sec-reg-d-compliance
