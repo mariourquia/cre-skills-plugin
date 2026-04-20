@@ -26,12 +26,13 @@ See [`../README.md#release-maturity`](../README.md#release-maturity) for the sup
 
 ## CLI marketplace vs Claude Desktop Chat tab "Add marketplace"
 
-These are two different surfaces. Only one is supported by this repo.
+These are two different surfaces. Only one is supported by this repo. The paragraph below is the **canonical caveat** — it is duplicated verbatim in `README.md`, `docs/INSTALL.md`, `docs/install-guide.md`, `docs/install-desktop.md`, and `docs/install-cowork.md`, and a parity assertion in `tests/test_release_version_parity.py` fails if those copies drift from this source.
 
-- **Claude Code CLI marketplace** (supported): `claude plugin marketplace add mariourquia/cre-skills-plugin` reads `.claude-plugin/marketplace.json` from this repo and registers it as a marketplace. The CLI then installs the `cre-skills` plugin from that marketplace with `claude plugin install cre-skills@cre-skills`. This works in the Claude Code CLI and in the Claude Desktop **Code tab** (which uses Claude Code under the hood).
-- **Claude Desktop Chat tab "Add marketplace" dialog** (NOT supported): the Chat tab has its own "Add marketplace" dialog. Pasting `https://github.com/mariourquia/cre-skills-plugin` into that dialog will produce a validation error. The correct install path for the Chat tab is the DMG or EXE installer below -- it registers a local MCP server in `claude_desktop_config.json`, which is how the Chat tab gets plugin tools.
+<!-- CANONICAL-CAVEAT:desktop-marketplace START -->
+> **Do not paste this repo URL into Claude Desktop Chat tab's "Add marketplace" dialog.** Chat tab's "Add marketplace" is a separate surface and is **not supported by this repo** — pasting `https://github.com/mariourquia/cre-skills-plugin` there will produce a validation error. The canonical Chat tab install path is the DMG (macOS) or EXE (Windows) installer, which registers a local MCP server via `claude_desktop_config.json`. The Claude Code CLI marketplace (`claude plugin marketplace add mariourquia/cre-skills-plugin` followed by `claude plugin install cre-skills@cre-skills`) **is** supported and is the canonical CLI install path; it also works in the Desktop **Code** tab (which uses Claude Code under the hood).
+<!-- CANONICAL-CAVEAT:desktop-marketplace END -->
 
-If in doubt: if you are using the Claude Code CLI or the Desktop Code tab, use marketplace. If you are using the Desktop Chat tab, use the installer.
+If in doubt: if you are using the Claude Code CLI or the Desktop Code tab, use the marketplace. If you are using the Desktop Chat tab, use the DMG/EXE installer.
 
 ---
 

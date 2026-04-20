@@ -99,6 +99,10 @@ This repo is a self-contained Claude marketplace. Choose the install method that
 
 > See [docs/WHAT-TO-USE-WHEN.md](docs/WHAT-TO-USE-WHEN.md) for a detailed comparison of all install surfaces.
 
+<!-- CANONICAL-CAVEAT:desktop-marketplace START -->
+> **Do not paste this repo URL into Claude Desktop Chat tab's "Add marketplace" dialog.** Chat tab's "Add marketplace" is a separate surface and is **not supported by this repo** — pasting `https://github.com/mariourquia/cre-skills-plugin` there will produce a validation error. The canonical Chat tab install path is the DMG (macOS) or EXE (Windows) installer, which registers a local MCP server via `claude_desktop_config.json`. The Claude Code CLI marketplace (`claude plugin marketplace add mariourquia/cre-skills-plugin` followed by `claude plugin install cre-skills@cre-skills`) **is** supported and is the canonical CLI install path; it also works in the Desktop **Code** tab (which uses Claude Code under the hood).
+<!-- CANONICAL-CAVEAT:desktop-marketplace END -->
+
 | Method | Best for | What you get |
 |--------|----------|-------------|
 | **Marketplace install** | Claude Code users (CLI or Desktop Code tab) | Full: skills, agents, commands, hooks, MCP tools |

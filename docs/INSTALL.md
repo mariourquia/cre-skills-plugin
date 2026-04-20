@@ -29,7 +29,11 @@ Then paste your deal details. The 113 CRE skills are ready to use.
 > **Important:** On Windows, update Claude Code to the latest version first.
 > Open PowerShell and run: `npm i -g @anthropic-ai/claude-code@latest`
 
-> **Do not paste this repo URL into Claude Desktop Chat tab's "Add marketplace" dialog.** Chat tab's Add marketplace is a separate surface and is not supported by this repo. The Claude Code CLI marketplace (`claude plugin marketplace add ...`) IS supported and is the canonical CLI install path. See [WHAT-TO-USE-WHEN.md](WHAT-TO-USE-WHEN.md) for the distinction.
+<!-- CANONICAL-CAVEAT:desktop-marketplace START -->
+> **Do not paste this repo URL into Claude Desktop Chat tab's "Add marketplace" dialog.** Chat tab's "Add marketplace" is a separate surface and is **not supported by this repo** — pasting `https://github.com/mariourquia/cre-skills-plugin` there will produce a validation error. The canonical Chat tab install path is the DMG (macOS) or EXE (Windows) installer, which registers a local MCP server via `claude_desktop_config.json`. The Claude Code CLI marketplace (`claude plugin marketplace add mariourquia/cre-skills-plugin` followed by `claude plugin install cre-skills@cre-skills`) **is** supported and is the canonical CLI install path; it also works in the Desktop **Code** tab (which uses Claude Code under the hood).
+<!-- CANONICAL-CAVEAT:desktop-marketplace END -->
+
+See [WHAT-TO-USE-WHEN.md](WHAT-TO-USE-WHEN.md) for the source of this caveat.
 
 ---
 
@@ -310,3 +314,22 @@ The `.exe` installer is not code-signed. Windows SmartScreen will warn "Windows 
 ### Validation error when pasting repo URL into "Add marketplace"
 
 This is expected. This repo is not a marketplace plugin. Use the DMG/EXE installer for Claude Desktop or `claude plugin install` for Claude Code. See [WHAT-TO-USE-WHEN.md](WHAT-TO-USE-WHEN.md).
+
+---
+
+## FAQ
+
+### Why does "Add marketplace" in Claude Desktop's Chat tab fail for this repo?
+
+Because Chat tab's "Add marketplace" and the Claude Code CLI marketplace are two different surfaces.
+
+- Chat tab's "Add marketplace" dialog expects a hosted marketplace manifest accessible at the URL you paste. This repo does not expose one at `https://github.com/mariourquia/cre-skills-plugin`; that URL points at the GitHub repository page, not a marketplace endpoint, so the dialog rejects it with a validation error.
+- The Claude Code CLI marketplace (`claude plugin marketplace add mariourquia/cre-skills-plugin`) reads `.claude-plugin/marketplace.json` from this repo via git, which is a different resolution path and **is** supported. It works from the Claude Code CLI and from the Claude Desktop **Code tab** (which uses Claude Code under the hood).
+- The Claude Desktop **Chat tab** is served by a separate integration layer and gets this plugin as a **local MCP server**, registered in `claude_desktop_config.json` by the DMG (macOS) or EXE (Windows) installer.
+
+**What to do instead:**
+
+- Using Claude Code CLI or Desktop Code tab → run `claude plugin marketplace add mariourquia/cre-skills-plugin` then `claude plugin install cre-skills@cre-skills`.
+- Using Claude Desktop Chat tab → download the DMG (macOS) or EXE (Windows) from the [latest release](https://github.com/mariourquia/cre-skills-plugin/releases/latest) and run the installer.
+
+See [WHAT-TO-USE-WHEN.md](WHAT-TO-USE-WHEN.md) and the [canonical caveat](#installation-guide) at the top of this page for the authoritative distinction.

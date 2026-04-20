@@ -2,7 +2,11 @@
 
 Version 4.2.0 | Apache 2.0 License
 
-> **Do not use "Add marketplace" in Claude Desktop with this repo URL.** This is not a marketplace plugin. Pasting this URL into Claude Desktop's "Add marketplace" dialog will produce a validation error. Use the installer or CLI method below. See [WHAT-TO-USE-WHEN.md](WHAT-TO-USE-WHEN.md) for the full explanation.
+<!-- CANONICAL-CAVEAT:desktop-marketplace START -->
+> **Do not paste this repo URL into Claude Desktop Chat tab's "Add marketplace" dialog.** Chat tab's "Add marketplace" is a separate surface and is **not supported by this repo** — pasting `https://github.com/mariourquia/cre-skills-plugin` there will produce a validation error. The canonical Chat tab install path is the DMG (macOS) or EXE (Windows) installer, which registers a local MCP server via `claude_desktop_config.json`. The Claude Code CLI marketplace (`claude plugin marketplace add mariourquia/cre-skills-plugin` followed by `claude plugin install cre-skills@cre-skills`) **is** supported and is the canonical CLI install path; it also works in the Desktop **Code** tab (which uses Claude Code under the hood).
+<!-- CANONICAL-CAVEAT:desktop-marketplace END -->
+
+See [WHAT-TO-USE-WHEN.md](WHAT-TO-USE-WHEN.md) for the source of this caveat.
 
 ---
 
