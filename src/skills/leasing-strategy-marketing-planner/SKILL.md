@@ -4,215 +4,102 @@ slug: leasing-strategy-marketing-planner
 version: 0.1.0
 status: deployed
 category: reit-cre
-description: "Marketing material creation, broker event planning, TI cost benchmarking, marketing plan development, and commission structure benchmarking for Leasing Directors."
+description: "Create leasing marketing materials, plan broker events, benchmark TI costs and commissions, and develop property marketing plans. Use when a user needs to build a leasing flyer, plan a broker open house, determine TI allowances, set commission structures, or create an annual leasing marketing strategy for office, retail, or industrial properties."
+user-invocable: true
+triggers:
+  - "marketing plan"
+  - "leasing strategy"
+  - "broker event"
+  - "TI allowance"
+  - "commission structure"
+  - "leasing flyer"
+  - "CoStar listing"
+  - "leasing budget"
+  - "tenant improvement cost"
+  - "broker commission"
 targets:
   - claude_code
 ---
 
 # Leasing Strategy & Marketing Planner
 
-You are a senior Leasing Director at an institutional CRE owner-operator responsible for developing leasing strategies, creating marketing plans, managing broker relationships, benchmarking TI costs and broker commissions, and driving leasing velocity across office, retail, and industrial portfolios.
+Develop leasing strategies, create marketing materials, plan broker events, benchmark TI costs and commissions, and drive leasing velocity across office, retail, and industrial portfolios.
 
 ## When to Activate
 
-Trigger on any of the following:
-- "Marketing plan" or "leasing strategy"
-- "Broker event" or "broker open house"
-- "TI allowance" or "tenant improvement cost"
-- "Commission structure" or "broker commission"
-- "Leasing flyer" or "brochure content"
-- "CoStar listing" or "LoopNet listing"
-- "Target tenant" or "prospect list"
-- "Leasing budget" or "marketing budget"
-- "Tour strategy" or "space staging"
-- Any mention of leasing marketing, broker outreach, TI benchmarking, or commission negotiation
+- User needs marketing materials (flyers, brochures, listing copy) for available spaces
+- User is planning a broker event, open house, or market update
+- User needs TI cost benchmarking or allowance determination
+- User wants an annual or property-specific marketing plan with budget allocation
+- User needs commission structure analysis or listing agreement negotiation guidance
+
+**Do NOT activate for:**
+- Lease document drafting or amendment — use `lease-document-factory`
+- Lease-up funnel diagnostics or absorption tracking — use `lease-up-war-room`
+- Rent optimization or concession modeling — use `rent-optimization-planner`
 
 ## Input Schema
 
-```yaml
-workflow_step:
-  type: enum
-  values:
-    - marketing_material     # Flyers, brochures, digital content, listing copy
-    - broker_event           # Broker event planning and relationship cultivation
-    - ti_benchmarking        # TI cost analysis and allowance determination
-    - marketing_plan         # Annual or property-specific marketing plan
-    - commission_benchmarking # Commission structure analysis and negotiation
-  required: true
+| Field | Required | Default if Missing |
+|-------|----------|--------------------|
+| workflow_step (marketing_material / broker_event / ti_benchmarking / marketing_plan / commission_benchmarking) | Yes | Infer from request |
+| property_name | Yes | Ask user |
+| property_type (office / retail / industrial / mixed-use) | Yes | Ask user |
+| total_sf | Yes | Ask user |
+| available_sf | Yes | Estimate from vacancy_rate if provided |
+| vacancy_rate | No | Calculate from available_sf / total_sf |
+| asking_rent ($/SF) | No | Use market_rent if available |
+| location (city, submarket) | Yes | Ask user |
+| class (A / B / C) | No | Infer from asking_rent and year_built |
 
-property_context:
-  property_name: string
-  property_type: string       # office, retail, industrial, mixed-use
-  total_sf: number
-  available_sf: number
-  vacancy_rate: number
-  asking_rent: number         # $/SF
-  market_rent: number
-  location: string            # city, submarket
-  year_built: integer
-  class: string               # A, B, C
-  amenities: list
-  parking_ratio: number       # spaces per 1,000 SF
-  required: true
+Additional inputs by workflow step — see [input-schema-detail.yaml](references/input-schema-detail.yaml) for the full schema including `available_spaces`, `market_context`, `budget`, and `brand_guidelines` fields.
 
-available_spaces:              # for marketing_material and marketing_plan
-  - suite: string
-  - floor: integer
-  - sf: number
-  - condition: string         # cold shell, warm shell, move-in ready, built out
-  - divisible: boolean
-  - asking_rent: number
-  - available_date: date
-
-market_context:
-  submarket_vacancy: number
-  submarket_absorption: number  # trailing 12-month net absorption
-  competitive_set: list         # competing buildings with vacancy and asking rent
-  demand_drivers: list          # major employers, industry trends, demographic shifts
-  supply_pipeline: list         # projects under construction with delivery dates
-
-budget:                         # for marketing_plan
-  annual_marketing_budget: number
-  channel_allocation: object    # budget by channel
-  prior_year_spend: number
-  prior_year_results: object    # inquiries, tours, proposals, leases
-
-brand_guidelines:               # optional, auto-loaded from ~/.cre-skills/brand-guidelines.json
-  type: object
-  description: Brand config (colors, fonts, disclaimers, contact info, number formatting). Auto-loaded, user can override.
-```
+If fewer than 3 required fields are present, ask clarifying questions.
 
 ## Process
 
 ### Step 0: Load Brand Guidelines (Auto)
 
-Before generating any deliverable:
-1. Check if `~/.cre-skills/brand-guidelines.json` exists
-2. If YES: load and apply throughout (colors, fonts, disclaimers, contact info, number formatting)
-3. If NO: ask the user:
-   > "I don't have your brand guidelines saved yet. Would you like to set them up now with `/cre-skills:brand-config`? Or I can proceed with professional defaults."
-   - If user says set up: direct them to `/cre-skills:brand-config`, then resume
-   - If user says proceed: use professional defaults (navy #1B365D, white #FFFFFF, gold accent #C9A84C, Helvetica Neue/Arial, standard disclaimer)
-4. Apply loaded or default guidelines to all output sections:
-   - Color references in any formatting instructions
-   - Company name in headers/footers
-   - Disclaimer text at the bottom of every page/section
-   - Confidentiality notice on cover
-   - Contact block on final page/section
-   - Number formatting preferences throughout
+Check `~/.cre-skills/brand-guidelines.json`. If missing, prompt: "Would you like to set up brand guidelines with `/cre-skills:brand-config`? Or I can proceed with professional defaults." Apply loaded or default guidelines (navy #1B365D, white #FFFFFF, gold #C9A84C, Helvetica Neue/Arial) to all deliverables.
 
 ### Step 1: Marketing Material Creation
 
-1. **Target Audience Definition**: Identify primary tenant profiles for each available space:
-   - Size range (SF requirements)
-   - Industry vertical
-   - Credit quality
-   - Growth stage
-   - Location drivers (transit, labor, clients)
-2. **Content Development**:
-   - **Headline**: Benefit-led (not feature-led). Focus on what the space enables, not just what it is.
-   - **Property highlights**: 3-5 key differentiators vs competitive set
-   - **Space specifications**: SF, floor plate, ceiling height, column spacing, HVAC capacity, power, connectivity
-   - **Amenity package**: On-site and neighborhood amenities
-   - **Location benefits**: Transit access, highway access, walkability, dining/retail, housing
-   - **Financial summary**: Asking rent, NNN estimates, TI available, move-in date
-3. **Channel-Specific Formatting**:
-   - **CoStar/LoopNet**: SEO-optimized listing copy, 10-15 photos, floor plans, 3D tours
-   - **Print flyer**: One-page front/back, high-impact imagery, QR code to landing page
-   - **Brochure**: 4-8 pages for major availabilities, includes market context and building story
-   - **Digital**: Email template for broker blasts, LinkedIn content, website availability page
-   - **Signage**: Building-mounted or sidewalk signs with key specs and contact
-4. **Quality Standards**: Professional photography (not phone photos), consistent brand identity, accurate SF and rent figures, legal review of claims.
+1. **Define target audience** for each available space: size range, industry vertical, credit quality, growth stage, location drivers.
+2. **Develop content** — benefit-led headline (not feature-led), 3-5 differentiators vs. competitive set, space specs, amenity package, financial summary (asking rent, NNN, TI, move-in date).
+3. **Format by channel**: CoStar/LoopNet (SEO-optimized, photos, floor plans), print flyer (one-page front/back, QR code), brochure (4-8 pages with market context), digital (email blast template, LinkedIn, website), signage.
+4. **Quality gate**: Professional photography, consistent brand identity, accurate SF/rent, legal review of claims.
 
 ### Step 2: Broker Event Planning
 
-1. **Event Strategy**: Select format based on objective:
-   - **Broker open house**: Tour the building, showcase improvements, distribute materials. Best for new-to-market availability or post-renovation.
-   - **Market update breakfast/lunch**: Present market data, pipeline, and investment thesis. Best for relationship building with top 20 brokers.
-   - **Exclusive preview**: Private tour for 5-10 targeted brokers working active requirements that match. Best for large blocks or unique spaces.
-   - **Tenant appreciation event**: Existing tenant event to strengthen retention and generate referrals. Best for multi-tenant properties.
-2. **Logistics Planning**:
-   - Venue: on-site (available space or amenity area) or off-site (restaurant, hotel)
-   - F&B: breakfast/coffee events ($15-25/person), lunch ($30-50/person), cocktail ($40-75/person)
-   - Invitations: 4 weeks out, RSVP required, follow-up at 2 weeks and 1 week
-   - Collateral: updated flyers, availability matrices, market one-pagers, branded giveaways
-   - Technology: digital presentation, virtual tour demo, CRM lead capture
-3. **Follow-Up Protocol**:
-   - Thank-you email within 24 hours with digital materials attached
-   - Personal follow-up call to top 10 broker attendees within 1 week
-   - Add all attendees to broker mailing list
-   - Track which brokers bring tours within 30/60/90 days post-event
-   - ROI analysis: event cost vs. leasing activity generated
+1. **Select format** — broker open house (new availability), market update breakfast ($15-25/person), exclusive preview (5-10 targeted brokers), or tenant appreciation event.
+2. **Plan logistics** — venue, F&B budget, invitations 4 weeks out with 2-week and 1-week follow-up, collateral and tech.
+3. **Execute follow-up** — thank-you email within 24 hours, personal calls to top 10 attendees within 1 week, track tours generated within 30/60/90 days, calculate ROI.
 
 ### Step 3: TI Cost Benchmarking
 
-1. **Condition Assessment**: Classify available space by finish level:
-   - **Cold shell**: No improvements, exposed structure, no ceiling, no flooring, no HVAC distribution
-   - **Warm shell**: Basic improvements: finished ceiling, concrete floor, HVAC distribution, lighting, restrooms on floor
-   - **Move-in ready (spec suite)**: Fully built out: offices, conference, break room, reception. Ready for occupancy.
-   - **Second-generation (existing build-out)**: Prior tenant's improvements in place. May or may not suit new tenant.
-2. **Cost Benchmarking**: Apply market-appropriate TI cost ranges (see reference file for detailed benchmarks by property type and finish level).
-3. **Allowance Determination**: Calculate appropriate TI allowance based on:
-   - Market comparison: what are competing buildings offering?
-   - Lease economics: amortize TI into rent at target return rate
-   - Tenant credit: higher allowance for investment-grade tenants
-   - Lease term: longer term supports higher TI (more months to amortize)
-   - Space condition: cold shell requires more TI than warm shell
-4. **Amortization Analysis**:
+1. **Classify space condition** — cold shell, warm shell, move-in ready (spec suite), or second-generation. See [ti-cost-benchmarks.yaml](references/ti-cost-benchmarks.yaml) for market-appropriate cost ranges.
+2. **Determine allowance** based on: competing building offers, lease economics (amortize at target return), tenant credit, lease term, space condition.
+3. **Run amortization analysis**:
    ```
    Monthly TI Amortization = TI Amount / PV Annuity Factor (rate, months)
-   Annual TI Cost per SF = (Monthly Amortization x 12) / Lease SF
-   Effective Rent = Face Rent - TI Amortization per SF
+   Effective Rent = Face Rent - (Monthly Amortization x 12 / Lease SF)
    ```
-   Target: Effective rent (net of TI amortization) meets or exceeds underwriting target.
+   Verify effective rent meets or exceeds underwriting target.
 
 ### Step 4: Marketing Plan Development
 
-1. **Situation Analysis**: Current portfolio leasing status (vacancy, expiring leases, prospects in pipeline), competitive landscape, market conditions and trajectory.
-2. **Target Tenant Profiles**: For each available space block, define ideal tenant:
-   - Industry/sector (tech, legal, financial, medical, government, co-working)
-   - Size range (5-10K, 10-25K, 25-50K, 50K+)
-   - Credit quality (investment grade, mid-market, startup)
-   - Growth trajectory (expanding, stable, contracting)
-   - Location sensitivity (must be in this submarket vs. flexible)
-3. **Channel Strategy**: Allocate budget and effort across channels:
-   - **Digital listings** (CoStar, LoopNet, CREXi): 15-25% of budget
-   - **Broker co-op program**: 20-30% of budget (events, tours, commissions)
-   - **Direct mail/email**: 5-10% of budget
-   - **Digital advertising** (LinkedIn, Google, targeted display): 10-15% of budget
-   - **Signage and property branding**: 10-15% of budget
-   - **PR and media**: 5-10% of budget
-   - **Events and hospitality**: 10-20% of budget
-4. **Calendar and Milestones**: Quarterly plan with seasonal adjustments:
-   - Q1: Launch annual campaign, broker event, fresh materials
-   - Q2: Peak touring season, accelerate advertising, spec suite completion
-   - Q3: Push proposals to LOI, maintain momentum through summer
-   - Q4: Year-end push for deals, prep next year plan
-5. **KPIs and Targets**: Set quarterly and annual targets:
-   - Inquiries (calls, emails, web leads)
-   - Tours conducted
-   - Proposals issued
-   - LOIs executed
-   - Leases signed (SF and count)
-   - Average days on market by space
-   - Conversion rate: inquiry-to-tour, tour-to-proposal, proposal-to-lease
+1. **Situation analysis** — vacancy, expiring leases, pipeline, competitive landscape, market trajectory.
+2. **Define target tenant profiles** per available space block (industry, size, credit, growth stage, location sensitivity). See [marketing-plan-template.md](references/marketing-plan-template.md) for the full template.
+3. **Allocate budget by channel** — digital listings (15-25%), broker co-op (20-30%), direct mail/email (5-10%), digital ads (10-15%), signage (10-15%), PR (5-10%), events (10-20%).
+4. **Set quarterly calendar** — Q1 launch, Q2 peak touring, Q3 LOI push, Q4 year-end close.
+5. **Define KPIs** — inquiries, tours, proposals, LOIs, leases signed (SF and count), days on market, conversion rates (inquiry→tour→proposal→lease).
 
 ### Step 5: Commission Structure Benchmarking
 
-1. **Market Rate Analysis**: Compile commission rates by property type, market, and deal type. (See reference file for detailed benchmarks.)
-2. **Structure Optimization**: Evaluate alternatives:
-   - Standard commission: percentage of aggregate rent
-   - Flat fee per deal
-   - Bonus structure: accelerators for speed or excess SF
-   - Override: additional percentage to listing broker's team
-3. **Listing Agreement Negotiation**: Key terms to address:
-   - Commission rate and split (listing vs. cooperating broker)
-   - Protected tenant list
-   - Term and termination provisions
-   - Tail period (typically 6-12 months after expiration)
-   - Marketing obligations
-   - Reporting requirements
-4. **Commission Budget**: Project total commission expense for portfolio:
+1. **Compile market rates** by property type and deal type. See [commission-benchmarks.yaml](references/commission-benchmarks.yaml).
+2. **Evaluate structures** — standard percentage, flat fee, speed/SF accelerators, listing override.
+3. **Negotiate listing agreement terms** — commission rate and split, protected tenant list, term/termination, tail period (6-12 months), marketing obligations.
+4. **Project commission budget**:
    ```
    Projected Commission = Absorption Target (SF) x Avg Rent x Avg Term x Commission Rate
    ```

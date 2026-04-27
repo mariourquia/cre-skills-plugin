@@ -1,0 +1,48 @@
+# Leasing Strategy & Marketing Planner — Full Input Schema
+# See SKILL.md for the summary table of required fields.
+# This file documents workflow-specific optional fields.
+
+available_spaces:  # for marketing_material and marketing_plan workflows
+  description: List of available spaces to market
+  items:
+    - suite: string
+    - floor: integer
+    - sf: number
+    - condition: string         # cold shell, warm shell, move-in ready, built out
+    - divisible: boolean
+    - asking_rent: number
+    - available_date: date
+
+market_context:
+  description: Submarket competitive data for positioning
+  fields:
+    submarket_vacancy: number
+    submarket_absorption: number  # trailing 12-month net absorption
+    competitive_set: list         # competing buildings with vacancy and asking rent
+    demand_drivers: list          # major employers, industry trends, demographic shifts
+    supply_pipeline: list         # projects under construction with delivery dates
+
+budget:  # for marketing_plan workflow
+  description: Marketing budget parameters for annual planning
+  fields:
+    annual_marketing_budget: number
+    channel_allocation: object    # budget by channel (digital, broker, direct, etc.)
+    prior_year_spend: number
+    prior_year_results: object    # inquiries, tours, proposals, leases from prior year
+
+brand_guidelines:
+  description: Auto-loaded from ~/.cre-skills/brand-guidelines.json if available
+  fields:
+    company_name: string
+    primary_color: string         # hex code
+    secondary_color: string       # hex code
+    accent_color: string          # hex code
+    heading_font: string
+    body_font: string
+    layout_style: string          # minimal, corporate, boutique, institutional
+    number_format: string         # full ($1,234,567), abbreviated ($1.2M), both
+    units_preference: string      # psf, per_unit, auto
+    disclaimer_text: string
+    confidentiality_notice: string
+    contact_block: string
+    logo_path: string

@@ -4,66 +4,75 @@ slug: lease-strategy-papering
 version: 0.1.0
 status: deployed
 category: workspace
-description: "Top-level workspace for leasing workflows. Routes through tenant retention, lease-up campaigns, negotiations, rent optimization, and lease documentation. Manages persistent leasing context across sessions."
+description: "Orchestrate leasing workflows across tenant retention, lease-up campaigns, rent optimization, negotiations, and lease documentation. Use when a user brings a leasing task — routes to the appropriate specialist skill and maintains persistent leasing context across sessions."
+user-invocable: true
+triggers:
+  - "leasing strategy"
+  - "lease strategy"
+  - "tenant renewal"
+  - "lease-up"
+  - "rent optimization"
+  - "lease document"
+  - "lease amendment"
+  - "concession analysis"
+  - "trade-out comparison"
 targets:
   - claude_code
 ---
 
 # Lease Strategy & Papering
 
-You are the leasing strategy coordinator. When a user brings in a leasing task -- whether tenant retention, new lease-up, rent optimization, or lease documentation -- you orchestrate the right specialist skills in sequence.
+Orchestrate leasing workflows by routing to specialist skills, gathering property and tenant context, and maintaining persistent workspace state across sessions. See [routing-map.md](references/routing-map.md) for the full skill routing reference.
 
 ## When to Activate
 
-- User mentions leasing strategy, tenant negotiations, or lease renewals
-- User is planning a new lease-up campaign or absorption push
+- User needs tenant retention analysis, renewal probability scoring, or NPV comparison
+- User is planning a new lease-up campaign or absorption strategy
 - User needs to draft, amend, or restructure lease documents
 - User wants rent optimization, concession analysis, or trade-out comparison
-- User says "leasing", "lease strategy", "tenant renewal", "lease-up", "rent optimization"
+
+**Do NOT activate for:**
+- Single-lease abstraction or data extraction — use `lease-abstract-extractor`
+- CAM reconciliation calculations — use `cam-reconciliation-calculator`
+- Lease compliance auditing — use `lease-compliance-auditor` directly
+
+## Input Schema
+
+| Field | Required | Default if Missing |
+|-------|----------|--------------------|
+| property_name | Yes | Ask user |
+| property_type | Yes | Ask user |
+| task_type (retention / lease_up / documentation / renewal) | Yes | Infer from user request |
+| current_occupancy | No | Ask if routing to retention or lease-up skills |
+| lease_expiration_schedule | No | Ask if routing to retention skills |
+
+If fewer than 2 required fields are present, ask clarifying questions before routing.
 
 ## Process
 
-### Step 1: Check for Existing Workspace
+### Step 1: Resume or Create Workspace
 
-Read `~/.cre-skills/workspaces/` for any active leasing workspace matching the property or campaign name. If found, offer to resume.
+Read `~/.cre-skills/workspaces/` for any active leasing workspace matching the property or campaign name. If found, offer to resume with a summary of prior state. Otherwise, collect the inputs above and create a new workspace.
 
-### Step 2: Gather Leasing Context
+### Step 2: Route to Specialist Skills
 
-Collect minimum required inputs:
-- Property type and location
-- Current occupancy and lease expiration schedule
-- Whether this is a retention, lease-up, renewal, or documentation task
-- Relevant rent roll or tenant roster
-- Any active negotiations or pending lease actions
+Route based on `task_type`:
 
-### Step 3: Route to Specialist Skills
+| Task Type | Primary Skill | Secondary Skills |
+|-----------|--------------|-----------------|
+| Retention & Renewals | [tenant-retention-engine](../tenant-retention-engine/SKILL.md) | [rent-optimization-planner](../rent-optimization-planner/SKILL.md), [lease-negotiation-analyzer](../lease-negotiation-analyzer/SKILL.md) |
+| Lease-Up Campaigns | [lease-up-war-room](../lease-up-war-room/SKILL.md) | [leasing-operations-engine](../leasing-operations-engine/SKILL.md), [rent-optimization-planner](../rent-optimization-planner/SKILL.md) |
+| Lease Documentation | [lease-document-factory](../lease-document-factory/SKILL.md) | [lease-option-structurer](../lease-option-structurer/SKILL.md), [lease-trade-out-analyzer](../lease-trade-out-analyzer/SKILL.md) |
 
-Based on the task type and available information, invoke skills as appropriate:
+Invoke the primary skill first. After it completes, save workspace state, then suggest the next skill with rationale.
 
-**Retention & Renewals:**
-1. `/tenant-retention-engine` -- renewal probability scoring, retention NPV analysis
-2. `/rent-optimization-planner` -- loss-to-lease waterfall, effective rent NPV comparison
-3. `/lease-negotiation-analyzer` -- complex negotiation scenario analysis
+### Step 3: Save Workspace State
 
-**Lease-Up Campaigns:**
-1. `/lease-up-war-room` -- funnel diagnostics, pricing strategy, absorption benchmarking
-2. `/leasing-operations-engine` -- inquiry response, tour prep, pipeline CRM
-3. `/rent-optimization-planner` -- pricing and concession strategy
-
-**Lease Documentation:**
-1. `/lease-document-factory` -- amendments, template refresh, expansion/contraction options
-2. `/lease-option-structurer` -- option structuring and analysis
-3. `/lease-trade-out-analyzer` -- renewal vs. re-tenant NPV comparison
-
-At each stage, save workspace state and present the next-action footer.
-
-### Step 4: Save Workspace State
-
-After each specialist skill completes, update the workspace JSON at `~/.cre-skills/workspaces/<workspace-id>.json` with results, decisions, and next actions.
+After each specialist skill completes, update `~/.cre-skills/workspaces/<workspace-id>.json` with results, decisions, and next actions.
 
 ## Output Format
 
-End every response with the required next-action footer:
+End every response with:
 
 ```
 ---
@@ -71,13 +80,24 @@ End every response with the required next-action footer:
 [One-sentence verdict from the latest stage]
 
 ## Assumptions Used
-- [List key assumptions]
+- [Key assumptions]
 
 ## Missing Inputs
-- [List what's still needed]
+- [What's still needed]
 
 ## Recommended Next Actions
 1. [Next skill to invoke with rationale]
 2. [Alternative path if applicable]
-3. [Information to gather before next step]
 ```
+
+## Red Flags
+
+- Routing to lease-up skills when the property is >95% occupied — this is a retention task, not lease-up
+- Generating lease documents without confirming current rent roll data matches actual lease terms
+- Proceeding with concession analysis without market comp data from `comp-snapshot`
+
+## Chain Notes
+
+- **Upstream**: `rent-roll-analyzer` (verified rent roll and expiration data), `comp-snapshot` (market rent comparisons), `property-performance-dashboard` (leasing as NOI lever)
+- **Downstream**: All specialist skills listed in the routing table above
+- **Parallel**: `leasing-strategy-marketing-planner` (marketing materials and broker strategy), `noi-sprint-plan` (leasing as part of NOI improvement)
