@@ -4,246 +4,96 @@ slug: post-close-onboarding-transition
 version: 0.1.0
 status: deployed
 category: reit-cre
-description: "Post-acquisition asset onboarding to property management, TI project coordination, and development-to-stabilization transition bridging Acquisitions, PM, and Development."
+description: "Execute post-acquisition asset onboarding (60-day plan), coordinate TI projects, and manage development-to-stabilization transitions. Use when a user has just closed an acquisition and needs to onboard the asset to property management, coordinate tenant improvements, or transition a development project to operations."
+user-invocable: true
+triggers:
+  - "post-close"
+  - "post-acquisition"
+  - "asset onboarding"
+  - "PM transition"
+  - "development to operations"
+  - "TCO"
+  - "utility transfer"
+  - "vendor transition"
+  - "tenant welcome letter"
+  - "lease file audit"
 targets:
   - claude_code
 ---
 
 # Post-Close Onboarding & Transition
 
-You are a senior Director of Asset Management at an institutional CRE owner-operator responsible for post-acquisition integration, property management transitions, development handoffs, and operational stabilization. You bridge Acquisitions, Property Management, Development, and Accounting teams.
+Execute post-acquisition integration, property management transitions, TI project coordination, and development-to-operations handoffs. Bridges Acquisitions, PM, Development, and Accounting teams. See [onboarding-checklist.md](references/onboarding-checklist.md) and [transition-frameworks.md](references/transition-frameworks.md) for detailed checklists and frameworks.
 
 ## When to Activate
 
-Trigger on any of the following:
-- "Post-close" or "post-acquisition"
-- "Onboarding" or "asset onboarding"
-- "PM transition" or "property management transition"
-- "Development to operations" or "stabilization transition"
-- "TCO to leasing" or "certificate of occupancy"
-- "Utility transfer" or "vendor transition"
-- "Tenant welcome letter" or "new ownership letter"
-- "Lockbox setup" or "bank account"
-- "Lease file audit" or "document transfer"
-- Any mention of post-closing integration, PM company changeover, or development handoff
+- User has just closed an acquisition and needs a 60-day onboarding plan
+- User needs to coordinate a tenant improvement (TI) buildout project
+- User is transitioning a development project from construction to operations
+- User needs to set up PM company, transfer utilities, or audit lease files post-close
+
+**Do NOT activate for:**
+- Pre-close due diligence — use `dd-command-center`
+- Closing checklist and document tracking — use `closing-checklist-tracker`
+- Ongoing property performance monitoring — use `property-performance-dashboard`
 
 ## Input Schema
 
-```yaml
-workflow_step:
-  type: enum
-  values:
-    - acquisition_onboarding   # Post-acquisition onboarding (60-day plan)
-    - ti_coordination          # TI project coordination for tenant improvements
-    - dev_to_ops_transition    # Development-to-operations stabilization handoff
-  required: true
+| Field | Required | Default if Missing |
+|-------|----------|--------------------|
+| workflow_step (acquisition_onboarding / ti_coordination / dev_to_ops_transition) | Yes | Infer from context |
+| property_name | Yes | Ask user |
+| property_type | Yes | Ask user |
+| total_sf_or_units | Yes | Ask user |
+| closing_date | Yes | Ask user |
+| location | Yes | Ask user |
 
-transaction_context:
-  property_name: string
-  property_type: string         # multifamily, office, retail, industrial, mixed-use
-  total_sf_or_units: number
-  acquisition_price: number
-  closing_date: date
-  location: string
-  required: true
+**Workflow-specific inputs** (ask only when relevant):
+- **Acquisition onboarding**: seller/buyer entities, PM company, occupancy rate, tenant count, annual NOI
+- **TI coordination**: tenant name, suite, TI allowance, construction budget/timeline, lease commencement date
+- **Dev-to-ops**: TCO date, lease-up target months, stabilized occupancy target, punch list status
 
-onboarding_parameters:          # for acquisition_onboarding
-  seller_entity: string
-  buyer_entity: string
-  pm_company: string            # new PM company (or incumbent retained)
-  pm_retained_from_seller: boolean
-  lender: string
-  occupancy_rate: number
-  tenant_count: integer
-  annual_noi: number
-  key_vendors: list
-  it_systems: object            # accounting software, access control, etc.
-
-ti_parameters:                  # for ti_coordination
-  tenant_name: string
-  suite: string
-  ti_allowance: number
-  construction_budget: number
-  construction_timeline_weeks: integer
-  lease_commencement_date: date
-  rent_commencement_date: date
-
-development_parameters:         # for dev_to_ops_transition
-  project_name: string
-  tco_date: date
-  final_co_date: date
-  total_units_or_sf: number
-  lease_up_target_months: integer
-  stabilized_occupancy_target: number
-  pm_company: string
-  warranty_tracking: object
-  punch_list_status: string
-```
+If fewer than 3 required fields are present, ask clarifying questions.
 
 ## Process
 
 ### Step 1: Post-Acquisition Onboarding (60-Day Plan)
 
-**Day 1-7: Critical Path Items**
+Follow the detailed checklist in [onboarding-checklist.md](references/onboarding-checklist.md). Key phases:
 
-1. **Ownership Transfer Notifications**:
-   - File deed and transfer documents
-   - Notify all tenants of ownership change (welcome letter with new payment instructions)
-   - Notify all utility companies and transfer accounts to buyer entity
-   - Notify insurance carrier and bind coverage on buyer's policy (coordinate with `insurance-risk-manager`)
-   - Notify local tax assessor of ownership transfer
-   - Set up new lockbox/payment portal for rent collection
-   - Open property-level bank accounts (operating, security deposit escrow, reserve)
+**Day 1-7 — Critical Path:**
+1. **Ownership transfer** — file deed, notify tenants (welcome letter with new payment instructions), transfer utilities, bind buyer insurance (coordinate with [insurance-risk-manager](../insurance-risk-manager/SKILL.md)), set up lockbox and bank accounts.
+2. **PM activation** — execute PM agreement, transfer emergency contacts, issue access credentials, conduct Day 1 walkthrough with photo documentation.
+3. **Financial setup** — configure accounting system, load rent roll, process closing prorations, verify security deposit transfer against lease files.
 
-2. **Property Management Activation**:
-   - Execute PM agreement (if new PM company)
-   - Transfer emergency contact information
-   - Set up property phone line, email, and after-hours answering service
-   - Provide PM company with access credentials (building access, utility portals, vendor contacts)
-   - Issue master keys and access cards to PM team
-   - Conduct Day 1 property walkthrough (document condition with photos)
+**Day 8-30 — Foundation:**
+4. **Lease file audit** — compare abstracts to actual documents, flag missing amendments, create critical dates calendar, send estoppels (see [estoppel-certificate-generator](../estoppel-certificate-generator/SKILL.md)).
+5. **Vendor review** — inventory all contracts, assess pricing vs. market and cancellation provisions, notify vendors of ownership change or issue termination.
+6. **Deferred maintenance** — commission PCA if not done during DD, prioritize safety and code items, build 30/60/90-day punch list.
+7. **IT/access systems** — transfer BAS access, reset access control, set up security and utility monitoring.
 
-3. **Financial Setup**:
-   - Set up property in accounting system (chart of accounts, cost centers)
-   - Load rent roll into accounting/PM software
-   - Process any closing prorations and credits
-   - Establish initial operating account balance (typically 1-2 months of operating expenses)
-   - Confirm security deposit transfer from seller (verify against lease files)
-
-**Day 8-30: Foundation Building**
-
-4. **Lease File Audit**:
-   - Inventory all lease files received from seller
-   - Compare lease abstracts to actual lease documents (verify rent, SF, term, options, clauses)
-   - Identify missing leases, amendments, or exhibits
-   - Flag discrepancies between seller's rent roll and actual lease terms
-   - Create critical dates calendar (expirations, options, escalation dates, insurance renewal)
-   - Send estoppel certificates to all tenants (verify lease status; see `estoppel-certificate-generator`)
-
-5. **Vendor Contract Review**:
-   - Inventory all vendor contracts (janitorial, landscaping, security, elevator, HVAC, fire/life safety, waste)
-   - Assess each contract: pricing vs. market, term, cancellation provisions, performance quality
-   - Determine which contracts to retain, renegotiate, or terminate
-   - Notify vendors of ownership change and confirm continued service (or issue termination notice per contract)
-   - Set up vendor payment accounts in AP system
-
-6. **Deferred Maintenance Assessment**:
-   - Commission Property Condition Assessment (PCA) if not done during DD
-   - Walk each building system with PM superintendent
-   - Prioritize immediate maintenance needs (safety, code compliance, tenant-facing)
-   - Develop 30/60/90-day maintenance punch list
-   - Cross-reference against capital budget from underwriting
-
-7. **IT and Access Systems**:
-   - Transfer or set up building management system (BAS) access
-   - Reset access control system (rekey if necessary, issue new credentials)
-   - Set up security cameras and monitoring
-   - Establish utility monitoring (if sub-metered)
-   - Configure property management software integration
-
-**Day 31-60: Operational Stabilization**
-
-8. **First Month Financial Close**:
-   - Complete first month operating statement
-   - Reconcile actual vs. closing prorations
-   - Verify all rent payments received at new lockbox
-   - Identify any delinquencies and begin collection process
-   - Present preliminary actuals vs. acquisition underwriting budget
-
-9. **Budget Finalization**:
-   - Develop operating budget for remainder of fiscal year (see `annual-budget-engine`)
-   - Incorporate actual conditions discovered during onboarding
-   - Set up monthly financial reporting package
-   - Establish variance reporting thresholds
-
-10. **Capital Plan Initiation**:
-    - Finalize Year 1 capital expenditure plan
-    - Obtain contractor bids for priority projects
-    - Submit capital requests to ownership for approval
-    - Coordinate with lender for capital reserve draws (if escrowed)
-
-11. **Tenant Relationship Building**:
-    - Schedule introductory meetings with major tenants (top 5 by SF or rent)
-    - Conduct tenant satisfaction survey
-    - Identify immediate tenant concerns or requests
-    - Begin building relationship with tenant contacts
-
-12. **Market Positioning**:
-    - Review current leasing status against market
-    - Assess vacant space condition and leasing readiness
-    - Update marketing materials with new ownership branding
-    - Brief leasing brokers on new ownership and value-add strategy
+**Day 31-60 — Stabilization:**
+8. **First month close** — complete operating statement, reconcile prorations, verify rent payments at new lockbox, present actuals vs. underwriting.
+9. **Budget** — develop operating budget (see [annual-budget-engine](../annual-budget-engine/SKILL.md)), set up monthly reporting and variance thresholds.
+10. **Capital plan** — finalize Year 1 capex, obtain bids, coordinate lender reserve draws.
+11. **Tenant relationships** — introductory meetings with top 5 tenants, satisfaction survey.
+12. **Market positioning** — review leasing status, update materials, brief brokers on value-add strategy.
 
 ### Step 2: TI Project Coordination
 
-1. **Pre-Construction**:
-   - Review TI scope of work against lease exhibit/work letter
-   - Confirm TI allowance amount, disbursement method (landlord-managed vs. tenant-managed), and approval process
-   - Obtain tenant's architect drawings and verify code compliance
-   - Bid TI work to 2-3 qualified contractors (or sole-source if lease permits)
-   - Review contractor proposals for completeness, pricing, and schedule
-   - Issue TI construction contract or approve tenant's contractor
-
-2. **During Construction**:
-   - Conduct weekly site visits (or require PM to inspect)
-   - Review and approve change orders per lease authorization limits
-   - Verify contractor insurance (COI) and lien waivers with each draw
-   - Track budget: committed, invoiced, paid, remaining
-   - Monitor schedule against lease commencement/rent commencement dates
-   - Coordinate with building operations (freight elevator, fire alarm bypasses, after-hours work)
-
-3. **Completion and Delivery**:
-   - Conduct punch list walkthrough with tenant and contractor
-   - Obtain tenant sign-off on substantial completion
-   - Verify all permits closed and inspections passed
-   - Collect as-built drawings, O&M manuals, warranty information
-   - Process final TI payment (retain 10% until punch list complete)
-   - Confirm rent commencement per lease terms
-   - Update rent roll and accounting system with new rent schedule
+1. **Pre-construction** — review TI scope vs. work letter, confirm allowance and disbursement method, bid to 2-3 contractors, verify code compliance.
+2. **During construction** — weekly site visits, change order approval per lease limits, verify COI and lien waivers with each draw, track budget (committed/invoiced/paid/remaining), monitor schedule against rent commencement.
+3. **Completion** — punch list walkthrough, tenant sign-off on substantial completion, collect as-builts and warranties, process final payment (retain 10% until punch list complete), confirm rent commencement.
 
 ### Step 3: Development-to-Operations Transition
 
-1. **Pre-TCO Preparation** (60-90 days before TCO):
-   - Select and engage PM company (if not already under contract)
-   - Develop Year 1 operating budget from development pro forma
-   - Hire or assign on-site staff (building superintendent, maintenance, leasing)
-   - Procure all operating vendor contracts (janitorial, landscaping, security, elevator maintenance, waste, pest control)
-   - Set up utility accounts in owner entity name
-   - Set up accounting system, chart of accounts, bank accounts
-   - Prepare marketing materials and launch leasing campaign (coordinate with `leasing-strategy-marketing-planner`)
-   - Commission building systems training for PM staff
+See [transition-frameworks.md](references/transition-frameworks.md) for the full framework.
 
-2. **TCO/CO Transition**:
-   - Obtain TCO from municipality
-   - Activate permanent insurance policy (transition from builder's risk; coordinate with `insurance-risk-manager`)
-   - Begin tenant move-ins per lease schedule
-   - Activate fire alarm monitoring, elevator inspection, and emergency systems
-   - Confirm all building systems are operational and commissioned
-   - Establish emergency procedures and tenant handbook
-   - Commence rent collection
-
-3. **Warranty and Punch List Tracking**:
-   - Maintain master warranty log (see `construction-procurement-contracts-engine` punch list reference)
-   - Track all punch list items from development to completion
-   - Schedule 6-month and 11-month warranty walkthroughs
-   - File warranty claims promptly with GC and subcontractors
-   - Maintain reserve for warranty-period repairs
-
-4. **Lease-Up to Stabilization**:
-   - Track lease-up velocity: applications, approvals, move-ins by week/month
-   - Monitor concession burn-down (coordinate with `lease-up-war-room`)
-   - Adjust marketing and pricing based on absorption pace
-   - Report lease-up progress to ownership weekly during active lease-up
-   - Declare stabilization when occupancy reaches target (typically 90-95%)
-   - Transition from lease-up reporting to stabilized asset reporting
-   - Begin permanent financing process once stabilized
-
-5. **Operating Budget Calibration**:
-   - After first 3-6 months of operations, compare actuals to development pro forma assumptions
-   - Adjust operating budget for actual utility consumption, staffing needs, vendor costs
-   - Identify any construction deficiencies causing excess operating costs
-   - File builder warranty claims for deficiency-related costs
-   - Present first stabilized operating budget to ownership
+1. **Pre-TCO** (60-90 days before TCO) — engage PM company, develop Year 1 operating budget from pro forma, hire on-site staff, procure vendor contracts, launch leasing campaign (coordinate with [leasing-strategy-marketing-planner](../leasing-strategy-marketing-planner/SKILL.md)).
+2. **TCO/CO transition** — obtain TCO, activate permanent insurance (transition from builder's risk), begin move-ins, commission all building systems, establish emergency procedures.
+3. **Warranty tracking** — maintain master warranty log, schedule 6-month and 11-month walkthroughs, file claims promptly.
+4. **Lease-up to stabilization** — track velocity weekly, monitor concession burn-down (coordinate with [lease-up-war-room](../lease-up-war-room/SKILL.md)), declare stabilization at target occupancy (90-95%), begin permanent financing process.
+5. **Budget calibration** — after 3-6 months, compare actuals to pro forma, adjust for actual consumption, file warranty claims for deficiency-related costs.
 
 ## Output Format
 
