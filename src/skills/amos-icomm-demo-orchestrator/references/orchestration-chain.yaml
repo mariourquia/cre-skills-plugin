@@ -1,0 +1,244 @@
+# orchestration-chain.yaml
+# Canonical stage chain, hand-off contracts, human review gates, and source-lineage
+# rules for the AMOS IC demo orchestrator. This is the conductor's score: it defines
+# the order skills run in, what each stage must hand the next, and where a human
+# must approve before the chain advances.
+#
+# All dollar/percentage figures in the worked_example section are ILLUSTRATIVE only.
+# They exist to show the SHAPE of a hand-off, not to assert any real deal's economics.
+# The orchestrator never originates numbers; it relays the specialist skills' outputs.
+
+schema:
+  version: "1.0"
+  updated: "2026-05-29"
+  status: deployed
+  usage: |
+    Read this when conducting the acquisition-to-IC workflow. Run the stages in the
+    listed order. Enforce every gate marked required: true. Do not advance past a
+    stage whose required inputs are absent. If an input is missing, pause at that
+    stage, name the missing artifact and the skill or document that supplies it, and
+    ask the human deal lead. Never fabricate a placeholder to keep the chain moving.
+
+# =========================================================================
+# THE STAGE CHAIN
+# Each stage names the specialist skill it delegates to. The orchestrator itself
+# produces no new numbers at any stage except intake (Stage 0) and verification
+# (Stage 11), both of which are bookkeeping, not analysis.
+# =========================================================================
+stages:
+
+  - id: S0
+    name: "Data-Room Intake and Manifest"
+    delegates_to: "(orchestrator)"
+    consumes: ["data_room", "property_type", "deal_name"]
+    produces: ["intake_manifest", "input_to_artifact_map", "gap_list"]
+    blocks_if_missing: ["data_room"]
+    notes: "Inventory artifacts; map each downstream required input to a source document; surface gaps before any analysis."
+
+  - id: S1
+    name: "Document Extraction"
+    delegates_to: "document-to-data-room-extractor"
+    consumes: ["unstructured_om", "unstructured_rent_roll", "unstructured_operating_statement"]
+    produces: ["structured_rent_roll", "structured_operating_statement", "extraction_confidence_per_doc"]
+    blocks_if_missing: []
+    notes: "Convert scans/PDFs/images to structured tables. Flag low-confidence fields for human spot-check before they propagate."
+
+  - id: S2
+    name: "Rent-Roll Analysis"
+    delegates_to: "rent-roll-analyzer"
+    consumes: ["structured_rent_roll"]
+    produces: ["in_place_vs_market_rent", "walt", "rollover_schedule", "concentration_flags", "economic_occupancy"]
+    blocks_if_missing: ["structured_rent_roll"]
+    notes: "Output becomes the revenue assumption set for underwriting."
+
+  - id: S3
+    name: "T-12 Normalization"
+    delegates_to: "t12-normalizer"
+    consumes: ["structured_operating_statement", "purchase_price_for_tax_reassessment"]
+    produces: ["normalized_noi", "normalization_adjustments_table"]
+    blocks_if_missing: ["structured_operating_statement"]
+    notes: "Only normalized NOI advances. Raw T-12 NOI is never an underwriting baseline."
+
+  - id: S4
+    name: "PCA Reserve Analysis"
+    delegates_to: "pca-reserve-analyzer"
+    consumes: ["pca_report"]
+    produces: ["immediate_repairs_total", "reserve_schedule_10_12yr", "annual_reserve_per_unit_or_sf"]
+    blocks_if_missing: ["pca_report"]
+    notes: "Becomes the capital reserve line in the proforma and a potential lender holdback."
+
+  - id: S5
+    name: "Agency Debt Analysis and Sizing"
+    delegates_to: "agency-loan-quote-analyzer -> loan-sizing-engine"
+    consumes: ["debt_term_sheets", "normalized_noi", "annual_reserve"]
+    produces: ["supportable_loan_amount", "binding_constraint", "financing_terms"]
+    blocks_if_missing: ["normalized_noi"]
+    notes: "Analyze quotes, then size against normalized NOI. Record which test binds: LTV vs DSCR vs debt yield."
+
+  - id: S6
+    name: "Acquisition Underwriting"
+    delegates_to: "acquisition-underwriting-engine"
+    consumes: ["revenue_assumptions", "normalized_noi", "reserves", "financing_terms", "return_targets", "hold_exit"]
+    produces: ["sources_and_uses", "ten_year_proforma", "cap_rate_decomposition", "unlevered_vs_levered_returns", "base_case_irr", "go_no_go_draft"]
+    blocks_if_missing: ["normalized_noi", "return_targets"]
+    notes: "Orchestrator relays these numbers; it does not adjust them."
+
+  - id: S7
+    name: "Sensitivity and Stress Test"
+    delegates_to: "sensitivity-stress-test"
+    consumes: ["base_case_proforma"]
+    produces: ["two_variable_grid", "probability_weighted_irr", "breakeven_thresholds", "downside_dscr"]
+    blocks_if_missing: ["base_case_proforma"]
+    notes: "Stage the worst credible downside for the red-team and the memo."
+
+  - id: S8
+    name: "IC Memo Generation"
+    delegates_to: "ic-memo-generator"
+    consumes: ["underwriting_output", "sensitivities", "reserves", "financing_terms"]
+    produces: ["draft_ic_memo"]
+    blocks_if_missing: ["underwriting_output"]
+    notes: "Marked DRAFT. Not committee-ready until human review at Gate 3."
+
+  - id: S9
+    name: "Red-Team Challenge"
+    delegates_to: "ic-red-team-challenger"
+    consumes: ["draft_ic_memo", "locked_assumptions", "risk_appetite"]
+    produces: ["adversarial_critique"]
+    blocks_if_missing: ["draft_ic_memo"]
+    notes: "Attached as a standing rebuttal section. Never silently absorbed into the memo."
+
+  - id: S10
+    name: "Source Verification"
+    delegates_to: "(orchestrator)"
+    consumes: ["all_material_claims", "intake_manifest"]
+    produces: ["source_lineage_table"]
+    blocks_if_missing: []
+    notes: "Trace every material number back to its originating skill and artifact. Unverified claims are flagged and must be resolved or struck. Fail closed."
+
+  - id: S11
+    name: "IC Q&A Context"
+    delegates_to: "icomm-context-builder"
+    consumes: ["verified_package"]
+    produces: ["anticipated_questions", "supporting_figure_and_source_per_question"]
+    blocks_if_missing: ["verified_package"]
+    notes: "Arms the human presenter. Not a transcript of a decision."
+
+# =========================================================================
+# HUMAN REVIEW GATES
+# The orchestrator pauses at each required gate and waits for human authorization.
+# It proposes; the human decides. Gates are the whole point of a conductor that is
+# explicitly NOT autonomous.
+# =========================================================================
+gates:
+
+  - id: G1
+    name: "Intake Review"
+    after_stage: "S0"
+    required: true
+    owner_default: "deal lead"
+    decision: "Confirm the manifest and authorize which stages run given what is actually in the data room."
+    fail_action: "Do not proceed past a missing artifact a required stage depends on without an explicit skip and a recorded gap."
+
+  - id: G2
+    name: "Assumption Lock"
+    after_stage: "S5"
+    required: true
+    owner_default: "acquisitions + finance"
+    decision: "Lock the four assumption sets (revenue, normalized expenses, reserves, debt) or send a stage back for rework before any model is built."
+    fail_action: "Building the model before this gate means the IC reviews numbers no one approved. This gate is non-skippable."
+    note: "Single most important gate in the chain."
+
+  - id: G3
+    name: "IC Submission"
+    after_stage: "S10"
+    required: true
+    owner_default: "deal lead + IC chair"
+    decision: "Review the verified package plus the red-team rebuttal and decide whether to submit to committee."
+    fail_action: "Any row in the source-lineage table marked 'Verified? no' blocks submission until resolved or struck."
+
+# =========================================================================
+# SOURCE-LINEAGE RULES (fail-closed posture)
+# =========================================================================
+source_lineage:
+  rule_1: "Every material number in the assembled package must trace to an originating skill AND an originating data-room artifact."
+  rule_2: "A claim that cannot be traced is marked 'Verified? no' and blocks IC submission."
+  rule_3: "The orchestrator does not originate numbers. If a figure has no specialist-skill source, it does not exist and must not appear in the package."
+  rule_4: "Recency: an artifact (rent roll, T-12) dated more than ~90 days before the IC date is flagged stale in the manifest so reviewers can judge it."
+  enterprise_contrast: |
+    In this demo, lineage is reconstructed in-session by the verification pass (Stage 10).
+    The AMOS enterprise surface persists lineage continuously: every number is bound to its
+    source at the moment it is produced, governance controls which stages may run, the
+    approval workflow records each gate decision, and the committee record is packaged and
+    retained. The orchestrator demonstrates the motion; AMOS operationalizes and persists it.
+
+# =========================================================================
+# WORKED HAND-OFF EXAMPLE -- ILLUSTRATIVE NUMBERS ONLY
+# A 180-unit suburban multifamily, shown only to demonstrate how one stage's output
+# becomes the next stage's input. None of these figures assert any real deal. They are
+# placeholders chosen to be internally consistent for teaching the hand-off shape.
+# =========================================================================
+worked_example:
+  disclaimer: "ILLUSTRATIVE ONLY. Numbers are fabricated for teaching the hand-off shape and do not represent any real or recommended deal."
+  deal_name: "Maple Court (illustrative)"
+  property_type: "multifamily"
+  units: 180
+
+  S2_rent_roll_analyzer_output:
+    in_place_rent_per_unit_month: 1850          # illustrative
+    market_rent_per_unit_month: 1975            # illustrative
+    loss_to_lease_pct: 6.3                       # illustrative, derived from the two above
+    economic_occupancy_pct: 93.5                 # illustrative
+    walt_months: 9                               # illustrative (MF short-term leases)
+    hands_to_S6_as: "revenue assumptions (in-place rent, mark-to-market path, occupancy)"
+
+  S3_t12_normalizer_output:
+    raw_t12_noi: 2150000                          # illustrative -- NOT an underwriting baseline
+    normalization_adjustments:
+      management_fee_restated_to_market: -65000   # illustrative
+      taxes_reassessed_on_purchase_basis: -180000 # illustrative
+      insurance_repriced: -42000                  # illustrative
+      one_time_items_stripped: 30000              # illustrative
+    normalized_noi: 1893000                        # illustrative -- THIS is what advances
+    hands_to_S5_and_S6_as: "normalized NOI baseline"
+
+  S4_pca_reserve_analyzer_output:
+    immediate_repairs_total: 220000               # illustrative
+    annual_reserve_per_unit: 350                  # illustrative
+    annual_reserve_total: 63000                    # illustrative = 180 units * 350
+    hands_to_S5_as: "potential lender replacement-reserve / holdback"
+    hands_to_S6_as: "capital reserve line in proforma"
+
+  S5_debt_sizing_output:
+    normalized_noi_used: 1893000                  # carried from S3, illustrative
+    binding_constraint: "DSCR"                     # illustrative; LTV was looser than DSCR here
+    target_dscr: 1.25                              # illustrative
+    supportable_loan_amount: 23000000             # illustrative
+    hands_to_S6_as: "financing terms + supportable proceeds"
+
+  S6_underwriting_output:
+    base_case_levered_irr_pct: 14.2               # illustrative
+    equity_multiple: 1.9                           # illustrative
+    going_in_cap_on_normalized_noi_pct: 5.4       # illustrative = normalized_noi / purchase price
+    hands_to_S7_as: "base case for stress testing"
+
+  S7_stress_output:
+    downside_dscr: 1.08                            # illustrative -- surfaced in Deal Snapshot
+    probability_weighted_irr_pct: 12.6            # illustrative
+    note: "Downside DSCR above 1.0x but thin; flagged for IC visibility per Red Flags."
+
+  lineage_sample:
+    - claim: "Normalized NOI"
+      value: 1893000
+      originating_skill: "t12-normalizer"
+      originating_artifact: "Seller T-12 operating statement (PDF)"
+      verified: true
+    - claim: "Supportable loan amount"
+      value: 23000000
+      originating_skill: "loan-sizing-engine"
+      originating_artifact: "Agency term sheet + normalized NOI"
+      verified: true
+    - claim: "Market rent per unit"
+      value: 1975
+      originating_skill: "rent-roll-analyzer (corroborated by comp-snapshot)"
+      originating_artifact: "Rent roll + submarket comps"
+      verified: true

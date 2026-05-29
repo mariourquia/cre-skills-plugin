@@ -1,0 +1,278 @@
+# Data Room Extraction Taxonomy
+#
+# The typed fact catalog this skill emits. Every fact produced by
+# document-to-data-room-extractor must map to a (domain, field) pair below,
+# carry the listed unit/type, and cite a sourceRef.
+#
+# All dollar amounts, percentages, and counts shown in examples are
+# ILLUSTRATIVE placeholders for a fictional 219-unit garden multifamily asset.
+# They are not benchmarks. Real extractions take values from the documents.
+
+fact_row_schema:
+  factId: "string, stable within a run (F-0001, F-0002, ...)"
+  propertyId: "string, joins to the asset"
+  domain: "enum: property | revenue | expense | rent_roll_aggregate | lease_economics | physical | title | debt | tax | insurance"
+  field: "enum within domain (see catalogs below)"
+  value: "typed scalar (number | string | boolean)"
+  unit: "USD | USD_per_unit | USD_per_sf | percent | bps | x | years | count | year | enum | flag"
+  asOf: "reporting date or period the fact represents (ISO date or period label)"
+  sourceRef: "REQUIRED precise locator. PDF: docId#p<page>. Sheet: docId!<sheet>!<range>. Append quoted span for single values."
+  confidence: "float in [0,1] from extraction-confidence-rubric.md"
+  extractionMethod: "enum: spreadsheet_cell | labeled_table | broker_stated | agency_quote | computed_aggregate | prose_inferred | ocr_low"
+  reviewState: "enum: auto_pass | needs_review | human_confirmed | human_rejected"
+  conflict: "boolean, true when cross-doc values disagree beyond tolerance"
+  stale: "boolean, true when source period > 90 days before as_of"
+  notes: "string; for sub-floor facts, name the dominant confidence driver"
+
+reconciliation_tolerances:
+  usd_abs: 10000        # +/- $10K
+  usd_pct: 0.01         # or +/- 1%, whichever is larger
+  percent_pts: 0.005    # +/- 0.5 percentage points
+  rate_bps: 5           # +/- 5 bps for cap rate / yield / spread
+  ratio_x: 0.05         # +/- 0.05x for DSCR / debt yield expressed as x
+  count_exact: true     # unit counts, easement counts must match exactly
+
+# -------------------------------------------------------------------------
+# DOMAIN: property  (typical source: OM, ALTA)
+# -------------------------------------------------------------------------
+property:
+  - field: asset_name
+    unit: string
+    typical_source: om
+  - field: address
+    unit: string
+    typical_source: om
+  - field: submarket
+    unit: string
+    typical_source: om
+  - field: property_type
+    unit: enum            # multifamily | office | retail | industrial | mixed_use
+    typical_source: om
+  - field: unit_count
+    unit: count
+    typical_source: [om, rent_roll]
+    example_illustrative: 219
+  - field: rentable_sf
+    unit: count
+    typical_source: [om, alta_survey]
+  - field: year_built
+    unit: year
+    typical_source: om
+    example_illustrative: 1998
+  - field: year_renovated
+    unit: year
+    typical_source: om
+  - field: asking_price
+    unit: USD
+    typical_source: om
+    extraction_method_hint: broker_stated
+    example_illustrative: 61500000   # illustrative only
+
+# -------------------------------------------------------------------------
+# DOMAIN: revenue  (typical source: T-12, OM pro forma)
+# -------------------------------------------------------------------------
+revenue:
+  - field: t12_gpr
+    unit: USD
+    typical_source: t12
+    note: "gross potential rent at native granularity; do not normalize"
+    example_illustrative: 2418540
+  - field: vacancy_loss
+    unit: USD
+    typical_source: t12
+  - field: concessions
+    unit: USD
+    typical_source: [t12, rent_roll]
+  - field: other_income
+    unit: USD
+    typical_source: t12
+  - field: effective_gross_income
+    unit: USD
+    typical_source: t12
+  - field: noi
+    unit: USD
+    typical_source: [t12, om]
+    note: "OM-stated and T-12-derived NOI are distinct facts; reconcile in Step 6"
+    example_illustrative_om: 4210000
+    example_illustrative_t12: 3961000
+
+# -------------------------------------------------------------------------
+# DOMAIN: expense  (typical source: T-12)  -- native line items, NOT normalized
+# -------------------------------------------------------------------------
+expense:
+  - field: payroll
+    unit: USD
+    typical_source: t12
+  - field: repairs_maintenance
+    unit: USD
+    typical_source: t12
+  - field: utilities
+    unit: USD
+    typical_source: t12
+  - field: management_fee
+    unit: USD
+    typical_source: t12
+    note: "carry seller's actual fee; t12-normalizer restates to market"
+  - field: insurance
+    unit: USD
+    typical_source: t12
+  - field: real_estate_taxes
+    unit: USD
+    typical_source: [t12, tax_bill]
+  - field: contract_services
+    unit: USD
+    typical_source: t12
+  - field: gna_admin
+    unit: USD
+    typical_source: t12
+
+# -------------------------------------------------------------------------
+# DOMAIN: rent_roll_aggregate  (source: rent roll)  -- AGGREGATES ONLY, no unit rows
+# -------------------------------------------------------------------------
+rent_roll_aggregate:
+  - field: physical_occupancy
+    unit: percent
+    note: "occupied units / total units"
+    example_illustrative: 93.6
+  - field: economic_occupancy
+    unit: percent
+  - field: units_by_floorplan
+    unit: count
+    note: "count per floor-plan type, e.g., {1x1: 96, 2x2: 88, 3x2: 35}"
+  - field: avg_in_place_rent_by_floorplan
+    unit: USD_per_unit
+  - field: loss_to_lease
+    unit: percent
+  - field: units_delinquent_60d
+    unit: count
+    note: "COUNT only; names are PII and never emitted"
+  - field: walt
+    unit: years
+    note: "commercial only; weighted average lease term"
+  - field: expiring_sf_by_year
+    unit: count
+    note: "commercial; SF expiring per forward year bucket, NOT per tenant"
+  - field: largest_tenant_pct
+    unit: percent
+    note: "anonymized as Tenant A; concentration risk without identity"
+
+# -------------------------------------------------------------------------
+# DOMAIN: lease_economics  (source: lease docs)  -- REDACTED economic structure only
+# -------------------------------------------------------------------------
+lease_economics:
+  - field: tenant_code
+    unit: string
+    note: "anonymized (Tenant A...). Trade name withheld under strict_no_lease_names"
+  - field: suite_sf
+    unit: count
+  - field: lease_commence
+    unit: date
+  - field: lease_expire
+    unit: date
+  - field: base_rent_psf
+    unit: USD_per_sf
+  - field: escalation_pattern
+    unit: string            # e.g., "3% annual" or "CPI, 2% floor / 4% cap"
+  - field: free_rent_months
+    unit: count
+  - field: ti_allowance_psf
+    unit: USD_per_sf
+  - field: renewal_options
+    unit: string            # e.g., "2 x 5yr, 9-mo notice"
+  - field: recovery_structure
+    unit: enum              # nnn | modified_gross | full_service
+  - field: cotenancy_or_kickout_present
+    unit: flag
+
+# -------------------------------------------------------------------------
+# DOMAIN: physical  (source: PCA)
+# -------------------------------------------------------------------------
+physical:
+  - field: immediate_repairs_total
+    unit: USD
+    note: "surface as top-line fact; large values change the deal"
+  - field: short_term_repairs_total
+    unit: USD
+  - field: reserve_recommendation
+    unit: USD_per_unit
+    note: "or USD_per_sf for commercial"
+  - field: effective_age
+    unit: years
+  - field: remaining_useful_life_roof
+    unit: years
+  - field: remaining_useful_life_hvac
+    unit: years
+  - field: life_safety_findings_present
+    unit: flag
+
+# -------------------------------------------------------------------------
+# DOMAIN: title  (source: ALTA survey, title commitment)
+# -------------------------------------------------------------------------
+title:
+  - field: legal_description_present
+    unit: flag
+  - field: recorded_easements_count
+    unit: count
+  - field: encroachments_present
+    unit: flag
+  - field: flood_zone
+    unit: enum              # e.g., X | AE | A | VE
+  - field: parking_count
+    unit: count
+  - field: site_acreage
+    unit: count
+
+# -------------------------------------------------------------------------
+# DOMAIN: debt  (source: agency quote)  -- INDICATIVE, not committed
+# -------------------------------------------------------------------------
+debt:
+  - field: lender
+    unit: string
+  - field: program
+    unit: string            # e.g., "Freddie SBL" | "Fannie DUS"
+  - field: quoted_loan_amount
+    unit: USD
+    extraction_method_hint: agency_quote
+    note: "indicative; never treated as a commitment downstream"
+  - field: quoted_rate
+    unit: percent
+  - field: index_plus_spread
+    unit: string            # e.g., "SOFR + 215 bps" or "10yr UST + 165 bps"
+  - field: term
+    unit: years
+  - field: amortization
+    unit: years
+  - field: io_period
+    unit: years
+  - field: quoted_max_ltv
+    unit: percent
+  - field: quoted_min_dscr
+    unit: x
+    example_illustrative: 1.25
+  - field: quoted_min_debt_yield
+    unit: percent
+  - field: prepay_structure
+    unit: string            # e.g., "yield maintenance" | "5-4-3-2-1 step-down"
+
+# -------------------------------------------------------------------------
+# DOMAIN: tax  (source: tax bill)
+# -------------------------------------------------------------------------
+tax:
+  - field: assessed_value
+    unit: USD
+  - field: mill_rate
+    unit: number
+  - field: current_annual_taxes
+    unit: USD
+    note: "anchors t12-normalizer reassessment; if missing, reassessment is unanchored"
+
+# -------------------------------------------------------------------------
+# DOMAIN: insurance  (source: loss run)
+# -------------------------------------------------------------------------
+insurance:
+  - field: current_annual_premium
+    unit: USD
+  - field: claims_count_trailing_3yr
+    unit: count
+  - field: loss_ratio_trailing_3yr
+    unit: percent

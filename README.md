@@ -65,9 +65,9 @@ Upcoming work is tracked in [`docs/ROADMAP.md`](docs/ROADMAP.md) — phased from
 <!-- CATALOG:STATS:START -->
 | Metric | Count |
 |--------|-------|
-| Skills | **113** |
+| Skills | **119** |
 | Expert Agents | **54** |
-| Reference Files | **247** |
+| Reference Files | **256** |
 | Python Calculators | **12** |
 | Workflow Chains | **6** |
 | Orchestrator Pipelines | **10** |

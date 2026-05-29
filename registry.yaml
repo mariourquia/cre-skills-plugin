@@ -1,13 +1,13 @@
 # CRE Skills Registry
 # GENERATED from catalog/catalog.yaml — do not edit manually
 # Run: python scripts/catalog-generate.py
-# Generated: 2026-04-20
-# Total Skills: 113
+# Generated: 2026-05-29
+# Total Skills: 119
 
 metadata:
   version: "2.0"
-  generated: "2026-04-20"
-  total_skills: 113
+  generated: "2026-05-29"
+  total_skills: 119
   source: catalog/catalog.yaml
 
 skills:
@@ -51,6 +51,20 @@ skills:
   - comp-snapshot
   - market-memo-generator
   - loan-sizing-engine
+- slug: agency-loan-quote-analyzer
+  name: Agency Loan Quote Analyzer
+  category: cross-cutting
+  priority: P1
+  status: deployed
+  chains_to: []
+  chains_from: []
+- slug: amos-icomm-demo-orchestrator
+  name: AMOS IC Demo Orchestrator
+  category: cross-cutting
+  priority: P1
+  status: deployed
+  chains_to: []
+  chains_from: []
 - slug: annual-budget-engine
   name: Annual Budget Engine
   category: 07-asset-management
@@ -433,6 +447,13 @@ skills:
   chains_from:
   - jv-waterfall-architect
   - partnership-allocation-engine
+- slug: document-to-data-room-extractor
+  name: Document-to-Data-Room Extractor
+  category: cross-cutting
+  priority: P1
+  status: deployed
+  chains_to: []
+  chains_from: []
 - slug: emerging-manager-evaluator
   name: Emerging Manager Evaluator
   category: 09-investor-relations
@@ -554,6 +575,20 @@ skills:
   - sourcing-outreach-system
   - portfolio-allocator
   - reit-profile-builder
+- slug: ic-red-team-challenger
+  name: IC Red Team Challenger
+  category: cross-cutting
+  priority: P1
+  status: deployed
+  chains_to: []
+  chains_from: []
+- slug: icomm-context-builder
+  name: IComm Context Builder
+  category: cross-cutting
+  priority: P1
+  status: deployed
+  chains_to: []
+  chains_from: []
 - slug: insurance-risk-manager
   name: Insurance & Risk Manager
   category: 16-daily-operations
@@ -870,6 +905,13 @@ skills:
   - fund-formation-toolkit
   - cost-segregation-analyzer
   - opportunity-zone-underwriter
+- slug: pca-reserve-analyzer
+  name: PCA Reserve Analyzer
+  category: cross-cutting
+  priority: P1
+  status: deployed
+  chains_to: []
+  chains_from: []
 - slug: performance-attribution
   name: Performance Attribution
   category: 15-portfolio-strategy

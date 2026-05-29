@@ -1,0 +1,144 @@
+# Challenge Question Bank and Break-Trigger Heuristics
+#
+# A structured library the IC Red Team Challenger draws on to author the
+# Section 7 challenge questions and the Section 6 break triggers.
+#
+# IMPORTANT: every numeric value in this file is ILLUSTRATIVE. The thresholds,
+# rates, caps, and basis-point moves are shape examples to show what a grounded
+# answer looks like. They are NOT benchmarks and must NOT be quoted into a live
+# deal. Always recompute against the actual underwriting and current market data.
+
+meta:
+  purpose: >
+    Seed bank for adversarial IC review. Pairs the sharp questions a skeptical
+    committee asks with the form of the grounded answer the deal team should
+    prepare. Organized by the committee member's lens so the lead questions can
+    be tailored to ic_composition.
+  usage: >
+    Select 8-12 questions weighted toward the property_type, the business_plan,
+    and the known hot buttons of the committee. Replace every illustrative
+    number with the deal's real figure and cite the underwriting or diligence
+    source.
+  numbers_are: illustrative
+
+# ---------------------------------------------------------------------------
+# Questions by committee lens
+# ---------------------------------------------------------------------------
+challenge_questions:
+
+  returns_lens:
+    description: "Asked by the returns-minded GP/partner. Leads on exit cap, promote, and the return distribution."
+    questions:
+      - q: "Your levered IRR rests on a 5.50% exit cap after a going-in of 5.25%. Why does the market pay a tighter cap for an older asset in five years?"
+        prepared_answer_shape: >
+          Either: the exit reflects stabilized NOI on a repositioned asset (cite the
+          value-add bridge and signed-lease comps), or we underwrote exit = going-in
+          and the spread is purely NOI growth (show the growth bridge). If neither,
+          this is cap compression as the return driver - flag it.
+        if_unanswerable: "Return depends on multiple expansion of value, i.e. market timing. Flag as single-assumption risk."
+      - q: "Strip out exit-cap compression and rent growth above trend. What is the going-in cash yield carrying this for five years?"
+        prepared_answer_shape: "Show the year-1 and stabilized cash-on-cash, and the unlevered yield vs. the loan rate to test for negative leverage."
+        if_unanswerable: "Deal has no current return; it is entirely a back-end bet."
+      - q: "Where does this sit in the fund's return distribution, and what does it do to blended fund IRR if it lands at the downside case?"
+        prepared_answer_shape: "Position vs. fund target (e.g., 16.8% vs. 15% target) and the probability-weighted IRR from the scenario set."
+        if_unanswerable: "No return context; the committee cannot size the bet."
+
+  credit_lens:
+    description: "Asked by the lender-minded chair or credit committee. Leads on debt yield, DSCR, and the refinance."
+    questions:
+      - q: "What rate and what proceeds does your takeout actually need, and what is that rate versus today's market?"
+        prepared_answer_shape: >
+          State the assumed refi rate and required proceeds to clear the maturing
+          balance plus costs. Compare to today's market rate. Illustrative refi
+          cliff: model assumes 5.75% takeout while market is ~6.75% - a 100 bps gap
+          that must be defended with a forward curve, not hope.
+        if_unanswerable: "Refi cliff: a financing risk dressed as a return assumption."
+      - q: "At what NOI haircut does the DSCR or debt-yield covenant trip, and how much headroom is that off base?"
+        prepared_answer_shape: "Name the covenant floor, the base-case coverage, and the haircut to breach. Illustrative: covenant at 1.20x, base 1.34x, trips at a ~10% NOI haircut."
+        if_unanswerable: "Covenant headroom unknown; cross-ref debt-covenant-monitor before the committee meets."
+      - q: "Is this negative leverage at close? Going-in cap versus the loan constant?"
+        prepared_answer_shape: "Going-in cap vs. interest rate; if cap < rate, every dollar of debt dilutes year-1 return and the case rests on NOI growth."
+        if_unanswerable: "Negative leverage not acknowledged; flag prominently."
+
+  operations_lens:
+    description: "Asked by the ops-minded partner. Leads on the business plan, pace, and execution risk."
+    questions:
+      - q: "Your $250/unit renovation premium - what did renovated comps actually lease at, net of concessions, in this submarket in the last six months?"
+        prepared_answer_shape: "Signed-lease net-effective rents from primary leasing sources, not asking-rent averages. If the gap to asking is wide, the premium is unproven."
+        if_unanswerable: "Value-creation bridge unsupported; this is a market-rate buy at a value-add price."
+      - q: "What happens to IRR and the refi if lease-up/renovation slips one quarter? Two?"
+        prepared_answer_shape: "Pace sensitivity from the stress test; state the IRR and refi-proceeds impact per quarter of slip and the break trigger in months."
+        if_unanswerable: "Pace risk unpriced, yet construction and leasing routinely slip a quarter."
+      - q: "Has this sponsor executed this exact business plan in this exact submarket, and how did the last one perform?"
+        prepared_answer_shape: "Cite prior executions with outcomes. If the prior win was a different cycle or product, name that as an anchor, not a precedent."
+        if_unanswerable: "Execution risk concentrated in an unproven plan; size accordingly."
+
+  diligence_lens:
+    description: "Asked by anyone who has read the data room. Leads on what the model assumes but has not confirmed."
+    questions:
+      - q: "Are in-place rents estoppel-confirmed, or are we trusting the seller's rent roll?"
+        prepared_answer_shape: "Estoppel status by tenant; flag any delta between estopped and modeled rents."
+        if_unanswerable: "In-place income unconfirmed; a known unknown sitting under the entire proforma."
+      - q: "Did you normalize the T-12 for market management fee, real tax reassessment at the new basis, and insurance repricing?"
+        prepared_answer_shape: "Show the normalization adjustments; un-normalized seller NOI inflates going-in yield. Cross-ref t12-normalizer."
+        if_unanswerable: "Going-in yield likely overstated; re-normalize before the memo."
+      - q: "What does the PCA say about structural reserves, and is the model's reserve adequate?"
+        prepared_answer_shape: "PCA reserve recommendation vs. modeled reserve; name any shortfall as a capital risk."
+        if_unanswerable: "Reserve adequacy unconfirmed; potential capital surprise post-close."
+
+# ---------------------------------------------------------------------------
+# Break-trigger heuristics (all illustrative)
+# ---------------------------------------------------------------------------
+break_trigger_heuristics:
+  description: >
+    Default variables to convert from sensitivity to decision line. For each,
+    compute the value at which the deal fails its hurdle, covenant, or refi.
+    Headroom = percentage move from base to trigger. Reference points below are
+    ILLUSTRATIVE thin-headroom prompts, not pass/fail lines.
+  variables:
+    - variable: exit_cap_rate
+      failure: "Levered IRR falls below equity hurdle."
+      thin_headroom_reference_illustrative: "breaks within ~25 bps of base"
+    - variable: dscr_or_debt_yield_covenant
+      failure: "Covenant trips on an NOI haircut."
+      thin_headroom_reference_illustrative: "clears base by less than ~10%"
+    - variable: refi_takeout_rate
+      failure: "Takeout proceeds fall below maturing balance plus costs."
+      thin_headroom_reference_illustrative: "needs a rate ~100 bps+ below today's market"
+    - variable: leaseup_or_renovation_pace
+      failure: "Stabilization slips past the refi/sale window."
+      thin_headroom_reference_illustrative: "breaks if pace slips ~3 months"
+    - variable: breakeven_occupancy
+      failure: "No operational cushion for rollover or move-out."
+      thin_headroom_reference_illustrative: "base-case breakeven above ~90%"
+
+# ---------------------------------------------------------------------------
+# Regime-break prompts for unknown-unknown discovery
+# ---------------------------------------------------------------------------
+regime_break_prompts:
+  description: "Structured prompts to surface risks the model omits because it assumes the current regime persists."
+  prompts:
+    - "What rate path does this underwriting silently assume at the refinance date?"
+    - "What cap-rate level is assumed stable from acquisition through exit?"
+    - "Is credit assumed available at the refi at the assumed terms?"
+    - "What single-tenant or single-industry concentration is the deal exposed to?"
+    - "What supply is in the pipeline but not yet permitted in this submarket?"
+    - "Could the insurance market reprice this entire asset class (coastal, wildfire, older vintage)?"
+    - "Which two variables are stressed independently that actually move together in a recession (vacancy and exit cap; refi rate and exit value)?"
+
+# ---------------------------------------------------------------------------
+# Disconfirming-evidence source map
+# ---------------------------------------------------------------------------
+disconfirming_source_map:
+  description: "For common load-bearing assumptions, the source that could disprove them."
+  mappings:
+    - assumption: "Market rent supports the renovation premium"
+      disconfirming_source: "Signed-lease net-effective rents from primary leasing agents, last 6 months (not asking-rent averages)"
+    - assumption: "Exit cap holds at or below going-in"
+      disconfirming_source: "Recent trades of comparable-vintage assets and the forward cap-rate trend; comp-snapshot and submarket-truth-serum"
+    - assumption: "Refi clears at the assumed rate and proceeds"
+      disconfirming_source: "Current lender quotes at the asset's stabilized debt yield; debt-covenant-monitor for covenant interaction"
+    - assumption: "In-place rents are real"
+      disconfirming_source: "Tenant estoppels and a lease audit, not the seller's rent roll"
+    - assumption: "Going-in NOI is achievable"
+      disconfirming_source: "Normalized T-12 with market management fee, reassessed taxes, and repriced insurance; t12-normalizer"
