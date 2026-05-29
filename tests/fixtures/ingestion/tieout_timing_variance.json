@@ -1,0 +1,26 @@
+{
+  "_fixture": "Rent roll <-> T-12 tie-out: TIMING variance. The T-12 recovery line carries an annual CAM true-up lump, so recognized recovery income exceeds the contractual run-rate and the EGI total does not tie. The tool must classify the recovery gap as 'timing' (estimate-vs-annual-true-up), not a mapping error, and route it to review. No real data.",
+  "rent_roll": {
+    "doc_type": "rent_roll", "run_id": "RUN-TT-1", "as_of": "2026-05-31", "tenant_id": "synthetic-fund",
+    "source": {"document_id": "RR-TT", "document_type": "rent_roll"},
+    "property": {"property_id": "P-TT", "property_type": "multifamily", "rentable_sf": 20000, "units": 2},
+    "rows": [
+      {"row_number": 1, "unit": "101", "rentable_sf": 850, "unit_status": "occupied", "lease_status": "active", "tenant_name": "Tenant Alpha LLC", "lease_start": "2024-01-01", "lease_expire": "2027-12-31", "lease_type": "modified_gross",
+       "charges": [{"charge_code": "RENT", "monthly_amount": 1700, "annual_amount": 20400}, {"charge_code": "CAM", "monthly_amount": 150, "annual_amount": 1800, "is_recoverable": true, "is_estimate": true}]},
+      {"row_number": 2, "unit": "102", "rentable_sf": 900, "unit_status": "occupied", "lease_status": "active", "tenant_name": "Beta LLC", "lease_start": "2023-06-01", "lease_expire": "2028-05-31", "lease_type": "modified_gross",
+       "charges": [{"charge_code": "RENT", "monthly_amount": 1800, "annual_amount": 21600}]}
+    ]
+  },
+  "t12": {
+    "doc_type": "t12", "run_id": "RUN-TT-1", "as_of": "2026-05-31", "tenant_id": "synthetic-fund",
+    "source": {"document_id": "T12-TT", "document_type": "t12"},
+    "property": {"property_id": "P-TT"},
+    "periods": ["2025-06", "2025-05", "2025-04", "2025-03", "2025-02", "2025-01", "2024-12", "2024-11", "2024-10", "2024-09", "2024-08", "2024-07"],
+    "lines": [
+      {"account_code": "4000", "account_name": "Rental Income - Base", "line_type": "actual",
+       "amounts": {"2025-06": 3500, "2025-05": 3500, "2025-04": 3500, "2025-03": 3500, "2025-02": 3500, "2025-01": 3500, "2024-12": 3500, "2024-11": 3500, "2024-10": 3500, "2024-09": 3500, "2024-08": 3500, "2024-07": 3500}},
+      {"account_code": "4100", "account_name": "Rental Income - Other (CAM est + annual true-up)", "line_type": "actual",
+       "amounts": {"2025-06": 3150, "2025-05": 150, "2025-04": 150, "2025-03": 150, "2025-02": 150, "2025-01": 150, "2024-12": 150, "2024-11": 150, "2024-10": 150, "2024-09": 150, "2024-08": 150, "2024-07": 150}}
+    ]
+  }
+}

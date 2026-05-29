@@ -1,0 +1,29 @@
+{
+  "_fixture": "Synthetic rent roll WITHOUT charge codes but with charge DESCRIPTIONS. Exercises description-keyword inference (medium confidence + human-review flag). No real data.",
+  "doc_type": "rent_roll",
+  "run_id": "RUN-RRDO-1",
+  "as_of": "2026-05-31",
+  "tenant_id": "synthetic-fund",
+  "source": {"document_id": "RR-002", "file_name": "synthetic_rent_roll_desc.csv", "document_type": "rent_roll", "table_id": "Sheet1"},
+  "property": {"property_id": "P-SYN-2", "property_name": "Synthetic Garden Apts", "property_type": "multifamily", "rentable_sf": 25000, "units": 3},
+  "rows": [
+    {"row_number": 1, "unit": "A1", "rentable_sf": 720, "unit_status": "occupied", "lease_status": "active",
+     "tenant_name": "Resident One", "lease_start": "2024-03-01", "lease_expire": "2026-02-28", "lease_type": "gross",
+     "charges": [
+       {"charge_code": null, "description": "Base Rent", "monthly_amount": 1400, "annual_amount": 16800},
+       {"charge_code": null, "description": "Parking - monthly", "monthly_amount": 75, "annual_amount": 900}
+     ]},
+    {"row_number": 2, "unit": "A2", "rentable_sf": 720, "unit_status": "occupied", "lease_status": "active",
+     "tenant_name": "Resident Two", "lease_start": "2023-11-01", "lease_expire": "2025-10-31", "lease_type": "gross",
+     "charges": [
+       {"charge_code": null, "description": "Minimum Rent", "monthly_amount": 1450, "annual_amount": 17400},
+       {"charge_code": null, "description": "Storage locker", "monthly_amount": 40, "annual_amount": 480},
+       {"charge_code": null, "description": "Mystery surcharge", "monthly_amount": 25, "annual_amount": 300}
+     ]},
+    {"row_number": 3, "unit": "A3", "rentable_sf": 900, "unit_status": "leased_not_occupied", "lease_status": "future_commencement",
+     "tenant_name": "Resident Three", "lease_start": "2026-07-01", "lease_expire": "2028-06-30", "lease_type": "gross",
+     "charges": [
+       {"charge_code": null, "description": "Base Rent", "monthly_amount": 1600, "annual_amount": 19200, "effective_start": "2026-07-01"}
+     ]}
+  ]
+}

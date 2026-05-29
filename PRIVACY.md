@@ -1,11 +1,22 @@
 # Privacy Policy
 
-**CRE Skills Plugin v4.4.0**
-**Last updated:** 2026-04-02
+**CRE Skills Plugin v4.5.0**
+**Last updated:** 2026-05-31
 
 ## Data Collection Scope
 
 The CRE Skills Plugin does NOT collect, transmit, or store any deal data, financial figures, property details, or personally identifiable information. All skill execution happens locally in the user's Claude Code session. No data leaves the user's machine unless they explicitly choose to send feedback remotely (mode: ask_each_time, anonymous_remote, or remote_with_contact in config).
+
+## Document-to-Database Ingestion (Local, Stateless / Zero-Data-Retention)
+
+The `document-to-database` family (rent roll, T-12 / operating statement, and rent-roll <-> T-12 tie-out) reads CRE document content (a rent roll or T-12 you choose to process) so it can produce structured records. That processing is **local, in-memory, and stateless**:
+
+- The ingestion calculators are pure, standard-library Python that read a JSON payload and write a JSON result to stdout. They make **no network calls**, hold **no state between runs**, and write **nothing** to `~/.cre-skills/` or any telemetry/feedback file.
+- **No deal content is ever written to telemetry or feedback.** Telemetry records only the skill slug and date (as above); it never records the document content, the extracted values, or the output.
+- **Tenant identity is pseudonymized on ingest.** Natural-person names, per-unit actual rent tied to a named person, guarantor/signatory names, SSNs, and bank account/routing numbers are NEVER emitted; a verbatim `source_text_span` is retained only for non-PII fields (a cell-address locator is kept for PII fields, never the value). A redaction breach is a non-overridable failure that halts the run.
+- This is the **zero-data-retention (ZDR) / stateless** path. A consumer that chooses to PERSIST ingestion output (e.g. into their own database) is operating their own stateful extension under their own application security and data-processing agreement; that persistence is not performed by the plugin.
+
+Synthetic, clearly-fictional fixtures are the only document content committed to this repository.
 
 ## Telemetry (Enabled by Default, Opt-Out)
 

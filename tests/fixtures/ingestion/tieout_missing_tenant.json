@@ -1,0 +1,26 @@
+{
+  "_fixture": "Rent roll <-> T-12 tie-out: MISSING income. A tenant on the rent roll generates materially less in the T-12 (collections/vacancy gap), so the EGI total does not tie and the rent-roll side is HIGHER. The tool must classify base rent as 'missing' (income present on the roll, absent in the ledger) and surface it, never absorb it. No real data.",
+  "rent_roll": {
+    "doc_type": "rent_roll", "run_id": "RUN-TMT-1", "as_of": "2026-05-31", "tenant_id": "synthetic-fund",
+    "source": {"document_id": "RR-TMT", "document_type": "rent_roll"},
+    "property": {"property_id": "P-TMT", "property_type": "multifamily", "rentable_sf": 20000, "units": 2},
+    "rows": [
+      {"row_number": 1, "unit": "101", "rentable_sf": 850, "unit_status": "occupied", "lease_status": "active", "tenant_name": "Tenant Alpha LLC", "lease_start": "2024-01-01", "lease_expire": "2027-12-31", "lease_type": "modified_gross",
+       "charges": [{"charge_code": "RENT", "monthly_amount": 1700, "annual_amount": 20400}, {"charge_code": "CAM", "monthly_amount": 150, "annual_amount": 1800, "is_recoverable": true}]},
+      {"row_number": 2, "unit": "102", "rentable_sf": 900, "unit_status": "occupied", "lease_status": "in_default", "tenant_name": "Delinquent LLC", "lease_start": "2023-06-01", "lease_expire": "2028-05-31", "lease_type": "modified_gross",
+       "charges": [{"charge_code": "RENT", "monthly_amount": 1800, "annual_amount": 21600}]}
+    ]
+  },
+  "t12": {
+    "doc_type": "t12", "run_id": "RUN-TMT-1", "as_of": "2026-05-31", "tenant_id": "synthetic-fund",
+    "source": {"document_id": "T12-TMT", "document_type": "t12"},
+    "property": {"property_id": "P-TMT"},
+    "periods": ["2025-06", "2025-05", "2025-04", "2025-03", "2025-02", "2025-01", "2024-12", "2024-11", "2024-10", "2024-09", "2024-08", "2024-07"],
+    "lines": [
+      {"account_code": "4000", "account_name": "Rental Income - Base", "line_type": "actual",
+       "amounts": {"2025-06": 2500, "2025-05": 2500, "2025-04": 2500, "2025-03": 2500, "2025-02": 2500, "2025-01": 2500, "2024-12": 2500, "2024-11": 2500, "2024-10": 2500, "2024-09": 2500, "2024-08": 2500, "2024-07": 2500}},
+      {"account_code": "4100", "account_name": "Rental Income - Other", "line_type": "actual",
+       "amounts": {"2025-06": 150, "2025-05": 150, "2025-04": 150, "2025-03": 150, "2025-02": 150, "2025-01": 150, "2024-12": 150, "2024-11": 150, "2024-10": 150, "2024-09": 150, "2024-08": 150, "2024-07": 150}}
+    ]
+  }
+}

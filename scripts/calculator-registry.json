@@ -310,6 +310,153 @@
         "sensitivity_3scenario": { "type": "object", "description": "Low/base/high TDC scenarios" }
       },
       "used_by": ["construction-cost-estimator"]
+    },
+    "normalize_tokens": {
+      "script": "src/calculators/normalize_tokens.py",
+      "description": "Normalize a tokenized/extracted rent roll, T-12, or operating statement into canonical, provenance-stamped, pseudonymized records (charge-schedule lines or account x period lines).",
+      "inputs": {
+        "doc_type": { "type": "string", "required": false, "description": "rent_roll | t12 | operating_statement | auto" },
+        "as_of": { "type": "string", "required": true, "description": "ISO as-of date; flows into created_at/updated_at (no wall clock)" },
+        "run_id": { "type": "string", "required": false, "description": "Run identifier; salts pseudonyms and stamps extraction_run_id" },
+        "tenant_id": { "type": "string", "required": false, "description": "Tenancy/workspace label (path-validated; not an auth token)" },
+        "source": { "type": "object", "required": false, "description": "{document_id, file_name, document_type, table_id}" },
+        "property": { "type": "object", "required": false, "description": "Property context {property_id, rentable_sf, ...}" },
+        "rows": { "type": "array", "required": false, "description": "Rent-roll rows (units/leases/charges); required for rent_roll" },
+        "lines": { "type": "array", "required": false, "description": "Operating-statement lines (account + monthly amounts); required for t12" },
+        "periods": { "type": "array", "required": false, "description": "Declared period columns; aggregate columns are excluded" },
+        "expense_sign_convention": { "type": "string", "required": false, "description": "positive_magnitude | signed_negative | debit_credit_normal_balance" }
+      },
+      "outputs": {
+        "doc_type": { "type": "string", "description": "Resolved document type" },
+        "records": { "type": "array", "description": "Canonical charge-schedule lines or operating-statement lines" },
+        "leases": { "type": "array", "description": "Lease-level facts (rent roll)" },
+        "units": { "type": "array", "description": "Unit/suite-level facts (rent roll)" },
+        "aggregates": { "type": "object", "description": "GPR, occupancy, NOI, periods_present, etc." },
+        "issues": { "type": "array", "description": "Inline normalization issues with severity + field path" }
+      },
+      "used_by": ["document-to-database", "rent-roll-to-database", "t12-to-database", "operating-statement-to-database"]
+    },
+    "map_charge_codes": {
+      "script": "src/calculators/map_charge_codes.py",
+      "description": "Map rent-roll charge codes/descriptions and T-12 account codes/names to the canonical chart of accounts (reuses the residential-multifamily GL crosswalk); flags low-confidence and unmapped items for human review.",
+      "inputs": {
+        "charges": { "type": "array", "required": false, "description": "Charge items {charge_code, description, monthly_amount}" },
+        "accounts": { "type": "array", "required": false, "description": "Account lines {account_code, account_name}" }
+      },
+      "outputs": {
+        "charge_mappings": { "type": "array", "description": "Per-charge canonical account + confidence + method" },
+        "account_mappings": { "type": "array", "description": "Per-account canonical slug + confidence + method" },
+        "summary": { "type": "object", "description": "Dollar-weighted and code-count coverage + review count" },
+        "human_review_items": { "type": "array", "description": "Unmapped/inferred items routed to review" }
+      },
+      "used_by": ["document-to-database", "rent-roll-to-database", "t12-to-database"]
+    },
+    "validate_payload": {
+      "script": "src/calculators/validate_payload.py",
+      "description": "Validate a canonical payload: type/range/nullability plus cross-field reconciliations (annual==monthly*12 within $1, NOI==revenue-opex, period integrity). Distinguishes impossible (critical) from implausible (warning).",
+      "inputs": {
+        "payload": { "type": "object", "required": true, "description": "Output of normalize_tokens" },
+        "property_type": { "type": "string", "required": false, "description": "Branches PSF vs per-unit checks" }
+      },
+      "outputs": {
+        "checks": { "type": "array", "description": "Per-rule {code, status, field_path, detail}" },
+        "summary": { "type": "object", "description": "Counts by severity" },
+        "validation_status": { "type": "string", "description": "pass | warn | fail | critical" },
+        "pass_rate": { "type": "number", "description": "Fraction of checks passing" }
+      },
+      "used_by": ["document-to-database", "rent-roll-to-database", "t12-to-database"]
+    },
+    "reconcile_rent_roll_t12": {
+      "script": "src/calculators/reconcile_rent_roll_t12.py",
+      "description": "Tie out a normalized rent roll against a normalized T-12 on a stated basis (contractual vs accrual). Classifies mapping/timing/missing, surfaces residual_unexplained, never forces a tie, routes untied dimensions to review.",
+      "inputs": {
+        "rent_roll": { "type": "object", "required": true, "description": "normalize_tokens output (rent_roll)" },
+        "t12": { "type": "object", "required": true, "description": "normalize_tokens output (t12)" },
+        "tolerance_overrides": { "type": "object", "required": false, "description": "Per-dimension fractional tolerance overrides" },
+        "as_of": { "type": "string", "required": true, "description": "ISO as-of date" }
+      },
+      "outputs": {
+        "dimensions": { "type": "array", "description": "Per-dimension tie-out with basis, variance, tie_status, difference_type, residual_unexplained" },
+        "summary": { "type": "object", "description": "tied/untied counts + residual_unexplained_total + egi_ties" },
+        "human_review_items": { "type": "array", "description": "Untied dimensions routed to an analyst" },
+        "basis": { "type": "object", "description": "Stated rent-roll/T-12/collected bases" }
+      },
+      "used_by": ["rent-roll-t12-tieout", "document-to-database"]
+    },
+    "map_to_target_model": {
+      "script": "src/calculators/map_to_target_model.py",
+      "description": "Map a canonical payload into a target-model profile (raw_landing | normalized_relational | star_schema | data_vault | hybrid_recommended) and report row counts + sample rows per table.",
+      "inputs": {
+        "profile": { "type": "string", "required": false, "description": "Target-model profile (default hybrid_recommended)" },
+        "payload": { "type": "object", "required": true, "description": "normalize_tokens output" },
+        "validation": { "type": "object", "required": false, "description": "validate_payload output" },
+        "reconciliation": { "type": "object", "required": false, "description": "reconcile_rent_roll_t12 output" }
+      },
+      "outputs": {
+        "profile": { "type": "string", "description": "Resolved profile" },
+        "tables": { "type": "object", "description": "Per-table row_count + sample_row" },
+        "summary": { "type": "object", "description": "table/row counts" }
+      },
+      "used_by": ["document-to-database"]
+    },
+    "emit_sql_ddl": {
+      "script": "src/calculators/emit_sql_ddl.py",
+      "description": "Emit reviewable, DML-free CREATE TABLE DDL (Postgres) for a target-model profile. Target-warehouse DDL; not executed by amos-prototype.",
+      "inputs": {
+        "profile": { "type": "string", "required": false, "description": "Target-model profile" },
+        "dialect": { "type": "string", "required": false, "description": "Only 'postgres' supported" }
+      },
+      "outputs": {
+        "statements": { "type": "array", "description": "One CREATE TABLE statement per table" },
+        "ddl": { "type": "string", "description": "Concatenated DDL" },
+        "table_count": { "type": "number", "description": "Number of tables" }
+      },
+      "used_by": ["document-to-database"]
+    },
+    "emit_load_plan": {
+      "script": "src/calculators/emit_load_plan.py",
+      "description": "Emit a reviewable, FK-ordered load plan for a target-model profile (load order, upsert keys, dependencies). Specification only; does not execute.",
+      "inputs": {
+        "profile": { "type": "string", "required": false, "description": "Target-model profile" }
+      },
+      "outputs": {
+        "load_order": { "type": "array", "description": "Ordered tables with depends_on + upsert_keys" },
+        "topologically_valid": { "type": "boolean", "description": "Whether every FK target precedes its referrer" }
+      },
+      "used_by": ["document-to-database"]
+    },
+    "grade_ingestion": {
+      "script": "src/calculators/grade_ingestion.py",
+      "description": "Score an ingestion run: weakest-link A/B/C (primary) + 0-100 (secondary), merge>=85 / prod>=92 gates, critical-failure block, non-overridable PII-redaction-breach block. Executable realization of the rent-roll data-quality rubric.",
+      "inputs": {
+        "payload": { "type": "object", "required": true, "description": "normalize_tokens output" },
+        "validation": { "type": "object", "required": false, "description": "validate_payload output" },
+        "reconciliation": { "type": "object", "required": false, "description": "reconcile_rent_roll_t12 output" },
+        "banned_pii_values": { "type": "array", "required": false, "description": "Synthetic PII values the leak scan must not find" },
+        "as_of": { "type": "string", "required": true, "description": "ISO as-of date" }
+      },
+      "outputs": {
+        "weakest_link_grade": { "type": "string", "description": "A | B | C (primary)" },
+        "score_100": { "type": "number", "description": "0-100 weighted score (secondary)" },
+        "merge_ready": { "type": "boolean", "description": ">=85 + no C + no critical" },
+        "production_ready": { "type": "boolean", "description": "all-A + >=92 + no critical" },
+        "critical_failures": { "type": "array", "description": "Enumerated critical codes" },
+        "pii_redaction_breach": { "type": "boolean", "description": "Non-overridable leak block" }
+      },
+      "used_by": ["document-to-database", "rent-roll-to-database", "t12-to-database", "rent-roll-t12-tieout"]
+    },
+    "infer_schema": {
+      "script": "src/calculators/infer_schema.py",
+      "description": "Infer column types (integer/numeric/date/period/boolean/text), nullability, detected unit, and per-column confidence from an unknown tabular token stream (the doc_type:auto path).",
+      "inputs": {
+        "rows": { "type": "array", "required": false, "description": "Token rows (objects); 'lines'/'tokens' also accepted" }
+      },
+      "outputs": {
+        "columns": { "type": "array", "description": "Per-column inferred type + nullable + confidence" },
+        "row_count": { "type": "number", "description": "Rows sampled" },
+        "grain": { "type": "string", "description": "Inferred grain" }
+      },
+      "used_by": ["document-to-database"]
     }
   }
 }

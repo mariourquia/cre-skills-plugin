@@ -2,6 +2,46 @@
 
 ## [Unreleased]
 
+### Added (document-to-database ingestion family)
+
+An EXECUTABLE, deterministic, institutional-grade ingestion family that turns
+tokenized/extracted CRE documents into validated, typed, auditable,
+target-model-ready database payloads. Unlike the document -> warehouse -> deck
+skills below (which GUIDE Claude), this family is backed by real stdlib Python
+calculators in `src/calculators/`, each `calculate_<x>(dict)->dict`, pure and
+byte-reproducible (no wall clock; `as_of` is caller-supplied).
+
+- New `category: reit-cre` skills: `document-to-database` (the orchestrator +
+  shared references covering the canonical schema, field dictionary,
+  charge-code/account framework, target-model profiles, data-quality rules,
+  human-review workflow, self-iteration loop, security/governance, known
+  limitations, and supported input formats), `rent-roll-to-database`,
+  `t12-to-database`, `operating-statement-to-database` (the general root; T-12
+  is a constrained preset over it), and `rent-roll-t12-tieout`.
+- New calculators in `src/calculators/`: `normalize_tokens`, `map_charge_codes`,
+  `validate_payload`, `reconcile_rent_roll_t12`, `map_to_target_model`,
+  `emit_sql_ddl`, `emit_load_plan`, `grade_ingestion`, `infer_schema`, plus a
+  shared stdlib `ingest/` support package (schema, accounts, rubric, pii,
+  provenance, profiles, tolerances, determinism).
+- Models the rent roll as a CONTRACT- and CHARGE-level cash-flow source
+  (multi-line charge schedule -> charge code -> canonical account) so it can be
+  tied to T-12 account-level actuals; the rent-roll <-> T-12 tie-out is
+  basis-aware (contractual vs accrual), classifies mapping/timing/missing,
+  surfaces `residual_unexplained`, and never forces a tie.
+- REUSES (does not fork) the existing canonical sources of truth: the
+  residential-multifamily GL crosswalk + GL schema, the rent-roll
+  `data-quality-rubric.yaml`, and the extractor's `pii-redaction-policy.yaml`;
+  parity is enforced by `tests/test_ingestion_canonical_sources.py`.
+- Five target-model profiles (raw landing, normalized relational, star schema,
+  data vault, hybrid recommended) with reviewable, DML-free Postgres DDL and a
+  topologically-valid load plan. Emitted DDL is target-warehouse, not executed.
+- Governance: unit/tenant grain under a pseudonymized trust tier
+  (locator-not-value), a non-overridable PII-redaction-breach grade block, a
+  weakest-link A/B/C grade (merge >= 85, production >= 92), and a stateless /
+  zero-data-retention posture. Synthetic, clearly-fictional fixtures only.
+- New ADR `docs/adr/0002-document-to-database-ingestion.md` and the
+  `docs/ingestion/` documentation set.
+
 ### Added (document -> warehouse -> deck skill chain)
 
 Three new `category: reit-cre` skills wiring the pipeline from extracted

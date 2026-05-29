@@ -1,6 +1,6 @@
 version: 1.0.0
-generated_at: '2026-05-29T17:11:02.437464+00:00'
-plugin_version: 4.4.0
+generated_at: '2026-05-29T20:15:22.200860+00:00'
+plugin_version: 4.5.0
 items:
 - id: 1031-exchange-executor
   display_name: 1031 Exchange Executor
@@ -1246,6 +1246,32 @@ items:
   notes: ''
   calculator_file: null
   priority: P1
+  version: 0.1.0
+- id: document-to-database
+  display_name: Document to Database
+  type: skill
+  status: stable
+  source_path: src/skills/document-to-database/SKILL.md
+  domain: cross-cutting
+  persona: Executable orchestrator that turns tokenized/extracted CRE document content (rent rolls, T-12s, operating statements,
+    Prose Frontier narrative artifacts) into validated, typed, auditable, target-model
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers: []
+  input_artifacts:
+  - OM
+  - Rent Roll
+  - T-12
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
   version: 0.1.0
 - id: document-to-warehouse-pipeline
   display_name: Document-to-Warehouse Pipeline
@@ -2545,6 +2571,31 @@ items:
   calculator_file: null
   priority: P0
   version: 0.1.0
+- id: operating-statement-to-database
+  display_name: Operating Statement to Database
+  type: skill
+  status: stable
+  source_path: src/skills/operating-statement-to-database/SKILL.md
+  domain: cross-cutting
+  persona: 'Transforms a tokenized/extracted operating statement (any line type: actual, budget, reforecast, prior-year; any
+    period grain; monthly, quarterly, annual-summary, or multi-scenario) into validated, ac'
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers: []
+  input_artifacts:
+  - OM
+  - Budget
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
+  version: 0.1.0
 - id: opportunity-zone-underwriter
   display_name: Opportunity Zone Underwriter
   type: skill
@@ -3095,6 +3146,58 @@ items:
   calculator_file: null
   priority: P0
   version: 0.1.0
+- id: rent-roll-t12-tieout
+  display_name: Rent Roll to T-12 Tie-Out
+  type: skill
+  status: stable
+  source_path: src/skills/rent-roll-t12-tieout/SKILL.md
+  domain: cross-cutting
+  persona: Reconciles a normalized rent roll against a normalized T-12 on a stated, consistent basis (annualized contractual
+    vs recognized accrual; collected cash out of scope) and never forces a tie. Reconciles
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers: []
+  input_artifacts:
+  - OM
+  - Rent Roll
+  - T-12
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
+  version: 0.1.0
+- id: rent-roll-to-database
+  display_name: Rent Roll to Database
+  type: skill
+  status: stable
+  source_path: src/skills/rent-roll-to-database/SKILL.md
+  domain: cross-cutting
+  persona: 'Transforms a tokenized/extracted rent roll into validated, typed, auditable, database-ready records: a multi-line
+    charge schedule (base rent, CAM/tax/insurance recoveries, percentage rent, parking, st'
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers: []
+  input_artifacts:
+  - OM
+  - Rent Roll
+  - Lease
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: P1
+  version: 0.1.0
 - id: residential_multifamily
   display_name: Residential Multifamily Operating System
   type: skill
@@ -3407,6 +3510,31 @@ items:
   notes: ''
   calculator_file: null
   priority: P0
+  version: 0.1.0
+- id: t12-to-database
+  display_name: T-12 to Database
+  type: skill
+  status: stable
+  source_path: src/skills/t12-to-database/SKILL.md
+  domain: cross-cutting
+  persona: 'Transforms a tokenized/extracted trailing-twelve-month operating statement into validated account-level monthly
+    records. A constrained preset over operating-statement-to-database: it asserts line_type'
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers: []
+  input_artifacts:
+  - Lease
+  - T-12
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
   version: 0.1.0
 - id: tenant-credit-analyzer
   display_name: Tenant Credit Analyzer
@@ -5327,6 +5455,50 @@ items:
   calculator_file: null
   priority: null
   version: null
+- id: emit_load_plan
+  display_name: Emit Load Plan
+  type: calculator
+  status: stable
+  source_path: src/calculators/emit_load_plan.py
+  domain: cross-cutting
+  persona: 'Document-to-Database: Load Plan Emitter'
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers: []
+  input_artifacts: []
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
+  version: null
+- id: emit_sql_ddl
+  display_name: Emit Sql Ddl
+  type: calculator
+  status: stable
+  source_path: src/calculators/emit_sql_ddl.py
+  domain: cross-cutting
+  persona: 'Document-to-Database: SQL DDL Emitter'
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers: []
+  input_artifacts: []
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
+  version: null
 - id: fund_fee_modeler
   display_name: Fund Fee Modeler
   type: calculator
@@ -5349,6 +5521,94 @@ items:
   calculator_file: null
   priority: null
   version: null
+- id: grade_ingestion
+  display_name: Grade Ingestion
+  type: calculator
+  status: stable
+  source_path: src/calculators/grade_ingestion.py
+  domain: cross-cutting
+  persona: 'Document-to-Database: Ingestion Self-Grader'
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers: []
+  input_artifacts: []
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
+  version: null
+- id: infer_schema
+  display_name: Infer Schema
+  type: calculator
+  status: stable
+  source_path: src/calculators/infer_schema.py
+  domain: cross-cutting
+  persona: 'Document-to-Database: Schema Inference'
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers: []
+  input_artifacts: []
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
+  version: null
+- id: map_charge_codes
+  display_name: Map Charge Codes
+  type: calculator
+  status: stable
+  source_path: src/calculators/map_charge_codes.py
+  domain: cross-cutting
+  persona: 'Document-to-Database: Charge-Code / Account Mapper'
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers: []
+  input_artifacts: []
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
+  version: null
+- id: map_to_target_model
+  display_name: Map To Target Model
+  type: calculator
+  status: stable
+  source_path: src/calculators/map_to_target_model.py
+  domain: cross-cutting
+  persona: 'Document-to-Database: Target-Model Mapper'
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers: []
+  input_artifacts: []
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
+  version: null
 - id: monte_carlo_simulator
   display_name: Monte Carlo Simulator
   type: calculator
@@ -5356,6 +5616,28 @@ items:
   source_path: src/calculators/monte_carlo_simulator.py
   domain: cross-cutting
   persona: Monte Carlo Return Simulator
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers: []
+  input_artifacts: []
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
+  version: null
+- id: normalize_tokens
+  display_name: Normalize Tokens
+  type: calculator
+  status: stable
+  source_path: src/calculators/normalize_tokens.py
+  domain: cross-cutting
+  persona: 'Document-to-Database: Token Normalizer'
   lifecycle_phase: cross-cutting
   aliases: []
   intent_triggers: []
@@ -5459,6 +5741,28 @@ items:
   calculator_file: null
   priority: null
   version: null
+- id: reconcile_rent_roll_t12
+  display_name: Reconcile Rent Roll T12
+  type: calculator
+  status: stable
+  source_path: src/calculators/reconcile_rent_roll_t12.py
+  domain: cross-cutting
+  persona: 'Document-to-Database: Rent Roll <-> T-12 Tie-Out'
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers: []
+  input_artifacts: []
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
+  version: null
 - id: tenant_credit_scorer
   display_name: Tenant Credit Scorer
   type: calculator
@@ -5488,6 +5792,28 @@ items:
   source_path: src/calculators/transfer_tax.py
   domain: cross-cutting
   persona: Transfer Tax Calculator
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers: []
+  input_artifacts: []
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
+  version: null
+- id: validate_payload
+  display_name: Validate Payload
+  type: calculator
+  status: stable
+  source_path: src/calculators/validate_payload.py
+  domain: cross-cutting
+  persona: 'Document-to-Database: Payload Validator'
   lifecycle_phase: cross-cutting
   aliases: []
   intent_triggers: []

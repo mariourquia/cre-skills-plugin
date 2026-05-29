@@ -1,0 +1,17 @@
+{
+  "_fixture": "Partial-year / lease-up T-12: only 8 monthly periods present (new construction). Must produce a WARNING + carry the gap (periods_present < expected), NOT a hard failure, and must NOT synthesize the missing months by multiplying by 12. No real data.",
+  "doc_type": "t12",
+  "run_id": "RUN-T12P-1",
+  "as_of": "2026-05-31",
+  "tenant_id": "synthetic-fund",
+  "source": {"document_id": "T12-003", "document_type": "t12"},
+  "property": {"property_id": "P-SYN-3"},
+  "periods": ["2025-06", "2025-05", "2025-04", "2025-03", "2025-02", "2025-01", "2024-12", "2024-11"],
+  "expense_sign_convention": "positive_magnitude",
+  "lines": [
+    {"account_code": "4000", "account_name": "Rental Income - Base", "line_type": "actual",
+     "amounts": {"2025-06": 20000, "2025-05": 18000, "2025-04": 16000, "2025-03": 14000, "2025-02": 12000, "2025-01": 10000, "2024-12": 8000, "2024-11": 6000}},
+    {"account_code": "6100", "account_name": "Repairs and Maintenance", "line_type": "actual",
+     "amounts": {"2025-06": 1500, "2025-05": 1500, "2025-04": 1500, "2025-03": 1500, "2025-02": 1500, "2025-01": 1500, "2024-12": 1500, "2024-11": 1500}}
+  ]
+}
