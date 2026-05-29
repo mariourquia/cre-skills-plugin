@@ -2,12 +2,12 @@
 # GENERATED from catalog/catalog.yaml — do not edit manually
 # Run: python scripts/catalog-generate.py
 # Generated: 2026-05-29
-# Total Skills: 122
+# Total Skills: 127
 
 metadata:
   version: "2.0"
   generated: "2026-05-29"
-  total_skills: 122
+  total_skills: 127
   source: catalog/catalog.yaml
 
 skills:
@@ -449,6 +449,13 @@ skills:
   - partnership-allocation-engine
 - slug: document-to-data-room-extractor
   name: Document-to-Data-Room Extractor
+  category: cross-cutting
+  priority: P1
+  status: deployed
+  chains_to: []
+  chains_from: []
+- slug: document-to-database
+  name: Document to Database
   category: cross-cutting
   priority: P1
   status: deployed
@@ -906,6 +913,13 @@ skills:
   - submarket-truth-serum
   chains_from:
   - deal-quick-screen
+- slug: operating-statement-to-database
+  name: Operating Statement to Database
+  category: cross-cutting
+  priority: P1
+  status: deployed
+  chains_to: []
+  chains_from: []
 - slug: opportunity-zone-underwriter
   name: Opportunity Zone Underwriter
   category: 13-tax-entity
@@ -1105,6 +1119,20 @@ skills:
   - acquisition-underwriting-engine
   - variance-narrative-generator
   chains_from: []
+- slug: rent-roll-t12-tieout
+  name: Rent Roll to T-12 Tie-Out
+  category: cross-cutting
+  priority: P1
+  status: deployed
+  chains_to: []
+  chains_from: []
+- slug: rent-roll-to-database
+  name: Rent Roll to Database
+  category: cross-cutting
+  priority: P1
+  status: deployed
+  chains_to: []
+  chains_from: []
 - slug: residential_multifamily
   name: Residential Multifamily Operating System
   category: cross-cutting
@@ -1219,6 +1247,13 @@ skills:
   - deal-underwriting-assistant
   chains_from:
   - lease-abstract-extractor
+- slug: t12-to-database
+  name: T-12 to Database
+  category: cross-cutting
+  priority: P1
+  status: deployed
+  chains_to: []
+  chains_from: []
 - slug: tenant-credit-analyzer
   name: Tenant Credit Analyzer
   category: 04-due-diligence

@@ -1,0 +1,28 @@
+{
+  "_fixture": "Rent roll <-> T-12 tie-out: CLEAN match. Annualized contractual rent roll equals recognized T-12 revenue across base and recoveries; every dimension ties within tolerance; residual_unexplained is 0. No real data.",
+  "rent_roll": {
+    "doc_type": "rent_roll", "run_id": "RUN-TC-1", "as_of": "2026-05-31", "tenant_id": "synthetic-fund",
+    "source": {"document_id": "RR-TC", "document_type": "rent_roll"},
+    "property": {"property_id": "P-TC", "property_type": "multifamily", "rentable_sf": 20000, "units": 2},
+    "rows": [
+      {"row_number": 1, "unit": "101", "rentable_sf": 850, "unit_status": "occupied", "lease_status": "active", "tenant_name": "Tenant Alpha LLC", "lease_start": "2024-01-01", "lease_expire": "2027-12-31", "lease_type": "modified_gross",
+       "escalation": {"escalation_type": "fixed_pct", "escalation_amount": 3.0, "next_escalation_date": "2027-01-01"},
+       "charges": [{"charge_code": "RENT", "monthly_amount": 1700, "annual_amount": 20400}, {"charge_code": "CAM", "monthly_amount": 150, "annual_amount": 1800, "is_recoverable": true}]},
+      {"row_number": 2, "unit": "102", "rentable_sf": 900, "unit_status": "occupied", "lease_status": "active", "tenant_name": "Beta LLC", "lease_start": "2023-06-01", "lease_expire": "2028-05-31", "lease_type": "modified_gross",
+       "escalation": {"escalation_type": "fixed_pct", "escalation_amount": 2.5, "next_escalation_date": "2026-06-01"},
+       "charges": [{"charge_code": "RENT", "monthly_amount": 1800, "annual_amount": 21600}]}
+    ]
+  },
+  "t12": {
+    "doc_type": "t12", "run_id": "RUN-TC-1", "as_of": "2026-05-31", "tenant_id": "synthetic-fund",
+    "source": {"document_id": "T12-TC", "document_type": "t12"},
+    "property": {"property_id": "P-TC"},
+    "periods": ["2025-06", "2025-05", "2025-04", "2025-03", "2025-02", "2025-01", "2024-12", "2024-11", "2024-10", "2024-09", "2024-08", "2024-07"],
+    "lines": [
+      {"account_code": "4000", "account_name": "Rental Income - Base", "line_type": "actual",
+       "amounts": {"2025-06": 3500, "2025-05": 3500, "2025-04": 3500, "2025-03": 3500, "2025-02": 3500, "2025-01": 3500, "2024-12": 3500, "2024-11": 3500, "2024-10": 3500, "2024-09": 3500, "2024-08": 3500, "2024-07": 3500}},
+      {"account_code": "4100", "account_name": "Rental Income - Other", "line_type": "actual",
+       "amounts": {"2025-06": 150, "2025-05": 150, "2025-04": 150, "2025-03": 150, "2025-02": 150, "2025-01": 150, "2024-12": 150, "2024-11": 150, "2024-10": 150, "2024-09": 150, "2024-08": 150, "2024-07": 150}}
+    ]
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "_fixture": "Synthetic T-12 WITH GL account codes. 12 monthly columns plus a Total aggregate column (must be excluded from the period set). Includes a below-the-NOI capex line that must NOT enter NOI. No real data.",
+  "doc_type": "t12",
+  "run_id": "RUN-T12C-1",
+  "as_of": "2026-05-31",
+  "tenant_id": "synthetic-fund",
+  "source": {"document_id": "T12-001", "file_name": "synthetic_t12.xlsx", "document_type": "t12"},
+  "property": {"property_id": "P-SYN-1"},
+  "periods": ["2025-06", "2025-05", "2025-04", "2025-03", "2025-02", "2025-01", "2024-12", "2024-11", "2024-10", "2024-09", "2024-08", "2024-07", "Total"],
+  "aggregate_columns": ["Total"],
+  "expense_sign_convention": "positive_magnitude",
+  "lines": [
+    {"account_code": "4000", "account_name": "Rental Income - Base", "line_type": "actual",
+     "amounts": {"2025-06": 50000, "2025-05": 50000, "2025-04": 50000, "2025-03": 50000, "2025-02": 50000, "2025-01": 50000, "2024-12": 50000, "2024-11": 50000, "2024-10": 50000, "2024-09": 50000, "2024-08": 50000, "2024-07": 50000, "Total": 600000}},
+    {"account_code": "4100", "account_name": "Rental Income - Other", "line_type": "actual",
+     "amounts": {"2025-06": 2000, "2025-05": 2000, "2025-04": 2000, "2025-03": 2000, "2025-02": 2000, "2025-01": 2000, "2024-12": 2000, "2024-11": 2000, "2024-10": 2000, "2024-09": 2000, "2024-08": 2000, "2024-07": 2000, "Total": 24000}},
+    {"account_code": "6000", "account_name": "Payroll - On-Site", "line_type": "actual",
+     "amounts": {"2025-06": 8000, "2025-05": 8000, "2025-04": 8000, "2025-03": 8000, "2025-02": 8000, "2025-01": 8000, "2024-12": 8000, "2024-11": 8000, "2024-10": 8000, "2024-09": 8000, "2024-08": 8000, "2024-07": 8000, "Total": 96000}},
+    {"account_code": "6100", "account_name": "Repairs and Maintenance", "line_type": "actual",
+     "amounts": {"2025-06": 3000, "2025-05": 3000, "2025-04": 3000, "2025-03": 3000, "2025-02": 3000, "2025-01": 3000, "2024-12": 3000, "2024-11": 3000, "2024-10": 3000, "2024-09": 3000, "2024-08": 3000, "2024-07": 3000, "Total": 36000}},
+    {"account_code": "7100", "account_name": "Capex - Component Replacement", "line_type": "actual", "statement_section": "capex",
+     "amounts": {"2025-06": 0, "2025-05": 0, "2025-04": 0, "2025-03": 0, "2025-02": 0, "2025-01": 0, "2024-12": 0, "2024-11": 25000, "2024-10": 0, "2024-09": 0, "2024-08": 0, "2024-07": 0, "Total": 25000}}
+  ]
+}

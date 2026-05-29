@@ -1,0 +1,21 @@
+{
+  "_fixture": "Prose Frontier narrative extraction. Structured tokens extracted FROM a qualitative narrative artifact (an OM/teaser paragraph), with provenance pointing at narrative sections rather than spreadsheet cells. Demonstrates the family ingesting narrative-derived tokens. No real data.",
+  "doc_type": "rent_roll",
+  "run_id": "RUN-PFN-1",
+  "as_of": "2026-05-31",
+  "tenant_id": "synthetic-fund",
+  "source": {"document_id": "OM-NARR-1", "file_name": "synthetic_offering_memo.pdf", "document_type": "narrative", "table_id": null},
+  "property": {"property_id": "P-PFN", "property_name": "Narrative Gardens", "property_type": "multifamily", "rentable_sf": 18000, "units": 2},
+  "narrative_excerpt": "The asset is 100% leased. The two ground-floor commercial suites contribute base rent with CAM reimbursement; residential units are stabilized.",
+  "rows": [
+    {"row_number": 1, "unit": "C1", "rentable_sf": 1000, "unit_status": "occupied", "lease_status": "active",
+     "tenant_name": "Narrative Cafe LLC", "lease_start": "2024-02-01", "lease_expire": "2029-01-31", "lease_type": "nnn",
+     "source_section": "OM p.5 'Commercial Tenancy'",
+     "charges": [{"charge_code": "RENT", "description": "Base rent (per OM narrative)", "monthly_amount": 4000, "annual_amount": 48000},
+                 {"charge_code": "CAM", "description": "CAM reimbursement", "monthly_amount": 600, "annual_amount": 7200, "is_recoverable": true}]},
+    {"row_number": 2, "unit": "R1", "rentable_sf": 850, "unit_status": "occupied", "lease_status": "active",
+     "tenant_name": "Resident Narrative", "lease_start": "2025-01-01", "lease_expire": "2026-12-31", "lease_type": "gross",
+     "source_section": "OM p.6 'Residential Stabilization'",
+     "charges": [{"charge_code": "RENT", "description": "Residential base rent", "monthly_amount": 1900, "annual_amount": 22800}]}
+  ]
+}

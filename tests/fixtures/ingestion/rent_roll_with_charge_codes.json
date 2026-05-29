@@ -1,0 +1,37 @@
+{
+  "_fixture": "Synthetic rent roll WITH charge codes. Mixed multifamily + commercial. Contains obviously-synthetic tenant names ('Tenant Alpha LLC', 'J. Fixture') so the PII redaction test has banned values to catch. No real data.",
+  "doc_type": "rent_roll",
+  "run_id": "RUN-RRWC-1",
+  "as_of": "2026-05-31",
+  "tenant_id": "synthetic-fund",
+  "source": {"document_id": "RR-001", "file_name": "synthetic_rent_roll.xlsx", "document_type": "rent_roll", "table_id": "Detail"},
+  "property": {"property_id": "P-SYN-1", "property_name": "Synthetic Mixed-Use", "property_type": "mixed-use", "market": "Test Metro", "rentable_sf": 40000, "units": 4},
+  "rows": [
+    {"row_number": 1, "unit": "101", "rentable_sf": 850, "unit_status": "occupied", "lease_status": "active",
+     "tenant_name": "Tenant Alpha LLC", "lease_start": "2024-01-01", "lease_expire": "2026-12-31",
+     "lease_type": "modified_gross", "recovery_method": "modified_gross",
+     "escalation": {"escalation_type": "fixed_pct", "escalation_amount": 3.0, "escalation_frequency": "annual", "next_escalation_date": "2027-01-01"},
+     "charges": [
+       {"charge_code": "RENT", "monthly_amount": 1700, "annual_amount": 20400, "frequency": "monthly"},
+       {"charge_code": "CAM", "monthly_amount": 150, "annual_amount": 1800, "frequency": "monthly", "is_recoverable": true, "is_estimate": true}
+     ]},
+    {"row_number": 2, "unit": "200", "rentable_sf": 12000, "unit_status": "occupied", "lease_status": "active",
+     "tenant_name": "Acme Retail Co", "lease_start": "2022-06-01", "lease_expire": "2032-05-31",
+     "lease_type": "nnn", "recovery_method": "nnn", "base_year": 2022, "expense_stop_psf": 0,
+     "charges": [
+       {"charge_code": "RENT", "monthly_amount": 25000, "annual_amount": 300000, "frequency": "monthly"},
+       {"charge_code": "CAM", "monthly_amount": 4000, "annual_amount": 48000, "frequency": "monthly", "is_recoverable": true, "is_estimate": true},
+       {"charge_code": "RET", "monthly_amount": 3000, "annual_amount": 36000, "frequency": "monthly", "is_recoverable": true},
+       {"charge_code": "PKG", "monthly_amount": 500, "annual_amount": 6000, "frequency": "monthly"}
+     ]},
+    {"row_number": 3, "unit": "102", "rentable_sf": 850, "unit_status": "occupied", "lease_status": "active",
+     "tenant_name": "J. Fixture", "lease_start": "2025-09-01", "lease_expire": "2027-08-31",
+     "lease_type": "modified_gross", "free_rent_months": 2,
+     "escalation": {"escalation_type": "fixed_pct", "escalation_amount": 2.5},
+     "charges": [
+       {"charge_code": "RENT", "monthly_amount": 1750, "annual_amount": 21000, "frequency": "monthly"}
+     ]},
+    {"row_number": 4, "unit": "103", "rentable_sf": 800, "unit_status": "vacant_available", "lease_status": "terminated",
+     "charges": []}
+  ]
+}

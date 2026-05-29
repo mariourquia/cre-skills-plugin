@@ -1,0 +1,21 @@
+{
+  "_fixture": "Synthetic T-12 WITHOUT GL account codes (account NAMES only). Exercises name-keyword inference to canonical accounts. 12 monthly periods. No real data.",
+  "doc_type": "t12",
+  "run_id": "RUN-T12N-1",
+  "as_of": "2026-05-31",
+  "tenant_id": "synthetic-fund",
+  "source": {"document_id": "T12-002", "file_name": "synthetic_t12_named.pdf", "document_type": "t12"},
+  "property": {"property_id": "P-SYN-2"},
+  "periods": ["2025-06", "2025-05", "2025-04", "2025-03", "2025-02", "2025-01", "2024-12", "2024-11", "2024-10", "2024-09", "2024-08", "2024-07"],
+  "expense_sign_convention": "positive_magnitude",
+  "lines": [
+    {"account_code": null, "account_name": "Gross Potential Rent", "line_type": "actual",
+     "amounts": {"2025-06": 30000, "2025-05": 30000, "2025-04": 30000, "2025-03": 30000, "2025-02": 30000, "2025-01": 30000, "2024-12": 30000, "2024-11": 30000, "2024-10": 30000, "2024-09": 30000, "2024-08": 30000, "2024-07": 30000}},
+    {"account_code": null, "account_name": "Other Income - Late Fees", "line_type": "actual",
+     "amounts": {"2025-06": 400, "2025-05": 400, "2025-04": 400, "2025-03": 400, "2025-02": 400, "2025-01": 400, "2024-12": 400, "2024-11": 400, "2024-10": 400, "2024-09": 400, "2024-08": 400, "2024-07": 400}},
+    {"account_code": null, "account_name": "On-Site Payroll & Wages", "line_type": "actual",
+     "amounts": {"2025-06": 5000, "2025-05": 5000, "2025-04": 5000, "2025-03": 5000, "2025-02": 5000, "2025-01": 5000, "2024-12": 5000, "2024-11": 5000, "2024-10": 5000, "2024-09": 5000, "2024-08": 5000, "2024-07": 5000}},
+    {"account_code": null, "account_name": "Repairs & Maintenance", "line_type": "actual",
+     "amounts": {"2025-06": 2200, "2025-05": 2200, "2025-04": 2200, "2025-03": 2200, "2025-02": 2200, "2025-01": 2200, "2024-12": 2200, "2024-11": 2200, "2024-10": 2200, "2024-09": 2200, "2024-08": 2200, "2024-07": 2200}}
+  ]
+}
