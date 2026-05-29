@@ -164,7 +164,7 @@ cat << 'HEADER'
 HEADER
 printf "${RESET}"
 
-printf "${BLUE}  Plugin Installer v4.3.0${RESET}\n"
+printf "${BLUE}  Plugin Installer v4.4.0${RESET}\n"
 printf "${DIM}  113 skills | 54 agents | 8 MCP tools | 6 workflow chains${RESET}\n"
 echo ""
 

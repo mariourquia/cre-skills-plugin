@@ -1,0 +1,209 @@
+# Field-Mapping Patterns: warehouse dataset columns -> exhibit fields
+#
+# These patterns GUIDE Claude in mapping validated warehouse datasets (produced by
+# document-to-warehouse-pipeline) onto deck exhibit fields. They are NOT executed;
+# they are a model-authored specification a downstream composer implements. Every
+# exhibit field names the dataset column that populates it and carries the row's
+# source_ref + classification through.
+#
+# Dataset table names referenced here match document-to-warehouse-pipeline's
+# warehouse-schema-conventions.md (cre_<dataset>_<grain>).
+
+provenance_carry_rule:
+  description: >
+    Every mapped exhibit field inherits source_ref + classification from the
+    dataset row(s) it reads. A field aggregating multiple rows carries the full
+    set of contributing source_refs and is classified `calculated`. A field with
+    no resolvable source_ref is a hard error: do not emit the exhibit.
+  derived_fields: >
+    A field computed inside the exhibit (e.g., % of total, a sum, a delta) is
+    classification `calculated`, never `source-fact`. State the derivation.
+  modeled_fields: >
+    A field whose value is a modeled assumption (assumed exit cap, projected lift,
+    target rent) is classification `modeled-assumption` and MUST carry a visible
+    "modeled" tag through to the slide. Never relabel it as a fact.
+
+# ---------------------------------------------------------------------------
+# Exhibit: Returns / KPI snapshot (table KPI strip)
+# ---------------------------------------------------------------------------
+returns_snapshot:
+  form: table_kpi_strip
+  fields:
+    - field: levered_irr
+      from_table: (model output or cre_* metric)
+      from_column: levered_irr
+      classification_hint: modeled-assumption   # IRR is a model output -> tag modeled
+      format: pct_1dp
+    - field: equity_multiple
+      from_table: (model output)
+      from_column: equity_multiple
+      classification_hint: modeled-assumption
+      format: x_2dp
+    - field: going_in_cap
+      from_table: cre_revenue_lineitems_period + cre_expense_lineitems_period
+      from_column: noi / purchase_price
+      classification_hint: calculated
+      format: pct_2dp
+    - field: stabilized_yield
+      from_table: (model output)
+      from_column: stabilized_yield
+      classification_hint: modeled-assumption
+      format: pct_2dp
+
+# ---------------------------------------------------------------------------
+# Exhibit: Sources & Uses (table)
+# ---------------------------------------------------------------------------
+sources_and_uses:
+  form: table
+  columns: [item, amount, pct_of_total, source_ref, classification]
+  field_map:
+    senior_debt:
+      from_table: cre_debt_terms_term
+      from_column: term_value            # where term_name == loan_amount
+      classification_hint: source-fact
+    equity:
+      from_table: (derived)
+      from_column: total_uses - senior_debt
+      classification_hint: calculated
+    purchase_price:
+      from_table: cre_property_master_attribute
+      from_column: value                 # where attribute == purchase_price
+      classification_hint: source-fact
+    pct_of_total:
+      from_table: (derived)
+      from_column: amount / total
+      classification_hint: calculated
+
+# ---------------------------------------------------------------------------
+# Exhibit: NOI Walk / bridge (waterfall)
+# ---------------------------------------------------------------------------
+noi_walk:
+  form: waterfall
+  axes:
+    x: { field: bridge_step, ordering: explicit }
+    y: { field: noi, unit: USD_000s, scale: linear, start_at_zero: true }
+  bars:
+    - bar: in_place_noi          # start bar
+      from_table: cre_revenue_lineitems_period + cre_expense_lineitems_period
+      from_column: amount        # revenue sum - expense sum, current period
+      classification_hint: calculated
+    - bar: loss_to_lease         # signed delta
+      from_table: cre_rent_roll_aggregate_asof
+      from_column: value         # where metric == loss_to_lease
+      sign: positive
+      classification_hint: source-fact
+    - bar: renovation_lift       # signed delta
+      from_table: (modeled)
+      from_column: assumed_reno_lift
+      sign: positive
+      classification_hint: modeled-assumption   # tag "modeled"
+    - bar: vacancy_loss
+      from_table: cre_rent_roll_aggregate_asof
+      from_column: value         # where metric == economic_vacancy
+      sign: negative
+      classification_hint: source-fact
+    - bar: stabilized_noi        # end bar
+      from_table: (derived)
+      from_column: sum_of_prior_bars
+      classification_hint: calculated
+
+# ---------------------------------------------------------------------------
+# Exhibit: Cash flow by year (column chart)
+# ---------------------------------------------------------------------------
+cash_flow_by_year:
+  form: column_chart
+  axes:
+    x: { field: hold_year, unit: year, ordering: ascending }
+    y: { field: cash_flow, unit: USD_000s, scale: linear }
+  series:
+    - { name: levered_cash_flow, from_table: (model output), from_column: cf_by_year, classification_hint: modeled-assumption }
+  backing_table_required: true
+
+# ---------------------------------------------------------------------------
+# Exhibit: Sensitivity grid (heat-map)
+# ---------------------------------------------------------------------------
+sensitivity_grid:
+  form: heatmap
+  axes:
+    rows: { field: exit_cap_bps_delta, members: [-50, -25, 0, 25, 50] }
+    cols: { field: rent_growth_delta_pct, members: [-1, 0, 1] }
+  cell:
+    field: levered_irr
+    from_table: (model output grid)
+    from_column: irr
+    classification_hint: modeled-assumption   # whole grid is modeled
+  backing_table_required: true
+
+# ---------------------------------------------------------------------------
+# Exhibit: Rent roll summary (table)
+# ---------------------------------------------------------------------------
+rent_roll_summary:
+  form: table
+  columns: [metric, value, unit, as_of, source_ref, classification]
+  field_map:
+    physical_occupancy:
+      from_table: cre_rent_roll_aggregate_asof
+      from_column: value         # where metric == physical_occupancy
+      classification_hint: source-fact
+    walt_years:
+      from_table: cre_rent_roll_aggregate_asof
+      from_column: value         # where metric == walt
+      classification_hint: source-fact
+    in_place_gpr:
+      from_table: cre_rent_roll_aggregate_asof
+      from_column: value         # where metric == in_place_gpr
+      classification_hint: source-fact
+
+# ---------------------------------------------------------------------------
+# Exhibit: Debt terms (table)
+# ---------------------------------------------------------------------------
+debt_terms_table:
+  form: table
+  columns: [term_name, term_value, unit, lender, source_ref, classification]
+  field_map:
+    all_terms:
+      from_table: cre_debt_terms_term
+      from_column: [term_name, term_value, unit, lender]
+      classification_hint: source-fact   # quoted terms are facts; note "indicative" if from a quote
+
+# ---------------------------------------------------------------------------
+# Exhibit: Value walk (valuation-committee waterfall)
+# ---------------------------------------------------------------------------
+value_walk:
+  form: waterfall
+  axes:
+    x: { field: value_driver, ordering: explicit }
+    y: { field: value, unit: USD_000s }
+  bars:
+    - bar: prior_mark            # start
+      from_table: (prior valuation input)
+      from_column: prior_value
+      classification_hint: source-fact
+    - bar: noi_change
+      from_table: cre_revenue_lineitems_period + cre_expense_lineitems_period
+      from_column: noi_delta
+      classification_hint: calculated
+    - bar: cap_rate_change
+      from_table: (modeled)
+      from_column: cap_rate_delta_effect
+      classification_hint: modeled-assumption
+    - bar: capex_adjustment
+      from_table: cre_physical_condition_finding
+      from_column: amount        # immediate repairs
+      sign: negative
+      classification_hint: source-fact
+    - bar: new_mark              # end
+      from_table: (derived)
+      from_column: sum_of_prior_bars
+      classification_hint: calculated
+
+# ---------------------------------------------------------------------------
+# Number formatting tokens (advisory; applied by the composer)
+# ---------------------------------------------------------------------------
+format_tokens:
+  pct_1dp: "0.0%"
+  pct_2dp: "0.00%"
+  x_2dp: "0.00x"
+  usd_000s: "$#,##0,"          # display in thousands
+  usd_full: "$#,##0"
+  bps: "0 bps"

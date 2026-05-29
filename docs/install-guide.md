@@ -1,6 +1,6 @@
 # CRE Skills Plugin -- Installation Guide
 
-Version 4.3.0 | Apache 2.0 License
+Version 4.4.0 | Apache 2.0 License
 
 <!-- CANONICAL-CAVEAT:desktop-marketplace START -->
 > **Do not paste this repo URL into Claude Desktop Chat tab's "Add marketplace" dialog.** Chat tab's "Add marketplace" is a separate surface and is **not supported by this repo** — pasting `https://github.com/mariourquia/cre-skills-plugin` there will produce a validation error. The canonical Chat tab install path is the DMG (macOS) or EXE (Windows) installer, which registers a local MCP server via `claude_desktop_config.json`. The Claude Code CLI marketplace (`claude plugin marketplace add mariourquia/cre-skills-plugin` followed by `claude plugin install cre-skills@cre-skills`) **is** supported and is the canonical CLI install path; it also works in the Desktop **Code** tab (which uses Claude Code under the hood).

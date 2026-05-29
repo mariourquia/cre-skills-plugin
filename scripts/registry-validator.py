@@ -357,14 +357,22 @@ def validate_stale_versions() -> list[str]:
         "README.md",               # release-maturity table cites RMF subsystem version (v1.0.0-rc1)
         "docs/ROADMAP.md",         # current-release block cites RMF subsystem version (v1.0.0-rc1)
         "CONTRIBUTING.md",         # release-process example cites tag-to-push format
+        "docs/release-checklist.md",          # links the prior release-notes file as the template by design
+        "docs/tailoring_capability_matrix.md", # links the prior release-notes file for closure context by design
+        ".github/workflows/verify-release.yml", # input description carries a prior tag as an "e.g." example
     }
 
     scan_extensions = {".md", ".json", ".mjs", ".sh", ".ps1", ".iss", ".yml"}
 
+    # Skip non-source trees: vendored deps and generated build artifacts. These
+    # are gitignored and are not a source of truth, so a prior-version string in a
+    # third-party dependency's README (e.g. tools/node_modules) is not our drift.
+    skip_dirs = {".git", "node_modules", "builds", "dist", ".pytest_cache"}
+
     for fpath in sorted(PLUGIN_ROOT.rglob("*")):
         if not fpath.is_file():
             continue
-        if ".git" in fpath.parts:
+        if skip_dirs.intersection(fpath.parts):
             continue
         if fpath.suffix not in scan_extensions:
             continue
@@ -479,9 +487,12 @@ def validate_legacy_files() -> list[str]:
                     f"FAIL  docs/plans/{pf.name}: completed plan doc should be removed before release"
                 )
 
-    # Duplicate files with " 2" suffix (macOS conflict copies)
+    # Duplicate files with " 2" suffix (macOS conflict copies). Skip vendored
+    # deps and build artifacts (gitignored, not ours): node_modules legitimately
+    # contains files with " 2" in their names.
+    skip_dirs = {".git", "node_modules", "builds", "dist", ".pytest_cache"}
     for fpath in PLUGIN_ROOT.rglob("* 2*"):
-        if ".git" in fpath.parts:
+        if skip_dirs.intersection(fpath.parts):
             continue
         relpath = str(fpath.relative_to(PLUGIN_ROOT))
         failures.append(

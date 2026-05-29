@@ -110,7 +110,7 @@ function Write-Step($Description) {
 
 $TelemetryUrl = "https://cre-skills-feedback-api.vercel.app/api/installer-telemetry"
 $PluginNameConst = "cre-skills-plugin"
-$InstallerVersionConst = "4.3.0"
+$InstallerVersionConst = "4.4.0"
 
 function Send-InstallerTelemetry {
     param(
@@ -251,7 +251,7 @@ Write-Host "  \____|_| \_\_____| |____/|_|\_\_|_|_|___/" -ForegroundColor Cyan
 Write-Host "" -ForegroundColor Cyan
 Write-Host "  Commercial Real Estate Skills for Claude" -ForegroundColor Cyan
 
-Write-Blue  "  Plugin Installer v4.3.0"
+Write-Blue  "  Plugin Installer v4.4.0"
 Write-Dim   "  113 skills | 54 agents | 6 workflow chains"
 Write-Host  ""
 
