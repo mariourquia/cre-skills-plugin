@@ -1,6 +1,6 @@
 # CRE Skill Routing Index
 
-> 119 CRE skills across 16 subcategories. Use this index to find the right skill -- do NOT load all SKILL.md files.
+> 122 CRE skills across 16 subcategories. Use this index to find the right skill -- do NOT load all SKILL.md files.
 > When a CRE task comes in, match the user's request to a category below, then invoke the specific skill via `/skill-slug`.
 > Only read the full SKILL.md + references when you need the detailed process.
 
@@ -41,6 +41,7 @@
 | "sell vs hold", "disposition strategy", "exit analysis" | `/disposition-strategy-engine` |
 | "distressed", "special servicing", "note purchase", "REO" | `/distressed-acquisition-playbook` |
 | "distribution notice", "capital distribution", "distribution waterfall letter" | `/distribution-notice-generator` |
+| "build the warehouse dataset", "assemble these extractions", "validate the data room for the model", "make this deck-ready", "stage extracted data for the warehouse" | `/document-to-warehouse-pipeline` |
 | "emerging manager", "first-time fund", "emerging GP evaluation", "seed allocation" | `/emerging-manager-evaluator` |
 | "zoning", "entitlement", "rezoning", "variance" | `/entitlement-feasibility` |
 | "estoppel", "estoppel certificate" | `/estoppel-certificate-generator` |
@@ -50,6 +51,7 @@
 | "compare fund terms", "fee comparison", "carried interest benchmark", "fund economics comparison" | `/fund-terms-comparator` |
 | "calculate funds flow", "closing statement", "HUD-1", "settlement statement", "wire amounts" | `/funds-flow-calculator` |
 | "evaluate GP performance", "assess GP track record", "GP evaluation", "manager due diligence" | `/gp-performance-evaluator` |
+| "build the IC deck", "compose the committee deck", "valuation committee deck", "quarterly asset review deck", "annual business plan deck" | `/ic-deck-composer` |
 | "IC memo", "investment committee", "deal presentation" | `/ic-memo-generator` |
 | "insurance renewal", "coverage adequacy", "builder's risk" | `/insurance-risk-manager` |
 | "investor meeting", "audit coordination", "GIPS composite" | `/investor-lifecycle-manager` |
@@ -107,6 +109,7 @@
 | "prepare transfer documents", "deed preparation", "assignment of leases", "transfer instruments" | `/transfer-document-preparer` |
 | "variance narrative", "budget vs actual explanation" | `/variance-narrative-generator` |
 | "vendor invoice", "invoice validation" | `/vendor-invoice-validator` |
+| "map this to exhibits", "turn the dataset into slides", "build the exhibit specs", "table or chart for this deck", "spec the slide inputs" | `/warehouse-to-exhibit-mapper` |
 | "work order", "maintenance request", "triage" | `/work-order-triage` |
 | "workout", "loan modification", "forbearance", "DPO" | `/workout-playbook` |
 

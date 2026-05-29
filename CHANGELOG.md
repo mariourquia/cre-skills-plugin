@@ -2,6 +2,43 @@
 
 ## [Unreleased]
 
+### Added (document -> warehouse -> deck skill chain)
+
+Three new `category: reit-cre` skills wiring the pipeline from extracted
+documents to institutional committee decks. These are documentation/skill-
+packaging skills that GUIDE Claude; they are not deterministic runtime engines
+(no database, no charting library, no slide renderer behind them), and each
+SKILL.md says so in its opening paragraph.
+
+- `document-to-warehouse-pipeline` (domain `04-due-diligence`): orchestration
+  skill that sits ABOVE the single-document extractors. It does not re-extract;
+  it assembles extractor OUTPUT into validated, warehouse-ready tabular datasets
+  with declared schemas, data-quality/validation rules, standardized provenance
+  columns (`source_doc`, `locator`, `source_ref` canonical join key,
+  `extracted_by`, `classification`, `confidence`, `review_status`,
+  `extracted_at`), warehouse table naming, and a deck-readiness gate that
+  surfaces failing rows rather than dropping them. Negative trigger redirects raw
+  single-document extraction to `document-to-data-room-extractor`. chains_from:
+  `document-to-data-room-extractor`, `lease-abstract-extractor`,
+  `rent-roll-analyzer`, `t12-normalizer`; chains_to: `warehouse-to-exhibit-mapper`.
+- `warehouse-to-exhibit-mapper` (domain `02-underwriting-analysis`): maps
+  validated datasets to deck-ready exhibit specs and slide inputs (table vs.
+  chart selection, axes/series, source-column-to-exhibit-field mapping, slide
+  binding) and carries provenance THROUGH so every exhibit cell keeps its
+  `source_ref` + `classification`. chains_from: `document-to-warehouse-pipeline`;
+  chains_to: `ic-deck-composer`.
+- `ic-deck-composer` (domain `09-investor-relations`): composes institutional
+  committee decks (executive-summary-first, explicit decision ask, R/Y/G status,
+  returns snapshot near the front, sources & assumptions visible, appendix/
+  source-map). Documents all four deck families: Investment Committee, Valuation
+  Committee, Quarterly Business Plan / Asset Review, Annual Business Plan.
+  Negative triggers redirect memo PROSE to `ic-memo-generator` and LP fundraising
+  decks to `lp-pitch-deck-builder`. chains_from: `warehouse-to-exhibit-mapper`,
+  `acquisition-underwriting-engine`, `ic-memo-generator`; chains_to: none.
+- Each skill ships two `references/` files. Registry + routing index + catalog +
+  downstream surfaces regenerated via `scripts/catalog-build.py` +
+  `scripts/catalog-generate.py`. Plugin version bumped 4.3.0 -> 4.4.0.
+
 v4.4 orchestrator-engine items continue below under their original
 "v4.4, orchestrator engine" headings. They are in-flight and will roll
 into the v4.4 entry when that release lands.

@@ -1,6 +1,6 @@
 version: 1.0.0
-generated_at: '2026-05-29T05:07:46.939766+00:00'
-plugin_version: 4.3.0
+generated_at: '2026-05-29T17:11:02.437464+00:00'
+plugin_version: 4.4.0
 items:
 - id: 1031-exchange-executor
   display_name: 1031 Exchange Executor
@@ -128,7 +128,7 @@ items:
   last_reviewed_at: null
   notes: ''
   calculator_file: null
-  priority: null
+  priority: P1
   version: 0.1.0
 - id: amos-icomm-demo-orchestrator
   display_name: AMOS IC Demo Orchestrator
@@ -153,7 +153,7 @@ items:
   last_reviewed_at: null
   notes: ''
   calculator_file: null
-  priority: null
+  priority: P1
   version: 0.1.0
 - id: annual-budget-engine
   display_name: Annual Budget Engine
@@ -1245,7 +1245,41 @@ items:
   last_reviewed_at: null
   notes: ''
   calculator_file: null
-  priority: null
+  priority: P1
+  version: 0.1.0
+- id: document-to-warehouse-pipeline
+  display_name: Document-to-Warehouse Pipeline
+  type: skill
+  status: stable
+  source_path: src/skills/document-to-warehouse-pipeline/SKILL.md
+  domain: 04-due-diligence
+  persona: 'Orchestration skill that assembles the OUTPUT of single-document extractors into validated, warehouse-ready tabular
+    datasets. It does not re-extract individual documents; it sits above the extractors '
+  lifecycle_phase: due-diligence
+  aliases: []
+  intent_triggers:
+  - build the warehouse dataset
+  - assemble these extractions
+  - validate the data room for the model
+  - make this deck-ready
+  - stage extracted data for the warehouse
+  input_artifacts:
+  - OM
+  outputs: []
+  downstream_items:
+  - warehouse-to-exhibit-mapper
+  upstream_items:
+  - document-to-data-room-extractor
+  - lease-abstract-extractor
+  - rent-roll-analyzer
+  - t12-normalizer
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: P1
   version: 0.1.0
 - id: emerging-manager-evaluator
   display_name: Emerging Manager Evaluator
@@ -1557,6 +1591,39 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+- id: ic-deck-composer
+  display_name: IC Deck Composer
+  type: skill
+  status: stable
+  source_path: src/skills/ic-deck-composer/SKILL.md
+  domain: 09-investor-relations
+  persona: Composes professional INSTITUTIONAL committee decks from source-grounded model outputs, warehouse exhibits, and
+    memo narrative, following brand-guideline conventions (executive-summary-first, explicit
+  lifecycle_phase: investor-relations
+  aliases: []
+  intent_triggers:
+  - build the IC deck
+  - compose the committee deck
+  - valuation committee deck
+  - quarterly asset review deck
+  - annual business plan deck
+  input_artifacts:
+  - OM
+  - Budget
+  outputs: []
+  downstream_items: []
+  upstream_items:
+  - warehouse-to-exhibit-mapper
+  - acquisition-underwriting-engine
+  - ic-memo-generator
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: P1
+  version: 0.1.0
 - id: ic-memo-generator
   display_name: IC Memo Generator
   type: skill
@@ -1618,7 +1685,7 @@ items:
   last_reviewed_at: null
   notes: ''
   calculator_file: null
-  priority: null
+  priority: P1
   version: 0.1.0
 - id: icomm-context-builder
   display_name: IComm Context Builder
@@ -1642,7 +1709,7 @@ items:
   last_reviewed_at: null
   notes: ''
   calculator_file: null
-  priority: null
+  priority: P1
   version: 0.1.0
 - id: insurance-risk-manager
   display_name: Insurance & Risk Manager
@@ -2562,7 +2629,7 @@ items:
   last_reviewed_at: null
   notes: ''
   calculator_file: null
-  priority: null
+  priority: P1
   version: 0.1.0
 - id: performance-attribution
   display_name: Performance Attribution
@@ -3614,6 +3681,37 @@ items:
   - lender-compliance-certificate
   - cam-reconciliation-calculator
   upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: P1
+  version: 0.1.0
+- id: warehouse-to-exhibit-mapper
+  display_name: Warehouse-to-Exhibit Mapper
+  type: skill
+  status: stable
+  source_path: src/skills/warehouse-to-exhibit-mapper/SKILL.md
+  domain: 02-underwriting-analysis
+  persona: Maps validated, warehouse-ready tabular datasets into deck-ready EXHIBIT specifications and slide inputs. Selects
+    table vs. chart per exhibit, names axes and series, maps source dataset columns to exh
+  lifecycle_phase: underwriting
+  aliases: []
+  intent_triggers:
+  - map this to exhibits
+  - turn the dataset into slides
+  - build the exhibit specs
+  - table or chart for this deck
+  - spec the slide inputs
+  input_artifacts:
+  - OM
+  outputs: []
+  downstream_items:
+  - ic-deck-composer
+  upstream_items:
+  - document-to-warehouse-pipeline
   hidden_from_default_catalog: false
   legacy_wrapper_for: null
   owner: Mario Urquia

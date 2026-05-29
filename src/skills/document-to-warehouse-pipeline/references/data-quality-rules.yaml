@@ -1,0 +1,192 @@
+# Data-Quality & Validation Rules
+#
+# These rules GUIDE Claude when validating assembled datasets. They are NOT
+# executed by a database or a runtime engine; Claude applies them as a
+# specification and reports the verdicts as model-generated proposals a human
+# must confirm. Every rule names: the dataset(s) it covers, the severity it
+# escalates to on failure, and the human-readable reason to record.
+#
+# Severity model:
+#   hard  -> failing rows become review_status: flagged (never deck-ready)
+#   soft  -> failing rows become review_status: needs-review (not deck-ready under deck_scope=committed)
+# Rows are never deleted by validation. They are labeled and surfaced.
+
+profiles:
+  # validation_profile selects thresholds. The rule SET is the same across
+  # profiles; the profile only tunes the numeric tolerances and how aggressively
+  # low-confidence rows are escalated.
+  strict:
+    confidence_floor: 0.80      # rows below this -> needs-review even if otherwise clean
+    noi_reconcile_tolerance_pct: 0.5
+    dollar_reconcile_tolerance_usd: 10000
+    pct_reconcile_tolerance_pts: 0.5
+    staleness_window_days: 60
+    escalate_low_confidence: true
+  standard:
+    confidence_floor: 0.70
+    noi_reconcile_tolerance_pct: 1.0
+    dollar_reconcile_tolerance_usd: 10000
+    pct_reconcile_tolerance_pts: 0.5
+    staleness_window_days: 90
+    escalate_low_confidence: true
+  lenient:
+    confidence_floor: 0.55
+    noi_reconcile_tolerance_pct: 2.0
+    dollar_reconcile_tolerance_usd: 25000
+    pct_reconcile_tolerance_pts: 1.0
+    staleness_window_days: 120
+    escalate_low_confidence: false
+
+# ---------------------------------------------------------------------------
+# Structural / provenance rules (apply to every dataset)
+# ---------------------------------------------------------------------------
+structural_rules:
+  - id: provenance_columns_nonnull
+    severity: hard
+    applies_to: all
+    check: >
+      All eight provenance columns (source_doc, locator, source_ref, extracted_by,
+      classification, confidence, review_status, extracted_at) are present and
+      non-null on the row.
+    reason_on_fail: "Missing provenance column; cannot trace or gate this row."
+
+  - id: source_ref_resolves
+    severity: hard
+    applies_to: all
+    check: >
+      source_ref matches the canonical form data-room/<doc>#<anchor> with a
+      non-empty <anchor>. The <doc> portion must equal source_doc.
+    reason_on_fail: "source_ref does not resolve to data-room/<doc>#<anchor>; provenance chain broken."
+
+  - id: classification_in_union
+    severity: hard
+    applies_to: all
+    check: >
+      classification is exactly one of: source-fact, calculated,
+      modeled-assumption, requires-review.
+    reason_on_fail: "classification outside the allowed union."
+
+  - id: classification_not_upgraded
+    severity: hard
+    applies_to: all
+    check: >
+      Assembly did not raise a row's classification toward source-fact or its
+      confidence toward high relative to the upstream extractor row.
+    reason_on_fail: "Classification/confidence was upgraded during assembly; not permitted."
+
+  - id: requires_review_is_soft_block
+    severity: soft
+    applies_to: all
+    check: "Rows classified requires-review are escalated to needs-review."
+    reason_on_fail: "Classification itself uncertain; needs analyst review before deck use."
+
+  - id: confidence_floor_check
+    severity: soft
+    applies_to: all
+    check: "Row confidence (mapped high=0.9/medium=0.7/low=0.5) >= profile.confidence_floor, unless escalate_low_confidence is false."
+    reason_on_fail: "Confidence below profile floor; flag for human confirmation."
+
+# ---------------------------------------------------------------------------
+# Domain / value rules (range, sign, sanity)
+# ---------------------------------------------------------------------------
+value_rules:
+  - id: occupancy_in_range
+    severity: hard
+    applies_to: [rent_roll_aggregate]
+    check: "Any occupancy/vacancy metric value is within [0, 100] (percent)."
+    reason_on_fail: "Occupancy/vacancy out of [0,100]; likely a unit or extraction error."
+
+  - id: expense_non_negative
+    severity: hard
+    applies_to: [expense_lineitems]
+    check: "Expense amount >= 0."
+    reason_on_fail: "Negative expense line item; sign or sign-convention error."
+
+  - id: revenue_non_negative
+    severity: soft
+    applies_to: [revenue_lineitems]
+    check: "Revenue amount >= 0 (credits/concessions may legitimately net negative; flag, do not hard-fail)."
+    reason_on_fail: "Negative revenue line item; confirm whether it is a concession/credit."
+
+  - id: dscr_plausible
+    severity: soft
+    applies_to: [debt_terms]
+    check: "Any DSCR term value is within [0.5, 3.0]x."
+    reason_on_fail: "DSCR outside plausible band; confirm extraction."
+
+  - id: ltv_plausible
+    severity: soft
+    applies_to: [debt_terms]
+    check: "Any LTV/LTC term value is within [0, 1.0] (fraction) or [0,100] (percent)."
+    reason_on_fail: "LTV/LTC outside plausible band; confirm unit and value."
+
+  - id: lease_dates_ordered
+    severity: hard
+    applies_to: [lease_economics]
+    check: "Lease expiration is on or after lease commencement."
+    reason_on_fail: "Lease expiration precedes commencement; date extraction error."
+
+# ---------------------------------------------------------------------------
+# Cross-dataset reconciliation rules
+# ---------------------------------------------------------------------------
+cross_dataset_rules:
+  - id: noi_cross_doc_reconcile
+    severity: soft
+    applies_to: [revenue_lineitems, expense_lineitems]
+    check: >
+      Where both an OM-stated NOI and a T-12-derived NOI exist for the same
+      period, they agree within profile.noi_reconcile_tolerance_pct. This is the
+      classic broker-vs-verified gap.
+    reason_on_fail: "OM-stated NOI diverges from T-12-derived NOI beyond tolerance; keep both, flag needs-review, apply dedupe_policy and record it."
+
+  - id: gpr_vs_rentroll_reconcile
+    severity: soft
+    applies_to: [revenue_lineitems, rent_roll_aggregate]
+    check: >
+      T-12 gross potential rent and rent-roll in-place GPR agree within
+      profile.dollar_reconcile_tolerance_usd or profile.pct_reconcile_tolerance_pts.
+    reason_on_fail: "T-12 GPR and rent-roll GPR disagree beyond tolerance; reconcile before deck."
+
+# ---------------------------------------------------------------------------
+# Duplicate / dedupe rules
+# ---------------------------------------------------------------------------
+dedupe_rules:
+  - id: duplicate_same_fact
+    severity: soft
+    applies_to: all
+    check: >
+      Rows asserting the same (dataset, field/metric/line_item, grain, as_of) are
+      reconciled per the run's dedupe_policy (prefer_corroborated | prefer_verified |
+      keep_both_flagged). Every contributing source_ref is preserved.
+    reason_on_fail: "Duplicate fact across documents; resolved per dedupe_policy with both refs retained."
+
+# ---------------------------------------------------------------------------
+# Freshness / staleness rules
+# ---------------------------------------------------------------------------
+freshness_rules:
+  - id: source_staleness
+    severity: soft
+    applies_to: [revenue_lineitems, expense_lineitems, rent_roll_aggregate]
+    check: >
+      The source document's reporting period ends within profile.staleness_window_days
+      of as_of_date.
+    reason_on_fail: "Source period older than the staleness window; figures may understate current inflation; mark needs-review."
+
+# ---------------------------------------------------------------------------
+# Deck-readiness gate (decision, not a single rule)
+# ---------------------------------------------------------------------------
+deck_readiness_gate:
+  description: >
+    A row is deck_ready only if ALL hold: (1) source_ref is non-null and resolves
+    to data-room/<doc>#<anchor>; (2) classification is in
+    {source-fact, calculated, modeled-assumption, requires-review}; (3) for
+    deck_scope=committed, review_status != flagged AND review_status != needs-review.
+    Under deck_scope=exploratory, needs-review rows may appear on draft slides with
+    a visible caveat. A flagged row is NEVER deck_ready under any scope.
+  modeled_assumption_note: >
+    A modeled-assumption row may be deck_ready but MUST keep its classification and
+    a visible "modeled" label through every downstream handoff. Never present a
+    modeled value as a machine-validated fact.
+  on_block: >
+    Blocked rows are surfaced in a Gate Report (row id, source_ref, exact failing
+    rule, and an unblock path). Never silently drop a blocked row.

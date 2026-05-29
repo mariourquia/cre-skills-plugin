@@ -2,12 +2,12 @@
 # GENERATED from catalog/catalog.yaml — do not edit manually
 # Run: python scripts/catalog-generate.py
 # Generated: 2026-05-29
-# Total Skills: 119
+# Total Skills: 122
 
 metadata:
   version: "2.0"
   generated: "2026-05-29"
-  total_skills: 119
+  total_skills: 122
   source: catalog/catalog.yaml
 
 skills:
@@ -454,6 +454,18 @@ skills:
   status: deployed
   chains_to: []
   chains_from: []
+- slug: document-to-warehouse-pipeline
+  name: Document-to-Warehouse Pipeline
+  category: 04-due-diligence
+  priority: P1
+  status: deployed
+  chains_to:
+  - warehouse-to-exhibit-mapper
+  chains_from:
+  - document-to-data-room-extractor
+  - lease-abstract-extractor
+  - rent-roll-analyzer
+  - t12-normalizer
 - slug: emerging-manager-evaluator
   name: Emerging Manager Evaluator
   category: 09-investor-relations
@@ -556,6 +568,16 @@ skills:
   chains_from:
   - lp-data-request-generator
   - performance-attribution
+- slug: ic-deck-composer
+  name: IC Deck Composer
+  category: 09-investor-relations
+  priority: P1
+  status: deployed
+  chains_to: []
+  chains_from:
+  - warehouse-to-exhibit-mapper
+  - acquisition-underwriting-engine
+  - ic-memo-generator
 - slug: ic-memo-generator
   name: IC Memo Generator
   category: 09-investor-relations
@@ -1290,6 +1312,15 @@ skills:
   - lender-compliance-certificate
   - cam-reconciliation-calculator
   chains_from: []
+- slug: warehouse-to-exhibit-mapper
+  name: Warehouse-to-Exhibit Mapper
+  category: 02-underwriting-analysis
+  priority: P1
+  status: deployed
+  chains_to:
+  - ic-deck-composer
+  chains_from:
+  - document-to-warehouse-pipeline
 - slug: work-order-triage
   name: Work Order Triage and Priority Scorer
   category: 16-daily-operations
