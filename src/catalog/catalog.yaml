@@ -1,5 +1,5 @@
 version: 1.0.0
-generated_at: '2026-04-20T04:39:02.082755+00:00'
+generated_at: '2026-05-29T05:07:46.939766+00:00'
 plugin_version: 4.3.0
 items:
 - id: 1031-exchange-executor
@@ -103,6 +103,57 @@ items:
   notes: ''
   calculator_file: null
   priority: P0
+  version: 0.1.0
+- id: agency-loan-quote-analyzer
+  display_name: Agency Loan Quote Analyzer
+  type: skill
+  status: stable
+  source_path: src/skills/agency-loan-quote-analyzer/SKILL.md
+  domain: cross-cutting
+  persona: Analyzes Freddie Mac and Fannie Mae agency multifamily quotes (lease-up and stabilized) into a decision-ready package.
+    Reconciles each quote's DSCR/LTV/LTPP sizing constraints, prices rate buy-downs a
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers: []
+  input_artifacts:
+  - OM
+  - Lease
+  - Term Sheet
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
+  version: 0.1.0
+- id: amos-icomm-demo-orchestrator
+  display_name: AMOS IC Demo Orchestrator
+  type: skill
+  status: stable
+  source_path: src/skills/amos-icomm-demo-orchestrator/SKILL.md
+  domain: cross-cutting
+  persona: 'Thin demo conductor that sequences the reusable CRE acquisition skills into one end-to-end Investment Committee
+    workflow: data-room intake, document extraction, rent-roll analysis, T-12 normalization,'
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers: []
+  input_artifacts:
+  - OM
+  - T-12
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
   version: 0.1.0
 - id: annual-budget-engine
   display_name: Annual Budget Engine
@@ -1169,6 +1220,33 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+- id: document-to-data-room-extractor
+  display_name: Document-to-Data-Room Extractor
+  type: skill
+  status: stable
+  source_path: src/skills/document-to-data-room-extractor/SKILL.md
+  domain: cross-cutting
+  persona: Converts a raw CRE data room (OM, T-12, rent roll, PCA, ALTA survey, leases, agency debt quotes) into a single
+    typed fact table with per-fact sourceRefs, extraction confidence scores, and human review
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers: []
+  input_artifacts:
+  - OM
+  - Rent Roll
+  - Lease
+  - T-12
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
+  version: 0.1.0
 - id: emerging-manager-evaluator
   display_name: Emerging Manager Evaluator
   type: skill
@@ -1517,6 +1595,54 @@ items:
   notes: ''
   calculator_file: null
   priority: P0
+  version: 0.1.0
+- id: ic-red-team-challenger
+  display_name: IC Red Team Challenger
+  type: skill
+  status: stable
+  source_path: src/skills/ic-red-team-challenger/SKILL.md
+  domain: cross-cutting
+  persona: 'Pressure-tests a deal recommendation before it reaches the investment committee. Takes underwriting and stress-test
+    outputs and produces a structured adversarial review: known risks (quantified), know'
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers: []
+  input_artifacts:
+  - OM
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
+  version: 0.1.0
+- id: icomm-context-builder
+  display_name: IComm Context Builder
+  type: skill
+  status: stable
+  source_path: src/skills/icomm-context-builder/SKILL.md
+  domain: cross-cutting
+  persona: Assembles a source-grounded Investment Committee Q&A context pack from upstream underwriting, diligence, debt,
+    and risk outputs. Indexes every deal fact to a citable sourceRef, builds a question-and-a
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers: []
+  input_artifacts:
+  - OM
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
   version: 0.1.0
 - id: insurance-risk-manager
   display_name: Insurance & Risk Manager
@@ -2413,6 +2539,30 @@ items:
   notes: ''
   calculator_file: null
   priority: P2
+  version: 0.1.0
+- id: pca-reserve-analyzer
+  display_name: PCA Reserve Analyzer
+  type: skill
+  status: stable
+  source_path: src/skills/pca-reserve-analyzer/SKILL.md
+  domain: cross-cutting
+  persona: 'Converts a Property Condition Assessment (PCA) into an underwriting-ready capital plan: immediate (Year 0) repair
+    costs, a 10-year replacement-reserve schedule by building component, an implied per-un'
+  lifecycle_phase: cross-cutting
+  aliases: []
+  intent_triggers: []
+  input_artifacts:
+  - OM
+  outputs: []
+  downstream_items: []
+  upstream_items: []
+  hidden_from_default_catalog: false
+  legacy_wrapper_for: null
+  owner: Mario Urquia
+  last_reviewed_at: null
+  notes: ''
+  calculator_file: null
+  priority: null
   version: 0.1.0
 - id: performance-attribution
   display_name: Performance Attribution

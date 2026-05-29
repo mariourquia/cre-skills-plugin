@@ -1,0 +1,144 @@
+# PII Redaction Policy
+#
+# The hard boundary for document-to-data-room-extractor. The rent roll and
+# lease documents carry personally identifiable and commercially sensitive
+# information that MUST NOT cross into the typed fact table. This file is the
+# exhaustive emit / never-emit specification the skill enforces in Steps 1, 3,
+# and 4. A redaction failure is a hard stop, not a warning.
+#
+# Policy modes:
+#   strict (default):
+#     - Redact natural-person PII everywhere.
+#     - Reduce rent roll to aggregates only.
+#     - Reduce leases to redacted economic structure, retaining commercial
+#       tenant TRADE NAME (e.g., "Acme Hardware") as an anonymizable label.
+#   strict_no_lease_names:
+#     - Everything in strict, PLUS remove commercial tenant trade names.
+#     - Leases keep only anonymized codes (Tenant A, Tenant B, ...).
+#
+# Rationale: rent rolls and unredacted leases are routinely shared with the
+# deal team but should not be embedded verbatim into a model-input artifact
+# that may be copied, logged, or fed to a downstream LLM. Aggregation preserves
+# every figure underwriting needs (occupancy, in-place rent, rollover,
+# concentration) while removing the identity layer.
+
+never_emit:
+  natural_person:
+    - tenant_individual_name        # residential lessee names
+    - guarantor_name
+    - signatory_name
+    - occupant_name
+    - emergency_contact
+  identifiers:
+    - ssn
+    - ein_of_natural_person
+    - drivers_license_number
+    - passport_number
+  contact:
+    - personal_phone
+    - personal_email
+    - notice_address_of_individual
+  financial:
+    - bank_routing_number
+    - bank_account_number
+    - credit_score
+    - guarantor_personal_balance_sheet_detail
+    - personal_tax_return_figures
+  rent_roll_unit_level:
+    - per_unit_tenant_name
+    - per_unit_actual_rent          # individual unit rent is reducible to aggregates
+    - per_unit_lease_dates_tied_to_named_person
+    - named_delinquency             # "Unit 14B, J. Doe, $2,400 past due" -> emit COUNT only
+
+emit_as_existence_flag_only:
+  # Presence matters to underwriting; the contents are PII.
+  - field: guarantor_personal_financials_present
+    type: flag
+  - field: named_delinquencies_present
+    type: flag
+    paired_aggregate: units_delinquent_60d   # the COUNT is emitted; the names are not
+  - field: criminal_background_or_eviction_history_present
+    type: flag
+
+rent_roll_reduction:
+  rule: "Never emit a per-unit or per-tenant row. Emit aggregates computed from the detail, each citing the source range."
+  multifamily_aggregates_allowed:
+    - units_by_floorplan            # count per plan type
+    - occupied_units
+    - vacant_units
+    - physical_occupancy            # percent
+    - economic_occupancy            # percent
+    - in_place_gpr                  # dollar total
+    - avg_in_place_rent_by_floorplan
+    - loss_to_lease                 # percent
+    - units_delinquent_60d          # COUNT, never names
+    - trailing_concessions          # dollar total
+  commercial_aggregates_allowed:
+    - occupied_sf
+    - vacant_sf
+    - walt_years
+    - expiring_sf_by_year_bucket    # NOT by tenant
+    - largest_tenant_pct_anonymized # "Tenant A = 18% of NRA"
+    - in_place_base_rent_psf
+  sourceRef_form: "RR-<id>!<sheet>!<range> (column sum)"
+
+lease_reduction:
+  rule: "Emit redacted economic structure only. The downstream model must be able to reconstruct cash flows without knowing the tenant identity."
+  fields_allowed:
+    - tenant_code                   # Tenant A, Tenant B...
+    - trade_name                    # allowed under 'strict', removed under 'strict_no_lease_names'
+    - suite_sf
+    - lease_commence
+    - lease_expire
+    - base_rent_psf
+    - escalation_pattern
+    - free_rent_months
+    - ti_allowance_psf
+    - renewal_options
+    - recovery_structure            # nnn | modified_gross | full_service
+    - cotenancy_or_kickout_present  # flag
+  fields_forbidden:
+    - tenant_legal_entity_signatory
+    - guarantor_name
+    - notice_address
+    - tenant_bank_details
+    - tenant_financial_statements_detail
+
+# Worked example (ILLUSTRATIVE; fictional data, not a benchmark)
+# A 219-unit garden multifamily rent roll arrives as a 219-row spreadsheet.
+worked_example_illustrative:
+  input: "RR-001 spreadsheet, 219 unit rows, columns: Unit, Tenant Name, Floor Plan, Actual Rent, Market Rent, Move-In, Lease End, Balance Due"
+  forbidden_output: "219 rows, each with Tenant Name and Actual Rent"          # PII leak -- HARD STOP
+  correct_output_facts:
+    - field: units_by_floorplan
+      value: "1x1: 96, 2x2: 88, 3x2: 35"
+      sourceRef: "RR-001!Detail!C2:C220 (group count)"
+    - field: physical_occupancy
+      value: 93.6
+      unit: percent
+      sourceRef: "RR-001!Detail!occupied/total"
+    - field: in_place_gpr
+      value: 2418540
+      unit: USD
+      sourceRef: "RR-001!Detail!D2:D220 (sum)"
+    - field: loss_to_lease
+      value: 7.2
+      unit: percent
+      sourceRef: "RR-001!Detail!(market-actual)/market"
+    - field: units_delinquent_60d
+      value: 11
+      unit: count
+      sourceRef: "RR-001!Detail!H2:H220 (count > 60d)"
+    - field: named_delinquencies_present
+      value: true
+      unit: flag
+      note: "names withheld; count emitted above"
+  note: "All numeric values above are illustrative placeholders for a fictional asset."
+
+hard_stop:
+  conditions:
+    - "Any per-unit actual rent appears in the fact table."
+    - "Any tenant individual name appears in any value or note."
+    - "A guarantor or signatory name appears anywhere."
+    - "Bank account / routing numbers appear in any extracted span."
+  on_hard_stop: "Halt emission, report the leaking factIds, re-run the relevant reduction step (Step 3 or Step 4). Do not deliver a partially redacted table."
