@@ -4,74 +4,78 @@ slug: asset-ops-cockpit
 version: 0.1.0
 status: deployed
 category: workspace
-description: "Top-level workspace for ongoing asset management and property operations. Routes through budgeting, performance monitoring, capex, NOI optimization, compliance, maintenance, and vendor management. Manages persistent asset context across sessions."
+description: "Orchestrate ongoing asset management and property operations across budgeting, performance monitoring, capex prioritization, NOI optimization, compliance, maintenance, and vendor management. Use when a user needs to manage property performance, build budgets, handle delinquencies, or run day-to-day operations — routes to the appropriate specialist skill and maintains persistent asset context across sessions."
+user-invocable: true
+triggers:
+  - "asset management"
+  - "property ops"
+  - "budget review"
+  - "performance dashboard"
+  - "maintenance"
+  - "NOI improvement"
+  - "capex"
+  - "work order"
+  - "vendor management"
 targets:
   - claude_code
 ---
 
 # Asset Operations Cockpit
 
-You are the asset operations coordinator. When a user needs to manage property performance, build budgets, prioritize capital expenditures, handle delinquencies, or run day-to-day operations, you orchestrate the right specialist skills in sequence.
+Orchestrate asset management workflows by routing to specialist skills for budgeting, performance monitoring, capital planning, compliance, and day-to-day operations. Maintains persistent workspace state across sessions. See [routing-map.md](references/routing-map.md) for the full skill routing reference.
 
 ## When to Activate
 
-- User mentions property operations, asset management, or performance review
-- User needs to build or review an annual budget
-- User wants capex analysis, NOI improvement, or variance explanations
-- User is managing maintenance, work orders, or vendor relationships
-- User says "asset management", "property ops", "budget review", "performance dashboard", "maintenance", "NOI"
+- User needs to build or review an annual operating budget
+- User wants property performance reports, NOI improvement plans, or variance analysis
+- User needs capex analysis, prioritization, or IRR/NPV evaluation
+- User is managing maintenance, work orders, vendor contracts, or lease compliance
+- User has delinquent tenants or collection issues
+
+**Do NOT activate for:**
+- Leasing strategy or lease documentation — use `lease-strategy-papering`
+- Deal-level underwriting or acquisition analysis — use `acquisition-underwriting-engine`
+- Fund-level reporting or LP communications — use `fund-lp-reporting`
+
+## Input Schema
+
+| Field | Required | Default if Missing |
+|-------|----------|--------------------|
+| property_name | Yes | Ask user |
+| property_type | Yes | Ask user |
+| task_type (budgeting / performance / capex / compliance / maintenance) | Yes | Infer from user request |
+| current_occupancy | No | Ask if needed for routing |
+| financial_data (T-12, budget, rent roll) | No | Ask when routing to financial skills |
+
+If fewer than 2 required fields are present, ask clarifying questions before routing.
 
 ## Process
 
-### Step 1: Check for Existing Workspace
+### Step 1: Resume or Create Workspace
 
-Read `~/.cre-skills/workspaces/` for any active asset ops workspace matching the property or portfolio name. If found, offer to resume.
+Read `~/.cre-skills/workspaces/` for any active asset ops workspace matching the property or portfolio name. If found, offer to resume with a summary of prior state. Otherwise, collect the inputs above and create a new workspace.
 
-### Step 2: Gather Asset Context
+### Step 2: Route to Specialist Skills
 
-Collect minimum required inputs:
-- Property name, type, and location
-- Current occupancy and major tenant roster
-- Whether this is budgeting, performance review, capex, maintenance, or compliance
-- Relevant financial data (T-12, budget, rent roll)
-- Any urgent operational issues
+Route based on `task_type`:
 
-### Step 3: Route to Specialist Skills
+| Task Type | Primary Skill | Secondary Skills |
+|-----------|--------------|-----------------|
+| Budgeting | [annual-budget-engine](../annual-budget-engine/SKILL.md) | [cam-reconciliation-calculator](../cam-reconciliation-calculator/SKILL.md), [variance-narrative-generator](../variance-narrative-generator/SKILL.md) |
+| Performance | [property-performance-dashboard](../property-performance-dashboard/SKILL.md) | [noi-sprint-plan](../noi-sprint-plan/SKILL.md), [vendor-invoice-validator](../vendor-invoice-validator/SKILL.md) |
+| Capex | [capex-prioritizer](../capex-prioritizer/SKILL.md) | [noi-sprint-plan](../noi-sprint-plan/SKILL.md) |
+| Compliance | [lease-compliance-auditor](../lease-compliance-auditor/SKILL.md) | [tenant-delinquency-workout](../tenant-delinquency-workout/SKILL.md) |
+| Maintenance | [building-systems-maintenance-manager](../building-systems-maintenance-manager/SKILL.md) | [work-order-triage](../work-order-triage/SKILL.md), [property-operations-admin-toolkit](../property-operations-admin-toolkit/SKILL.md) |
 
-Based on the task type and available information, invoke skills as appropriate:
+Invoke the primary skill first. After it completes, save workspace state, then suggest the next skill with rationale.
 
-**Budgeting & Financial Planning:**
-1. `/annual-budget-engine` -- institutional-quality operating budgets with benchmarking
-2. `/cam-reconciliation-calculator` -- annual CAM reconciliation by tenant
-3. `/variance-narrative-generator` -- ownership-ready variance narratives
+### Step 3: Save Workspace State
 
-**Performance Monitoring:**
-1. `/property-performance-dashboard` -- monthly/quarterly performance reports
-2. `/noi-sprint-plan` -- 90-day operational sprint plan to raise NOI
-3. `/vendor-invoice-validator` -- validate invoices against contracts and market rates
-
-**Capital Planning:**
-1. `/capex-prioritizer` -- IRR/NPV evaluation of competing capex projects
-2. `/noi-sprint-plan` -- quick operational improvements before larger capex
-
-**Compliance & Collections:**
-1. `/lease-compliance-auditor` -- CAM, percentage rent, insurance, escalation compliance
-2. `/tenant-delinquency-workout` -- structured workout for delinquent tenants
-
-**Maintenance & Operations:**
-1. `/building-systems-maintenance-manager` -- preventive maintenance, equipment lifecycle
-2. `/work-order-triage` -- priority classification, SLA assignment, cost estimation
-3. `/property-operations-admin-toolkit` -- parking, inspections, landscaping, janitorial
-
-At each stage, save workspace state and present the next-action footer.
-
-### Step 4: Save Workspace State
-
-After each specialist skill completes, update the workspace JSON at `~/.cre-skills/workspaces/<workspace-id>.json` with results, decisions, and next actions.
+After each specialist skill completes, update `~/.cre-skills/workspaces/<workspace-id>.json` with results, decisions, and next actions.
 
 ## Output Format
 
-End every response with the required next-action footer:
+End every response with:
 
 ```
 ---
@@ -79,13 +83,24 @@ End every response with the required next-action footer:
 [One-sentence verdict from the latest stage]
 
 ## Assumptions Used
-- [List key assumptions]
+- [Key assumptions]
 
 ## Missing Inputs
-- [List what's still needed]
+- [What's still needed]
 
 ## Recommended Next Actions
 1. [Next skill to invoke with rationale]
 2. [Alternative path if applicable]
-3. [Information to gather before next step]
 ```
+
+## Red Flags
+
+- Running NOI improvement plans without current T-12 data — request actuals before proceeding
+- Prioritizing capex without knowing current DSCR covenant levels — check with `debt-covenant-monitor`
+- Approving vendor invoices without verifying against contract terms and market rates
+
+## Chain Notes
+
+- **Upstream**: `post-close-onboarding-transition` (newly acquired assets), `deal-intake` (new asset setup), `t12-normalizer` (cleaned financial data)
+- **Downstream**: All specialist skills listed in the routing table above
+- **Parallel**: `lease-strategy-papering` (leasing as NOI lever), `insurance-risk-manager` (risk and coverage review)

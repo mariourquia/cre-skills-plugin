@@ -4,72 +4,76 @@ slug: fund-lp-reporting
 version: 0.1.0
 status: deployed
 category: workspace
-description: "Top-level workspace for fund management and LP communications. Routes through fund formation, investor updates, pitch decks, capital raises, lifecycle management, compliance, performance attribution, and distributions. Manages persistent fund context across sessions."
+description: "Orchestrate fund management and LP communications across formation, capital raising, quarterly reporting, performance attribution, and distributions. Use when a user needs to form a fund, communicate with LPs, raise capital, track performance, or manage distributions — routes to the appropriate specialist skill and maintains persistent fund context across sessions."
+user-invocable: true
+triggers:
+  - "fund management"
+  - "investor reporting"
+  - "LP update"
+  - "capital raise"
+  - "distributions"
+  - "fund formation"
+  - "quarterly report"
+  - "NAV reporting"
+  - "pitch deck"
 targets:
   - claude_code
 ---
 
 # Fund & LP Reporting
 
-You are the fund management coordinator. When a user needs to form a fund, communicate with LPs, raise capital, track performance, or manage distributions, you orchestrate the right specialist skills in sequence.
+Orchestrate fund management workflows by routing to specialist skills, gathering fund context, and maintaining persistent workspace state across sessions. See [routing-map.md](references/routing-map.md) for the full skill routing reference.
 
 ## When to Activate
 
-- User mentions fund management, investor reporting, or LP communications
+- User needs fund formation, entity structuring, or PPM drafting
 - User is preparing a capital raise, pitch deck, or investor update
 - User needs performance attribution, NAV reporting, or distribution notices
-- User is working on fund formation, compliance, or regulatory filings
-- User says "fund management", "investor reporting", "LP update", "capital raise", "distributions", "fund formation"
+- User is working on fund compliance, regulatory filings, or fee calculations
+
+**Do NOT activate for:**
+- Individual deal-level underwriting — use `acquisition-underwriting-engine`
+- Portfolio-level allocation or rebalancing — use `portfolio-allocator`
+- Single-property investor communications — use `quarterly-investor-update` directly
+
+## Input Schema
+
+| Field | Required | Default if Missing |
+|-------|----------|--------------------|
+| fund_or_vehicle_name | Yes | Ask user |
+| task_type (formation / active_management / reporting / capital_raise) | Yes | Infer from user request |
+| fund_size | No | Ask if needed for routing |
+| reporting_period | No | Current quarter |
+| lp_base_composition | No | Ask if producing LP-facing deliverables |
+
+If fewer than 2 required fields are present, ask clarifying questions before routing.
 
 ## Process
 
-### Step 1: Check for Existing Workspace
+### Step 1: Resume or Create Workspace
 
-Read `~/.cre-skills/workspaces/` for any active fund workspace matching the fund or vehicle name. If found, offer to resume.
+Read `~/.cre-skills/workspaces/` for any active fund workspace matching the fund name. If found, offer to resume with a summary of prior state. Otherwise, collect the inputs above and create a new workspace.
 
-### Step 2: Gather Fund Context
+### Step 2: Route to Specialist Skills
 
-Collect minimum required inputs:
-- Fund or vehicle name and strategy
-- Whether this is formation, active management, reporting, or capital raise
-- Fund size (target or committed)
-- Number of assets or investments
-- Reporting period (if applicable)
-- LP base composition (institutional, HNW, family office)
+Route based on `task_type`:
 
-### Step 3: Route to Specialist Skills
+| Task Type | Primary Skill | Secondary Skills |
+|-----------|--------------|-----------------|
+| Formation | [fund-formation-toolkit](../fund-formation-toolkit/SKILL.md) | [sec-reg-d-compliance](../sec-reg-d-compliance/SKILL.md), [fund-raise-negotiation-engine](../fund-raise-negotiation-engine/SKILL.md) |
+| Capital Raise | [lp-pitch-deck-builder](../lp-pitch-deck-builder/SKILL.md) | [capital-raise-machine](../capital-raise-machine/SKILL.md), [investor-lifecycle-manager](../investor-lifecycle-manager/SKILL.md) |
+| Reporting | [quarterly-investor-update](../quarterly-investor-update/SKILL.md) | [performance-attribution](../performance-attribution/SKILL.md), [distribution-notice-generator](../distribution-notice-generator/SKILL.md) |
+| Compliance | [fund-operations-compliance-dashboard](../fund-operations-compliance-dashboard/SKILL.md) | [sec-reg-d-compliance](../sec-reg-d-compliance/SKILL.md), [investor-lifecycle-manager](../investor-lifecycle-manager/SKILL.md) |
 
-Based on the task type and available information, invoke skills as appropriate:
+Invoke the primary skill first. After it completes, save workspace state, then suggest the next skill with rationale.
 
-**Fund Formation:**
-1. `/fund-formation-toolkit` -- entity structuring, PPM drafting, Reg D compliance
-2. `/sec-reg-d-compliance` -- regulatory compliance and filing preparation
-3. `/fund-raise-negotiation-engine` -- side letter negotiation, fee structuring
+### Step 3: Save Workspace State
 
-**Capital Raise:**
-1. `/lp-pitch-deck-builder` -- slide-by-slide pitch deck with track record
-2. `/capital-raise-machine` -- data room, investor tracking, capital call notices
-3. `/investor-lifecycle-manager` -- LP meetings, re-up solicitation, benchmark comparison
-
-**Reporting & Attribution:**
-1. `/quarterly-investor-update` -- LP-ready quarterly update letters
-2. `/performance-attribution` -- return decomposition by income, appreciation, leverage
-3. `/distribution-notice-generator` -- distribution calculations and investor notices
-
-**Compliance & Operations:**
-1. `/fund-operations-compliance-dashboard` -- regulatory monitoring, fee calculations
-2. `/sec-reg-d-compliance` -- ongoing Reg D compliance tracking
-3. `/investor-lifecycle-manager` -- audit coordination, cash management
-
-At each stage, save workspace state and present the next-action footer.
-
-### Step 4: Save Workspace State
-
-After each specialist skill completes, update the workspace JSON at `~/.cre-skills/workspaces/<workspace-id>.json` with results, decisions, and next actions.
+After each specialist skill completes, update `~/.cre-skills/workspaces/<workspace-id>.json` with results, decisions, and next actions.
 
 ## Output Format
 
-End every response with the required next-action footer:
+End every response with:
 
 ```
 ---
@@ -77,13 +81,24 @@ End every response with the required next-action footer:
 [One-sentence verdict from the latest stage]
 
 ## Assumptions Used
-- [List key assumptions]
+- [Key assumptions]
 
 ## Missing Inputs
-- [List what's still needed]
+- [What's still needed]
 
 ## Recommended Next Actions
 1. [Next skill to invoke with rationale]
 2. [Alternative path if applicable]
-3. [Information to gather before next step]
 ```
+
+## Red Flags
+
+- Routing to formation skills when the fund already exists — confirm fund status first
+- Producing LP-facing deliverables without loading brand guidelines — check `~/.cre-skills/brand-guidelines.json`
+- Generating distribution notices without verifying the current NAV and waterfall terms
+
+## Chain Notes
+
+- **Upstream**: `deal-intake` (new fund setup), `closing-checklist-tracker` (post-close fund administration)
+- **Downstream**: All specialist skills listed in the routing table above
+- **Parallel**: `portfolio-allocator` (fund-level allocation decisions), `performance-attribution` (return decomposition)
