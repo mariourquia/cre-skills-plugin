@@ -54,7 +54,11 @@ orchestrator. The limitations below are deliberate and named.
   new contracts. **But nothing runs:** no adapter executes, no record is emitted,
   and the consume-time `max_staleness` refusal + `source_class` stamping at a
   connector runtime remain **deferred**. All 13 connector contracts (the 9 prior +
-  these 4) are stubs; **0 are live/implemented.**
+  these 4) are stubs; **0 are live/implemented.** The connector **runtime**
+  (consume-time `max_staleness` refusal + `source_class` stamping at emit time) and
+  any runnable / vendor adapters are the **v6** real-world-data track, **not** v5.x —
+  see [`docs/ROADMAP.md`](ROADMAP.md). v5.x scope is limited to the static no-live
+  invariants, schema validation, and (optionally) non-live interface scaffolding.
 
 ## Orchestration
 
@@ -77,12 +81,43 @@ orchestrator. The limitations below are deliberate and named.
   `status: stable` is gated on the first operator shakedown log (see
   [`docs/PREVIEW_MODE.md`](PREVIEW_MODE.md)).
 
+- **Six regulatory / affordable-compliance workflows are phase-1 scaffolding.**
+  `compliance_calendar_review`, `income_certification_cycle`, `rent_limit_test`,
+  `agency_reporting_prep`, `file_audit_prep`, and `recertification_batch` are
+  recognized by the router and have overlay slots, but **no workflow pack implements
+  them yet**. The routing rule `r011_regulatory_workflow_explicit` is gated behind an
+  explicit `regulatory_program` axis and `rent_limits` / `income_limits` reference
+  files; missing references refuse the match. Making these runnable (LIHTC, Section 8
+  HAP, rent stabilization, recapture math, HUD cycles) is **v6** work.
+
+- **The tailoring TUI has open follow-ups.** Tailoring Pass 2 Objective 4 is
+  **closed** — conflict surfacing, approval-floor guard, canonical-redefinition
+  refusal, preview-bundle YAML emission, and missing-doc blocker are all implemented.
+  Two follow-ups remain tracked in
+  [`docs/tailoring_capability_matrix.md`](tailoring_capability_matrix.md):
+  legacy-bank retirement (warn-on-load, then removal once orgs migrate) and
+  role-based question-bank filtering (`load_question_banks()` currently loads every
+  bank rather than filtering by the asker's role).
+
 ## Packaging and distribution
 
 - **The Windows `.exe` is not locally buildable on macOS.** The Windows installer
   is produced on **CI / Windows only** (Inno Setup, `scripts/create-exe.iss`); it
   cannot be built from a macOS dev machine. The macOS DMG is locally buildable
   (`scripts/create-dmg.sh`).
+
+- **The Windows installer does not halt on missing prerequisites.** `Install.ps1`
+  defends against UTF-8 BOM edge cases under PowerShell 5.1 and logs detected
+  Node / Python / npm versions, but it does **not** currently fail with a remediation
+  step when those prerequisites are missing from `%PATH%`. A hard-fail
+  (`Fail-If-Missing`) is tracked as future work.
+
+- **The Codex / Gemini / Grok / Manus portable ZIP is experimental.** A structural
+  smoke test (`tests/install_smoke/test_portable_zip.py` + the `Portable ZIP Smoke`
+  workflow) validates ZIP layout, skills-tree mirroring, the frontmatter contract,
+  and runtime-file exclusion. **Cross-runtime invocation** — a skill actually loading
+  and running inside one of those CLIs — is **not** tested and remains an explicit
+  gap. Treat those surfaces as experimental.
 
 ## AMOS integration
 

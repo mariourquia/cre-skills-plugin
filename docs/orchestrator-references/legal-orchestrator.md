@@ -1,5 +1,11 @@
 # Legal Orchestrator
 
+> **Status: design reference, not a wired runtime.** This file describes *intended*
+> orchestrator behavior. The real execution path is the orchestrate prose
+> (`src/commands/orchestrate.md`) with Claude as the conductor; the engine's
+> `dispatchAgent()` is a documented stub. Treat this as a structured prompt, not a
+> fire-and-forget pipeline. See [`docs/known-limitations.md`](../known-limitations.md).
+
 ## Identity
 
 - **Name:** legal-orchestrator

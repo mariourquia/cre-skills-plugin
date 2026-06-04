@@ -262,7 +262,7 @@ Release artifacts are published to GitHub Releases when a version tag is pushed.
 
 ### Release Process
 
-1. Tag the release: `git tag v4.3.0 && git push origin v4.3.0`
+1. Tag the release: `git tag v<version> && git push origin v<version>`
 2. Build the DMG: `./scripts/create-dmg.sh`
 3. Create a GitHub release from the tag and attach the DMG as a release asset alongside the auto-generated source archives.
 
@@ -293,6 +293,7 @@ No Apple code signing is required for distribution. The DMG installer is a shell
 - [ ] Slug matches directory name
 - [ ] No hallucinated benchmarks or data
 - [ ] Chain notes point to existing skills
+- [ ] For docs / governance / contract changes: ran `python scripts/catalog-generate.py --check` (zero drift) and `python scripts/governance-scan.py`; see [`docs/release-checklist.md`](docs/release-checklist.md)
 ```
 
 ---
