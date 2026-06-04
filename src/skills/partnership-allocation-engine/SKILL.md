@@ -8,6 +8,9 @@ description: "Structures and models Section 704(b) tax allocation provisions for
 targets:
   - claude_code
 stale_data: "Tax allocation mechanics reflect Reg. 1.704-1(b) and Reg. 1.704-2 as of mid-2025. REIT qualification thresholds (75%/95% income tests, quarterly asset tests, 90% distribution requirement) reflect current IRC requirements. Always verify with qualified tax counsel."
+pii_policy: sensitive_financial
+produces_artifact_kind: model_output
+
 ---
 
 # Partnership Allocation Engine

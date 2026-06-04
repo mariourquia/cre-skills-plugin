@@ -1,18 +1,22 @@
-# Known Limitations (v5.1.0)
+# Known Limitations (v5.2.0)
 
-> Status: released (v5.1.0)
+> Status: released (v5.2.0)
 > Owner: Mario Urquia
 > Last reviewed: 2026-06-04
-> This is the honest, single-page statement of what v5.1.0 does **not** do.
+> Source-of-truth code this doc describes:
+> - `scripts/governance-scan.py` (the corpus-wide **static** governance scanner shipped in v5.2.0)
+> This is the honest, single-page statement of what v5.2.0 does **not** do.
 > The README "Known Limitations" section summarizes these; this file is the
 > long-form companion. If a v5 collateral piece implies more than this, it is wrong.
 
-v5.1.0 is honest about its scope. It is a governance-hardening release: calculator
-fidelity fixes, four connector contract **schema stubs** plus a schema-enforced
-`source_class` enum, and AMOS forward-compat manifest fields — on top of v5.0.0's
-governable taxonomy and data-grade ladder. It does **not** deliver universal
-runtime governance, live connectors, or an autonomous orchestrator. The
-limitations below are deliberate and named.
+v5.2.0 is honest about its scope. It is a skill-contract + governance-metadata
+foundation release: the full-corpus tiered skill contract, consumer-ready
+forward-compat manifest fields (manifest contract `1.1`), a corpus-wide **static**
+governance scanner (`scripts/governance-scan.py`), and the connector no-live
+invariants — on top of v5.1.0's connector contract schemas + schema-enforced
+`source_class` enum and v5.0.0's governable taxonomy and data-grade ladder. It does
+**not** deliver universal **runtime** governance, live connectors, or an autonomous
+orchestrator. The limitations below are deliberate and named.
 
 ## Governance and enforcement
 
@@ -23,18 +27,22 @@ limitations below are deliberate and named.
   for the per-vendor honest state (CoStar is **not-supported-live** per its AI-use
   T&C; Yardi / MRI / RealPage are **blocked-by-vendor**).
 
-- **The generalized cross-skill governance scanner is v5.1.** Decision-grade
-  runtime enforcement (source-class tagging, refusal-on-missing-input,
-  period-seal, the placeholder scanner) is **deployed and running only inside the
-  `residential_multifamily` subsystem.** Across the rest of the corpus, v5.0.0
-  ships the `final_marked` selector plus the **targeted finance-placeholder guard**
-  on a named allowlist (`acquisition-underwriting-engine`, `ic-memo-generator`,
+- **The corpus-wide governance scanner is STATIC; the generalized RUNTIME scanner
+  remains deferred.** v5.2.0 ships `scripts/governance-scan.py`, a corpus-wide
+  **static + generated-artifact** scanner that validates governance **declarations**
+  over SKILL.md frontmatter + the generated catalog/manifest (per-rule severity;
+  fixtures in `tests/test_governance_scan.py`). What it does **not** do — and what
+  **remains deferred (v5.x)** — is **runtime** emitted-output enforcement: tagging
+  or refusing every cell of every decision-grade skill *at emit time* (source-class
+  tagging, refusal-on-missing-input, period-seal, the placeholder scanner). That
+  machinery is **deployed and running only inside the `residential_multifamily`
+  subsystem.** Across the rest of the corpus, the runtime leg is still the
+  `final_marked` selector plus the **targeted finance-placeholder guard** on a named
+  allowlist (`acquisition-underwriting-engine`, `ic-memo-generator`,
   `comp-snapshot`, `fund-lp-reporting`, `jv-waterfall-architect`,
-  `opportunity-zone-underwriter`, `cost-segregation-analyzer`). That guard is a
-  **presence-of-discipline check**, not a runtime scanner of emitted output. A
-  fully-generalized, corpus-wide runtime data scanner (every cell of every skill
-  checked at emit time) **remains deferred** — v5.1.0 added the static connector
-  `source_class` enum, not a runtime scanner. Do not assume universal enforcement.
+  `opportunity-zone-underwriter`, `cost-segregation-analyzer`) — a
+  **presence-of-discipline check**, not a runtime scanner of emitted output. Do not
+  assume universal runtime enforcement.
 
 - **The four connector contract schemas exist as stubs; the connector runtime does
   not.** `debt`, `entity` (legal/ownership cap-structure, distinct from

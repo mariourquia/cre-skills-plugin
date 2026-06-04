@@ -22,6 +22,15 @@ refusal_trigger: "Refuse to populate any quantitative claim in the IC memo (retu
 targets:
   - claude_code
 stale_data: "Cap rate benchmarks, comparable transaction data, and market cycle assessments reflect mid-2025 conditions. Verify current transaction comps and market data with brokers and research providers."
+v5_contract: true
+confidence_default: estimated
+produces_artifact_kind: memo
+outputs:
+  - One-page executive summary
+  - Six-section IC memo body
+  - Sensitivity grids
+  - Risk register
+workspace_scope: deal
 ---
 
 # IC Memo Generator
@@ -234,6 +243,12 @@ See the data-grade ladder in `docs/DATA_GRADES.md` for the `confirmed | estimate
 - Default output fidelity is **estimated**: the memo synthesizes upstream underwriting and market inputs; it does not independently confirm them.
 - Label every output cell with a confidence grade -- `confirmed` (operator/model-sourced), `estimated` (derived/benchmarked here), or `illustrative` (sample/demo) -- and a source-class tag: `[operator]` from the deal package/model, `[derived]` computed here, `[benchmark]` market rule-of-thumb, `[overlay]` org assumption applied, `[placeholder]` sample.
 - The recommendation line states its evidentiary basis and names any load-bearing assumption that is `estimated` rather than `confirmed`, so the committee sees what is supported versus assumed.
+
+## Known Limitations
+
+- **Synthesis, not independent verification.** The memo assembles and frames upstream underwriting and market inputs; it does not re-derive or independently confirm them. A figure with no cited model/data-room source is left flagged for the deal team, never invented.
+- **Format and framing, judgment stays human.** Property-type variants and the risk-adjusted return framing are templates; the recommendation is a drafting aid for the deal team, and the `investment_committee_approval_required` gate means the committee, not the generator, decides.
+- **Inherits upstream staleness.** Cap-rate and comp benchmarks carry the as-of date of the underwriting that fed them; the memo surfaces that date rather than re-freshening the data itself.
 
 ## Chain Notes
 

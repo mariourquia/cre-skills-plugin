@@ -7,6 +7,8 @@ category: reit-cre
 description: "Classifies work order urgency from free-text descriptions, assigns priority (P1-P4) with SLA deadlines, estimates cost, checks lease responsibility, and routes to the correct approval path."
 targets:
   - claude_code
+pii_policy: tenant_or_personal
+
 ---
 
 # Work Order Triage and Priority Scorer

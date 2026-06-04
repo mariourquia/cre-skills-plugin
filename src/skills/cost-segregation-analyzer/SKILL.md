@@ -23,6 +23,13 @@ refusal_trigger: "Refuse to emit a final cost-seg recommendation if the placed-i
 statute_review:
   - code: "IRC 168(k) (OBBBA 2025)"
     last_verified: "2026-06-03"
+produces_artifact_kind: model_output
+outputs:
+  - Cost-segregation study
+  - Reclassification schedule
+  - PV of accelerated depreciation
+  - Recapture-at-disposition analysis
+
 ---
 
 # Cost Segregation Analyzer

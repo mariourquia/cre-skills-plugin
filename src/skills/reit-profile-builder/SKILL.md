@@ -8,6 +8,8 @@ description: "Extracts and structures comprehensive REIT profiles from 10-K fili
 targets:
   - claude_code
 stale_data: "REIT financial data is point-in-time. Always verify against the most recent SEC filing (EDGAR) and latest supplemental data package. Peer multiples, dividend yields, and implied cap rates change daily with market pricing. Treasury rates and credit spreads used in cost of capital assessment must reflect current market conditions."
+produces_artifact_kind: diligence_report
+
 ---
 
 # REIT Profile Builder

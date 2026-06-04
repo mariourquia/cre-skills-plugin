@@ -8,6 +8,8 @@ description: "Structured financial and legal workout framework for delinquent te
 targets:
   - claude_code
 stale_data: "State-specific eviction timelines and court processing times reflect training data cutoff. Verify current statutes, COVID/emergency protections, and local court backlogs. Legal cost estimates vary by jurisdiction and attorney."
+pii_policy: tenant_or_personal
+
 ---
 
 # Tenant Delinquency Workout

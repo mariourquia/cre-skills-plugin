@@ -1,5 +1,86 @@
 # Changelog
 
+## [5.2.0] - 2026-06-04
+
+Skill-contract + governance-metadata foundation release. No catalog growth (still
+127 skills / 54 agents / 21 calculators-MCP-tools / 10 orchestrators / 6 workflow
+chains; **0 net new skills**) — the value is a corpus-wide governance contract,
+consumer-ready governance metadata, and a corpus-wide **static** governance
+scanner. **No live connector, no live external coupling, and no production runtime
+enforcement is introduced.** The release is explicit about what is validated
+statically versus what remains runtime work. Full narrative:
+`docs/releases/v5.2.0-release-notes.md`.
+
+### Added (full-corpus skill contract — tiered)
+- **Tier 1 (all 127 skills):** every skill now carries valid, non-null
+  `classification` and `runtime_role` plus the v5.2 forward-compat fields,
+  enum-validated corpus-wide (`tests/test_skill_contract_corpus.py`). Derived by
+  `catalog-build.py` with frontmatter override — metadata + validation, **not**
+  stub-skill inflation.
+- **Tier 2 (decision-grade set):** the **9** decision-grade / `final_marked`
+  carriers reach full `v5_contract: true` conformance (`## Refusal Behavior`,
+  `## Confidence and Provenance`, `## Known Limitations`, plus the `stale_data` /
+  `confidence_default` / `refusal_trigger` fields). Orchestrators/workspaces, which
+  delegate every number to specialist skills, carry the Known-Limitations-only
+  contract.
+
+### Added (consumer-ready governance metadata — manifest forward-compatibility)
+The skill-manifest export now carries **meaningfully populated** forward-compat
+fields; the manifest contract version is bumped **1.0 → 1.1**:
+- **`produces_artifact_kind`** — a stable, plugin-namespaced artifact vocabulary
+  (`memo`, `model_output`, `calculator_result`, `diligence_report`, `source_map`,
+  `tie_out_report`, `investor_report`, `lender_package`, `valuation_support`,
+  `checklist`, `workflow_plan`, `advisory_note`). Derived (calculator-backed →
+  `calculator_result`, orchestrator → `workflow_plan`) with explicit frontmatter
+  override on the decision-grade / consumer-facing set.
+- **`pii_policy`** — refined from the never-populated v5.1 posture enum into a
+  **sensitivity ladder** (`none` → `business_contact` → `tenant_or_personal` →
+  `sensitive_financial`), conservative default `none` (explicit opt-in, never
+  over-claimed). **PHI is intentionally not a value — CRE Skills do not accept
+  PHI.**
+- **`workspace_scope`** — widened to the full CRE workspace set (`asset`, `fund`,
+  `portfolio`, `deal`, `debt`, `leasing`, `property_management`,
+  `investor_relations`, `governance`, `market`, `data_room`, `enterprise`) and
+  derived from each skill's slug/subcategory with frontmatter override.
+- **`outputs[]`** — backfilled with named output artifacts (symmetric with
+  `input_artifacts`) on artifact-producing and consumer-facing skills.
+
+### Added (corpus-wide static governance scanner)
+- **`scripts/governance-scan.py`** — a corpus-wide **static + generated-artifact**
+  scanner. It validates governance **declarations** over SKILL.md frontmatter
+  (read from the filesystem so a stale catalog cannot mask a removed disclaimer)
+  plus the generated catalog/manifest. Per-rule severity: fail-closed (ERROR)
+  rules cover decision-grade ⇒ human gate + source-ref policy + refusal trigger;
+  source-ref refusal posture; valuation output ⇒ "not an appraisal" stamp;
+  statute-encoding (tax/legal) skill ⇒ fresh `statute_review` + "not legal/tax
+  advice" disclaimer; calculator-backed ⇒ resolvable `calculator_result`;
+  decomposition references resolve; PII never over-claims. WARN rules surface
+  completeness/backfill candidates. Liability rules trigger on **explicit**
+  governance fields, never description keyword-sniffing.
+- Data-driven fixtures (`tests/test_governance_scan.py`) prove each rule fails
+  closed, with a positive control on the real catalog. Wired into CI.
+- **This is static declaration validation, not runtime enforcement.**
+
+### Added (connector / source-class no-live invariants)
+- Top-level, CI-runnable invariants (`tests/test_connector_stub_invariants.py`)
+  pin the no-live guarantee: every connector domain and adapter manifest stays
+  `status: stub`, no entity declares a live `source_class`, and the `source_class`
+  enum matches its canonical list. The `source_class` schema work from v5.1.0 is
+  unchanged (no regression).
+
+### Still deferred (honest)
+- **Generalized runtime emitted-output governance scanner.** Tagging/refusing
+  every cell of every decision-grade skill *at emit time* is deployed **only
+  inside the `residential_multifamily` subsystem**. The corpus-wide scanner shipped
+  here validates **declarations**, not emitted output; generalizing the runtime
+  machinery to the whole corpus remains future work.
+- **Live connectors / runnable adapters.** All connector contracts and adapters
+  stay `status: stub`; `source_class` / `max_staleness` are declared and
+  schema-validated, not enforced at a connector runtime.
+- PII/confidentiality backfill is meaningful, not exhaustive (the static scanner
+  WARNs on the remaining candidates); `statute_review` freshness is a scheduled
+  24-month CI liability, not a one-time fix.
+
 ## [5.1.0] - 2026-06-04
 
 Governance-hardening release. No catalog growth (still 127 skills / 54 agents /

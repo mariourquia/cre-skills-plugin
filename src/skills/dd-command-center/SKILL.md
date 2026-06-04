@@ -7,6 +7,8 @@ category: reit-cre
 description: "Generates a comprehensive, timeline-driven due diligence plan for commercial property acquisitions with 6 workstream checklists, risk matrix, third-party report ordering guide, decision gates, closing condition tracker, and contingency removal strategy. Scales dynamically to 30/45/60/90-day DD periods. Triggers on 'DD period', 'due diligence', 'inspection period', 'feasibility period', or when ordering third-party reports."
 targets:
   - claude_code
+produces_artifact_kind: diligence_report
+
 ---
 
 # DD Command Center

@@ -7,6 +7,8 @@ category: reit-cre
 description: "Converts a raw CRE data room (OM, T-12, rent roll, PCA, ALTA survey, leases, agency debt quotes) into a single typed fact table with per-fact sourceRefs, extraction confidence scores, and human review state. Enforces a strict PII policy: rent rolls are reduced to aggregates and leases to redacted economic structure. Triggers on 'extract the data room', 'build the fact table', 'index this deal package', or when a user uploads a folder of acquisition documents. Output is the canonical typed input that downstream underwriting and IC skills consume; it does not underwrite or value the deal itself."
 targets:
   - claude_code
+pii_policy: tenant_or_personal
+
 ---
 
 # Document-to-Data-Room Extractor

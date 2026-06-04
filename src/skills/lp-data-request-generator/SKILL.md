@@ -9,6 +9,8 @@ description: "Generate structured data requests for Limited Partners to send to 
 targets:
   - claude_code
 stale_data: "Benchmark reporting standards reflect ILPA Reporting Template v3.0 (2024) and institutional best practices through mid-2025. Specific regulatory references (Form PF, Form ADV) reflect SEC requirements current through 2025. Market fee benchmarks for comparison purposes are based on Preqin and Cambridge Associates data through Q4 2024."
+pii_policy: sensitive_financial
+
 ---
 
 # LP Data Request Generator

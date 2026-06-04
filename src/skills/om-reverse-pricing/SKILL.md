@@ -7,6 +7,8 @@ category: reit-cre
 description: "Deconstructs an offering memorandum to expose the broker's embedded assumptions, reverse-engineers the purchase price needed to hit target returns, and produces a defensible bid range. Triggers on 'reverse price this OM', 'what should I actually pay?', or when an OM needs critical analysis."
 targets:
   - claude_code
+produces_artifact_kind: valuation_support
+
 ---
 
 # OM Reverse Pricing

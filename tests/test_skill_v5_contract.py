@@ -59,8 +59,16 @@ def _skills() -> List[Path]:
     return sorted(SKILLS_ROOT.rglob("SKILL.md"))
 
 
-def _is_workspace(front: dict) -> bool:
-    return front.get("category") == "workspace" or front.get("pack_type") in {"router", "workspace"}
+def _is_delegating(front: dict) -> bool:
+    """Workspaces, routers, and orchestrators route to / sequence other skills and
+    do not produce analytics directly. They carry only ## Known Limitations; the
+    full Refusal / Confidence sections live on the delegated specialist skills
+    (e.g. amos-icomm-demo-orchestrator hands off every number to a specialist)."""
+    return (
+        front.get("category") == "workspace"
+        or front.get("pack_type") in {"router", "workspace"}
+        or front.get("classification") in {"workspace", "orchestrator"}
+    )
 
 
 def test_yaml_available():
@@ -79,7 +87,7 @@ def test_v5_skills_conform():
         for f in _REQUIRED_FIELDS:
             if f not in front:
                 failures.append(f"{rel}: v5_contract skill missing frontmatter '{f}'")
-        sections = _WORKSPACE_REQUIRED_SECTIONS if _is_workspace(front) else _REQUIRED_SECTIONS
+        sections = _WORKSPACE_REQUIRED_SECTIONS if _is_delegating(front) else _REQUIRED_SECTIONS
         for s in sections:
             if s not in body:
                 failures.append(f"{rel}: v5_contract skill missing section '{s}'")

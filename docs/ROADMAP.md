@@ -1,6 +1,6 @@
 # Public Roadmap
 
-Last updated: 2026-06-04 · Plugin version: v5.1.0
+Last updated: 2026-06-04 · Plugin version: v5.2.0
 
 This is the plan for where `cre-skills-plugin` goes from here. It groups
 the pending work by release and by track. Items carry a size (S / M / L /
@@ -18,11 +18,45 @@ Conventions:
   that a subsystem occupies between `beta_rc` and `stable` while it waits
   for that first shakedown log. See `docs/PREVIEW_MODE.md`.
 
-## Current release: v5.1.0 (2026-06-04)
+## Current release: v5.2.0 (2026-06-04)
+
+Skill-contract + governance-metadata foundation release. No catalog growth (still
+127 / 54 / 21 / 10 / 6; **0 net new skills**). No live connector, no live AMOS
+coupling, no production **runtime** enforcement is introduced.
+
+**Shipped in v5.2.0:**
+
+- **Full-corpus tiered skill contract.** Tier 1: all 127 skills carry valid,
+  non-null `classification` + `runtime_role` + the v5.2 forward-compat fields,
+  enum-validated corpus-wide (`tests/test_skill_contract_corpus.py`). Tier 2: the
+  9 decision-grade / `final_marked` carriers reach full `v5_contract: true`
+  conformance.
+- **Consumer-ready governance metadata (manifest `1.1`).** The four forward-compat
+  manifest fields are now **populated**: `produces_artifact_kind` (plugin-namespaced
+  enum), `pii_policy` (refined to a sensitivity ladder `none` →
+  `business_contact` → `tenant_or_personal` → `sensitive_financial`, default `none`,
+  PHI excluded), `workspace_scope` (widened), `outputs[]` (backfilled).
+- **Corpus-wide STATIC governance scanner.** `scripts/governance-scan.py` validates
+  governance *declarations* over SKILL.md frontmatter + the generated
+  catalog/manifest, with per-rule severity and data-driven fixtures
+  (`tests/test_governance_scan.py`). It is **not** runtime emitted-output
+  enforcement.
+- **Connector / source-class no-live invariants** pinned top-level
+  (`tests/test_connector_stub_invariants.py`): every connector/adapter stays
+  `status: stub`; no entity declares a live `source_class`.
+
+See `docs/releases/v5.2.0-release-notes.md`. The **generalized runtime
+emitted-output scanner**, the connector **runtime** enforcement of
+`source_class`/`max_staleness`, and live/runnable connector adapters remain
+deferred — tracked below.
+
+---
+
+## Previous release: v5.1.0 (2026-06-04)
 
 Governance-hardening release. No catalog growth (still 127 / 54 / 21 / 10 / 6;
 **0 net new skills**). No live connector, no live AMOS coupling, no production
-runtime enforcement is introduced.
+runtime enforcement was introduced.
 
 **Shipped in v5.1.0:**
 
@@ -40,14 +74,13 @@ runtime enforcement is introduced.
   `_schema/source_class.yaml`, wired into `entity_contract.schema.yaml`, validated
   by `tests/test_connector_source_class.py`. `max_staleness` declared on the new
   contracts.
-- **AMOS forward-compat fields.** `produces_artifact_kind`, `pii_policy` (default
-  `none`), `workspace_scope` emitted in the manifest; `live_connector` stays
-  `false`; `--emit-sample` regenerator added.
+- **AMOS forward-compat fields (emitted, then unpopulated).** `produces_artifact_kind`,
+  `pii_policy` (default `none`), `workspace_scope` emitted in the manifest;
+  `live_connector` stays `false`; `--emit-sample` regenerator added. (v5.2.0 then
+  **populated** these and bumped the manifest contract to `1.1` — see the current
+  release above.)
 
-See `docs/releases/v5.1.0-release-notes.md`. The runtime enforcement of
-`source_class`/`max_staleness`, the corpus-wide governance scanner, the full
-127-skill `v5_contract` sweep, and live/runnable connector adapters remain
-deferred — tracked below.
+See `docs/releases/v5.1.0-release-notes.md`.
 
 ---
 
@@ -92,34 +125,34 @@ shakedown log before graduation to `status: stable`.
 
 ---
 
-## v5.x — Remaining governance + connector runtime (deferred from v5.1.0)
+## v5.x — Remaining governance + connector runtime (deferred from v5.2.0)
 
-The honest deferrals that remain after v5.1.0. v5.1.0 added the connector contract
-schemas + the `source_class` schema enum + the AMOS forward-compat fields + the
-calculator fidelity fixes; the **runtime** enforcement and the full-corpus sweep
-below are still future work.
+The honest deferrals that remain after v5.2.0. v5.2.0 added the full-corpus tiered
+skill contract, the populated forward-compat manifest fields (`1.1`), the
+corpus-wide **static** governance scanner, and the connector no-live invariants; the
+**runtime** enforcement below is still future work.
 
-### Full 127-skill v5-contract conformance sweep — L
-v5.0.0 opted a pilot slice into `v5_contract: true` and corrected the
-decision-grade / AMOS-facing skills (still the state after v5.1.0). This remains:
-extend the contract (Refusal Behavior / Confidence and Provenance / Known
-Limitations sections + the new frontmatter fields) across the full corpus.
+### Full 127-skill v5-contract conformance sweep — SHIPPED (v5.2.0)
+**Done.** v5.2.0 brought every skill to the Tier-1 contract floor (non-null
+`classification` + `runtime_role` + the forward-compat fields, enum-validated
+corpus-wide by `tests/test_skill_contract_corpus.py`) and the 9 decision-grade /
+`final_marked` carriers to full `v5_contract: true` (Refusal Behavior / Confidence
+and Provenance / Known Limitations + the frontmatter fields). The catalog now
+carries classification + governance metadata for all 127.
 
-Acceptance: `tests/test_skill_v5_contract.py` enforces the contract on every
-non-exempt skill (not just the opted-in slice), and the catalog carries
-classification + governance metadata for all 127.
+### Generalized cross-skill governance scanner (RUNTIME) — L
+**v5.2.0 shipped the corpus-wide STATIC scanner** — `scripts/governance-scan.py`,
+which validates governance *declarations* over SKILL.md frontmatter + the generated
+catalog/manifest (per-rule severity; fixtures in `tests/test_governance_scan.py`).
+What **remains deferred** is the **RUNTIME emitted-output scanner**: tagging/refusing
+every cell of every decision-grade skill *at emit time* for source-class tagging and
+placeholder leakage, generalizing the `residential_multifamily` runtime machinery to
+the whole plugin. The runtime leg outside RMF is still the `final_marked` selector
+plus the targeted finance-placeholder discipline guard.
 
-### Generalized cross-skill governance scanner — L
-v5.0.0 ships the `final_marked` selector plus a **targeted** finance-placeholder
-guard over a named allowlist — a presence-of-discipline check, not a runtime
-scanner of emitted output (still the state after v5.1.0; v5.1.0 added the static
-connector `source_class` enum, not a runtime scanner). This remains: the
-corpus-wide runtime data scanner (every cell of every decision-grade skill checked
-at emit time for source-class tagging and placeholder leakage), generalizing the
-`residential_multifamily` machinery to the whole plugin.
-
-Acceptance: a runtime scanner that tags/refuses emitted output across the
-decision-grade corpus, with tests, not just the RMF subsystem.
+Acceptance: a **runtime** scanner that tags/refuses emitted output across the
+decision-grade corpus, with tests — beyond the v5.2.0 static declaration scanner and
+the RMF subsystem.
 
 ### Connector contract runtime enforcement — M
 **The four contract schemas (`debt`, `entity`, `valuation`, `funds` + investor
@@ -253,12 +286,14 @@ approval matrix, and example.
 
 ---
 
-## Real-world data integration — connector track (v5.1 → v6, target: H2)
+## Real-world data integration — connector track (v5.x → v6, target: H2)
 
 The deep connector buildout. v5.0.0 shipped the honest capability matrix and the
-`source_class` / `max_staleness` contract spec; v5.1 lands the four canonical
-contract schemas + the runtime that enforces them (see the v5.1 section above).
-The vendor-specific adapters below sit on top of that and span v5.1 → v6.
+`source_class` / `max_staleness` contract spec; **v5.1.0 landed the four canonical
+contract schemas** (`status: stub`) and the schema-enforced `source_class` enum. The
+connector **runtime** that emits `source_class` and refuses past `max_staleness`
+**remains deferred (v5.x)** — see "Connector contract runtime enforcement" above.
+The vendor-specific adapters below sit on top of that runtime and span v5.x → v6.
 
 ### Yardi Voyager connector (cat 3) — XL
 Build the Voyager connector beyond the current wave-5 adapter stub. Five

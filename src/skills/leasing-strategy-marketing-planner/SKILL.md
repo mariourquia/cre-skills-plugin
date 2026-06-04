@@ -7,6 +7,8 @@ category: reit-cre
 description: "Marketing material creation, broker event planning, TI cost benchmarking, marketing plan development, and commission structure benchmarking for Leasing Directors."
 targets:
   - claude_code
+pii_policy: tenant_or_personal
+
 ---
 
 # Leasing Strategy & Marketing Planner

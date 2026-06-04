@@ -1,8 +1,8 @@
 ---
 title: AMOS Skill Manifest — Contract
-status: draft
+status: released (v5.2.0)
 owner: Mario Urquia
-last_reviewed: 2026-06-03
+last_reviewed: 2026-06-04
 sources_of_truth:
   - scripts/amos-manifest-build.py
   - docs/integrations/amos-skill-manifest.schema.json
@@ -50,7 +50,7 @@ python3 scripts/amos-manifest-build.py --as-of 2026-06-03T00:00:00Z   # determin
 
 | Field | Type | Meaning |
 |---|---|---|
-| `manifest_version` | string | Semver of **this manifest schema** (currently `1.0`), independent of the plugin release. |
+| `manifest_version` | string | Semver of **this manifest schema** (currently `1.1` — bumped from `1.0` in v5.2.0 when the forward-compat fields were populated and `pii_policy` became a sensitivity ladder), independent of the plugin release. |
 | `plugin_version` | string | The `cre-skills-plugin` release, read from `.claude-plugin/plugin.json` (never hardcoded in the generator). |
 | `generated_at` | string (ISO-8601) | Build timestamp. **Determinism-preserving** — see [§4](#4-determinism-of-generated_at). |
 | `repo` | string | `mariourquia/cre-skills-plugin`. GitHub deep link = `{repo}/blob/main/{source_path}`. |
@@ -81,7 +81,7 @@ by the generator.
 | `decomposes_to` | string[] | catalog | Catalog ids this orchestrator/workspace composes. Powers workflow-timeline ordering. |
 | `composed_from` | string[] | catalog | Inverse pointer (orchestrators/workspaces that use this item). |
 | `input_artifacts` | string[] | catalog | Named CRE artifacts (OM, T-12, rent roll, …). Binds docs → skill in the source map. → `PluginSkillRef.inputArtifacts`. |
-| `outputs` | string[] | catalog | Output artifacts. → `PluginSkillRef.outputArtifacts`. **Sparse in v5** — see [§6 gaps](#6-known-gaps-v51). |
+| `outputs` | string[] | catalog | Output artifacts. → `PluginSkillRef.outputArtifacts`. **Backfilled in v5.2.0** on artifact-producing / consumer-facing skills — see [§6](#6-forward-compat-fields--populated-in-v520). |
 | `chains_to` | string[] | catalog `downstream_items` | Downstream skill ids. |
 | `chains_from` | string[] | catalog `upstream_items` | Upstream skill ids. |
 | `calculator_file` | string \| null | catalog | Path to the stdlib calculator (when `runtime_role = deterministic_calculator`). Lets AMOS wire a future live connector. |
@@ -121,7 +121,8 @@ live connector maps to `future-live-connector`.
 > connector** (e.g. market & sales comps: `comp-snapshot`,
 > `submarket-truth-serum`, `market-memo-generator`). That distinction is not
 > derivable from `runtime_role`, so the plugin does not assert it here — it is a
-> [v5.1 gap](#6-known-gaps-v51) (`needs_external_connector`).
+> [still-open gap](#6-forward-compat-fields--populated-in-v520)
+> (`needs_external_connector`).
 
 ### 3.2 Crosswalk 2 — `human_gate` → AMOS `amos_signoff`
 
@@ -189,39 +190,69 @@ facts/model values, not skill metadata.
 | **Feedback / redlines** | `ic-feedback-view` (`FeedbackItem`) | `id` (routing target), `human_gate`/`amos_signoff` (a redline is a gate failing back), `runtime_role`. |
 | **Deck / memo** | `lib/deck/registry.ts`, `data/artifacts/registry.ts` | `id` (named in `GovernedGap.connectors`), `decision_grade`, `source_ref_policy` (deck binds resolve-by-reference values, `forbids_fabricated_model_ref`). |
 
-## 6. Known gaps
+## 6. Forward-compat fields — populated in v5.2.0
 
-**Added in v5.1.0 (now emitted, with conservative defaults):**
+The four forward-compat fields were first **emitted** in v5.1.0 (every entry then
+carried `null` / `"none"` / `null`). **v5.2.0 populates them meaningfully** and
+bumps the manifest contract to `1.1`:
 
-- **`produces_artifact_kind`** (string | null), **`pii_policy`** (enum
-  `none | aggregate_only | pseudonymized | redacted_at_extraction`, conservative
-  default `none` — explicit-opt-in, never over-claims PII handling), and
-  **`workspace_scope`** (enum `deal | asset | fund | portfolio` | null) are now
-  emitted on every entry. In v5.1.0 no skill declares them in source metadata, so
-  every entry carries `null` / `"none"` / `null`; **per-skill population from
-  SKILL.md frontmatter is the remaining work.** `governed_metrics` is still
-  unmapped.
+- **`produces_artifact_kind`** (string | null) — now carries a stable,
+  **plugin-namespaced** artifact vocabulary: `memo`, `model_output`,
+  `calculator_result`, `diligence_report`, `source_map`, `tie_out_report`,
+  `investor_report`, `lender_package`, `valuation_support`, `checklist`,
+  `workflow_plan`, `advisory_note`. Derived (calculator-backed →
+  `calculator_result`, orchestrator → `workflow_plan`) with explicit frontmatter
+  override on the decision-grade / consumer-facing set. **These are plugin-owned
+  enum values; a downstream consumer maps them to its own artifact registry via a
+  crosswalk on its side — the plugin does NOT encode any consumer's registry
+  slugs.**
+- **`pii_policy`** — refined from the v5.1 posture enum into a **sensitivity
+  ladder**: `none` → `business_contact` → `tenant_or_personal` →
+  `sensitive_financial`. Conservative default `none` (explicit opt-in, never
+  over-claimed); any non-`none` value is an explicit frontmatter declaration.
+  **PHI is intentionally not a value — CRE Skills do not accept PHI.**
+- **`workspace_scope`** — widened beyond the original `deal | asset | fund |
+  portfolio` to the full CRE workspace set (adds `debt`, `leasing`,
+  `property_management`, `investor_relations`, `governance`, `market`,
+  `data_room`, `enterprise`) and derived from each skill's slug/subcategory with
+  frontmatter override.
+- **`outputs[]`** — backfilled with named output artifacts (symmetric with
+  `input_artifacts`) on artifact-producing and consumer-facing skills; no longer
+  uniformly sparse.
+
+> **`pii_policy` vs connector `source_class` — different axes, do not conflate.**
+> `pii_policy` is the **skill's data-sensitivity tier** (how confidential the
+> personal/financial data a skill touches is). The connector `source_class`
+> (`docs/connectors/CAPABILITY-MATRIX.md`, `docs/DATA_GRADES.md`) is the **data's
+> trust grade** (how trustworthy/fresh an ingested record is). A skill can be
+> `sensitive_financial` *and* read `connector_sample` data; the two are orthogonal
+> and must not be merged into one field.
+
+`governed_metrics` is still unmapped.
 
 **Still not supplied honestly:**
 
-- **`outputs` is sparse.** Many catalog items have `outputs: []`; AMOS's skill
-  cards / timeline render `outputArtifacts`. Backfill belongs to a SKILL.md
-  Output-Format sweep, not this export.
 - **`needs_external_connector`.** The plugin cannot say "this skill is a fixture
   *because* it needs a live market/comp/valuation data feed." That nuance lives in
   AMOS's per-skill `demoStatus` today (market & comps). A future boolean would let
   the plugin drive the `preprocessed-fixture` → `future-live-connector`
   distinction.
-- **Corpus-wide runtime enforcement.** See the scope statement below.
+- **Corpus-wide runtime enforcement.** See the scope statement below. (v5.2.0
+  shipped the corpus-wide **static** governance scanner `scripts/governance-scan.py`,
+  which validates declarations; the **runtime** emitted-output scanner remains
+  deferred.)
 
 ## 7. Honest scope statement (M-H1)
 
 The v5 governance metadata is a **catalog/manifest contract + CI validation for the
 listed decision-grade / AMOS-facing slugs** (the 8 priority + pilot, enforced by
 `tests/test_skill_classification.py` and `tests/test_amos_manifest.py`), **plus
-`residential_multifamily`'s deployed runtime enforcement**. It is **NOT yet a
-corpus-wide runtime fail-closed guard** — that is v5.1. Do not read the manifest as
-asserting universal enforcement.
+`residential_multifamily`'s deployed runtime enforcement**. v5.2.0 adds the
+corpus-wide **static** governance scanner (`scripts/governance-scan.py`), which
+validates governance *declarations* over frontmatter + the catalog/manifest. It is
+**NOT yet a corpus-wide RUNTIME fail-closed guard** — that emitted-output scanner
+**remains deferred (v5.x)**. Do not read the manifest as asserting universal
+**runtime** enforcement.
 
 ## 8. Honest framing: no live coupling
 

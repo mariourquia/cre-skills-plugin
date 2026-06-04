@@ -374,6 +374,10 @@ def validate_stale_versions() -> list[str]:
         "README.md",               # release-maturity table cites RMF subsystem version (v1.0.0-rc1)
         "docs/ROADMAP.md",         # current-release block cites RMF subsystem version (v1.0.0-rc1)
         "docs/known-limitations.md", # subsystem-maturity section cites RMF version (v1.0.0-rc1) + the v4.5.0->v5.0.0 migration pointer
+        "docs/DATA_GRADES.md",       # cites when the connector source_class enum + placeholder guard landed (v5.1.0) by design
+        "docs/architecture/v5-micro-skill-architecture.md", # phase-1 artifact authored for v5.1.0; cites that release as history
+        "docs/connectors/CAPABILITY-MATRIX.md", # cites when the connector stubs were authored (v5.1.0) by design
+        "docs/integrations/amos-skill-manifest.md", # cites when the forward-compat fields were first emitted (v5.1.0) by design
 
         "CONTRIBUTING.md",         # release-process example cites tag-to-push format
         "docs/release-checklist.md",          # links the prior release-notes file as the template by design

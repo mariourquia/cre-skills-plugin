@@ -1,6 +1,6 @@
 # Connector Capability Matrix (Honest)
 
-> Status: released (v5.1.0)
+> Status: released (v5.2.0)
 > Owner: Mario Urquia
 > Last reviewed: 2026-06-04
 > Source-of-truth this doc describes:

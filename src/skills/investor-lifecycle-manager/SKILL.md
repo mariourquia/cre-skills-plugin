@@ -7,6 +7,8 @@ category: reit-cre
 description: "LP lifecycle management: investor meetings, benchmark comparison, cash management, audit coordination, re-up solicitation, GIPS composites, satisfaction tracking. Triggers: investor meeting, LP relations, benchmark, NCREIF, ODCE, audit PBC, re-up, GIPS, capital call, distribution, investor reporting."
 targets:
   - claude_code
+pii_policy: sensitive_financial
+
 ---
 
 # Investor Lifecycle Manager

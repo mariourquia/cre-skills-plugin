@@ -7,6 +7,8 @@ category: reit-cre
 description: "Prepares quarterly lender compliance certificates using loan-specific financial metric definitions. Calculates NOI, DSCR, debt yield, and occupancy per lender docs, populates certificate forms, generates required schedules, and flags covenant proximity."
 targets:
   - claude_code
+produces_artifact_kind: lender_package
+
 ---
 
 # Lender Compliance Certificate

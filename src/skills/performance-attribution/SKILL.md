@@ -8,6 +8,8 @@ description: "Decomposes fund or portfolio returns into income, appreciation, le
 targets:
   - claude_code
 stale_data: "NCREIF NPI and ODCE benchmark data reflects published returns through mid-2025 with typical one-quarter publication lag. Peer comparison data is indicative and should be supplemented with current fund universe data from consultants. Subscription line IRR inflation effects are estimated based on industry studies."
+pii_policy: sensitive_financial
+
 ---
 
 # Performance Attribution

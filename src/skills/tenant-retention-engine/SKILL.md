@@ -8,6 +8,8 @@ description: "Generates comprehensive tenant retention strategies with per-tenan
 targets:
   - claude_code
 stale_data: "Market vacancy rates, competitive concession levels, and NCREIF benchmarks reflect training data cutoff. User must provide current submarket data for accurate competitive analysis."
+pii_policy: tenant_or_personal
+
 ---
 
 # Tenant Retention Engine

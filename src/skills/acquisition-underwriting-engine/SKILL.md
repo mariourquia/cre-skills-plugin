@@ -20,6 +20,17 @@ amos_surface:
   - t12
   - decision
 refusal_trigger: "Refuse to emit a go/no-go recommendation or a proforma figure that depends on an input (rent roll line, T-12 line, financing term) which cannot be cited back to the deal package; the engine never invents a model/* or data-room/* value and flags the missing input for the analyst instead."
+v5_contract: true
+confidence_default: estimated
+stale_data: "Cap rates, market rents, exit assumptions, financing quotes, and replacement costs are market-sensitive and age quickly; rerun against current comps and quotes. Operator-supplied actuals override modeled or benchmarked inputs."
+produces_artifact_kind: model_output
+outputs:
+  - Normalized T-12
+  - 10-year operating proforma
+  - Cap-rate decomposition
+  - Probability-weighted return summary
+  - Go/no-go recommendation
+workspace_scope: deal
 targets:
   - claude_code
 ---
@@ -229,6 +240,13 @@ See the data-grade ladder in `docs/DATA_GRADES.md` for the `confirmed | estimate
 - Default output fidelity is **estimated**: the proforma and returns are derived from the supplied deal package and the assumptions above, not operator-confirmed actuals.
 - Label every output cell with a confidence grade -- `confirmed` (operator/deal-package-sourced), `estimated` (derived/benchmarked here), or `illustrative` (sample/demo) -- and a source-class tag: `[operator]` from the deal package, `[derived]` computed here, `[benchmark]` market rule-of-thumb, `[overlay]` org/market assumption applied, `[placeholder]` sample.
 - **Estimate, not an appraisal (required on every valuation output):** *The cap-rate decomposition, replacement-cost anchor, and any value conclusion this engine produces are a screening ESTIMATE for underwriting decision support — NOT an appraisal and not an opinion of value by a licensed appraiser. A USPAP-compliant appraisal by a qualified professional is required before the value is relied upon for a transaction, financing, or reporting.*
+
+## Known Limitations
+
+- **Screening estimate, not an appraisal or a transaction model of record.** Outputs support an underwriting decision; a USPAP appraisal, a tax opinion, and lender-confirmed quotes are required before reliance (see the valuation stamp above).
+- **Deterministic proforma with bolt-on scenarios.** The 10-year proforma and cap-rate decomposition are deterministic; probability weighting and stochastic returns live in `sensitivity-stress-test` / `monte-carlo-return-simulator` and are not replaced here.
+- **Garbage-in propagates.** Normalization corrects classification and timing in a supplied T-12; it cannot detect a misstated or fraudulent operating statement. An unresolved `$X`/`[placeholder]` input is refused, not silently defaulted.
+- **No live market data.** Cap-rate and rent benchmarks are training-data rules-of-thumb unless the analyst supplies current comps; they stay `estimated` until grounded.
 
 ## Chain Notes
 

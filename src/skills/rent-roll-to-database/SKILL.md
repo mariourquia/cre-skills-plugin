@@ -7,6 +7,8 @@ category: reit-cre
 description: "Transforms a tokenized/extracted rent roll into validated, typed, auditable, database-ready records: a multi-line charge schedule (base rent, CAM/tax/insurance recoveries, percentage rent, parking, storage) mapped to the canonical chart of accounts, lease- and unit-level facts, GPR and occupancy aggregates, a data-quality grade, and a target-model load plan. Tenant identity is pseudonymized; per-unit natural-person data never leaves the boundary. Triggers on 'load this rent roll into the database', 'normalize the rent roll to our schema', 'rent roll to warehouse', or when extracted rent-roll tokens need to become structured records before underwriting or tie-out."
 targets:
   - claude_code
+pii_policy: tenant_or_personal
+
 ---
 
 # Rent Roll to Database

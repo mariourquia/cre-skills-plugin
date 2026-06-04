@@ -7,6 +7,8 @@ category: reit-cre
 description: "Generates a complete, copy-paste-ready Letter of Intent with negotiation strategy memo, three-tier pricing table, ten non-price levers, seller psychology brief, and broker cover email. Triggers on 'draft an LOI', 'build an offer', 'help me structure the bid', or when an acquisitions team is ready to submit."
 targets:
   - claude_code
+pii_policy: business_contact
+
 ---
 
 # LOI & Offer Builder

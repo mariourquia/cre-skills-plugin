@@ -7,6 +7,8 @@ category: reit-cre
 description: "Validates certificates of insurance against lease and contract requirements. Compares coverage types, limits, endorsements, and expiration dates field-by-field, flags deficiencies, and generates cure notices."
 targets:
   - claude_code
+pii_policy: tenant_or_personal
+
 ---
 
 # COI Compliance Checker

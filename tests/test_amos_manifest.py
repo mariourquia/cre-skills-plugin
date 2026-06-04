@@ -22,8 +22,9 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import jsonschema
 
@@ -32,6 +33,7 @@ SCHEMA_PATH = REPO_ROOT / "docs" / "integrations" / "amos-skill-manifest.schema.
 SAMPLE_PATH = REPO_ROOT / "docs" / "integrations" / "amos-skill-manifest.sample.json"
 CATALOG_SCHEMA_PATH = REPO_ROOT / "src" / "catalog" / "catalog.schema.json"
 BUILDER_PATH = REPO_ROOT / "scripts" / "amos-manifest-build.py"
+SKILLS_ROOT = REPO_ROOT / "src" / "skills"
 
 # AMOS target vocabularies (amos-prototype types.ts / room-tabs.ts), pinned here
 # so a drift in the plugin's emitted values is caught against the real AMOS enums.
@@ -42,11 +44,21 @@ AMOS_ROOM_TAB_KEYS_PLUS = {
     "sources", "memo", "feedback", "decision", "landing",
 }
 
-# v5.1 forward-compatibility metadata (WS-F). Contract-only fields AMOS consumes;
-# no live coupling. pii_policy default is the CONSERVATIVE "none" (explicit
-# opt-in), never aggregate_only.
-AMOS_PII_POLICY = {"none", "aggregate_only", "pseudonymized", "redacted_at_extraction"}
-AMOS_WORKSPACE_SCOPE = {"deal", "asset", "fund", "portfolio"}
+# v5.2 consumer-contract metadata. Contract-only fields AMOS consumes; no live
+# coupling. pii_policy is a sensitivity ladder (refined from the never-populated
+# v5.1 posture enum); default is the CONSERVATIVE "none" (explicit opt-in). The
+# removed posture values (aggregate_only/pseudonymized/redacted_at_extraction)
+# must no longer appear anywhere — membership in this set enforces that.
+AMOS_PII_POLICY = {"none", "business_contact", "tenant_or_personal", "sensitive_financial"}
+AMOS_WORKSPACE_SCOPE = {
+    "asset", "fund", "portfolio", "deal", "debt", "leasing", "property_management",
+    "investor_relations", "governance", "market", "data_room", "enterprise",
+}
+AMOS_ARTIFACT_KIND = {
+    "memo", "model_output", "calculator_result", "diligence_report", "source_map",
+    "tie_out_report", "investor_report", "lender_package", "valuation_support",
+    "checklist", "workflow_plan", "advisory_note",
+}
 
 
 # ---------------------------------------------------------------------------
@@ -98,7 +110,7 @@ def test_generated_manifest_validates_against_schema():
 def test_manifest_root_shape():
     """Root carries the spec-required fields with the right contents."""
     m = _build_manifest()
-    assert m["manifest_version"] == "1.0"
+    assert m["manifest_version"] == "1.1"
     # plugin_version comes from plugin.json, never hardcoded in the manifest builder.
     pj = json.loads((REPO_ROOT / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))
     assert m["plugin_version"] == pj["version"]
@@ -235,18 +247,44 @@ def test_every_entry_carries_the_v51_forward_compat_keys():
     assert not missing, "entries missing v5.1 forward-compat keys:\n  " + "\n  ".join(missing)
 
 
-def test_pii_policy_is_enum_valued_and_defaults_conservatively():
-    """pii_policy is a non-null enum value; in v5.1 no skill opts in, so every
-    entry defaults to the CONSERVATIVE 'none' (never aggregate_only)."""
+def _frontmatter_field(skill_id: str, field: str) -> Optional[str]:
+    """Read a scalar frontmatter field from src/skills/<id>/SKILL.md, or None."""
+    p = SKILLS_ROOT / skill_id / "SKILL.md"
+    if not p.exists():
+        return None
+    text = p.read_text(encoding="utf-8")
+    if not text.startswith("---\n"):
+        return None
+    try:
+        fm = text[4:text.index("\n---\n", 4)]
+    except ValueError:
+        return None
+    m = re.search(rf"^{field}:\s*(\S+)", fm, re.M)
+    return m.group(1) if m else None
+
+
+def test_pii_policy_is_enum_valued_and_conservative_default_holds():
+    """pii_policy is a v5.2 sensitivity value. The conservative default is 'none';
+    any non-'none' sensitivity MUST be an explicit frontmatter opt-in (derivation
+    never fabricates a sensitivity), so the manifest can never over-claim. The
+    removed v5.1 posture values cannot appear (enum membership enforces it)."""
     m = _build_manifest()
     failures: List[str] = []
     for s in m["skills"]:
         pp = s["pii_policy"]
         if pp not in AMOS_PII_POLICY:
             failures.append(f"{s['id']}: pii_policy '{pp}' not in {sorted(AMOS_PII_POLICY)}")
-        # v5.1: no skill declares a PII posture, so the conservative default holds.
-        if pp != "none":
-            failures.append(f"{s['id']}: pii_policy is '{pp}', expected conservative default 'none' in v5.1")
+            continue
+        if pp != "none" and s.get("type") == "skill":
+            declared = _frontmatter_field(s["id"], "pii_policy")
+            if declared != pp:
+                failures.append(
+                    f"{s['id']}: pii_policy '{pp}' is not an explicit frontmatter "
+                    f"opt-in (declared={declared!r}); a non-'none' sensitivity must "
+                    f"be declared, never derived/over-claimed"
+                )
+    non_none = [s["id"] for s in m["skills"] if s["pii_policy"] != "none"]
+    assert non_none, "expected at least one skill to declare a non-'none' pii_policy in v5.2"
     assert not failures, "pii_policy violations:\n  " + "\n  ".join(failures)
 
 
@@ -261,14 +299,15 @@ def test_workspace_scope_is_null_or_a_valid_scope():
     assert not failures, "workspace_scope violations:\n  " + "\n  ".join(failures)
 
 
-def test_produces_artifact_kind_is_null_or_a_string():
-    """produces_artifact_kind is null (v5.1 default) or a non-empty string."""
+def test_produces_artifact_kind_is_null_or_a_valid_kind():
+    """produces_artifact_kind is null or a member of the plugin-namespaced enum
+    (schema-validated too, but pinned here so the unit layer cannot drift)."""
     m = _build_manifest()
     failures: List[str] = []
     for s in m["skills"]:
         pak = s["produces_artifact_kind"]
-        if pak is not None and not (isinstance(pak, str) and pak.strip()):
-            failures.append(f"{s['id']}: produces_artifact_kind must be null or a non-empty string, got {pak!r}")
+        if pak is not None and pak not in AMOS_ARTIFACT_KIND:
+            failures.append(f"{s['id']}: produces_artifact_kind '{pak}' not null and not in {sorted(AMOS_ARTIFACT_KIND)}")
     assert not failures, "produces_artifact_kind violations:\n  " + "\n  ".join(failures)
 
 

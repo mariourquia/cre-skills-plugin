@@ -23,6 +23,12 @@ refusal_trigger: "Refuse to emit a final OZ recommendation if the QOF investment
 statute_review:
   - code: "IRC 1400Z-2 (OBBBA 2025)"
     last_verified: "2026-06-03"
+produces_artifact_kind: model_output
+outputs:
+  - OZ benefit model
+  - Hold-period tax comparison
+  - Compliance checklist
+
 ---
 
 # Opportunity Zone Underwriter

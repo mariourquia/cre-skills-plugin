@@ -8,6 +8,9 @@ description: "Generates a complete LP pitch deck with slide-by-slide content, in
 targets:
   - claude_code
 stale_data: "GIPS compliance standards, fee benchmarking ranges, and market cycle assessments reflect mid-2025 norms. Verify current NCREIF/ODCE benchmarks, fee market data, and cycle positioning with placement agents."
+pii_policy: sensitive_financial
+produces_artifact_kind: investor_report
+
 ---
 
 # LP Pitch Deck Builder

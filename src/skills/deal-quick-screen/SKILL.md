@@ -7,6 +7,8 @@ category: reit-cre
 description: "Fast go/no-go screening tool for inbound CRE deals. Takes a raw OM, broker email, or listing and returns a KEEP/KILL verdict with back-of-napkin returns, key assumptions, and a diligence checklist. Triggers on 'quick screen this deal', 'should I look at this?', or any new deal flow needing triage."
 targets:
   - claude_code
+pii_policy: business_contact
+
 ---
 
 # Deal QuickScreen

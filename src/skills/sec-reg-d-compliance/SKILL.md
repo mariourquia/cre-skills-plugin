@@ -9,6 +9,8 @@ description: "SEC Regulation D compliance for CRE syndications: 506(b) vs 506(c)
 targets:
   - claude_code
 stale_data: "SEC accredited investor thresholds reflect the 2020 amendment adding professional certifications and knowledgeable employees of private funds. State blue sky filing fees and deadlines reflect 2024-2025 data and change periodically. SEC enforcement trends and no-action letter interpretations are current through mid-2025. Always verify state-specific requirements on NASAA or individual state securities regulator websites before filing."
+pii_policy: sensitive_financial
+
 ---
 
 # SEC Regulation D Compliance

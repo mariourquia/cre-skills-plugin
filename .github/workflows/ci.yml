@@ -57,5 +57,7 @@ jobs:
         run: |
           python scripts/catalog-build.py
           python scripts/catalog-generate.py --check
+      - name: Corpus governance scan (static + generated metadata)
+        run: python scripts/governance-scan.py
       - name: Check prose drift (hardcoded counts outside CATALOG:STATS markers)
         run: python scripts/prose-drift-check.py

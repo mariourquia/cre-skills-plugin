@@ -8,6 +8,8 @@ description: "Produces a comprehensive sell/hold/refinance analysis with market 
 targets:
   - claude_code
 stale_data: "Cap rate comparisons, tax rates, refinance terms, and market cycle assessments reflect mid-2025 conditions. Verify current cap rates, interest rates for refi modeling, and federal/state tax rates with brokers, lenders, and tax counsel."
+produces_artifact_kind: memo
+
 ---
 
 # Disposition Strategy Engine

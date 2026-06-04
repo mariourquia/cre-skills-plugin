@@ -9,6 +9,8 @@ description: "Evaluates first-time and second-time CRE fund managers for institu
 targets:
   - claude_code
 stale_data: "Emerging manager fee benchmarks and fund size norms reflect Preqin and ILPA surveys through mid-2025. Attribution discount methodology is consistent with ILPA track record verification standards. Operational infrastructure benchmarks reflect ILPA Principles 3.0 and NCREIF operational guidance."
+pii_policy: sensitive_financial
+
 ---
 
 # Emerging Manager Evaluator

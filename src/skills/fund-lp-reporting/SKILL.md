@@ -26,6 +26,17 @@ decomposes_to:
   - performance-attribution
   - fund-raise-negotiation-engine
 refusal_trigger: "Refuse to release an LP-facing NAV, distribution, or performance figure that cannot be traced to the fund model or data-room source; the workspace never fabricates a model/* reference and routes any unresolved figure to fund counsel / IC review before it reaches an LP."
+v5_contract: true
+confidence_default: estimated
+stale_data: "Fund NAV, capital-account balances, distribution figures, and performance metrics are period-sensitive and must trace to the current fund model/data-room; prior-period figures are never carried into an LP-facing release without re-grounding to the current period close."
+produces_artifact_kind: investor_report
+outputs:
+  - LP quarterly report
+  - Capital-account statements
+  - Distribution notices
+  - Performance attribution
+pii_policy: sensitive_financial
+workspace_scope: investor_relations
 targets:
   - claude_code
 ---

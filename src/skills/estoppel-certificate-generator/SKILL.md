@@ -8,6 +8,8 @@ description: "Automates estoppel certificate population for CRE transactions. Pe
 targets:
   - claude_code
 stale_data: "Estoppel certificate templates and deemed-approval language reflect standard institutional CRE practice. Jurisdiction-specific requirements and forms vary. Always verify with transaction counsel."
+pii_policy: tenant_or_personal
+
 ---
 
 # Estoppel Certificate Generator

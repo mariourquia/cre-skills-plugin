@@ -1,11 +1,12 @@
 ---
 title: v5 Micro-Skill Architecture
-status: draft
+status: released (v5.2.0)
 owner: Mario Urquia
-last_reviewed: 2026-06-03
+last_reviewed: 2026-06-04
 sources_of_truth:
   - src/catalog/catalog.schema.json
   - scripts/catalog-build.py
+  - scripts/governance-scan.py
   - CONTRIBUTING.md
   - docs/plans/v5-analysis/09-amos-integration.md
 ---
@@ -16,6 +17,18 @@ sources_of_truth:
 > `docs/plans/v5-skill-modernization-plan.md` (trust-hardening track) and
 > `docs/plans/v5-analysis/09-amos-integration.md` (AMOS contract).
 > Branch: `release/v5-skill-modernization` (single branch/PR for all v5 work).
+>
+> **v5.2.0 revision note (2026-06-04).** The taxonomy + manifest contract described
+> here shipped as planned. Two scope lines below have since advanced: (1) the
+> full-corpus tiered skill contract is now enforced (Tier-1 classification/runtime_role
+> on all 127 skills; the 9 decision-grade carriers at full `v5_contract`); and
+> (2) the corpus-wide **static** governance scanner (`scripts/governance-scan.py`)
+> shipped in v5.2.0, validating governance *declarations* over frontmatter + the
+> catalog/manifest. The generalized **runtime** emitted-output scanner (every cell
+> tagged/refused at emit time) **remains deferred (v5.x)**, deployed only inside
+> `residential_multifamily`. Where §7 / §10 still say a deferral is "v5.1", read it
+> per this note: the static scanner is v5.2-shipped; the runtime scanner is
+> runtime-deferred.
 
 ## 1. Why
 
@@ -144,7 +157,7 @@ every governance attribute is data.
 - `classification` + `runtime_role`: **whole corpus** via derivation (zero-edit) + explicit overrides for the 8.
 - Full `v5_contract` conformance (3 sections + decision_grade + human_gate + source_ref_policy + amos_surface in frontmatter): **pilot set** — the 8 priority skills + the WS-1a regulatory three + ~10 high-traffic skills (target ~20).
 - New micro-skills: **0 shipped**, backlog documented here + in ROADMAP.
-- Generalized governance scanner, valuation/investor connectors, full 127 conformance: **v5.1** (unchanged).
+- Generalized **runtime** governance scanner, valuation/investor connectors: **deferred (v5.x)**. *(v5.2 update: the corpus-wide **static** governance scanner, `scripts/governance-scan.py`, and full 127 contract conformance have since shipped; only the runtime emitted-output scanner and runnable connector adapters remain deferred.)*
 
 ## 8. Workstream additions (folded into the task list)
 
@@ -177,7 +190,7 @@ Folded from the Phase-1 review wave (agentic-architecture, data-governance, AMOS
 - **M-D1 — Allowlist enforcement, not field-presence.** Maintain explicit `DECISION_GRADE_SLUGS` and `AMOS_FACING_SLUGS` sets (the 8 priority + ~12 pilot). Rules 2–3 fire on **membership**: a listed skill MISSING `human_gate`/`source_ref_policy`/`refusal_trigger` is a CI failure. Non-listed skills are advisory (honest scope — §M-H1).
 - **M-D2 — `source_ref_policy` is an OBJECT, not a flat enum** (adopt the 09 shape): `{ emits: [namespace...], on_unresolvable: refuse|warn|cite_best_effort, forbids_fabricated_model_ref: bool }`. For AMOS-facing decision-grade skills, `forbids_fabricated_model_ref: true` + a CI check that any declared `model/*`/`data-room/*` namespace is in the manifest root `ref_namespaces`.
 - **M-D3 — Reconcile, don't fork, `source_class`.** Add `docs/DATA_GRADES.md` as the single crosswalk across the four deployed vocabularies (RMF executive `[operator|derived|benchmark|overlay|placeholder]`, fallback_resolver `overlay:fallback`, ingest `classification` = `source-fact|calculated|modeled-assumption|requires-review`, and the connector `source_class` from WS-4). `confidence_default` and `source_ref_policy` reference this ladder; no new 5th enum.
-- **M-D4 — Add freshness/confidence to the decision-grade gate (advisory metadata, not new runtime):** optional `data_freshness` + `confidence_floor` fields documented for decision-grade skills; reuse provenance.py bands. Not gating in v5 (runtime wiring is v5.1) but documented as the intended control.
+- **M-D4 — Add freshness/confidence to the decision-grade gate (advisory metadata, not new runtime):** optional `data_freshness` + `confidence_floor` fields documented for decision-grade skills; reuse provenance.py bands. Not gating (the runtime wiring **remains deferred, v5.x**) but documented as the intended control.
 
 ### AMOS alignment
 - **M-AM1 — `amos_surface` = AMOS `RoomTabKey` + `landing`** (corrected in §3). Source of truth: amos-prototype `room-tabs.ts`.
@@ -186,12 +199,12 @@ Folded from the Phase-1 review wave (agentic-architecture, data-governance, AMOS
 - **M-AM4 — Manifest is a STATIC generated artifact + documented contract; no live coupling.** Honest capability states; no skill marked live-connected (ADR-0006: skills are referenced, not invoked live).
 
 ### Business credibility + honest framing
-- **M-H1 — Honest scope statement** in the architecture doc + README + manifest docs: the v5 governance metadata is a **catalog/manifest contract + CI validation for the listed decision-grade/AMOS-facing slugs**, plus RMF's deployed runtime enforcement. It is NOT yet a corpus-wide runtime fail-closed guard (that is v5.1). Do not imply universal enforcement.
+- **M-H1 — Honest scope statement** in the architecture doc + README + manifest docs: the v5 governance metadata is a **catalog/manifest contract + CI validation for the listed decision-grade/AMOS-facing slugs**, plus RMF's deployed runtime enforcement. v5.2.0 adds the corpus-wide **static** governance scanner (`scripts/governance-scan.py`, declaration-validating). It is NOT yet a corpus-wide **runtime** fail-closed guard (that **remains deferred, v5.x**). Do not imply universal runtime enforcement.
 - **M-H2 — Business-facing taxonomy paragraph** (operator language) in README + `docs/integrations/amos-skill-manifest.md`: what orchestrator/workspace/normal/micro mean for a deal team / AM / fund team and why classification affects which outputs need sign-off.
 - **M-H3 — Release narrative leads with what is delivered** (governable taxonomy, AMOS manifest, honest decomposition map, trust fixes) — `micro-skill` never appears in a headline without the "0 new stubs; reclassify + backlog" qualifier.
 
 ### Targeted governance guard (WS-3, bounded)
-- **M-G1 — Ship a real, targeted finance-placeholder guard** (not the full generalized scanner) covering the named decision-grade slugs: `acquisition-underwriting-engine`, `ic-memo-generator`, `comp-snapshot`, `fund-lp-reporting`, `jv-waterfall-architect` (+ the WS-1a three already done). A test asserts these fail closed on an unresolved `$X`/placeholder token in a final-marked path. The fully-generalized corpus-wide scanner remains v5.1.
+- **M-G1 — Ship a real, targeted finance-placeholder guard** (not the full generalized scanner) covering the named decision-grade slugs: `acquisition-underwriting-engine`, `ic-memo-generator`, `comp-snapshot`, `fund-lp-reporting`, `jv-waterfall-architect` (+ the WS-1a three already done). A test asserts these fail closed on an unresolved `$X`/placeholder token in a final-marked path. The fully-generalized corpus-wide **runtime** scanner **remains deferred (v5.x)**. *(v5.2 update: the corpus-wide **static** governance scanner `scripts/governance-scan.py` — which validates governance *declarations*, not emitted output — has since shipped.)*
 
 ### Specific skill fixes
 - **M-S1 — `fund-lp-reporting`:** rebucket `human_gate` to `investment_committee_approval_required` (it routes LP NAV/distribution notices, not lender covenant packages) and resolve its zero-`references/` contract violation (ship a one-page `references/routing-logic.md` OR formalize the router/workspace reference exemption in CONTRIBUTING and apply it). Name ILPA + NCREIF-PREA reporting standards in the routing reference.

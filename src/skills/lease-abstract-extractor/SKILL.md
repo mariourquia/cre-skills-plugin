@@ -8,6 +8,9 @@ description: "Extracts structured data from commercial lease documents (30+ fiel
 targets:
   - claude_code
 stale_data: "Lease abstraction templates and field definitions reflect standard institutional CRE practice. Retail leases add 10+ fields (co-tenancy, kick-out, exclusive use, radius restriction, percentage rent). Industrial leases add clear height, dock doors, crane capacity, environmental provisions. Always verify extraction against original lease language."
+pii_policy: tenant_or_personal
+produces_artifact_kind: diligence_report
+
 ---
 
 # Lease Abstract Extractor

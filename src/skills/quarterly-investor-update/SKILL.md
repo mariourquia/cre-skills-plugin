@@ -8,6 +8,9 @@ description: "Generates professional, LP-ready quarterly investor update letters
 targets:
   - claude_code
 stale_data: "Market outlook commentary and NCREIF/S&P 500 comparison benchmarks reflect training data cutoff. User must provide current quarter market conditions and benchmark returns."
+pii_policy: sensitive_financial
+produces_artifact_kind: investor_report
+
 ---
 
 # Quarterly Investor Update

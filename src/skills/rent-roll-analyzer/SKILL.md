@@ -7,6 +7,9 @@ category: reit-cre
 description: "Ingests raw rent rolls (pasted table, CSV, or PDF extract) and produces a clean dataset with layered analytics: rollover schedule, mark-to-market waterfall, tenant concentration risk, WALT, rent benchmarking, MTM exposure, and data quality flags. Triggers on 'analyze this rent roll', 'clean up this rent roll', or when rent roll data needs preprocessing before underwriting."
 targets:
   - claude_code
+pii_policy: tenant_or_personal
+produces_artifact_kind: model_output
+
 ---
 
 # Rent Roll Analyzer

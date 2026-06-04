@@ -7,6 +7,8 @@ category: reit-cre
 description: "Generates text-based stacking plans from rent rolls, providing floor-by-floor visual layout of tenant occupancy, lease expiration, contiguous availability analysis, rollover concentration, and prospect pipeline overlay."
 targets:
   - claude_code
+pii_policy: tenant_or_personal
+
 ---
 
 # Stacking Plan Builder

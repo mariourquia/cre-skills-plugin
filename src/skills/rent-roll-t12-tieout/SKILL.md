@@ -7,6 +7,8 @@ category: reit-cre
 description: "Reconciles a normalized rent roll against a normalized T-12 on a stated, consistent basis (annualized contractual vs recognized accrual; collected cash out of scope) and never forces a tie. Reconciles base rent, recoveries and other income (jointly, per the canonical chart), occupancy, and the EGI / NOI-revenue bridge; classifies each gap as mapping, timing, or missing on a deterministic signature; surfaces residual_unexplained; and routes every untied dimension to human review. Triggers on 'tie out the rent roll to the T-12', 'reconcile contractual rent to actuals', 'NOI bridge from the rent roll', or 'revenue leakage check'."
 targets:
   - claude_code
+pii_policy: tenant_or_personal
+
 ---
 
 # Rent Roll to T-12 Tie-Out
