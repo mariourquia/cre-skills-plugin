@@ -455,7 +455,7 @@ Capability-matrix doc now reflects Obj 4 closure; open follow-ups (legacy-bank r
   orchestrators, calculators, lib, catalog, MCP server, templates) moved from repo root
   into `src/`. Symlinks removed. `scripts/`, `docs/`, `tests/`, `dist/`, `registry.yaml`,
   and `README.md` remain at repo root. Build output goes to `builds/`.
-- Feedback default mode: ask_each_time -> local_only (privacy-first)
+- Feedback default mode: ask_each_time (prompts for consent per submission; set local_only to suppress all remote sends)
 - Feedback backend_url default: pre-configured -> empty (opt-in remote submission)
 - registry.yaml: manually maintained -> generated from catalog
 - Router: markdown-table parsing -> catalog-driven with fallback

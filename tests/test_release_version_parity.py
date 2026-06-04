@@ -265,24 +265,36 @@ def test_no_wrong_marketplace_install_suffix(doc: str) -> None:
 # ---------------------------------------------------------------------------
 
 
+_STALE_SKILL_COUNTS = (105, 112, 113)
+
+_STALE_COUNT_PATTERN = re.compile(
+    r"\b(" + "|".join(str(c) for c in _STALE_SKILL_COUNTS) + r")\s+(?:CRE\s+)?(?:institutional-grade\s+)?skills\b"
+)
+
+
 @pytest.mark.parametrize("script", INSTALLER_SCRIPTS + ("scripts/create-dmg.sh", "scripts/create-exe.iss"))
 def test_installer_advertised_skill_count_matches_filesystem(script: str) -> None:
     """Installer banners that advertise a skill count must match the actual number
-    of directories under ``src/skills/``. Catches the pre-hardening drift where
-    five installer scripts and the EXE compiler script all said ``112 skills``
-    while the filesystem had 113."""
+    of directories under ``src/skills/``. Checks that no stale count (105, 112, 113)
+    appears and that the live filesystem count is what the installer advertises."""
+    from glob import glob
     path = REPO_ROOT / script
     if not path.exists():
         pytest.skip(f"{script} missing; nothing to check")
     text = _read(path)
-    actual = _actual_skill_count()
+    actual = len(glob(str(REPO_ROOT / "src" / "skills" / "*" / "SKILL.md")))
 
-    # Any standalone "112 skills" or "112 CRE skills" is now stale.
-    stale_hits = re.findall(r"\b(?:(?<!\$)112)\s+(?:CRE\s+)?skills\b", text)
+    # Any occurrence of a stale count adjacent to "skills" is a hard failure.
+    stale_hits = _STALE_COUNT_PATTERN.findall(text)
     assert not stale_hits, (
-        f"{script} advertises stale '112 skills' banner ({stale_hits!r}); "
-        f"filesystem has {actual} skills. Update the banner or regenerate via "
-        f"scripts/catalog-generate.py."
+        f"{script} advertises stale skill count(s) {stale_hits!r}; "
+        f"filesystem has {actual} skills. Update the banner to {actual}."
+    )
+
+    # The live count must appear somewhere in the script.
+    assert str(actual) in text, (
+        f"{script} does not advertise the current skill count ({actual}); "
+        f"update the banner to match the filesystem."
     )
 
 

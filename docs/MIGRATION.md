@@ -2,19 +2,17 @@
 
 ## Breaking Changes
 
-### 1. Feedback default mode changed
+### 1. Feedback default mode
 
-**Before:** `feedback.mode` defaulted to `ask_each_time` with a pre-configured backend URL.
-**After:** `feedback.mode` defaults to `local_only` with an empty backend URL.
+**Default:** `feedback.mode` is `ask_each_time` — the plugin prompts for consent before each remote send and sends nothing without explicit per-submission approval.
 
-**Impact:** Existing installs that relied on the default `ask_each_time` behavior will stop prompting for remote submission. Users who want remote submission must explicitly configure it.
+**Impact:** No remote data is sent without the user's explicit approval on each submission. This is the default in both v3 and v4; no migration action is required.
 
-**Action:** If you want remote feedback submission:
+**Action:** If you want to suppress all remote sends entirely:
 ```json
 {
   "feedback": {
-    "mode": "ask_each_time",
-    "backend_url": "https://cre-skills-feedback-api.vercel.app/api/feedback"
+    "mode": "local_only"
   }
 }
 ```
@@ -61,7 +59,7 @@
 |------|--------|
 | Hardcoded counts in README, plugin.json, hooks.json | Replaced by catalog-generated values |
 | Manual registry.yaml editing | Replaced by catalog.yaml -> generate workflow |
-| `feedback.mode: ask_each_time` as default | Changed to `local_only` |
+| Manual `feedback.mode` prompts | Default remains `ask_each_time`; set `local_only` to suppress all remote sends |
 
 ## Verification
 
