@@ -5,6 +5,27 @@ version: 0.1.0
 status: deployed
 category: workspace
 description: "Top-level workspace for fund management and LP communications. Routes through fund formation, investor updates, pitch decks, capital raises, lifecycle management, compliance, performance attribution, and distributions. Manages persistent fund context across sessions."
+classification: workspace
+runtime_role: workspace_router
+final_marked: true
+human_gate: investment_committee_approval_required
+source_ref_policy:
+  emits:
+    - data-room/*
+    - model/*
+  on_unresolvable: refuse
+  forbids_fabricated_model_ref: true
+amos_surface:
+  - decision
+  - memo
+decomposes_to:
+  - lp-data-request-generator
+  - fund-terms-comparator
+  - distribution-notice-generator
+  - quarterly-investor-update
+  - performance-attribution
+  - fund-raise-negotiation-engine
+refusal_trigger: "Refuse to release an LP-facing NAV, distribution, or performance figure that cannot be traced to the fund model or data-room source; the workspace never fabricates a model/* reference and routes any unresolved figure to fund counsel / IC review before it reaches an LP."
 targets:
   - claude_code
 ---

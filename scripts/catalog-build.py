@@ -217,6 +217,92 @@ SKILL_CALCULATOR_MAP = {
 
 
 # ---------------------------------------------------------------------------
+# v5 classification + governance metadata (see
+# docs/architecture/v5-micro-skill-architecture.md §2, §3, §10/M-A1)
+# ---------------------------------------------------------------------------
+
+# True multi-phase conductors only (NOT every "command center" by name). The
+# description-prefix heuristic below also catches conductors that open with
+# "orchestrator"/"conductor"/"command center" but are not in this explicit set.
+ORCHESTRATOR_SLUGS = {
+    "amos-icomm-demo-orchestrator",
+    "document-to-database",
+    "document-to-warehouse-pipeline",
+    "property-management-orchestrator",
+    "sourcing-outreach-system",
+}
+
+# Frontmatter-overridable governance keys flowed verbatim into the catalog item.
+_HUMAN_GATE_DEFAULT = "none"
+
+# classification -> runtime_role default projection (§2). Frontmatter
+# `runtime_role:` overrides this derived value.
+CLASSIFICATION_TO_RUNTIME_ROLE = {
+    "orchestrator": "workflow_conductor",
+    "workspace": "workspace_router",
+    "calculator": "deterministic_calculator",
+    "agent": "agent_persona",
+    "micro": "callable_tool",
+    "normal": "callable_tool",
+}
+
+
+def derive_classification(slug: str, item_type: str, category: str,
+                          pack_type, description: str) -> str:
+    """Derive a default classification when frontmatter omits it (§2, §10).
+
+    workspace  if category == 'workspace' or pack_type == 'router'
+    orchestrator if slug in ORCHESTRATOR_SLUGS or description opens with a
+                 conductor cue ('orchestrator'/'conductor'/'command center')
+    calculator/agent mirror the item type
+    else        normal
+    """
+    if item_type == "calculator":
+        return "calculator"
+    if item_type == "agent":
+        return "agent"
+    if category == "workspace" or pack_type == "router":
+        return "workspace"
+    if slug in ORCHESTRATOR_SLUGS:
+        return "orchestrator"
+    desc_lead = (description or "").strip().lower()
+    if desc_lead.startswith(("orchestrator", "conductor", "command center")):
+        return "orchestrator"
+    return "normal"
+
+
+def derive_runtime_role(classification: str) -> str:
+    """Project classification -> runtime_role (§2). Overridable in frontmatter."""
+    return CLASSIFICATION_TO_RUNTIME_ROLE.get(classification, "callable_tool")
+
+
+def governance_from_frontmatter(fm: dict, slug: str, item_type: str,
+                                category: str, pack_type, description: str) -> dict:
+    """Read the v5 governance keys from frontmatter and apply derivation
+    defaults for classification/runtime_role (§10/M-A1). Returns a dict of the
+    eight catalog fields ready to merge into an item.
+
+    `final_marked` (frontmatter, NOT renamed — §10/M-A3) projects to the catalog
+    `decision_grade` field.
+    """
+    fm = fm or {}
+    classification = fm.get("classification") or derive_classification(
+        slug, item_type, category, pack_type, description
+    )
+    runtime_role = fm.get("runtime_role") or derive_runtime_role(classification)
+    return {
+        "classification": classification,
+        "runtime_role": runtime_role,
+        "decision_grade": bool(fm.get("final_marked", False)),
+        "human_gate": fm.get("human_gate", _HUMAN_GATE_DEFAULT),
+        "source_ref_policy": fm.get("source_ref_policy"),
+        "amos_surface": fm.get("amos_surface") or [],
+        "decomposes_to": fm.get("decomposes_to") or [],
+        "composed_from": fm.get("composed_from") or [],
+    }
+
+
+# ---------------------------------------------------------------------------
 # Scanners
 # ---------------------------------------------------------------------------
 
@@ -271,6 +357,9 @@ def scan_skills(registry: dict, triggers: dict) -> list:
             "priority": reg.get("priority"),
             "version": fm.get("version"),
         }
+        item.update(governance_from_frontmatter(
+            fm, slug, "skill", category, fm.get("pack_type"), desc
+        ))
         items.append(item)
     return items
 
@@ -314,6 +403,10 @@ def scan_agents() -> list:
             "priority": None,
             "version": None,
         }
+        item.update(governance_from_frontmatter(
+            fm, agent_id, "agent", domain, fm.get("pack_type"),
+            fm.get("description", ""),
+        ))
         items.append(item)
     return items
 
@@ -352,6 +445,10 @@ def scan_commands() -> list:
             "priority": None,
             "version": None,
         }
+        item.update(governance_from_frontmatter(
+            fm, slug, "command", "cross-cutting", fm.get("pack_type"),
+            fm.get("description", ""),
+        ))
         items.append(item)
     return items
 
@@ -398,6 +495,9 @@ def scan_calculators() -> list:
             "priority": None,
             "version": None,
         }
+        item.update(governance_from_frontmatter(
+            {}, calc_id, "calculator", "cross-cutting", None, desc
+        ))
         items.append(item)
     return items
 
@@ -444,6 +544,14 @@ def scan_orchestrators() -> list:
             "priority": None,
             "version": None,
         }
+        # Runtime orchestrator engine configs are conductors by definition.
+        # They declare runtime `phases` (agents + orchestratorFile), not a flat
+        # list of catalog skill ids, so decomposes_to stays empty here; the
+        # classification validator exempts these subsystem routers (§4.1).
+        gov = governance_from_frontmatter({}, orch_id, "skill", orch_id, None, desc)
+        gov["classification"] = "orchestrator"
+        gov["runtime_role"] = "workflow_conductor"
+        item.update(gov)
         items.append(item)
     return items
 
@@ -476,6 +584,14 @@ def build_workflow_items(chains: list) -> list:
             "priority": None,
             "version": None,
         }
+        # Workflow chains are documented routing descriptions (free-text steps
+        # in CRE-ROUTING.md), not executable conductors. They carry no
+        # resolvable decomposes_to; surface them as reference_only.
+        gov = governance_from_frontmatter(
+            {}, chain["id"], "workflow", "cross-cutting", None, ""
+        )
+        gov["runtime_role"] = "reference_only"
+        item.update(gov)
         items.append(item)
     return items
 

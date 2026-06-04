@@ -5,6 +5,17 @@ version: 0.1.0
 status: deployed
 category: reit-cre
 description: "Deep property management command center that orchestrates all PM workflows across any asset type. Single entry point for tenant relations, maintenance operations, financial operations, vendor management, compliance monitoring, capital planning, and performance benchmarking. Routes to specialized downstream skills and includes asset-type-specific modules. Triggers on 'property management', 'PM report', 'tenant issue', 'maintenance plan', 'vendor management', 'building operations', 'PM dashboard', or any operational property management question."
+classification: orchestrator
+runtime_role: workflow_conductor
+human_gate: review_recommended
+decomposes_to:
+  - work-order-triage
+  - vendor-invoice-validator
+  - building-systems-maintenance-manager
+  - tenant-event-planner
+  - variance-narrative-generator
+  - debt-covenant-monitor
+  - property-performance-dashboard
 targets:
   - claude_code
 stale_data: "IREM/BOMA benchmark data reflects 2023-2024 publications. Operating expense ratios and staffing benchmarks vary by market cycle. Verify current local market conditions and regulatory requirements."

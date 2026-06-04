@@ -7,6 +7,15 @@ category: reit-cre
 description: "Evaluates whether investing capital gains into a Qualified Opportunity Fund produces superior after-tax returns vs. a non-OZ alternative. Models BOTH OZ regimes keyed on investment date: the pre-2027 vintage (OZ 1.0, fixed 12/31/2026 inclusion) and the post-2026 permanent regime introduced by the One Big Beautiful Bill Act (OZ 2.0 -- rolling 5-year deferral, restored 10% basis step-up, 30% for rural QOFs, decennial zone redesignation). Quantifies deferral, the 10-year exclusion, compliance, and the OZ premium -- how much worse the OZ project can be in pre-tax terms while still matching the non-OZ after-tax return."
 targets:
   - claude_code
+classification: normal
+runtime_role: callable_tool
+final_marked: true
+human_gate: legal_tax_regulatory_review_required
+source_ref_policy:
+  emits:
+    - model/*
+  on_unresolvable: refuse
+  forbids_fabricated_model_ref: true
 v5_contract: true
 confidence_default: estimated
 stale_data: "OZ analysis reflects IRC Section 1400Z-2 as amended by the One Big Beautiful Bill Act (OBBBA, enacted 2025-07-04). The benefit set is keyed on the QOF investment date: pre-2027 vintages follow OZ 1.0 (deferred gain included 12/31/2026, with the 5yr/7yr step-ups unreachable for late vintages); investments after 12/31/2026 follow the permanent OZ 2.0 regime (rolling 5-year deferral, 10% basis step-up at 5 years, 30% for Qualified Rural Opportunity Funds, new zone map effective 2027-01-01 on a decennial cycle). State OZ conformity varies and changes frequently. Tax rates, asset values, and IRR inputs the user provides override any figure baked into this skill. Always verify the current statute and state conformity with qualified tax counsel."

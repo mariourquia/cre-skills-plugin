@@ -5,6 +5,20 @@ version: 0.1.0
 status: deployed
 category: reit-cre
 description: "Produces a fast, credible comparable analysis (rent comps and sales comps) for active deals, appraisal reviews, or pricing validation. Includes adjustment grids, confidence scoring, effective rent calculations, replacement cost anchor, and assumption validation."
+classification: normal
+runtime_role: callable_tool
+final_marked: true
+human_gate: review_recommended
+source_ref_policy:
+  emits:
+    - data-room/*
+    - market/*
+  on_unresolvable: cite_best_effort
+  forbids_fabricated_model_ref: true
+amos_surface:
+  - market
+  - model
+refusal_trigger: "Refuse to present a comp as confirmed when its source is not a user-provided or cited transaction; training-data benchmarks are labeled illustrative, never passed off as a verified comparable, and a comp set with no resolvable source is flagged rather than used as a valuation anchor."
 targets:
   - claude_code
 stale_data: "Replacement cost estimates, construction cost indices, and land values reflect mid-2025 market. Cap rate and rent benchmarks are as of training data. User-provided comps and recent transaction data should always override training data."

@@ -5,6 +5,13 @@ version: 0.1.0
 status: deployed
 category: reit-cre
 description: "Full-lifecycle CRE deal sourcing engine: target identification, lead scoring (0-100), multi-channel outreach (mail, call, email, LinkedIn), broker relationship cultivation, CRM pipeline schema, and KPI benchmarks. Built for small-team operators doing 2-10 acquisitions per year."
+classification: orchestrator
+runtime_role: workflow_conductor
+human_gate: review_recommended
+decomposes_to:
+  - deal-quick-screen
+  - om-reverse-pricing
+  - loi-offer-builder
 targets:
   - claude_code
 stale_data: "Conversion benchmarks (response rates, cost per deal) reflect mid-2025 industry averages for small-team CRE operators. Subscription costs for CoStar, Reonomy, and PropStream may have changed. Verify current pricing before budgeting."

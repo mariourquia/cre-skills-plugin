@@ -5,6 +5,21 @@ version: 0.1.0
 status: deployed
 category: reit-cre
 description: "Full-cycle acquisition underwriting engine. Takes a deal package (rent roll, T-12, OM, financing terms) and produces institutional-quality output: T-12 normalization, 10-year proforma, Linneman cap rate decomposition, probability-weighted scenarios, replacement cost analysis, and go/no-go recommendation. Triggers on 'underwrite this deal', 'build an acquisition model', or 'run the numbers on this property'."
+classification: normal
+runtime_role: callable_tool
+final_marked: true
+human_gate: investment_committee_approval_required
+source_ref_policy:
+  emits:
+    - data-room/*
+    - model/*
+  on_unresolvable: refuse
+  forbids_fabricated_model_ref: true
+amos_surface:
+  - model
+  - t12
+  - decision
+refusal_trigger: "Refuse to emit a go/no-go recommendation or a proforma figure that depends on an input (rent roll line, T-12 line, financing term) which cannot be cited back to the deal package; the engine never invents a model/* or data-room/* value and flags the missing input for the analyst instead."
 targets:
   - claude_code
 ---

@@ -135,6 +135,74 @@
         "version": {
           "type": ["string", "null"],
           "description": "Item version from frontmatter"
+        },
+        "classification": {
+          "type": ["string", "null"],
+          "enum": ["micro", "normal", "orchestrator", "workspace", "agent", "calculator", null],
+          "default": null,
+          "description": "v5 agent-ecosystem role subdividing `type`. Derived by catalog-build.py; SKILL.md frontmatter overrides. See docs/architecture/v5-micro-skill-architecture.md §2."
+        },
+        "runtime_role": {
+          "type": ["string", "null"],
+          "enum": ["callable_tool", "workflow_conductor", "workspace_router", "deterministic_calculator", "agent_persona", "reference_only", "human_review_surface", null],
+          "default": null,
+          "description": "v5 execution role. Derived from classification with frontmatter override. See §2."
+        },
+        "decision_grade": {
+          "type": "boolean",
+          "default": false,
+          "description": "Can emit a decision-grade artifact (IC memo, valuation, LP report, waterfall). Catalog projection of SKILL.md frontmatter `final_marked`. See §3, §10/M-A3."
+        },
+        "human_gate": {
+          "type": "string",
+          "enum": ["none", "review_recommended", "approval_required", "legal_tax_regulatory_review_required", "investment_committee_approval_required", "lender_or_investor_review_required"],
+          "default": "none",
+          "description": "CRE-business-semantic human sign-off required before the output is acted on. See §3, §10/M-AM2."
+        },
+        "source_ref_policy": {
+          "type": ["object", "null"],
+          "default": null,
+          "description": "Source-grounding posture (09 shape). Required for AMOS-facing / decision-grade skills. See §10/M-D2.",
+          "properties": {
+            "emits": {
+              "type": "array",
+              "items": { "type": "string" },
+              "default": [],
+              "description": "Source-ref namespaces this skill emits (e.g., data-room/*, model/*)."
+            },
+            "on_unresolvable": {
+              "type": "string",
+              "enum": ["refuse", "warn", "cite_best_effort"],
+              "description": "Behavior when a required source reference cannot be resolved."
+            },
+            "forbids_fabricated_model_ref": {
+              "type": "boolean",
+              "description": "If true, the skill must never invent a model/* or data-room/* reference."
+            }
+          },
+          "required": ["emits", "on_unresolvable", "forbids_fabricated_model_ref"],
+          "additionalProperties": false
+        },
+        "amos_surface": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["model", "leasing", "t12", "debt", "market", "diligence", "sources", "memo", "feedback", "decision", "landing"]
+          },
+          "default": [],
+          "description": "AMOS RoomTabKey (+ landing) placement. Source of truth: amos-prototype room-tabs.ts. See §3, §10/M-AM1."
+        },
+        "decomposes_to": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Catalog item ids this orchestrator/workspace composes. Required when classification in {orchestrator, workspace}. See §4.1, §4.5."
+        },
+        "composed_from": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Inverse pointer: orchestrators/workspaces that use this item. Ids resolve to real catalog items. See §4.5."
         }
       },
       "additionalProperties": false

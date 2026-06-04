@@ -5,6 +5,16 @@ version: 0.1.0
 status: deployed
 category: reit-cre
 description: "Designs, calculates, and explains joint venture equity waterfall structures for GP/LP partnerships. Three modes: Structure (term sheet from scratch), Calculate (distributions under specific scenarios), Explain (LP-facing plain-language education). Triggers on 'waterfall', 'promote', 'preferred return', 'GP/LP split', 'JV structure', or 'carry'."
+classification: normal
+runtime_role: callable_tool
+final_marked: true
+human_gate: investment_committee_approval_required
+source_ref_policy:
+  emits:
+    - model/*
+  on_unresolvable: refuse
+  forbids_fabricated_model_ref: true
+refusal_trigger: "Refuse to emit a distribution split or promote figure when a required term (preferred rate, tier hurdle, contributed capital) is unspecified or unresolved; the architect never assumes a number into the waterfall and asks for the missing term instead."
 targets:
   - claude_code
 ---

@@ -5,6 +5,32 @@ version: 0.1.0
 status: deployed
 category: reit-cre
 description: "Thin demo conductor that sequences the reusable CRE acquisition skills into one end-to-end Investment Committee workflow: data-room intake, document extraction, rent-roll analysis, T-12 normalization, PCA reserve analysis, agency debt analysis, full underwriting, sensitivity stress test, IC memo generation, red-team challenge, source verification, and IC Q&A context. It orchestrates and hands off; it does not re-derive numbers itself. Every stage proposes work for human review and pauses at named gates. Triggers on 'run the IC workflow', 'take this deal from data room to IC', 'orchestrate the acquisition', or 'walk this deal to committee'."
+classification: orchestrator
+runtime_role: workflow_conductor
+final_marked: true
+human_gate: investment_committee_approval_required
+source_ref_policy:
+  emits:
+    - data-room/*
+    - model/*
+  on_unresolvable: refuse
+  forbids_fabricated_model_ref: true
+amos_surface:
+  - decision
+  - model
+  - sources
+  - memo
+decomposes_to:
+  - document-to-data-room-extractor
+  - rent-roll-analyzer
+  - t12-normalizer
+  - pca-reserve-analyzer
+  - loan-sizing-engine
+  - acquisition-underwriting-engine
+  - sensitivity-stress-test
+  - ic-memo-generator
+  - ic-red-team-challenger
+refusal_trigger: "Refuse to advance any stage to the Investment Committee gate (or emit an IC-grade artifact) when an upstream numeric input cannot be resolved to a data-room or model source reference; the conductor never fabricates a model/* citation and pauses for human review instead."
 targets:
   - claude_code
 ---

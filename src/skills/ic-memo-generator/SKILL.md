@@ -5,6 +5,20 @@ version: 0.1.0
 status: deployed
 category: reit-cre
 description: "Produces a complete investment committee memo from underwriting outputs: 1-page executive summary with risk-adjusted return framing, full 6-section IC memo body, sensitivity grids, and property-type variant templates (apartment, NNN, land, bridge, trophy office, industrial)."
+classification: normal
+runtime_role: callable_tool
+final_marked: true
+human_gate: investment_committee_approval_required
+source_ref_policy:
+  emits:
+    - model/*
+    - data-room/*
+  on_unresolvable: refuse
+  forbids_fabricated_model_ref: true
+amos_surface:
+  - memo
+  - decision
+refusal_trigger: "Refuse to populate any quantitative claim in the IC memo (return, valuation, sensitivity cell) that is not backed by a cited underwriting-model or data-room source; the generator never fabricates a model/* figure and leaves the field flagged for the deal team rather than inventing a number."
 targets:
   - claude_code
 stale_data: "Cap rate benchmarks, comparable transaction data, and market cycle assessments reflect mid-2025 conditions. Verify current transaction comps and market data with brokers and research providers."

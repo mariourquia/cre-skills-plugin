@@ -7,6 +7,15 @@ category: reit-cre
 description: "Evaluates whether a cost segregation study is worth pursuing for a CRE property by estimating reclassifiable components, quantifying PV of accelerated depreciation, modeling recapture at disposition, and determining breakeven hold period. Applies the One Big Beautiful Bill Act's permanent 100% bonus depreciation for qualified property placed in service after 2025-01-19 (and the pre-2025-01-19 TCJA phase-down for earlier placements), and accounts for passive activity limitations and state decoupling."
 targets:
   - claude_code
+classification: normal
+runtime_role: callable_tool
+final_marked: true
+human_gate: legal_tax_regulatory_review_required
+source_ref_policy:
+  emits:
+    - model/*
+  on_unresolvable: refuse
+  forbids_fabricated_model_ref: true
 v5_contract: true
 confidence_default: estimated
 stale_data: "Bonus depreciation treatment reflects IRC Section 168(k) as amended by the One Big Beautiful Bill Act (OBBBA, enacted 2025-07-04): a permanent 100% bonus for qualified property (MACRS class life <=20 years, QIP, software) acquired and placed in service after 2025-01-19; placements on or before 2025-01-19 keep the prior TCJA phase-down (e.g., 2023=80%, 2024=60%, early-2025=40%). Many states decouple from federal bonus and require a separate state computation. Component-reclassification benchmarks are historical engineering ranges. Tax rates, basis, and the placed-in-service date the user provides override any default here. Always verify the current statute and state conformity with qualified tax counsel."

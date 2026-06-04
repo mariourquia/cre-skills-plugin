@@ -1,5 +1,5 @@
 version: 1.0.0
-generated_at: '2026-05-29T20:15:22.200860+00:00'
+generated_at: '2026-06-04T02:19:48.592464+00:00'
 plugin_version: 4.5.0
 items:
 - id: 1031-exchange-executor
@@ -32,6 +32,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: 1031-pipeline-manager
   display_name: 1031 Pipeline Manager
   type: skill
@@ -64,6 +72,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: acquisition-underwriting-engine
   display_name: Acquisition Underwriting Engine
   type: skill
@@ -104,6 +120,22 @@ items:
   calculator_file: null
   priority: P0
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: true
+  human_gate: investment_committee_approval_required
+  source_ref_policy:
+    emits:
+    - data-room/*
+    - model/*
+    on_unresolvable: refuse
+    forbids_fabricated_model_ref: true
+  amos_surface:
+  - model
+  - t12
+  - decision
+  decomposes_to: []
+  composed_from: []
 - id: agency-loan-quote-analyzer
   display_name: Agency Loan Quote Analyzer
   type: skill
@@ -130,6 +162,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: amos-icomm-demo-orchestrator
   display_name: AMOS IC Demo Orchestrator
   type: skill
@@ -155,6 +195,32 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: orchestrator
+  runtime_role: workflow_conductor
+  decision_grade: true
+  human_gate: investment_committee_approval_required
+  source_ref_policy:
+    emits:
+    - data-room/*
+    - model/*
+    on_unresolvable: refuse
+    forbids_fabricated_model_ref: true
+  amos_surface:
+  - decision
+  - model
+  - sources
+  - memo
+  decomposes_to:
+  - document-to-data-room-extractor
+  - rent-roll-analyzer
+  - t12-normalizer
+  - pca-reserve-analyzer
+  - loan-sizing-engine
+  - acquisition-underwriting-engine
+  - sensitivity-stress-test
+  - ic-memo-generator
+  - ic-red-team-challenger
+  composed_from: []
 - id: annual-budget-engine
   display_name: Annual Budget Engine
   type: skill
@@ -187,6 +253,14 @@ items:
   calculator_file: null
   priority: P0
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: asset-ops-cockpit
   display_name: Asset Operations Cockpit
   type: skill
@@ -212,6 +286,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: building-systems-maintenance-manager
   display_name: Building Systems Maintenance Manager
   type: skill
@@ -242,6 +324,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: cam-reconciliation-calculator
   display_name: CAM Reconciliation Calculator
   type: skill
@@ -276,6 +366,14 @@ items:
   calculator_file: null
   priority: P0
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: capex-prioritizer
   display_name: CapEx Prioritizer
   type: skill
@@ -309,6 +407,14 @@ items:
   calculator_file: null
   priority: P0
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: capital-projects-development
   display_name: Capital Projects & Development
   type: skill
@@ -333,6 +439,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: capital-raise-machine
   display_name: Capital Raise Machine
   type: skill
@@ -363,6 +477,14 @@ items:
   calculator_file: null
   priority: P2
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: lender_or_investor_review_required
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: capital-stack-optimizer
   display_name: Capital Stack Optimizer
   type: skill
@@ -395,6 +517,14 @@ items:
   calculator_file: null
   priority: P0
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: carbon-audit-compliance
   display_name: Carbon Audit & BPS Compliance
   type: skill
@@ -427,6 +557,14 @@ items:
   calculator_file: null
   priority: P2
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: climate-risk-assessment
   display_name: Climate Risk Assessment
   type: skill
@@ -459,7 +597,15 @@ items:
   notes: ''
   calculator_file: null
   priority: P2
-  version: 0.1.0
+  version: 0.2.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: closing-checklist-tracker
   display_name: Closing Checklist Tracker
   type: skill
@@ -490,6 +636,14 @@ items:
   calculator_file: src/calculators/proration_calculator.py
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: coi-compliance-checker
   display_name: COI Compliance Checker
   type: skill
@@ -521,6 +675,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: comp-snapshot
   display_name: Comp Snapshot
   type: skill
@@ -554,6 +716,21 @@ items:
   calculator_file: null
   priority: P0
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: true
+  human_gate: review_recommended
+  source_ref_policy:
+    emits:
+    - data-room/*
+    - market/*
+    on_unresolvable: cite_best_effort
+    forbids_fabricated_model_ref: true
+  amos_surface:
+  - market
+  - model
+  decomposes_to: []
+  composed_from: []
 - id: compliance-regulatory-response-kit
   display_name: Compliance & Regulatory Response Kit
   type: skill
@@ -583,6 +760,14 @@ items:
   calculator_file: null
   priority: P2
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: construction-budget-gc-analyzer
   display_name: Construction Budget & GC Contract Analyzer
   type: skill
@@ -613,6 +798,14 @@ items:
   calculator_file: null
   priority: P2
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: construction-cost-estimator
   display_name: Construction Cost Estimator
   type: skill
@@ -650,6 +843,14 @@ items:
   calculator_file: src/calculators/construction_estimator.py
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: construction-procurement-contracts-engine
   display_name: Construction Procurement & Contracts Engine
   type: skill
@@ -680,6 +881,14 @@ items:
   calculator_file: null
   priority: P2
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: construction-project-command-center
   display_name: Construction Project Command Center
   type: skill
@@ -712,6 +921,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: cost-segregation-analyzer
   display_name: Cost Segregation Analyzer
   type: skill
@@ -742,7 +959,19 @@ items:
   notes: ''
   calculator_file: null
   priority: P1
-  version: 0.1.0
+  version: 0.2.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: true
+  human_gate: legal_tax_regulatory_review_required
+  source_ref_policy:
+    emits:
+    - model/*
+    on_unresolvable: refuse
+    forbids_fabricated_model_ref: true
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: cpi-escalation-calculator
   display_name: CPI Rent Escalation Calculator
   type: skill
@@ -776,6 +1005,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: creative-seller-financing
   display_name: Creative Seller Financing
   type: skill
@@ -806,6 +1043,14 @@ items:
   calculator_file: null
   priority: P2
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: crisis-special-situations-playbook
   display_name: Crisis & Special Situations Playbook
   type: skill
@@ -835,6 +1080,14 @@ items:
   calculator_file: null
   priority: P2
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: dd-command-center
   display_name: DD Command Center
   type: skill
@@ -869,6 +1122,14 @@ items:
   calculator_file: null
   priority: P0
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: deal-attribution-tracker
   display_name: Deal Attribution Tracker
   type: skill
@@ -902,6 +1163,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: deal-intake
   display_name: Deal Intake
   type: skill
@@ -925,6 +1194,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: deal-quick-screen
   display_name: Deal QuickScreen
   type: skill
@@ -957,6 +1234,14 @@ items:
   calculator_file: src/calculators/quick_screen.py
   priority: P0
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: deal-underwriting-assistant
   display_name: Deal Underwriting Assistant
   type: skill
@@ -987,6 +1272,14 @@ items:
   calculator_file: null
   priority: deployed
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: debt-covenant-monitor
   display_name: Debt Covenant Compliance Monitor
   type: skill
@@ -1021,6 +1314,14 @@ items:
   calculator_file: src/calculators/covenant_tester.py
   priority: P0
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: debt-portfolio-monitor
   display_name: Debt Portfolio Monitor
   type: skill
@@ -1051,6 +1352,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: dev-proforma-engine
   display_name: Development Pro Forma Engine
   type: skill
@@ -1086,6 +1395,14 @@ items:
   calculator_file: null
   priority: P0
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: disposition-prep-kit
   display_name: Disposition Prep Kit
   type: skill
@@ -1119,6 +1436,14 @@ items:
   calculator_file: null
   priority: P2
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: disposition-strategy-engine
   display_name: Disposition Strategy Engine
   type: skill
@@ -1159,6 +1484,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: distressed-acquisition-playbook
   display_name: Distressed Acquisition Playbook
   type: skill
@@ -1191,6 +1524,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: distribution-notice-generator
   display_name: Distribution Notice Generator
   type: skill
@@ -1220,6 +1561,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: document-to-data-room-extractor
   display_name: Document-to-Data-Room Extractor
   type: skill
@@ -1247,6 +1596,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: document-to-database
   display_name: Document to Database
   type: skill
@@ -1271,8 +1628,29 @@ items:
   last_reviewed_at: null
   notes: ''
   calculator_file: null
-  priority: null
+  priority: P1
   version: 0.1.0
+  classification: orchestrator
+  runtime_role: workflow_conductor
+  decision_grade: false
+  human_gate: review_recommended
+  source_ref_policy:
+    emits:
+    - data-room/*
+    on_unresolvable: refuse
+    forbids_fabricated_model_ref: true
+  amos_surface:
+  - sources
+  - t12
+  decomposes_to:
+  - normalize_tokens
+  - map_charge_codes
+  - validate_payload
+  - map_to_target_model
+  - emit_sql_ddl
+  - emit_load_plan
+  - grade_ingestion
+  composed_from: []
 - id: document-to-warehouse-pipeline
   display_name: Document-to-Warehouse Pipeline
   type: skill
@@ -1307,6 +1685,23 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: orchestrator
+  runtime_role: workflow_conductor
+  decision_grade: false
+  human_gate: review_recommended
+  source_ref_policy:
+    emits:
+    - data-room/*
+    on_unresolvable: refuse
+    forbids_fabricated_model_ref: true
+  amos_surface:
+  - sources
+  - t12
+  decomposes_to:
+  - document-to-data-room-extractor
+  - warehouse-to-exhibit-mapper
+  - reconcile_rent_roll_t12
+  composed_from: []
 - id: emerging-manager-evaluator
   display_name: Emerging Manager Evaluator
   type: skill
@@ -1339,6 +1734,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: entitlement-feasibility
   display_name: Entitlement & Zoning Feasibility Assessment
   type: skill
@@ -1370,6 +1773,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: estoppel-certificate-generator
   display_name: Estoppel Certificate Generator
   type: skill
@@ -1403,6 +1814,14 @@ items:
   calculator_file: null
   priority: P0
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: fund-formation-toolkit
   display_name: Fund Formation Toolkit
   type: skill
@@ -1436,6 +1855,14 @@ items:
   calculator_file: null
   priority: P2
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: fund-lp-reporting
   display_name: Fund & LP Reporting
   type: skill
@@ -1460,6 +1887,27 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: workspace
+  runtime_role: workspace_router
+  decision_grade: true
+  human_gate: investment_committee_approval_required
+  source_ref_policy:
+    emits:
+    - data-room/*
+    - model/*
+    on_unresolvable: refuse
+    forbids_fabricated_model_ref: true
+  amos_surface:
+  - decision
+  - memo
+  decomposes_to:
+  - lp-data-request-generator
+  - fund-terms-comparator
+  - distribution-notice-generator
+  - quarterly-investor-update
+  - performance-attribution
+  - fund-raise-negotiation-engine
+  composed_from: []
 - id: fund-operations-compliance-dashboard
   display_name: Fund Operations Compliance Dashboard
   type: skill
@@ -1491,6 +1939,14 @@ items:
   calculator_file: null
   priority: P2
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: fund-raise-negotiation-engine
   display_name: Fund Raise Negotiation Engine
   type: skill
@@ -1526,6 +1982,14 @@ items:
   calculator_file: src/calculators/fund_fee_modeler.py
   priority: P0
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: fund-terms-comparator
   display_name: Fund Terms Comparator
   type: skill
@@ -1556,6 +2020,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: funds-flow-calculator
   display_name: Funds Flow Calculator
   type: skill
@@ -1586,6 +2058,14 @@ items:
   calculator_file: null
   priority: P0
   version: 0.2.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: gp-performance-evaluator
   display_name: GP Performance Evaluator
   type: skill
@@ -1617,6 +2097,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: ic-deck-composer
   display_name: IC Deck Composer
   type: skill
@@ -1650,6 +2138,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: ic-memo-generator
   display_name: IC Memo Generator
   type: skill
@@ -1689,6 +2185,21 @@ items:
   calculator_file: null
   priority: P0
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: true
+  human_gate: investment_committee_approval_required
+  source_ref_policy:
+    emits:
+    - model/*
+    - data-room/*
+    on_unresolvable: refuse
+    forbids_fabricated_model_ref: true
+  amos_surface:
+  - memo
+  - decision
+  decomposes_to: []
+  composed_from: []
 - id: ic-red-team-challenger
   display_name: IC Red Team Challenger
   type: skill
@@ -1713,6 +2224,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: icomm-context-builder
   display_name: IComm Context Builder
   type: skill
@@ -1737,6 +2256,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: insurance-risk-manager
   display_name: Insurance & Risk Manager
   type: skill
@@ -1766,6 +2293,14 @@ items:
   calculator_file: null
   priority: P2
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: investor-lifecycle-manager
   display_name: Investor Lifecycle Manager
   type: skill
@@ -1796,6 +2331,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: jv-waterfall-architect
   display_name: JV Waterfall Architect
   type: skill
@@ -1831,6 +2374,18 @@ items:
   calculator_file: src/calculators/waterfall_calculator.py
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: true
+  human_gate: investment_committee_approval_required
+  source_ref_policy:
+    emits:
+    - model/*
+    on_unresolvable: refuse
+    forbids_fabricated_model_ref: true
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: land-residual-hbu-analyzer
   display_name: Land Residual & HBU Analyzer
   type: skill
@@ -1861,6 +2416,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: lease-abstract-extractor
   display_name: Lease Abstract Extractor
   type: skill
@@ -1894,6 +2457,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: lease-compliance-auditor
   display_name: Lease Compliance Auditor
   type: skill
@@ -1926,6 +2497,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: lease-document-factory
   display_name: Lease Document Factory
   type: skill
@@ -1957,6 +2536,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: lease-negotiation-analyzer
   display_name: Lease Negotiation Analyzer
   type: skill
@@ -1991,6 +2578,14 @@ items:
   calculator_file: null
   priority: P2
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: legal_tax_regulatory_review_required
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: lease-option-structurer
   display_name: Lease Option Structurer
   type: skill
@@ -2025,6 +2620,14 @@ items:
   calculator_file: src/calculators/option_valuation.py
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: lease-strategy-papering
   display_name: Lease Strategy & Papering
   type: skill
@@ -2049,6 +2652,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: lease-trade-out-analyzer
   display_name: Lease Trade-Out Analyzer
   type: skill
@@ -2081,6 +2692,14 @@ items:
   calculator_file: src/calculators/npv_trade_out.py
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: lease-up-war-room
   display_name: Lease-Up War Room
   type: skill
@@ -2112,6 +2731,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: leasing-operations-engine
   display_name: Leasing Operations Engine
   type: skill
@@ -2142,6 +2769,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: leasing-strategy-marketing-planner
   display_name: Leasing Strategy & Marketing Planner
   type: skill
@@ -2173,6 +2808,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: lender-compliance-certificate
   display_name: Lender Compliance Certificate
   type: skill
@@ -2204,6 +2847,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: loan-document-reviewer
   display_name: Loan Document Reviewer
   type: skill
@@ -2235,6 +2886,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.2.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: loan-sizing-engine
   display_name: Loan Sizing Engine
   type: skill
@@ -2268,6 +2927,14 @@ items:
   calculator_file: src/calculators/debt_sizing.py
   priority: P0
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: loi-offer-builder
   display_name: LOI & Offer Builder
   type: skill
@@ -2301,6 +2968,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: lp-data-request-generator
   display_name: LP Data Request Generator
   type: skill
@@ -2331,6 +3006,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: lp-pitch-deck-builder
   display_name: LP Pitch Deck Builder
   type: skill
@@ -2364,6 +3047,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: market-cycle-positioner
   display_name: Market Cycle Positioner
   type: skill
@@ -2396,6 +3087,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: market-memo-generator
   display_name: Market Memo Generator
   type: skill
@@ -2425,6 +3124,14 @@ items:
   calculator_file: null
   priority: deployed
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: mezz-pref-structurer
   display_name: Mezz / Pref Equity Structurer
   type: skill
@@ -2456,6 +3163,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: monte-carlo-return-simulator
   display_name: Monte Carlo Return Simulator
   type: skill
@@ -2487,6 +3202,14 @@ items:
   calculator_file: src/calculators/monte_carlo_simulator.py
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: navigator
   display_name: Navigator
   type: skill
@@ -2510,6 +3233,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: noi-sprint-plan
   display_name: NOI Sprint Plan
   type: skill
@@ -2541,6 +3272,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: om-reverse-pricing
   display_name: OM Reverse Pricing
   type: skill
@@ -2571,6 +3310,14 @@ items:
   calculator_file: null
   priority: P0
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: operating-statement-to-database
   display_name: Operating Statement to Database
   type: skill
@@ -2594,16 +3341,24 @@ items:
   last_reviewed_at: null
   notes: ''
   calculator_file: null
-  priority: null
+  priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: opportunity-zone-underwriter
   display_name: Opportunity Zone Underwriter
   type: skill
   status: stable
   source_path: src/skills/opportunity-zone-underwriter/SKILL.md
   domain: 13-tax-entity
-  persona: Evaluates whether investing capital gains into a Qualified Opportunity Zone Fund produces superior after-tax returns
-    vs. a non-OZ alternative. Quantifies deferral, 10-year exclusion, compliance requir
+  persona: 'Evaluates whether investing capital gains into a Qualified Opportunity Fund produces superior after-tax returns
+    vs. a non-OZ alternative. Models BOTH OZ regimes keyed on investment date: the pre-2027 '
   lifecycle_phase: tax-entity
   aliases: []
   intent_triggers:
@@ -2624,7 +3379,19 @@ items:
   notes: ''
   calculator_file: null
   priority: P2
-  version: 0.1.0
+  version: 0.2.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: true
+  human_gate: legal_tax_regulatory_review_required
+  source_ref_policy:
+    emits:
+    - model/*
+    on_unresolvable: refuse
+    forbids_fabricated_model_ref: true
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: partnership-allocation-engine
   display_name: Partnership Allocation Engine
   type: skill
@@ -2658,6 +3425,14 @@ items:
   calculator_file: null
   priority: P2
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: pca-reserve-analyzer
   display_name: PCA Reserve Analyzer
   type: skill
@@ -2682,6 +3457,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: performance-attribution
   display_name: Performance Attribution
   type: skill
@@ -2715,6 +3498,14 @@ items:
   calculator_file: null
   priority: P2
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: plugin-admin
   display_name: Plugin Admin
   type: skill
@@ -2738,6 +3529,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: portfolio-allocator
   display_name: Portfolio Allocator
   type: skill
@@ -2775,6 +3574,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: post-close-onboarding-transition
   display_name: Post-Close Onboarding & Transition
   type: skill
@@ -2805,6 +3612,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: property-management-orchestrator
   display_name: Property Management Orchestrator
   type: skill
@@ -2839,6 +3654,21 @@ items:
   calculator_file: null
   priority: P0
   version: 0.1.0
+  classification: orchestrator
+  runtime_role: workflow_conductor
+  decision_grade: false
+  human_gate: review_recommended
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to:
+  - work-order-triage
+  - vendor-invoice-validator
+  - building-systems-maintenance-manager
+  - tenant-event-planner
+  - variance-narrative-generator
+  - debt-covenant-monitor
+  - property-performance-dashboard
+  composed_from: []
 - id: property-operations-admin-toolkit
   display_name: Property Operations & Admin Toolkit
   type: skill
@@ -2869,6 +3699,14 @@ items:
   calculator_file: null
   priority: P2
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: property-performance-dashboard
   display_name: Property Performance Dashboard
   type: skill
@@ -2902,6 +3740,14 @@ items:
   calculator_file: null
   priority: P0
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: property-tax-appeal-analyzer
   display_name: Property Tax Appeal Analyzer
   type: skill
@@ -2930,6 +3776,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: psa-redline-strategy
   display_name: PSA Redline Strategy
   type: skill
@@ -2959,6 +3813,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: quarterly-investor-update
   display_name: Quarterly Investor Update
   type: skill
@@ -2990,6 +3852,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: refi-decision-analyzer
   display_name: Refinancing Decision Analyzer
   type: skill
@@ -3022,6 +3892,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: reit-profile-builder
   display_name: REIT Profile Builder
   type: skill
@@ -3049,6 +3927,14 @@ items:
   calculator_file: null
   priority: deployed
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: rent-optimization-planner
   display_name: Rent Optimization Planner
   type: skill
@@ -3083,6 +3969,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: rent-roll-analyzer
   display_name: Rent Roll Analyzer
   type: skill
@@ -3113,6 +4007,14 @@ items:
   calculator_file: null
   priority: P0
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: rent-roll-formatter
   display_name: Rent Roll Formatter
   type: skill
@@ -3146,6 +4048,14 @@ items:
   calculator_file: null
   priority: P0
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: rent-roll-t12-tieout
   display_name: Rent Roll to T-12 Tie-Out
   type: skill
@@ -3170,8 +4080,16 @@ items:
   last_reviewed_at: null
   notes: ''
   calculator_file: null
-  priority: null
+  priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: rent-roll-to-database
   display_name: Rent Roll to Database
   type: skill
@@ -3198,6 +4116,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: residential_multifamily
   display_name: Residential Multifamily Operating System
   type: skill
@@ -3225,6 +4151,14 @@ items:
   calculator_file: null
   priority: P1
   version: 1.0.0-rc1
+  classification: workspace
+  runtime_role: workspace_router
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: sec-reg-d-compliance
   display_name: SEC Regulation D Compliance
   type: skill
@@ -3258,6 +4192,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: sensitivity-stress-test
   display_name: Sensitivity & Stress Test Engine
   type: skill
@@ -3289,6 +4231,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: small-operator-pm
   display_name: Small Operator PM
   type: skill
@@ -3321,6 +4271,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: sourcing-outreach-system
   display_name: Sourcing & Outreach System
   type: skill
@@ -3355,6 +4313,17 @@ items:
   calculator_file: null
   priority: P2
   version: 0.1.0
+  classification: orchestrator
+  runtime_role: workflow_conductor
+  decision_grade: false
+  human_gate: review_recommended
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to:
+  - deal-quick-screen
+  - om-reverse-pricing
+  - loi-offer-builder
+  composed_from: []
 - id: space-planning-redesign-orchestrator
   display_name: Space Planning & Redesign Orchestrator
   type: skill
@@ -3388,6 +4357,14 @@ items:
   calculator_file: null
   priority: P2
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: stacking-plan-builder
   display_name: Stacking Plan Builder
   type: skill
@@ -3418,6 +4395,14 @@ items:
   calculator_file: null
   priority: P2
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: submarket-truth-serum
   display_name: Submarket Truth Serum
   type: skill
@@ -3450,6 +4435,14 @@ items:
   calculator_file: null
   priority: P0
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: supply-demand-forecast
   display_name: Supply-Demand Forecast
   type: skill
@@ -3480,6 +4473,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: t12-normalizer
   display_name: T-12 Operating Statement Normalizer
   type: skill
@@ -3511,6 +4512,14 @@ items:
   calculator_file: null
   priority: P0
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: t12-to-database
   display_name: T-12 to Database
   type: skill
@@ -3534,8 +4543,16 @@ items:
   last_reviewed_at: null
   notes: ''
   calculator_file: null
-  priority: null
+  priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: tenant-credit-analyzer
   display_name: Tenant Credit Analyzer
   type: skill
@@ -3567,6 +4584,14 @@ items:
   calculator_file: src/calculators/tenant_credit_scorer.py
   priority: P1
   version: 0.2.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: tenant-delinquency-workout
   display_name: Tenant Delinquency Workout
   type: skill
@@ -3599,6 +4624,14 @@ items:
   calculator_file: null
   priority: P0
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: tenant-event-planner
   display_name: Tenant Event Planner
   type: skill
@@ -3629,6 +4662,14 @@ items:
   calculator_file: null
   priority: P2
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: tenant-retention-engine
   display_name: Tenant Retention Engine
   type: skill
@@ -3662,6 +4703,14 @@ items:
   calculator_file: null
   priority: P0
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: term-sheet-builder
   display_name: Term Sheet Builder
   type: skill
@@ -3694,6 +4743,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.2.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: title-commitment-reviewer
   display_name: Title Commitment Reviewer
   type: skill
@@ -3725,6 +4782,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.2.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: transfer-document-preparer
   display_name: Transfer Document Preparer
   type: skill
@@ -3756,6 +4821,14 @@ items:
   calculator_file: src/calculators/transfer_tax.py
   priority: P1
   version: 0.2.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: variance-narrative-generator
   display_name: Variance Narrative Generator
   type: skill
@@ -3788,6 +4861,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: vendor-invoice-validator
   display_name: Vendor Invoice Validator
   type: skill
@@ -3817,6 +4898,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: warehouse-to-exhibit-mapper
   display_name: Warehouse-to-Exhibit Mapper
   type: skill
@@ -3848,6 +4937,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: work-order-triage
   display_name: Work Order Triage and Priority Scorer
   type: skill
@@ -3880,6 +4977,14 @@ items:
   calculator_file: null
   priority: P1
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: workout-playbook
   display_name: Workout Playbook
   type: skill
@@ -3913,6 +5018,14 @@ items:
   calculator_file: null
   priority: P2
   version: 0.1.0
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: acquisitions-analyst
   display_name: Acquisitions Analyst
   type: agent
@@ -3936,6 +5049,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: aggressive-gp
   display_name: Aggressive GP
   type: agent
@@ -3959,6 +5080,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: allocation-committee-member
   display_name: Allocation Committee Member
   type: agent
@@ -3981,6 +5110,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: asset-manager-lead
   display_name: Asset Manager Lead Agent
   type: agent
@@ -4003,6 +5140,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: asset-manager
   display_name: Asset Manager
   type: agent
@@ -4026,6 +5171,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: buyer-family-office
   display_name: Family Office Investor
   type: agent
@@ -4049,6 +5202,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: buyer-pension-fund
   display_name: Pension Fund Allocator
   type: agent
@@ -4072,6 +5233,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: buyer-private-equity
   display_name: Private Equity Fund
   type: agent
@@ -4095,6 +5264,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: buyer-reit
   display_name: Public REIT Acquisitions
   type: agent
@@ -4118,6 +5295,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: buyer-syndicator
   display_name: Multifamily Syndicator
   type: agent
@@ -4141,6 +5326,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: capital-markets-specialist
   display_name: Capital Markets Specialist
   type: agent
@@ -4164,6 +5357,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: chief-investment-officer
   display_name: Chief Investment Officer Agent
   type: agent
@@ -4186,6 +5387,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: conservative-lender
   display_name: Conservative Lender
   type: agent
@@ -4209,6 +5418,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: cre-veteran
   display_name: CRE Veteran
   type: agent
@@ -4232,6 +5449,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: deal-team-lead
   display_name: Deal Team Lead
   type: agent
@@ -4255,6 +5480,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: development-manager
   display_name: Development Manager
   type: agent
@@ -4278,6 +5511,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: disposition-manager
   display_name: Disposition Manager
   type: agent
@@ -4300,6 +5541,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: disposition-strategist
   display_name: Disposition Strategist
   type: agent
@@ -4323,6 +5572,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: distressed-specialist
   display_name: Distressed Specialist
   type: agent
@@ -4346,6 +5603,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: fund-analyst
   display_name: Fund Analyst
   type: agent
@@ -4368,6 +5633,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: fund-controller
   display_name: Fund Controller
   type: agent
@@ -4390,6 +5663,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: ic-challenger
   display_name: IC Challenger
   type: agent
@@ -4413,6 +5694,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: investor-relations-associate
   display_name: Investor Relations Associate
   type: agent
@@ -4435,6 +5724,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: investor-relations-director
   display_name: Investor Relations Director
   type: agent
@@ -4458,6 +5755,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: leasing-director
   display_name: Leasing Director
   type: agent
@@ -4481,6 +5786,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: leasing-manager
   display_name: Leasing Manager Agent
   type: agent
@@ -4503,6 +5816,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: lens-contrarian
   display_name: Contrarian Analyst
   type: agent
@@ -4526,6 +5847,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: lens-esg-impact
   display_name: ESG and Impact Specialist
   type: agent
@@ -4549,6 +5878,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: lens-qualitative
   display_name: Qualitative Research Analyst
   type: agent
@@ -4572,6 +5909,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: lens-quantitative
   display_name: Quantitative Analyst
   type: agent
@@ -4595,6 +5940,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: lens-risk-manager
   display_name: Chief Risk Officer
   type: agent
@@ -4618,6 +5971,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: lp-advisor
   display_name: LP Advisor
   type: agent
@@ -4640,6 +6001,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: market-research-analyst
   display_name: Market Research Analyst Agent
   type: agent
@@ -4662,6 +6031,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: perspective-appraiser
   display_name: 'Perspective: Commercial Appraiser -- USPAP-Compliant Valuation Framework'
   type: agent
@@ -4685,6 +6062,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: perspective-construction
   display_name: 'Perspective: Construction Manager -- Buildability, Cost, and Schedule Framework'
   type: agent
@@ -4708,6 +6093,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: perspective-environmental
   display_name: 'Perspective: Environmental Consultant -- Contamination, Compliance, and Climate Risk Framework'
   type: agent
@@ -4731,6 +6124,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: perspective-insurance
   display_name: 'Perspective: Insurance Underwriter -- Property Risk Classification and Pricing Framework'
   type: agent
@@ -4754,6 +6155,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: perspective-legal
   display_name: 'Perspective: Real Estate Legal -- Contract Risk, Liability, and Entity Structure Framework'
   type: agent
@@ -4777,6 +6186,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: perspective-lender
   display_name: 'Perspective: Senior Lender -- Credit Underwriting and Collateral Protection Framework'
   type: agent
@@ -4800,6 +6217,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: perspective-municipality
   display_name: 'Perspective: Municipality -- Planning, Zoning, and Community Impact Framework'
   type: agent
@@ -4823,6 +6248,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: perspective-tenant
   display_name: 'Perspective: Corporate Tenant -- Total Occupancy Cost and Space Decision Framework'
   type: agent
@@ -4846,6 +6279,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: portfolio-manager
   display_name: Portfolio Manager Agent
   type: agent
@@ -4868,6 +6309,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: portfolio-strategist
   display_name: Portfolio Strategist Agent
   type: agent
@@ -4890,6 +6339,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: property-manager
   display_name: Property Manager
   type: agent
@@ -4913,6 +6370,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: risk-officer
   display_name: Risk Officer Agent
   type: agent
@@ -4935,6 +6400,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: skeptical-lp
   display_name: Skeptical LP
   type: agent
@@ -4958,6 +6431,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: submarket-specialist
   display_name: Submarket Specialist Agent
   type: agent
@@ -4980,6 +6461,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: titan-barrack
   display_name: 'Titan: Tom Barrack -- Global Macro, Cycle Timing, and Relationship Framework'
   type: agent
@@ -5003,6 +6492,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: titan-gray
   display_name: 'Titan: Jonathan Gray -- Institutional Scale and Thematic Conviction Framework'
   type: agent
@@ -5026,6 +6523,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: titan-linneman
   display_name: 'Titan: Peter Linneman -- First-Principles Quantitative Framework'
   type: agent
@@ -5049,6 +6554,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: titan-ross
   display_name: 'Titan: Stephen Ross -- Development Vision and Placemaking Framework'
   type: agent
@@ -5072,6 +6585,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: titan-sternlicht
   display_name: 'Titan: Barry Sternlicht -- Brand, Design, and Experience Framework'
   type: agent
@@ -5095,6 +6616,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: titan-zell
   display_name: 'Titan: Sam Zell -- Contrarian Value Framework'
   type: agent
@@ -5118,6 +6647,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: value-add-operator
   display_name: Value-Add Operator
   type: agent
@@ -5141,6 +6678,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: agent
+  runtime_role: agent_persona
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: brand-config
   display_name: Brand Guidelines Configurator
   type: command
@@ -5164,6 +6709,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: cre-agents
   display_name: CRE Expert Agents
   type: command
@@ -5187,6 +6740,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: cre-route
   display_name: CRE Skill Router
   type: command
@@ -5210,6 +6771,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: cre-workflows
   display_name: CRE Workflow Chains
   type: command
@@ -5233,6 +6802,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: customization-analytics
   display_name: Customization Analytics
   type: command
@@ -5256,6 +6833,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: customize-skill
   display_name: Customize a CRE Skill
   type: command
@@ -5278,6 +6863,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: feedback-summary
   display_name: CRE Skill Feedback Summary
   type: command
@@ -5300,6 +6893,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: orchestrate
   display_name: CRE Orchestrator
   type: command
@@ -5323,6 +6924,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: report-problem
   display_name: Report a Problem
   type: command
@@ -5345,6 +6954,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: send-feedback
   display_name: Share Feedback About CRE Skills
   type: command
@@ -5367,6 +6984,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: usage-stats
   display_name: CRE Skill Usage Stats
   type: command
@@ -5389,6 +7014,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: normal
+  runtime_role: callable_tool
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: construction_estimator
   display_name: Construction Estimator
   type: calculator
@@ -5411,6 +7044,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: calculator
+  runtime_role: deterministic_calculator
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: covenant_tester
   display_name: Covenant Tester
   type: calculator
@@ -5433,6 +7074,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: calculator
+  runtime_role: deterministic_calculator
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: debt_sizing
   display_name: Debt Sizing
   type: calculator
@@ -5455,6 +7104,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: calculator
+  runtime_role: deterministic_calculator
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: emit_load_plan
   display_name: Emit Load Plan
   type: calculator
@@ -5477,6 +7134,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: calculator
+  runtime_role: deterministic_calculator
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: emit_sql_ddl
   display_name: Emit Sql Ddl
   type: calculator
@@ -5499,6 +7164,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: calculator
+  runtime_role: deterministic_calculator
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: fund_fee_modeler
   display_name: Fund Fee Modeler
   type: calculator
@@ -5521,6 +7194,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: calculator
+  runtime_role: deterministic_calculator
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: grade_ingestion
   display_name: Grade Ingestion
   type: calculator
@@ -5543,6 +7224,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: calculator
+  runtime_role: deterministic_calculator
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: infer_schema
   display_name: Infer Schema
   type: calculator
@@ -5565,6 +7254,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: calculator
+  runtime_role: deterministic_calculator
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: map_charge_codes
   display_name: Map Charge Codes
   type: calculator
@@ -5587,6 +7284,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: calculator
+  runtime_role: deterministic_calculator
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: map_to_target_model
   display_name: Map To Target Model
   type: calculator
@@ -5609,6 +7314,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: calculator
+  runtime_role: deterministic_calculator
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: monte_carlo_simulator
   display_name: Monte Carlo Simulator
   type: calculator
@@ -5631,6 +7344,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: calculator
+  runtime_role: deterministic_calculator
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: normalize_tokens
   display_name: Normalize Tokens
   type: calculator
@@ -5653,6 +7374,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: calculator
+  runtime_role: deterministic_calculator
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: npv_trade_out
   display_name: Npv Trade Out
   type: calculator
@@ -5675,6 +7404,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: calculator
+  runtime_role: deterministic_calculator
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: option_valuation
   display_name: Option Valuation
   type: calculator
@@ -5697,6 +7434,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: calculator
+  runtime_role: deterministic_calculator
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: proration_calculator
   display_name: Proration Calculator
   type: calculator
@@ -5719,6 +7464,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: calculator
+  runtime_role: deterministic_calculator
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: quick_screen
   display_name: Quick Screen
   type: calculator
@@ -5741,6 +7494,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: calculator
+  runtime_role: deterministic_calculator
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: reconcile_rent_roll_t12
   display_name: Reconcile Rent Roll T12
   type: calculator
@@ -5763,6 +7524,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: calculator
+  runtime_role: deterministic_calculator
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: tenant_credit_scorer
   display_name: Tenant Credit Scorer
   type: calculator
@@ -5785,6 +7554,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: calculator
+  runtime_role: deterministic_calculator
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: transfer_tax
   display_name: Transfer Tax
   type: calculator
@@ -5807,6 +7584,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: calculator
+  runtime_role: deterministic_calculator
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: validate_payload
   display_name: Validate Payload
   type: calculator
@@ -5829,13 +7614,21 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: calculator
+  runtime_role: deterministic_calculator
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: waterfall_calculator
   display_name: Waterfall Calculator
   type: calculator
   status: stable
   source_path: src/calculators/waterfall_calculator.py
   domain: cross-cutting
-  persona: JV Waterfall Calculator
+  persona: JV Waterfall Calculator (screening-grade)
   lifecycle_phase: cross-cutting
   aliases: []
   intent_triggers: []
@@ -5851,6 +7644,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: calculator
+  runtime_role: deterministic_calculator
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: acquisition
   display_name: Acquisition
   type: orchestrator
@@ -5874,6 +7675,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: orchestrator
+  runtime_role: workflow_conductor
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: capital-stack
   display_name: Capital Stack
   type: orchestrator
@@ -5897,6 +7706,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: orchestrator
+  runtime_role: workflow_conductor
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: development
   display_name: Development
   type: orchestrator
@@ -5920,6 +7737,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: orchestrator
+  runtime_role: workflow_conductor
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: disposition
   display_name: Disposition
   type: orchestrator
@@ -5943,6 +7768,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: orchestrator
+  runtime_role: workflow_conductor
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: fund-management
   display_name: Fund Management
   type: orchestrator
@@ -5966,6 +7799,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: orchestrator
+  runtime_role: workflow_conductor
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: hold-period
   display_name: Hold Period
   type: orchestrator
@@ -5989,6 +7830,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: orchestrator
+  runtime_role: workflow_conductor
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: investment-strategy
   display_name: Investment Strategy
   type: orchestrator
@@ -6012,6 +7861,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: orchestrator
+  runtime_role: workflow_conductor
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: lp-intelligence
   display_name: Lp Intelligence
   type: orchestrator
@@ -6035,6 +7892,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: orchestrator
+  runtime_role: workflow_conductor
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: portfolio-management
   display_name: Portfolio Management
   type: orchestrator
@@ -6058,6 +7923,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: orchestrator
+  runtime_role: workflow_conductor
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: research-intelligence
   display_name: Research Intelligence
   type: orchestrator
@@ -6081,6 +7954,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: orchestrator
+  runtime_role: workflow_conductor
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: acquisition-pipeline
   display_name: Acquisition Pipeline
   type: workflow
@@ -6115,6 +7996,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: normal
+  runtime_role: reference_only
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: capital-stack
   display_name: Capital Stack
   type: workflow
@@ -6143,6 +8032,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: normal
+  runtime_role: reference_only
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: hold-period
   display_name: Hold Period
   type: workflow
@@ -6170,6 +8067,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: normal
+  runtime_role: reference_only
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: disposition
   display_name: Disposition
   type: workflow
@@ -6197,6 +8102,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: normal
+  runtime_role: reference_only
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: development
   display_name: Development
   type: workflow
@@ -6227,6 +8140,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: normal
+  runtime_role: reference_only
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 - id: fund-management
   display_name: Fund Management
   type: workflow
@@ -6256,6 +8177,14 @@ items:
   calculator_file: null
   priority: null
   version: null
+  classification: normal
+  runtime_role: reference_only
+  decision_grade: false
+  human_gate: none
+  source_ref_policy: null
+  amos_surface: []
+  decomposes_to: []
+  composed_from: []
 mcp_tools:
 - name: cre_route
   description: Route a CRE query to the right specialist skill. Returns the best match with confidence score and alternatives.
