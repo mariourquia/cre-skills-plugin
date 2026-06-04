@@ -9,6 +9,8 @@ description: "Analyze General Partner performance against vintage peer benchmark
 targets:
   - claude_code
 stale_data: "Vintage benchmark data reflects NCREIF, Cambridge Associates, and Preqin published benchmarks through Q4 2024. Fee market data reflects Preqin and Hodes Weill surveys through mid-2025. Return decomposition methodology follows CFA Institute GIPS standards. Historical default and recovery assumptions are based on CRE fund data through 2024 vintages."
+pii_policy: sensitive_financial
+
 ---
 
 # GP Performance Evaluator

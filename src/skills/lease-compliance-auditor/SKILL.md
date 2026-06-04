@@ -8,6 +8,8 @@ description: "Unified lease administration compliance audit covering CAM reconci
 targets:
   - claude_code
 stale_data: "ICSC/ULI retail sales benchmarks, insurance coverage minimums, and CAM allocation methodologies reflect training data cutoff. State-specific landlord-tenant statutes require verification for current requirements."
+pii_policy: tenant_or_personal
+
 ---
 
 # Lease Compliance Auditor

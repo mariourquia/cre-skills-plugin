@@ -9,6 +9,8 @@ description: "Designs optimal lease option packages (renewal, expansion, contrac
 targets:
   - claude_code
 stale_data: "Cap rate impact benchmarks for renewal options and ROFO/ROFR premiums reflect mid-2025 institutional data. Termination fee methodologies and market benchmarks by tier vary materially -- verify against current local market comps and lender covenants before finalizing term sheets."
+pii_policy: tenant_or_personal
+
 ---
 
 # Lease Option Structurer

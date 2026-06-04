@@ -15,6 +15,8 @@ decomposes_to:
 targets:
   - claude_code
 stale_data: "Conversion benchmarks (response rates, cost per deal) reflect mid-2025 industry averages for small-team CRE operators. Subscription costs for CoStar, Reonomy, and PropStream may have changed. Verify current pricing before budgeting."
+pii_policy: business_contact
+
 ---
 
 # Sourcing & Outreach System

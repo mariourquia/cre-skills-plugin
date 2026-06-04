@@ -8,6 +8,8 @@ description: "End-to-end fund formation toolkit covering entity structuring (syn
 targets:
   - claude_code
 stale_data: "Reg D requirements, UBTI/UDFI thresholds, state blue sky filing requirements, and fund formation cost estimates reflect mid-2025 legal and regulatory environment. All outputs require securities counsel review before use."
+pii_policy: sensitive_financial
+
 ---
 
 # Fund Formation Toolkit

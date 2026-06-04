@@ -7,6 +7,8 @@ category: reit-cre
 description: "Plans, budgets, and executes tenant appreciation events, seasonal programming, and community engagement for CRE properties. Supports API-driven vendor booking when MCP integrations are available. Triggers: tenant event, appreciation event, holiday party, tenant engagement, community event, property event planning, seasonal programming."
 targets:
   - claude_code
+pii_policy: tenant_or_personal
+
 ---
 
 # Tenant Event Planner

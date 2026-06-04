@@ -1,6 +1,6 @@
 # Data Grades — Canonical Taxonomy and Crosswalk
 
-> Status: released (v5.1.0)
+> Status: released (v5.2.0)
 > Owner: Mario Urquia
 > Last reviewed: 2026-06-04
 > Source-of-truth code this doc describes:
@@ -9,6 +9,7 @@
 > - `src/calculators/ingest/provenance.py` (the ingestion `classification` enum)
 > - `docs/connectors/CAPABILITY-MATRIX.md` (the connector `source_class` vocabulary)
 > - `src/skills/residential_multifamily/reference/connectors/_schema/source_class.yaml` (canonical connector `source_class` enum — schema-enforced in v5.1.0 via `entity_contract.schema.yaml` + `tests/test_connector_source_class.py`)
+> - `scripts/governance-scan.py` (the corpus-wide **static** governance scanner shipped in v5.2.0 — validates these grade declarations over frontmatter + catalog/manifest, not at runtime)
 > - `CONTRIBUTING.md` (the v5 skill standard — `## Refusal Behavior` / `## Confidence and Provenance`)
 
 This is the **single canonical data-grade ladder** for the plugin. Before v5 the
@@ -41,13 +42,16 @@ on?"** verdict.
 | **decision-grade** | Verdict-first, source-class-tagged, refusal-on-missing-input, period-sealed *final* output | **enforced today only in** `residential_multifamily` final-marked workflows; elsewhere it is the *target contract* (the named decision-grade slugs + the finance placeholder guard) | executive output contract; no preview banner once `stable` | **Yes, within `residential_multifamily`** after operator overlay + shakedown. Elsewhere: only when every load-bearing cell is `overlay`/`production`-class and no `placeholder`/`$X` remains. |
 | **advisory** | Everything else: methodology output an operator must validate; any `beta_rc` / `experimental` skill | all other top-level skills; any preview-status output | `PREVIEW / STAGING` stamp; advisory; "not legal/tax advice / not an appraisal" where applicable | **No** — screening / advisory only; the operator bears liability. |
 
-**Honest-scope note (v5.1.0):** *decision-grade* enforcement (source-class
-tagging, refusal-on-missing-input, period-seal, the placeholder scanner) is fully
-implemented inside the `residential_multifamily` subsystem. Across the rest of the
-corpus, v5.1.0 ships the `final_marked` selector plus a **targeted** finance
-placeholder guard on a named allowlist (see §4); a fully-generalized corpus-wide
-runtime data scanner is a **v5.1** item. No skill outside RMF should imply that
-decision-grade enforcement is universal.
+**Honest-scope note (v5.2.0):** *decision-grade* **runtime** enforcement
+(source-class tagging, refusal-on-missing-input, period-seal, the placeholder
+scanner) is fully implemented inside the `residential_multifamily` subsystem only.
+Across the rest of the corpus, the runtime leg is the `final_marked` selector plus
+a **targeted** finance placeholder guard on a named allowlist (see §4). v5.2.0
+shipped the corpus-wide **static** governance scanner (`scripts/governance-scan.py`)
+that validates these grade *declarations* over frontmatter + the catalog/manifest;
+a fully-generalized corpus-wide **runtime** data scanner (every cell checked at emit
+time) **remains deferred (v5.x)**. No skill outside RMF should imply that
+decision-grade runtime enforcement is universal.
 
 ---
 
@@ -89,11 +93,13 @@ grade — **conditionally** trustworthy — and it carries a confidence downgrad
   `calculated` (derived from cited facts), `modeled-assumption` (assumed, not
   observed), `requires-review` (flagged for a human). Every normalized row carries
   one, alongside the 8-column provenance bundle and a cell-level `source_ref`.
-- **Connector `source_class`** (v5.1) — `connector_live`, `document_extracted`,
+- **Connector `source_class`** — `connector_live`, `document_extracted`,
   `operator_supplied`, `connector_sample`, `reference_illustrative`,
-  `modeled_assumption`. This vocabulary is **specified** in the v5 connector
-  analysis and the capability matrix; the connector *runtime* that emits it is a
-  v5.1 deliverable. No live adapter emits `connector_live` today.
+  `modeled_assumption`. This vocabulary is **schema-enforced** as of v5.1.0
+  (`_schema/source_class.yaml` + `entity_contract.schema.yaml` +
+  `tests/test_connector_source_class.py`); the connector *runtime* that **emits**
+  it and refuses past `max_staleness` at consume time **remains deferred (v5.x)**.
+  No live adapter emits `connector_live` today.
 
 ---
 
@@ -133,9 +139,11 @@ Equivalently, in the deployed vocabularies:
 
 This rule is **enforced at runtime today only inside `residential_multifamily`**
 (the executive output contract + `fallback_resolver.py` + the period-seal gate).
-Outside RMF, v5.1.0 enforces the *placeholder* leg of this rule on the named
+Outside RMF, the *placeholder* leg of this rule is enforced on the named
 decision-grade slugs via the finance placeholder guard (§4); the remaining legs
-are the v5.1 generalized scanner.
+await the deferred (v5.x) generalized **runtime** scanner. v5.2.0's corpus-wide
+`scripts/governance-scan.py` checks the grade *declarations* statically, not the
+emitted output.
 
 ---
 
@@ -163,10 +171,13 @@ The valuation / comp skills (`comp-snapshot`, `om-reverse-pricing`,
 appraisal"** stamp in `## Confidence and Provenance` (or body), per the 2026 case
 law distinguishing AI valuation estimates from professional appraisals.
 
-The fully-generalized, corpus-wide runtime data scanner (every cell of every
-skill checked at emit time) remains a **v5.1** item. v5.1.0 ships RMF's deployed
-runtime enforcement plus this named-allowlist discipline guard, and is honest that
-the two together are not yet universal enforcement.
+The fully-generalized, corpus-wide **runtime** data scanner (every cell of every
+skill checked at emit time) **remains deferred (v5.x)**. v5.2.0 shipped the
+corpus-wide **static** governance scanner (`scripts/governance-scan.py`, which
+validates grade *declarations* over frontmatter + the catalog/manifest); the
+runtime legs are still RMF's deployed enforcement plus this named-allowlist
+discipline guard, and this doc is honest that the static scanner plus those two
+are not yet universal **runtime** enforcement.
 
 ---
 

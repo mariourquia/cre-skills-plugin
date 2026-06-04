@@ -64,7 +64,13 @@ SAMPLE_ROOT_CONTRACT_KEYS = (
 )
 SAMPLE_AS_OF = "2026-06-03T00:00:00Z"
 
-MANIFEST_VERSION = "1.0"
+# 1.1 (v5.2.0): produces_artifact_kind gains a plugin-namespaced enum + real
+# values; pii_policy refined from the never-populated posture enum to a
+# sensitivity ladder {none, business_contact, tenant_or_personal,
+# sensitive_financial}; workspace_scope widened; outputs[] backfilled. All
+# additive in practice (no previously emitted value changes meaning), so a minor
+# bump — but consumers can detect the field-set refinement.
+MANIFEST_VERSION = "1.1"
 REPO_SLUG = "mariourquia/cre-skills-plugin"
 
 # Root-level allowed sourceRef namespaces. A skill's source_ref_policy.emits

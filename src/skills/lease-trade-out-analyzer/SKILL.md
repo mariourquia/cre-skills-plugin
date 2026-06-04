@@ -8,6 +8,8 @@ subcategory: leasing
 description: "Analyzes whether to renew an existing tenant or trade out for a new one with full financial comparison. Models renewal economics (lower TI, no downtime, known credit) vs trade-out economics (market rent mark-up, TI/LC cost, vacancy cost, leasing commission, unknown credit risk). Produces NPV comparison with breakeven analysis."
 targets: [claude_code]
 stale_data: "Market TI benchmarks, LC rates, and vacancy duration estimates reflect mid-2025 market norms. Submarket absorption data must be user-supplied. Cap rate assumptions for sensitivity analysis are estimates -- use current broker opinion or recent comps."
+pii_policy: tenant_or_personal
+
 ---
 
 # Lease Trade-Out Analyzer

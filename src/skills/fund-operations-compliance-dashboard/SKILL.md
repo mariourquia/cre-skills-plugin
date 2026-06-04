@@ -8,6 +8,8 @@ description: "Institutional fund management operations: regulatory compliance mo
 targets:
   - claude_code
 stale_data: "Regulatory references reflect SEC/FINRA guidance as of mid-2025. Form D filing requirements, Reg D exemptions, and accredited investor thresholds are current as of training data cutoff. AML/KYC requirements follow FinCEN guidance current at cutoff. Verify all regulatory deadlines and thresholds with fund counsel before reliance."
+pii_policy: sensitive_financial
+
 ---
 
 # Fund Operations Compliance Dashboard

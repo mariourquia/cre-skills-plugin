@@ -126,9 +126,9 @@ Starting in v5.0.0, skills adopt an extended contract that makes refusal, proven
 
 Skills with `category: workspace` (or an explicit `pack_type: router|workspace`) route to other skills and do not produce analytics directly. They are exempt from `## Input Schema`, `## Red Flags`, and `## Chain Notes`, and instead provide routing/process content. At conformance they still declare `stale_data`, `confidence_default`, `refusal_trigger`, and a `## Known Limitations` section.
 
-### Governance scope (honest as of v5.0.0)
+### Governance scope (honest as of v5.2.0)
 
-The decision-grade enforcement machinery (source-class tagging, refusal-on-missing-input, period-seal, the placeholder scanner) is fully implemented inside the `residential_multifamily` subsystem. Across the rest of the corpus, v5.0.0 ships the `final_marked` selector and a finance-critical placeholder guard where reference data exists; the fully-generalized cross-skill data scanner is a v5.1 item. Skills must not imply that decision-grade enforcement is universal. A repo-wide guardrail forbids asserting hallucinated legal/tax/regulatory conclusions as fact; such outputs are labeled advisory and defer to a qualified professional.
+The decision-grade **runtime** enforcement machinery (source-class tagging, refusal-on-missing-input, period-seal, the placeholder scanner) is fully implemented inside the `residential_multifamily` subsystem only. Across the rest of the corpus, the runtime leg is the `final_marked` selector plus a finance-critical placeholder guard where reference data exists. v5.2.0 ships `scripts/governance-scan.py`, a corpus-wide **static** governance scanner that validates governance *declarations* over SKILL.md frontmatter + the generated catalog/manifest (with per-rule severity); the fully-generalized cross-skill **runtime** data scanner (every cell checked at emit time) **remains deferred (v5.x)**. Skills must not imply that decision-grade runtime enforcement is universal. A repo-wide guardrail forbids asserting hallucinated legal/tax/regulatory conclusions as fact; such outputs are labeled advisory and defer to a qualified professional.
 
 ---
 

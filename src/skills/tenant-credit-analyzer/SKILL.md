@@ -9,6 +9,8 @@ description: "Evaluate tenant creditworthiness and concentration risk across ret
 targets:
   - claude_code
 stale_data: "Default probability tables reflect Moody's and S&P cumulative default studies through mid-2025. Recovery rate assumptions are based on CMBS historical data and may vary significantly by market cycle, asset quality, and lease structure. Occupancy cost ratio benchmarks reflect 2023-2025 market conditions -- retail benchmarks in particular are highly market- and format-dependent."
+pii_policy: tenant_or_personal
+
 ---
 
 # Tenant Credit Analyzer

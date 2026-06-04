@@ -22,6 +22,19 @@
     "items": {
       "type": "array",
       "items": { "$ref": "#/$defs/CatalogItem" }
+    },
+    "mcp_tools": {
+      "type": "array",
+      "description": "MCP tool inventory parsed from src/mcp-server.mjs (name + description).",
+      "items": {
+        "type": "object",
+        "required": ["name", "description"],
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
     }
   },
   "$defs": {
@@ -203,6 +216,24 @@
           "items": { "type": "string" },
           "default": [],
           "description": "Inverse pointer: orchestrators/workspaces that use this item. Ids resolve to real catalog items. See §4.5."
+        },
+        "produces_artifact_kind": {
+          "type": ["string", "null"],
+          "enum": ["memo", "model_output", "calculator_result", "diligence_report", "source_map", "tie_out_report", "investor_report", "lender_package", "valuation_support", "checklist", "workflow_plan", "advisory_note", null],
+          "default": null,
+          "description": "v5.2 consumer-contract field. Plugin-namespaced artifact family the item emits. Derived (calculator_file -> calculator_result, orchestrator -> workflow_plan) with SKILL.md frontmatter override. null where not yet declared. Plugin vocabulary, NOT a downstream consumer's internal artifact registry."
+        },
+        "pii_policy": {
+          "type": "string",
+          "enum": ["none", "business_contact", "tenant_or_personal", "sensitive_financial"],
+          "default": "none",
+          "description": "v5.2 consumer-contract field. Maximum PII/confidentiality sensitivity the item is expected to encounter in inputs. CONSERVATIVE default 'none' (explicit-opt-in). PHI is intentionally NOT a value: CRE Skills do not accept PHI. Sensitivity ladder, distinct from the connector data-trust source_class vocabulary."
+        },
+        "workspace_scope": {
+          "type": ["string", "null"],
+          "enum": ["asset", "fund", "portfolio", "deal", "debt", "leasing", "property_management", "investor_relations", "governance", "market", "data_room", "enterprise", null],
+          "default": null,
+          "description": "v5.2 consumer-contract field. CRE workspace the item operates within, for downstream filtering/grouping. Derived from subcategory/keywords with frontmatter override. null where unscoped."
         }
       },
       "additionalProperties": false

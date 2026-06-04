@@ -11,6 +11,8 @@ human_gate: legal_tax_regulatory_review_required
 targets:
   - claude_code
 stale_data: "Naming rights valuation benchmarks, life science TI ranges, and CBRE/JLL market data reflect training data cutoff. Verify current comparable transactions and market conditions."
+pii_policy: tenant_or_personal
+
 ---
 
 # Lease Negotiation Analyzer

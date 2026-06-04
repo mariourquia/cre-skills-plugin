@@ -11,6 +11,8 @@ human_gate: lender_or_investor_review_required
 targets:
   - claude_code
 stale_data: "Fee benchmarks, waterfall norms, and data room platform recommendations reflect mid-2025 institutional standards. Verify current market terms with fund counsel and placement agents."
+pii_policy: sensitive_financial
+
 ---
 
 # Capital Raise Machine

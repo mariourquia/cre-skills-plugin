@@ -8,6 +8,8 @@ description: "Front-of-house leasing operations: inquiry response, tour preparat
 targets:
   - claude_code
 stale_data: "Commission structures and brokerage conventions reflect mid-2025 market norms. Marketing channel costs (CoStar, LoopNet) are estimates that vary by market and subscription tier. Conversion rate benchmarks are industry averages from BOMA/IREM -- actual performance varies significantly by property type, class, and market."
+pii_policy: tenant_or_personal
+
 ---
 
 # Leasing Operations Engine

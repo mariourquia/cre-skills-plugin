@@ -7,6 +7,8 @@ category: reit-cre
 description: "Lease amendment drafting, standard lease template refresh, expansion/contraction option analysis, and build-to-suit proposal evaluation for Leasing and Asset Management."
 targets:
   - claude_code
+pii_policy: tenant_or_personal
+
 ---
 
 # Lease Document Factory

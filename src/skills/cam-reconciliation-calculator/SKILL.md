@@ -8,6 +8,8 @@ description: "Calculates annual CAM reconciliation for multi-tenant commercial p
 targets:
   - claude_code
 stale_data: "Gross-up conventions, admin fee practices, and cap calculation methods reflect standard institutional CRE lease practices. Lease-specific terms always override defaults. CPI rates must be sourced from current BLS data."
+pii_policy: tenant_or_personal
+
 ---
 
 # CAM Reconciliation Calculator

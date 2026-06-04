@@ -7,6 +7,8 @@ category: reit-cre
 description: "Pressure-tests a deal recommendation before it reaches the investment committee. Takes underwriting and stress-test outputs and produces a structured adversarial review: known risks (quantified), known unknowns (diligence gaps), unknown unknowns (regime and tail risks), disconfirming-evidence prompts, what-would-break-the-deal trigger thresholds, and the sharp IC challenge questions with the grounded answers the deal team should prepare. Triggers on 'red team this deal', 'pressure-test the recommendation', 'what would the IC ask', 'play devil's advocate', or as the adversarial gate between underwriting and the IC memo."
 targets:
   - claude_code
+produces_artifact_kind: advisory_note
+
 ---
 
 # IC Red Team Challenger

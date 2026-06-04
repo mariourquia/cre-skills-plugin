@@ -8,6 +8,8 @@ description: "Generates structured CRE market research memos covering MSA, subma
 targets:
   - claude_code
 stale_data: "Market data is inherently time-sensitive. Employment figures, rent surveys, transaction volumes, and cap rates cited here reflect the most recent available data as of the analysis date. Always cross-reference CoStar, CBRE-EA, Green Street, or other institutional data sources for current figures before using in IC memos or investment decisions. Construction pipeline data can shift quarterly as permits are filed and projects break ground or stall."
+produces_artifact_kind: memo
+
 ---
 
 # Market Memo Generator

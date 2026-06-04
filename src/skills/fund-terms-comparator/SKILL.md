@@ -9,6 +9,8 @@ description: "Compare fund terms against market norms and produce a terms compar
 targets:
   - claude_code
 stale_data: "Market term benchmarks reflect Preqin, Hodes Weill, and ILPA fee surveys through mid-2025. Fee market data is segmented by strategy (core through opportunistic), fund size (<$500M, $500M-$2B, >$2B), and vintage year. Market norms shift over time -- in LP-favorable capital markets, terms tighten; in GP-favorable markets, terms loosen. The skill's benchmarks represent a mid-cycle equilibrium and should be adjusted for current capital market conditions."
+pii_policy: sensitive_financial
+
 ---
 
 # Fund Terms Comparator

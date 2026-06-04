@@ -8,6 +8,15 @@ description: "Thin demo conductor that sequences the reusable CRE acquisition sk
 classification: orchestrator
 runtime_role: workflow_conductor
 final_marked: true
+v5_contract: true
+confidence_default: estimated
+stale_data: "Deal-room artifacts (rent roll, T-12), debt quotes, and market comps age; a rent roll or T-12 dated more than ~90 days before the IC date is flagged at intake. The conductor carries each upstream as-of date forward rather than re-deriving or re-freshening it."
+produces_artifact_kind: workflow_plan
+outputs:
+  - IC decision package
+  - Source-lineage table
+  - Stage and gate status map
+workspace_scope: deal
 human_gate: investment_committee_approval_required
 source_ref_policy:
   emits:
@@ -191,6 +200,12 @@ If any required upstream output is missing, do not synthesize the assembled pack
 - **Downside DSCR below 1.0x not surfaced at submission.** If the stress test shows the property cannot service debt in the downside case, that figure must appear in the Deal Snapshot, not only deep in the sensitivity output.
 - **Orchestrator presenting itself as the decision-maker.** This is a demo conductor. It proposes a motion; the human IC decides. Any output phrased as an autonomous approval is wrong.
 - **Stale data-room artifact.** A rent roll or T-12 dated more than ~90 days before the IC date is a recency red flag; the intake manifest must note the as-of date so reviewers can judge it.
+
+## Known Limitations
+
+- **Demo conductor, not a runtime.** This skill simulates the acquisition-to-IC motion in one session: it sequences specialist skills and enforces named gates, but it does not persist deal state, run agents autonomously, or replace any specialist skill. It proposes a motion; the human IC decides.
+- **No number is re-derived here.** Every figure comes from a delegated skill with its own source-ref policy. The conductor hands off and assembles; a stage missing its input pauses the chain rather than advancing on a fabricated placeholder.
+- **Gates are declared; the human enforces them.** Gate 2 (assumption lock) and Gate 3 (source verification) are non-skippable in the documented flow, but their enforcement is the reviewer's responsibility, not an automated runtime's.
 
 ## Chain Notes
 

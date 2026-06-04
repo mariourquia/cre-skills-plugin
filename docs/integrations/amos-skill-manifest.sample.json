@@ -1,6 +1,6 @@
 {
-  "manifest_version": "1.0",
-  "plugin_version": "5.1.0",
+  "manifest_version": "1.1",
+  "plugin_version": "5.2.0",
   "generated_at": "2026-06-03T00:00:00Z",
   "repo": "mariourquia/cre-skills-plugin",
   "ref_namespaces": [
@@ -73,13 +73,17 @@
         "OM",
         "T-12"
       ],
-      "outputs": [],
+      "outputs": [
+        "IC decision package",
+        "Source-lineage table",
+        "Stage and gate status map"
+      ],
       "chains_to": [],
       "chains_from": [],
       "calculator_file": null,
-      "produces_artifact_kind": null,
+      "produces_artifact_kind": "workflow_plan",
       "pii_policy": "none",
-      "workspace_scope": null,
+      "workspace_scope": "deal",
       "demo_status": "preprocessed-fixture",
       "amos_signoff": "external-attestation",
       "amos_signoff_chain": [
@@ -125,13 +129,15 @@
         "Rent Roll",
         "T-12"
       ],
-      "outputs": [],
+      "outputs": [
+        "Workflow plan"
+      ],
       "chains_to": [],
       "chains_from": [],
       "calculator_file": null,
-      "produces_artifact_kind": null,
+      "produces_artifact_kind": "workflow_plan",
       "pii_policy": "none",
-      "workspace_scope": null,
+      "workspace_scope": "data_room",
       "demo_status": "preprocessed-fixture",
       "amos_signoff": "analyst-review",
       "amos_signoff_chain": [
@@ -170,7 +176,9 @@
       "input_artifacts": [
         "OM"
       ],
-      "outputs": [],
+      "outputs": [
+        "Workflow plan"
+      ],
       "chains_to": [
         "warehouse-to-exhibit-mapper"
       ],
@@ -181,9 +189,9 @@
         "t12-normalizer"
       ],
       "calculator_file": null,
-      "produces_artifact_kind": null,
+      "produces_artifact_kind": "workflow_plan",
       "pii_policy": "none",
-      "workspace_scope": null,
+      "workspace_scope": "data_room",
       "demo_status": "preprocessed-fixture",
       "amos_signoff": "analyst-review",
       "amos_signoff_chain": [
@@ -217,7 +225,9 @@
       "input_artifacts": [
         "OM"
       ],
-      "outputs": [],
+      "outputs": [
+        "Workflow plan"
+      ],
       "chains_to": [
         "noi-sprint-plan",
         "property-performance-dashboard",
@@ -230,9 +240,9 @@
         "construction-project-command-center"
       ],
       "calculator_file": null,
-      "produces_artifact_kind": null,
+      "produces_artifact_kind": "workflow_plan",
       "pii_policy": "none",
-      "workspace_scope": null,
+      "workspace_scope": "property_management",
       "demo_status": "preprocessed-fixture",
       "amos_signoff": "analyst-review",
       "amos_signoff_chain": [
@@ -304,8 +314,8 @@
       ],
       "calculator_file": null,
       "produces_artifact_kind": null,
-      "pii_policy": "none",
-      "workspace_scope": null,
+      "pii_policy": "tenant_or_personal",
+      "workspace_scope": "leasing",
       "demo_status": "preprocessed-fixture",
       "amos_signoff": "external-attestation",
       "amos_signoff_chain": [
@@ -336,7 +346,9 @@
       ],
       "composed_from": [],
       "input_artifacts": [],
-      "outputs": [],
+      "outputs": [
+        "Workflow plan"
+      ],
       "chains_to": [
         "deal-quick-screen",
         "deal-underwriting-assistant",
@@ -349,9 +361,9 @@
         "capital-raise-machine"
       ],
       "calculator_file": null,
-      "produces_artifact_kind": null,
-      "pii_policy": "none",
-      "workspace_scope": null,
+      "produces_artifact_kind": "workflow_plan",
+      "pii_policy": "business_contact",
+      "workspace_scope": "deal",
       "demo_status": "preprocessed-fixture",
       "amos_signoff": "analyst-review",
       "amos_signoff_chain": [
@@ -394,13 +406,18 @@
       "input_artifacts": [
         "OM"
       ],
-      "outputs": [],
+      "outputs": [
+        "LP quarterly report",
+        "Capital-account statements",
+        "Distribution notices",
+        "Performance attribution"
+      ],
       "chains_to": [],
       "chains_from": [],
       "calculator_file": null,
-      "produces_artifact_kind": null,
-      "pii_policy": "none",
-      "workspace_scope": null,
+      "produces_artifact_kind": "investor_report",
+      "pii_policy": "sensitive_financial",
+      "workspace_scope": "investor_relations",
       "demo_status": "preprocessed-fixture",
       "amos_signoff": "am-cfo-signoff",
       "amos_signoff_chain": [
@@ -438,7 +455,12 @@
       "input_artifacts": [
         "OM"
       ],
-      "outputs": [],
+      "outputs": [
+        "One-page executive summary",
+        "Six-section IC memo body",
+        "Sensitivity grids",
+        "Risk register"
+      ],
       "chains_to": [
         "lp-pitch-deck-builder",
         "disposition-strategy-engine"
@@ -456,9 +478,9 @@
         "reit-profile-builder"
       ],
       "calculator_file": null,
-      "produces_artifact_kind": null,
+      "produces_artifact_kind": "memo",
       "pii_policy": "none",
-      "workspace_scope": null,
+      "workspace_scope": "deal",
       "demo_status": "preprocessed-fixture",
       "amos_signoff": "am-cfo-signoff",
       "amos_signoff_chain": [
@@ -496,7 +518,11 @@
       "input_artifacts": [
         "OM"
       ],
-      "outputs": [],
+      "outputs": [
+        "Rent comp set with adjustment grid",
+        "Sales comp set with adjustment grid",
+        "Confidence-scored pricing range"
+      ],
       "chains_to": [
         "acquisition-underwriting-engine",
         "loi-offer-builder",
@@ -508,9 +534,9 @@
         "submarket-truth-serum"
       ],
       "calculator_file": null,
-      "produces_artifact_kind": null,
+      "produces_artifact_kind": "valuation_support",
       "pii_policy": "none",
-      "workspace_scope": null,
+      "workspace_scope": "market",
       "demo_status": "preprocessed-fixture",
       "amos_signoff": "analyst-review",
       "amos_signoff_chain": [
@@ -543,7 +569,11 @@
         "OM",
         "Term Sheet"
       ],
-      "outputs": [],
+      "outputs": [
+        "Distribution waterfall schedule",
+        "Promote and catch-up tiers",
+        "LP/GP split summary"
+      ],
       "chains_to": [
         "acquisition-underwriting-engine",
         "capital-stack-optimizer",
@@ -555,9 +585,9 @@
         "acquisition-underwriting-engine"
       ],
       "calculator_file": "src/calculators/waterfall_calculator.py",
-      "produces_artifact_kind": null,
-      "pii_policy": "none",
-      "workspace_scope": null,
+      "produces_artifact_kind": "calculator_result",
+      "pii_policy": "sensitive_financial",
+      "workspace_scope": "fund",
       "demo_status": "preprocessed-fixture",
       "amos_signoff": "am-cfo-signoff",
       "amos_signoff_chain": [

@@ -9,6 +9,9 @@ description: "Generates individual LP distribution notices with per-investor sha
 targets:
   - claude_code
 stale_data: "Waterfall structures and preferred return conventions reflect mid-2025 market norms for institutional CRE private equity. Tax characterization guidance (return of capital vs. ordinary income vs. capital gain) reflects IRC treatment under current law; consult fund tax counsel before issuing K-1 previews, as depreciation elections and cost segregation studies materially affect characterization. Wire cut-off times reflect Fedwire schedules as of 2025."
+pii_policy: sensitive_financial
+produces_artifact_kind: investor_report
+
 ---
 
 # Distribution Notice Generator

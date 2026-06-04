@@ -19,6 +19,13 @@ amos_surface:
   - market
   - model
 refusal_trigger: "Refuse to present a comp as confirmed when its source is not a user-provided or cited transaction; training-data benchmarks are labeled illustrative, never passed off as a verified comparable, and a comp set with no resolvable source is flagged rather than used as a valuation anchor."
+v5_contract: true
+confidence_default: estimated
+produces_artifact_kind: valuation_support
+outputs:
+  - Rent comp set with adjustment grid
+  - Sales comp set with adjustment grid
+  - Confidence-scored pricing range
 targets:
   - claude_code
 stale_data: "Replacement cost estimates, construction cost indices, and land values reflect mid-2025 market. Cap rate and rent benchmarks are as of training data. User-provided comps and recent transaction data should always override training data."
@@ -249,6 +256,12 @@ See the data-grade ladder in `docs/DATA_GRADES.md` for the `confirmed | estimate
 - Default output fidelity is **estimated**: the concluded rent and pricing range are derived from the supplied comp set and the adjustment grid, not an operator-confirmed transaction.
 - Label every output cell with a confidence grade -- `confirmed` (operator/licensed-comp-sourced), `estimated` (derived/adjusted here), or `illustrative` (sample/demo) -- and a source-class tag per comp: `[operator]` operator-supplied, `[derived]` adjusted here, `[benchmark]` reference comp, `[overlay]` operator's licensed comp overlay, `[placeholder]` sample.
 - **Estimate, not an appraisal (required on every output):** *This comp snapshot is a screening ESTIMATE of market rent and value for deal/diligence support — NOT an appraisal and not an opinion of value by a licensed appraiser, and not a USPAP-compliant deliverable. A qualified appraiser's report is required before the conclusion is relied upon for a transaction, financing, or financial reporting.*
+
+## Known Limitations
+
+- **Screening estimate, not an appraisal.** The concluded rent and pricing range support deal/diligence decisions; a USPAP appraisal is required before reliance (see the stamp above).
+- **Only as good as the comp set.** With no operator- or user-supplied transactions, comps fall back to training-data benchmarks that are labeled `illustrative` and never presented as verified — they are a starting point, not an anchor. `on_unresolvable: cite_best_effort` means an unresolved comp is surfaced and cited as weak, not silently dropped.
+- **Adjustment grid is judgment, not a model of record.** Amenity, location, and condition adjustments are transparent rules-of-thumb; a thin or stale comp set widens the range, which the confidence score reflects rather than hides.
 
 ## Chain Notes
 

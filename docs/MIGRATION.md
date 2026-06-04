@@ -66,17 +66,22 @@ accurate statement.
 - **Action:** to suppress all remote sends entirely, set
   `{"feedback": {"mode": "local_only"}}` in `~/.cre-skills/config.json`.
 
-### 5. Connector `source_class` hardening — framed as v5.1
+### 5. Connector `source_class` hardening — schemas in v5.1.0, runtime deferred
 
 The connector `source_class` provenance field
 (`connector_live | document_extracted | operator_supplied | connector_sample |
 reference_illustrative | modeled_assumption`) and the `max_staleness`
 consume-time refusal are **specified** and crosswalked in
-[DATA_GRADES.md](DATA_GRADES.md) §2, but the connector **runtime** that emits and
-enforces them — together with the four canonical contract schemas (debt / entity /
-valuation / funds) — is a **v5.1** deliverable. **No connector is live in v5.0.0.**
+[DATA_GRADES.md](DATA_GRADES.md) §2. In **v5.0.0** they were a forward-looking
+contract only. **As of v5.1.0** the four canonical contract **schema stubs** (debt /
+entity / valuation / funds) landed and `source_class` became a **schema-enforced**
+enum (`_schema/source_class.yaml` + `entity_contract.schema.yaml` +
+`tests/test_connector_source_class.py`). The connector **runtime** that *emits*
+`source_class` and *refuses* stale records past `max_staleness` at consume time
+**remains deferred (v5.x)**. **No connector is live.**
 
-- **Impact:** none today; this is a forward-looking contract. See
+- **Impact:** none today; the schemas are declared and validated, not enforced by
+  any running connector. See
   [connectors/CAPABILITY-MATRIX.md](connectors/CAPABILITY-MATRIX.md) for the
   honest per-vendor state.
 - **Action:** do not build against a live connector; none exists.

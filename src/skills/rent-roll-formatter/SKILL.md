@@ -7,6 +7,8 @@ category: reit-cre
 description: "Standardizes rent roll data from any source format into a consistent underwriting template, validates data integrity (SF reconciliation, revenue reconciliation, date consistency, rent reasonableness), and calculates derived analytics (WALT, rollover, concentration, mark-to-market)."
 targets:
   - claude_code
+pii_policy: tenant_or_personal
+
 ---
 
 # Rent Roll Formatter

@@ -9,6 +9,8 @@ description: "Tracks LP-by-LP capital raise negotiations with persistent state, 
 targets:
   - claude_code
 stale_data: "Fee benchmarks and market norms reflect mid-2025 institutional fundraising market. Verify current benchmarks with placement agents."
+pii_policy: sensitive_financial
+
 ---
 
 # Fund Raise Negotiation Engine

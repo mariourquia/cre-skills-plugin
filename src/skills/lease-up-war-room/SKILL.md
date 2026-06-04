@@ -8,6 +8,8 @@ description: "Generates a full-stack lease-up operations plan for new developmen
 targets:
   - claude_code
 stale_data: "Industry-standard conversion rate benchmarks and submarket absorption averages reflect training data cutoff. User must provide current local market data for accurate benchmarking."
+pii_policy: tenant_or_personal
+
 ---
 
 # Lease-Up War Room

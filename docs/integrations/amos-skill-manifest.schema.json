@@ -208,7 +208,7 @@
         "outputs": {
           "type": "array",
           "items": { "type": "string" },
-          "description": "Output artifacts. Maps to PluginSkillRef.outputArtifacts. Sparse in v5 (backfill is a v5.1 gap)."
+          "description": "Named CRE output artifacts (symmetric with input_artifacts). Maps to PluginSkillRef.outputArtifacts. v5.2: populated for artifact-producing / consumer-facing skills; [] where the item emits no named artifact."
         },
         "chains_to": {
           "type": "array",
@@ -226,17 +226,18 @@
         },
         "produces_artifact_kind": {
           "type": ["string", "null"],
-          "description": "v5.1 forward-compat. The AMOS artifact family a skill emits (e.g. 'ic-memo', 'valcomm-deck'). Default null in v5.1 (no skill declares it yet). Contract-only; no live coupling."
+          "enum": ["memo", "model_output", "calculator_result", "diligence_report", "source_map", "tie_out_report", "investor_report", "lender_package", "valuation_support", "checklist", "workflow_plan", "advisory_note", null],
+          "description": "v5.2 consumer-contract. PLUGIN-namespaced artifact family the item emits. Derived (calculator_file -> calculator_result, orchestrator -> workflow_plan) with frontmatter override; null where not yet declared. A consumer maps these to its own internal artifact registry via a crosswalk on its side; the plugin does not encode any consumer's registry slugs. Contract-only; no live coupling."
         },
         "pii_policy": {
           "type": "string",
-          "enum": ["none", "aggregate_only", "pseudonymized", "redacted_at_extraction"],
-          "description": "v5.1 forward-compat. PII-handling posture. CONSERVATIVE default 'none' — explicit-opt-in only (a skill that touches no PII must not over-claim aggregate_only)."
+          "enum": ["none", "business_contact", "tenant_or_personal", "sensitive_financial"],
+          "description": "v5.2 consumer-contract (refined from the v5.1 forward-compat posture enum, which was never populated). Maximum PII/confidentiality sensitivity the item expects in inputs: none < business_contact < tenant_or_personal < sensitive_financial. CONSERVATIVE default 'none' (explicit-opt-in). PHI is intentionally absent — CRE Skills do not accept PHI. Distinct axis from the connector data-trust source_class vocabulary."
         },
         "workspace_scope": {
           "type": ["string", "null"],
-          "enum": ["deal", "asset", "fund", "portfolio", null],
-          "description": "v5.1 forward-compat. AMOS RBAC scope the skill operates within. Default null in v5.1. Contract-only; no live coupling."
+          "enum": ["asset", "fund", "portfolio", "deal", "debt", "leasing", "property_management", "investor_relations", "governance", "market", "data_room", "enterprise", null],
+          "description": "v5.2 consumer-contract (widened from the v5.1 4-value RBAC set). CRE workspace the item operates within, for downstream filtering/grouping. Derived from subcategory/keywords with frontmatter override; null where unscoped. Contract-only; no live coupling."
         },
         "demo_status": {
           "type": "string",

@@ -7,6 +7,8 @@ category: workspace
 description: "Top-level workspace for leasing workflows. Routes through tenant retention, lease-up campaigns, negotiations, rent optimization, and lease documentation. Manages persistent leasing context across sessions."
 targets:
   - claude_code
+pii_policy: tenant_or_personal
+
 ---
 
 # Lease Strategy & Papering

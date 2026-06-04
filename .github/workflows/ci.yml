@@ -32,7 +32,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install test dependencies
-        run: pip install pytest pyyaml
+        run: pip install pytest pyyaml jsonschema
       - name: Build catalog (required before tests)
         run: |
           python scripts/catalog-build.py
@@ -57,5 +57,7 @@ jobs:
         run: |
           python scripts/catalog-build.py
           python scripts/catalog-generate.py --check
+      - name: Corpus governance scan (static + generated metadata)
+        run: python scripts/governance-scan.py
       - name: Check prose drift (hardcoded counts outside CATALOG:STATS markers)
         run: python scripts/prose-drift-check.py

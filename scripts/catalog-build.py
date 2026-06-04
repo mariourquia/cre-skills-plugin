@@ -303,6 +303,113 @@ def governance_from_frontmatter(fm: dict, slug: str, item_type: str,
 
 
 # ---------------------------------------------------------------------------
+# v5.2 consumer-contract forward-compat fields (produces_artifact_kind,
+# pii_policy, workspace_scope, outputs). Derived with frontmatter override.
+# These are rendering/consumer hints, NOT liability gates — the governance
+# scanner keys liability rules off explicit governance fields, never these.
+# See docs/integrations/amos-skill-manifest.md and
+# docs/architecture/v5-micro-skill-architecture.md.
+# ---------------------------------------------------------------------------
+
+# Plugin-namespaced artifact kind -> human label, used to seed outputs[] when a
+# skill declares no explicit `outputs:`. Keys MUST match the catalog/manifest
+# `produces_artifact_kind` enum.
+ARTIFACT_KIND_LABEL = {
+    "memo": "Investment memo",
+    "model_output": "Model output",
+    "calculator_result": "Calculator result",
+    "diligence_report": "Diligence report",
+    "source_map": "Source map",
+    "tie_out_report": "Tie-out report",
+    "investor_report": "Investor report",
+    "lender_package": "Lender package",
+    "valuation_support": "Valuation support",
+    "checklist": "Checklist",
+    "workflow_plan": "Workflow plan",
+    "advisory_note": "Advisory note",
+}
+
+# Explicit subcategory -> workspace_scope (reliable; checked first).
+_SUBCATEGORY_SCOPE = {
+    "investor-relations": "investor_relations",
+    "fund-management": "fund",
+    "due-diligence": "data_room",
+    "leasing": "leasing",
+    "legal": "governance",
+    "closing": "deal",
+    "daily-operations": "property_management",
+    "financing": "debt",
+    "portfolio-strategy": "portfolio",
+    "tax-entity": "governance",
+    "underwriting-analysis": "deal",
+}
+
+# Ordered (scope, keyword-tuple). First match wins; specific scopes precede
+# the broad `deal` catch so e.g. a debt or leasing skill is not bucketed deal.
+# Every scope value here MUST be in the workspace_scope enum.
+_WORKSPACE_SCOPE_KEYWORDS = [
+    ("debt", ("debt", "loan", "covenant", "mezz", "refi", "lender", "mortgage")),
+    ("leasing", ("lease", "leasing", "tenant", "estoppel", "stacking", "rent-roll", "cam", "coi", "delinquency")),
+    ("investor_relations", ("investor", "lp-", "lp_", "fund-raise", "capital-raise", "pitch", "quarterly-investor")),
+    ("fund", ("fund-formation", "fund-operations", "partnership-allocation", "waterfall", "jv-")),
+    ("property_management", ("property-management", "work-order", "vendor", "maintenance", "building-systems", "operations", "noi", "tenant-event")),
+    ("data_room", ("data-room", "diligence", "dd-", "document-to", "warehouse", "lease-abstract", "exhibit")),
+    ("governance", ("compliance", "regulatory", "audit", "tax-appeal", "1031", "cost-seg", "opportunity-zone", "insurance", "legal", "carbon")),
+    ("market", ("market", "comp", "submarket", "supply-demand", "reit", "cycle")),
+    ("portfolio", ("portfolio", "performance-attribution", "allocator")),
+    ("deal", ("acquisition", "underwriting", "deal", "loi", "psa", "offer", "om-", "disposition", "closing", "ic-memo", "ic-red", "sourcing", "screen", "sensitivity", "land-residual", "entitlement")),
+]
+
+
+def derive_workspace_scope(slug: str, subcategory, category, description: str):
+    """Conservative workspace_scope derivation. Subcategory (explicit, reliable)
+    first, then SLUG substring match only — the slug is a curated identifier, so
+    it avoids description false-positives like 'comp' inside 'decomposition' or a
+    stray 'diligence' in a screening tool. Returns a valid enum value or None
+    (honest 'unscoped'); explicit frontmatter `workspace_scope:` overrides.
+    Non-liability hint."""
+    if subcategory and subcategory in _SUBCATEGORY_SCOPE:
+        return _SUBCATEGORY_SCOPE[subcategory]
+    hay = (slug or "").lower()
+    for scope, kws in _WORKSPACE_SCOPE_KEYWORDS:
+        if any(k in hay for k in kws):
+            return scope
+    return None
+
+
+def forward_compat_from(fm: dict, slug: str, item_type: str, classification: str,
+                        calculator_file, subcategory, description: str,
+                        category) -> dict:
+    """Derive the four v5.2 forward-compat fields with frontmatter override.
+
+    produces_artifact_kind: calculator_file/calculator -> calculator_result;
+      orchestrator -> workflow_plan; else frontmatter or None.
+    pii_policy: conservative default 'none', explicit frontmatter opt-in.
+    workspace_scope: derived (subcategory/keywords) or frontmatter, else None.
+    outputs: frontmatter list, else a single label seeded from artifact kind.
+    """
+    fm = fm or {}
+    pak = fm.get("produces_artifact_kind")
+    if pak is None:
+        if item_type == "calculator" or calculator_file:
+            pak = "calculator_result"
+        elif classification == "orchestrator":
+            pak = "workflow_plan"
+    pii = fm.get("pii_policy") or "none"
+    ws = fm.get("workspace_scope") or derive_workspace_scope(
+        slug, subcategory, category, description)
+    outputs = fm.get("outputs")
+    if not outputs:
+        outputs = [ARTIFACT_KIND_LABEL[pak]] if pak in ARTIFACT_KIND_LABEL else []
+    return {
+        "produces_artifact_kind": pak,
+        "pii_policy": pii,
+        "workspace_scope": ws,
+        "outputs": outputs,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Scanners
 # ---------------------------------------------------------------------------
 
@@ -357,8 +464,13 @@ def scan_skills(registry: dict, triggers: dict) -> list:
             "priority": reg.get("priority"),
             "version": fm.get("version"),
         }
-        item.update(governance_from_frontmatter(
+        gov = governance_from_frontmatter(
             fm, slug, "skill", category, fm.get("pack_type"), desc
+        )
+        item.update(gov)
+        item.update(forward_compat_from(
+            fm, slug, "skill", gov["classification"],
+            SKILL_CALCULATOR_MAP.get(slug), fm.get("subcategory"), desc, category,
         ))
         items.append(item)
     return items
@@ -403,9 +515,14 @@ def scan_agents() -> list:
             "priority": None,
             "version": None,
         }
-        item.update(governance_from_frontmatter(
+        gov = governance_from_frontmatter(
             fm, agent_id, "agent", domain, fm.get("pack_type"),
             fm.get("description", ""),
+        )
+        item.update(gov)
+        item.update(forward_compat_from(
+            fm, agent_id, "agent", gov["classification"], None,
+            fm.get("subcategory"), fm.get("description", ""), domain,
         ))
         items.append(item)
     return items
@@ -445,9 +562,14 @@ def scan_commands() -> list:
             "priority": None,
             "version": None,
         }
-        item.update(governance_from_frontmatter(
+        gov = governance_from_frontmatter(
             fm, slug, "command", "cross-cutting", fm.get("pack_type"),
             fm.get("description", ""),
+        )
+        item.update(gov)
+        item.update(forward_compat_from(
+            fm, slug, "command", gov["classification"], None,
+            fm.get("subcategory"), fm.get("description", ""), "cross-cutting",
         ))
         items.append(item)
     return items
@@ -495,8 +617,13 @@ def scan_calculators() -> list:
             "priority": None,
             "version": None,
         }
-        item.update(governance_from_frontmatter(
+        gov = governance_from_frontmatter(
             {}, calc_id, "calculator", "cross-cutting", None, desc
+        )
+        item.update(gov)
+        item.update(forward_compat_from(
+            {}, calc_id, "calculator", gov["classification"],
+            f"src/calculators/{py_path.name}", None, desc, "cross-cutting",
         ))
         items.append(item)
     return items
@@ -552,6 +679,9 @@ def scan_orchestrators() -> list:
         gov["classification"] = "orchestrator"
         gov["runtime_role"] = "workflow_conductor"
         item.update(gov)
+        item.update(forward_compat_from(
+            {}, orch_id, "orchestrator", "orchestrator", None, None, desc, orch_id,
+        ))
         items.append(item)
     return items
 
@@ -592,6 +722,10 @@ def build_workflow_items(chains: list) -> list:
         )
         gov["runtime_role"] = "reference_only"
         item.update(gov)
+        item.update(forward_compat_from(
+            {}, chain["id"], "workflow", gov["classification"], None, None,
+            chain.get("display_name", ""), "cross-cutting",
+        ))
         items.append(item)
     return items
 

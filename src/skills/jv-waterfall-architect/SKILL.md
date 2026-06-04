@@ -15,6 +15,16 @@ source_ref_policy:
   on_unresolvable: refuse
   forbids_fabricated_model_ref: true
 refusal_trigger: "Refuse to emit a distribution split or promote figure when a required term (preferred rate, tier hurdle, contributed capital) is unspecified or unresolved; the architect never assumes a number into the waterfall and asks for the missing term instead."
+v5_contract: true
+confidence_default: estimated
+stale_data: "Preferred-return rates, market-standard promote tiers, and catch-up conventions drift with the rate environment and fund vintage; benchmark splits age. Agreement- or user-supplied terms override any modeled default."
+produces_artifact_kind: calculator_result
+outputs:
+  - Distribution waterfall schedule
+  - Promote and catch-up tiers
+  - LP/GP split summary
+workspace_scope: fund
+pii_policy: sensitive_financial
 targets:
   - claude_code
 ---
@@ -149,6 +159,12 @@ See the data-grade ladder in `docs/DATA_GRADES.md` for the `confirmed | estimate
 - Default output fidelity is **estimated**: the waterfall is structured from the supplied deal parameters and market benchmarks, not an executed agreement.
 - Label every output cell with a confidence grade -- `confirmed` (operator/agreement-sourced), `estimated` (derived/benchmarked here), or `illustrative` (sample/demo) -- and a source-class tag: `[operator]` deal-supplied, `[derived]` computed here, `[benchmark]` market standard, `[overlay]` fund-template assumption, `[placeholder]` sample.
 - Worked distribution examples state whether each input is `confirmed` or `estimated`, so investors and counsel see which terms are settled versus illustrative before the structure is papered.
+
+## Known Limitations
+
+- **Economics, not enforceability.** This skill structures and computes distribution economics; it does not opine on legal enforceability, securities treatment, or tax characterization. Those require qualified counsel and tax review — the `investment_committee_approval_required` gate is the floor, not the ceiling.
+- **Two-tier promote with a single catch-up.** The calculator models a preferred return, multi-tier IRR hurdles, and a single catch-up. Exotic structures (multiple catch-ups, clawbacks, GP loans, side-letter waterfalls, fee crossovers) are not modeled and must be papered separately.
+- **Hurdles are only as good as the underwriting they trace to.** Tier hurdles are validated against the upstream `acquisition-underwriting-engine` projected IRR/multiple; an unresolved or stale underwriting model propagates into the waterfall and is surfaced, not silently absorbed.
 
 ## Chain Notes
 
