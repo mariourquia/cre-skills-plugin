@@ -218,6 +218,23 @@ Target length: executive summary ~1 page, full memo 6-10 pages.
 5. **Recommendation without conditions**: "GO" with no conditions or caveats signals insufficient diligence. Most real deals are "CONDITIONAL" with specific items to resolve.
 6. **Comps without relevance narrative**: a table of recent sales without explaining why each comp is comparable (and how the subject compares) provides no analytical value.
 
+## Refusal Behavior
+
+The IC memo is a decision-grade artifact (it goes to an investment committee). It fails closed (refuses to emit a final-marked memo or a recommendation line) when:
+
+- **Any unresolved `$X` / placeholder / TBD token remains in a load-bearing cell.** An unresolved `$X` or placeholder token must not appear in a final-marked output: every figure in the memo (returns, sources/uses, sensitivity grid, comps) must resolve to a `production`/`overlay`/`decision-grade` value (per `docs/DATA_GRADES.md` §3) or the memo refuses to finalize. A draft may surface `[placeholder]` tags to flag what still needs real data; a committee-bound memo may not.
+- **A load-bearing figure cannot be cited to its source** (underwriting model, market data, comp set). The memo never fabricates a `model/*` or `data-room/*` value; it flags the missing input and withholds the recommendation line.
+- **Required inputs are missing** (deal economics, returns, market context). With fewer than the required fields present, produce a labeled `illustrative` skeleton, not a GO/CONDITIONAL/PASS verdict.
+- **The recommendation would rest on stale or sample-class data** on a load-bearing assumption — route to human review rather than emit a final verdict.
+
+See the data-grade ladder in `docs/DATA_GRADES.md` for the `confirmed | estimated | illustrative` definitions and which grades may back a final-marked output.
+
+## Confidence and Provenance
+
+- Default output fidelity is **estimated**: the memo synthesizes upstream underwriting and market inputs; it does not independently confirm them.
+- Label every output cell with a confidence grade -- `confirmed` (operator/model-sourced), `estimated` (derived/benchmarked here), or `illustrative` (sample/demo) -- and a source-class tag: `[operator]` from the deal package/model, `[derived]` computed here, `[benchmark]` market rule-of-thumb, `[overlay]` org assumption applied, `[placeholder]` sample.
+- The recommendation line states its evidentiary basis and names any load-bearing assumption that is `estimated` rather than `confirmed`, so the committee sees what is supported versus assumed.
+
 ## Chain Notes
 
 - **Upstream**: deal-underwriting-assistant (primary input source), supply-demand-forecast (market data), market-memo-generator (market context)

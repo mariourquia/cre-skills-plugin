@@ -6,6 +6,8 @@
 ╚██████╗██║  ██║███████╗    ███████║██║  ██╗██║███████╗███████╗███████║
  ╚═════╝╚═╝  ╚═╝╚══════╝    ╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝╚══════╝
 
+        v5.0.0  ·  governable CRE skill taxonomy + AMOS skill-manifest export
+
                                 │                                                                         |        
             *                   │           │           │                     _                          /|     |#|
            /|                  _│_         _|_          A          _        _[_]_                _|_    / |     |#|
@@ -30,6 +32,10 @@
 
 A Claude plugin delivering a large library of **commercial real estate skills** covering the full investment lifecycle -- deal sourcing, screening, underwriting, structuring, due diligence, capital markets, market research, asset management, leasing, investor relations, development, disposition, tax planning, ESG, portfolio strategy, and daily property operations. Each skill includes structured process logic, reference documents, chain connections to other skills, and Python calculators for precise quantitative output. Deploys as a plugin in Claude Code (CLI or Desktop Code tab) or as a local MCP server for Claude Desktop Chat tab. See [Key Stats](#key-stats) for current counts and [Release Maturity](#release-maturity) for status by surface.
 
+### How the skill taxonomy works for your team
+
+Every skill now declares a **classification** that tells your team what it is and how much to trust its output. In plain terms: a **micro** or **normal** skill does one bounded job — normalize a T-12, size a loan, draft a quarterly LP letter — and is invoked as a single unit. An **orchestrator** is a conductor that runs several skills in sequence (an underwrite-to-IC pipeline, a document-to-database ingest); it is a workflow, not an atomic tool. A **workspace** is a business-facing surface that routes a whole domain — your fund team's LP reporting, your asset managers' operations cockpit — to the right specialist skill and holds context across sessions. For a **deal team**, an **asset manager**, or a **fund team**, the classification is not cosmetic: it determines which outputs are decision-grade and therefore need a human sign-off before they reach an investment committee, a lender, or an LP. Skills whose output can land on a board deck or a distribution notice are marked `decision-grade` and carry an explicit **human gate** (analyst review, AM/CFO sign-off, IC approval, or lender/investor review) plus a source posture that **refuses to emit a final figure it cannot trace to your data** — no fabricated model references, no unresolved `$X` placeholders in a final-marked report. Everything else is advisory screening output your operator validates. See [`docs/DATA_GRADES.md`](docs/DATA_GRADES.md) for the data-grade ladder and `docs/integrations/amos-skill-manifest.md` for how this metadata is exported to AMOS.
+
 ## Release Maturity
 
 This release is an **internal beta / controlled release candidate**. Most top-level skills (1:1 with a single `src/skills/<slug>/SKILL.md`) are self-contained and usable today. The residential multifamily subsystem and several install surfaces are held to a higher fail-closed bar and are labeled below.
@@ -49,6 +55,13 @@ This release is an **internal beta / controlled release candidate**. Most top-le
 
 ## Known Limitations
 
+> Full honest statement: [`docs/known-limitations.md`](docs/known-limitations.md). The headline v5.0.0 limitations:
+
+- **Connectors are not live.** Every connector contract and vendor adapter is `status: stub`; there is no live API feed to any system. The only `active` ingestion shape is a shared-drive / email file drop. See [`docs/connectors/CAPABILITY-MATRIX.md`](docs/connectors/CAPABILITY-MATRIX.md) (CoStar is **not-supported-live** per its AI-use T&C; Yardi / MRI / RealPage are **blocked-by-vendor**).
+- **Generalized cross-skill governance is v5.1.** Decision-grade runtime enforcement (source-class tagging, refusal-on-missing-input, period-seal, placeholder scanner) runs as deployed runtime **only inside `residential_multifamily`**. Elsewhere, v5.0.0 ships the `final_marked` selector + the **targeted named-allowlist finance-placeholder guard** (`tests/test_finance_placeholder_guard.py`) — a presence-of-discipline check, not a corpus-wide runtime scanner. The four canonical connector contract schemas (debt / entity / valuation / funds) are also v5.1.
+- **The orchestrator runtime `dispatchAgent()` is a documented stub.** The real execution path is the orchestrate **prose** (`src/commands/orchestrate.md`) with Claude as conductor — not an autonomous engine. Treat orchestrators as structured prompts.
+- **The AMOS manifest is a static export.** `dist/amos-skill-manifest.json` is a generated artifact with honest capability states and **no live coupling**; no skill is marked live-connected (AMOS references skills as data, it does not invoke them live).
+- **The Windows `.exe` is not locally buildable** on macOS — it is produced on CI / Windows only (Inno Setup). The macOS DMG is locally buildable.
 - The `residential_multifamily` subsystem is `status: stable_pending_shakedown` (v1.0.0-rc1). Code complete; refusal-on-missing-input contracts active. Every reference file still ships as sample/starter/illustrative/placeholder — decision-grade use requires an org overlay. Final-marked workflows (executive, IC, quarterly, pipeline summary) declare `fallback_behavior: refuse` on required inputs — they fail closed rather than proceed with stale data — and period-grade workflows additionally refuse if the GL is not at the declared `close_status` floor (`soft_close` or `hard_close`). Graduation to `status: stable` is gated on the first operator shakedown log (see [PREVIEW_MODE.md](docs/PREVIEW_MODE.md)); until then, output carries a `Stable, awaiting shakedown` banner.
 - Six regulatory/affordable compliance workflows (`compliance_calendar_review`, `income_certification_cycle`, `rent_limit_test`, `agency_reporting_prep`, `file_audit_prep`, `recertification_batch`) are **phase-1 scaffolding** — the router recognizes them and the overlay slots exist, but no workflow pack implements them yet. The routing rule `r011_regulatory_workflow_explicit` is gated behind an explicit `regulatory_program` axis and `rent_limits` / `income_limits` reference files; missing references refuse the match.
 - The **tailoring TUI** (`src/skills/residential_multifamily/tailoring/tools/tailoring_tui.py`) has a documented capability matrix in [docs/tailoring_capability_matrix.md](docs/tailoring_capability_matrix.md). As of v4.3, Tailoring Pass 2 Obj 4 is closed: conflict surfacing, approval-floor guard, canonical-definition-redefinition refusal, preview-bundle YAML emission, and missing-doc blocker are all **Implemented**. Open follow-ups (legacy-bank retirement, role-based bank filtering) are tracked in the matrix.
@@ -74,6 +87,20 @@ Upcoming work is tracked in [`docs/ROADMAP.md`](docs/ROADMAP.md) — phased from
 | Slash Commands | **11** |
 | Skill Categories | **18** |
 <!-- CATALOG:STATS:END -->
+
+---
+
+## What's New in v5.0.0
+
+**A governable skill taxonomy across the whole corpus.** Every catalog item now carries a `classification` (`micro | normal | orchestrator | workspace | agent | calculator`) and a `runtime_role`, so a deal team, asset manager, or fund team can tell an atomic tool from a conductor from a business-facing surface — and, critically, which outputs are decision-grade and need a human sign-off. See [How the skill taxonomy works for your team](#how-the-skill-taxonomy-works-for-your-team). This shipped by **reclassification + honest backlog: 0 new stub skills** — the value is the governable metadata and the decomposition map, not skill count.
+
+**AMOS skill-manifest export.** The plugin now publishes `dist/amos-skill-manifest.json` (a superset of the catalog carrying the governance fields: `decision_grade`, `human_gate`, `source_ref_policy`, `amos_surface`, `decomposes_to`), plus a documented contract at [`docs/integrations/amos-skill-manifest.md`](docs/integrations/amos-skill-manifest.md). AMOS consumes the plugin as a governed skill layer **as data** — no skill is hardcoded, and the manifest is a static generated artifact with **no live coupling**.
+
+**Trust fixes (governance honesty).** A canonical data-grade ladder ([`docs/DATA_GRADES.md`](docs/DATA_GRADES.md)) reconciles the four source-class vocabularies already deployed (RMF executive tags, the fallback resolver, the ingestion `classification`, the connector `source_class`) into one ladder, and states which grades may back a final-marked output and which must refuse. A **targeted finance-placeholder guard** (`tests/test_finance_placeholder_guard.py`) enforces, on a named decision-grade allowlist (`acquisition-underwriting-engine`, `ic-memo-generator`, `comp-snapshot`, `fund-lp-reporting`, `jv-waterfall-architect`, `opportunity-zone-underwriter`, `cost-segregation-analyzer`), that those skills declare a `## Refusal Behavior` discipline and forbid unresolved `$X`/placeholder tokens in a final output. Valuation/comp skills (`comp-snapshot`, `om-reverse-pricing`, `acquisition-underwriting-engine`) carry an explicit **"estimate, not an appraisal"** stamp.
+
+**Honest scope (read this).** This release is a **micro-skill architecture delivered as 0 new stubs; reclassify + backlog** — not a wave of new atomic skills. The decision-grade governance (source-class tagging, refusal-on-missing-input, period-seal, the placeholder scanner) runs as **deployed runtime enforcement only inside `residential_multifamily`**; across the rest of the corpus v5.0.0 ships the `final_marked` selector plus the named-allowlist finance guard. A fully-generalized, corpus-wide runtime data scanner is a **v5.1** item, and the four canonical connector contract schemas (debt / entity / valuation / funds) and the live connector runtime are **v5.1** as well. See [Known Limitations](#known-limitations) and [`docs/connectors/CAPABILITY-MATRIX.md`](docs/connectors/CAPABILITY-MATRIX.md) — **no connector is live today.**
+
+See `CHANGELOG.md` and [`docs/MIGRATION.md`](docs/MIGRATION.md) for the full v4.5.0 → v5.0.0 entry.
 
 ---
 

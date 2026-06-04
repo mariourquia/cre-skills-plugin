@@ -233,6 +233,23 @@ Target output: 800-1,500 words. Tables are the core; narrative is supporting.
 5. **Total adjustment exceeding 25%**: If the comp requires >25% net adjustment to be comparable, it is not a good comp. Flag and reduce weight.
 6. **Comp relevance hierarchy**: Proximity > recency > size similarity > class similarity > vintage similarity. A comp 0.5 miles away from 18 months ago beats a comp 5 miles away from last month.
 
+## Refusal Behavior
+
+A comp snapshot can feed a decision-grade output (an underwriting model, an IC memo, or an appraisal review). It fails closed (refuses to emit a final-marked pricing conclusion) when:
+
+- **Any unresolved `$X` / placeholder / TBD token remains in a load-bearing cell.** An unresolved `$X` or placeholder token must not appear in a final-marked output: every comp rent/price, adjustment, and the concluded range must resolve to a `production`/`overlay`/`decision-grade` value (per `docs/DATA_GRADES.md` §3) or the conclusion refuses. A draft may carry `[placeholder]` tags to flag what still needs real comps; a final-marked pricing opinion may not.
+- **The comp set is sample/illustrative only** (no operator-supplied or licensed comps). Illustrative comps are labeled and must NOT be represented as "market evidence" in a final memo; mark the run `illustrative` and withhold a defensible conclusion. Comps sourced from a licensed provider (e.g. CoStar) are the operator's licensed overlay — never represented as a live plugin feed (see `docs/connectors/CAPABILITY-MATRIX.md`).
+- **Required inputs are missing** (subject property, submarket, comp data). With fewer than the required fields present, produce a labeled `illustrative` framework, not a pricing range.
+- **A comp requires >25% net adjustment** to be comparable on a load-bearing cell — drop it or flag and reduce weight; do not anchor a final conclusion on it.
+
+See the data-grade ladder in `docs/DATA_GRADES.md` for the `confirmed | estimated | illustrative` definitions and which grades may back a final-marked output.
+
+## Confidence and Provenance
+
+- Default output fidelity is **estimated**: the concluded rent and pricing range are derived from the supplied comp set and the adjustment grid, not an operator-confirmed transaction.
+- Label every output cell with a confidence grade -- `confirmed` (operator/licensed-comp-sourced), `estimated` (derived/adjusted here), or `illustrative` (sample/demo) -- and a source-class tag per comp: `[operator]` operator-supplied, `[derived]` adjusted here, `[benchmark]` reference comp, `[overlay]` operator's licensed comp overlay, `[placeholder]` sample.
+- **Estimate, not an appraisal (required on every output):** *This comp snapshot is a screening ESTIMATE of market rent and value for deal/diligence support — NOT an appraisal and not an opinion of value by a licensed appraiser, and not a USPAP-compliant deliverable. A qualified appraiser's report is required before the conclusion is relied upon for a transaction, financing, or financial reporting.*
+
 ## Chain Notes
 
 - **Upstream**: deal-quick-screen (detailed comp work after screening), om-reverse-pricing (comp validation), submarket-truth-serum (competitive set feeds in)

@@ -108,3 +108,26 @@ End every response with the required next-action footer:
 2. [Alternative path if applicable]
 3. [Information to gather before next step]
 ```
+
+## Refusal Behavior
+
+This workspace routes LP-facing, decision-grade artifacts (NAV statements, distribution notices, quarterly updates, performance attribution) to specialist skills. It — and the skills it routes to — fail closed (refuse to release a final-marked LP-facing figure) when:
+
+- **Any unresolved `$X` / placeholder / TBD token remains in a load-bearing cell.** An unresolved `$X` or placeholder token must not appear in a final-marked output: every LP-facing NAV, capital-account balance, distribution amount, and return figure must resolve to a `production`/`overlay`/`decision-grade` value (per `docs/DATA_GRADES.md` §3) or the workspace routes the figure to IC / fund-counsel review rather than release it. A draft may carry `[placeholder]` tags as a signal for what still needs real data; an LP-bound report may not.
+- **A figure cannot be traced to the fund model or a data-room source.** The workspace never fabricates a `model/*` or `data-room/*` reference; an unresolved figure is escalated to IC review before it reaches an LP.
+- **Capital-account or NAV data is stale** on a load-bearing input — refuse the LP-facing artifact rather than report a sealed-period figure against stale data.
+- **An output would expose a natural-person LP identity** — investor identity is pseudonymized; the workspace never emits a natural-person LP name.
+
+See the data-grade ladder in `docs/DATA_GRADES.md` for the `confirmed | estimated | illustrative` definitions and which grades may back a final-marked output. ILPA and NCREIF-PREA reporting standards govern the downstream LP-facing artifacts (see `references/routing-logic.md`).
+
+## Confidence and Provenance
+
+- Default output fidelity is **estimated** at the workspace level: the workspace coordinates; each specialist skill labels its own cells and the workspace surfaces those labels.
+- Every LP-facing figure carries a confidence grade -- `confirmed` (administrator/operator-sourced), `estimated` (derived here), or `illustrative` (sample/demo) -- and a source-class tag: `[operator]` administrator/GL-sourced, `[derived]` computed here, `[benchmark]` reference, `[overlay]` fund-overlay assumption, `[placeholder]` sample.
+- The Decision Summary names which load-bearing figures are `confirmed` versus `estimated` so the GP sees what is releasable to LPs versus what still needs sign-off.
+
+## Known Limitations
+
+- This is a routing workspace; it produces no analytics directly. The decision-grade guarantees (refusal-on-missing-input, source-class tagging) are enforced by the specialist skills it routes to and, for residential workflows, by the `residential_multifamily` subsystem — not by the workspace itself.
+- LP-facing reporting standards (ILPA templates, NCREIF-PREA Reporting Standards) are referenced for conformance, not mechanically validated; the GP and fund administrator remain responsible for final reporting compliance.
+- Investor and capital-account data are assumed pseudonymized on input; the workspace does not itself de-identify a payload that arrives with natural-person names.
