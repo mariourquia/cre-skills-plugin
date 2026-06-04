@@ -87,6 +87,96 @@ def sample_beta(rng: random.Random, alpha: float, beta_param: float) -> float:
     return rng.betavariate(alpha, beta_param)
 
 
+def _betacf(a: float, b: float, x: float) -> float:
+    """Continued fraction for the incomplete beta (Lentz's method).
+
+    Converges for ``x < (a+1)/(a+b+2)``; the caller (``regularized_incomplete_beta``)
+    applies the symmetry transform ``I_x(a,b) = 1 - I_{1-x}(b,a)`` outside that
+    region so the fraction is only evaluated where it converges (correct even for
+    alpha/beta < 1).
+    """
+    MAXIT = 300
+    EPS = 3.0e-14
+    FPMIN = 1.0e-300
+    qab = a + b
+    qap = a + 1.0
+    qam = a - 1.0
+    c = 1.0
+    d = 1.0 - qab * x / qap
+    if abs(d) < FPMIN:
+        d = FPMIN
+    d = 1.0 / d
+    h = d
+    for m in range(1, MAXIT + 1):
+        m2 = 2 * m
+        aa = m * (b - m) * x / ((qam + m2) * (a + m2))
+        d = 1.0 + aa * d
+        if abs(d) < FPMIN:
+            d = FPMIN
+        c = 1.0 + aa / c
+        if abs(c) < FPMIN:
+            c = FPMIN
+        d = 1.0 / d
+        h *= d * c
+        aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2))
+        d = 1.0 + aa * d
+        if abs(d) < FPMIN:
+            d = FPMIN
+        c = 1.0 + aa / c
+        if abs(c) < FPMIN:
+            c = FPMIN
+        d = 1.0 / d
+        delta = d * c
+        h *= delta
+        if abs(delta - 1.0) < EPS:
+            break
+    return h
+
+
+def regularized_incomplete_beta(x: float, a: float, b: float) -> float:
+    """Regularized incomplete beta I_x(a, b) = CDF of Beta(a, b) at x.
+
+    Pure-stdlib (``math.lgamma``); uses the standard symmetry transform so it is
+    stable across the full parameter range, including alpha/beta < 1.
+    """
+    if x <= 0.0:
+        return 0.0
+    if x >= 1.0:
+        return 1.0
+    ln_front = (
+        math.lgamma(a + b) - math.lgamma(a) - math.lgamma(b)
+        + a * math.log(x) + b * math.log(1.0 - x)
+    )
+    front = math.exp(ln_front)
+    if x < (a + 1.0) / (a + b + 2.0):
+        return front * _betacf(a, b, x) / a
+    return 1.0 - front * _betacf(b, a, 1.0 - x) / b
+
+
+def beta_invcdf(u: float, alpha: float, beta_param: float) -> float:
+    """Inverse CDF (quantile) of Beta(alpha, beta_param) via bisection.
+
+    Deterministic and rng-free, so mapping a Gaussian-copula uniform through it
+    preserves correlation without desyncing the shared random stream. ``u`` is
+    clamped off the divergent endpoints (normal_cdf saturates to exactly 0.0/1.0
+    beyond +/-8 sigma, which is reachable under correlated normals).
+    """
+    if u <= 0.0:
+        return 0.0
+    if u >= 1.0:
+        return 1.0
+    eps = 1.0e-12
+    u = min(max(u, eps), 1.0 - eps)
+    lo, hi = 0.0, 1.0
+    for _ in range(100):  # 2**-100 precision; far tighter than any caller needs
+        mid = 0.5 * (lo + hi)
+        if regularized_incomplete_beta(mid, alpha, beta_param) < u:
+            lo = mid
+        else:
+            hi = mid
+    return 0.5 * (lo + hi)
+
+
 # ---------------------------------------------------------------------------
 # Distribution parameter fitting from three-point estimates
 # ---------------------------------------------------------------------------
@@ -472,6 +562,56 @@ def spearman_rank_correlation(x: list[float], y: list[float]) -> float:
 
 
 # ---------------------------------------------------------------------------
+# Per-trial sampling (copula-correlated across all distribution types)
+# ---------------------------------------------------------------------------
+
+def sample_trial_values(
+    correlated_normals: list[float], fitted: dict, var_names: list[str]
+) -> dict:
+    """Map a vector of correlated standard normals to per-variable samples.
+
+    The Gaussian-copula correlation is preserved for EVERY distribution type:
+    triangular/uniform via the inverse-CDF of the copula uniform
+    ``u = normal_cdf(z)``, normal/lognormal via the correlated normal directly,
+    and beta via ``beta_invcdf(u, ...)`` (v5.1 fix — previously beta drew an
+    independent variate that silently discarded the correlation). Returns a
+    ``{name: value}`` dict and consumes no rng.
+    """
+    sampled_values: dict[str, float] = {}
+    for i, name in enumerate(var_names):
+        u = normal_cdf(correlated_normals[i])
+        params = fitted[name]
+        t = params["type"]
+
+        # Inverse CDF sampling using the (correlated) uniform variate
+        if t == "triangular":
+            a, c, b = params["a"], params["c"], params["b"]
+            if b <= a:
+                sampled_values[name] = c
+            else:
+                fc = (c - a) / (b - a)
+                if u < fc:
+                    val = a + math.sqrt(u * (b - a) * (c - a))
+                else:
+                    val = b - math.sqrt((1 - u) * (b - a) * (b - c))
+                sampled_values[name] = val
+        elif t == "normal":
+            sampled_values[name] = params["mu"] + params["sigma"] * correlated_normals[i]
+        elif t == "lognormal":
+            sampled_values[name] = math.exp(params["mu_ln"] + params["sigma_ln"] * correlated_normals[i])
+        elif t == "uniform":
+            sampled_values[name] = params["a"] + u * (params["b"] - params["a"])
+        elif t == "beta":
+            # Map the copula uniform through the beta inverse-CDF so the beta
+            # marginal inherits the Gaussian-copula correlation while keeping
+            # its own shape. (Pre-v5.1 this drew an independent betavariate.)
+            sampled_values[name] = beta_invcdf(u, params["alpha"], params["beta_param"])
+        else:
+            sampled_values[name] = params.get("mean", 0)
+    return sampled_values
+
+
+# ---------------------------------------------------------------------------
 # Main simulation
 # ---------------------------------------------------------------------------
 
@@ -566,39 +706,10 @@ def run_simulation(config: dict) -> dict:
         # Generate correlated normal variates
         correlated_normals = generate_correlated_normals(rng, L, n_vars)
 
-        # Convert to uniform [0,1] via normal CDF, then to target distribution
-        sampled_values = {}
-        for i, name in enumerate(var_names):
-            u = normal_cdf(correlated_normals[i])
-            params = fitted[name]
-            t = params["type"]
-
-            # Inverse CDF sampling using the uniform variate
-            if t == "triangular":
-                a, c, b = params["a"], params["c"], params["b"]
-                if b <= a:
-                    sampled_values[name] = c
-                else:
-                    fc = (c - a) / (b - a)
-                    if u < fc:
-                        val = a + math.sqrt(u * (b - a) * (c - a))
-                    else:
-                        val = b - math.sqrt((1 - u) * (b - a) * (b - c))
-                    sampled_values[name] = val
-            elif t == "normal":
-                # Inverse normal CDF approximation (Beasley-Springer-Moro)
-                sampled_values[name] = params["mu"] + params["sigma"] * correlated_normals[i]
-            elif t == "lognormal":
-                sampled_values[name] = math.exp(params["mu_ln"] + params["sigma_ln"] * correlated_normals[i])
-            elif t == "uniform":
-                sampled_values[name] = params["a"] + u * (params["b"] - params["a"])
-            elif t == "beta":
-                # Beta inverse CDF is complex; use independent beta sample as approximation
-                # with correlation preserved through the normal copula structure
-                sampled_values[name] = rng.betavariate(params["alpha"], params["beta_param"])
-            else:
-                sampled_values[name] = params.get("mean", 0)
-
+        # Map correlated normals to per-variable samples; copula-correlated for
+        # every distribution type, including beta via the inverse-CDF (v5.1 fix).
+        sampled_values = sample_trial_values(correlated_normals, fitted, var_names)
+        for name in var_names:
             all_samples[name].append(sampled_values[name])
 
         # Run DCF

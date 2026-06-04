@@ -54,10 +54,10 @@ FINANCIAL_SLUGS = [
 ]
 
 # Calculators that must REFUSE (typed dict) on a VALUE-domain degeneracy, with
-# all required keys present. (quick_screen / proration / transfer_tax degrade
-# gracefully on value degeneracies and only error on missing keys, which Layer 2
-# covers; fund_fee_modeler is CLI-dispatched and covered by its own file +
-# Layer 2.)
+# all required keys present. As of v5.1, quick_screen / proration_calculator /
+# transfer_tax also refuse in-process (previously they degraded "gracefully" into
+# negative tax / negative prorations / a raw traceback on an unparseable date).
+# fund_fee_modeler remains CLI-dispatched and is covered by its own file + Layer 2.
 VALUE_DEGENERATE_REFUSERS = {
     "debt_sizing": (
         "debt_sizing", "calculate_debt_sizing",
@@ -116,6 +116,21 @@ VALUE_DEGENERATE_REFUSERS = {
         "tenant_credit_scorer", "calculate_tenant_credit",
         {"tenants": []},
         "tenant_credit_scorer_degenerate",
+    ),
+    "quick_screen": (
+        "quick_screen", "calculate_quick_screen",
+        {"purchase_price": 0, "noi": 650_000, "units_or_sf": 50},
+        "quick_screen_degenerate",
+    ),
+    "proration_calculator": (
+        "proration_calculator", "calculate_prorations",
+        {"closing_date": "2026-07-01", "annual_tax": -5, "tax_year_start": "2026-01-01"},
+        "proration_calculator_degenerate",
+    ),
+    "transfer_tax": (
+        "transfer_tax", "calculate_transfer_tax",
+        {"state": "NY", "purchase_price": -1, "property_type": "commercial"},
+        "transfer_tax_degenerate",
     ),
 }
 
