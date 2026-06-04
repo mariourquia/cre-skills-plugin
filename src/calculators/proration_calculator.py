@@ -242,9 +242,45 @@ def prorate_insurance(
     }
 
 
+def _proration_refusal(reason: str) -> dict[str, Any]:
+    return {"error": reason, "refused": True, "code": "proration_calculator_degenerate"}
+
+
 def calculate_prorations(inputs: dict[str, Any]) -> dict[str, Any]:
     """Main calculation entry point."""
-    closing_date = parse_date(inputs["closing_date"])
+    # --- Value-domain refusal (v5.1) -------------------------------------- #
+    # Unparseable closing_date previously raised a ValueError that surfaced as an
+    # opaque "exited 1" traceback through the calculator bridge; refuse cleanly.
+    try:
+        closing_date = parse_date(inputs["closing_date"])
+    except (ValueError, TypeError):
+        return _proration_refusal(
+            f"closing_date {inputs.get('closing_date')!r} is not a parseable date "
+            "(expected YYYY-MM-DD)."
+        )
+    for _amt_key in ("annual_tax", "monthly_rent", "insurance_annual", "cam_annual"):
+        _v = inputs.get(_amt_key)
+        if isinstance(_v, (int, float)) and not isinstance(_v, bool) and _v < 0:
+            return _proration_refusal(
+                f"{_amt_key} must be non-negative; got {_v!r}. A negative basis "
+                "fabricates negative prorations."
+            )
+    # When a property-tax proration is requested, the closing must fall within the
+    # tax year; otherwise day counts (and thus credits) go negative.
+    if inputs.get("annual_tax"):
+        try:
+            _tys = parse_date(inputs.get("tax_year_start", f"{closing_date.year}-01-01"))
+        except (ValueError, TypeError):
+            return _proration_refusal(
+                f"tax_year_start {inputs.get('tax_year_start')!r} is not a parseable date."
+            )
+        _tye = date(_tys.year, 12, 31)
+        if not (_tys <= closing_date <= _tye):
+            return _proration_refusal(
+                f"closing_date {inputs['closing_date']} is outside the tax year "
+                f"[{_tys.isoformat()}..{_tye.isoformat()}]; prorations would be negative."
+            )
+
     method = inputs.get("proration_method", "actual_365")
 
     results = {"closing_date": inputs["closing_date"], "proration_method": method, "line_items": []}

@@ -1,0 +1,19 @@
+# Valuation mapping template — raw source column → normalized column.
+# Vendor-neutral v5.1 stub. The worked example below is illustrative; a real
+# adapter fork fills in per-source column names.
+valuation:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [valuation_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: as_of_date
+    allow_backfill: true
+  fields:
+    - { source_column: val_id,       normalized_column: valuation_id,       transform: trim_string,      required: true }
+    - { source_column: prop_id,      normalized_column: property_id,        transform: trim_string,      required: true }
+    - { source_column: as_of,        normalized_column: as_of_date,         transform: to_iso_date,      required: true }
+    - { source_column: appraiser,    normalized_column: appraiser,          transform: trim_string,      required: true }
+    - { source_column: value_usd,    normalized_column: value_conclusion,   transform: dollars_to_cents, required: true }
+    - { source_column: approach,     normalized_column: approach,           transform: map_approach,     required: true }
+    - { source_column: cap_rate,     normalized_column: cap_rate_concluded, transform: to_number,        required: false }

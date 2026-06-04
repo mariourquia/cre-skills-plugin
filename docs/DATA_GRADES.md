@@ -1,13 +1,14 @@
 # Data Grades — Canonical Taxonomy and Crosswalk
 
-> Status: released (v5.0.0)
+> Status: released (v5.1.0)
 > Owner: Mario Urquia
-> Last reviewed: 2026-06-03
+> Last reviewed: 2026-06-04
 > Source-of-truth code this doc describes:
 > - `src/skills/residential_multifamily/_core/executive_output_contract.md` (RMF executive source-class tags)
 > - `src/skills/residential_multifamily/_core/runtime/fallback_resolver.py` (the `overlay:fallback` class)
 > - `src/calculators/ingest/provenance.py` (the ingestion `classification` enum)
-> - `docs/connectors/CAPABILITY-MATRIX.md` (the connector `source_class` vocabulary, v5.1)
+> - `docs/connectors/CAPABILITY-MATRIX.md` (the connector `source_class` vocabulary)
+> - `src/skills/residential_multifamily/reference/connectors/_schema/source_class.yaml` (canonical connector `source_class` enum — schema-enforced in v5.1.0 via `entity_contract.schema.yaml` + `tests/test_connector_source_class.py`)
 > - `CONTRIBUTING.md` (the v5 skill standard — `## Refusal Behavior` / `## Confidence and Provenance`)
 
 This is the **single canonical data-grade ladder** for the plugin. Before v5 the
@@ -40,10 +41,10 @@ on?"** verdict.
 | **decision-grade** | Verdict-first, source-class-tagged, refusal-on-missing-input, period-sealed *final* output | **enforced today only in** `residential_multifamily` final-marked workflows; elsewhere it is the *target contract* (the named decision-grade slugs + the finance placeholder guard) | executive output contract; no preview banner once `stable` | **Yes, within `residential_multifamily`** after operator overlay + shakedown. Elsewhere: only when every load-bearing cell is `overlay`/`production`-class and no `placeholder`/`$X` remains. |
 | **advisory** | Everything else: methodology output an operator must validate; any `beta_rc` / `experimental` skill | all other top-level skills; any preview-status output | `PREVIEW / STAGING` stamp; advisory; "not legal/tax advice / not an appraisal" where applicable | **No** — screening / advisory only; the operator bears liability. |
 
-**Honest-scope note (v5.0.0):** *decision-grade* enforcement (source-class
+**Honest-scope note (v5.1.0):** *decision-grade* enforcement (source-class
 tagging, refusal-on-missing-input, period-seal, the placeholder scanner) is fully
 implemented inside the `residential_multifamily` subsystem. Across the rest of the
-corpus, v5.0.0 ships the `final_marked` selector plus a **targeted** finance
+corpus, v5.1.0 ships the `final_marked` selector plus a **targeted** finance
 placeholder guard on a named allowlist (see §4); a fully-generalized corpus-wide
 runtime data scanner is a **v5.1** item. No skill outside RMF should imply that
 decision-grade enforcement is universal.
@@ -132,13 +133,13 @@ Equivalently, in the deployed vocabularies:
 
 This rule is **enforced at runtime today only inside `residential_multifamily`**
 (the executive output contract + `fallback_resolver.py` + the period-seal gate).
-Outside RMF, v5.0.0 enforces the *placeholder* leg of this rule on the named
+Outside RMF, v5.1.0 enforces the *placeholder* leg of this rule on the named
 decision-grade slugs via the finance placeholder guard (§4); the remaining legs
 are the v5.1 generalized scanner.
 
 ---
 
-## 4. The targeted finance placeholder guard (v5.0.0)
+## 4. The targeted finance placeholder guard (v5.1.0)
 
 `tests/test_finance_placeholder_guard.py` is an honest, **targeted** discipline
 check — a presence-of-discipline assertion over a named allowlist, **not** a
@@ -163,7 +164,7 @@ appraisal"** stamp in `## Confidence and Provenance` (or body), per the 2026 cas
 law distinguishing AI valuation estimates from professional appraisals.
 
 The fully-generalized, corpus-wide runtime data scanner (every cell of every
-skill checked at emit time) remains a **v5.1** item. v5.0.0 ships RMF's deployed
+skill checked at emit time) remains a **v5.1** item. v5.1.0 ships RMF's deployed
 runtime enforcement plus this named-allowlist discipline guard, and is honest that
 the two together are not yet universal enforcement.
 

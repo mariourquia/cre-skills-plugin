@@ -1,0 +1,18 @@
+# Entity mapping template — raw source column → normalized column.
+# Vendor-neutral v5.1 stub. The worked example below is illustrative; a real
+# adapter fork fills in per-source column names.
+legal_entity:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [entity_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: false
+  fields:
+    - { source_column: entity_id,     normalized_column: entity_id,        transform: trim_string, required: true }
+    - { source_column: legal_name,    normalized_column: legal_name,       transform: trim_string, required: true }
+    - { source_column: entity_type,   normalized_column: entity_type,      transform: map_entity_type, required: true }
+    - { source_column: entity_role,   normalized_column: role,             transform: map_entity_role, required: true }
+    - { source_column: parent_id,     normalized_column: parent_entity_id, transform: trim_string, required: false }
+    - { source_column: own_pct,       normalized_column: ownership_pct,    transform: to_number,   required: false }

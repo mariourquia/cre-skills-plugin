@@ -1,0 +1,81 @@
+entities:
+  loan:
+    entity_name: loan
+    grain: one row per loan facility
+    time_basis: state
+    source_class: operator_supplied
+    max_staleness: P30D
+    primary_key:
+    - loan_id
+    required_fields:
+    - name: loan_id
+      type: string
+      description: Stable identifier for the loan facility
+      is_key: true
+    - name: property_id
+      type: string
+      description: FK to the financed property
+      is_key: false
+    - name: lender
+      type: string
+      description: Lender name
+      is_key: false
+    - name: original_balance
+      type: money_cents
+      description: Original loan balance at origination, in cents
+      is_key: false
+      unit: cents_usd
+    - name: current_balance
+      type: money_cents
+      description: Current outstanding loan balance, in cents
+      is_key: false
+      unit: cents_usd
+    - name: rate_type
+      type: enum
+      description: Interest rate structure
+      is_key: false
+      enum_values:
+      - fixed
+      - floating
+    - name: all_in_rate
+      type: number
+      description: All-in interest rate
+      is_key: false
+      unit: percent
+    - name: origination_date
+      type: date
+      description: Loan origination date
+      is_key: false
+    - name: maturity_date
+      type: date
+      description: Loan maturity date
+      is_key: false
+    optional_fields:
+    - name: entity_id
+      type: string
+      description: FK to the borrowing legal entity (entity connector)
+    - name: index
+      type: string
+      description: Floating-rate index name (e.g. SOFR), when rate_type = floating
+    - name: spread_bps
+      type: integer
+      description: Spread over the index, in basis points
+      unit: basis_points
+    - name: covenant_set
+      type: array
+      description: Covenant identifiers / terms attached to the facility
+    foreign_keys:
+    - field: entity_id
+      references: legal_entity.entity_id
+      on_missing: warn
+    null_handling:
+    - field: current_balance
+      behavior: reject_record
+      notes: debt math and DSCR monitoring require this
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - source_row_id
+    dependents:
+    - debt-covenant-monitor; refi-decision-analyzer; loan-sizing-engine skills

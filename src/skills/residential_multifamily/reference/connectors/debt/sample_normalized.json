@@ -1,0 +1,23 @@
+{
+  "loan": [
+    {
+      "loan_id": "loan_sample_001",
+      "property_id": "prop_demo_001",
+      "lender": "Sample Agency Lender",
+      "original_balance": 2500000000,
+      "current_balance": 2410000000,
+      "rate_type": "fixed",
+      "all_in_rate": 5.45,
+      "origination_date": "2022-06-01",
+      "maturity_date": "2032-06-01",
+      "entity_id": "ent_spe_001",
+      "index": null,
+      "spread_bps": null,
+      "covenant_set": ["dscr_min_1_20", "ltv_max_0_70"],
+      "source_name": "sample_feed",
+      "source_type": "debt",
+      "source_date": "2026-04-01",
+      "source_row_id": "loan_sample_001"
+    }
+  ]
+}

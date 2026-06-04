@@ -1,6 +1,6 @@
 # Public Roadmap
 
-Last updated: 2026-06-03 · Plugin version: v5.0.0
+Last updated: 2026-06-04 · Plugin version: v5.1.0
 
 This is the plan for where `cre-skills-plugin` goes from here. It groups
 the pending work by release and by track. Items carry a size (S / M / L /
@@ -18,7 +18,40 @@ Conventions:
   that a subsystem occupies between `beta_rc` and `stable` while it waits
   for that first shakedown log. See `docs/PREVIEW_MODE.md`.
 
-## Current release: v5.0.0 (2026-06-03)
+## Current release: v5.1.0 (2026-06-04)
+
+Governance-hardening release. No catalog growth (still 127 / 54 / 21 / 10 / 6;
+**0 net new skills**). No live connector, no live AMOS coupling, no production
+runtime enforcement is introduced.
+
+**Shipped in v5.1.0:**
+
+- **Calculator fidelity.** Monte Carlo beta variables now inherit the
+  Gaussian-copula correlation (was silently dropped); `fund_fee_modeler`
+  promote-sensitivity labeled `grade: screening` / `linear_fee_drag_approximation`
+  (not a DCF-IRR); `transfer_tax` / `proration_calculator` / `quick_screen` refuse
+  value-domain degeneracy (incl. the proration unparseable-date traceback);
+  `debt_sizing` gains `interest_only` aliases. All test-backed.
+- **Connector contract schemas (stubs).** The four canonical contracts — `debt`,
+  `entity` (legal/ownership, distinct from `master_data`), `valuation`, `funds`
+  (+ pseudonymized `investor_report`) — authored as `status: stub`, conforming to
+  the connector meta-schemas with round-tripping samples.
+- **`source_class` schema enforcement.** Canonical enum in
+  `_schema/source_class.yaml`, wired into `entity_contract.schema.yaml`, validated
+  by `tests/test_connector_source_class.py`. `max_staleness` declared on the new
+  contracts.
+- **AMOS forward-compat fields.** `produces_artifact_kind`, `pii_policy` (default
+  `none`), `workspace_scope` emitted in the manifest; `live_connector` stays
+  `false`; `--emit-sample` regenerator added.
+
+See `docs/releases/v5.1.0-release-notes.md`. The runtime enforcement of
+`source_class`/`max_staleness`, the corpus-wide governance scanner, the full
+127-skill `v5_contract` sweep, and live/runnable connector adapters remain
+deferred — tracked below.
+
+---
+
+## Previous release: v5.0.0 (2026-06-03)
 
 Single consolidating release. The source had been version-stamped to 4.4.0
 then 4.5.0 but neither tag was ever cut (last published tag: `v4.3.0`).
@@ -59,17 +92,18 @@ shakedown log before graduation to `status: stable`.
 
 ---
 
-## v5.1 — Generalized governance + connector contracts (next)
+## v5.x — Remaining governance + connector runtime (deferred from v5.1.0)
 
-The honest deferrals from v5.0.0. v5.0.0 shipped the metadata, the validator,
-and the honest capability matrix; v5.1 turns the specified-but-not-enforced
-pieces into runtime.
+The honest deferrals that remain after v5.1.0. v5.1.0 added the connector contract
+schemas + the `source_class` schema enum + the AMOS forward-compat fields + the
+calculator fidelity fixes; the **runtime** enforcement and the full-corpus sweep
+below are still future work.
 
 ### Full 127-skill v5-contract conformance sweep — L
 v5.0.0 opted a pilot slice into `v5_contract: true` and corrected the
-decision-grade / AMOS-facing skills. v5.1 extends the contract (Refusal
-Behavior / Confidence and Provenance / Known Limitations sections + the new
-frontmatter fields) across the full corpus.
+decision-grade / AMOS-facing skills (still the state after v5.1.0). This remains:
+extend the contract (Refusal Behavior / Confidence and Provenance / Known
+Limitations sections + the new frontmatter fields) across the full corpus.
 
 Acceptance: `tests/test_skill_v5_contract.py` enforces the contract on every
 non-exempt skill (not just the opted-in slice), and the catalog carries
@@ -78,24 +112,26 @@ classification + governance metadata for all 127.
 ### Generalized cross-skill governance scanner — L
 v5.0.0 ships the `final_marked` selector plus a **targeted** finance-placeholder
 guard over a named allowlist — a presence-of-discipline check, not a runtime
-scanner of emitted output. v5.1 builds the corpus-wide runtime data scanner
-(every cell of every decision-grade skill checked at emit time for source-class
-tagging and placeholder leakage), generalizing the `residential_multifamily`
-machinery to the whole plugin.
+scanner of emitted output (still the state after v5.1.0; v5.1.0 added the static
+connector `source_class` enum, not a runtime scanner). This remains: the
+corpus-wide runtime data scanner (every cell of every decision-grade skill checked
+at emit time for source-class tagging and placeholder leakage), generalizing the
+`residential_multifamily` machinery to the whole plugin.
 
 Acceptance: a runtime scanner that tags/refuses emitted output across the
 decision-grade corpus, with tests, not just the RMF subsystem.
 
-### Four canonical connector contract schemas — M
-`debt`, `entity`, `valuation`, and the promotion of `funds` (with investor
-reporting) into a connector entity contract do not exist yet. The nine existing
-contracts (`pms, gl, crm, ap, market_data, construction, hr_payroll,
-manual_uploads, deal_pipeline`) are v5.0.0 stubs.
+### Connector contract runtime enforcement — M
+**The four contract schemas (`debt`, `entity`, `valuation`, `funds` + investor
+reporting) were authored in v5.1.0 as `status: stub`, and `source_class` is now a
+schema-enforced enum.** What remains is the **runtime**: a connector layer that
+emits records carrying `source_class` and **refuses** stale records past their
+declared `max_staleness` at consume time. Today these are declared and
+schema-validated, not enforced by any running connector.
 
-Acceptance: the four new contract schemas land with the `source_class`
-provenance field and the `max_staleness` consume-time refusal **enforced** at a
-connector runtime (specified in `docs/DATA_GRADES.md` §2 in v5.0.0; enforced in
-v5.1).
+Acceptance: a connector runtime that stamps `source_class` on emitted records and
+refuses on `max_staleness` violation, with tests — not just the static schema
+check shipped in v5.1.0.
 
 ### Valuation + investor connectors — L
 Beyond the four contract schemas, the first valuation and investor-reporting

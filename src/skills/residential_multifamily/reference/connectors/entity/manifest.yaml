@@ -1,0 +1,33 @@
+# Entity connector manifest (vendor-neutral v5.1 stub).
+# Conforms to reference/connectors/_schema/connector_manifest.schema.yaml.
+connector_id: entity
+connector_kind: entity
+version: 0.1.0
+status: stub
+owner: residential_multifamily_subsystem
+vendor_neutral: true
+description: |
+  Legal / ownership structure feed. Carries the legal entities in the
+  ownership and capital structure (funds, JVs, SPEs, sponsors, lenders,
+  owners) and their hierarchy.
+authoring_notes: |
+  v5.1 stub contract. Schema only; no live adapter exists and nothing
+  executes. Boundary note: this `entity` connector is DISTINCT from the
+  operational `master_data` connector. `master_data` does operational
+  identity resolution (resident / vendor / property crosswalks); `entity`
+  carries legal / ownership / cap-structure relationships (who owns what,
+  GP/LP/SPE roles, parent-child ownership). Do not merge the two.
+entities:
+  - legal_entity
+provenance_fields_required:
+  - source_name
+  - source_type
+  - source_date
+  - source_row_id
+handshake:
+  auth_kind: file_drop
+  access_pattern: pull_scheduled
+  notes: |
+    Stub. A future adapter replaces file_drop with the source-of-record
+    system's native auth kind and access pattern.
+contact: operator_placeholder

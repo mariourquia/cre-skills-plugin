@@ -116,6 +116,9 @@
         "amos_surface",
         "decomposes_to",
         "composed_from",
+        "produces_artifact_kind",
+        "pii_policy",
+        "workspace_scope",
         "demo_status",
         "amos_signoff",
         "amos_signoff_chain",
@@ -220,6 +223,20 @@
         "calculator_file": {
           "type": ["string", "null"],
           "description": "Path to the stdlib calculator when runtime_role is deterministic; null otherwise."
+        },
+        "produces_artifact_kind": {
+          "type": ["string", "null"],
+          "description": "v5.1 forward-compat. The AMOS artifact family a skill emits (e.g. 'ic-memo', 'valcomm-deck'). Default null in v5.1 (no skill declares it yet). Contract-only; no live coupling."
+        },
+        "pii_policy": {
+          "type": "string",
+          "enum": ["none", "aggregate_only", "pseudonymized", "redacted_at_extraction"],
+          "description": "v5.1 forward-compat. PII-handling posture. CONSERVATIVE default 'none' — explicit-opt-in only (a skill that touches no PII must not over-claim aggregate_only)."
+        },
+        "workspace_scope": {
+          "type": ["string", "null"],
+          "enum": ["deal", "asset", "fund", "portfolio", null],
+          "description": "v5.1 forward-compat. AMOS RBAC scope the skill operates within. Default null in v5.1. Contract-only; no live coupling."
         },
         "demo_status": {
           "type": "string",

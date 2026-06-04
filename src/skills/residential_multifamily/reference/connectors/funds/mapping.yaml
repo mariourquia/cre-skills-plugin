@@ -1,0 +1,35 @@
+# Funds mapping template — raw source column → normalized column.
+# Vendor-neutral v5.1 stub. The worked examples below are illustrative; a real
+# adapter fork fills in per-source column names.
+fund:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [fund_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: false
+  fields:
+    - { source_column: fund_id,     normalized_column: fund_id,    transform: trim_string, required: true }
+    - { source_column: fund_name,   normalized_column: fund_name,  transform: trim_string, required: true }
+    - { source_column: vintage_yr,  normalized_column: vintage,    transform: to_integer,  required: true }
+    - { source_column: strategy,    normalized_column: strategy,   transform: trim_string, required: true }
+
+investor_report:
+  source_format: [csv, jsonl]
+  dedup_rule:
+    keys: [report_id]
+    tie_breaker: latest_extracted_at_wins
+  as_of_handling:
+    carry_field: source_date
+    allow_backfill: true
+  fields:
+    - { source_column: report_id,       normalized_column: report_id,        transform: trim_string,      required: true }
+    - { source_column: fund_id,         normalized_column: fund_id,          transform: trim_string,      required: true }
+    - { source_column: investor_key,    normalized_column: investor_id,      transform: trim_string,      required: true }
+    - { source_column: period,          normalized_column: period,           transform: trim_string,      required: true }
+    - { source_column: cap_acct_usd,    normalized_column: cap_acct_balance, transform: dollars_to_cents, required: true }
+    - { source_column: nav_usd,         normalized_column: nav,              transform: dollars_to_cents, required: true }
+    - { source_column: irr,             normalized_column: irr,              transform: to_number,        required: true }
+    - { source_column: moic,            normalized_column: moic,             transform: to_number,        required: true }
+    - { source_column: distributions_usd, normalized_column: distributions,  transform: dollars_to_cents, required: false }

@@ -1,8 +1,8 @@
 # Connector Capability Matrix (Honest)
 
-> Status: released (v5.0.0)
+> Status: released (v5.1.0)
 > Owner: Mario Urquia
-> Last reviewed: 2026-06-03
+> Last reviewed: 2026-06-04
 > Source-of-truth this doc describes:
 > - `src/skills/residential_multifamily/reference/connectors/` (canonical connector contracts + adapters — **every one is `status: stub`**)
 > - `src/skills/residential_multifamily/reference/connectors/source_registry/source_registry.yaml` (per-source `status: stubbed | planned | active`)
@@ -67,30 +67,38 @@ domains under
 `src/skills/residential_multifamily/reference/connectors/` (`pms, gl, crm, ap,
 market_data, construction, hr_payroll, manual_uploads, deal_pipeline`), each with
 a `manifest.yaml`, `schema.yaml`, `mapping.yaml`, `field_mapping.yaml`,
-`dq_rules.yaml`, and `reconciliation_checks.yaml`. These are the **v5.0.0** stubs
+`dq_rules.yaml`, and `reconciliation_checks.yaml`. These are the **v5.1.0** stubs
 (`status: stub`, v0.1.0).
 
 The **four canonical contract schemas the v5 connector analysis calls for —
 `debt`, `entity`, `valuation`, and the promotion of `funds` (with investor
-reporting) into a connector entity contract — are a v5.1 deliverable, NOT
-v5.0.0.** They do not exist in the repo yet (the connector analysis lists them as
-`CREATE`). When authored in v5.1 they must: conform to
-`connector_manifest.schema.yaml`, declare `vendor_neutral: true`, carry the
-6-field raw-landing provenance + the `source_class` field, declare `null_handling`
-per required field, and ship `dq_rules.yaml` + `reconciliation_checks.yaml` —
-reusing `accounts.py` / `schema.py` / `rubric.py`, never forking the chart of
-accounts or grade rubric.
+reporting) into a connector entity contract — were authored in v5.1.0 as
+vendor-neutral STUBS** (`status: stub`). They conform to
+`connector_manifest.schema.yaml` + `entity_contract.schema.yaml`, declare
+`vendor_neutral: true`, carry the 6-field raw-landing provenance + the
+`source_class` field + `max_staleness`, declare `null_handling` per required
+field, and ship `dq_rules.yaml` + `reconciliation_checks.yaml` with
+round-tripping `sample_input.json` / `sample_normalized.json` payloads
+(`tests/test_connector_contracts.py` validates all of this). The `entity`
+contract is scoped to legal/ownership cap-structure and is explicitly distinct
+from the operational `master_data` connector. **They are schema/contract only —
+no adapter exists, nothing is live, and the connector runtime that emits/enforces
+`source_class` + `max_staleness` at consume time remains deferred.**
 
-Likewise, the connector **`source_class`** provenance field
+The connector **`source_class`** field
 (`connector_live | document_extracted | operator_supplied | connector_sample |
-reference_illustrative | modeled_assumption`) and the `max_staleness` consume-time
-refusal are **specified** in the v5 connector analysis and crosswalked in
-`docs/DATA_GRADES.md` §2, but the connector *runtime* that emits and enforces them
-is **v5.1**. No live adapter emits `connector_live` today.
+reference_illustrative | modeled_assumption`) is now a **schema-enforced enum**:
+the canonical list lives in
+`reference/connectors/_schema/source_class.yaml`, is wired into
+`entity_contract.schema.yaml`, and is checked by
+`tests/test_connector_source_class.py`. The `max_staleness` consume-time refusal
+is **declared** on the new contracts but the connector *runtime* that emits and
+enforces it at consume time is still **deferred** (see ROADMAP). No live adapter
+emits `connector_live` today; **0 connectors are implemented/live.**
 
-## 4. What this means for skills (v5.0.0)
+## 4. What this means for skills (v5.1.0)
 
-- No skill gains a "connect to Yardi / AppFolio / CoStar" affordance in v5.0.0.
+- No skill gains a "connect to Yardi / AppFolio / CoStar" affordance in v5.1.0.
 - Skills consume the **canonical normalized shape** (the connector `schema.yaml`
   entities / the ingest cash-flow spine), never a vendor-native payload, and never
   assume the source is live.

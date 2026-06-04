@@ -1,0 +1,40 @@
+# Debt data-quality rules (v5.1 stub).
+# Each rule addresses one DQ dimension: freshness, completeness, conformance,
+# consistency, uniqueness, referential_integrity, reasonableness.
+rules:
+- rule_id: debt_completeness_required_fields
+  dimension: completeness
+  severity: blocker
+  description: Every required field in debt/schema.yaml is non-null in the
+    normalized landing.
+  expected: for each required_field, count(null) == 0
+  remediation: A silent null in a required field indicates a mapping gap;
+    operator fixes mapping.yaml and re-lands.
+- rule_id: debt_conformance_enum_values
+  dimension: conformance
+  severity: blocker
+  description: rate_type carries a value in its canonical enum from
+    debt/schema.yaml.
+  expected: rate_type IN canonical_enum
+  remediation: Unmapped source values are rejected at landing; operator extends
+    mapping.yaml.
+- rule_id: debt_uniqueness_primary_key
+  dimension: uniqueness
+  severity: blocker
+  description: No duplicate loan_id across loan after dedup.
+  expected: count(distinct loan_id) == count(records)
+  remediation: See qa/duplicate_id.yaml.
+- rule_id: debt_consistency_current_le_original
+  dimension: consistency
+  severity: blocker
+  description: Current balance never exceeds original balance on a loan facility.
+  expected: for each loan, current_balance <= original_balance
+  remediation: A current balance above the original balance indicates a sign or
+    units error in the feed; operator corrects and re-lands.
+- rule_id: debt_reasonableness_maturity_after_origination
+  dimension: reasonableness
+  severity: warning
+  description: Maturity date is on or after origination date.
+  expected: for each loan, maturity_date >= origination_date
+  remediation: A maturity before origination indicates a date-entry error;
+    operator confirms the facility dates.

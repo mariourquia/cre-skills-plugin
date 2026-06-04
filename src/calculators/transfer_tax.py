@@ -288,6 +288,26 @@ def calculate_transfer_tax(inputs: dict[str, Any]) -> dict[str, Any]:
     price = inputs["purchase_price"]
     ptype = inputs.get("property_type", "commercial").lower()
 
+    # --- Value-domain refusal (v5.1) -------------------------------------- #
+    if not isinstance(price, (int, float)) or isinstance(price, bool) or price <= 0:
+        return {
+            "error": (
+                f"purchase_price must be positive; got {price!r}. Refusing rather "
+                "than returning a negative or zero transfer tax."
+            ),
+            "refused": True,
+            "code": "transfer_tax_degenerate",
+        }
+    if state not in {"NY", "NJ", "DC", "WA", "HI"} and state not in STATE_TRANSFER_TAX:
+        return {
+            "error": (
+                f"state {state!r} is not in the transfer-tax table. Refusing rather "
+                "than silently returning $0 tax for an unmodeled jurisdiction."
+            ),
+            "refused": True,
+            "code": "transfer_tax_degenerate",
+        }
+
     # Handle states with tiered/special calculations
     if state == "NY":
         result = calc_ny_transfer_tax(price, ptype, county)

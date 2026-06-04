@@ -1,6 +1,6 @@
 {
   "manifest_version": "1.0",
-  "plugin_version": "5.0.0",
+  "plugin_version": "5.1.0",
   "generated_at": "2026-06-03T00:00:00Z",
   "repo": "mariourquia/cre-skills-plugin",
   "ref_namespaces": [
@@ -77,6 +77,9 @@
       "chains_to": [],
       "chains_from": [],
       "calculator_file": null,
+      "produces_artifact_kind": null,
+      "pii_policy": "none",
+      "workspace_scope": null,
       "demo_status": "preprocessed-fixture",
       "amos_signoff": "external-attestation",
       "amos_signoff_chain": [
@@ -126,6 +129,9 @@
       "chains_to": [],
       "chains_from": [],
       "calculator_file": null,
+      "produces_artifact_kind": null,
+      "pii_policy": "none",
+      "workspace_scope": null,
       "demo_status": "preprocessed-fixture",
       "amos_signoff": "analyst-review",
       "amos_signoff_chain": [
@@ -175,6 +181,9 @@
         "t12-normalizer"
       ],
       "calculator_file": null,
+      "produces_artifact_kind": null,
+      "pii_policy": "none",
+      "workspace_scope": null,
       "demo_status": "preprocessed-fixture",
       "amos_signoff": "analyst-review",
       "amos_signoff_chain": [
@@ -221,6 +230,9 @@
         "construction-project-command-center"
       ],
       "calculator_file": null,
+      "produces_artifact_kind": null,
+      "pii_policy": "none",
+      "workspace_scope": null,
       "demo_status": "preprocessed-fixture",
       "amos_signoff": "analyst-review",
       "amos_signoff_chain": [
@@ -250,6 +262,9 @@
       "chains_to": [],
       "chains_from": [],
       "calculator_file": null,
+      "produces_artifact_kind": null,
+      "pii_policy": "none",
+      "workspace_scope": null,
       "demo_status": "preprocessed-fixture",
       "amos_signoff": "analyst-review",
       "amos_signoff_chain": [
@@ -288,6 +303,9 @@
         "lease-compliance-auditor"
       ],
       "calculator_file": null,
+      "produces_artifact_kind": null,
+      "pii_policy": "none",
+      "workspace_scope": null,
       "demo_status": "preprocessed-fixture",
       "amos_signoff": "external-attestation",
       "amos_signoff_chain": [
@@ -331,6 +349,9 @@
         "capital-raise-machine"
       ],
       "calculator_file": null,
+      "produces_artifact_kind": null,
+      "pii_policy": "none",
+      "workspace_scope": null,
       "demo_status": "preprocessed-fixture",
       "amos_signoff": "analyst-review",
       "amos_signoff_chain": [
@@ -377,6 +398,9 @@
       "chains_to": [],
       "chains_from": [],
       "calculator_file": null,
+      "produces_artifact_kind": null,
+      "pii_policy": "none",
+      "workspace_scope": null,
       "demo_status": "preprocessed-fixture",
       "amos_signoff": "am-cfo-signoff",
       "amos_signoff_chain": [
@@ -432,6 +456,9 @@
         "reit-profile-builder"
       ],
       "calculator_file": null,
+      "produces_artifact_kind": null,
+      "pii_policy": "none",
+      "workspace_scope": null,
       "demo_status": "preprocessed-fixture",
       "amos_signoff": "am-cfo-signoff",
       "amos_signoff_chain": [
@@ -481,6 +508,9 @@
         "submarket-truth-serum"
       ],
       "calculator_file": null,
+      "produces_artifact_kind": null,
+      "pii_policy": "none",
+      "workspace_scope": null,
       "demo_status": "preprocessed-fixture",
       "amos_signoff": "analyst-review",
       "amos_signoff_chain": [
@@ -525,6 +555,9 @@
         "acquisition-underwriting-engine"
       ],
       "calculator_file": "src/calculators/waterfall_calculator.py",
+      "produces_artifact_kind": null,
+      "pii_policy": "none",
+      "workspace_scope": null,
       "demo_status": "preprocessed-fixture",
       "amos_signoff": "am-cfo-signoff",
       "amos_signoff_chain": [
@@ -562,6 +595,9 @@
         "lease-abstract-extractor"
       ],
       "calculator_file": null,
+      "produces_artifact_kind": null,
+      "pii_policy": "none",
+      "workspace_scope": null,
       "demo_status": "preprocessed-fixture",
       "amos_signoff": "analyst-review",
       "amos_signoff_chain": [

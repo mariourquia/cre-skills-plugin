@@ -1,0 +1,34 @@
+# Funds data-quality rules (v5.1 stub).
+# Each rule addresses one DQ dimension: freshness, completeness, conformance,
+# consistency, uniqueness, referential_integrity, reasonableness.
+rules:
+- rule_id: funds_completeness_required_fields
+  dimension: completeness
+  severity: blocker
+  description: Every required field in funds/schema.yaml is non-null in the
+    normalized landing for both fund and investor_report.
+  expected: for each entity and required_field, count(null) == 0
+  remediation: A silent null in a required field indicates a mapping gap;
+    operator fixes mapping.yaml and re-lands.
+- rule_id: funds_uniqueness_primary_keys
+  dimension: uniqueness
+  severity: blocker
+  description: No duplicate fund_id across fund and no duplicate report_id across
+    investor_report after dedup.
+  expected: count(distinct pk) == count(records) per entity
+  remediation: See qa/duplicate_id.yaml.
+- rule_id: funds_referential_integrity_report_fund
+  dimension: referential_integrity
+  severity: blocker
+  description: Every investor_report.fund_id resolves to a fund row.
+  expected: for each investor_report, fund_id IN fund.fund_id
+  remediation: An orphan fund_id means the report references a fund not in the
+    fund feed; operator reconciles before re-landing.
+- rule_id: funds_completeness_investor_id
+  dimension: completeness
+  severity: blocker
+  description: Every investor_report row carries a pseudonymized investor_id; rows
+    without it are rejected (never PII).
+  expected: count(investor_report where investor_id IS NULL) == 0
+  remediation: A report row without an investor key cannot be attributed; operator
+    supplies the pseudonymized key and re-lands.

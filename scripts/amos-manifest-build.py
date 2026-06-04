@@ -47,6 +47,22 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 CATALOG_JSON = REPO_ROOT / "dist" / "catalog.json"
 PLUGIN_JSON = REPO_ROOT / ".claude-plugin" / "plugin.json"
 OUT_PATH = REPO_ROOT / "dist" / "amos-skill-manifest.json"
+# Hand-maintained committed excerpt (dist/ is gitignored, so this is the tracked
+# proof). Regenerated, not hand-edited, via --emit-sample so its entries stay a
+# byte-for-byte subset of a fresh build.
+SAMPLE_PATH = REPO_ROOT / "docs" / "integrations" / "amos-skill-manifest.sample.json"
+# Root keys the sample carries verbatim from the full manifest (the contract
+# fields the subset test compares). Everything else in the sample root (today,
+# only _sample_note) is preserved from the committed file.
+SAMPLE_ROOT_CONTRACT_KEYS = (
+    "manifest_version",
+    "plugin_version",
+    "generated_at",
+    "repo",
+    "ref_namespaces",
+    "crosswalks",
+)
+SAMPLE_AS_OF = "2026-06-03T00:00:00Z"
 
 MANIFEST_VERSION = "1.0"
 REPO_SLUG = "mariourquia/cre-skills-plugin"
@@ -215,6 +231,14 @@ def build_skill_entry(item: dict) -> dict:
         "chains_to": item.get("downstream_items", []),
         "chains_from": item.get("upstream_items", []),
         "calculator_file": item.get("calculator_file"),
+        # --- v5.1 forward-compatibility metadata (contract-only; AMOS consumes,
+        # no live coupling). Derived from the catalog item if it declares them,
+        # else conservative defaults. No skill declares them in v5.1, so today
+        # these are uniformly (null, "none", null). PURE/deterministic — the
+        # source is the static catalog item only (no datetime/env/random). ---
+        "produces_artifact_kind": item.get("produces_artifact_kind"),  # None default in v5.1
+        "pii_policy": item.get("pii_policy") or "none",                # conservative explicit-opt-in default
+        "workspace_scope": item.get("workspace_scope"),                # None default in v5.1
         # --- COMPUTED CROSSWALKS (code, not prose) ---
         "demo_status": demo_status_for(runtime_role),
         "amos_signoff": signoff["amos_signoff"],
@@ -249,13 +273,68 @@ def _serialize(manifest: dict) -> str:
     return json.dumps(manifest, indent=2, ensure_ascii=False) + "\n"
 
 
+def build_sample(as_of: str = SAMPLE_AS_OF) -> dict:
+    """Regenerate the committed sample excerpt from a fresh in-process build.
+
+    Selects the SAME skill ids (and order) currently present in the committed
+    docs/.../amos-skill-manifest.sample.json, copies their entries byte-for-byte
+    from a fresh full build, and preserves the sample's _sample_note and root
+    shape. Uses as_of=SAMPLE_AS_OF so generated_at matches the test pin. Pure:
+    the only inputs are the static catalog + the committed sample's id list.
+    """
+    if not SAMPLE_PATH.exists():
+        print(
+            f"FAIL: {SAMPLE_PATH} missing — cannot derive the sample's id list.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    existing = json.loads(SAMPLE_PATH.read_text(encoding="utf-8"))
+    sample_ids = [s["id"] for s in existing.get("skills", [])]
+
+    full = build_manifest(as_of=as_of)
+    full_by_id = {s["id"]: s for s in full["skills"]}
+
+    missing = [sid for sid in sample_ids if sid not in full_by_id]
+    if missing:
+        print(
+            "FAIL: committed sample references ids absent from the manifest: "
+            + ", ".join(missing),
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    # Start from the existing sample to preserve its exact root shape (key order
+    # and any non-contract annotations such as _sample_note), then overwrite the
+    # contract-bearing root keys + the skills array from the fresh build.
+    out = dict(existing)
+    for key in SAMPLE_ROOT_CONTRACT_KEYS:
+        out[key] = full[key]
+    out["skills"] = [full_by_id[sid] for sid in sample_ids]  # same ids, same order
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Build dist/amos-skill-manifest.json")
     parser.add_argument("--as-of", help="ISO-8601 generated_at override (determinism)")
     parser.add_argument("--now", action="store_true", help="Stamp wall-clock generated_at (non-deterministic)")
     parser.add_argument("--stdout", action="store_true", help="Print to stdout, do not write")
     parser.add_argument("--check", action="store_true", help="Fail if dist manifest differs from a fresh build")
+    parser.add_argument(
+        "--emit-sample",
+        action="store_true",
+        help=(
+            "Regenerate the committed docs sample (same ids/order, pinned as_of) "
+            "from a fresh build, instead of writing the dist manifest."
+        ),
+    )
     args = parser.parse_args()
+
+    if args.emit_sample:
+        sample = build_sample()
+        SAMPLE_PATH.write_text(_serialize(sample), encoding="utf-8")
+        print(f"Wrote {SAMPLE_PATH} ({len(sample['skills'])} sample skills)")
+        print(f"  generated_at: {sample['generated_at']}")
+        return
 
     manifest = build_manifest(as_of=args.as_of, use_now=args.now)
     payload = _serialize(manifest)

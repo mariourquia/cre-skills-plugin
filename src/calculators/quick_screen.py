@@ -103,6 +103,18 @@ def calculate_quick_screen(inputs: dict[str, Any]) -> dict[str, Any]:
     noi = inputs["noi"]
     units_sf = inputs["units_or_sf"]
     unit_type = inputs.get("unit_type", "units")  # "units" or "sf"
+
+    # --- Value-domain refusal (v5.1) -------------------------------------- #
+    # A non-positive price fabricates a 0% cap rate and $0 price-per-unit screen.
+    if not isinstance(price, (int, float)) or isinstance(price, bool) or price <= 0:
+        return {
+            "error": (
+                f"purchase_price must be positive; got {price!r}. Refusing rather "
+                "than fabricating a zero-cap-rate / zero-per-unit screen."
+            ),
+            "refused": True,
+            "code": "quick_screen_degenerate",
+        }
     market_rent = inputs.get("market_rent_per_unit")
     in_place_rent = inputs.get("in_place_rent_per_unit")
     loan_amount = inputs.get("loan_amount", price * 0.65)

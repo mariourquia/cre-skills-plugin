@@ -189,25 +189,29 @@ facts/model values, not skill metadata.
 | **Feedback / redlines** | `ic-feedback-view` (`FeedbackItem`) | `id` (routing target), `human_gate`/`amos_signoff` (a redline is a gate failing back), `runtime_role`. |
 | **Deck / memo** | `lib/deck/registry.ts`, `data/artifacts/registry.ts` | `id` (named in `GovernedGap.connectors`), `decision_grade`, `source_ref_policy` (deck binds resolve-by-reference values, `forbids_fabricated_model_ref`). |
 
-## 6. Known gaps (v5.1)
+## 6. Known gaps
 
-Fields AMOS would consume that the plugin **cannot yet supply** honestly:
+**Added in v5.1.0 (now emitted, with conservative defaults):**
+
+- **`produces_artifact_kind`** (string | null), **`pii_policy`** (enum
+  `none | aggregate_only | pseudonymized | redacted_at_extraction`, conservative
+  default `none` — explicit-opt-in, never over-claims PII handling), and
+  **`workspace_scope`** (enum `deal | asset | fund | portfolio` | null) are now
+  emitted on every entry. In v5.1.0 no skill declares them in source metadata, so
+  every entry carries `null` / `"none"` / `null`; **per-skill population from
+  SKILL.md frontmatter is the remaining work.** `governed_metrics` is still
+  unmapped.
+
+**Still not supplied honestly:**
 
 - **`outputs` is sparse.** Many catalog items have `outputs: []`; AMOS's skill
-  cards / timeline render `outputArtifacts`. Backfill belongs to the v5.1 SKILL.md
+  cards / timeline render `outputArtifacts`. Backfill belongs to a SKILL.md
   Output-Format sweep, not this export.
 - **`needs_external_connector`.** The plugin cannot say "this skill is a fixture
   *because* it needs a live market/comp/valuation data feed." That nuance lives in
-  AMOS's per-skill `demoStatus` today (market & comps). A v5.1 boolean would let
+  AMOS's per-skill `demoStatus` today (market & comps). A future boolean would let
   the plugin drive the `preprocessed-fixture` → `future-live-connector`
   distinction.
-- **`produces_artifact_kind` / `governed_metrics`.** No binding from a skill to an
-  AMOS `data/artifacts` family (`ic-memo`, `valcomm-deck`, …) or to a versioned org
-  metric (DSCR/NOI/TVPI). Proposed in `09 §4`, deferred to v5.1.
-- **`pii_policy`.** CAPABILITIES describes aggregate-only / pseudonymization and a
-  non-overridable PII-breach block, but no per-skill `pii_policy` enum is exported.
-- **`workspace_scope`.** ADR-0004 Addendum §4 RBAC (deal/asset/fund/portfolio) is
-  not yet emitted.
 - **Corpus-wide runtime enforcement.** See the scope statement below.
 
 ## 7. Honest scope statement (M-H1)

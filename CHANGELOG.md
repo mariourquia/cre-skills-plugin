@@ -1,5 +1,48 @@
 # Changelog
 
+## [5.1.0] - 2026-06-04
+
+Governance-hardening release. No catalog growth (still 127 skills / 54 agents /
+21 calculators-MCP-tools / 10 orchestrators / 6 workflow chains; **0 net new
+skills**) — the value is correctness, truthful labels, and a more durable contract
+surface. No live connector, no live AMOS coupling, no production runtime
+enforcement is introduced. Full narrative: `docs/releases/v5.1.0-release-notes.md`.
+
+### Fixed (calculators)
+- **Monte Carlo beta copula:** beta-distributed variables now inherit the
+  Gaussian-copula correlation (previously an independent `rng.betavariate()`
+  silently discarded the `correlation_matrix`). Added a stdlib regularized
+  incomplete beta + inverse-CDF; extracted `sample_trial_values`.
+- **`fund_fee_modeler`:** promote-sensitivity output labeled `grade: screening` /
+  `method: linear_fee_drag_approximation` — the `breakeven_irr_*` values are a
+  fee-drag approximation, not a DCF-IRR (numeric keys preserved).
+- **Refusals:** `transfer_tax` / `proration_calculator` / `quick_screen` now
+  return typed refusals on value-domain degeneracy (incl. the proration
+  unparseable-date raw-traceback path) instead of fabricated/negative output.
+
+### Added (connectors + source_class)
+- Four vendor-neutral connector **contract stubs** (`status: stub`): `debt`,
+  `entity` (legal/ownership, distinct from `master_data`), `valuation`, `funds`
+  (+ pseudonymized `investor_report`). Conform to the existing meta-schemas with
+  round-tripping samples.
+- `source_class` is now a **schema-enforced enum** (`_schema/source_class.yaml` +
+  `entity_contract.schema.yaml` + `test_connector_source_class.py`). `max_staleness`
+  declared on the new contracts.
+
+### Added (AMOS forward-compat)
+- Manifest emits `produces_artifact_kind`, `pii_policy` (conservative default
+  `none`), `workspace_scope`. `live_connector` stays `const: false`. New
+  `--emit-sample` regenerates the committed sample deterministically.
+
+### Added (debt_sizing)
+- Non-breaking `interest_only` alias keys alongside the `_io` outputs.
+
+### Still deferred (honest)
+- Corpus-wide runtime governance scanner; full 127-skill `v5_contract` sweep; live
+  connector adapters + runnable valuation/investor adapters; per-skill population
+  of the new AMOS fields from frontmatter + `outputs[]` backfill; the Windows
+  `.exe` (CI/Windows-only).
+
 ## [5.0.0] - 2026-06-03
 
 Single consolidating release. The source tree was version-stamped to 4.4.0 then

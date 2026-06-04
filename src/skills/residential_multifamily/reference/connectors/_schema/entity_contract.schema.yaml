@@ -175,4 +175,20 @@ properties:
     description: Informational — downstream metrics / workflows / templates.
     items:
       type: string
+  source_class:
+    type: string
+    enum:
+      - connector_live
+      - connector_sample
+      - document_extracted
+      - operator_supplied
+      - reference_illustrative
+      - modeled_assumption
+    description: |
+      Optional. Trust grade of the records this entity emits. Canonical
+      vocabulary lives in _schema/source_class.yaml and mirrors
+      docs/DATA_GRADES.md. Omitting it keeps legacy stubs valid.
+  max_staleness:
+    type: string
+    description: "ISO-8601 duration after which a record is stale and decision-grade use must refuse (e.g. P30D)."
 additionalProperties: false

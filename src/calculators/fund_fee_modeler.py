@@ -450,10 +450,15 @@ def promote_sensitivity(
 
     def _breakeven_gross_irr(fee_rate: float) -> float:
         """
-        Find gross IRR where net IRR equals preferred return after fees.
+        Approximate the gross return at which net return clears the preferred.
 
-        Simplified model: annual fee drag on returns during investment period,
-        reduced fee post-investment period (step-down). Gross IRR = net IRR + fee drag.
+        SCREENING-GRADE linear fee-drag approximation, NOT a discounted-cashflow
+        IRR root-find: ``breakeven ~= pref_return + weighted_avg_fee_drag`` with a
+        step-down after the investment period. It ignores cash-draw timing and the
+        compounding of fees on intermediate returns, so it is suitable for "how
+        much does a fee change move the hurdle" sensitivity, not a binding IRR
+        hurdle. Reported under ``grade: screening`` / ``method:
+        linear_fee_drag_approximation``.
         """
         step_down = _safe_get(state, "standardTerms", "feeStepDown")
         step_rate = step_down.get("rate", fee_rate * 0.75) if step_down else fee_rate * 0.75
@@ -499,6 +504,10 @@ def promote_sensitivity(
     promote_delta_total = promote_delta_annual * fund_term
 
     return {
+        # Honesty labels (v5.1): the breakeven_irr_* values are a linear
+        # fee-drag approximation, not a DCF-IRR root-find. See _breakeven_gross_irr.
+        "grade": "screening",
+        "method": "linear_fee_drag_approximation",
         "standard_fee": standard_rate,
         "blended_fee": blended_rate,
         "preferred_return": pref_return,
@@ -761,9 +770,9 @@ def _format_dashboard(result: dict) -> str:
 
     # GP promote sensitivity
     ps = result["promoteSensitivity"]
-    lines.append("GP PROMOTE SENSITIVITY:")
-    lines.append(f"  At current blended fee: promote breakeven at {_fmt_pct(ps['breakeven_irr_blended'])} gross IRR")
-    lines.append(f"  At standard fee:        promote breakeven at {_fmt_pct(ps['breakeven_irr_standard'])} gross IRR")
+    lines.append("GP PROMOTE SENSITIVITY (screening-grade fee-drag approximation):")
+    lines.append(f"  At current blended fee: promote breakeven ~{_fmt_pct(ps['breakeven_irr_blended'])} approx. gross return")
+    lines.append(f"  At standard fee:        promote breakeven ~{_fmt_pct(ps['breakeven_irr_standard'])} approx. gross return")
     lines.append(f"  Breakeven delta: {ps['breakeven_delta_bps']:+.0f} bps")
     lines.append(f"  Promote delta over fund life: {_fmt_dollars(ps['promote_delta_fund_life'])} to GP")
 
@@ -991,11 +1000,11 @@ def _format_scenario(result: dict) -> str:
 
     # Promote sensitivity
     ps = result["promoteSensitivity"]
-    lines.append("GP PROMOTE SENSITIVITY:")
+    lines.append("GP PROMOTE SENSITIVITY (screening-grade fee-drag approximation):")
     lines.append(
         f"  Promote breakeven shifts: "
         f"{_fmt_pct(ps['current']['breakeven_irr_blended'])} -> "
-        f"{_fmt_pct(ps['proposed']['breakeven_irr_blended'])} gross IRR"
+        f"{_fmt_pct(ps['proposed']['breakeven_irr_blended'])} approx. gross return"
     )
     lines.append(f"  Promote delta over fund life: {_fmt_dollars(ps['promote_delta_shift'])}")
     lines.append("")

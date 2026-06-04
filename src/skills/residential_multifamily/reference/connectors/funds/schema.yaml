@@ -1,0 +1,101 @@
+entities:
+  fund:
+    entity_name: fund
+    grain: one row per fund
+    time_basis: state
+    source_class: operator_supplied
+    max_staleness: P30D
+    primary_key:
+    - fund_id
+    required_fields:
+    - name: fund_id
+      type: string
+      description: Stable identifier for the fund
+      is_key: true
+    - name: fund_name
+      type: string
+      description: Fund name
+      is_key: false
+    - name: vintage
+      type: integer
+      description: Vintage year of the fund
+      is_key: false
+    - name: strategy
+      type: string
+      description: Investment strategy label
+      is_key: false
+    optional_fields: []
+    foreign_keys: []
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - source_row_id
+    dependents:
+    - fund-formation-toolkit; fund-operations-compliance-dashboard skills
+  investor_report:
+    entity_name: investor_report
+    grain: one row per investor per fund per reporting period (investor_id is
+      pseudonymized — a stable opaque key, never PII)
+    time_basis: snapshot
+    source_class: operator_supplied
+    max_staleness: P30D
+    primary_key:
+    - report_id
+    required_fields:
+    - name: report_id
+      type: string
+      description: Stable identifier for the investor reporting row
+      is_key: true
+    - name: fund_id
+      type: string
+      description: FK to fund
+      is_key: false
+    - name: investor_id
+      type: string
+      description: Pseudonymized investor key (opaque, never PII)
+      is_key: false
+    - name: period
+      type: string
+      description: Reporting period label (e.g. 2026Q1)
+      is_key: false
+    - name: cap_acct_balance
+      type: money_cents
+      description: Capital account balance, in cents
+      is_key: false
+      unit: cents_usd
+    - name: nav
+      type: money_cents
+      description: Net asset value attributable to the investor, in cents
+      is_key: false
+      unit: cents_usd
+    - name: irr
+      type: number
+      description: Net internal rate of return for the investor position
+      is_key: false
+      unit: percent
+    - name: moic
+      type: number
+      description: Multiple on invested capital for the investor position
+      is_key: false
+    optional_fields:
+    - name: distributions
+      type: money_cents
+      description: Cumulative distributions to the investor, in cents
+      unit: cents_usd
+    foreign_keys:
+    - field: fund_id
+      references: fund.fund_id
+      on_missing: reject
+    null_handling:
+    - field: investor_id
+      behavior: reject_record
+      notes: pseudonymized investor key is mandatory; a row without it cannot be
+        attributed and is rejected. investor_id is opaque, never PII.
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - source_row_id
+    dependents:
+    - quarterly-investor-update; investor-lifecycle-manager skills

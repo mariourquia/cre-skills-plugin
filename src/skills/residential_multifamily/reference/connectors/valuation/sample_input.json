@@ -1,0 +1,17 @@
+{
+  "valuation": [
+    {
+      "val_id": "val_sample_001",
+      "prop_id": "prop_demo_001",
+      "as_of": "2026-03-31",
+      "appraiser": "Sample Appraisal Group",
+      "value_usd": 42500000,
+      "approach": "income",
+      "cap_rate": 5.25,
+      "source_name": "sample_feed",
+      "source_type": "valuation",
+      "source_date": "2026-04-01",
+      "source_row_id": "val_sample_001"
+    }
+  ]
+}

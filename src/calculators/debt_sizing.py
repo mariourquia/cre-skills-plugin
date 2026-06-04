@@ -245,9 +245,13 @@ def calculate_debt_sizing(inputs: dict[str, Any]) -> dict[str, Any]:
             "recommended_loan": recommended_loan,
             "annual_debt_service_amort": round(ds_amort, 2),
             "annual_debt_service_io": round(ds_io, 2),
+            # interest_only aliases clarify the `_io` abbreviation (v5.1); the
+            # legacy `_io` keys are retained for back-compat.
+            "annual_debt_service_interest_only": round(ds_io, 2),
             "mortgage_constant": round(mc, 6),
             "dscr_amortizing": actual_dscr_amort,
             "dscr_io": actual_dscr_io,
+            "dscr_interest_only": actual_dscr_io,
             "ltv": actual_ltv,
             "debt_yield": actual_dy,
             "equity_required": round(equity_required, 0),
