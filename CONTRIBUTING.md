@@ -99,6 +99,39 @@ Name reference files descriptively: `loan-sizing-formulas.md`, `replacement-cost
 
 ---
 
+## v5 Skill Standard (v0.2.0 conformance)
+
+Starting in v5.0.0, skills adopt an extended contract that makes refusal, provenance, and limitations explicit. A skill signals conformance by setting `v5_contract: true` in its frontmatter (and bumping `version` to `0.2.0`+). Enforcement keys on the `v5_contract` flag, **not** the version number, because a handful of skills already sit at `0.2.0` for unrelated reasons. The contract above remains valid for skills that have not opted in; they are migrated incrementally (see the v5 roadmap). `tests/test_skill_v5_contract.py` enforces this standard on every skill with `v5_contract: true`, and checks the grammar of the new fields on any skill that carries them.
+
+### Additional frontmatter fields
+
+| Field | Type | Required at conformance | Meaning |
+|---|---|---|---|
+| `v5_contract` | bool | yes | Set `true` to opt the skill into the v5 contract (enforced by `tests/test_skill_v5_contract.py`). Enforcement keys on this flag, not the version number. |
+| `stale_data` | string | yes | A one-paragraph freshness caveat naming the market-sensitive inputs that age (rents, cap rates, comps, rates) and instructing that user-provided/fetched data overrides training data. This is the existing corpus convention (a descriptive string, not a boolean). |
+| `confidence_default` | enum | yes | Baseline output fidelity: `confirmed` (operator-sourced), `estimated` (derived/benchmarked), or `illustrative` (sample/demo). |
+| `refusal_trigger` | string | yes | One sentence naming the input condition under which the skill refuses to emit a final-marked output. |
+| `calculator_bridge` | list[str] | conditional | Calculator slugs the skill invokes via the bridge. Required iff the skill calls a calculator. |
+| `statute_review` | list | conditional | For skills encoding tax/legal/regulatory regimes: list of `{ code: <authority>, last_verified: <YYYY-MM-DD> }`. Distinct from `stale_data` (market drift). Re-verify within 24 months (enforced). |
+| `final_marked` | bool | optional | True if the skill can emit a decision-grade ("final") artifact (IC memo, valuation, LP report, waterfall). Selects it into the finance-critical governance guard. |
+
+### Additional sections (insert after `## Red Flags`, before `## Chain Notes`)
+
+- `## Refusal Behavior` — explicit fail-closed conditions (missing required input, stale/sample data on a final-marked path, sub-threshold confidence). Reference the data-grade ladder in `docs/DATA_GRADES.md`.
+- `## Confidence and Provenance` — output cells carry a `confirmed | estimated | illustrative` label and a source-class tag (`[operator] [derived] [benchmark] [overlay] [placeholder]`). Valuation/comp skills include the "estimate, not an appraisal" stamp.
+- `## Known Limitations` — domain-specific, minimum one; no generic filler.
+- `## Calculator / Tool Bridge` — **conditional**, required iff `calculator_bridge` is set. Names the calculator slug(s), the inputs handed to them, and notes they are invoked via the bridge (not emitted as code to the user).
+
+### Router / workspace sub-contract
+
+Skills with `category: workspace` (or an explicit `pack_type: router|workspace`) route to other skills and do not produce analytics directly. They are exempt from `## Input Schema`, `## Red Flags`, and `## Chain Notes`, and instead provide routing/process content. At conformance they still declare `stale_data`, `confidence_default`, `refusal_trigger`, and a `## Known Limitations` section.
+
+### Governance scope (honest as of v5.0.0)
+
+The decision-grade enforcement machinery (source-class tagging, refusal-on-missing-input, period-seal, the placeholder scanner) is fully implemented inside the `residential_multifamily` subsystem. Across the rest of the corpus, v5.0.0 ships the `final_marked` selector and a finance-critical placeholder guard where reference data exists; the fully-generalized cross-skill data scanner is a v5.1 item. Skills must not imply that decision-grade enforcement is universal. A repo-wide guardrail forbids asserting hallucinated legal/tax/regulatory conclusions as fact; such outputs are labeled advisory and defer to a qualified professional.
+
+---
+
 ## Adding a New Agent
 
 Agents live in `src/agents/<name>.md` where `<name>` is a lowercase-hyphenated role identifier.
