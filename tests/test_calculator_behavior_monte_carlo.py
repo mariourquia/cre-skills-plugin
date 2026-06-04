@@ -103,16 +103,41 @@ class TestMonteCarloMonotonicity(unittest.TestCase):
 
 
 class TestMonteCarloDegenerateInputs(unittest.TestCase):
-    @unittest.expectedFailure
     def test_zero_trials_should_refuse_DEFECT(self) -> None:
-        """KNOWN DEFECT: zero trials currently returns a fabricated
-        distribution instead of refusing or returning an explicit
-        degenerate result. This test is marked `expectedFailure` so CI
-        does not go red; flipping it to a hard assertion is tracked as
-        a v4.3 follow-up fix to the simulator."""
+        """FIXED in v5: zero (or negative) trials now returns a typed refusal
+        dict instead of silently floor-clamping 0 -> 1000 and fabricating a
+        full distribution. Per the calculator degenerate-input contract the
+        refusal is a returned envelope (not a raised exception), so the bridge
+        surfaces a clean reason.
+        """
         bad = _base_input(trials=0)
-        with self.assertRaises(Exception):
-            run_simulation(bad)
+        out = run_simulation(bad)
+        self.assertTrue(
+            out.get("refused") is True and bool(out.get("error")),
+            f"expected typed refusal for zero trials, got {out}",
+        )
+        # The fabricated-distribution symptom must be gone: no convergence block
+        # claiming trials_run=1000 for a request of 0.
+        self.assertNotIn("convergence", out)
+
+    def test_negative_trials_refuses(self) -> None:
+        out = run_simulation(_base_input(trials=-5))
+        self.assertTrue(out.get("refused") is True and bool(out.get("error")))
+
+    def test_zero_equity_refuses(self) -> None:
+        bad = _base_input()
+        bad["equity_invested"] = 0
+        out = run_simulation(bad)
+        self.assertTrue(
+            out.get("refused") is True and bool(out.get("error")),
+            f"expected refusal for zero equity, got keys={list(out)}",
+        )
+
+    def test_valid_trials_in_clamp_range_still_run(self) -> None:
+        # A small but valid request (1..999) is still allowed and clamped up to
+        # the 1000-trial floor for statistical stability -- only <1 refuses.
+        out = run_simulation(_base_input(trials=10))
+        self.assertGreaterEqual(out["convergence"]["trials_run"], 1000)
 
     def test_impossible_correlation_degrades_gracefully(self) -> None:
         bad = _base_input()
@@ -125,6 +150,44 @@ class TestMonteCarloDegenerateInputs(unittest.TestCase):
         except Exception:
             return
         self.assertLessEqual(_irr_at(out, "P10"), _irr_at(out, "P90"))
+
+
+class TestMonteCarloRegressionSnapshot(unittest.TestCase):
+    """Pinned P10/P50/P90 IRR at seed=42, trials=2000.
+
+    The pre-v5 file only checked percentile ORDERING, not values, so a silent
+    change to a sampler or DCF constant would not be caught. These are
+    seed-deterministic; the small deltas guard against float drift while
+    failing on any real change to the distribution.
+    """
+
+    def test_pinned_irr_percentiles(self) -> None:
+        out = run_simulation(_base_input(seed=42, trials=2000))
+        self.assertAlmostEqual(_irr_at(out, "P10"), 0.005746, delta=2e-4)
+        self.assertAlmostEqual(_irr_at(out, "P50"), 0.098291, delta=2e-4)
+        self.assertAlmostEqual(_irr_at(out, "P90"), 0.174556, delta=2e-4)
+
+    def test_pinned_equity_multiples(self) -> None:
+        out = run_simulation(_base_input(seed=42, trials=2000))
+        self.assertAlmostEqual(_em_at(out, "P50"), 2.5495, delta=2e-3)
+
+    def test_pinned_probability_of_loss(self) -> None:
+        out = run_simulation(_base_input(seed=42, trials=2000))
+        self.assertAlmostEqual(_prob_loss(out), 0.08, delta=0.01)
+
+
+class TestMonteCarloUnitSanity(unittest.TestCase):
+    """A scale/unit sanity check: IRR is a decimal fraction, not a percent;
+    equity multiple is a positive ratio."""
+
+    def test_irr_is_decimal_fraction_scale(self) -> None:
+        out = run_simulation(_base_input(seed=42, trials=1000))
+        # A 5-yr value-add CRE IRR distribution should sit well within (-1, 1)
+        # as a decimal; if a constant were expressed as a percent (e.g. 9.8),
+        # this band would catch it.
+        self.assertGreater(_irr_at(out, "P50"), -1.0)
+        self.assertLess(_irr_at(out, "P90"), 1.0)
+        self.assertGreater(_em_at(out, "P50"), 0.0)
 
 
 if __name__ == "__main__":

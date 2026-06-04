@@ -5,6 +5,9 @@ version: 0.1.0
 status: deployed
 category: reit-cre
 description: "Produces the full operational infrastructure for an active capital raise: data room structure, investor tracking, capital call notices, LP onboarding workflow, waterfall explainer, and crisis communication framework."
+classification: normal
+runtime_role: callable_tool
+human_gate: lender_or_investor_review_required
 targets:
   - claude_code
 stale_data: "Fee benchmarks, waterfall norms, and data room platform recommendations reflect mid-2025 institutional standards. Verify current market terms with fund counsel and placement agents."

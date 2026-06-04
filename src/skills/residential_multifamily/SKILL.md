@@ -6,6 +6,7 @@ status: stable_pending_shakedown
 category: residential_multifamily
 subsystem: residential_multifamily
 pack_type: router
+classification: workspace
 targets:
   - claude_code
 stale_data: |

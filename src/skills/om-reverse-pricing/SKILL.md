@@ -140,6 +140,12 @@ Initial offer, walk-away price, DD priorities, next steps.
 - **Vague adjustments**: Every adjusted assumption must have a stated, specific reason tied to market data.
 - **Missing dollar impact**: Every red flag must quantify the dollar impact on NOI or valuation.
 
+## Confidence and Provenance
+
+- Default output fidelity is **estimated**: the reverse-engineered pricing is derived from the OM's figures adjusted to market, not an operator-confirmed valuation.
+- Label every output cell with a confidence grade -- `confirmed` (operator/market-sourced), `estimated` (derived/adjusted here), or `illustrative` (sample/demo) -- and a source-class tag: `[operator]` user/OM-supplied, `[derived]` adjusted here, `[benchmark]` market rule-of-thumb, `[overlay]` market assumption applied, `[placeholder]` sample.
+- **Estimate, not an appraisal (required on every output):** *This reverse-pricing analysis is a screening ESTIMATE of value to inform a bid — NOT an appraisal and not an opinion of value by a licensed appraiser, and not a USPAP-compliant deliverable. A qualified appraiser's report is required before the recommended price is relied upon for a transaction or financing.*
+
 ## Chain Notes
 
 - **Upstream**: May follow `deal-quick-screen` when verdict is KEEP and OM is available.

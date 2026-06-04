@@ -5,6 +5,16 @@ version: 0.1.0
 status: deployed
 category: reit-cre
 description: "Designs, calculates, and explains joint venture equity waterfall structures for GP/LP partnerships. Three modes: Structure (term sheet from scratch), Calculate (distributions under specific scenarios), Explain (LP-facing plain-language education). Triggers on 'waterfall', 'promote', 'preferred return', 'GP/LP split', 'JV structure', or 'carry'."
+classification: normal
+runtime_role: callable_tool
+final_marked: true
+human_gate: investment_committee_approval_required
+source_ref_policy:
+  emits:
+    - model/*
+  on_unresolvable: refuse
+  forbids_fabricated_model_ref: true
+refusal_trigger: "Refuse to emit a distribution split or promote figure when a required term (preferred rate, tier hurdle, contributed capital) is unspecified or unresolved; the architect never assumes a number into the waterfall and asks for the missing term instead."
 targets:
   - claude_code
 ---
@@ -122,6 +132,23 @@ Mode-dependent (see Process above). Mode A produces a term sheet document. Mode 
 - **Insufficient GP co-invest**: LP alignment concern if GP contributes < 5-10% of equity. Always note co-invest percentage and alignment signal.
 - **Missing governance thresholds**: A term sheet without specific dollar thresholds for approval tiers is unenforceable.
 - **Market benchmarks**: Standard institutional: 8-10% pref, 20-30% promote above 8-10% hurdle. Flag significant deviations.
+
+## Refusal Behavior
+
+A waterfall term sheet / distribution schedule is a decision-grade artifact (it governs real GP/LP economics and goes to investors and counsel). It fails closed (refuses to emit a final-marked term sheet or distribution table) when:
+
+- **Any unresolved `$X` / placeholder / TBD token remains in a load-bearing cell of the final output.** A `$X` used illustratively in the Input Schema (e.g. "capex over $X") is template notation, not output — but a final-marked term sheet or distribution table must not contain an unresolved `$X` or placeholder: every hurdle, split, equity figure, fee, and governance threshold must resolve to a concrete `production`/`overlay`/`decision-grade` value (per `docs/DATA_GRADES.md` §3) or the document refuses. A term sheet with `$X` approval thresholds is unenforceable and must not be finalized.
+- **Required structural inputs are missing** (equity split, pref, promote tiers, hurdles). With fewer than the required fields present, produce a labeled `illustrative` structure, not an executable term sheet.
+- **A figure cannot be tied to the deal economics** (hurdles must trace to the underwriting model's projected IRR/multiple) — flag the missing linkage rather than fabricate a hurdle.
+- **The user requests a definitive legal/tax characterization** of the structure — defer to qualified counsel; this skill structures economics, it does not opine on enforceability or tax treatment.
+
+See the data-grade ladder in `docs/DATA_GRADES.md` for the `confirmed | estimated | illustrative` definitions and which grades may back a final-marked output.
+
+## Confidence and Provenance
+
+- Default output fidelity is **estimated**: the waterfall is structured from the supplied deal parameters and market benchmarks, not an executed agreement.
+- Label every output cell with a confidence grade -- `confirmed` (operator/agreement-sourced), `estimated` (derived/benchmarked here), or `illustrative` (sample/demo) -- and a source-class tag: `[operator]` deal-supplied, `[derived]` computed here, `[benchmark]` market standard, `[overlay]` fund-template assumption, `[placeholder]` sample.
+- Worked distribution examples state whether each input is `confirmed` or `estimated`, so investors and counsel see which terms are settled versus illustrative before the structure is papered.
 
 ## Chain Notes
 

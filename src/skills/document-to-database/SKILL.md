@@ -5,6 +5,26 @@ version: 0.1.0
 status: deployed
 category: reit-cre
 description: "Executable orchestrator that turns tokenized/extracted CRE document content (rent rolls, T-12s, operating statements, Prose Frontier narrative artifacts) into validated, typed, auditable, target-model-ready database payloads. Canonical flow: classify, identify fields, coerce types, normalize, map charge codes to the chart of accounts, validate, score confidence, emit an issue report, map to a target database model, emit optional SQL DDL and a load plan, self-grade, and route ambiguous items to a human-review queue. Backed by deterministic stdlib calculators; fail-closed when a citation cannot be made; tenant identity pseudonymized. Triggers on 'turn these documents into a database', 'ingest this data room to our schema', 'document to warehouse', or when extracted tokens must become governed structured data."
+classification: orchestrator
+runtime_role: workflow_conductor
+human_gate: review_recommended
+source_ref_policy:
+  emits:
+    - data-room/*
+  on_unresolvable: refuse
+  forbids_fabricated_model_ref: true
+amos_surface:
+  - sources
+  - t12
+decomposes_to:
+  - normalize_tokens
+  - map_charge_codes
+  - validate_payload
+  - map_to_target_model
+  - emit_sql_ddl
+  - emit_load_plan
+  - grade_ingestion
+refusal_trigger: "Refuse to emit a database payload (or SQL DDL / load plan) for any record whose source field cannot be cited back to the originating document; ambiguous or uncitable rows route to the human-review queue and are never silently coerced or dropped."
 targets:
   - claude_code
 ---

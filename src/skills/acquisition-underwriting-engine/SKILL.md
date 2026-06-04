@@ -5,6 +5,21 @@ version: 0.1.0
 status: deployed
 category: reit-cre
 description: "Full-cycle acquisition underwriting engine. Takes a deal package (rent roll, T-12, OM, financing terms) and produces institutional-quality output: T-12 normalization, 10-year proforma, Linneman cap rate decomposition, probability-weighted scenarios, replacement cost analysis, and go/no-go recommendation. Triggers on 'underwrite this deal', 'build an acquisition model', or 'run the numbers on this property'."
+classification: normal
+runtime_role: callable_tool
+final_marked: true
+human_gate: investment_committee_approval_required
+source_ref_policy:
+  emits:
+    - data-room/*
+    - model/*
+  on_unresolvable: refuse
+  forbids_fabricated_model_ref: true
+amos_surface:
+  - model
+  - t12
+  - decision
+refusal_trigger: "Refuse to emit a go/no-go recommendation or a proforma figure that depends on an input (rent roll line, T-12 line, financing term) which cannot be cited back to the deal package; the engine never invents a model/* or data-room/* value and flags the missing input for the analyst instead."
 targets:
   - claude_code
 ---
@@ -197,6 +212,23 @@ Cross-reference: cost-segregation-analyzer, 1031-exchange-executor, opportunity-
 - **Breakeven occupancy > 90%**: No cushion for operational disruption.
 - **Debt yield < 6.5% (MF) or 7.5% (commercial)**: Financing may be unavailable at assumed terms.
 - **Skipping T-12 normalization**: Raw T-12 NOI is never the right starting point for underwriting. Always normalize.
+
+## Refusal Behavior
+
+This engine emits decision-grade output (a go/no-go recommendation routed to an investment committee). It fails closed (refuses to emit a final-marked figure or verdict) when:
+
+- **A load-bearing input cannot be cited back to the deal package.** Any proforma figure that depends on a rent-roll line, T-12 line, or financing term which cannot be resolved to a `data-room/*` or `model/*` source is refused; the engine never invents a value and flags the missing input for the analyst instead.
+- **Any unresolved `$X` / placeholder / TBD token remains in a load-bearing cell.** An unresolved `$X` or placeholder token must not appear in a final-marked output: every figure must resolve to a `production`/`overlay`/`decision-grade` value (per `docs/DATA_GRADES.md` §3) or the model refuses. A draft may carry `[placeholder]` tags as a signal for what still needs real data; a final IC-bound underwriting may not.
+- **Required deal inputs are missing** (rent roll, T-12, purchase price, financing terms). With fewer than the required fields present, produce a partial framework labeled `illustrative`, not a recommendation.
+- **DSCR < 1.0x or other hard gates trip** — block the IRR calculation until the operator acknowledges, rather than silently emitting a return on un-serviceable debt.
+
+See the data-grade ladder in `docs/DATA_GRADES.md` for the `confirmed | estimated | illustrative` definitions and the rule on which grades may back a final-marked output.
+
+## Confidence and Provenance
+
+- Default output fidelity is **estimated**: the proforma and returns are derived from the supplied deal package and the assumptions above, not operator-confirmed actuals.
+- Label every output cell with a confidence grade -- `confirmed` (operator/deal-package-sourced), `estimated` (derived/benchmarked here), or `illustrative` (sample/demo) -- and a source-class tag: `[operator]` from the deal package, `[derived]` computed here, `[benchmark]` market rule-of-thumb, `[overlay]` org/market assumption applied, `[placeholder]` sample.
+- **Estimate, not an appraisal (required on every valuation output):** *The cap-rate decomposition, replacement-cost anchor, and any value conclusion this engine produces are a screening ESTIMATE for underwriting decision support — NOT an appraisal and not an opinion of value by a licensed appraiser. A USPAP-compliant appraisal by a qualified professional is required before the value is relied upon for a transaction, financing, or reporting.*
 
 ## Chain Notes
 

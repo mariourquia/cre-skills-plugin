@@ -1,0 +1,573 @@
+{
+  "manifest_version": "1.0",
+  "plugin_version": "5.0.0",
+  "generated_at": "2026-06-03T00:00:00Z",
+  "repo": "mariourquia/cre-skills-plugin",
+  "ref_namespaces": [
+    "data-room/*",
+    "model/*"
+  ],
+  "crosswalks": {
+    "runtime_role_to_demo_status": {
+      "deterministic_calculator": "deterministic-calc",
+      "callable_tool": "preprocessed-fixture",
+      "workflow_conductor": "preprocessed-fixture",
+      "workspace_router": "preprocessed-fixture",
+      "agent_persona": "preprocessed-fixture",
+      "human_review_surface": "preprocessed-fixture",
+      "reference_only": "future-live-connector"
+    },
+    "human_gate_to_signoff": {
+      "none": "analyst-review",
+      "review_recommended": "analyst-review",
+      "approval_required": "am-signoff",
+      "lender_or_investor_review_required": "am-cfo-signoff",
+      "investment_committee_approval_required": "am-cfo-signoff",
+      "legal_tax_regulatory_review_required": "external-attestation"
+    },
+    "debt_hedging_signoff_chain": [
+      "am-cfo-signoff",
+      "external-attestation"
+    ]
+  },
+  "_sample_note": "STATIC committed excerpt of dist/amos-skill-manifest.json (gitignored). The 8 v5 priority skills + 4 pilot entries. Every entry is a byte-for-byte subset of the full generated manifest; regenerate with: python3 scripts/amos-manifest-build.py. See docs/integrations/amos-skill-manifest.md.",
+  "skills": [
+    {
+      "id": "amos-icomm-demo-orchestrator",
+      "display_name": "AMOS IC Demo Orchestrator",
+      "type": "skill",
+      "status": "stable",
+      "source_path": "src/skills/amos-icomm-demo-orchestrator/SKILL.md",
+      "version": "0.1.0",
+      "classification": "orchestrator",
+      "runtime_role": "workflow_conductor",
+      "decision_grade": true,
+      "human_gate": "investment_committee_approval_required",
+      "source_ref_policy": {
+        "emits": [
+          "data-room/*",
+          "model/*"
+        ],
+        "on_unresolvable": "refuse",
+        "forbids_fabricated_model_ref": true
+      },
+      "amos_surface": [
+        "decision",
+        "model",
+        "sources",
+        "memo"
+      ],
+      "decomposes_to": [
+        "document-to-data-room-extractor",
+        "rent-roll-analyzer",
+        "t12-normalizer",
+        "pca-reserve-analyzer",
+        "loan-sizing-engine",
+        "acquisition-underwriting-engine",
+        "sensitivity-stress-test",
+        "ic-memo-generator",
+        "ic-red-team-challenger"
+      ],
+      "composed_from": [],
+      "input_artifacts": [
+        "OM",
+        "T-12"
+      ],
+      "outputs": [],
+      "chains_to": [],
+      "chains_from": [],
+      "calculator_file": null,
+      "demo_status": "preprocessed-fixture",
+      "amos_signoff": "external-attestation",
+      "amos_signoff_chain": [
+        "am-cfo-signoff",
+        "external-attestation"
+      ],
+      "live_connector": false
+    },
+    {
+      "id": "document-to-database",
+      "display_name": "Document to Database",
+      "type": "skill",
+      "status": "stable",
+      "source_path": "src/skills/document-to-database/SKILL.md",
+      "version": "0.1.0",
+      "classification": "orchestrator",
+      "runtime_role": "workflow_conductor",
+      "decision_grade": false,
+      "human_gate": "review_recommended",
+      "source_ref_policy": {
+        "emits": [
+          "data-room/*"
+        ],
+        "on_unresolvable": "refuse",
+        "forbids_fabricated_model_ref": true
+      },
+      "amos_surface": [
+        "sources",
+        "t12"
+      ],
+      "decomposes_to": [
+        "normalize_tokens",
+        "map_charge_codes",
+        "validate_payload",
+        "map_to_target_model",
+        "emit_sql_ddl",
+        "emit_load_plan",
+        "grade_ingestion"
+      ],
+      "composed_from": [],
+      "input_artifacts": [
+        "OM",
+        "Rent Roll",
+        "T-12"
+      ],
+      "outputs": [],
+      "chains_to": [],
+      "chains_from": [],
+      "calculator_file": null,
+      "demo_status": "preprocessed-fixture",
+      "amos_signoff": "analyst-review",
+      "amos_signoff_chain": [
+        "analyst-review"
+      ],
+      "live_connector": false
+    },
+    {
+      "id": "document-to-warehouse-pipeline",
+      "display_name": "Document-to-Warehouse Pipeline",
+      "type": "skill",
+      "status": "stable",
+      "source_path": "src/skills/document-to-warehouse-pipeline/SKILL.md",
+      "version": "0.1.0",
+      "classification": "orchestrator",
+      "runtime_role": "workflow_conductor",
+      "decision_grade": false,
+      "human_gate": "review_recommended",
+      "source_ref_policy": {
+        "emits": [
+          "data-room/*"
+        ],
+        "on_unresolvable": "refuse",
+        "forbids_fabricated_model_ref": true
+      },
+      "amos_surface": [
+        "sources",
+        "t12"
+      ],
+      "decomposes_to": [
+        "document-to-data-room-extractor",
+        "warehouse-to-exhibit-mapper",
+        "reconcile_rent_roll_t12"
+      ],
+      "composed_from": [],
+      "input_artifacts": [
+        "OM"
+      ],
+      "outputs": [],
+      "chains_to": [
+        "warehouse-to-exhibit-mapper"
+      ],
+      "chains_from": [
+        "document-to-data-room-extractor",
+        "lease-abstract-extractor",
+        "rent-roll-analyzer",
+        "t12-normalizer"
+      ],
+      "calculator_file": null,
+      "demo_status": "preprocessed-fixture",
+      "amos_signoff": "analyst-review",
+      "amos_signoff_chain": [
+        "analyst-review"
+      ],
+      "live_connector": false
+    },
+    {
+      "id": "property-management-orchestrator",
+      "display_name": "Property Management Orchestrator",
+      "type": "skill",
+      "status": "stable",
+      "source_path": "src/skills/property-management-orchestrator/SKILL.md",
+      "version": "0.1.0",
+      "classification": "orchestrator",
+      "runtime_role": "workflow_conductor",
+      "decision_grade": false,
+      "human_gate": "review_recommended",
+      "source_ref_policy": null,
+      "amos_surface": [],
+      "decomposes_to": [
+        "work-order-triage",
+        "vendor-invoice-validator",
+        "building-systems-maintenance-manager",
+        "tenant-event-planner",
+        "variance-narrative-generator",
+        "debt-covenant-monitor",
+        "property-performance-dashboard"
+      ],
+      "composed_from": [],
+      "input_artifacts": [
+        "OM"
+      ],
+      "outputs": [],
+      "chains_to": [
+        "noi-sprint-plan",
+        "property-performance-dashboard",
+        "annual-budget-engine",
+        "disposition-strategy-engine",
+        "investor-lifecycle-manager"
+      ],
+      "chains_from": [
+        "post-close-onboarding-transition",
+        "construction-project-command-center"
+      ],
+      "calculator_file": null,
+      "demo_status": "preprocessed-fixture",
+      "amos_signoff": "analyst-review",
+      "amos_signoff_chain": [
+        "analyst-review"
+      ],
+      "live_connector": false
+    },
+    {
+      "id": "residential_multifamily",
+      "display_name": "Residential Multifamily Operating System",
+      "type": "skill",
+      "status": "stable",
+      "source_path": "src/skills/residential_multifamily/SKILL.md",
+      "version": "1.0.0-rc1",
+      "classification": "workspace",
+      "runtime_role": "workspace_router",
+      "decision_grade": false,
+      "human_gate": "none",
+      "source_ref_policy": null,
+      "amos_surface": [],
+      "decomposes_to": [],
+      "composed_from": [],
+      "input_artifacts": [
+        "OM"
+      ],
+      "outputs": [],
+      "chains_to": [],
+      "chains_from": [],
+      "calculator_file": null,
+      "demo_status": "preprocessed-fixture",
+      "amos_signoff": "analyst-review",
+      "amos_signoff_chain": [
+        "analyst-review"
+      ],
+      "live_connector": false
+    },
+    {
+      "id": "lease-negotiation-analyzer",
+      "display_name": "Lease Negotiation Analyzer",
+      "type": "skill",
+      "status": "stable",
+      "source_path": "src/skills/lease-negotiation-analyzer/SKILL.md",
+      "version": "0.1.0",
+      "classification": "normal",
+      "runtime_role": "callable_tool",
+      "decision_grade": false,
+      "human_gate": "legal_tax_regulatory_review_required",
+      "source_ref_policy": null,
+      "amos_surface": [],
+      "decomposes_to": [],
+      "composed_from": [],
+      "input_artifacts": [
+        "OM",
+        "Lease"
+      ],
+      "outputs": [],
+      "chains_to": [
+        "rent-optimization-planner",
+        "capex-prioritizer"
+      ],
+      "chains_from": [
+        "market-memo-generator",
+        "deal-underwriting-assistant",
+        "tenant-delinquency-workout",
+        "lease-compliance-auditor"
+      ],
+      "calculator_file": null,
+      "demo_status": "preprocessed-fixture",
+      "amos_signoff": "external-attestation",
+      "amos_signoff_chain": [
+        "analyst-review",
+        "am-signoff",
+        "am-cfo-signoff",
+        "external-attestation"
+      ],
+      "live_connector": false
+    },
+    {
+      "id": "sourcing-outreach-system",
+      "display_name": "Sourcing & Outreach System",
+      "type": "skill",
+      "status": "stable",
+      "source_path": "src/skills/sourcing-outreach-system/SKILL.md",
+      "version": "0.1.0",
+      "classification": "orchestrator",
+      "runtime_role": "workflow_conductor",
+      "decision_grade": false,
+      "human_gate": "review_recommended",
+      "source_ref_policy": null,
+      "amos_surface": [],
+      "decomposes_to": [
+        "deal-quick-screen",
+        "om-reverse-pricing",
+        "loi-offer-builder"
+      ],
+      "composed_from": [],
+      "input_artifacts": [],
+      "outputs": [],
+      "chains_to": [
+        "deal-quick-screen",
+        "deal-underwriting-assistant",
+        "loi-offer-builder",
+        "ic-memo-generator",
+        "portfolio-allocator"
+      ],
+      "chains_from": [
+        "market-memo-generator",
+        "capital-raise-machine"
+      ],
+      "calculator_file": null,
+      "demo_status": "preprocessed-fixture",
+      "amos_signoff": "analyst-review",
+      "amos_signoff_chain": [
+        "analyst-review"
+      ],
+      "live_connector": false
+    },
+    {
+      "id": "fund-lp-reporting",
+      "display_name": "Fund & LP Reporting",
+      "type": "skill",
+      "status": "stable",
+      "source_path": "src/skills/fund-lp-reporting/SKILL.md",
+      "version": "0.1.0",
+      "classification": "workspace",
+      "runtime_role": "workspace_router",
+      "decision_grade": true,
+      "human_gate": "investment_committee_approval_required",
+      "source_ref_policy": {
+        "emits": [
+          "data-room/*",
+          "model/*"
+        ],
+        "on_unresolvable": "refuse",
+        "forbids_fabricated_model_ref": true
+      },
+      "amos_surface": [
+        "decision",
+        "memo"
+      ],
+      "decomposes_to": [
+        "lp-data-request-generator",
+        "fund-terms-comparator",
+        "distribution-notice-generator",
+        "quarterly-investor-update",
+        "performance-attribution",
+        "fund-raise-negotiation-engine"
+      ],
+      "composed_from": [],
+      "input_artifacts": [
+        "OM"
+      ],
+      "outputs": [],
+      "chains_to": [],
+      "chains_from": [],
+      "calculator_file": null,
+      "demo_status": "preprocessed-fixture",
+      "amos_signoff": "am-cfo-signoff",
+      "amos_signoff_chain": [
+        "analyst-review",
+        "am-signoff",
+        "am-cfo-signoff"
+      ],
+      "live_connector": false
+    },
+    {
+      "id": "ic-memo-generator",
+      "display_name": "IC Memo Generator",
+      "type": "skill",
+      "status": "stable",
+      "source_path": "src/skills/ic-memo-generator/SKILL.md",
+      "version": "0.1.0",
+      "classification": "normal",
+      "runtime_role": "callable_tool",
+      "decision_grade": true,
+      "human_gate": "investment_committee_approval_required",
+      "source_ref_policy": {
+        "emits": [
+          "model/*",
+          "data-room/*"
+        ],
+        "on_unresolvable": "refuse",
+        "forbids_fabricated_model_ref": true
+      },
+      "amos_surface": [
+        "memo",
+        "decision"
+      ],
+      "decomposes_to": [],
+      "composed_from": [],
+      "input_artifacts": [
+        "OM"
+      ],
+      "outputs": [],
+      "chains_to": [
+        "lp-pitch-deck-builder",
+        "disposition-strategy-engine"
+      ],
+      "chains_from": [
+        "deal-underwriting-assistant",
+        "supply-demand-forecast",
+        "market-memo-generator",
+        "acquisition-underwriting-engine",
+        "submarket-truth-serum",
+        "comp-snapshot",
+        "sensitivity-stress-test",
+        "sourcing-outreach-system",
+        "portfolio-allocator",
+        "reit-profile-builder"
+      ],
+      "calculator_file": null,
+      "demo_status": "preprocessed-fixture",
+      "amos_signoff": "am-cfo-signoff",
+      "amos_signoff_chain": [
+        "analyst-review",
+        "am-signoff",
+        "am-cfo-signoff"
+      ],
+      "live_connector": false
+    },
+    {
+      "id": "comp-snapshot",
+      "display_name": "Comp Snapshot",
+      "type": "skill",
+      "status": "stable",
+      "source_path": "src/skills/comp-snapshot/SKILL.md",
+      "version": "0.1.0",
+      "classification": "normal",
+      "runtime_role": "callable_tool",
+      "decision_grade": true,
+      "human_gate": "review_recommended",
+      "source_ref_policy": {
+        "emits": [
+          "data-room/*",
+          "market/*"
+        ],
+        "on_unresolvable": "cite_best_effort",
+        "forbids_fabricated_model_ref": true
+      },
+      "amos_surface": [
+        "market",
+        "model"
+      ],
+      "decomposes_to": [],
+      "composed_from": [],
+      "input_artifacts": [
+        "OM"
+      ],
+      "outputs": [],
+      "chains_to": [
+        "acquisition-underwriting-engine",
+        "loi-offer-builder",
+        "ic-memo-generator"
+      ],
+      "chains_from": [
+        "deal-quick-screen",
+        "om-reverse-pricing",
+        "submarket-truth-serum"
+      ],
+      "calculator_file": null,
+      "demo_status": "preprocessed-fixture",
+      "amos_signoff": "analyst-review",
+      "amos_signoff_chain": [
+        "analyst-review"
+      ],
+      "live_connector": false
+    },
+    {
+      "id": "jv-waterfall-architect",
+      "display_name": "JV Waterfall Architect",
+      "type": "skill",
+      "status": "stable",
+      "source_path": "src/skills/jv-waterfall-architect/SKILL.md",
+      "version": "0.1.0",
+      "classification": "normal",
+      "runtime_role": "callable_tool",
+      "decision_grade": true,
+      "human_gate": "investment_committee_approval_required",
+      "source_ref_policy": {
+        "emits": [
+          "model/*"
+        ],
+        "on_unresolvable": "refuse",
+        "forbids_fabricated_model_ref": true
+      },
+      "amos_surface": [],
+      "decomposes_to": [],
+      "composed_from": [],
+      "input_artifacts": [
+        "OM",
+        "Term Sheet"
+      ],
+      "outputs": [],
+      "chains_to": [
+        "acquisition-underwriting-engine",
+        "capital-stack-optimizer",
+        "dd-command-center",
+        "noi-sprint-plan",
+        "partnership-allocation-engine"
+      ],
+      "chains_from": [
+        "acquisition-underwriting-engine"
+      ],
+      "calculator_file": "src/calculators/waterfall_calculator.py",
+      "demo_status": "preprocessed-fixture",
+      "amos_signoff": "am-cfo-signoff",
+      "amos_signoff_chain": [
+        "analyst-review",
+        "am-signoff",
+        "am-cfo-signoff"
+      ],
+      "live_connector": false
+    },
+    {
+      "id": "t12-normalizer",
+      "display_name": "T-12 Operating Statement Normalizer",
+      "type": "skill",
+      "status": "stable",
+      "source_path": "src/skills/t12-normalizer/SKILL.md",
+      "version": "0.1.0",
+      "classification": "normal",
+      "runtime_role": "callable_tool",
+      "decision_grade": false,
+      "human_gate": "none",
+      "source_ref_policy": null,
+      "amos_surface": [],
+      "decomposes_to": [],
+      "composed_from": [],
+      "input_artifacts": [
+        "OM"
+      ],
+      "outputs": [],
+      "chains_to": [
+        "cam-reconciliation-calculator",
+        "debt-covenant-monitor",
+        "deal-underwriting-assistant"
+      ],
+      "chains_from": [
+        "lease-abstract-extractor"
+      ],
+      "calculator_file": null,
+      "demo_status": "preprocessed-fixture",
+      "amos_signoff": "analyst-review",
+      "amos_signoff_chain": [
+        "analyst-review"
+      ],
+      "live_connector": false
+    }
+  ]
+}

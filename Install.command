@@ -60,7 +60,7 @@ press_to_exit() {
 
 TELEMETRY_URL="https://cre-skills-feedback-api.vercel.app/api/installer-telemetry"
 PLUGIN_NAME_CONST="cre-skills-plugin"
-INSTALLER_VERSION_CONST="4.5.0"
+INSTALLER_VERSION_CONST="5.0.0"
 
 send_telemetry() {
     local step_failed="$1"
@@ -164,8 +164,8 @@ cat << 'HEADER'
 HEADER
 printf "${RESET}"
 
-printf "${BLUE}  Plugin Installer v4.5.0${RESET}\n"
-printf "${DIM}  113 skills | 54 agents | 8 MCP tools | 6 workflow chains${RESET}\n"
+printf "${BLUE}  Plugin Installer v5.0.0${RESET}\n"
+printf "${DIM}  127 skills | 54 agents | 21 MCP tools | 6 workflow chains${RESET}\n"
 echo ""
 
 # ── Timing and structured telemetry tracking ────────────────────────
@@ -317,7 +317,7 @@ echo ""
 # ── Step 2: Register plugin ──────────────────────────────────────────
 
 INSTALL_DIR="$SCRIPT_DIR"
-PLUGIN_VERSION="$(python3 -c "import json; print(json.load(open('$SCRIPT_DIR/.claude-plugin/plugin.json'))['version'])" 2>/dev/null || echo "4.5.0")"
+PLUGIN_VERSION="$(python3 -c "import json; print(json.load(open('$SCRIPT_DIR/.claude-plugin/plugin.json'))['version'])" 2>/dev/null || echo "5.0.0")"
 CLAUDE_HOME="$HOME/.claude"
 PLUGINS_CACHE="$CLAUDE_HOME/plugins/cache/local/cre-skills-plugin/$PLUGIN_VERSION"
 INSTALLED_PLUGINS="$CLAUDE_HOME/plugins/installed_plugins.json"
@@ -464,7 +464,7 @@ MCP_OK="false"
 
 VERIFY_FAILS=0
 green "  Verification:"
-echo "    Skills: $SKILL_COUNT (expected 113)"
+echo "    Skills: $SKILL_COUNT (expected 127)"
 echo "    Agents: $AGENT_COUNT (expected 54)"
 echo "    MCP server: $MCP_OK"
 
@@ -507,14 +507,14 @@ printf "  ${BOLD}Quick Start${RESET}\n"
 echo ""
 printf "  ${CYAN}/cre-skills:cre-route${RESET}         Route any CRE task to the right skill\n"
 printf "  ${CYAN}/cre-skills:deal-intake${RESET}       Start a deal workspace\n"
-printf "  ${CYAN}/cre-skills:navigator${RESET}         Browse all 113 skills\n"
+printf "  ${CYAN}/cre-skills:navigator${RESET}         Browse all 127 skills\n"
 printf "  ${CYAN}/cre-skills:cre-agents${RESET}        List 54 expert agents\n"
 echo ""
 
 printf "  ${BOLD}Where It Works${RESET}\n"
 echo ""
-printf "  ${GREEN}Claude Code${RESET}     113 skills + 54 agents + hooks\n"
-printf "  ${GREEN}Claude Desktop${RESET}  8 MCP tools (route, list, workspace, feedback)\n"
+printf "  ${GREEN}Claude Code${RESET}     127 skills + 54 agents + hooks\n"
+printf "  ${GREEN}Claude Desktop${RESET}  21 MCP tools (route, list, workspace, feedback)\n"
 echo ""
 
 printf "  ${BOLD}Restart Claude Desktop${RESET} to see the MCP server.\n"

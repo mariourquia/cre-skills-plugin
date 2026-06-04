@@ -36,6 +36,11 @@ import sys
 from typing import Any
 
 
+def _refusal(reason: str) -> dict[str, Any]:
+    """Typed refusal envelope for degenerate input."""
+    return {"error": reason, "refused": True, "code": "option_valuation_degenerate"}
+
+
 def termination_fee(inputs: dict[str, Any]) -> dict[str, Any]:
     """
     Calculate minimum acceptable termination fee.
@@ -264,6 +269,20 @@ def package_comparison(inputs: dict[str, Any]) -> dict[str, Any]:
 
 def calculate_option_valuation(inputs: dict[str, Any]) -> dict[str, Any]:
     """Main calculation entry point."""
+    # --- Degenerate-input guard (refuse; do not raise) ---
+    # cap_rate is a denominator in base_value = noi / cap_rate (and every option
+    # value impact); sf is a denominator in the rent calcs. Non-positive values
+    # yield ZeroDivisionError -- refuse with a typed dict instead.
+    cap_rate = inputs.get("cap_rate")
+    sf = inputs.get("sf")
+    if cap_rate is None or cap_rate <= 0:
+        return _refusal(
+            f"cap_rate must be positive; got {cap_rate!r}. Property value (noi / "
+            "cap_rate) is undefined at non-positive cap rate."
+        )
+    if sf is None or sf <= 0:
+        return _refusal(f"sf (suite square footage) must be positive; got {sf!r}.")
+
     result = {}
 
     # Termination fee calculation

@@ -1,8 +1,52 @@
 # Changelog
 
-## [Unreleased]
+## [5.0.0] - 2026-06-03
 
-### Added (document-to-database ingestion family)
+Single consolidating release. The source tree was version-stamped to 4.4.0 then
+4.5.0, but neither tag was ever cut (last published tag: `v4.3.0`). v5.0.0 folds
+both never-tagged releases, a trust-hardening pass, and a new micro-skill
+governance architecture into one honest tagged release. Catalog counts are
+unchanged (127 skills / 54 agents / 21 MCP tools / 10 orchestrators / 6 workflow
+chains) and **zero new stub skills** were added in the v5 modernization. Full
+narrative: `docs/releases/v5.0.0-release-notes.md`.
+
+### Added (v5 micro-skill architecture)
+
+- **Classification taxonomy + governance metadata.** `CatalogItem` schema
+  (`src/catalog/catalog.schema.json`) gains optional, backward-compatible fields:
+  `classification` (`micro` / `normal` / `orchestrator` / `workspace`),
+  `runtime_role`, `decision_grade`, `human_gate`, `source_ref_policy`,
+  `amos_surface`, `decomposes_to`, `composed_from`. `scripts/catalog-build.py`
+  reads, derives, and emits them across all six item builders, including a
+  `final_marked -> decision_grade` projection (no frontmatter rename).
+- **Catalog validator.** New `tests/test_skill_classification.py`
+  jsonschema-validates the generated catalog (nothing did before) and enforces
+  governance rules (decision-grade implies a human gate, source-ref policy
+  present) on an explicit decision-grade / AMOS-facing slug allowlist.
+- **8 mega-skills reclassified** as `orchestrator` / `workspace` / `normal`
+  (conductors and routers, not atomic tools); decision-grade / AMOS-facing pilot
+  slice annotated. `residential_multifamily` reclassified `workspace` (one-line
+  metadata; status + contract untouched). Previously zero-reference
+  `fund-lp-reporting` gains `routing-logic.md` (names ILPA, NCREIF-PREA). No new
+  skill stubs.
+- **AMOS skill-manifest export.** `scripts/amos-manifest-build.py` emits
+  `dist/amos-skill-manifest.json` (gitignored) — a governed superset of the
+  catalog with two code-computed crosswalks (`runtime_role` -> AMOS demo status,
+  7->3; `human_gate` -> AMOS sign-off, 4 levels incl. ADR-0004 debt/hedging
+  escalation), deterministic `generated_at`. Contract doc, JSON schema, and a
+  tracked sample ship under `docs/integrations/`. 13 manifest tests.
+- **`docs/architecture/v5-micro-skill-architecture.md`** and the v5 skill
+  contract standard in `CONTRIBUTING.md` (opt-in `v5_contract: true`; new
+  frontmatter fields `stale_data`, `confidence_default`, `refusal_trigger`,
+  `calculator_bridge`, `statute_review`, `final_marked`; the Refusal Behavior /
+  Confidence and Provenance / Known Limitations sections; the workspace-router
+  sub-contract). New `tests/test_skill_v5_contract.py` enforces it.
+- **`docs/DATA_GRADES.md`** — single canonical six-grade data ladder reconciling
+  the source-class vocabularies already deployed (it does not add a fifth enum).
+  **`docs/connectors/CAPABILITY-MATRIX.md`** — honest per-vendor connector state.
+  **`docs/known-limitations.md`** — long-form honest scope statement.
+
+### Added (document-to-database ingestion family — was v4.5.0, never tagged)
 
 An EXECUTABLE, deterministic, institutional-grade ingestion family that turns
 tokenized/extracted CRE documents into validated, typed, auditable,
@@ -42,7 +86,7 @@ byte-reproducible (no wall clock; `as_of` is caller-supplied).
 - New ADR `docs/adr/0002-document-to-database-ingestion.md` and the
   `docs/ingestion/` documentation set.
 
-### Added (document -> warehouse -> deck skill chain)
+### Added (document -> warehouse -> deck skill chain — was v4.4.0, never tagged)
 
 Three new `category: reit-cre` skills wiring the pipeline from extracted
 documents to institutional committee decks. These are documentation/skill-
@@ -79,9 +123,104 @@ SKILL.md says so in its opening paragraph.
   downstream surfaces regenerated via `scripts/catalog-build.py` +
   `scripts/catalog-generate.py`. Plugin version bumped 4.3.0 -> 4.4.0.
 
-v4.4 orchestrator-engine items continue below under their original
-"v4.4, orchestrator engine" headings. They are in-flight and will roll
-into the v4.4 entry when that release lands.
+### Added (orchestrator engine — was in-flight under v4.4, never tagged)
+
+- **Persistent deal-scoped state.** `src/orchestrators/engine/deal-state.mjs`
+  loads, writes (atomic via `.tmp`+rename), and mutates
+  `<home>/.claude/cre-skills/deals/<deal_id>/state.json`. Executor gains
+  `--deal-id <id>`: first run initializes state, subsequent runs resume from
+  `verdicts_by_phase` and skip already-resolved phases; mismatched `--pipeline`
+  + existing deal refuses (exit 3). Omitting `--deal-id` keeps the pre-existing
+  ephemeral session flow unchanged.
+- **Human-in-the-loop audit log.** `src/orchestrators/engine/audit-log.mjs`
+  appends newline-delimited JSON events to `<dealDir>/audit_log.jsonl`
+  (append-only; never reads-and-rewrites).
+- **Typed approval gates + out-of-band clearance.**
+  `src/orchestrators/engine/approval-gate.mjs` evaluates gates declared on a
+  phase against `dealState.approval_gate_log`; any gate `pending|denied|expired`
+  blocks the phase with verdict `AWAITING_APPROVAL` (executor exits 0 — paused,
+  not killed). `src/orchestrators/engine/approve-gate.mjs` flips a gate record
+  out-of-band so the executor never approves its own gates.
+- **Variant loader.** `src/orchestrators/engine/variant-loader.mjs` overlays
+  `src/orchestrators/configs/<pipeline>/variants/<variant>/phases.json` onto the
+  base config (phase-weight overrides + merged approval gates); unknown phase-id
+  overrides raise, unknown variant slug is tolerated.
+- **Calculator bridge.** `src/orchestrators/engine/calculator-bridge.mjs` spawns
+  `scripts/calculator-invoker.py` to resolve phase `tool_calls`, surfacing the
+  invoker's structured error envelopes via a typed `CalculatorBridgeError`. New
+  `--config-path <path>` flag bypasses the registry lookup.
+- Tests: `tests/test_orchestrator_deal_state.py` (5),
+  `tests/test_orchestrator_gates_variants.py` (3),
+  `tests/test_orchestrator_calculator_bridge.py` (4).
+
+### Changed
+
+- **Version bump 4.5.0 -> 5.0.0** across `.claude-plugin/plugin.json`,
+  `.claude-plugin/marketplace.json`, regenerated `src/catalog/catalog.yaml`
+  `plugin_version`, `src/hooks/telemetry-init.mjs`, installer banners +
+  fallbacks (`Install.command`, `scripts/Install.ps1`, `scripts/install.sh`),
+  `PRIVACY.md`, install-doc asset filenames (`docs/INSTALL.md`,
+  `docs/install-desktop.md`, `docs/install-guide.md`), and the AMOS
+  skill-manifest sample.
+- **Tax + climate corrected to current law** (each reaches v5 contract with a
+  `statute_review` horizon + advisory stamps): `opportunity-zone-underwriter`
+  models BOTH OZ regimes by investment date (pre-2027 legacy fixed-inclusion AND
+  post-2026 OBBBA permanent rolling 5-yr deferral + restored 10%/30%-rural
+  step-ups + 2027 decennial maps); `cost-segregation-analyzer` replaces the dead
+  TCJA bonus phasedown (60/40/0) with OBBBA permanent 100% bonus for property in
+  service after 2025-01-19 (worked example recomputed);
+  `climate-risk-assessment` re-anchored from TCFD (disbanded 2023) to IFRS S2
+  (ISSB).
+- **Installer + doc counts corrected** from stale 105 / 113 to the live
+  127 skills / 54 agents / 21 MCP tools across `Install.command`,
+  `scripts/Install.ps1`, `scripts/create-dmg.sh`, `scripts/create-exe.iss`,
+  `scripts/install.sh`; `docs/COMPATIBILITY.md` corrected to 127 / 21 with a
+  guard test.
+- **Privacy / feedback default reconciled.** PRIVACY.md, MIGRATION.md, this
+  CHANGELOG, and the v4.0.0 notes corrected to state the true `ask_each_time`
+  feedback default (the prior `local_only`-default claim was false), while
+  preserving the separate opt-out usage-telemetry language.
+- `tests/test_release_version_parity.py` tightened to compute the live
+  filesystem skill count rather than assert a hard-coded literal.
+- `scripts/registry-validator.py`: the legacy-plan-doc release check now skips
+  git-ignored files (so local-only `docs/plans/` working docs do not gate the
+  release, matching a fresh CI checkout); `docs/known-limitations.md` added to
+  the prior-version exempt list for its RMF `v1.0.0-rc1` reference + v4.5.0->v5.0.0
+  migration pointer (same pattern already applied to README.md / docs/ROADMAP.md).
+
+### Fixed
+
+- **Calculators refuse degenerate input** via a shared typed refusal envelope
+  across `debt_sizing`, `waterfall_calculator`, `covenant_tester`,
+  `monte_carlo_simulator`, `npv_trade_out`, `option_valuation`,
+  `construction_estimator`, `tenant_credit_scorer`. `debt_sizing` refuses
+  non-positive NOI; `monte_carlo_simulator` refuses `trials < 1` (previously an
+  xfail DEFECT, now a real pass). New behavioral tests incl. `fund_fee_modeler`
+  (had none) and a cross-cutting degenerate-input contract test.
+- **JV waterfall catch-up base** previously included return-of-capital; it now
+  excludes it (catch-up is on profit above the preferred return), and the tier is
+  relabeled screening-grade.
+- Orchestrator executor summary prints a "paused, awaiting human approval" line
+  for `AWAITING_APPROVAL` pipelines instead of the `KILL`-style "Pipeline
+  terminated" message (exit code + verdict were already correct; only the summary
+  text was mis-branched).
+
+### Breaking Changes
+
+Minimal and honest; no installed deployment breaks on upgrade. See
+`docs/MIGRATION.md` (v4.5.0 -> v5.0.0).
+
+- **Calculator refusal envelope.** Calculators that previously returned a
+  misleading number on degenerate input now return a typed refusal; callers that
+  depended on the old silent-number behavior must handle the envelope.
+- **JV waterfall catch-up.** The catch-up base no longer includes
+  return-of-capital and the tier is relabeled screening-grade; promote figures
+  differ from the prior behavior.
+- **Feedback-default documentation correction.** The code default was always
+  `ask_each_time`; only the docs change — no runtime behavior changes.
+- **Connector `source_class` hardening deferred to v5.1.** The classification /
+  governance metadata is additive and backward-compatible; the connector runtime
+  that emits and enforces `source_class` + `max_staleness` is v5.1.
 
 ## [4.3.0] - 2026-04-20
 
@@ -136,90 +275,9 @@ Capability-matrix doc now reflects Obj 4 closure; open follow-ups (legacy-bank r
 
 - `README.md` and `docs/install_smoke_test_matrix.md` no longer frame the residential_multifamily subsystem as unfinished near-term hardening — the pass-2 deferred items all close in this release.
 
-### Historical: v4.4, orchestrator engine (in-flight)
-
-### Fixed (v4.4, orchestrator engine)
-- Executor summary now prints a "paused, awaiting human approval"
-  line for `AWAITING_APPROVAL` pipelines instead of falling through
-  to the `KILL`-style "Pipeline terminated. Deal is not viable at
-  current terms." message. Exit code (`0`) and pipeline verdict were
-  already correct; only the summary text was mis-branched.
-
-### Added (v4.4, orchestrator engine — PR C of 3)
-- **Calculator bridge (design doc section 3).** New
-  `src/orchestrators/engine/calculator-bridge.mjs` spawns
-  `scripts/calculator-invoker.py` on demand to resolve phase
-  `tool_calls`. Surfaces the invoker's structured error envelopes
-  (`validation_errors`, unknown-calculator `error` field) via a
-  typed `CalculatorBridgeError` before falling through to a generic
-  exit-code error.
-- Executor now honors `tool_calls` declared on a phase: invokes
-  each, logs per-call success/failure to stdout, and attaches
-  parsed results to the phase result under a `tool_results` key
-  (keyed by the `as` alias or `tool` slug). Emits
-  `calculator_invoked` / `calculator_failed` audit events when
-  running under `--deal-id`.
-- New `--config-path <path>` flag on the executor lets test
-  fixtures and ad-hoc pipelines bypass the registry lookup.
-  `--pipeline` is now optional when `--config-path` is set
-  (pipeline id derived from `orchestratorId`).
-- `tests/test_orchestrator_calculator_bridge.py` (4 tests). A tiny
-  Node driver (`tests/harness_calculator_bridge.mjs`) exercises the
-  bridge directly for success, unknown-slug, and validation-error
-  paths; an E2E test wires a minimal fixture pipeline through the
-  executor and asserts `calculator_invoked` in the audit log.
-
-### Added (v4.4, orchestrator engine — PR B of 3)
-- **Variant loader (design doc section 4).** New
-  `src/orchestrators/engine/variant-loader.mjs` resolves
-  `src/orchestrators/configs/<pipeline>/variants/<variant>/phases.json`
-  and overlays it onto the base config. Applies
-  `phase_weight_overrides` and merges `added_approval_gates` into the
-  target phase's `approval_gates` array. Unknown phase-id overrides
-  raise — authoring bugs fail loudly, not silently. Unknown variant
-  slug (no directory) is tolerated with a log line.
-- **Typed approval gates (design doc section 2).** New
-  `src/orchestrators/engine/approval-gate.mjs` evaluates any gate
-  declared on the current phase against `dealState.approval_gate_log`.
-  First encounter opens the gate as `pending` and fires
-  `gate_opened` audit event. Any gate with status `pending|denied|expired`
-  blocks the phase with verdict `AWAITING_APPROVAL`; agents do not
-  dispatch. Executor exits 0 on AWAITING_APPROVAL (pipeline paused,
-  not killed).
-- **Out-of-band gate clearance.** New CLI
-  `src/orchestrators/engine/approve-gate.mjs` flips a gate record to
-  `approved`, `approved_with_conditions`, `denied`, or `expired`,
-  persists state, and appends the matching audit event
-  (`gate_approved`, `gate_approved_with_conditions`, `gate_denied`,
-  `gate_expired`). Kept separate from `executor.mjs` so the executor
-  never approves its own gates.
-- Executor applies the variant overlay after config load when
-  `--strategy` matches a variant directory. Pipeline-level verdict
-  vocabulary extended with `AWAITING_APPROVAL`.
-- `tests/test_orchestrator_gates_variants.py` (3 tests). Covers
-  weight override (underwriting 0.2 → 0.3 in dry run), unknown
-  variant tolerated, and the full block→approve→resume→complete
-  cycle with audit append-only verification across the approval.
-
-### Added (v4.4, orchestrator engine — PR A of 3)
-- **Persistent deal-scoped state (design doc section 1).** New
-  `src/orchestrators/engine/deal-state.mjs` loads, writes (atomic via
-  `.tmp`+rename), and mutates `<home>/.claude/cre-skills/deals/<deal_id>/state.json`
-  against the schema shipped in the v4.4 scaffold. Executor gains
-  `--deal-id <id>`: first run initializes state, subsequent runs
-  resume from `verdicts_by_phase` and skip already-resolved phases.
-  Mismatched `--pipeline` + existing deal refuses (exit 3).
-- **Human-in-the-loop audit log (design doc section 5).** New
-  `src/orchestrators/engine/audit-log.mjs` appends newline-delimited
-  JSON events to `<dealDir>/audit_log.jsonl`. Append-only invariant:
-  never reads-and-rewrites. Every orchestrator event (pipeline_started,
-  phase_started/completed, pipeline_halted/completed, resume_started)
-  carries `timestamp`, `event`, `actor`, `deal_id`, `run_id`.
-- `tests/test_orchestrator_deal_state.py` (5 tests) covers roundtrip,
-  resume, pipeline-mismatch refusal, audit append-only (SHA-256 prefix
-  check), and back-compat (omitting `--deal-id` creates no deal dir).
-- Omitting `--deal-id` keeps the pre-v4.4 ephemeral session flow
-  unchanged — no existing behavior regresses.
+> The v4.4 orchestrator-engine items that were previously listed here as
+> "in-flight" have been moved into the `## [5.0.0]` entry above, since v4.4 was
+> never tagged and that work ships in v5.0.0.
 
 ## [4.2.0] - 2026-04-16
 
@@ -455,7 +513,7 @@ Capability-matrix doc now reflects Obj 4 closure; open follow-ups (legacy-bank r
   orchestrators, calculators, lib, catalog, MCP server, templates) moved from repo root
   into `src/`. Symlinks removed. `scripts/`, `docs/`, `tests/`, `dist/`, `registry.yaml`,
   and `README.md` remain at repo root. Build output goes to `builds/`.
-- Feedback default mode: ask_each_time -> local_only (privacy-first)
+- Feedback default mode: ask_each_time (prompts for consent per submission; set local_only to suppress all remote sends)
 - Feedback backend_url default: pre-configured -> empty (opt-in remote submission)
 - registry.yaml: manually maintained -> generated from catalog
 - Router: markdown-table parsing -> catalog-driven with fallback

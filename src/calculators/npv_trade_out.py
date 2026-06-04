@@ -34,6 +34,11 @@ import sys
 from typing import Any
 
 
+def _refusal(reason: str) -> dict[str, Any]:
+    """Typed refusal envelope for degenerate input."""
+    return {"error": reason, "refused": True, "code": "npv_trade_out_degenerate"}
+
+
 def npv_stream(cashflows: list[float], rate: float) -> float:
     """Calculate NPV of a list of annual cash flows (year 0 = index 0)."""
     return sum(cf / (1 + rate) ** t for t, cf in enumerate(cashflows))
@@ -188,6 +193,16 @@ def build_sensitivity_grid(inputs: dict[str, Any], rate: float) -> list[dict[str
 
 def calculate_trade_out(inputs: dict[str, Any]) -> dict[str, Any]:
     """Main calculation entry point."""
+    # --- Degenerate-input guard (refuse; do not raise) ---
+    # sf and lease_term_years are denominators in the effective-rent calc; a
+    # zero/negative value yields ZeroDivisionError. Refuse with a typed dict.
+    sf = inputs.get("sf")
+    term = inputs.get("lease_term_years")
+    if sf is None or sf <= 0:
+        return _refusal(f"sf (suite square footage) must be positive; got {sf!r}.")
+    if term is None or term <= 0:
+        return _refusal(f"lease_term_years must be positive; got {term!r}.")
+
     rate = inputs.get("discount_rate", 0.07)
 
     renewal_cfs = build_renewal_cashflows(inputs)

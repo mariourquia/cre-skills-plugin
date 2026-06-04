@@ -5,6 +5,9 @@ version: 0.1.0
 status: deployed
 category: reit-cre
 description: "Consolidates 8 complex lease negotiation scenarios into a single skill with scenario selector: (a) anchor replacement with co-tenancy cascade, (b) trophy tower backfill, (c) naming rights valuation, (d) life science TI amortization, (e) sublease consent with recapture NPV, (f) exclusive use violation, (g) specialty conversion IRR crossover, (h) ground lease improvements. Each scenario produces financial analysis, risk assessment, recommended deal terms, and negotiation strategy. Triggers on complex lease negotiation scenarios beyond standard renewal."
+classification: normal
+runtime_role: callable_tool
+human_gate: legal_tax_regulatory_review_required
 targets:
   - claude_code
 stale_data: "Naming rights valuation benchmarks, life science TI ranges, and CBRE/JLL market data reflect training data cutoff. Verify current comparable transactions and market conditions."

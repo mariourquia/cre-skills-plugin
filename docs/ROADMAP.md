@@ -1,6 +1,6 @@
 # Public Roadmap
 
-Last updated: 2026-04-20 · Plugin version: v4.3.0
+Last updated: 2026-06-03 · Plugin version: v5.0.0
 
 This is the plan for where `cre-skills-plugin` goes from here. It groups
 the pending work by release and by track. Items carry a size (S / M / L /
@@ -18,18 +18,92 @@ Conventions:
   that a subsystem occupies between `beta_rc` and `stable` while it waits
   for that first shakedown log. See `docs/PREVIEW_MODE.md`.
 
-## Current release: v4.3.0 (2026-04-20)
+## Current release: v5.0.0 (2026-06-03)
 
-`residential_multifamily` graduates from `beta_rc` (v0.6.0) to
-`stable_pending_shakedown` (v1.0.0-rc1): all pass-2 deferred items close,
-including the four Tailoring Pass 2 Obj 4 items previously listed as
-**Not implemented**. The subsystem is code-complete; only the first
-operator shakedown log remains before graduation to `status: stable`.
-Preview-mode gate lands repo-wide (root `tests/test_preview_mode_gate.py`
-+ subsystem counterpart). Portable ZIP gains structural smoke coverage in
-CI (cross-runtime invocation remains a gap). Install caveat is
-canonicalized across install surfaces. See
-`docs/releases/v4.3.0-release-notes.md`.
+Single consolidating release. The source had been version-stamped to 4.4.0
+then 4.5.0 but neither tag was ever cut (last published tag: `v4.3.0`).
+v5.0.0 folds both never-tagged releases plus a trust-hardening pass and a
+new micro-skill governance architecture into one tagged release. Catalog
+counts are unchanged (127 skills / 54 agents / 21 MCP tools / 10
+orchestrators / 6 workflow chains); **zero new stub skills** were added.
+
+**Shipped in v5.0.0:**
+
+- **Trust hardening.** `opportunity-zone-underwriter`,
+  `cost-segregation-analyzer`, and `climate-risk-assessment` corrected to
+  current law (OBBBA OZ both-regimes + permanent 100% cost-seg bonus; TCFD
+  re-anchored to IFRS S2 / ISSB). Python calculators now refuse degenerate
+  input via a typed envelope; JV waterfall catch-up base excludes
+  return-of-capital and is relabeled screening-grade. Privacy/feedback
+  default reconciled to the true `ask_each_time`. Installer + doc counts
+  corrected to 127 / 54 / 21.
+- **v5 micro-skill architecture.** Catalog classification taxonomy
+  (`micro` / `normal` / `orchestrator` / `workspace`) + governance metadata
+  (`decision_grade`, `human_gate`, `source_ref_policy`, `amos_surface`, …),
+  a jsonschema catalog validator (`tests/test_skill_classification.py`), the
+  v5 skill contract standard (`CONTRIBUTING.md` + `tests/test_skill_v5_contract.py`),
+  and the AMOS skill-manifest export. 8 mega-skills reclassified.
+- **Honest scope docs.** `docs/DATA_GRADES.md` (canonical six-grade ladder),
+  `docs/connectors/CAPABILITY-MATRIX.md` (per-vendor connector truth — all
+  stub/planned), `docs/known-limitations.md`.
+- **Consolidated v4.4.0** (document → warehouse → deck guidance chain) and
+  **v4.5.0** (executable document-to-database ingestion family + the
+  orchestrator-engine deal-state / approval-gate / variant / calculator-bridge
+  work).
+
+See `docs/releases/v5.0.0-release-notes.md`.
+
+`residential_multifamily` remains `status: stable_pending_shakedown`
+(v1.0.0-rc1) — code-complete, contracts active, awaiting the first operator
+shakedown log before graduation to `status: stable`.
+
+---
+
+## v5.1 — Generalized governance + connector contracts (next)
+
+The honest deferrals from v5.0.0. v5.0.0 shipped the metadata, the validator,
+and the honest capability matrix; v5.1 turns the specified-but-not-enforced
+pieces into runtime.
+
+### Full 127-skill v5-contract conformance sweep — L
+v5.0.0 opted a pilot slice into `v5_contract: true` and corrected the
+decision-grade / AMOS-facing skills. v5.1 extends the contract (Refusal
+Behavior / Confidence and Provenance / Known Limitations sections + the new
+frontmatter fields) across the full corpus.
+
+Acceptance: `tests/test_skill_v5_contract.py` enforces the contract on every
+non-exempt skill (not just the opted-in slice), and the catalog carries
+classification + governance metadata for all 127.
+
+### Generalized cross-skill governance scanner — L
+v5.0.0 ships the `final_marked` selector plus a **targeted** finance-placeholder
+guard over a named allowlist — a presence-of-discipline check, not a runtime
+scanner of emitted output. v5.1 builds the corpus-wide runtime data scanner
+(every cell of every decision-grade skill checked at emit time for source-class
+tagging and placeholder leakage), generalizing the `residential_multifamily`
+machinery to the whole plugin.
+
+Acceptance: a runtime scanner that tags/refuses emitted output across the
+decision-grade corpus, with tests, not just the RMF subsystem.
+
+### Four canonical connector contract schemas — M
+`debt`, `entity`, `valuation`, and the promotion of `funds` (with investor
+reporting) into a connector entity contract do not exist yet. The nine existing
+contracts (`pms, gl, crm, ap, market_data, construction, hr_payroll,
+manual_uploads, deal_pipeline`) are v5.0.0 stubs.
+
+Acceptance: the four new contract schemas land with the `source_class`
+provenance field and the `max_staleness` consume-time refusal **enforced** at a
+connector runtime (specified in `docs/DATA_GRADES.md` §2 in v5.0.0; enforced in
+v5.1).
+
+### Valuation + investor connectors — L
+Beyond the four contract schemas, the first valuation and investor-reporting
+connectors (the AMOS-facing surfaces) move from contract to runnable adapter
+against a sandbox.
+
+Acceptance: a valuation connector and an investor-reporting connector at
+`status: starter` (beyond `stub`), each runnable against a sandbox instance.
 
 ---
 
@@ -143,9 +217,12 @@ approval matrix, and example.
 
 ---
 
-## v5.0 — Real-world data integration (target: H2)
+## Real-world data integration — connector track (v5.1 → v6, target: H2)
 
-This is a breaking release because the connector contract hardens.
+The deep connector buildout. v5.0.0 shipped the honest capability matrix and the
+`source_class` / `max_staleness` contract spec; v5.1 lands the four canonical
+contract schemas + the runtime that enforces them (see the v5.1 section above).
+The vendor-specific adapters below sit on top of that and span v5.1 → v6.
 
 ### Yardi Voyager connector (cat 3) — XL
 Build the Voyager connector beyond the current wave-5 adapter stub. Five

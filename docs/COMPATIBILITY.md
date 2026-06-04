@@ -12,13 +12,13 @@
 
 | Component | Claude Code | Cowork | Notes |
 |-----------|:-----------:|:------:|-------|
-| Skills (112) | All fields | name+description only | Cowork strips slug, version, status, category, targets |
+| Skills (127) | All fields | name+description only | Cowork strips slug, version, status, category, targets |
 | Agents (54) | name, description | name, description, model, color | Cowork requires model+color (injected from defaults) |
 | Commands (11) | All fields | No `name` field | Cowork forbids `name` in command frontmatter |
 | Hooks (full) | All types | Prompt-only | Cowork gets no command-type hooks, no .mjs scripts |
 | Orchestrators (10) | Included | Excluded | Cowork does not support orchestrator pipelines |
 | MCP Server | Included | Excluded | Cowork uses native MCP |
-| Calculators (12) | Included | Excluded | Python calculators not portable to Cowork |
+| Calculators (21) | Included | Excluded | Python calculators not portable to Cowork |
 | Routing | Included | Included | CRE-ROUTING.md and workflow chains |
 | Catalog | Included | Included | catalog.yaml for metadata |
 | Templates | Included | Included | Output styles and customization templates |

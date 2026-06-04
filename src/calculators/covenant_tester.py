@@ -66,10 +66,27 @@ def loan_balance_at_year(
     return balance
 
 
+def _refusal(reason: str) -> dict[str, Any]:
+    """Typed refusal envelope for degenerate input."""
+    return {"error": reason, "refused": True, "code": "covenant_tester_degenerate"}
+
+
 def calculate_covenants(inputs: dict[str, Any]) -> dict[str, Any]:
     """Main calculation entry point."""
-    noi_by_year = inputs["noi_by_year"]
-    loan_amount = inputs["loan_amount"]
+    noi_by_year = inputs.get("noi_by_year", [])
+    loan_amount = inputs.get("loan_amount")
+
+    # --- Degenerate-input guard (refuse; do not raise) ---
+    # Empty NOI series -> min() over empty; non-positive loan -> debt yield and
+    # IO debt service divide by zero. Both must return a typed refusal.
+    if not isinstance(noi_by_year, list) or len(noi_by_year) == 0:
+        return _refusal("noi_by_year must be a non-empty array of annual NOI values.")
+    if loan_amount is None or loan_amount <= 0:
+        return _refusal(
+            f"loan_amount must be positive; got {loan_amount!r}. Debt yield and "
+            "IO debt service are undefined at non-positive loan."
+        )
+
     rate = inputs["rate"]
     amort_years = inputs.get("amortization_years", 30)
     io_years = inputs.get("io_years", 0)

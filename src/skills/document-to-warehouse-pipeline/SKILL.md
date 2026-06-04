@@ -5,6 +5,22 @@ version: 0.1.0
 status: deployed
 category: reit-cre
 description: "Orchestration skill that assembles the OUTPUT of single-document extractors into validated, warehouse-ready tabular datasets. It does not re-extract individual documents; it sits above the extractors and turns their per-document fact tables into multi-document datasets with declared extraction schemas, data-quality and validation rules, standardized provenance columns, warehouse table naming, and a deck-readiness gate. Triggers on 'build the warehouse dataset', 'assemble these extractions', 'validate the data room for the model/deck', or when several extracted documents must become one queryable table. Failing rows are surfaced for review, never silently dropped. Output is the validated dataset that warehouse-to-exhibit-mapper consumes."
+classification: orchestrator
+runtime_role: workflow_conductor
+human_gate: review_recommended
+source_ref_policy:
+  emits:
+    - data-room/*
+  on_unresolvable: refuse
+  forbids_fabricated_model_ref: true
+amos_surface:
+  - sources
+  - t12
+decomposes_to:
+  - document-to-data-room-extractor
+  - warehouse-to-exhibit-mapper
+  - reconcile_rent_roll_t12
+refusal_trigger: "Refuse to mark the assembled dataset deck-ready when any row fails a declared validation rule or lacks a provenance column tying it to its source document; failing rows are surfaced for review, never silently dropped to force a clean table."
 targets:
   - claude_code
 ---

@@ -45,18 +45,22 @@ Is the component structural (walls, roof, foundation)?
 
 ---
 
-## 2. Bonus Depreciation Phase-Down Schedule
+## 2. Bonus Depreciation Schedule
 
-### Current Schedule (Tax Cuts and Jobs Act of 2017, as amended)
+Statute basis: IRC Section 168(k) as amended by the One Big Beautiful Bill Act (OBBBA, enacted 2025-07-04). Last verified 2026-06-03. The bonus rate is keyed on the **placed-in-service date**.
 
-| Tax Year | Bonus Depreciation Rate | Applies To |
-|---|---|---|
-| 2017-2022 | 100% | 5, 7, 15-year property (new and used) |
-| 2023 | 80% | 5, 7, 15-year property |
-| 2024 | 60% | 5, 7, 15-year property |
-| 2025 | 40% | 5, 7, 15-year property |
-| 2026 | 20% | 5, 7, 15-year property |
-| 2027+ | 0% | Bonus fully phased out |
+### Current Schedule (OBBBA permanent 100% + the legacy TCJA phase-down it superseded)
+
+| Placed in Service | Bonus Rate | Regime | Applies To |
+|---|---|---|---|
+| 2017 - 2022 | 100% | TCJA | 5, 7, 15-year property (new and used) |
+| 2023 | 80% | TCJA phase-down | 5, 7, 15-year property |
+| 2024 | 60% | TCJA phase-down | 5, 7, 15-year property |
+| 2025, on or before Jan 19 | 40% | TCJA phase-down | 5, 7, 15-year property |
+| **2025, after Jan 19** | **100%** | **OBBBA permanent** | 5, 7, 15-year property, QIP, software |
+| **2026 and later** | **100%** | **OBBBA permanent** | 5, 7, 15-year property, QIP, software |
+
+OBBBA restored a permanent 100% bonus for qualified property (MACRS class life <= 20 years, plus QIP and software) acquired and placed in service after 2025-01-19; the prior 60% -> 40% -> 20% -> 0% phase-down applies only to placements on or before that date. Real property (27.5-/39-year) never qualifies for bonus. Note: many states decouple from federal bonus and require a separate state computation.
 
 ### Impact on Year-1 Deduction
 
@@ -68,17 +72,23 @@ Regular first-year depreciation (half-year convention):
   7-year: 14.29% (200% DB)
   15-year: 5.00% (150% DB)
 
-Example with 60% bonus (2024):
+Example with 100% bonus (placed in service after 2025-01-19, OBBBA permanent):
   $1,000,000 of 5-year property:
-    Bonus: $1,000,000 * 60% = $600,000
-    Regular on remaining $400,000: $400,000 * 20% = $80,000
-    Year-1 total: $680,000 (68% of basis)
+    Bonus: $1,000,000 * 100% = $1,000,000
+    Remaining basis: $0
+    Year-1 total: $1,000,000 (100% of basis)
 
   Without cost seg (all 27.5-year):
     $1,000,000 / 27.5 * (11.5/12) = $34,848  (mid-month convention, assuming July acquisition)
     Year-1 total: $34,848 (3.5% of basis)
 
-  Acceleration factor: $680,000 / $34,848 = 19.5x
+  Acceleration factor: $1,000,000 / $34,848 = 28.7x
+
+Legacy example with 60% bonus (placed in service 2024, TCJA phase-down):
+  $1,000,000 of 5-year property:
+    Bonus: $1,000,000 * 60% = $600,000
+    Regular on remaining $400,000: $400,000 * 20% = $80,000
+    Year-1 total: $680,000 (68% of basis)
 ```
 
 ---
@@ -330,14 +340,13 @@ Breakeven: find t where NPV(incremental_savings[1..t]) = PV(incremental_recaptur
 
 | Bonus Depreciation Rate | Breakeven Hold Period |
 |---|---|
-| 100% (2022) | 1-2 years |
+| 100% (placed in service after 2025-01-19, OBBBA permanent; or 2017-2022 TCJA) | 1-2 years |
 | 80% (2023) | 2-3 years |
 | 60% (2024) | 2-3 years |
-| 40% (2025) | 3-4 years |
-| 20% (2026) | 4-5 years |
-| 0% (2027+) | 5-7 years |
+| 40% (early-2025, on/before Jan 19) | 3-4 years |
+| 20% / 0% (legacy phase-down or non-conforming state add-back) | 4-7 years |
 
-For the $10M multifamily example at 40% bonus, the breakeven is approximately 3 years. Holds shorter than 3 years may not benefit from cost seg after recapture.
+For a property placed in service after 2025-01-19 at the permanent 100% bonus, the breakeven is typically 1-2 years -- the year-1 deduction is large, so the acceleration benefit dominates incremental recapture almost immediately. Lower-bonus rows apply only to pre-2025-01-19 placements or states that decouple from federal bonus.
 
 ---
 

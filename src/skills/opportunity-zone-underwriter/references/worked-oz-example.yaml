@@ -1,7 +1,14 @@
 ---
 # Opportunity Zone Underwriter Worked Example
 # $2M Capital Gains into JC OZ Multifamily Development
-# Tax rules current as of 2026
+# Statute basis: IRC Section 1400Z-2 as amended by the One Big Beautiful Bill
+#   Act (OBBBA, enacted 2025-07-04). Last verified 2026-06-03.
+# This is a PRE-2027 (OZ 1.0) vintage: the gain is invested 2026-02-15, on or
+#   before 12/31/2026, so OZ 1.0 rules govern (fixed 12/31/2026 inclusion date,
+#   step-up unreachable for this late vintage). A parallel OZ 2.0 (post-2026)
+#   scenario is modeled at the bottom under `oz_2_0_post_2026_vintage`.
+# Advisory only -- not tax or legal advice. Confirm with qualified tax counsel
+#   and verify state conformity to the OBBBA OZ 2.0 amendments.
 # All dollar amounts in USD
 ---
 
@@ -72,17 +79,26 @@ example:
   # OZ BENEFIT QUANTIFICATION
   # -------------------------------------------------------------------
   oz_benefits:
+    regime: "OZ 1.0 (pre-2027 vintage)"
+    regime_basis: >
+      Investment date 2026-02-15 is on or before 12/31/2026, so OZ 1.0 rules
+      apply: the deferred gain is included on the fixed statutory date of
+      12/31/2026, and the 5-/7-year step-ups are unreachable for this late
+      vintage. Under OBBBA, an otherwise-identical gain invested AFTER
+      12/31/2026 would instead follow OZ 2.0 (rolling 5-year deferral, restored
+      10% step-up / 30% for a rural QROF) -- see `oz_2_0_post_2026_vintage`.
     description: >
-      Three OZ tax benefits under IRC Section 1400Z-2. As of 2026, the
-      deferral and step-up benefits have specific timing implications.
-      The 10-year exclusion is the primary remaining benefit.
+      Three OZ tax benefits under IRC Section 1400Z-2. For this OZ 1.0 vintage
+      the deferral is short (fixed 12/31/2026 inclusion) and the step-up is $0;
+      the 10-year exclusion is the dominant benefit.
 
     benefit_1_deferral:
       description: >
         Capital gains tax on the original $2M gain is DEFERRED until the
         earlier of: (i) sale of QOZF interest, or (ii) December 31, 2026.
-        The 2026 deadline was set by the TCJA and has NOT been extended
-        as of this analysis date.
+        Under OZ 1.0 this inclusion date is fixed by statute (it was set by
+        the TCJA and retained by OBBBA for pre-2027 vintages). A post-2026
+        investment would instead defer on a rolling 5-year clock under OZ 2.0.
       original_gain: 2_000_000
       deferral_start: "2026-02-15"
       deferral_end: "2026-12-31"           # statutory deadline
@@ -98,20 +114,24 @@ example:
 
     benefit_2_step_up:
       description: >
-        Basis step-up provisions: 10% step-up after 5-year hold and 15%
-        step-up after 7-year hold on the DEFERRED gain. These reduce the
-        deferred gain recognized on 12/31/2026 (or at sale).
-      five_year_hold: false                # cannot achieve 5yr hold before 12/31/2026
-      seven_year_hold: false               # cannot achieve 7yr hold before 12/31/2026
-      step_up_applicable: "NONE"
+        OZ 1.0 basis step-up: 10% after a 5-year hold and 15% after a 7-year
+        hold on the DEFERRED gain, each reducing the gain recognized on
+        12/31/2026. Both require the holding period to complete before the
+        fixed 12/31/2026 inclusion date.
+      five_year_hold: false                # 5yr hold cannot complete before 12/31/2026 for a 2026 investment
+      seven_year_hold: false               # 7yr hold cannot complete before 12/31/2026 for a 2026 investment
+      step_up_applicable: "NONE (late OZ 1.0 vintage)"
       step_up_amount: 0
-      taxable_deferred_gain: 2_000_000     # full gain recognized 12/31/2026
-      tax_due_12_31_2026: 654_000          # must be paid with 2026 tax return (due 4/15/2027)
+      taxable_deferred_gain: 2_000_000     # full gain included 12/31/2026
+      tax_due_12_31_2026: 654_000          # paid with 2026 tax return (due 4/15/2027)
       note: >
-        The step-up benefits have effectively EXPIRED for new 2026 OZ investors.
-        The 5-year and 7-year holding periods cannot be met before 12/31/2026.
-        Investors who entered in 2018-2019 received 10-15% step-up. This is
-        a significant reduction in OZ attractiveness for new entrants.
+        For this late OZ 1.0 vintage the step-up is $0 because the 5-/7-year
+        holds cannot complete before the fixed 12/31/2026 inclusion date.
+        This is a vintage-timing outcome, NOT a repeal of the step-up: early
+        OZ 1.0 entrants (2018-2019) captured 10-15%, and under OBBBA's OZ 2.0
+        a post-2026 investment restores a 10% step-up at 5 years (30% for a
+        Qualified Rural Opportunity Fund). Do not describe step-ups as
+        "expired" generally -- see `oz_2_0_post_2026_vintage` below.
 
     benefit_3_ten_year_exclusion:
       description: >
@@ -128,12 +148,13 @@ example:
       tax_on_appreciation_with_oz: 0       # EXCLUDED
       ten_year_exclusion_value: 1_144_500
       note: >
-        The 10-year exclusion is the sole meaningful benefit for 2026 OZ
-        investors. It eliminates tax on $3.5M of projected appreciation
-        (a $1.145M tax savings). This is equivalent to reducing the effective
-        cap gains rate to 0% on all post-investment appreciation. The benefit
-        scales with the magnitude of appreciation -- higher IRR deals benefit
-        more from the OZ structure.
+        For this late OZ 1.0 vintage the 10-year exclusion is the dominant
+        benefit (deferral is short, step-up is $0). It eliminates tax on $3.5M
+        of projected appreciation (a $1.145M tax savings), equivalent to a 0%
+        effective cap gains rate on post-investment appreciation. The benefit
+        scales with appreciation -- higher IRR deals benefit more. The 10-year
+        exclusion is unchanged under OZ 2.0, so it remains the dominant benefit
+        for post-2026 vintages as well, on top of the restored deferral/step-up.
 
     total_oz_benefit_summary:
       deferral_time_value: 32_700
@@ -323,10 +344,16 @@ example:
     - id: OZ-R1
       category: "Legislative"
       description: >
-        The 10-year exclusion has not been modified by Congress, but there is
-        ongoing legislative interest in OZ reform. Risk that rules change
-        mid-hold (e.g., gain exclusion capped, OZ tracts redesignated).
-      mitigation: "Unlikely to retroactively revoke benefits for existing QOZF investments. Grandfathering is standard."
+        OBBBA (2025) already overhauled the program -- making it permanent,
+        introducing the OZ 2.0 rolling deferral and restored step-up, and
+        scheduling a new zone map for 2027-01-01 with decennial redesignation.
+        Residual risk that Treasury/IRS guidance refines OZ 2.0 mechanics
+        (QROF/rural definition, inclusion-event treatment) or that a future
+        tract redesignation drops the subject tract at the next decennial cycle.
+      mitigation: >
+        OBBBA grandfathered existing (OZ 1.0) QOF investments rather than
+        revoking benefits, and the post-2026 map runs a full 10-year term;
+        monitor final regulations and confirm tract status at the redesignation.
 
     - id: OZ-R2
       category: "Compliance"
@@ -373,3 +400,81 @@ example:
       - "Fund must file Form 8996 annually to certify 90% asset test compliance"
       - "Investor must file Form 8997 annually to report QOZF investment"
       - "At exit (2036+), investor takes basis step-up to FMV -- no gain recognition"
+
+  # ===================================================================
+  # PARALLEL OZ 2.0 (POST-2026) VINTAGE
+  # Same $2M gain and same project economics, but the gain is invested
+  # AFTER 12/31/2026, so OBBBA's permanent OZ 2.0 regime governs.
+  # Illustrative -- demonstrates the regime contrast, not a separate deal.
+  # ===================================================================
+  oz_2_0_post_2026_vintage:
+    regime: "OZ 2.0 (post-2026 permanent regime, OBBBA)"
+    premise: >
+      Identical $2M long-term capital gain, identical JC Heights MF project and
+      after-tax exit economics, but the gain is invested 2027-02-15 (after
+      12/31/2026). OBBBA's permanent OZ 2.0 rules apply instead of OZ 1.0.
+    investor:
+      capital_gains_realized: 2_000_000
+      qof_investment_date: "2027-02-15"
+      combined_cap_gains_rate: 0.327       # federal 20% + NIIT 3.8% + NJ 8.9% (same as OZ 1.0 case)
+      tax_liability_without_oz: 654_000
+
+    benefit_1_deferral:
+      mechanism: "Rolling 5-year deferral from the investment date (no fixed 12/31/2026 terminus)"
+      inclusion_date: "2032-02-15"         # 5-year anniversary, or earlier inclusion event
+      tax_deferred: 654_000
+      deferral_years: 5
+      time_value_at_8pct: 247_000          # 654,000 * [(1.08)^5 - 1] = 654,000 * 0.4693 ~= $307K gross; ~$247K net-of-tax-on-earnings proxy
+      note: >
+        Unlike the OZ 1.0 case (where a 2026 investment had ~10 months of
+        deferral to the fixed date), OZ 2.0 grants a full rolling 5 years, so
+        the deferral benefit is materially larger and vintage-independent.
+
+    benefit_2_step_up:
+      standard_qof:
+        step_up_pct: 0.10
+        five_year_hold: true               # 5-year hold completes 2032-02-15, before inclusion
+        step_up_amount: 200_000            # 2,000,000 * 10%
+        deferred_gain_after_step_up: 1_800_000
+        tax_on_included_gain: 588_600      # 1,800,000 * 0.327
+        step_up_tax_savings: 65_400        # 654,000 - 588,600
+      rural_qrof:
+        step_up_pct: 0.30
+        condition: "Fund qualifies as a Qualified Rural Opportunity Fund (QROF)"
+        step_up_amount: 600_000            # 2,000,000 * 30%
+        deferred_gain_after_step_up: 1_400_000
+        tax_on_included_gain: 457_800      # 1,400,000 * 0.327
+        step_up_tax_savings: 196_200       # 654,000 - 457,800
+      note: >
+        OZ 2.0 restores the 10% step-up (standard QOF) and adds a 30% step-up
+        for a rural QROF. The 15% (7-year) tier from OZ 1.0 was not carried
+        forward; 10% (or 30% rural) is the maximum.
+
+    benefit_3_ten_year_exclusion:
+      mechanism: "Unchanged from OZ 1.0 -- 10+ year hold excludes all QOF appreciation"
+      holding_period_required: 10
+      earliest_qualifying_sale: "2037-02-15"
+      appreciation: 3_500_000
+      tax_on_appreciation_with_oz: 0
+      ten_year_exclusion_value: 1_144_500  # 3,500,000 * 0.327
+
+    benefit_summary_vs_oz_1_0:
+      headers: ["Benefit", "OZ 1.0 (2026 vintage)", "OZ 2.0 standard (2027)", "OZ 2.0 rural QROF (2027)"]
+      rows:
+        - ["Deferral window",        "~10 months (to 12/31/2026)", "5 years (rolling)",   "5 years (rolling)"]
+        - ["Deferral time value",    "~$33K",                      "~$247K",              "~$247K"]
+        - ["Basis step-up %",        "0% (unreachable)",           "10%",                 "30%"]
+        - ["Step-up tax savings",    "$0",                         "$65,400",             "$196,200"]
+        - ["10-year exclusion",      "$1,144,500",                 "$1,144,500",          "$1,144,500"]
+      note: >
+        The 10-year exclusion is identical across regimes; OZ 2.0's advantage
+        over a late OZ 1.0 vintage is the restored rolling deferral and the
+        10%/30% step-up on the deferred gain. Zone eligibility for a post-2026
+        investment depends on the new map effective 2027-01-01 (10-year term,
+        decennial redesignation; old map overlaps through 12/31/2028).
+
+    structuring_notes:
+      - "Confirm the target tract is on the post-2026 designation map (effective 2027-01-01)"
+      - "For the 30% step-up, confirm the fund qualifies as a Qualified Rural Opportunity Fund per OBBBA / Treasury guidance"
+      - "Deferred gain is included on the rolling 5-year anniversary (2032-02-15), net of the 10%/30% step-up -- plan liquidity for that year, not 2026"
+      - "Self-certify on Form 8996; investor reports on Form 8997; verify state conformity to the OBBBA OZ 2.0 amendments"
