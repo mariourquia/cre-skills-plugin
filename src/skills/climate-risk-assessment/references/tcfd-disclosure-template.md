@@ -1,8 +1,10 @@
-# TCFD Disclosure Template for Commercial Real Estate
+# Climate Disclosure Template for Commercial Real Estate (IFRS S2 / ISSB)
 
 ## Background
 
-The Task Force on Climate-related Financial Disclosures (TCFD) framework is the global standard for climate risk reporting. GRESB (Global Real Estate Sustainability Benchmark) has aligned its assessment with TCFD. Institutional LPs increasingly require TCFD-aligned disclosure. This template provides CRE-specific content for each TCFD pillar.
+**The current global baseline for climate-related financial disclosure is IFRS S2 Climate-related Disclosures, issued by the International Sustainability Standards Board (ISSB).** The Task Force on Climate-related Financial Disclosures (TCFD) was **disbanded in October 2023** after the Financial Stability Board declared its work complete; the IFRS Foundation / ISSB assumed responsibility for monitoring climate disclosures. IFRS S2 **fully incorporates the TCFD recommendations**, so an entity that applies IFRS S1 (general sustainability requirements) together with IFRS S2 satisfies what TCFD asked for.
+
+This template is structured around the **four IFRS S2 pillars -- Governance, Strategy, Risk Management, and Metrics and Targets** (the same pillar names TCFD used, because IFRS S2 absorbed them). GRESB and most institutional LPs now align to the ISSB standards. **TCFD is retained in this document only as a legacy crosswalk** for audiences that still reference the older framework; it is not a separate live obligation. Last verified 2026-06-03. This template is advisory and is not legal or accounting advice; jurisdiction-specific adoption timing varies and must be confirmed with qualified counsel and accountants.
 
 ---
 
@@ -159,7 +161,7 @@ Climate risk integration points:
 - Annual business plan: property-level decarbonization budget included
 - Quarterly portfolio review: climate KPI dashboard (emissions, energy, certifications)
 - Insurance renewal: physical risk data informs program structure
-- LP reporting: annual ESG/climate report aligned with TCFD
+- LP reporting: annual ESG/climate report aligned with IFRS S2 (ISSB) -- which also satisfies the legacy TCFD recommendations
 
 ---
 
@@ -314,6 +316,6 @@ Process:
 | BPS jurisdiction reporting (varies) | April-June | Sustainability / Legal |
 | GRESB submission | July 1 | Sustainability / IR |
 | Annual ESG report publication | Q3 | Sustainability / Marketing |
-| TCFD-aligned disclosure (annual report) | Q4 | Sustainability / IR / Legal |
+| IFRS S2 (ISSB) climate disclosure (annual report; also satisfies legacy TCFD recommendations) | Q4 | Sustainability / IR / Legal |
 | Board climate risk briefing | Q4 | CSO / CRO |
 | Insurance renewal with climate data | 60 days pre-renewal | Risk Management |

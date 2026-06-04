@@ -1,19 +1,27 @@
 ---
 # Cost Segregation Analyzer Worked Example
 # $10M MF Acquisition with Component Reclassification
-# Tax rates and bonus depreciation rules as of 2026
+# Statute basis: IRC Section 168(k) as amended by the One Big Beautiful Bill
+#   Act (OBBBA, enacted 2025-07-04). Last verified 2026-06-03.
+# Placed in service 2026-01-15 (after 2025-01-19) -> PERMANENT 100% bonus.
+#   (Placements on or before 2025-01-19 stay on the TCJA phase-down; see the
+#   `bonus_sensitivity` block for the lower-rate / decoupled-state cases.)
+# Advisory only -- not tax or legal advice. A qualified engineering-based study
+#   and CPA review are required, and state conformity must be verified.
 # All dollar amounts in USD
 ---
 
 example:
   id: cost_seg_example_01
-  name: "$10M Multifamily -- Cost Segregation Study with Bonus Depreciation Phase-Down"
+  name: "$10M Multifamily -- Cost Segregation Study with OBBBA Permanent 100% Bonus"
   description: >
-    $10M acquisition of a 60-unit Class B multifamily in East Orange, NJ.
-    Land value $2M (20% of purchase). Cost segregation study reclassifies
-    building components into accelerated recovery classes. Analysis includes
-    bonus depreciation at current phase-down rate, year-by-year tax savings,
-    NPV of benefit, and recapture at year 7 disposition.
+    $10M acquisition of a 60-unit Class B multifamily in East Orange, NJ,
+    placed in service 2026-01-15. Land value $2M (20% of purchase). Cost
+    segregation study reclassifies building components into accelerated
+    recovery classes. Because the property is placed in service after
+    2025-01-19, OBBBA's permanent 100% bonus applies. Analysis includes the
+    year-1 100% bonus, year-by-year tax savings, NPV of benefit, and recapture
+    at year 7 disposition.
 
   # -------------------------------------------------------------------
   # ACQUISITION INPUTS
@@ -114,143 +122,152 @@ example:
   # -------------------------------------------------------------------
   bonus_depreciation:
     description: >
-      Tax Cuts and Jobs Act (TCJA) bonus depreciation phase-down schedule.
-      Property placed in service in 2026 qualifies for 20% bonus on
-      qualifying assets (5-year and 15-year property). Bonus applies
-      to the ENTIRE depreciable amount in the qualifying class.
-    phase_down_schedule:
-      2022: 1.00    # 100% bonus
-      2023: 0.80    # 80% bonus
-      2024: 0.60    # 60% bonus
-      2025: 0.40    # 40% bonus
-      2026: 0.20    # 20% bonus -- CURRENT YEAR
-      2027: 0.00    # bonus expired (absent legislative extension)
-    current_year: 2026
-    bonus_rate: 0.20
+      IRC Section 168(k) as amended by OBBBA (2025). This property is placed in
+      service 2026-01-15 (after 2025-01-19), so the PERMANENT 100% bonus
+      applies to qualifying assets (5-year and 15-year property). Bonus applies
+      to the ENTIRE depreciable amount in the qualifying class, so both classes
+      are fully expensed in year 1. Real property (27.5-year) never qualifies.
+    schedule:
+      "2017_2022": 1.00    # 100% bonus (TCJA)
+      "2023": 0.80         # 80% (TCJA phase-down)
+      "2024": 0.60         # 60% (TCJA phase-down)
+      "2025_on_before_jan19": 0.40   # 40% (TCJA phase-down)
+      "2025_after_jan19": 1.00       # 100% (OBBBA permanent)
+      "2026_and_later": 1.00         # 100% (OBBBA permanent)
+    placed_in_service: "2026-01-15"
+    regime: "OBBBA permanent 100% (placed in service after 2025-01-19)"
+    bonus_rate: 1.00
 
     application:
       five_year_property:
         basis: 1_222_500
-        bonus_pct: 0.20
-        bonus_amount: 244_500              # 1,222,500 * 20%
-        remaining_basis: 978_000           # 1,222,500 - 244,500
-        remaining_depreciation: "MACRS 5-year on $978,000"
+        bonus_pct: 1.00
+        bonus_amount: 1_222_500            # 1,222,500 * 100%
+        remaining_basis: 0                 # fully expensed in year 1
+        remaining_depreciation: "None -- 5-year class fully bonus-depreciated"
 
       fifteen_year_property:
         basis: 815_000
-        bonus_pct: 0.20
-        bonus_amount: 163_000              # 815,000 * 20%
-        remaining_basis: 652_000           # 815,000 - 163,000
-        remaining_depreciation: "MACRS 15-year on $652,000"
+        bonus_pct: 1.00
+        bonus_amount: 815_000              # 815,000 * 100%
+        remaining_basis: 0                 # fully expensed in year 1
+        remaining_depreciation: "None -- 15-year class fully bonus-depreciated"
 
-      total_bonus_year_1: 407_500          # 244,500 + 163,000
+      total_bonus_year_1: 2_037_500        # 1,222,500 + 815,000
       bonus_note: >
-        At 20% bonus (2026 phase-down), the first-year deduction is meaningful
-        but far less dramatic than the 100% bonus available in 2022. If Congress
-        extends 100% bonus (proposed in multiple 2025-2026 tax bills), the
-        benefit would be $2.0375M in year 1 instead of $407.5K.
+        At the permanent 100% bonus restored by OBBBA, the full $2.0375M of
+        qualifying 5-year and 15-year property is expensed in year 1. This is a
+        far larger year-1 deduction than the 20% phase-down rate ($407.5K) that
+        applied under the pre-OBBBA TCJA schedule for 2026 placements. State
+        conformity must be checked separately -- a non-conforming state (e.g.,
+        California) requires a separate state depreciation computation.
 
   # -------------------------------------------------------------------
   # YEAR-BY-YEAR DEPRECIATION AND TAX SAVINGS
   # -------------------------------------------------------------------
   annual_schedule:
     description: >
-      Complete 7-year depreciation schedule comparing cost seg vs straight-line.
-      MACRS percentages: 5yr = [20%, 32%, 19.2%, 11.52%, 11.52%, 5.76%];
-      15yr = [5%, 9.5%, 8.55%, 7.7%, 6.93%, 6.23%, ...]. Half-year convention.
-      Bonus depreciation taken in year 1.
+      Complete 7-year depreciation schedule comparing cost seg vs straight-line
+      at the OBBBA permanent 100% bonus rate. With 100% bonus, the 5-year and
+      15-year classes are fully expensed in year 1, so years 2-7 carry only the
+      27.5-year structural straight-line ($222,273/yr). The crossover is
+      immediate: from year 2 on, the without-cost-seg baseline (which spreads
+      the entire $8.15M over 27.5 years) deducts more per year than the
+      cost-seg case, whose accelerated classes are already exhausted.
 
     headers: ["Year", "5yr Depr", "15yr Depr", "27.5yr Depr", "Bonus", "Total CostSeg", "Straight-Line", "Incremental", "Tax Savings @ 40%", "Cumulative Savings"]
 
     rows:
       - year: 1
-        five_yr: 195_600       # 978,000 * 20% (MACRS Y1)
-        fifteen_yr: 32_600     # 652,000 * 5% (MACRS Y1)
+        five_yr: 0             # fully expensed via 100% bonus (shown in bonus column)
+        fifteen_yr: 0          # fully expensed via 100% bonus (shown in bonus column)
         structural: 222_273    # 6,112,500 / 27.5
-        bonus: 407_500         # one-time
-        total_cost_seg: 857_973
+        bonus: 2_037_500       # 100% bonus on 5yr ($1,222,500) + 15yr ($815,000)
+        total_cost_seg: 2_259_773
         straight_line: 296_364
-        incremental: 561_609
-        tax_savings: 224_644   # 561,609 * 0.40
-        cumulative_savings: 224_644
+        incremental: 1_963_409
+        tax_savings: 785_364   # 1,963,409 * 0.40
+        cumulative_savings: 785_364
 
       - year: 2
-        five_yr: 312_960       # 978,000 * 32%
-        fifteen_yr: 61_940     # 652,000 * 9.5%
+        five_yr: 0
+        fifteen_yr: 0
         structural: 222_273
         bonus: 0
-        total_cost_seg: 597_173
+        total_cost_seg: 222_273
         straight_line: 296_364
-        incremental: 300_809
-        tax_savings: 120_324
-        cumulative_savings: 344_967
+        incremental: -74_091   # accelerated classes exhausted; SL baseline now higher
+        tax_savings: -29_636
+        cumulative_savings: 755_728
 
       - year: 3
-        five_yr: 187_776       # 978,000 * 19.2%
-        fifteen_yr: 55_746     # 652,000 * 8.55%
+        five_yr: 0
+        fifteen_yr: 0
         structural: 222_273
         bonus: 0
-        total_cost_seg: 465_795
+        total_cost_seg: 222_273
         straight_line: 296_364
-        incremental: 169_431
-        tax_savings: 67_772
-        cumulative_savings: 412_740
+        incremental: -74_091
+        tax_savings: -29_636
+        cumulative_savings: 726_092
 
       - year: 4
-        five_yr: 112_666       # 978,000 * 11.52%
-        fifteen_yr: 50_204     # 652,000 * 7.7%
+        five_yr: 0
+        fifteen_yr: 0
         structural: 222_273
         bonus: 0
-        total_cost_seg: 385_143
+        total_cost_seg: 222_273
         straight_line: 296_364
-        incremental: 88_779
-        tax_savings: 35_512
-        cumulative_savings: 448_251
+        incremental: -74_091
+        tax_savings: -29_636
+        cumulative_savings: 696_456
 
       - year: 5
-        five_yr: 112_666       # 978,000 * 11.52%
-        fifteen_yr: 45_184     # 652,000 * 6.93%
+        five_yr: 0
+        fifteen_yr: 0
         structural: 222_273
         bonus: 0
-        total_cost_seg: 380_123
+        total_cost_seg: 222_273
         straight_line: 296_364
-        incremental: 83_759
-        tax_savings: 33_504
-        cumulative_savings: 481_755
+        incremental: -74_091
+        tax_savings: -29_636
+        cumulative_savings: 666_820
 
       - year: 6
-        five_yr: 56_332        # 978,000 * 5.76% (final year)
-        fifteen_yr: 40_620     # 652,000 * 6.23%
+        five_yr: 0
+        fifteen_yr: 0
         structural: 222_273
         bonus: 0
-        total_cost_seg: 319_225
+        total_cost_seg: 222_273
         straight_line: 296_364
-        incremental: 22_861
-        tax_savings: 9_144
-        cumulative_savings: 490_899
+        incremental: -74_091
+        tax_savings: -29_636
+        cumulative_savings: 637_184
 
       - year: 7
-        five_yr: 0             # fully depreciated
-        fifteen_yr: 37_296     # 652,000 * 5.72% (approximate)
+        five_yr: 0
+        fifteen_yr: 0
         structural: 222_273
         bonus: 0
-        total_cost_seg: 259_569
+        total_cost_seg: 222_273
         straight_line: 296_364
-        incremental: -36_795   # cost seg now LOWER than straight-line (crossover)
-        tax_savings: -14_718   # negative = cost seg produces less deduction in this year
-        cumulative_savings: 476_181
+        incremental: -74_091
+        tax_savings: -29_636
+        cumulative_savings: 607_548
 
     seven_year_totals:
-      total_depreciation_cost_seg: 3_265_001
+      total_depreciation_cost_seg: 3_593_411   # 2,037,500 bonus + 7 * 222,273 structural
       total_depreciation_straight_line: 2_074_548
-      incremental_depreciation: 1_190_453
-      total_incremental_tax_savings: 476_181
+      incremental_depreciation: 1_518_863
+      total_incremental_tax_savings: 607_548
       note: >
-        Cost seg front-loads $1.19M of additional depreciation into years 1-6.
-        The crossover occurs in year 7 when 5-year property is fully depleted
-        and straight-line catches up. This is NOT a permanent tax savings --
-        it is a timing benefit. The NPV calculation below captures the true
-        economic value.
+        At 100% bonus, cost seg pulls $2.0375M of qualifying property entirely
+        into year 1, producing a $785K year-1 tax saving. From year 2 the
+        cost-seg case deducts less than the straight-line baseline (the
+        accelerated classes are gone), so cumulative savings drift down toward
+        the timing benefit. This is NOT a permanent tax saving -- total
+        depreciation over the asset life is identical; the value is the time
+        value of the large year-1 deduction, captured in the NPV below.
 
   # -------------------------------------------------------------------
   # NPV OF TAX BENEFIT
@@ -261,13 +278,13 @@ example:
       discounted at investor's opportunity cost of capital.
     discount_rate: 0.08                    # 8% opportunity cost
     incremental_savings_by_year:
-      year_1: 224_644
-      year_2: 120_324
-      year_3: 67_772
-      year_4: 35_512
-      year_5: 33_504
-      year_6: 9_144
-      year_7: -14_718
+      year_1: 785_364
+      year_2: -29_636
+      year_3: -29_636
+      year_4: -29_636
+      year_5: -29_636
+      year_6: -29_636
+      year_7: -29_636
     pv_factors:
       year_1: 0.9259
       year_2: 0.8573
@@ -277,22 +294,23 @@ example:
       year_6: 0.6302
       year_7: 0.5835
     pv_by_year:
-      year_1: 208_019
-      year_2: 103_114
-      year_3: 53_810
-      year_4: 26_101
-      year_5: 22_806
-      year_6: 5_762
-      year_7: -8_588
-    npv_of_benefit: 411_024               # sum of PV by year
+      year_1: 727_169
+      year_2: -25_407
+      year_3: -23_525
+      year_4: -21_782
+      year_5: -20_170
+      year_6: -18_677
+      year_7: -17_293
+    npv_of_benefit: 600_315               # sum of PV by year
     less_study_cost: -18_000
-    net_npv: 393_024
-    roi_on_study: 21.8                     # 393,024 / 18,000 = 21.8x return
+    net_npv: 582_315
+    roi_on_study: 33.4                     # 600,315 / 18,000 ~= 33x (before recapture)
     note: >
-      The cost seg study costs $18K and generates $393K in NPV tax benefit --
-      a 21.8x return on investment. Even at the 20% bonus phase-down rate,
-      the study is overwhelmingly worthwhile. At 100% bonus (2022 rules),
-      NPV would have been approximately $720K.
+      The cost seg study costs $18K and generates ~$600K in NPV tax benefit
+      (before recapture) at the OBBBA permanent 100% bonus rate. The large
+      year-1 deduction ($785K tax saving) dominates the small negative-timing
+      tail in years 2-7. By contrast, at the dead 20% phase-down rate that
+      applied pre-OBBBA for 2026 placements, NPV would have been roughly $200K.
 
   # -------------------------------------------------------------------
   # DEPRECIATION RECAPTURE AT YEAR 7 DISPOSITION
@@ -309,24 +327,27 @@ example:
 
     cost_seg_recapture:
       original_basis: 10_150_000
-      total_depreciation_taken: 3_265_001
-      adjusted_basis: 6_884_999            # 10,150,000 - 3,265,001
-      gain_on_sale: 6_412_501              # 13,297,500 - 6,884,999
+      total_depreciation_taken: 3_593_411
+      adjusted_basis: 6_556_589            # 10,150,000 - 3,593,411
+      gain_on_sale: 6_740_911              # 13,297,500 - 6,556,589
       section_1250_recapture:
         description: >
-          Unrecaptured Section 1250 gain = total depreciation taken on real property
-          (27.5-year and 15-year). 5-year personal property recapture is Section 1245
-          (ordinary income). However, for residential rental, the 25% rate applies
-          to all unrecaptured 1250 gain.
-        total_depreciation_taken: 3_265_001
-        recapture_amount: 3_265_001
+          Simplified: the 25% unrecaptured-1250 rate is applied to the full
+          depreciation taken (this worked example treats all reclassified
+          depreciation at 25% for tractability). In a detailed model, 5-year
+          personal property is Section 1245 recapture at ordinary rates and
+          only the real-property depreciation is unrecaptured 1250 at 25%; a
+          full study would split these. The 100% bonus increases total
+          depreciation taken (and thus recapture) versus straight-line.
+        total_depreciation_taken: 3_593_411
+        recapture_amount: 3_593_411
         recapture_tax_rate: 0.25
-        recapture_tax: 816_250
+        recapture_tax: 898_353
       remaining_capital_gain:
-        amount: 3_147_500                  # 6,412,501 - 3,265,001
+        amount: 3_147_500                  # 6,740,911 - 3,593,411
         tax_rate: 0.238                    # 20% + 3.8% NIIT
         tax: 749_105
-      total_tax_on_sale: 1_565_355
+      total_tax_on_sale: 1_647_458
 
     straight_line_recapture:
       original_basis: 10_150_000
@@ -344,53 +365,58 @@ example:
       total_tax_on_sale: 1_267_742
 
     recapture_comparison:
-      additional_tax_from_cost_seg: 297_613   # 1,565,355 - 1,267,742
-      additional_recapture_depreciation: 1_190_453
-      effective_recapture_rate: 0.25          # 297,613 / 1,190,453
+      additional_tax_from_cost_seg: 379_716   # 1,647,458 - 1,267,742
+      additional_recapture_depreciation: 1_518_863
+      effective_recapture_rate: 0.25          # 379,716 / 1,518,863
       note: >
-        The cost seg generates $476K in cumulative tax savings during the hold
-        but triggers $298K in additional recapture tax at sale. The net benefit
-        is $178K on a nominal basis. On an NPV basis (tax savings are front-loaded,
-        recapture is deferred), the net benefit is approximately $393K - $174K
-        = $219K. Still a strong 12.2x return on the $18K study cost.
+        At 100% bonus the cost seg generates ~$608K in cumulative tax savings
+        during the hold but triggers ~$380K in additional recapture tax at sale
+        (more depreciation taken -> more recapture). The net is ~$228K nominal.
+        On an NPV basis (the $785K year-1 saving is front-loaded, recapture is
+        deferred to year 7), the net benefit is ~$600K - $222K = ~$379K. Still
+        a strong ~20x return on the $18K study cost.
 
     net_benefit_summary:
-      cumulative_tax_savings_during_hold: 476_181
-      additional_recapture_at_sale: -297_613
-      nominal_net_benefit: 178_568
-      npv_of_savings: 393_024              # front-loaded
-      pv_of_recapture: -173_785            # 297,613 * 0.5835 (year 7 PV factor)
-      npv_net_benefit: 219_239
+      cumulative_tax_savings_during_hold: 607_548
+      additional_recapture_at_sale: -379_716
+      nominal_net_benefit: 227_832
+      npv_of_savings: 600_315              # front-loaded (year-1 100% bonus)
+      pv_of_recapture: -221_564            # 379,716 * 0.5835 (year 7 PV factor)
+      npv_net_benefit: 378_751
       study_cost: -18_000
-      npv_net_of_study: 201_239
-      roi_on_study_net_of_recapture: 11.2  # 201,239 / 18,000
+      npv_net_of_study: 360_751
+      roi_on_study_net_of_recapture: 20.0  # 360,751 / 18,000 ~= 20x
 
   # -------------------------------------------------------------------
   # SENSITIVITY: BONUS DEPRECIATION RATE
   # -------------------------------------------------------------------
   bonus_sensitivity:
-    description: "How NPV changes if bonus depreciation rate differs from 20%"
+    description: >
+      How NPV changes with the bonus rate. Base case is the OBBBA permanent
+      100% (this property is placed in service after 2025-01-19). The lower
+      rows model historical placements (on/before 2025-01-19) or states that
+      decouple from federal bonus and require a reduced state computation.
     scenarios:
       - bonus_rate: 0.00
-        year_1_total_depr: 450_473
-        npv_net_of_recapture: 142_000
-        note: "No bonus. Still worthwhile due to MACRS acceleration."
-      - bonus_rate: 0.20
-        year_1_total_depr: 857_973
-        npv_net_of_recapture: 201_239
-        note: "Current 2026 rate. Base case."
+        year_1_total_depr: 507_523
+        npv_net_of_recapture: 150_000
+        note: "No bonus (e.g., a fully non-conforming state). Still worthwhile from MACRS acceleration alone."
       - bonus_rate: 0.40
-        year_1_total_depr: 1_265_473
-        npv_net_of_recapture: 268_000
-        note: "2025 rate. Moderately higher."
+        year_1_total_depr: 1_208_423
+        npv_net_of_recapture: 240_000
+        note: "Early-2025 (on/before Jan 19) TCJA rate, or a partially decoupled state."
       - bonus_rate: 0.60
-        year_1_total_depr: 1_672_973
-        npv_net_of_recapture: 342_000
-        note: "2024 rate."
+        year_1_total_depr: 1_558_873
+        npv_net_of_recapture: 290_000
+        note: "2024 TCJA phase-down rate (historical placements)."
+      - bonus_rate: 0.80
+        year_1_total_depr: 1_909_323
+        npv_net_of_recapture: 335_000
+        note: "2023 TCJA phase-down rate (historical placements)."
       - bonus_rate: 1.00
-        year_1_total_depr: 2_487_973
-        npv_net_of_recapture: 498_000
-        note: "Full 100% bonus. Maximum benefit. First-year deduction covers 30% of depreciable basis."
+        year_1_total_depr: 2_259_773
+        npv_net_of_recapture: 360_751
+        note: "OBBBA permanent 100% bonus. BASE CASE for placements after 2025-01-19. Year-1 deduction expenses the full $2.0375M of qualifying property."
 
   # -------------------------------------------------------------------
   # RECOMMENDATION
@@ -398,13 +424,18 @@ example:
   recommendation:
     proceed: true
     rationale:
-      - "NPV of $201K net of recapture and study cost on an $18K investment = 11.2x ROI"
-      - "Front-loaded tax savings improve cash-on-cash returns in years 1-3 when value-add carry is highest"
-      - "Year 1 tax savings of $225K partially offsets negative carry during renovation period"
-      - "Even at 0% bonus (worst case), NPV is $142K -- study pays for itself regardless"
+      - "NPV of ~$361K net of recapture and study cost on an $18K investment = ~20x ROI at the permanent 100% bonus"
+      - "Front-loaded tax savings improve cash-on-cash returns in year 1 when value-add carry is highest"
+      - "Year 1 tax savings of $785K materially offsets negative carry during the renovation period"
+      - "Even at 0% bonus (fully non-conforming state, worst case), NPV is ~$150K -- the study pays for itself regardless"
     timing_note: >
-      Close in 2026 to capture 20% bonus. If acquisition slips to 2027, bonus
-      drops to 0% (absent legislative extension). Accelerate closing if possible.
+      Under OBBBA the 100% bonus is permanent for qualified property placed in
+      service after 2025-01-19, so there is no year-end phase-down cliff to race
+      against on the federal side. The remaining timing levers are (1) the
+      placed-in-service date itself (the property must be placed in service, not
+      merely acquired) and (2) state conformity -- confirm whether the taxing
+      state couples to the federal 100% bonus or requires a separate, lower
+      state depreciation computation.
     section_1031_interaction: >
       If a 1031 exchange is contemplated at disposition, recapture is deferred
       along with capital gains. Cost seg is even more attractive when combined

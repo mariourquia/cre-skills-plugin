@@ -1,6 +1,22 @@
 # Opportunity Zone Benefit Calculations Reference
 
-Complete OZ benefit mechanics, compliance tests, and after-tax IRR differentials. Worked example: $2M capital gains invested into a Qualified Opportunity Zone tract in Jersey City, NJ.
+Complete OZ benefit mechanics, compliance tests, and after-tax IRR differentials. Two regimes apply, keyed on the QOF investment date. Worked example: $2M capital gains invested into a Qualified Opportunity Zone tract in Jersey City, NJ.
+
+> **Statute basis.** IRC Section 1400Z-2 as amended by the One Big Beautiful Bill Act (OBBBA, enacted 2025-07-04), which made Opportunity Zones permanent. Last verified 2026-06-03. This reference is advisory, not tax or legal advice; confirm with qualified tax counsel and check state conformity.
+
+---
+
+## 0. Two Regimes, Keyed on Investment Date
+
+| | **OZ 1.0 (pre-2027 vintage)** | **OZ 2.0 (post-2026 vintage)** |
+|---|---|---|
+| Applies to | QOF investments on or before 12/31/2026 | QOF investments after 12/31/2026 |
+| Deferred-gain inclusion | Fixed date 12/31/2026 (or earlier inclusion event) | Rolling: 5 years from the investment date (or earlier inclusion event) |
+| Basis step-up | 10% at 5-year hold / 15% at 7-year hold -- but only if the hold completes before 12/31/2026, so unreachable for 2022-2026 vintages ($0) | 10% at 5-year hold restored; **30% for a Qualified Rural Opportunity Fund (QROF)**. The 15% step-up was not carried forward |
+| Zone designations | Original 2018 map | New map effective 2027-01-01, 10-year term, **decennial** redesignation; prior map overlaps through 12/31/2028 |
+| 10-year exclusion | Yes | Yes (unchanged) |
+
+Always classify the vintage before quantifying benefits.
 
 ---
 
@@ -8,9 +24,10 @@ Complete OZ benefit mechanics, compliance tests, and after-tax IRR differentials
 
 ### Benefit 1: Tax Deferral on Original Gain
 
-Capital gains invested in a Qualified Opportunity Fund (QOF) within 180 days of realization are deferred until the earlier of:
-- Sale or exchange of the QOF investment
-- December 31, 2026 (statutory recognition date)
+Capital gains invested in a Qualified Opportunity Fund (QOF) within 180 days of realization are deferred, with the inclusion date depending on the regime:
+
+- **OZ 1.0**: until the earlier of (i) sale/exchange of the QOF investment, or (ii) **December 31, 2026** (the fixed statutory inclusion date).
+- **OZ 2.0**: until the earlier of (i) sale/exchange, or (ii) the **5-year anniversary** of the investment (a rolling clock, no fixed calendar terminus).
 
 ```
 Deferral formula:
@@ -18,40 +35,65 @@ Deferral formula:
   Time value of deferral = deferred_tax * [(1 + r)^t - 1]
 
   where r = investor's opportunity cost of capital, t = years of deferral
+  OZ 1.0: t = (12/31/2026 - investment_date)
+  OZ 2.0: t = 5 (rolling), unless sold earlier
 
-Example:
-  $2,000,000 gain recognized June 2025
+Example (OZ 1.0, early vintage):
+  $2,000,000 gain recognized June 2019, invested in a QOF within 180 days
   Federal LTCG rate: 20% + 3.8% NIIT = 23.8%
   Tax deferred: $2,000,000 * 23.8% = $476,000
+  Deferral period: ~7.5 years (to 12/31/2026)
+  Time value at 8%: $476,000 * [(1.08)^7.5 - 1] = ~$370,000
 
-  Deferral period: June 2025 to December 2026 = 1.5 years
-  At 8% opportunity cost: $476,000 * [(1.08)^1.5 - 1] = $476,000 * 0.1225 = $58,310
-
-  Time value of deferral benefit: $58,310
+Example (OZ 2.0, post-2026 vintage):
+  $2,000,000 gain invested January 2027
+  Tax deferred: $476,000, included on the 5-year anniversary (Jan 2032)
+  Time value at 8%: $476,000 * [(1.08)^5 - 1] = $476,000 * 0.4693 = $223,400
 ```
 
-**Key constraint**: The December 31, 2026 forced recognition date means the deferral benefit is minimal for new investments in 2025-2026. The deferral was far more valuable for investments made in 2018-2021 with 5-8 years of deferral.
+**Key constraint (OZ 1.0 only)**: a late OZ 1.0 vintage invested near year-end 2026 has only weeks of deferral to the fixed 12/31/2026 date, so the benefit is minimal. The deferral was far more valuable for 2018-2021 vintages with 5-8 years of runway. Under OZ 2.0 the rolling 5-year window restores a meaningful, vintage-independent deferral.
 
-### Benefit 2: Step-Up in Basis (EXPIRED)
+### Benefit 2: Step-Up in Basis of the Deferred Gain
 
-Originally, the TCJA provided:
-- 10% step-up after 5 years of holding the QOF investment
-- 15% step-up after 7 years
+The TCJA (OZ 1.0) provided a 10% step-up after a 5-year hold and a 15% step-up after a 7-year hold, each reducing the deferred gain recognized at inclusion. OBBBA (OZ 2.0) restored a 10% step-up (5-year hold) and added a 30% step-up for Qualified Rural Opportunity Funds; the 15% (7-year) tier was not carried forward.
 
 ```
-5-year step-up: deferred_gain * 10% reduction = tax savings of gain * 10% * tax_rate
-7-year step-up: deferred_gain * 15% reduction = tax savings of gain * 15% * tax_rate
+step_up_savings = deferred_gain * step_up_pct * capital_gains_rate
+
+OZ 1.0:
+  10% step-up: requires the 5-year hold to complete before 12/31/2026
+    -> reachable only for gains invested by 12/31/2021
+  15% step-up: requires the 7-year hold to complete before 12/31/2026
+    -> reachable only for gains invested by 12/31/2019
+  For 2022-2026 vintages, neither is reachable: step_up_pct = 0
+
+OZ 2.0 (investments after 12/31/2026):
+  step_up_pct = 0.10 (standard QOF, 5-year hold)
+  step_up_pct = 0.30 (Qualified Rural Opportunity Fund, 5-year hold)
+  No 15% tier.
 ```
 
-**Status as of 2025**: Both step-up deadlines have effectively passed. To achieve the 7-year step-up by December 31, 2026, the investment must have been made by December 31, 2019. The 5-year step-up required investment by December 31, 2021. New investments in 2025 receive NO basis step-up.
-
-For legacy investments made before the deadlines:
+**Worked step-ups:**
 ```
-Example: $2M gain invested December 2019 (7-year step-up eligible)
+OZ 1.0 legacy: $2M gain invested December 2019 (7-year step-up reachable)
   Basis step-up: $2,000,000 * 15% = $300,000
-  Gain recognized at Dec 31, 2026: $2,000,000 - $300,000 = $1,700,000
+  Gain included at 12/31/2026: $2,000,000 - $300,000 = $1,700,000
   Tax savings: $300,000 * 23.8% = $71,400
+
+OZ 1.0 late vintage: $2M gain invested in 2026
+  Neither 5- nor 7-year hold completes before 12/31/2026
+  Step-up: $0; full $2,000,000 included at 12/31/2026
+
+OZ 2.0 standard: $2M gain invested January 2027, held 5 years
+  Basis step-up: $2,000,000 * 10% = $200,000
+  Tax savings: $200,000 * 23.8% = $47,600
+
+OZ 2.0 rural (QROF): $2M gain invested January 2027, held 5 years
+  Basis step-up: $2,000,000 * 30% = $600,000
+  Tax savings: $600,000 * 23.8% = $142,800
 ```
+
+Do not state that step-ups "expired." That is accurate only for late OZ 1.0 vintages; OZ 2.0 restores the step-up (and enhances it for rural).
 
 ### Benefit 3: 10-Year Exclusion of QOF Appreciation
 
@@ -63,16 +105,16 @@ Exclusion formula:
   Tax savings = QOF_appreciation * capital_gains_rate
 
 Example:
-  $2,000,000 invested in QOF in 2025
-  QOF value after 10 years (2035): $5,500,000
+  $2,000,000 invested in QOF
+  QOF value after 10 years: $5,500,000
   QOF appreciation: $5,500,000 - $2,000,000 = $3,500,000
 
   Tax excluded: $3,500,000 * 23.8% = $833,000
 
-  This is the primary remaining benefit for new OZ investments.
+  This is the dominant benefit in both OZ 1.0 and OZ 2.0.
 ```
 
-**Important**: The 10-year exclusion applies only to appreciation in the QOF investment itself. The original deferred gain is still recognized (at December 31, 2026 or earlier sale). The exclusion is available for investments through December 31, 2047 (current statutory sunset).
+**Important**: The 10-year exclusion applies only to appreciation in the QOF investment itself; the original deferred gain is still recognized at its inclusion date (OZ 1.0: 12/31/2026 or earlier sale; OZ 2.0: the rolling 5-year anniversary or earlier sale, net of the 10%/30% step-up). Under OBBBA the program is permanent, so the exclusion is no longer tied to a single statutory sunset; eligibility for any given investment depends on the zone designation in force (the post-2026 map runs 2027-01-01 for a 10-year term, redesignated decennially).
 
 ---
 
@@ -304,17 +346,19 @@ The discontinuity at year 10 is dramatic. Selling in year 9 instead of year 10 f
 
 ## 6. State Tax Conformity (Selected States)
 
+State conformity to the OBBBA OZ 2.0 amendments lags federal law and must be re-verified per state. Many states couple to the IRC on a rolling basis (and thus pick up OZ 2.0 automatically), others on a fixed/static date (and need legislation), and a few decouple entirely. The table below is the federal-conformity posture as a starting point only.
+
 | State | OZ Deferral | OZ Basis Step-Up | OZ 10-Year Exclusion | Notes |
 |---|---|---|---|---|
-| New Jersey | Yes (partial) | N/A (expired) | Yes (legislation enacted) | NJ has state-designated OZs with additional benefits |
-| New York | Yes | N/A | Yes | Full conformity to federal provisions |
-| California | No | No | No | CA does not conform to any OZ provisions |
-| Connecticut | Yes | N/A | Yes | Full conformity |
-| Pennsylvania | Yes | N/A | Yes | Full conformity |
+| New Jersey | Yes (partial) | Follows federal where conformed | Yes (legislation enacted) | NJ has state-designated OZs with additional benefits; confirm OZ 2.0 coupling |
+| New York | Yes | Follows federal | Yes | Generally conforms to federal provisions; confirm OZ 2.0 date coupling |
+| California | No | No | No | CA does not conform to any OZ provisions (1.0 or 2.0) |
+| Connecticut | Yes | Follows federal | Yes | Generally conforms |
+| Pennsylvania | Yes | Follows federal | Yes | Generally conforms |
 | Florida | N/A (no state income tax) | N/A | N/A | Federal benefits apply; no state layer |
 | Texas | N/A (no state income tax) | N/A | N/A | Federal benefits apply; no state layer |
 
-California non-conformity is a major consideration for CA-resident investors: the 10-year exclusion provides zero state benefit, and CA's 13.3% top rate on capital gains significantly reduces the net benefit.
+California non-conformity is a major consideration for CA-resident investors: the OZ benefit provides zero state relief, and CA's 13.3% top rate on capital gains significantly reduces the net benefit. Always verify whether the investor's state has conformed to the OBBBA OZ 2.0 amendments for the relevant tax year.
 
 ---
 
@@ -322,9 +366,9 @@ California non-conformity is a major consideration for CA-resident investors: th
 
 | Error | Consequence |
 |---|---|
-| Assuming basis step-up is still available for new investments | Step-up deadlines passed (5-year by Dec 2021, 7-year by Dec 2019); new 2025 investments get zero step-up |
+| Applying the wrong regime's step-up rule | For late OZ 1.0 vintages (2022-2026) the step-up is $0 because the 5-/7-year holds cannot complete before 12/31/2026; for OZ 2.0 (post-2026) the 10% step-up is restored (30% rural QROF). Pin the rule to the investment date, do not blanket-assert step-ups "expired" |
 | Selling in year 9 instead of 10 | Forfeits the entire 10-year exclusion; all QOF appreciation becomes taxable |
-| Ignoring the Dec 2026 forced gain recognition | Deferred gain is recognized regardless of whether the QOF investment is sold; investor must plan for tax liability in 2026 |
+| Using the fixed 12/31/2026 inclusion date for a post-2026 investment | OZ 2.0 defers on a rolling 5-year clock from the investment date, not to a fixed calendar date; the deferred gain is recognized at the 5-year anniversary (net of the 10%/30% step-up) or earlier sale |
 | Failing the 90% asset test | Penalty assessed monthly; repeated failure can disqualify the QOF entirely |
 | Including land in the substantial improvement calculation | Only building basis must be doubled; including land inflates the required improvement amount unnecessarily |
 | Assuming state conformity without verification | California, Mississippi, and others do not conform; state tax benefits may be zero |
