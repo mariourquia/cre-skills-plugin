@@ -18,6 +18,7 @@ Usage:
 """
 
 import argparse
+import importlib.util
 import json
 import re
 import sys
@@ -31,6 +32,17 @@ except ImportError:
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SRC_DIR = REPO_ROOT / "src"
+
+
+def _load_amos_manifest_builder():
+    """Import scripts/amos-manifest-build.py by path (hyphenated, not importable
+    as a normal module). Returns the module so catalog-generate can emit the
+    AMOS manifest as part of the standard generate flow."""
+    path = Path(__file__).resolve().parent / "amos-manifest-build.py"
+    spec = importlib.util.spec_from_file_location("amos_manifest_build", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def load_catalog() -> dict:
@@ -364,6 +376,8 @@ def main():
     parser = argparse.ArgumentParser(description="Generate public surfaces from catalog")
     parser.add_argument("--dry-run", action="store_true", help="Show changes without writing")
     parser.add_argument("--check", action="store_true", help="CI mode: fail if any surface would change")
+    parser.add_argument("--no-manifest", action="store_true", help="Skip emitting dist/amos-skill-manifest.json")
+    parser.add_argument("--as-of", help="ISO-8601 generated_at for the AMOS manifest (determinism)")
     args = parser.parse_args()
 
     catalog = load_catalog()
@@ -390,6 +404,17 @@ def main():
     for surface, changed in changes.items():
         status = "CHANGED" if changed else "ok"
         print(f"  {surface}: {status}")
+
+    # AMOS skill manifest (dist/amos-skill-manifest.json) is a gitignored build
+    # artifact, NOT a tracked public surface — so it is emitted on a real run but
+    # kept OUT of the `changes` drift gate above (a build artifact can never cause
+    # --check to fail). --check / --dry-run do not write it.
+    if not args.no_manifest and not args.check and not args.dry_run:
+        amos = _load_amos_manifest_builder()
+        manifest = amos.build_manifest(as_of=args.as_of)
+        amos.OUT_PATH.parent.mkdir(exist_ok=True)
+        amos.OUT_PATH.write_text(amos._serialize(manifest), encoding="utf-8")
+        print(f"  amos-skill-manifest.json: WROTE ({len(manifest['skills'])} skills)")
 
     if args.check and any_changed:
         print("\nFAIL: Surfaces have drifted from catalog. Run: python scripts/catalog-generate.py")
