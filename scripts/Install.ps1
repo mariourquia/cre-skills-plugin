@@ -252,7 +252,7 @@ Write-Host "" -ForegroundColor Cyan
 Write-Host "  Commercial Real Estate Skills for Claude" -ForegroundColor Cyan
 
 Write-Blue  "  Plugin Installer v4.5.0"
-Write-Dim   "  113 skills | 54 agents | 6 workflow chains"
+Write-Dim   "  127 skills | 54 agents | 6 workflow chains"
 Write-Host  ""
 
 # ── Verify plugin files exist ───────────────────────────────────────
@@ -745,7 +745,7 @@ $verifyFails = 0
 $cacheSkills = Join-Path $PluginCachePath "skills"
 if (Test-Path $cacheSkills) {
     $skillCount = (Get-ChildItem $cacheSkills -Directory -ErrorAction SilentlyContinue | Measure-Object).Count
-    Write-Green "  Skills: $skillCount (expected 113)"
+    Write-Green "  Skills: $skillCount (expected 127)"
 } else {
     Write-Red "  Plugin cache missing skills directory: $cacheSkills"
     $verifyFails++
@@ -865,7 +865,7 @@ Write-Host ""
 
 Write-Bold "  What's Included"
 Write-Host ""
-Write-Host "  113 skills across 18 categories" -ForegroundColor Green
+Write-Host "  127 skills across 18 categories" -ForegroundColor Green
 Write-Host "   54 expert agents (Pension Fund, PE, REIT, Risk Mgr, ...)" -ForegroundColor Green
 Write-Host "    6 workflow chains (Acquisition, Capital Stack, Hold, ...)" -ForegroundColor Green
 Write-Host ""

@@ -425,7 +425,7 @@ SUCCESS
   printf "  ${DIM}/cre-skills:cre-route generate an IC memo${RESET}\n"
   printf "  ${DIM}/cre-skills:cre-route normalize this T-12${RESET}\n"
   echo ""
-  printf "  ${BOLD}Skill Categories (113 skills)${RESET}\n"
+  printf "  ${BOLD}Skill Categories (127 skills)${RESET}\n"
   echo ""
   printf "  Deal Pipeline      Screening, underwriting, DD, closing\n"
   printf "  Capital Markets    Loan sizing, cap stack, debt monitoring, refi\n"
