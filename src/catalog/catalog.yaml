@@ -1,6 +1,6 @@
 version: 1.0.0
-generated_at: '2026-06-04T02:19:48.592464+00:00'
-plugin_version: 4.5.0
+generated_at: '2026-06-04T02:46:30.310552+00:00'
+plugin_version: 5.0.0
 items:
 - id: 1031-exchange-executor
   display_name: 1031 Exchange Executor

@@ -18,6 +18,7 @@ Usage:
 """
 
 import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -31,6 +32,22 @@ PLUGIN_ROOT = SCRIPT_DIR.parent
 SRC_DIR = PLUGIN_ROOT / "src"
 REGISTRY_PATH = PLUGIN_ROOT / "registry.yaml"
 SKILLS_DIR = SRC_DIR / "skills"
+
+
+def _git_ignores(path: Path) -> bool:
+    """Return True if `path` is git-ignored (so it never ships in a clone / CI
+    checkout). Used to keep the release-legacy checks from flagging local-only,
+    git-ignored working files (e.g. docs/plans/ design docs). Fail-closed: if git
+    is unavailable or errors, return False so the file is still flagged."""
+    try:
+        result = subprocess.run(
+            ["git", "check-ignore", "-q", str(path)],
+            cwd=PLUGIN_ROOT,
+            capture_output=True,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return result.returncode == 0
 
 
 # ---------------------------------------------------------------------------
@@ -356,6 +373,8 @@ def validate_stale_versions() -> list[str]:
         "tests/README.md",         # documents when specific test modules landed (v4.2.0 Obj 5/6/8, etc.)
         "README.md",               # release-maturity table cites RMF subsystem version (v1.0.0-rc1)
         "docs/ROADMAP.md",         # current-release block cites RMF subsystem version (v1.0.0-rc1)
+        "docs/known-limitations.md", # subsystem-maturity section cites RMF version (v1.0.0-rc1) + the v4.5.0->v5.0.0 migration pointer
+
         "CONTRIBUTING.md",         # release-process example cites tag-to-push format
         "docs/release-checklist.md",          # links the prior release-notes file as the template by design
         "docs/tailoring_capability_matrix.md", # links the prior release-notes file for closure context by design
@@ -477,15 +496,22 @@ def validate_legacy_files() -> list[str]:
     """
     failures: list[str] = []
 
-    # Plan docs should be removed after completion
+    # Plan docs should be removed after completion. docs/plans/ is gitignored
+    # (local-only specs/design docs/implementation plans, per .gitignore), so a
+    # plan doc present in a developer working tree but git-ignored is not part of
+    # the release and must not gate it -- a fresh clone / CI checkout has an empty
+    # docs/plans/. Only a plan doc that is NOT git-ignored (i.e. would actually
+    # ship) is a real release blocker. We probe git via `git check-ignore`; if git
+    # is unavailable we fall back to flagging (fail-closed).
     plans_dir = PLUGIN_ROOT / "docs" / "plans"
     if plans_dir.is_dir():
         plan_files = list(plans_dir.glob("*.md"))
-        if plan_files:
-            for pf in plan_files:
-                failures.append(
-                    f"FAIL  docs/plans/{pf.name}: completed plan doc should be removed before release"
-                )
+        for pf in plan_files:
+            if _git_ignores(pf):
+                continue
+            failures.append(
+                f"FAIL  docs/plans/{pf.name}: completed plan doc should be removed before release"
+            )
 
     # Duplicate files with " 2" suffix (macOS conflict copies). Skip vendored
     # deps and build artifacts (gitignored, not ours): node_modules legitimately
