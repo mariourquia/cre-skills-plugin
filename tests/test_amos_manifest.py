@@ -42,6 +42,12 @@ AMOS_ROOM_TAB_KEYS_PLUS = {
     "sources", "memo", "feedback", "decision", "landing",
 }
 
+# v5.1 forward-compatibility metadata (WS-F). Contract-only fields AMOS consumes;
+# no live coupling. pii_policy default is the CONSERVATIVE "none" (explicit
+# opt-in), never aggregate_only.
+AMOS_PII_POLICY = {"none", "aggregate_only", "pseudonymized", "redacted_at_extraction"}
+AMOS_WORKSPACE_SCOPE = {"deal", "asset", "fund", "portfolio"}
+
 
 # ---------------------------------------------------------------------------
 # Loaders
@@ -209,6 +215,71 @@ def test_no_entry_claims_a_live_connector():
     assert not offenders, (
         "ADR-0006 violation: the manifest must never mark a skill live-connected. "
         f"Offenders: {offenders}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# v5.1 forward-compat metadata (WS-F) — produces_artifact_kind / pii_policy /
+# workspace_scope. Contract-only fields; they must NOT introduce live coupling.
+# ---------------------------------------------------------------------------
+def test_every_entry_carries_the_v51_forward_compat_keys():
+    """The builder always emits the three v5.1 keys on every entry (the schema
+    lists them as required, so an omission would also fail schema validation)."""
+    m = _build_manifest()
+    keys = ("produces_artifact_kind", "pii_policy", "workspace_scope")
+    missing: List[str] = []
+    for s in m["skills"]:
+        for key in keys:
+            if key not in s:
+                missing.append(f"{s['id']}: missing '{key}'")
+    assert not missing, "entries missing v5.1 forward-compat keys:\n  " + "\n  ".join(missing)
+
+
+def test_pii_policy_is_enum_valued_and_defaults_conservatively():
+    """pii_policy is a non-null enum value; in v5.1 no skill opts in, so every
+    entry defaults to the CONSERVATIVE 'none' (never aggregate_only)."""
+    m = _build_manifest()
+    failures: List[str] = []
+    for s in m["skills"]:
+        pp = s["pii_policy"]
+        if pp not in AMOS_PII_POLICY:
+            failures.append(f"{s['id']}: pii_policy '{pp}' not in {sorted(AMOS_PII_POLICY)}")
+        # v5.1: no skill declares a PII posture, so the conservative default holds.
+        if pp != "none":
+            failures.append(f"{s['id']}: pii_policy is '{pp}', expected conservative default 'none' in v5.1")
+    assert not failures, "pii_policy violations:\n  " + "\n  ".join(failures)
+
+
+def test_workspace_scope_is_null_or_a_valid_scope():
+    """workspace_scope is null (v5.1 default) or a valid AMOS RBAC scope."""
+    m = _build_manifest()
+    failures: List[str] = []
+    for s in m["skills"]:
+        ws = s["workspace_scope"]
+        if ws is not None and ws not in AMOS_WORKSPACE_SCOPE:
+            failures.append(f"{s['id']}: workspace_scope '{ws}' not null and not in {sorted(AMOS_WORKSPACE_SCOPE)}")
+    assert not failures, "workspace_scope violations:\n  " + "\n  ".join(failures)
+
+
+def test_produces_artifact_kind_is_null_or_a_string():
+    """produces_artifact_kind is null (v5.1 default) or a non-empty string."""
+    m = _build_manifest()
+    failures: List[str] = []
+    for s in m["skills"]:
+        pak = s["produces_artifact_kind"]
+        if pak is not None and not (isinstance(pak, str) and pak.strip()):
+            failures.append(f"{s['id']}: produces_artifact_kind must be null or a non-empty string, got {pak!r}")
+    assert not failures, "produces_artifact_kind violations:\n  " + "\n  ".join(failures)
+
+
+def test_v51_fields_do_not_disturb_the_no_live_connector_invariant():
+    """Adding the v5.1 forward-compat fields keeps the ADR-0006 invariant: every
+    entry still reports live_connector === false (no live coupling introduced)."""
+    m = _build_manifest()
+    offenders = [s["id"] for s in m["skills"] if s.get("live_connector") is not False]
+    assert not offenders, (
+        "v5.1 forward-compat fields must not introduce live coupling; "
+        f"live_connector must stay false. Offenders: {offenders}"
     )
 
 
