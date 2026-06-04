@@ -41,7 +41,7 @@ python3 scripts/amos-manifest-build.py --as-of 2026-06-03T00:00:00Z   # determin
 > live-connected: every entry carries `live_connector: false`, always. Per AMOS
 > **ADR-0006**, AMOS *references* skills (by `id` + `source_path`); it does not
 > invoke them live. The manifest tells AMOS what a skill *is* and what governance
-> it *requires*; wiring a live connector is explicitly out of scope (a v5.1+
+> it *requires*; wiring a live connector is explicitly out of scope (a future **v6**
 > target). See the [Honest framing](#honest-framing-no-live-coupling) section.
 
 ---

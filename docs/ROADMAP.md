@@ -125,12 +125,17 @@ shakedown log before graduation to `status: stable`.
 
 ---
 
-## v5.x — Remaining governance + connector runtime (deferred from v5.2.0)
+## v5.x — Remaining governance runtime (deferred from v5.2.0)
 
 The honest deferrals that remain after v5.2.0. v5.2.0 added the full-corpus tiered
 skill contract, the populated forward-compat manifest fields (`1.1`), the
-corpus-wide **static** governance scanner, and the connector no-live invariants; the
-**runtime** enforcement below is still future work.
+corpus-wide **static** governance scanner, and the connector no-live invariants. The
+remaining **v5.x** scope is the generalized runtime **governance** scanner below,
+static-scanner refinement, docs / contract alignment, manifest capability metadata,
+no-live invariant enforcement, and optional non-live interface scaffolding. Connector
+**runtime** enforcement (`source_class` / `max_staleness`) and runnable / vendor
+adapters are **not** v5.x — they are the **v6** real-world-data track (see the
+**Real-world data integration — connector track** section below).
 
 ### Full 127-skill v5-contract conformance sweep — SHIPPED (v5.2.0)
 **Done.** v5.2.0 brought every skill to the Tier-1 contract floor (non-null
@@ -154,25 +159,14 @@ Acceptance: a **runtime** scanner that tags/refuses emitted output across the
 decision-grade corpus, with tests — beyond the v5.2.0 static declaration scanner and
 the RMF subsystem.
 
-### Connector contract runtime enforcement — M
-**The four contract schemas (`debt`, `entity`, `valuation`, `funds` + investor
-reporting) were authored in v5.1.0 as `status: stub`, and `source_class` is now a
-schema-enforced enum.** What remains is the **runtime**: a connector layer that
-emits records carrying `source_class` and **refuses** stale records past their
-declared `max_staleness` at consume time. Today these are declared and
-schema-validated, not enforced by any running connector.
-
-Acceptance: a connector runtime that stamps `source_class` on emitted records and
-refuses on `max_staleness` violation, with tests — not just the static schema
-check shipped in v5.1.0.
-
-### Valuation + investor connectors — L
-Beyond the four contract schemas, the first valuation and investor-reporting
-connectors (the AMOS-facing surfaces) move from contract to runnable adapter
-against a sandbox.
-
-Acceptance: a valuation connector and an investor-reporting connector at
-`status: starter` (beyond `stub`), each runnable against a sandbox instance.
+> **Connector runtime and runnable adapters moved to v6.** The four connector
+> contract schemas (`debt`, `entity`, `valuation`, `funds` + investor reporting)
+> shipped in v5.1.0 as `status: stub` with a schema-enforced `source_class` enum, and
+> v5.2.0 pinned the no-live invariants. The connector **runtime** that emits and
+> enforces `source_class` / `max_staleness`, and the first runnable /
+> `status: starter` adapters, are the **v6** real-world-data track — see the
+> **Real-world data integration — connector track** section below for their
+> acceptance criteria.
 
 ---
 
@@ -286,14 +280,25 @@ approval matrix, and example.
 
 ---
 
-## Real-world data integration — connector track (v5.x → v6, target: H2)
+## Real-world data integration — connector track (v6, target: 2027)
 
-The deep connector buildout. v5.0.0 shipped the honest capability matrix and the
-`source_class` / `max_staleness` contract spec; **v5.1.0 landed the four canonical
-contract schemas** (`status: stub`) and the schema-enforced `source_class` enum. The
-connector **runtime** that emits `source_class` and refuses past `max_staleness`
-**remains deferred (v5.x)** — see "Connector contract runtime enforcement" above.
-The vendor-specific adapters below sit on top of that runtime and span v5.x → v6.
+The deep connector buildout — the **v6** real-world / live data-integration track.
+v5.0.0 shipped the honest capability matrix and the `source_class` / `max_staleness`
+contract spec; **v5.1.0 landed the four canonical contract schemas** (`status: stub`)
+and the schema-enforced `source_class` enum; **v5.2.0 pinned the connector no-live
+invariants**. Everything below is **v6**: the connector **runtime** that emits
+`source_class` and refuses past `max_staleness`, the first valuation and
+investor-reporting connectors at `status: starter` (beyond `stub`, runnable against a
+sandbox), and the vendor-specific adapters. Live connector readiness is subject to
+vendor terms, security review, and org-specific configuration.
+
+**Acceptance (connector runtime):** a connector runtime that stamps `source_class` on
+emitted records and refuses on `max_staleness` violation, with tests — beyond the
+static schema check shipped in v5.1.0.
+
+**Acceptance (first adapters):** a valuation connector and an investor-reporting
+connector at `status: starter` (beyond `stub`), each runnable against a sandbox
+instance.
 
 ### Yardi Voyager connector (cat 3) — XL
 Build the Voyager connector beyond the current wave-5 adapter stub. Five
@@ -338,7 +343,8 @@ SAML/OIDC SSO for enterprise. Paired with the SOC 2 track.
 
 ### residential_multifamily → stable (cat 4) — L
 Acceptance:
-- `status: beta_rc` → `status: stable`.
+- `status: stable_pending_shakedown` → `status: stable` (after the first operator
+  shakedown log; see "Record the first residential_multifamily shakedown log" above).
 - Remove all `sample / starter / illustrative / placeholder` tags from
   operational `reference/normalized/` files (replace with operator-supplied
   overlays per the tailoring flow).
