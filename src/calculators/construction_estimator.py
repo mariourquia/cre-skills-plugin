@@ -434,10 +434,27 @@ def _fallback_base_cost(asset_type: str, finish_level: str) -> dict[str, float]:
     }
 
 
+def _refusal(reason: str) -> dict[str, Any]:
+    """Typed refusal envelope for degenerate input."""
+    return {"error": reason, "refused": True, "code": "construction_estimator_degenerate"}
+
+
 def calculate_estimate(inputs: dict[str, Any]) -> dict[str, Any]:
     """Main estimation engine."""
     asset_type = inputs["asset_type"]
-    gross_sf = inputs["gross_sf"]
+    gross_sf = inputs.get("gross_sf")
+
+    # --- Degenerate-input guard (refuse; do not return a silently-zero TDC) ---
+    # gross_sf is the cost base and the $/SF denominator. At gross_sf<=0 the
+    # building hard cost collapses to 0 while parking/soft costs persist, and the
+    # existing `... if gross_sf else 0` guards return tdc_per_sf=0 -- a
+    # plausible-looking but meaningless estimate. Refuse instead.
+    if gross_sf is None or gross_sf <= 0:
+        return _refusal(
+            f"gross_sf must be positive; got {gross_sf!r}. Cost base and all $/SF "
+            "metrics are undefined at non-positive gross square footage."
+        )
+
     unit_count = inputs.get("unit_count")
     stories = inputs.get("stories", 1)
     location = inputs["location"]

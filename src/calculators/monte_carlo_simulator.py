@@ -488,7 +488,43 @@ def run_simulation(config: dict) -> dict:
     seed = config.get("random_seed", 42)
     corr_matrix_input = config.get("correlation_matrix", None)
 
-    num_trials = max(1000, min(num_trials, 10000))
+    # --- Degenerate-input guard (refuse; do not fabricate a distribution) ---
+    # num_trials < 1 must REFUSE rather than be silently floor-clamped to 1000
+    # (the pre-v5 defect: max(1000, min(0, 10000)) == 1000 returned a fabricated
+    # 1000-trial result for a request of 0). Valid-but-small requests (1..999)
+    # are still clamped up to the 1000-trial statistical floor below.
+    if not isinstance(num_trials, (int, float)) or isinstance(num_trials, bool) or num_trials < 1:
+        return {
+            "error": (
+                f"num_trials must be a positive integer (>=1); got {num_trials!r}. "
+                "Refusing rather than fabricating a clamped 1000-trial distribution."
+            ),
+            "refused": True,
+            "code": "monte_carlo_degenerate",
+        }
+    if not isinstance(equity_invested, (int, float)) or equity_invested <= 0:
+        return {
+            "error": (
+                f"equity_invested must be positive; got {equity_invested!r}. "
+                "Equity multiple, cash-on-cash, and VaR are undefined at zero equity."
+            ),
+            "refused": True,
+            "code": "monte_carlo_degenerate",
+        }
+    if not isinstance(purchase_price, (int, float)) or purchase_price <= 0:
+        return {
+            "error": f"purchase_price must be positive; got {purchase_price!r}.",
+            "refused": True,
+            "code": "monte_carlo_degenerate",
+        }
+    if not variables:
+        return {
+            "error": "variables must be a non-empty list of stochastic drivers.",
+            "refused": True,
+            "code": "monte_carlo_degenerate",
+        }
+
+    num_trials = max(1000, min(int(num_trials), 10000))
 
     rng = random.Random(seed)
 

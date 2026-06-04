@@ -75,9 +75,13 @@ class TestIoVsAmortDscr(unittest.TestCase):
 
 
 class TestDegenerateInputs(unittest.TestCase):
-    def test_zero_noi_produces_zero_loan(self) -> None:
+    def test_zero_noi_refuses(self) -> None:
+        # v5: zero NOI now REFUSES (typed error dict) instead of returning a
+        # zero/wrong loan. Full refusal coverage lives in
+        # test_calculator_behavior_debt_sizing_refusal.py.
         out = calculate_debt_sizing(_input(noi=0))
-        self.assertEqual(out["sizing_results"]["recommended_loan"], 0)
+        self.assertTrue(out.get("refused") is True and bool(out.get("error")))
+        self.assertNotIn("sizing_results", out)
 
     def test_tiny_noi_produces_small_loan(self) -> None:
         out = calculate_debt_sizing(_input(noi=10_000))

@@ -146,13 +146,22 @@ def get_recovery_rate(property_type: str, tier: str) -> float:
         return RECOVERY_RATES.get(f"{ptype}_nr", 0.35)
 
 
+def _refusal(reason: str) -> dict[str, Any]:
+    """Typed refusal envelope for degenerate input."""
+    return {"error": reason, "refused": True, "code": "tenant_credit_scorer_degenerate"}
+
+
 def calculate_tenant_credit(inputs: dict[str, Any]) -> dict[str, Any]:
     """Main calculation entry point."""
-    tenants = inputs["tenants"]
-    total_rent = sum(t["annual_rent"] for t in tenants)
+    tenants = inputs.get("tenants", [])
 
-    if total_rent == 0:
-        return {"error": "Total rent is zero -- cannot compute metrics."}
+    # --- Degenerate-input guard (refuse; do not divide by zero rent) ---
+    if not isinstance(tenants, list) or len(tenants) == 0:
+        return _refusal("tenants must be a non-empty array of tenant objects.")
+    total_rent = sum(t.get("annual_rent", 0) for t in tenants)
+
+    if total_rent <= 0:
+        return _refusal("Total rent is zero -- cannot compute concentration metrics.")
 
     # --- HHI Concentration Index ---
     hhi = 0.0

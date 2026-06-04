@@ -29,6 +29,17 @@ import sys
 from typing import Any
 
 
+def _refusal(reason: str) -> dict[str, Any]:
+    """Typed refusal envelope for degenerate input.
+
+    The orchestrator calculator-bridge keys off the ``error`` field to surface
+    a clean refusal (instead of a generic non-zero-exit / traceback). ``refused``
+    and ``code`` make the refusal machine-distinguishable from a missing-input
+    validation error.
+    """
+    return {"error": reason, "refused": True, "code": "debt_sizing_degenerate"}
+
+
 def mortgage_constant(annual_rate: float, amort_years: int) -> float:
     """
     Calculate the annual mortgage constant (annual debt service per dollar of loan).
@@ -160,6 +171,23 @@ def calculate_debt_sizing(inputs: dict[str, Any]) -> dict[str, Any]:
     """Main calculation entry point."""
     noi = inputs["noi"]
     prop_value = inputs["property_value"]
+
+    # --- Degenerate-input guard (refuse, do not return a wrong-sign answer) ---
+    # Non-positive NOI cannot service debt; sizing on it yields a negative
+    # recommended loan (the min() picks the most-negative candidate). Non-positive
+    # property value makes LTV and equity undefined. Both must refuse rather than
+    # silently return a plausible-looking but wrong number.
+    if noi is None or noi <= 0:
+        return _refusal(
+            f"NOI must be positive to size debt; got {noi}. A non-positive NOI "
+            "cannot support any loan."
+        )
+    if prop_value is None or prop_value <= 0:
+        return _refusal(
+            f"property_value must be positive; got {prop_value}. LTV and equity "
+            "are undefined at non-positive value."
+        )
+
     target_dscr = inputs.get("target_dscr", 1.25)
     target_ltv = inputs.get("target_ltv", 0.65)
     target_dy = inputs.get("target_debt_yield")

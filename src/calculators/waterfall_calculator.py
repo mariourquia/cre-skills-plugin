@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
 """
-JV Waterfall Calculator
-========================
+JV Waterfall Calculator (screening-grade)
+=========================================
 Calculates GP/LP distributions through a multi-tier promote waterfall with
-preferred return accrual, catch-up provisions, and IRR-based lookback.
+preferred return accrual and a GP catch-up.
+
+SCOPE / FIDELITY: This is a SCREENING-GRADE model, not an institutional
+IRR-solved waterfall. The preferred return and the GP catch-up are computed
+exactly. The IRR-hurdle profit tiers, however, are distributed by a
+proportional hurdle-spread APPROXIMATION -- the model does NOT solve for the LP
+achieving each hurdle IRR before the GP promote steps up. The returned dict
+carries a ``method`` field and ``approximation: true`` saying exactly this; do
+not present its tier IRRs as IRR-solved.
 
 Used by: jv-waterfall-architect skill
 
@@ -61,17 +69,54 @@ def irr_calc(cashflows: list[float], guess: float = 0.10, max_iter: int = 1000, 
     return round((lo + hi) / 2, 6)
 
 
+def _refusal(reason: str) -> dict[str, Any]:
+    """Typed refusal envelope for degenerate input."""
+    return {"error": reason, "refused": True, "code": "waterfall_degenerate"}
+
+
+# Honest description of the promote engine. The IRR tiers are distributed by a
+# proportional hurdle-spread heuristic, NOT solved so the LP achieves each
+# hurdle IRR before the GP promote steps up. Surfaced in every result so the
+# synthesis layer never presents this as an institutional IRR-solved waterfall.
+_METHOD_LABEL = (
+    "screening-grade proportional approximation: preferred return and catch-up "
+    "are exact, but the IRR-hurdle profit tiers are allocated by a proportional "
+    "hurdle-spread heuristic and are NOT IRR-solved (the LP is not guaranteed to "
+    "achieve each hurdle IRR before the GP promote steps up). Use for screening, "
+    "not as a binding distribution calculation."
+)
+
+
 def calculate_waterfall(inputs: dict[str, Any]) -> dict[str, Any]:
-    """Main waterfall calculation."""
+    """Main waterfall calculation.
+
+    NOTE: This is a screening-grade model. Preferred return and GP catch-up are
+    computed exactly; the IRR-hurdle profit tiers are a proportional-spread
+    APPROXIMATION (not IRR-solved). See ``_METHOD_LABEL`` / the ``method`` field
+    in the returned dict.
+    """
     lp_equity = inputs["lp_equity"]
     gp_equity = inputs["gp_equity"]
-    total_equity = lp_equity + gp_equity
+    cashflows = inputs.get("cashflows_by_period", [])
+
+    # --- Degenerate-input guard (refuse; do not raise) ---
+    total_equity = (lp_equity or 0) + (gp_equity or 0)
+    if total_equity <= 0:
+        return _refusal(
+            f"Total equity (lp_equity + gp_equity) must be positive; got "
+            f"{lp_equity!r} + {gp_equity!r}. Equity shares are undefined at zero."
+        )
+    if not isinstance(cashflows, list) or len(cashflows) < 2:
+        return _refusal(
+            "cashflows_by_period must have at least 2 entries (index 0 = initial "
+            f"investment, then >=1 distribution period); got {cashflows!r}."
+        )
+
     lp_share = lp_equity / total_equity
     gp_share = gp_equity / total_equity
 
     pref_rate = inputs.get("preferred_return", 0.08)
     tiers = inputs.get("tiers", [])
-    cashflows = inputs["cashflows_by_period"]
     catch_up_pct = inputs.get("catch_up_pct", 0)
     compounding = inputs.get("compounding", True)
 
@@ -131,11 +176,18 @@ def calculate_waterfall(inputs: dict[str, Any]) -> dict[str, Any]:
 
     # TIER 3: GP Catch-Up (if applicable)
     if catch_up_pct > 0 and remaining > 0:
-        # GP catches up until GP has received catch_up_pct of total profit distributed so far
-        total_gp_so_far = gp_capital_returned
-        total_distributed_so_far = lp_pref_paid + capital_returned
-        target_gp_share = total_distributed_so_far * catch_up_pct / (1 - catch_up_pct)
-        gp_catch_up = min(remaining, max(target_gp_share - total_gp_so_far, 0))
+        # The catch-up "profit" base is the PREFERRED tier only. Return-of-capital
+        # is NOT profit, so it must be excluded from the base (the pre-v5 bug
+        # measured against pref + return-of-capital, which let the GP catch up
+        # against the LP's returned principal and swallow the whole residual).
+        #
+        # Standard full catch-up: the GP receives catch_up_pct/(1-catch_up_pct)
+        # of the preferred distributed, so that AFTER the catch-up the GP holds
+        # catch_up_pct of the total (pref + catch-up) profit distributed so far.
+        # gp_capital_returned is return-of-capital, not promote, so it does NOT
+        # offset the target.
+        target_gp_catch_up = lp_pref_paid * catch_up_pct / (1 - catch_up_pct)
+        gp_catch_up = min(remaining, max(target_gp_catch_up, 0))
         remaining -= gp_catch_up
 
         tier_distributions.append({
@@ -226,6 +278,8 @@ def calculate_waterfall(inputs: dict[str, Any]) -> dict[str, Any]:
     gp_multiple = round(total_gp / gp_equity, 2) if gp_equity > 0 else 0
 
     return {
+        "method": _METHOD_LABEL,
+        "approximation": True,
         "summary": {
             "total_equity": total_equity,
             "lp_equity": lp_equity,
