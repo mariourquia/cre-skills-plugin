@@ -1,17 +1,18 @@
-# Known Limitations (v5.0.0)
+# Known Limitations (v5.1.0)
 
-> Status: released (v5.0.0)
+> Status: released (v5.1.0)
 > Owner: Mario Urquia
-> Last reviewed: 2026-06-03
-> This is the honest, single-page statement of what v5.0.0 does **not** do.
+> Last reviewed: 2026-06-04
+> This is the honest, single-page statement of what v5.1.0 does **not** do.
 > The README "Known Limitations" section summarizes these; this file is the
 > long-form companion. If a v5 collateral piece implies more than this, it is wrong.
 
-v5.0.0 is honest about its scope. The release delivers a governable skill
-taxonomy, an AMOS skill-manifest export, a canonical data-grade ladder, and a
-targeted finance-placeholder guard. It does **not** deliver universal runtime
-governance, live connectors, or an autonomous orchestrator. The limitations below
-are deliberate and named.
+v5.1.0 is honest about its scope. It is a governance-hardening release: calculator
+fidelity fixes, four connector contract **schema stubs** plus a schema-enforced
+`source_class` enum, and AMOS forward-compat manifest fields — on top of v5.0.0's
+governable taxonomy and data-grade ladder. It does **not** deliver universal
+runtime governance, live connectors, or an autonomous orchestrator. The
+limitations below are deliberate and named.
 
 ## Governance and enforcement
 
@@ -32,16 +33,20 @@ are deliberate and named.
   `opportunity-zone-underwriter`, `cost-segregation-analyzer`). That guard is a
   **presence-of-discipline check**, not a runtime scanner of emitted output. A
   fully-generalized, corpus-wide runtime data scanner (every cell of every skill
-  checked at emit time) is a **v5.1** item. Do not assume universal enforcement.
+  checked at emit time) **remains deferred** — v5.1.0 added the static connector
+  `source_class` enum, not a runtime scanner. Do not assume universal enforcement.
 
-- **The four canonical connector contract schemas are v5.1.** `debt`, `entity`,
-  `valuation`, and the promotion of `funds` (with investor reporting) into a
-  connector entity contract do **not** exist in the repo yet. The nine existing
-  connector contracts (`pms, gl, crm, ap, market_data, construction, hr_payroll,
-  manual_uploads, deal_pipeline`) are v5.0.0 stubs. The `source_class` provenance
-  field and `max_staleness` consume-time refusal are **specified** (and crosswalked
-  in [`docs/DATA_GRADES.md`](DATA_GRADES.md) §2) but the connector runtime that
-  emits and enforces them is **v5.1**.
+- **The four connector contract schemas exist as stubs; the connector runtime does
+  not.** `debt`, `entity` (legal/ownership cap-structure, distinct from
+  `master_data`), `valuation`, and `funds` (+ pseudonymized `investor_report`) were
+  authored in v5.1.0 as `status: stub` contracts conforming to the connector
+  meta-schemas. `source_class` is now a schema-enforced enum
+  (`_schema/source_class.yaml` + `entity_contract.schema.yaml` +
+  `tests/test_connector_source_class.py`) and `max_staleness` is declared on the
+  new contracts. **But nothing runs:** no adapter executes, no record is emitted,
+  and the consume-time `max_staleness` refusal + `source_class` stamping at a
+  connector runtime remain **deferred**. All 13 connector contracts (the 9 prior +
+  these 4) are stubs; **0 are live/implemented.**
 
 ## Orchestration
 

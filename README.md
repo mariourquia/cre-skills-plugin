@@ -6,7 +6,7 @@
 ╚██████╗██║  ██║███████╗    ███████║██║  ██╗██║███████╗███████╗███████║
  ╚═════╝╚═╝  ╚═╝╚══════╝    ╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝╚══════╝
 
-        v5.0.0  ·  governable CRE skill taxonomy + AMOS skill-manifest export
+        v5.1.0  ·  governance hardening — connector contracts, source_class, calculator fidelity
 
                                 │                                                                         |        
             *                   │           │           │                     _                          /|     |#|
@@ -58,7 +58,7 @@ This release is an **internal beta / controlled release candidate**. Most top-le
 > Full honest statement: [`docs/known-limitations.md`](docs/known-limitations.md). The headline v5.0.0 limitations:
 
 - **Connectors are not live.** Every connector contract and vendor adapter is `status: stub`; there is no live API feed to any system. The only `active` ingestion shape is a shared-drive / email file drop. See [`docs/connectors/CAPABILITY-MATRIX.md`](docs/connectors/CAPABILITY-MATRIX.md) (CoStar is **not-supported-live** per its AI-use T&C; Yardi / MRI / RealPage are **blocked-by-vendor**).
-- **Generalized cross-skill governance is v5.1.** Decision-grade runtime enforcement (source-class tagging, refusal-on-missing-input, period-seal, placeholder scanner) runs as deployed runtime **only inside `residential_multifamily`**. Elsewhere, v5.0.0 ships the `final_marked` selector + the **targeted named-allowlist finance-placeholder guard** (`tests/test_finance_placeholder_guard.py`) — a presence-of-discipline check, not a corpus-wide runtime scanner. The four canonical connector contract schemas (debt / entity / valuation / funds) are also v5.1.
+- **Generalized cross-skill governance runtime is still deferred.** Decision-grade runtime enforcement (source-class tagging, refusal-on-missing-input, period-seal, placeholder scanner) runs as deployed runtime **only inside `residential_multifamily`**. Elsewhere the plugin ships the `final_marked` selector + the **targeted named-allowlist finance-placeholder guard** (`tests/test_finance_placeholder_guard.py`) — a presence-of-discipline check, not a corpus-wide runtime scanner. The four canonical connector contract schemas (debt / entity / valuation / funds) **exist as `status: stub` contracts** as of v5.1.0 (with a schema-enforced `source_class` enum), but **no connector runtime emits or enforces them and no adapter is live.**
 - **The orchestrator runtime `dispatchAgent()` is a documented stub.** The real execution path is the orchestrate **prose** (`src/commands/orchestrate.md`) with Claude as conductor — not an autonomous engine. Treat orchestrators as structured prompts.
 - **The AMOS manifest is a static export.** `dist/amos-skill-manifest.json` is a generated artifact with honest capability states and **no live coupling**; no skill is marked live-connected (AMOS references skills as data, it does not invoke them live).
 - **The Windows `.exe` is not locally buildable** on macOS — it is produced on CI / Windows only (Inno Setup). The macOS DMG is locally buildable.
@@ -87,6 +87,18 @@ Upcoming work is tracked in [`docs/ROADMAP.md`](docs/ROADMAP.md) — phased from
 | Slash Commands | **11** |
 | Skill Categories | **18** |
 <!-- CATALOG:STATS:END -->
+
+---
+
+## What's New in v5.1.0
+
+**A governance-hardening release — correctness and truthful contracts, not new skills (0 net new).** Highlights, each test-backed:
+
+- **Calculator fidelity.** Monte Carlo beta-distributed variables now inherit the Gaussian-copula correlation (it was being silently dropped). `fund_fee_modeler` promote-sensitivity is labeled `grade: screening` / `linear_fee_drag_approximation` — the `breakeven_irr_*` values are a fee-drag approximation, not a DCF-IRR. `transfer_tax` / `proration_calculator` / `quick_screen` now refuse value-domain degeneracy (including the proration unparseable-date path that used to throw a raw traceback). `debt_sizing` gains `interest_only` alias keys.
+- **Connector contract schemas.** The four canonical contracts — `debt`, `entity` (legal/ownership, distinct from `master_data`), `valuation`, `funds` (+ pseudonymized `investor_report`) — are authored as `status: stub` contracts with round-tripping samples, and `source_class` is now a schema-enforced enum. **No adapter is live; nothing executes.**
+- **AMOS forward-compat.** The skill-manifest emits `produces_artifact_kind`, `pii_policy` (conservative default `none`), and `workspace_scope`. `live_connector` stays `false`.
+
+Still deferred (honest): the corpus-wide runtime governance scanner, the full 127-skill `v5_contract` sweep, live/runnable connector adapters, and the Windows `.exe` (CI/Windows-only). See [Known Limitations](#known-limitations) and `docs/releases/v5.1.0-release-notes.md`.
 
 ---
 

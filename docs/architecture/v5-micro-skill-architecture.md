@@ -12,7 +12,7 @@ sources_of_truth:
 
 # v5 Micro-Skill Architecture
 
-> Phase-1 architecture artifact for the v5.0.0 release. Companion to
+> Phase-1 architecture artifact for the v5.1.0 release. Companion to
 > `docs/plans/v5-skill-modernization-plan.md` (trust-hardening track) and
 > `docs/plans/v5-analysis/09-amos-integration.md` (AMOS contract).
 > Branch: `release/v5-skill-modernization` (single branch/PR for all v5 work).
@@ -32,7 +32,7 @@ AMOS has already *designed* that contract (`PluginSkillRef`, `WorkflowStep`,
 `09-amos-integration.md`). v5's job is to make the plugin the **producer** of it.
 
 **This is primarily a metadata + validation + export effort, not a content
-rewrite and not stub-skill inflation.** Per the focused-scope decision, v5.0.0
+rewrite and not stub-skill inflation.** Per the focused-scope decision, v5.1.0
 ships the taxonomy, reclassifies the priority mega-skills, classifies the corpus
 (by derivation), and exports the AMOS manifest. Net new shipped micro-skills: **0**
 (every "candidate micro-skill" below is either an existing skill reclassified, or
