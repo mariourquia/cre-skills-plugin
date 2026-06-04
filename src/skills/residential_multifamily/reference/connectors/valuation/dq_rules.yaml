@@ -1,0 +1,33 @@
+# Valuation data-quality rules (v5.1 stub).
+# Each rule addresses one DQ dimension: freshness, completeness, conformance,
+# consistency, uniqueness, referential_integrity, reasonableness.
+rules:
+- rule_id: valuation_completeness_required_fields
+  dimension: completeness
+  severity: blocker
+  description: Every required field in valuation/schema.yaml is non-null in the
+    normalized landing.
+  expected: for each required_field, count(null) == 0
+  remediation: A silent null in a required field indicates a mapping gap;
+    operator fixes mapping.yaml and re-lands.
+- rule_id: valuation_conformance_enum_values
+  dimension: conformance
+  severity: blocker
+  description: approach carries a value in its canonical enum from
+    valuation/schema.yaml.
+  expected: approach IN canonical_enum
+  remediation: Unmapped source values are rejected at landing; operator extends
+    mapping.yaml.
+- rule_id: valuation_uniqueness_primary_key
+  dimension: uniqueness
+  severity: blocker
+  description: No duplicate valuation_id across valuation after dedup.
+  expected: count(distinct valuation_id) == count(records)
+  remediation: See qa/duplicate_id.yaml.
+- rule_id: valuation_reasonableness_positive_value
+  dimension: reasonableness
+  severity: warning
+  description: Concluded value is strictly positive.
+  expected: for each valuation, value_conclusion > 0
+  remediation: A non-positive concluded value indicates a units or sign error;
+    operator confirms the valuation amount.

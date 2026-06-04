@@ -1,0 +1,34 @@
+# Funds connector manifest (vendor-neutral v5.1 stub).
+# Conforms to reference/connectors/_schema/connector_manifest.schema.yaml.
+connector_id: funds
+connector_kind: funds
+version: 0.1.0
+status: stub
+owner: residential_multifamily_subsystem
+vendor_neutral: true
+description: |
+  Fund and investor-reporting feed. Carries fund-level identity and
+  per-investor reporting positions (capital account, NAV, IRR, MOIC) by
+  reporting period. Folds in what was scoped as an `investor_reporting`
+  domain — investor_report is an entity here, not a separate connector.
+authoring_notes: |
+  v5.1 stub contract. Schema only; no live adapter exists and nothing
+  executes. investor_report.investor_id is PSEUDONYMIZED — it is a stable
+  opaque key, never PII (no investor names, SSNs, or contact data land here).
+  A future adapter (fund admin export) replaces the file_drop handshake with
+  the source system's native auth.
+entities:
+  - fund
+  - investor_report
+provenance_fields_required:
+  - source_name
+  - source_type
+  - source_date
+  - source_row_id
+handshake:
+  auth_kind: file_drop
+  access_pattern: pull_scheduled
+  notes: |
+    Stub. A future adapter replaces file_drop with the fund-admin source
+    system's native auth kind and access pattern.
+contact: operator_placeholder

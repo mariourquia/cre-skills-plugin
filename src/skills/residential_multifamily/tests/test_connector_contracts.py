@@ -3,7 +3,7 @@
 Validates the vendor-neutral ingestion layer under `reference/connectors/`.
 
 Each connector domain (pms, gl, crm, ap, market_data, construction, hr_payroll,
-manual_uploads) must ship:
+manual_uploads, debt, entity, valuation, funds) must ship:
 - manifest.yaml conforming to _schema/connector_manifest.schema.yaml
 - schema.yaml declaring entities that conform to _schema/entity_contract.schema.yaml
 - mapping.yaml, sample_input.json, sample_normalized.json, reconciliation_checks.yaml
@@ -44,6 +44,10 @@ REQUIRED_DOMAINS = [
     "construction",
     "hr_payroll",
     "manual_uploads",
+    "debt",
+    "entity",
+    "valuation",
+    "funds",
 ]
 REQUIRED_PROVENANCE_FIELDS = {"source_name", "source_date", "source_row_id"}
 

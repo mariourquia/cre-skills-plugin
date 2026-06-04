@@ -1,0 +1,56 @@
+entities:
+  valuation:
+    entity_name: valuation
+    grain: one row per valuation event per property
+    time_basis: snapshot
+    source_class: operator_supplied
+    max_staleness: P30D
+    primary_key:
+    - valuation_id
+    required_fields:
+    - name: valuation_id
+      type: string
+      description: Stable identifier for the valuation event
+      is_key: true
+    - name: property_id
+      type: string
+      description: FK to the valued property
+      is_key: false
+    - name: as_of_date
+      type: date
+      description: Valuation as-of date
+      is_key: false
+    - name: appraiser
+      type: string
+      description: Appraiser or valuation source name
+      is_key: false
+    - name: value_conclusion
+      type: money_cents
+      description: Concluded value, in cents
+      is_key: false
+      unit: cents_usd
+    - name: approach
+      type: enum
+      description: Primary valuation approach
+      is_key: false
+      enum_values:
+      - income
+      - sales
+      - cost
+    optional_fields:
+    - name: cap_rate_concluded
+      type: number
+      description: Concluded capitalization rate
+      unit: percent
+    foreign_keys: []
+    null_handling:
+    - field: value_conclusion
+      behavior: reject_record
+      notes: valuation math requires a concluded value
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - source_row_id
+    dependents:
+    - reit-profile-builder; performance-attribution; disposition-strategy-engine skills

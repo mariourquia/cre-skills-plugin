@@ -1,0 +1,36 @@
+checks:
+- check_id: valuation_record_count
+  check_kind: record_count
+  severity: blocker
+  description: Raw row count minus rejects equals normalized row count for valuation.
+  inputs:
+  - reference/raw/valuation/<YYYY>/<MM>/<source>__<as_of>.*
+  - reference/normalized/valuation_valuation__<scope>.csv
+  expected_invariant: count(raw) - count(rejected) == count(normalized)
+  remediation: See qa/record_count.yaml.
+- check_id: valuation_duplicate_primary_key
+  check_kind: duplicate_id
+  severity: blocker
+  description: No duplicate valuation_id across valuation.
+  inputs:
+  - reference/normalized/valuation_valuation__<scope>.csv
+  expected_invariant: count(distinct valuation_id) == count(records)
+  remediation: See qa/duplicate_id.yaml.
+- check_id: valuation_null_critical_field
+  check_kind: null_critical
+  severity: blocker
+  description: Required fields on valuation are non-null in normalized output.
+  inputs:
+  - reference/normalized/valuation_valuation__<scope>.csv
+  - reference/connectors/valuation/schema.yaml
+  expected_invariant: 'for each required field: count(null) == 0'
+  remediation: See qa/null_critical_field.yaml.
+- check_id: valuation_as_of_date_coverage
+  check_kind: date_coverage
+  severity: warning
+  description: Every valuation row carries an as_of_date on or before its source_date.
+  inputs:
+  - reference/normalized/valuation_valuation__<scope>.csv
+  expected_invariant: 'for each valuation: as_of_date IS NOT NULL AND as_of_date <= source_date'
+  remediation: A future-dated valuation indicates a date-entry error; operator
+    confirms the as-of date.

@@ -1,0 +1,34 @@
+# Entity data-quality rules (v5.1 stub).
+# Each rule addresses one DQ dimension: freshness, completeness, conformance,
+# consistency, uniqueness, referential_integrity, reasonableness.
+rules:
+- rule_id: entity_completeness_required_fields
+  dimension: completeness
+  severity: blocker
+  description: Every required field in entity/schema.yaml is non-null in the
+    normalized landing.
+  expected: for each required_field, count(null) == 0
+  remediation: A silent null in a required field indicates a mapping gap;
+    operator fixes mapping.yaml and re-lands.
+- rule_id: entity_conformance_enum_values
+  dimension: conformance
+  severity: blocker
+  description: entity_type and role carry values in their canonical enums from
+    entity/schema.yaml.
+  expected: for each enum field, value IN canonical_enum
+  remediation: Unmapped source values are rejected at landing; operator extends
+    mapping.yaml, never buckets silently.
+- rule_id: entity_uniqueness_primary_key
+  dimension: uniqueness
+  severity: blocker
+  description: No duplicate entity_id across legal_entity after dedup.
+  expected: count(distinct entity_id) == count(records)
+  remediation: See qa/duplicate_id.yaml.
+- rule_id: entity_referential_integrity_parent
+  dimension: referential_integrity
+  severity: warning
+  description: Every non-null parent_entity_id resolves to a legal_entity row.
+  expected: for each row where parent_entity_id IS NOT NULL, parent_entity_id IN
+    legal_entity.entity_id
+  remediation: An orphan parent_entity_id breaks the ownership rollup; operator
+    reconciles the hierarchy.

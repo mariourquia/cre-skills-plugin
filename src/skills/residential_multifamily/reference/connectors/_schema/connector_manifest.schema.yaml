@@ -32,6 +32,10 @@ properties:
       - hr_payroll
       - manual_uploads
       - deal_pipeline
+      - debt
+      - entity
+      - valuation
+      - funds
   version:
     type: string
     description: Semver of this connector definition (e.g., 0.1.0).

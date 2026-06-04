@@ -1,0 +1,28 @@
+{
+  "legal_entity": [
+    {
+      "entity_id": "ent_fund_001",
+      "legal_name": "Sample Value-Add Fund III LP",
+      "entity_type": "fund",
+      "entity_role": "owner",
+      "parent_id": null,
+      "own_pct": null,
+      "source_name": "sample_feed",
+      "source_type": "entity",
+      "source_date": "2026-04-01",
+      "source_row_id": "ent_fund_001"
+    },
+    {
+      "entity_id": "ent_spe_001",
+      "legal_name": "Sample Property One SPE LLC",
+      "entity_type": "spe",
+      "entity_role": "owner",
+      "parent_id": "ent_fund_001",
+      "own_pct": 90.0,
+      "source_name": "sample_feed",
+      "source_type": "entity",
+      "source_date": "2026-04-01",
+      "source_row_id": "ent_spe_001"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+entities:
+  legal_entity:
+    entity_name: legal_entity
+    grain: one row per legal entity in the ownership structure
+    time_basis: state
+    source_class: operator_supplied
+    max_staleness: P30D
+    primary_key:
+    - entity_id
+    required_fields:
+    - name: entity_id
+      type: string
+      description: Stable identifier for the legal entity
+      is_key: true
+    - name: legal_name
+      type: string
+      description: Registered legal name of the entity
+      is_key: false
+    - name: entity_type
+      type: enum
+      description: Legal-structure classification
+      is_key: false
+      enum_values:
+      - fund
+      - jv
+      - spe
+      - reit
+      - opco
+      - individual
+    - name: role
+      type: enum
+      description: Role this entity plays in the ownership / capital structure
+      is_key: false
+      enum_values:
+      - gp
+      - lp
+      - sponsor
+      - lender
+      - owner
+    optional_fields:
+    - name: parent_entity_id
+      type: string
+      description: FK to the parent legal entity in the ownership hierarchy
+    - name: ownership_pct
+      type: number
+      description: Ownership percentage held by the parent in this entity
+      unit: percent
+    foreign_keys:
+    - field: parent_entity_id
+      references: legal_entity.entity_id
+      on_missing: warn
+    null_handling:
+    - field: role
+      behavior: reject_record
+      notes: must be in enum; role drives consolidation logic
+    provenance_fields:
+    - source_name
+    - source_type
+    - source_date
+    - source_row_id
+    dependents:
+    - ownership rollup; consolidation; partnership-allocation-engine skill

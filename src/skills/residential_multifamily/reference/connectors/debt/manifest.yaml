@@ -1,0 +1,29 @@
+# Debt connector manifest (vendor-neutral v5.1 stub).
+# Conforms to reference/connectors/_schema/connector_manifest.schema.yaml.
+connector_id: debt
+connector_kind: debt
+version: 0.1.0
+status: stub
+owner: residential_multifamily_subsystem
+vendor_neutral: true
+description: |
+  Debt / loan facility feed. Carries property-level loan facilities, their
+  balances, rate structure, and key dates for debt monitoring and refi work.
+authoring_notes: |
+  v5.1 stub contract. Schema only; no live adapter exists and nothing
+  executes. A future vendor adapter (loan servicer / debt admin export)
+  replaces the file_drop handshake with the source system's native auth.
+entities:
+  - loan
+provenance_fields_required:
+  - source_name
+  - source_type
+  - source_date
+  - source_row_id
+handshake:
+  auth_kind: file_drop
+  access_pattern: pull_scheduled
+  notes: |
+    Stub. A future adapter replaces file_drop with the loan-servicer
+    system's native auth kind and access pattern.
+contact: operator_placeholder

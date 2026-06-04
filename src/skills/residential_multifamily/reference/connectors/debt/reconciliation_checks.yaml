@@ -1,0 +1,38 @@
+checks:
+- check_id: debt_record_count
+  check_kind: record_count
+  severity: blocker
+  description: Raw row count minus rejects equals normalized row count for loan.
+  inputs:
+  - reference/raw/debt/<YYYY>/<MM>/<source>__<as_of>.*
+  - reference/normalized/debt_loan__<scope>.csv
+  expected_invariant: count(raw) - count(rejected) == count(normalized)
+  remediation: See qa/record_count.yaml.
+- check_id: debt_duplicate_primary_key
+  check_kind: duplicate_id
+  severity: blocker
+  description: No duplicate loan_id across loan.
+  inputs:
+  - reference/normalized/debt_loan__<scope>.csv
+  expected_invariant: count(distinct loan_id) == count(records)
+  remediation: See qa/duplicate_id.yaml.
+- check_id: debt_current_balance_not_above_original
+  check_kind: null_critical
+  severity: blocker
+  description: Every loan's current_balance is present and does not exceed its
+    original_balance (a record-level invariant).
+  inputs:
+  - reference/normalized/debt_loan__<scope>.csv
+  expected_invariant: 'for each loan: current_balance IS NOT NULL AND current_balance
+    <= original_balance'
+  remediation: A current balance above the original balance signals a sign or
+    units error in the feed; operator corrects the balances and re-lands.
+- check_id: debt_null_critical_field
+  check_kind: null_critical
+  severity: blocker
+  description: Required fields on loan are non-null in normalized output.
+  inputs:
+  - reference/normalized/debt_loan__<scope>.csv
+  - reference/connectors/debt/schema.yaml
+  expected_invariant: 'for each required field: count(null) == 0'
+  remediation: See qa/null_critical_field.yaml.

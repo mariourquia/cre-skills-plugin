@@ -1,0 +1,14 @@
+# Canonical connector source_class vocabulary.
+# Single source of truth for the trust grade an entity's records carry.
+# entity_contract.schema.yaml `source_class` enum MUST equal source_class_values
+# below; test_connector_source_class.py enforces that parity.
+source_class_values:
+  - connector_live
+  - connector_sample
+  - document_extracted
+  - operator_supplied
+  - reference_illustrative
+  - modeled_assumption
+notes: >-
+  Canonical connector source_class vocabulary; mirrors docs/DATA_GRADES.md.
+  entity_contract.schema.yaml source_class enum must equal this list.

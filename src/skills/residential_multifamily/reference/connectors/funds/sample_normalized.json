@@ -1,0 +1,31 @@
+{
+  "fund": [
+    {
+      "fund_id": "fund_sample_001",
+      "fund_name": "Sample Value-Add Fund III",
+      "vintage": 2022,
+      "strategy": "value_add_multifamily",
+      "source_name": "sample_feed",
+      "source_type": "funds",
+      "source_date": "2026-04-01",
+      "source_row_id": "fund_sample_001"
+    }
+  ],
+  "investor_report": [
+    {
+      "report_id": "rpt_sample_001",
+      "fund_id": "fund_sample_001",
+      "investor_id": "lp_pseudo_0001",
+      "period": "2026Q1",
+      "cap_acct_balance": 500000000,
+      "nav": 575000000,
+      "irr": 14.2,
+      "moic": 1.35,
+      "distributions": 60000000,
+      "source_name": "sample_feed",
+      "source_type": "funds",
+      "source_date": "2026-04-01",
+      "source_row_id": "rpt_sample_001"
+    }
+  ]
+}

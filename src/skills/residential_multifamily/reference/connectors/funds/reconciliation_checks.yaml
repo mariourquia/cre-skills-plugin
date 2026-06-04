@@ -1,0 +1,43 @@
+checks:
+- check_id: funds_record_count
+  check_kind: record_count
+  severity: blocker
+  description: Raw row count minus rejects equals normalized row count for fund
+    and investor_report.
+  inputs:
+  - reference/raw/funds/<YYYY>/<MM>/<source>__<as_of>.*
+  - reference/normalized/funds_fund__<scope>.csv
+  - reference/normalized/funds_investor_report__<scope>.csv
+  expected_invariant: count(raw) - count(rejected) == count(normalized) per entity
+  remediation: See qa/record_count.yaml.
+- check_id: funds_duplicate_primary_key
+  check_kind: duplicate_id
+  severity: blocker
+  description: No duplicate fund_id across fund and no duplicate report_id across
+    investor_report.
+  inputs:
+  - reference/normalized/funds_fund__<scope>.csv
+  - reference/normalized/funds_investor_report__<scope>.csv
+  expected_invariant: count(distinct pk) == count(records) per entity
+  remediation: See qa/duplicate_id.yaml.
+- check_id: funds_null_critical_investor_id
+  check_kind: null_critical
+  severity: blocker
+  description: Every investor_report row carries a pseudonymized investor_id; rows
+    without it are rejected.
+  inputs:
+  - reference/normalized/funds_investor_report__<scope>.csv
+  expected_invariant: 'for each investor_report row: investor_id IS NOT NULL'
+  remediation: A report row without an investor key cannot be attributed; operator
+    supplies the pseudonymized key (never PII) and re-lands.
+- check_id: funds_null_critical_field
+  check_kind: null_critical
+  severity: blocker
+  description: Required fields on fund and investor_report are non-null in
+    normalized output.
+  inputs:
+  - reference/normalized/funds_fund__<scope>.csv
+  - reference/normalized/funds_investor_report__<scope>.csv
+  - reference/connectors/funds/schema.yaml
+  expected_invariant: 'for each required field: count(null) == 0'
+  remediation: See qa/null_critical_field.yaml.
