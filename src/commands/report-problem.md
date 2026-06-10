@@ -113,7 +113,7 @@ For critical issues, you can also open an issue at:
 https://github.com/mariourquia/cre-skills-plugin/issues
 ```
 
-**If `mode` is `ask_each_time`:** ask the user: "Would you also like to send this to the plugin maintainer? (yes/no)". If no, skip. If yes, proceed to send.
+**If `mode` is `ask_each_time`:** ask the user: "Would you also like to send this to the plugin maintainer? This bug report helps improve CRE Skills, including the paid cre-skills-pro edition; no deal data or PII is sent. (yes/no)". If no, skip. If yes, proceed to send.
 
 **If `mode` is `anonymous_remote`:** send automatically. Strip `contact_email` and `organization` before sending.
 

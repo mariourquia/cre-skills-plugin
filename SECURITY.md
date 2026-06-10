@@ -32,14 +32,25 @@ This project is a Claude Code plugin delivering CRE skill methodology, agent pro
 
 If you have extended the plugin with real API integrations, persistent storage, or live deal-data pipelines, standard application security practices apply to your extension.
 
+## Editions (open core vs paid)
+
+This policy covers the free, open-source core (this repository). The paid
+`cre-skills-pro` edition adds a governance and state harness (lifecycle hooks, an
+approval engine, deal-state memory, and an audit log) with its own security and
+data posture, maintained in a separate private repository. The honest
+enforcement boundary for that edition: its hooks run client-side at user
+privilege, so on a self-install they are a strong guardrail plus a tamper-evident
+audit, not an operator-proof control. Hard, unbypassable enforcement requires
+managed deployment (admin-pushed settings the user cannot override) plus a
+server-side approval/identity service and an external append-only audit store.
+
 ## Supported Versions
 
 | Version | Supported |
 |---------|-----------|
-| 4.0.x   | Yes       |
-| 3.0.x   | Yes       |
-| 2.0.x   | Yes       |
-| 1.0.x   | No        |
+| 5.2.x   | Yes       |
+| 5.1.x   | Yes       |
+| < 5.1   | No        |
 
 ## Privacy
 

@@ -101,7 +101,7 @@ Feedback saved locally to ~/.cre-skills/feedback-log.jsonl
 View your feedback history with /cre-skills:feedback-summary
 ```
 
-**If `mode` is `ask_each_time`:** ask the user: "Would you also like to send this to the plugin maintainer? (yes/no)". If no, skip. If yes, proceed to send.
+**If `mode` is `ask_each_time`:** ask the user: "Would you also like to send this to the plugin maintainer? This feedback helps improve CRE Skills, including the paid cre-skills-pro edition; no deal data or PII is sent. (yes/no)". If no, skip. If yes, proceed to send.
 
 **If `mode` is `anonymous_remote`:** send automatically. Strip `contact_email` and `organization` before sending.
 

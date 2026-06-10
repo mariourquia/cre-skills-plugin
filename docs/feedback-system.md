@@ -2,7 +2,7 @@
 
 ## Overview
 
-The feedback system lets users share feedback and report problems without leaving their Claude session. All data is stored locally by default. Remote submission is planned for a future release.
+The feedback system lets users share feedback and report problems without leaving their Claude session. All data is stored locally by default; remote submission is opt-in (`ask_each_time`) and posts to the maintainer's feedback API. Feedback you choose to send remotely is used to improve CRE Skills, including to inform and refine the paid `cre-skills-pro` edition that will be offered for purchase later (see [PRIVACY.md](../PRIVACY.md)). Set `feedback.mode` to `local_only` to keep everything on your machine.
 
 ## Components
 

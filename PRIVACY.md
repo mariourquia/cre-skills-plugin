@@ -1,11 +1,34 @@
 # Privacy Policy
 
 **CRE Skills Plugin v5.2.0**
-**Last updated:** 2026-06-03
+**Last updated:** 2026-06-09
 
 ## Data Collection Scope
 
 The CRE Skills Plugin does NOT collect, transmit, or store any deal data, financial figures, property details, or personally identifiable information. All skill execution happens locally in the user's Claude Code session. No data leaves the user's machine unless they explicitly choose to send feedback remotely (mode: ask_each_time, anonymous_remote, or remote_with_contact in config).
+
+## Editions and How Your Feedback Is Used
+
+**Editions.** This policy covers the free, open-source core (this repository). A
+separate, paid edition (`cre-skills-pro`) is in development as the
+institution-grade governance layer; it has its own data and governance posture,
+documented with that product.
+
+**How feedback is used (including for the paid edition).** The feedback you choose
+to send remotely is used to improve CRE Skills, and that explicitly includes
+informing and refining the paid `cre-skills-pro` edition that will be offered for
+purchase later. "Feedback you send remotely" means the redacted feedback record
+plus the 30-day skill-usage summary bundled with it (skill slugs and counts
+only), as described under [Remote Feedback Submission](#remote-feedback-submission-ask-each-time).
+What is used: anonymous, non-deal product signals only (which skills are used,
+ratings, and the free-text feedback you author and explicitly approve for
+sending). What is NOT used: your deal data, financial figures, property details,
+prompts, AI responses, and PII are never collected or transmitted, so none of
+them are used for product development of any edition. Remote sending stays opt-in
+and per-submission (`ask_each_time` by default). Local telemetry is never
+transmitted on its own; it only leaves your machine if it is bundled into a
+remote feedback submission you approve. To keep everything on your machine and
+out of product development entirely, set `feedback.mode` to `local_only`.
 
 ## Document-to-Database Ingestion (Local, Stateless / Zero-Data-Retention)
 
@@ -117,6 +140,8 @@ When you approve a remote send:
 - A 30-day skill usage summary is included (skill slugs + counts only)
 - HTTPS POST to `https://cre-skills-feedback-api.vercel.app/api/feedback` (Vercel Function + Supabase)
 - Deal data, financial figures, prompts, and PII are never transmitted
+
+These submissions are used to improve CRE Skills, including to inform and refine the paid `cre-skills-pro` edition that will be offered for purchase later. See [Editions and How Your Feedback Is Used](#editions-and-how-your-feedback-is-used).
 
 Data deletion: open an issue at https://github.com/mariourquia/cre-skills-plugin/issues with your `install_id_hash` (found in your local feedback-log.jsonl records).
 

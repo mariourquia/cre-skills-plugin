@@ -36,6 +36,26 @@ A Claude plugin delivering a large library of **commercial real estate skills** 
 
 Every skill now declares a **classification** that tells your team what it is and how much to trust its output. In plain terms: a **micro** or **normal** skill does one bounded job — normalize a T-12, size a loan, draft a quarterly LP letter — and is invoked as a single unit. An **orchestrator** is a conductor that runs several skills in sequence (an underwrite-to-IC pipeline, a document-to-database ingest); it is a workflow, not an atomic tool. A **workspace** is a business-facing surface that routes a whole domain — your fund team's LP reporting, your asset managers' operations cockpit — to the right specialist skill and holds context across sessions. For a **deal team**, an **asset manager**, or a **fund team**, the classification is not cosmetic: it determines which outputs are decision-grade and therefore need a human sign-off before they reach an investment committee, a lender, or an LP. Skills whose output can land on a board deck or a distribution notice are marked `decision-grade` and carry an explicit **human gate** (analyst review, AM/CFO sign-off, IC approval, or lender/investor review) plus a source posture that **refuses to emit a final figure it cannot trace to your data** — no fabricated model references, no unresolved `$X` placeholders in a final-marked report. Everything else is advisory screening output your operator validates. See [`docs/DATA_GRADES.md`](docs/DATA_GRADES.md) for the data-grade ladder and `docs/integrations/amos-skill-manifest.md` for how this metadata is exported to AMOS.
 
+## Open core
+
+This repository is the free, open-source core of CRE Skills, licensed under
+Apache-2.0. It is the knowledge layer that runs locally in your Claude Code
+session: the skill library, routing, calculators, and the MCP surface. It stays
+free and open.
+
+A separate, paid edition, **cre-skills-pro**, is in development as the
+institution-grade governance layer that composes on top of this core. It adds a
+deterministic control plane: lifecycle hooks, a four-eyes approval matrix,
+append-only redacted deal-state memory, an audit log, and a first-run setup TUI,
+so decision-grade output (IC memos, valuations, lender and LP deliverables) is
+gated, provenanced, and auditable for institutional use. It will be offered
+commercially; this free core is not going away.
+
+Anonymous usage signals and any feedback you choose to send remotely also help
+shape the paid edition. No deal data, financial figures, prompts, or PII are
+ever collected or used for this. See [PRIVACY.md](PRIVACY.md) for exactly what is
+and is not used, and how to keep everything local.
+
 ## Release Maturity
 
 This release is an **internal beta / controlled release candidate**. Most top-level skills (1:1 with a single `src/skills/<slug>/SKILL.md`) are self-contained and usable today. The residential multifamily subsystem and several install surfaces are held to a higher fail-closed bar and are labeled below.
@@ -71,7 +91,7 @@ This release is an **internal beta / controlled release candidate**. Most top-le
 
 ## Roadmap
 
-Upcoming work is tracked in [`docs/ROADMAP.md`](docs/ROADMAP.md). The remaining **v5.x** work is documentation / contract alignment, static-scanner refinement, manifest capability metadata, no-live invariant enforcement, the generalized runtime **governance** scanner, and optional non-live interface scaffolding. The real-world / **live data-integration** track — connector runtime enforcement of `source_class` / `max_staleness`, sandbox-runnable adapters, and vendor-specific connectors beyond `status: stub` — is **v6**. A separate enterprise track covers SOC 2, RBAC, licensing, and team collaboration. Preview / staging mode for `status: beta_rc` and `status: experimental` skills is documented at [`docs/PREVIEW_MODE.md`](docs/PREVIEW_MODE.md).
+Upcoming work is tracked in [`docs/ROADMAP.md`](docs/ROADMAP.md). The remaining **v5.x** work is documentation / contract alignment, static-scanner refinement, manifest capability metadata, no-live invariant enforcement, the generalized runtime **governance** scanner, and optional non-live interface scaffolding. The real-world / **live data-integration** track — connector runtime enforcement of `source_class` / `max_staleness`, sandbox-runnable adapters, and vendor-specific connectors beyond `status: stub` — is **v6**. The enterprise governance track (a lifecycle-hook control plane, four-eyes approvals, deal-state memory, audit, SOC 2, RBAC, licensing, and team collaboration) is the paid **cre-skills-pro** edition, built separately as the open-core commercial layer on top of this free core; it is not part of this repository's release line. See [Open core](#open-core). Preview / staging mode for `status: beta_rc` and `status: experimental` skills is documented at [`docs/PREVIEW_MODE.md`](docs/PREVIEW_MODE.md).
 
 ## Key Stats
 

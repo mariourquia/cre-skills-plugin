@@ -1,6 +1,6 @@
 # Public Roadmap
 
-Last updated: 2026-06-04 · Plugin version: v5.2.0
+Last updated: 2026-06-09 · Plugin version: v5.2.0
 
 This is the plan for where `cre-skills-plugin` goes from here. It groups
 the pending work by release and by track. Items carry a size (S / M / L /
@@ -17,6 +17,21 @@ Conventions:
 - `stable_pending_shakedown` is the code-complete, contract-active sub-status
   that a subsystem occupies between `beta_rc` and `stable` while it waits
   for that first shakedown log. See `docs/PREVIEW_MODE.md`.
+
+## Editions: open core and the paid pro edition
+
+`cre-skills-plugin` is the free, open-source core (Apache-2.0). As of 2026-06-09
+the project is open-core: this repo stays the free knowledge layer, and a
+separate, private, paid edition, **cre-skills-pro**, is the institution-grade
+governance layer built on top of it (lifecycle hooks, four-eyes approvals,
+deal-state memory, audit, setup TUI). Net-new skills and the governance harness
+land in `cre-skills-pro`. The tracks below that concern governance, approvals,
+team collaboration, licensing, and SOC 2 (see [Enterprise / commercial
+track](#enterprise--commercial-track-separate-cadence)) are delivered through the
+paid edition; the connector, calculator, and skill-contract tracks continue in
+this free core.
+
+---
 
 ## Current release: v5.2.0 (2026-06-04)
 
@@ -376,6 +391,14 @@ recapture math, HUD MAT / REAC cycles, tax credit calculators.
 ---
 
 ## Enterprise / commercial track (separate cadence)
+
+This track is the paid **cre-skills-pro** edition: the institution-grade
+governance layer, developed in a separate private repository on its own cadence
+(not part of this free core's release line). The items below are the pro
+edition's scope. The honest enforcement note from [SECURITY.md](../SECURITY.md):
+client-side hooks are a guardrail plus tamper-evident audit on self-install;
+truly enforced governance (unbypassable approvals, a server-held audit trail)
+requires managed deployment plus a server-side approval/identity service.
 
 ### Licensing & tiering (cat 5) — L
 Free (community), Pro (individual / small team), Enterprise (firm).
