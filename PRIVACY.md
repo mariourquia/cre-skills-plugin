@@ -1,7 +1,7 @@
 # Privacy Policy
 
 **CRE Skills Plugin v5.2.0**
-**Last updated:** 2026-06-09
+**Last updated:** 2026-06-15
 
 ## Data Collection Scope
 
@@ -37,7 +37,7 @@ The `document-to-database` family (rent roll, T-12 / operating statement, and re
 - The ingestion calculators are pure, standard-library Python that read a JSON payload and write a JSON result to stdout. They make **no network calls**, hold **no state between runs**, and write **nothing** to `~/.cre-skills/` or any telemetry/feedback file.
 - **No deal content is ever written to telemetry or feedback.** Telemetry records only the skill slug and date (as above); it never records the document content, the extracted values, or the output.
 - **Tenant identity is pseudonymized on ingest.** Natural-person names, per-unit actual rent tied to a named person, guarantor/signatory names, SSNs, and bank account/routing numbers are NEVER emitted; a verbatim `source_text_span` is retained only for non-PII fields (a cell-address locator is kept for PII fields, never the value). A redaction breach is a non-overridable failure that halts the run.
-- This is the **zero-data-retention (ZDR) / stateless** path. A consumer that chooses to PERSIST ingestion output (e.g. into their own database) is operating their own stateful extension under their own application security and data-processing agreement; that persistence is not performed by the plugin.
+- This is the **zero-data-retention (ZDR) / stateless** path **for this open-source plugin**. A consumer that chooses to PERSIST ingestion output (e.g. into their own database) is operating their own stateful extension under their own application security and data-processing agreement; that persistence is not performed by this plugin. The separately-licensed **cre-skills-pro** governance edition is a distinct product that, by design, does persist local governance state on the operator's own machine (append-only deal-state, approval-ledger, and audit-log files under its own `state/` directory, never transmitted by this plugin); that is a property of cre-skills-pro under its own data posture (see Editions above), not of this open-source core.
 
 Synthetic, clearly-fictional fixtures are the only document content committed to this repository.
 
