@@ -281,6 +281,34 @@ if [ -f "$DATA_DIR/config.json" ]; then
 fi
 
 # ---------------------------------------------------------------------------
+# Check 8: Stop-hook block cap
+#
+# Claude Code Stop hooks can block a turn from ending only up to
+# CLAUDE_CODE_STOP_HOOK_BLOCK_CAP consecutive times (default 9) before the
+# harness force-ends the turn, truncating long agent loops. The helper raises
+# the cap to >= 100 in settings.json (raise-only) and prints its status; it
+# always exits 0, so it can both report and fix without failing this verify.
+# ---------------------------------------------------------------------------
+section "8. Stop-hook block cap"
+
+CAP_HELPER="$SCRIPT_DIR/ensure_stop_hook_cap.py"
+
+if ! command -v python3 &>/dev/null; then
+  warn_check "python3 not found. Cannot check CLAUDE_CODE_STOP_HOOK_BLOCK_CAP."
+elif [ ! -f "$CAP_HELPER" ]; then
+  warn_check "Helper not found: scripts/ensure_stop_hook_cap.py"
+else
+  # Capture the helper's single status line; the '|| true' keeps a non-zero
+  # (which the helper never returns, but be defensive) from aborting set -e.
+  CAP_OUT="$(python3 "$CAP_HELPER" 2>&1 || true)"
+  if [ -n "$CAP_OUT" ]; then
+    pass "$CAP_OUT"
+  else
+    warn_check "Stop-hook block-cap check produced no output (non-fatal)."
+  fi
+fi
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo ""

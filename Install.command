@@ -210,7 +210,7 @@ detect_node_source() {
 # ── Step counter ─────────────────────────────────────────────────────
 
 STEP=0
-TOTAL_STEPS=7
+TOTAL_STEPS=8
 step() {
     STEP=$((STEP + 1))
     bold "  [$STEP/$TOTAL_STEPS] $1"
@@ -491,6 +491,26 @@ if [ "$VERIFY_FAILS" -gt 0 ]; then
     add_step_result "verify" "fail"
 else
     add_step_result "verify" "ok"
+fi
+echo ""
+
+# ── Stop-hook block cap ──────────────────────────────────────────────
+# Claude Code Stop hooks block a turn from ending only up to
+# CLAUDE_CODE_STOP_HOOK_BLOCK_CAP consecutive times (default 9) before the
+# harness force-ends the turn, truncating long agent loops. Raise it to >= 100
+# in settings.json (raise-only; never lowers). Best-effort, never fatal.
+
+step "Ensuring Stop-hook block cap..."
+if command -v python3 &>/dev/null && [ -f "$INSTALL_DIR/scripts/ensure_stop_hook_cap.py" ]; then
+    if python3 "$INSTALL_DIR/scripts/ensure_stop_hook_cap.py"; then
+        add_step_result "stop_hook_cap" "ok"
+    else
+        yellow "  Stop-hook block-cap check did not complete (non-fatal)."
+        add_step_result "stop_hook_cap" "fail"
+    fi
+else
+    yellow "  Skipped Stop-hook block-cap check (python3 or helper missing)."
+    add_step_result "stop_hook_cap" "skipped"
 fi
 echo ""
 

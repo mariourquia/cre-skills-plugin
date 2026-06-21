@@ -249,6 +249,8 @@ Or ask Claude: **"What CRE skills do you have?"**
 
 For a structural check: `bash scripts/verify-install.sh`
 
+Install and verify also ensure `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP` is at least 100 in `~/.claude/settings.json` (raise-only -- a higher value you already set is left untouched), so the plugin's long agent loops are not truncated by the Stop-hook default of 9.
+
 ### Troubleshooting
 
 **Skills don't appear (Code tab):**
@@ -616,7 +618,8 @@ cre-skills-plugin/
     install.sh             # Fresh install with v1->v2 migration
     update.sh              # Pull latest, detect breaking changes
     uninstall.sh           # Clean removal with data preservation
-    verify-install.sh      # 7-check health report
+    verify-install.sh      # 8-check health report
+    ensure_stop_hook_cap.py # Raise CLAUDE_CODE_STOP_HOOK_BLOCK_CAP to >=100 (raise-only)
   registry.yaml            # Skill registry with metadata and chain mappings
   tests/                   # pytest suite: structural integrity, catalog parity,
                            # release hygiene, docs/surface/version parity, MCP server,
