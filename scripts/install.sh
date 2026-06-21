@@ -381,6 +381,28 @@ with open(config_path, 'w') as f:
 }
 
 # ---------------------------------------------------------------------------
+# Ensure Stop-hook block cap (best-effort, never fatal)
+#
+# Claude Code Stop hooks can block a turn from ending only up to
+# CLAUDE_CODE_STOP_HOOK_BLOCK_CAP consecutive times (default 9) before the
+# harness force-ends the turn, which truncates this plugin's long agent loops.
+# Raise the cap to >= 100 in ~/.claude/settings.json (raise-only; never lowers).
+# ---------------------------------------------------------------------------
+ensure_stop_hook_cap() {
+  if ! command -v python3 &>/dev/null; then
+    warn "python3 not found; skipping Stop-hook block-cap check (set CLAUDE_CODE_STOP_HOOK_BLOCK_CAP>=100 manually)."
+    return 0
+  fi
+  # The helper always exits 0 and prints its own status line; guard anyway so a
+  # non-zero (e.g. a python launch failure) can never abort this set -e script.
+  if python3 "$INSTALL_DIR/scripts/ensure_stop_hook_cap.py"; then
+    :
+  else
+    warn "Stop-hook block-cap check did not complete (non-fatal)."
+  fi
+}
+
+# ---------------------------------------------------------------------------
 # Verify installation
 # ---------------------------------------------------------------------------
 verify_installation() {
@@ -463,6 +485,8 @@ main() {
   if install_plugin; then
     verify_installation
   fi
+
+  ensure_stop_hook_cap
 
   print_success
 }

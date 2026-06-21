@@ -82,6 +82,8 @@ Symlinks in the repo root point to `src/`, so the plugin loads correctly from th
    ./scripts/verify-install.sh
    ```
 
+> Install and verify also raise `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP` to at least 100 in `~/.claude/settings.json` (raise-only; a higher value you set is preserved). This stops Claude Code's low Stop-hook default (9) from truncating the plugin's long agent loops.
+
 ---
 
 ## Claude Desktop
