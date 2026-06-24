@@ -23,63 +23,49 @@
     "finance"
   ],
   "skills": "./src/skills/",
-  "agents": "./src/agents/",
   "commands": "./src/commands/",
   "hooks": "./src/hooks/hooks.json",
   "mcpServers": "./.mcp.json",
   "userConfig": {
     "primary_asset_types": {
       "type": "string",
+      "title": "Primary asset types",
       "description": "Comma-separated property types to prioritize (e.g., multifamily, industrial, office)",
       "default": ""
     },
     "preferred_markets": {
       "type": "string",
+      "title": "Preferred markets",
       "description": "Comma-separated MSAs or submarkets to weight in analysis (e.g., NYC, DFW, ATL)",
       "default": ""
     },
     "default_output_style": {
       "type": "string",
-      "description": "Default output format for skill results",
-      "enum": [
-        "exec-brief",
-        "ic-memo",
-        "pm-action-list",
-        "lender-brief",
-        "lp-update"
-      ],
+      "title": "Default output style",
+      "description": "Default output format for skill results. One of: exec-brief, ic-memo, pm-action-list, lender-brief, lp-update.",
       "default": "exec-brief"
     },
     "feedback_mode": {
       "type": "string",
-      "description": "Feedback submission mode. Default ask_each_time prompts for consent per submission; local_only suppresses all remote sends; anonymous_remote and remote_with_contact enable telemetry with or without contact info.",
-      "enum": [
-        "local_only",
-        "ask_each_time",
-        "anonymous_remote",
-        "remote_with_contact"
-      ],
+      "title": "Feedback mode",
+      "description": "Feedback submission mode. One of: local_only, ask_each_time, anonymous_remote, remote_with_contact.",
       "default": "ask_each_time"
     },
     "brand_name": {
       "type": "string",
+      "title": "Brand name",
       "description": "Company or fund name for branded deliverables",
       "default": ""
     },
     "customization_feedback_mode": {
       "type": "string",
-      "description": "Privacy level for skill customization feedback. Controls how much data is shared when you customize a skill and opt in to feedback.",
-      "enum": [
-        "off",
-        "metadata_only",
-        "metadata_and_summary",
-        "metadata_and_diff",
-        "metadata_and_content"
-      ],
+      "title": "Customization feedback mode",
+      "description": "Privacy level for skill customization feedback. One of: off, metadata_only, metadata_and_summary, metadata_and_diff, metadata_and_content.",
       "default": "metadata_only"
     },
     "customization_feedback_endpoint": {
       "type": "string",
+      "title": "Customization feedback endpoint",
       "description": "HTTPS endpoint for customization feedback. Empty string = local-only (no remote sends). Can point to your own enterprise endpoint.",
       "default": ""
     }
