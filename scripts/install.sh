@@ -290,22 +290,19 @@ install_plugin() {
   local now
   now="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
 
-  # 1. Copy plugin to the plugins cache (two-step: src/ contents first, then top-level items)
+  # 1. Copy plugin to the plugins cache (whole-repo layout; src/ preserved as a
+  #    subdirectory so ${PLUGIN_ROOT}/mcp-server.mjs → ./src/mcp-server.mjs works)
   mkdir -p "$plugins_cache"
   rsync -a --delete \
     --exclude '.git' --exclude '__pycache__' --exclude 'node_modules' \
-    "$INSTALL_DIR/src/" "$plugins_cache/"
-  rsync -a \
-    --exclude '.git' --exclude '__pycache__' --exclude 'node_modules' \
     --exclude 'dist' --exclude '.venv' --exclude '.local' \
-    --exclude 'src' --exclude 'builds' --exclude 'tools' \
-    --exclude 'config' --exclude 'docs/plans' --exclude 'docs/specs' \
+    --exclude 'builds' --exclude 'tools' --exclude 'config' \
+    --exclude 'docs/plans' --exclude 'docs/specs' \
     --exclude 'docs/design' --exclude 'tests/golden' \
     --exclude 'tests/snapshots' --exclude 'tests/fixtures' \
     "$INSTALL_DIR/" "$plugins_cache/"
-  # rsync's second pass already copied $INSTALL_DIR/.claude-plugin/plugin.json into
-  # the cache root. Defensively ensure the directory exists in case the user's rsync
-  # excludes hidden directories.
+  # Defensively ensure .claude-plugin/plugin.json is present; some rsync builds
+  # skip hidden directories unless the trailing slash is present.
   mkdir -p "$plugins_cache/.claude-plugin"
   if [ ! -f "$plugins_cache/.claude-plugin/plugin.json" ] && [ -f "$INSTALL_DIR/.claude-plugin/plugin.json" ]; then
     cp "$INSTALL_DIR/.claude-plugin/plugin.json" "$plugins_cache/.claude-plugin/plugin.json"
