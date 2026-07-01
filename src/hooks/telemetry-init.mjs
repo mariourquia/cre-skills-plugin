@@ -26,7 +26,7 @@ function defaultConfig() {
     },
     anonymousId: randomUUID(),
     firstRunComplete: false,
-    version: '5.2.0',
+    version: '5.2.1',
   };
 }
 

@@ -6,7 +6,7 @@
 ╚██████╗██║  ██║███████╗    ███████║██║  ██╗██║███████╗███████╗███████║
  ╚═════╝╚═╝  ╚═╝╚══════╝    ╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝╚══════╝
 
-        v5.2.0  ·  skill-contract + governance-metadata foundation — tiered contract, manifest 1.1, static governance scan
+        v5.2.1  ·  MCP reconnect patch — plugin-root entrypoint, Claude/Codex cache compatibility
 
                                 │                                                                         |        
             *                   │           │           │                     _                          /|     |#|

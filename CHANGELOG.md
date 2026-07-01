@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.2.1] - 2026-07-01
+
+Patch release for Claude Code and Codex plugin MCP startup.
+
+### Fixed
+- Replaces the plugin MCP manifest's unresolved `${PLUGIN_ROOT}/mcp-server.mjs`
+  command with a plugin-root relative `./mcp-server.mjs` entrypoint and explicit
+  `cwd: "."`, matching Claude/Codex plugin cache launch behavior.
+- Adds an MCP catalog fallback to `src/routing/CRE-ROUTING.md` so `cre_route`
+  remains functional when generated `dist/catalog.json` is absent from local
+  plugin installs.
+- Updates install smoke tests and marketplace validation to execute the actual
+  `.mcp.json` command instead of substituting a placeholder path in tests.
+
 ## [5.2.0] - 2026-06-04
 
 Skill-contract + governance-metadata foundation release. No catalog growth (still

@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**CRE Skills Plugin v5.2.0**
+**CRE Skills Plugin v5.2.1**
 **Last updated:** 2026-06-15
 
 ## Data Collection Scope
