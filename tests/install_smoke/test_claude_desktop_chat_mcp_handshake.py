@@ -1,18 +1,18 @@
 """Smoke test: MCP handshake across all supported install layouts.
 
-Validates that ${PLUGIN_ROOT}/mcp-server.mjs resolves and starts correctly in:
-  1. Repo-root / dynamic-plugin mode (PLUGIN_ROOT = repo root)
+Validates that ./mcp-server.mjs resolves and starts correctly in:
+  1. Repo-root / dynamic-plugin mode (cwd = repo root)
   2. Marketplace-cache mode (cache mirrors repo; src/ is a subdirectory)
   3. Local-installer-cache mode (install.sh copies whole repo, preserving src/)
 
 Checks performed:
-  - .mcp.json is valid JSON with mcpServers.args[0] = ${PLUGIN_ROOT}/mcp-server.mjs
+  - .mcp.json is valid JSON with a relative ./mcp-server.mjs entrypoint
   - Root-level mcp-server.mjs exists (the entrypoint wrapper)
   - src/mcp-server.mjs exists (the real implementation)
   - node --check passes on both files
   - JSON-RPC initialize returns serverInfo.name = "cre-skills"
   - tools/list includes cre_route
-  - Root-level entrypoint (${PLUGIN_ROOT}/mcp-server.mjs) works from repo root
+  - Configured .mcp.json entrypoint works from repo root
   - Simulated cache layout (wrapper + src/ subdirectory) works
 
 The stdio handshake tests require node on PATH; they skip otherwise.
@@ -51,6 +51,61 @@ def _run_server(server_path: Path, timeout: int = 5) -> str:
     return proc.stdout.decode("utf-8", errors="replace")
 
 
+def _configured_server() -> dict:
+    data = json.loads((PLUGIN_ROOT / ".mcp.json").read_text(encoding="utf-8"))
+    servers = data.get("mcpServers", {})
+    if not servers:
+        raise AssertionError(".mcp.json has no mcpServers")
+    return next(iter(servers.values()))
+
+
+def _run_configured_server(cwd: Path, timeout: int = 5) -> str:
+    """Run the command exactly as published in .mcp.json from `cwd`."""
+    entry = _configured_server()
+    tools_req = json.dumps({"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}}).encode("utf-8")
+    proc = subprocess.run(
+        [entry["command"], *entry.get("args", [])],
+        input=INIT_REQ + b"\n" + tools_req + b"\n",
+        capture_output=True,
+        timeout=timeout,
+        cwd=cwd,
+    )
+    stdout = proc.stdout.decode("utf-8", errors="replace")
+    stderr = proc.stderr.decode("utf-8", errors="replace")
+    if proc.returncode != 0:
+        raise AssertionError(
+            f"Configured MCP command exited {proc.returncode} from {cwd}.\n"
+            f"stdout: {stdout!r}\nstderr: {stderr!r}"
+        )
+    return stdout
+
+
+def _run_route_call(server_path: Path, timeout: int = 5) -> dict:
+    """Call cre_route through MCP and return its JSON content payload."""
+    call_req = json.dumps({
+        "jsonrpc": "2.0",
+        "id": 2,
+        "method": "tools/call",
+        "params": {
+            "name": "cre_route",
+            "arguments": {"query": "underwrite a deal"},
+        },
+    }).encode("utf-8")
+    proc = subprocess.run(
+        ["node", str(server_path)],
+        input=INIT_REQ + b"\n" + call_req + b"\n",
+        capture_output=True,
+        timeout=timeout,
+    )
+    stdout = proc.stdout.decode("utf-8", errors="replace")
+    if proc.returncode != 0:
+        stderr = proc.stderr.decode("utf-8", errors="replace")
+        raise AssertionError(f"MCP route call exited {proc.returncode}.\nstdout: {stdout!r}\nstderr: {stderr!r}")
+    lines = [line for line in stdout.splitlines() if line.strip()]
+    response = json.loads(lines[-1])
+    return json.loads(response["result"]["content"][0]["text"])
+
+
 class TestMcpJsonStructure(unittest.TestCase):
     def test_mcp_json_exists(self) -> None:
         self.assertTrue((PLUGIN_ROOT / ".mcp.json").is_file())
@@ -59,29 +114,24 @@ class TestMcpJsonStructure(unittest.TestCase):
         data = json.loads((PLUGIN_ROOT / ".mcp.json").read_text(encoding="utf-8"))
         self.assertIn("mcpServers", data)
 
-    def test_mcp_json_args_point_to_plugin_root(self) -> None:
-        """${PLUGIN_ROOT}/mcp-server.mjs must be the configured path."""
-        data = json.loads((PLUGIN_ROOT / ".mcp.json").read_text(encoding="utf-8"))
-        servers = data.get("mcpServers", {})
-        self.assertTrue(servers, ".mcp.json has no mcpServers")
-        first = next(iter(servers.values()))
+    def test_mcp_json_args_point_to_relative_entrypoint(self) -> None:
+        """The configured path must be executable from the plugin root cwd."""
+        first = _configured_server()
+        self.assertEqual(first.get("command"), "node")
         args = first.get("args", [])
-        self.assertTrue(args, "mcpServers entry has no args")
-        self.assertIn("${PLUGIN_ROOT}/mcp-server.mjs", args[0],
-                      "args[0] must reference ${PLUGIN_ROOT}/mcp-server.mjs")
+        self.assertEqual(args, ["./mcp-server.mjs"])
+        self.assertEqual(first.get("cwd"), ".")
 
-    def test_mcp_json_args_resolve_from_repo_root(self) -> None:
-        """After substituting ${PLUGIN_ROOT} with repo root, the file must exist."""
-        data = json.loads((PLUGIN_ROOT / ".mcp.json").read_text(encoding="utf-8"))
-        first = next(iter(data["mcpServers"].values()))
-        resolved = Path(first["args"][0].replace("${PLUGIN_ROOT}", str(PLUGIN_ROOT)))
-        self.assertTrue(resolved.is_file(),
-                        f"${{{PLUGIN_ROOT}}}/mcp-server.mjs resolved to {resolved} which does not exist")
+    def test_mcp_json_has_no_unresolved_placeholders(self) -> None:
+        """Claude Code reports missing env vars when args contain ${PLUGIN_ROOT}."""
+        data = (PLUGIN_ROOT / ".mcp.json").read_text(encoding="utf-8")
+        self.assertNotIn("${PLUGIN_ROOT}", data)
+        self.assertNotIn("${CLAUDE_PLUGIN_ROOT}", data)
 
 
 class TestMcpServerFiles(unittest.TestCase):
     def test_root_entrypoint_exists(self) -> None:
-        """mcp-server.mjs must exist at the plugin root (the ${PLUGIN_ROOT} entrypoint)."""
+        """mcp-server.mjs must exist at the plugin root."""
         self.assertTrue((PLUGIN_ROOT / "mcp-server.mjs").is_file(),
                         "Root-level mcp-server.mjs missing; create it as a wrapper that imports ./src/mcp-server.mjs")
 
@@ -134,7 +184,7 @@ class TestMcpInitializeHandshake(unittest.TestCase):
         self.assertIn("cre-skills", out)
 
     def test_root_entrypoint_initializes(self) -> None:
-        """mcp-server.mjs at plugin root (the ${PLUGIN_ROOT} path) responds to initialize.
+        """mcp-server.mjs at plugin root responds to initialize.
 
         This is the exact path Claude Code uses.  Failure here produces -32000.
         """
@@ -173,6 +223,24 @@ class TestMcpInitializeHandshake(unittest.TestCase):
             except json.JSONDecodeError:
                 self.fail(f"Non-JSON on stdout during MCP init: {line!r}")
 
+    def test_configured_mcp_command_initializes_from_repo_root(self) -> None:
+        """Run .mcp.json command/args exactly as Claude/Codex plugin runners do."""
+        if shutil.which("node") is None:
+            self.skipTest("node not on PATH")
+        out = _run_configured_server(PLUGIN_ROOT)
+        self.assertIn("serverInfo", out,
+                      f"Configured .mcp.json command did not return serverInfo.\nOutput: {out!r}")
+        self.assertIn("cre_route", out,
+                      f"Configured .mcp.json command tools/list missing cre_route.\nOutput: {out!r}")
+
+    def test_root_entrypoint_routes_without_generated_dist_catalog(self) -> None:
+        """cre_route must fall back to routing markdown when dist/catalog.json is absent."""
+        if shutil.which("node") is None:
+            self.skipTest("node not on PATH")
+        content = _run_route_call(PLUGIN_ROOT / "mcp-server.mjs")
+        self.assertEqual(content["confidence"], "high")
+        self.assertIn("underwriting", content["recommendation"]["skill"])
+
 
 class TestSimulatedInstalledLayout(unittest.TestCase):
     """Simulate the installed cache layout (whole-repo copy, src/ preserved)
@@ -206,6 +274,31 @@ class TestSimulatedInstalledLayout(unittest.TestCase):
             out = _run_server(tmp / "mcp-server.mjs")
             self.assertIn("serverInfo", out,
                           f"Simulated cache layout did not return serverInfo.\nOutput: {out!r}")
+
+    def test_cache_layout_configured_command_initializes(self) -> None:
+        """The relative .mcp.json command must work from an installed cache cwd."""
+        if shutil.which("node") is None:
+            self.skipTest("node not on PATH")
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            src_dir = tmp / "src"
+            src_dir.mkdir()
+
+            (tmp / ".mcp.json").write_text((PLUGIN_ROOT / ".mcp.json").read_text(encoding="utf-8"), encoding="utf-8")
+            (tmp / "mcp-server.mjs").write_text((PLUGIN_ROOT / "mcp-server.mjs").read_text(encoding="utf-8"), encoding="utf-8")
+            (src_dir / "mcp-server.mjs").write_text((PLUGIN_ROOT / "src" / "mcp-server.mjs").read_text(encoding="utf-8"), encoding="utf-8")
+
+            lib_dst = src_dir / "lib"
+            lib_dst.mkdir()
+            for f in (PLUGIN_ROOT / "src" / "lib").glob("*.mjs"):
+                (lib_dst / f.name).write_text(f.read_text(encoding="utf-8"), encoding="utf-8")
+
+            out = _run_configured_server(tmp)
+            self.assertIn("serverInfo", out,
+                          f"Configured cache layout command did not return serverInfo.\nOutput: {out!r}")
+            self.assertIn("cre_route", out,
+                          f"Configured cache layout command tools/list missing cre_route.\nOutput: {out!r}")
 
 
 if __name__ == "__main__":

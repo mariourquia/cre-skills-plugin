@@ -59,6 +59,7 @@ const CATALOG_PATH = existsSync(join(__dirname, "dist", "catalog.json"))
   ? join(__dirname, "dist", "catalog.json")
   : join(__dirname, "..", "dist", "catalog.json");
 const SKILLS_DIR = join(__dirname, "skills");
+const ROUTING_MD_PATH = join(__dirname, "routing", "CRE-ROUTING.md");
 const WORKSPACE_DIR = join(homedir(), ".cre-skills", "workspaces");
 const CONFIG_DIR = join(homedir(), ".cre-skills");
 
@@ -89,13 +90,54 @@ let catalogCache = null;
 function loadCatalog() {
   if (catalogCache) return catalogCache;
   if (!existsSync(CATALOG_PATH)) {
-    // Try building from catalog.yaml
-    const yamlPath = join(__dirname, "catalog", "catalog.yaml");
-    if (!existsSync(yamlPath)) return { items: [] };
-    return { items: [] };
+    catalogCache = loadRoutingMarkdownCatalog();
+    return catalogCache;
   }
   catalogCache = JSON.parse(readFileSync(CATALOG_PATH, "utf-8"));
   return catalogCache;
+}
+
+function loadRoutingMarkdownCatalog() {
+  if (!existsSync(ROUTING_MD_PATH)) return { items: [] };
+  const md = readFileSync(ROUTING_MD_PATH, "utf-8");
+  const items = [];
+  let inTable = false;
+
+  for (const line of md.split("\n")) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("| User says")) {
+      inTable = true;
+      continue;
+    }
+    if (inTable && trimmed.startsWith("|---")) continue;
+    if (inTable && !trimmed.startsWith("|")) {
+      if (trimmed === "") continue;
+      if (trimmed.startsWith("#") || trimmed.startsWith(">")) inTable = false;
+      continue;
+    }
+    if (!inTable) continue;
+
+    const cells = trimmed.split("|").map((cell) => cell.trim()).filter(Boolean);
+    if (cells.length < 2) continue;
+    const slugMatch = cells[1].match(/`\/([^`]+)`/);
+    if (!slugMatch) continue;
+
+    const id = slugMatch[1];
+    items.push({
+      id,
+      type: "skill",
+      display_name: id.replace(/-/g, " "),
+      status: "stable",
+      lifecycle_phase: "unknown",
+      intent_triggers: [cells[0].replace(/"/g, "")],
+      aliases: [],
+      input_artifacts: [],
+      downstream_items: [],
+      hidden_from_default_catalog: false,
+    });
+  }
+
+  return { items, source: "routing-md-fallback" };
 }
 
 // ---------------------------------------------------------------------------

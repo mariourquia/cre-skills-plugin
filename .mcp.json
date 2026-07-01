@@ -2,7 +2,8 @@
   "mcpServers": {
     "cre-skills": {
       "command": "node",
-      "args": ["${PLUGIN_ROOT}/mcp-server.mjs"],
+      "args": ["./mcp-server.mjs"],
+      "cwd": ".",
       "env": {}
     }
   }

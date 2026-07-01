@@ -311,10 +311,10 @@ fi
 # ---------------------------------------------------------------------------
 # Check 9: MCP server startup
 #
-# Resolves the server path from .mcp.json (substituting ${PLUGIN_ROOT}),
-# verifies the file exists, then sends a JSON-RPC initialize request over
-# stdin and asserts the response contains "serverInfo".  A failure here is
-# exactly what causes the -32000 "Failed to reconnect" error in Claude Code.
+# Executes the command exactly as published in .mcp.json from the plugin root
+# and sends JSON-RPC initialize + tools/list requests over stdin. A failure
+# here is exactly what causes the -32000 "Failed to reconnect" error in
+# Claude Code.
 # ---------------------------------------------------------------------------
 section "9. MCP server startup"
 
@@ -325,51 +325,69 @@ if ! command -v node &>/dev/null; then
 elif [ ! -f "$MCP_JSON" ]; then
   fail_check ".mcp.json not found at $MCP_JSON"
 else
-  # Extract the first arg from .mcp.json, substituting ${PLUGIN_ROOT}
-  MCP_SERVER_PATH="$(python3 -c "
-import json, re
-data = json.load(open('$MCP_JSON'))
-servers = data.get('mcpServers', {})
+  if MCP_OUT="$(REPO_ROOT="$REPO_ROOT" python3 - <<'PY'
+import json
+import os
+import subprocess
+import sys
+
+repo = os.environ["REPO_ROOT"]
+with open(os.path.join(repo, ".mcp.json"), encoding="utf-8") as fh:
+    data = json.load(fh)
+
+servers = data.get("mcpServers", {})
 if not servers:
-    print('')
-else:
-    first = next(iter(servers.values()))
-    args = first.get('args', [])
-    if args:
-        print(args[0].replace('\${PLUGIN_ROOT}', '$REPO_ROOT'))
-    else:
-        print('')
-" 2>/dev/null)"
+    raise SystemExit(".mcp.json has no mcpServers")
 
-  if [ -z "$MCP_SERVER_PATH" ]; then
-    fail_check ".mcp.json has no mcpServers args entry"
-  elif [ ! -f "$MCP_SERVER_PATH" ]; then
-    fail_check "MCP server file not found: $MCP_SERVER_PATH"
-    fail_check "  .mcp.json points to \${PLUGIN_ROOT}/mcp-server.mjs but the file is missing."
-    fail_check "  Fix: ensure mcp-server.mjs exists at the plugin root (wraps src/mcp-server.mjs)."
+entry = next(iter(servers.values()))
+command = entry.get("command")
+args = entry.get("args", [])
+if not command or not args:
+    raise SystemExit(".mcp.json mcpServers entry must include command and args")
+
+joined = " ".join([command, *args])
+if "${PLUGIN_ROOT}" in joined or "${CLAUDE_PLUGIN_ROOT}" in joined:
+    raise SystemExit(f".mcp.json contains unresolved env placeholder: {joined}")
+
+env = os.environ.copy()
+for key, value in (entry.get("env") or {}).items():
+    env[str(key)] = str(value)
+
+init_req = json.dumps({
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "initialize",
+    "params": {
+        "protocolVersion": "2024-11-05",
+        "capabilities": {},
+        "clientInfo": {"name": "verify-install", "version": "1.0"},
+    },
+})
+tools_req = json.dumps({"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}})
+
+proc = subprocess.run(
+    [command, *args],
+    input=f"{init_req}\n{tools_req}\n",
+    capture_output=True,
+    text=True,
+    timeout=5,
+    cwd=repo,
+    env=env,
+)
+if proc.returncode != 0:
+    raise SystemExit(f"MCP command exited {proc.returncode}: {proc.stderr.strip()}")
+if '"serverInfo"' not in proc.stdout:
+    raise SystemExit(f"MCP initialize response missing serverInfo: {proc.stdout!r}")
+if '"cre_route"' not in proc.stdout:
+    raise SystemExit(f"MCP tools/list response missing cre_route: {proc.stdout!r}")
+
+print(" ".join([command, *args]))
+PY
+)"; then
+    pass "MCP configured command responds to initialize and tools/list: $MCP_OUT"
   else
-    pass "MCP server file exists: ${MCP_SERVER_PATH#"$REPO_ROOT/"}"
-
-    # JSON-RPC initialize handshake (3-second timeout)
-    MCP_INIT='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"verify-install","version":"1.0"}}}'
-    MCP_OUT="$(printf '%s\n' "$MCP_INIT" | node "$MCP_SERVER_PATH" 2>/dev/null)" || true
-
-    if printf '%s' "$MCP_OUT" | grep -q '"serverInfo"'; then
-      pass "MCP server responds to initialize with serverInfo"
-    else
-      fail_check "MCP server did not return a valid initialize response"
-      fail_check "  Smoke test: printf '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{}}\n' | node $MCP_SERVER_PATH"
-    fi
-
-    # Confirm tools/list returns the registered tools
-    MCP_TOOLS='{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}'
-    MCP_TOOLS_OUT="$(printf '%s\n' "$MCP_TOOLS" | node "$MCP_SERVER_PATH" 2>/dev/null)" || true
-
-    if printf '%s' "$MCP_TOOLS_OUT" | grep -q '"cre_route"'; then
-      pass "MCP tools/list returns cre_route tool"
-    else
-      warn_check "MCP tools/list did not return expected cre_route tool"
-    fi
+    fail_check "MCP configured command did not start cleanly from plugin root"
+    fail_check "  Smoke test: python3 scripts/verify-install.sh"
   fi
 fi
 

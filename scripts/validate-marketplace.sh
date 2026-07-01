@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Validate marketplace and plugin manifest structure for cre-skills-plugin
-set -euo pipefail
+set -uo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 ERRORS=0
@@ -56,13 +56,13 @@ else
     check $? "Plugin source '$SOURCE' resolves"
 fi
 
-# 7. Component paths resolve
+# 7. Plugin component paths resolve
 python3 -c "
 import json, os, sys
 p = json.load(open('$REPO_ROOT/.claude-plugin/plugin.json'))
 root = '$REPO_ROOT'
 errors = []
-for key in ['skills', 'agents', 'commands']:
+for key in ['skills', 'commands']:
     path = p.get(key, key + '/')
     full = os.path.join(root, path.lstrip('./'))
     if not os.path.exists(full):
@@ -71,9 +71,13 @@ if errors:
     print('; '.join(errors), file=sys.stderr)
     sys.exit(1)
 " 2>/dev/null
-check $? "Component paths (skills, agents, commands) resolve"
+check $? "Plugin component paths (skills, commands) resolve"
 
-# 8. Hooks file exists
+# 8. Bundled agents directory exists for commands, Cowork ZIPs, and portable builds
+test -d "$REPO_ROOT/src/agents"
+check $? "Bundled agents directory exists"
+
+# 9. Hooks file exists
 python3 -c "
 import json, os
 p = json.load(open('$REPO_ROOT/.claude-plugin/plugin.json'))
@@ -83,7 +87,7 @@ assert os.path.exists(full), f'hooks not found at {full}'
 " 2>/dev/null
 check $? "Hooks configuration resolves"
 
-# 9. MCP server config exists
+# 10. MCP server config exists
 python3 -c "
 import json, os
 p = json.load(open('$REPO_ROOT/.claude-plugin/plugin.json'))
@@ -95,15 +99,32 @@ if isinstance(mcp_path, str):
 " 2>/dev/null
 check $? "MCP server config resolves"
 
-# 10. mcp-server.mjs exists
-test -f "$REPO_ROOT/src/mcp-server.mjs"
-check $? "mcp-server.mjs exists"
+# 11. mcp-server.mjs exists
+test -f "$REPO_ROOT/mcp-server.mjs" && test -f "$REPO_ROOT/src/mcp-server.mjs"
+check $? "mcp-server.mjs entrypoint and implementation exist"
 
-# 11. plugin.json is single-sourced (no stray src/plugin/ duplicate)
+# 12. MCP command is executable from plugin root without unresolved placeholders
+python3 -c "
+import json, os, sys
+p = json.load(open('$REPO_ROOT/.mcp.json'))
+servers = p.get('mcpServers', {})
+assert servers, 'missing mcpServers'
+entry = next(iter(servers.values()))
+args = entry.get('args', [])
+joined = ' '.join([entry.get('command', ''), *args])
+assert '\${PLUGIN_ROOT}' not in joined, 'MCP command still references \${PLUGIN_ROOT}'
+assert '\${CLAUDE_PLUGIN_ROOT}' not in joined, 'MCP command should not require Claude-only env placeholders'
+assert entry.get('command') == 'node', 'MCP command must use node'
+assert args == ['./mcp-server.mjs'], f'unexpected MCP args: {args}'
+assert entry.get('cwd') == '.', 'MCP cwd must be plugin root'
+" 2>/dev/null
+check $? "MCP command uses relative plugin-root entrypoint"
+
+# 13. plugin.json is single-sourced (no stray src/plugin/ duplicate)
 test ! -f "$REPO_ROOT/src/plugin/plugin.json"
 check $? "no duplicate plugin.json under src/plugin/ (.claude-plugin/ is canonical)"
 
-# 12. Version consistency
+# 14. Version consistency
 MKT_VER=$(python3 -c "import json; print(json.load(open('$REPO_ROOT/.claude-plugin/marketplace.json'))['plugins'][0].get('version',''))" 2>/dev/null)
 PLG_VER=$(python3 -c "import json; print(json.load(open('$REPO_ROOT/.claude-plugin/plugin.json')).get('version',''))" 2>/dev/null)
 if [ -n "$MKT_VER" ] && [ -n "$PLG_VER" ] && [ "$MKT_VER" != "$PLG_VER" ]; then

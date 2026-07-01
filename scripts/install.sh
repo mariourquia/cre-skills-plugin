@@ -291,7 +291,7 @@ install_plugin() {
   now="$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
 
   # 1. Copy plugin to the plugins cache (whole-repo layout; src/ preserved as a
-  #    subdirectory so ${PLUGIN_ROOT}/mcp-server.mjs → ./src/mcp-server.mjs works)
+  #    subdirectory so ./mcp-server.mjs can import ./src/mcp-server.mjs)
   mkdir -p "$plugins_cache"
   rsync -a --delete \
     --exclude '.git' --exclude '__pycache__' --exclude 'node_modules' \
