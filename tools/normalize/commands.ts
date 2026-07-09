@@ -41,11 +41,20 @@ export function normalizeCommands(target: TargetName, profile: TargetProfile): N
       }
     }
 
+    // Source command files use src/-prefixed ${CLAUDE_PLUGIN_ROOT} paths so the
+    // repo/marketplace install (CLAUDE_PLUGIN_ROOT == repo root) resolves routing under
+    // src/routing. This build flattens src/routing -> routing/, so rewrite the body to the
+    // flat layout, mirroring the hooks normalizer (otherwise the built command references 404).
+    const flatBody = body
+      .replaceAll("${CLAUDE_PLUGIN_ROOT}/src/routing/", "${CLAUDE_PLUGIN_ROOT}/routing/")
+      .replaceAll("${CLAUDE_PLUGIN_ROOT}/src/hooks/", "${CLAUDE_PLUGIN_ROOT}/hooks/")
+      .replaceAll("${CLAUDE_PLUGIN_ROOT}/src/agents/", "${CLAUDE_PLUGIN_ROOT}/agents/");
+
     if (Object.keys(frontmatter).length > 0) {
-      writeFileSync(resolve(outCommands, file), serializeFrontmatter(frontmatter, body));
+      writeFileSync(resolve(outCommands, file), serializeFrontmatter(frontmatter, flatBody));
     } else {
       // No frontmatter left -- write plain markdown
-      writeFileSync(resolve(outCommands, file), body);
+      writeFileSync(resolve(outCommands, file), flatBody);
     }
     processed++;
   }

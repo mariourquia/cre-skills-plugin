@@ -5,7 +5,7 @@ description: "List available CRE expert agents and pre-built team compositions f
 
 # CRE Expert Agents
 
-Read the agent index at `${CLAUDE_PLUGIN_ROOT}/agents/_index.md` and present the available agents and team compositions to the user. The roster includes 54 agents across buyer, lens, function, challenge, titan, stakeholder, lifecycle, and composite categories.
+Read the agent index at `${CLAUDE_PLUGIN_ROOT}/src/agents/_index.md` and present the available agents and team compositions to the user. The roster includes 54 agents across buyer, lens, function, challenge, titan, stakeholder, lifecycle, and composite categories.
 
 If the user specified a team or task ("$ARGUMENTS"), recommend the appropriate team composition and offer to spawn the agents.
 

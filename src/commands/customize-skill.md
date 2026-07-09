@@ -11,7 +11,7 @@ Walk the user through creating or editing a local skill customization. Keep the 
 
 Ask: "Which skill would you like to customize? You can name it, describe your use case, or type 'list' to browse."
 
-- If the user names a skill, validate it exists via the `cre_route` MCP tool or by checking `${CLAUDE_PLUGIN_ROOT}/routing/CRE-ROUTING.md`.
+- If the user names a skill, validate it exists via the `cre_route` MCP tool or by checking `${CLAUDE_PLUGIN_ROOT}/src/routing/CRE-ROUTING.md`.
 - If the user says "list", use the `cre_list_skills` MCP tool to show available skills grouped by lifecycle phase.
 - If the user describes a task, route it via `cre_route` and confirm the match.
 

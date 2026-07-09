@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Plugin integrity and catalog consistency tests for CRE Skills Plugin v4.0.0"""
-import json, os, glob, subprocess, unittest
+import json, os, glob, re, subprocess, unittest
 
 try:
     import yaml
@@ -43,6 +43,48 @@ class TestPluginStructure(unittest.TestCase):
         with open(os.path.join(SRC_DIR, 'hooks/hooks.json')) as f:
             data = json.load(f)
         self.assertIn('hooks', data)
+
+    # Every ${CLAUDE_PLUGIN_ROOT}/<path> must resolve in the installed repo layout
+    # (CLAUDE_PLUGIN_ROOT == repo root, which the marketplace `github` source and install.sh
+    # both lay down). Trailing markdown/shell punctuation is stripped before resolving.
+    _PLUGIN_PATH_RE = re.compile(r'\$\{CLAUDE_PLUGIN_ROOT\}/([^\s"\'`)]+)')
+
+    def _unresolved_plugin_paths(self, text):
+        missing = []
+        for rel in self._PLUGIN_PATH_RE.findall(text):
+            rel = rel.rstrip('.,;:')
+            if not os.path.exists(os.path.join(PLUGIN_ROOT, rel)):
+                missing.append(rel)
+        return missing
+
+    def test_hook_paths_resolve_in_repo_layout(self):
+        """Regression guard: hooks.json shipped pointing at ${CLAUDE_PLUGIN_ROOT}/hooks/ while
+        the scripts live under src/hooks/, so all three command hooks and the routing prompt
+        silently 404'd on the primary install path. The old test only checked the JSON parsed."""
+        with open(os.path.join(SRC_DIR, 'hooks/hooks.json')) as f:
+            data = json.load(f)
+        refs, missing = 0, []
+        for matchers in data['hooks'].values():
+            for matcher in matchers:
+                for hook in matcher.get('hooks', []):
+                    text = hook.get('command') or hook.get('prompt') or ''
+                    found = self._PLUGIN_PATH_RE.findall(text)
+                    refs += len(found)
+                    missing += self._unresolved_plugin_paths(text)
+        self.assertTrue(refs, 'expected at least one plugin-root-relative hook path')
+        self.assertFalse(missing, 'hooks.json references paths absent in the repo layout: ' + ', '.join(missing))
+
+    def test_command_paths_resolve_in_repo_layout(self):
+        """Same guard for slash-command files: /cre-route execs
+        ${CLAUDE_PLUGIN_ROOT}/.../skill-dispatcher.mjs and several commands read the routing
+        index, all of which must resolve on the primary (repo-root) install path."""
+        cmd_dir = os.path.join(SRC_DIR, 'commands')
+        missing = []
+        for name in glob.glob(os.path.join(cmd_dir, '*.md')):
+            with open(name) as f:
+                for rel in self._unresolved_plugin_paths(f.read()):
+                    missing.append(f'{os.path.basename(name)}: {rel}')
+        self.assertFalse(missing, 'command files reference paths absent in the repo layout: ' + ', '.join(missing))
 
     def test_hook_scripts_syntax(self):
         for hook in glob.glob(os.path.join(SRC_DIR, 'hooks/*.mjs')):

@@ -5,9 +5,9 @@ description: "Show available CRE multi-skill workflow chains (acquisition pipeli
 
 # CRE Workflow Chains
 
-Read the workflow chain index from `${CLAUDE_PLUGIN_ROOT}/routing/CRE-ROUTING.md` (the "Workflow Chains" section) and present the available chains to the user.
+Read the workflow chain index from `${CLAUDE_PLUGIN_ROOT}/src/routing/CRE-ROUTING.md` (the "Workflow Chains" section) and present the available chains to the user.
 
-If the user specified a workflow ("$ARGUMENTS"), read the detailed workflow document from `${CLAUDE_PLUGIN_ROOT}/routing/workflows/` for that chain and walk the user through it step by step, invoking each skill in sequence.
+If the user specified a workflow ("$ARGUMENTS"), read the detailed workflow document from `${CLAUDE_PLUGIN_ROOT}/src/routing/workflows/` for that chain and walk the user through it step by step, invoking each skill in sequence.
 
 Available chains:
 1. **Acquisition Pipeline**: sourcing -> screening -> tenant-credit -> underwriting -> IC memo -> LOI -> PSA -> financing (term sheet + loan docs) -> DD (title + transfer docs) -> closing (checklist + funds flow) -> post-close

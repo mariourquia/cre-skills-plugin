@@ -19,7 +19,7 @@ Ask what the feedback is about. Present these options:
 
 ## Step 2: Which skill or workflow (optional)
 
-Ask which skill, workflow, or orchestrator this relates to. Accept a slug, a plain description, or "not sure". If the user names something, validate it exists by checking the routing index at `${CLAUDE_PLUGIN_ROOT}/routing/CRE-ROUTING.md`. If it doesn't match, suggest the closest match or proceed with the user's text.
+Ask which skill, workflow, or orchestrator this relates to. Accept a slug, a plain description, or "not sure". If the user names something, validate it exists by checking the routing index at `${CLAUDE_PLUGIN_ROOT}/src/routing/CRE-ROUTING.md`. If it doesn't match, suggest the closest match or proceed with the user's text.
 
 ## Step 3: Rating (optional)
 

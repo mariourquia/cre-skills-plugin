@@ -36,8 +36,18 @@ export function normalizeHooks(target: TargetName, profile: TargetProfile): Norm
   const warnings: string[] = [];
 
   if (profile.hooks.variant === "full") {
-    // Copy entire hooks directory as-is
+    // Copy entire hooks directory as-is...
     cpSync(srcHooks, outHooks, { recursive: true });
+    // ...then re-point the ${CLAUDE_PLUGIN_ROOT}-relative paths. The SOURCE hooks.json uses
+    // src/-prefixed paths so the repo/marketplace install (CLAUDE_PLUGIN_ROOT = repo root,
+    // scripts under src/hooks, routing under src/routing) resolves correctly. This build
+    // FLATTENS src/hooks -> hooks/ and src/routing -> routing/ (build-target.ts), so rewrite
+    // the copied hooks.json to the flat layout or every command/prompt path would 404.
+    const builtHooksJson = resolve(outHooks, "hooks.json");
+    const rewritten = readFileSync(builtHooksJson, "utf-8")
+      .replaceAll("${CLAUDE_PLUGIN_ROOT}/src/hooks/", "${CLAUDE_PLUGIN_ROOT}/hooks/")
+      .replaceAll("${CLAUDE_PLUGIN_ROOT}/src/routing/", "${CLAUDE_PLUGIN_ROOT}/routing/");
+    writeFileSync(builtHooksJson, rewritten);
     return { variant: "full", warnings };
   }
 
