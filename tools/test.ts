@@ -198,6 +198,19 @@ test("cowork hooks/ has no .mjs files", () => {
   assertEqual(mjsFiles.length, 0, "mjs files in cowork hooks");
 });
 
+test("cowork hooks.json has no unrewritten src/-prefixed paths", () => {
+  // Prompt-type hooks carry ${CLAUDE_PLUGIN_ROOT}-relative paths in their prompt
+  // TEXT (e.g. SessionStart pointing at CRE-ROUTING.md), not just in command
+  // fields. build-target.ts flattens src/routing -> routing/ and src/hooks ->
+  // hooks/ for every target, so a leftover "src/" path here would 404 at runtime.
+  const file = resolve(buildDir("cowork"), "hooks/hooks.json");
+  const text = readFileSync(file, "utf-8");
+  assert(
+    !text.includes("${CLAUDE_PLUGIN_ROOT}/src/"),
+    "cowork hooks.json still contains an unrewritten src/-prefixed path",
+  );
+});
+
 // ── Golden: Cowork Manifest ────────────────────────────────────────────
 
 console.log("\nGOLDEN: Cowork manifest normalization");
