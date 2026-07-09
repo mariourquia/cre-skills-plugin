@@ -797,6 +797,13 @@ def build_catalog() -> dict:
     return catalog
 
 
+def catalogs_match_ignoring_stamp(a: dict, b: dict) -> bool:
+    """True when two catalogs differ at most by their generated_at stamp."""
+    return {k: v for k, v in a.items() if k != "generated_at"} == {
+        k: v for k, v in b.items() if k != "generated_at"
+    }
+
+
 def validate_catalog(catalog: dict) -> list:
     """Basic validation checks. Returns list of issues."""
     issues = []
@@ -854,11 +861,26 @@ def main():
         for issue in issues:
             print(f"  - {issue}", file=sys.stderr)
 
-    # Write catalog.yaml
+    # Idempotent rebuild: when the only difference from the committed catalog
+    # is the generated_at stamp, keep the existing stamp so repeated builds
+    # (including test-session builds) never churn tracked or dist output with
+    # timestamp-only diffs.
     catalog_yaml_path = SRC_DIR / "catalog" / "catalog.yaml"
-    with open(catalog_yaml_path, "w", encoding="utf-8") as f:
-        yaml.dump(catalog, f, default_flow_style=False, sort_keys=False, allow_unicode=True, width=120)
-    print(f"Wrote {catalog_yaml_path} ({len(catalog['items'])} items)")
+    existing = None
+    if catalog_yaml_path.exists():
+        existing = yaml.safe_load(catalog_yaml_path.read_text(encoding="utf-8")) or None
+    if existing is not None and catalogs_match_ignoring_stamp(existing, catalog):
+        catalog["generated_at"] = existing.get("generated_at", catalog["generated_at"])
+
+    # Write catalog.yaml (unless --json, which emits dist/catalog.json only)
+    if args.json:
+        print(f"Skipped {catalog_yaml_path} (--json: writing dist/catalog.json only)")
+    elif existing == catalog:
+        print(f"Unchanged {catalog_yaml_path} ({len(catalog['items'])} items)")
+    else:
+        with open(catalog_yaml_path, "w", encoding="utf-8") as f:
+            yaml.dump(catalog, f, default_flow_style=False, sort_keys=False, allow_unicode=True, width=120)
+        print(f"Wrote {catalog_yaml_path} ({len(catalog['items'])} items)")
 
     # Always generate dist/catalog.json
     dist_dir = REPO_ROOT / "dist"

@@ -106,6 +106,33 @@ function testRedactDigits() {
 
   assert('digits', 'preserves year numbers',
     redactText('Built in 2026') === 'Built in 2026');
+
+  // Separator-joined PII the plain \d{5,} pass alone misses (groups < 5 digits).
+  assert('digits', 'dashed SSN',
+    redactText('SSN 123-45-6789 leaked') === 'SSN [NUM_REDACTED] leaked');
+
+  assert('digits', 'spaced SSN',
+    redactText('ssn 123 45 6789 here') === 'ssn [NUM_REDACTED] here');
+
+  assert('digits', 'US phone with parens',
+    redactText('call (212) 555-1234 now').includes('[NUM_REDACTED]') &&
+    !redactText('call (212) 555-1234 now').includes('555'));
+
+  assert('digits', 'dashed phone',
+    redactText('212-555-7890') === '[NUM_REDACTED]');
+
+  assert('digits', 'spaced card number',
+    redactText('card 4111 1111 1111 1111 x').includes('[NUM_REDACTED]') &&
+    !redactText('card 4111 1111 1111 1111 x').includes('1111'));
+
+  assert('digits', 'dashed card number',
+    redactText('4111-1111-1111-1111').startsWith('[NUM_REDACTED]'));
+
+  assert('digits', 'preserves ISO date',
+    redactText('shipped 2026-07-08 ok') === 'shipped 2026-07-08 ok');
+
+  assert('digits', 'preserves semver',
+    redactText('plugin v5.2.1 active') === 'plugin v5.2.1 active');
 }
 
 // ---------------------------------------------------------------------------

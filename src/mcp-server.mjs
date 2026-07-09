@@ -93,7 +93,15 @@ function loadCatalog() {
     catalogCache = loadRoutingMarkdownCatalog();
     return catalogCache;
   }
-  catalogCache = JSON.parse(readFileSync(CATALOG_PATH, "utf-8"));
+  try {
+    catalogCache = JSON.parse(readFileSync(CATALOG_PATH, "utf-8"));
+  } catch (err) {
+    // A present-but-corrupt catalog must not crash server startup: fall back to the routing
+    // markdown exactly like the missing-file case, and warn on stderr (never stdout, which
+    // carries the MCP protocol stream).
+    process.stderr.write(`cre-skills MCP: catalog at ${CATALOG_PATH} is unreadable (${err.message}); falling back to routing index\n`);
+    catalogCache = loadRoutingMarkdownCatalog();
+  }
   return catalogCache;
 }
 

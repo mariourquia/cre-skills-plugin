@@ -26,7 +26,17 @@ const WIN_PATH_RE = /[A-Z]:\\[\w\\. -]+/g;
 // Email addresses in free text (user@domain.tld)
 const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
 
-// Sequences of 5+ digits (SSNs, account numbers, phone-like strings)
+// Separator-joined sensitive numbers, matched BEFORE the plain-digit pass so the whole
+// token is redacted as a unit (each of these has digit groups shorter than 5, so the
+// \d{5,} pass alone misses them entirely):
+//   SSN 123-45-6789 / 123 45 6789
+const SSN_RE = /\b\d{3}[- ]\d{2}[- ]\d{4}\b/g;
+//   US phone (212) 555-1234 / 212-555-1234 / 212.555.1234
+const PHONE_RE = /\(?\b\d{3}\)?[ .-]\d{3}[ .-]\d{4}\b/g;
+//   card-like 13-19 digits in groups of 4 (4111 1111 1111 1111 / 4111-1111-1111-1111)
+const CARD_RE = /\b(?:\d[ -]?){13,19}\b/g;
+
+// Sequences of 5+ digits (account numbers, long id strings)
 const DIGIT_SEQ_RE = /\b\d{5,}\b/g;
 
 // Environment variable assignments: KEY=value or KEY="value"
@@ -46,6 +56,9 @@ export function redactText(text) {
     .replace(FILE_PATH_RE, '[PATH_REDACTED]')
     .replace(WIN_PATH_RE, '[PATH_REDACTED]')
     .replace(EMAIL_RE, '[EMAIL_REDACTED]')
+    .replace(SSN_RE, '[NUM_REDACTED]')
+    .replace(CARD_RE, '[NUM_REDACTED]')
+    .replace(PHONE_RE, '[NUM_REDACTED]')
     .replace(DIGIT_SEQ_RE, '[NUM_REDACTED]')
     .replace(ENV_VAR_RE, '[ENV_REDACTED]');
 }

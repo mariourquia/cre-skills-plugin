@@ -30,7 +30,7 @@ Ask: "How serious was this?"
 
 ## Step 4: Which skill, workflow, or orchestrator?
 
-Ask which skill, workflow, or orchestrator was involved. Accept a slug, a plain description, or "not sure". Validate against the routing index at `${CLAUDE_PLUGIN_ROOT}/routing/CRE-ROUTING.md` if the user provides a name.
+Ask which skill, workflow, or orchestrator was involved. Accept a slug, a plain description, or "not sure". Validate against the routing index at `${CLAUDE_PLUGIN_ROOT}/src/routing/CRE-ROUTING.md` if the user provides a name.
 
 If the user ran an orchestrator pipeline, also capture the orchestrator slug.
 
