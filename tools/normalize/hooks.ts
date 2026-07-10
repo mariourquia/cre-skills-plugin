@@ -77,7 +77,15 @@ export function normalizeHooks(target: TargetName, profile: TargetProfile): Norm
     }
   }
 
-  writeFileSync(resolve(outHooks, "hooks.json"), JSON.stringify(portable, null, 2) + "\n");
+  // Prompt-type hooks carry ${CLAUDE_PLUGIN_ROOT}-relative paths in their prompt TEXT (e.g.
+  // the SessionStart prompt telling the reader where to find CRE-ROUTING.md), not just in
+  // command fields -- build-target.ts flattens src/routing -> routing/ for every target
+  // (portable included), so this needs the same rewrite the full branch applies, or the
+  // portable prompt keeps pointing at a src/-prefixed path that doesn't exist in this layout.
+  const rewritten = JSON.stringify(portable, null, 2)
+    .replaceAll("${CLAUDE_PLUGIN_ROOT}/src/hooks/", "${CLAUDE_PLUGIN_ROOT}/hooks/")
+    .replaceAll("${CLAUDE_PLUGIN_ROOT}/src/routing/", "${CLAUDE_PLUGIN_ROOT}/routing/");
+  writeFileSync(resolve(outHooks, "hooks.json"), rewritten + "\n");
   // Do not copy .mjs script files for portable variant
   return { variant: "portable", warnings };
 }
