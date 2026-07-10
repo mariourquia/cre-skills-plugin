@@ -110,6 +110,25 @@ class TestPluginStructure(unittest.TestCase):
     def test_routing_index_exists(self):
         self.assertTrue(os.path.exists(os.path.join(SRC_DIR, 'routing/CRE-ROUTING.md')))
 
+    def test_routing_index_covers_previously_unrouted_reit_cre_skills(self):
+        """Regression guard for 15 reit-cre skills found missing a routing row
+        during a 2026-07-09 audit (23 unrouted total; the other 8 -- 7
+        workspace-category skills plus residential_multifamily -- are
+        deliberately not asserted here pending a product decision)."""
+        with open(os.path.join(SRC_DIR, 'routing/CRE-ROUTING.md')) as f:
+            routing_text = f.read()
+        previously_unrouted = [
+            'agency-loan-quote-analyzer', 'amos-icomm-demo-orchestrator',
+            'deal-underwriting-assistant', 'document-to-data-room-extractor',
+            'document-to-database', 'ic-red-team-challenger', 'icomm-context-builder',
+            'market-memo-generator', 'operating-statement-to-database',
+            'pca-reserve-analyzer', 'reit-profile-builder', 'rent-roll-t12-tieout',
+            'rent-roll-to-database', 'space-planning-redesign-orchestrator',
+            't12-to-database',
+        ]
+        for slug in previously_unrouted:
+            self.assertIn(f'`/{slug}`', routing_text, f'{slug} still missing a routing row')
+
     def test_feedback_schemas_valid(self):
         for name in ['feedback-submission.schema.json', 'feedback-config.schema.json']:
             path = os.path.join(SRC_DIR, 'schemas', name)
