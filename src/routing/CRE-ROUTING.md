@@ -11,6 +11,8 @@
 | "1031", "like-kind exchange", "tax deferral" | `/1031-exchange-executor` |
 | "1031 pipeline", "replacement property pipeline", "exchange timeline", "1031 ID deadline" | `/1031-pipeline-manager` |
 | "underwrite this deal", "run the numbers", "model this property" | `/acquisition-underwriting-engine` |
+| "analyze this agency quote", "compare Freddie vs Fannie", "DUS quote", "Optigo quote" | `/agency-loan-quote-analyzer` |
+| "run the IC workflow", "take this deal from data room to IC", "orchestrate the acquisition" | `/amos-icomm-demo-orchestrator` |
 | "annual budget", "operating budget", "IREM benchmark" | `/annual-budget-engine` |
 | "PM schedule", "HVAC maintenance", "elevator inspection" | `/building-systems-maintenance-manager` |
 | "CAM reconciliation", "tenant billing", "common area maintenance" | `/cam-reconciliation-calculator` |
@@ -34,6 +36,7 @@
 | "due diligence", "DD period", "inspection period" | `/dd-command-center` |
 | "deal attribution", "deal-level P&L", "track record attribution", "realized/unrealized" | `/deal-attribution-tracker` |
 | "screen this deal", "should I look at this", "new OM/listing" | `/deal-quick-screen` |
+| "quick underwrite", "deal analysis", "go/no-go scorecard" | `/deal-underwriting-assistant` |
 | "debt covenant", "DSCR compliance", "covenant breach" | `/debt-covenant-monitor` |
 | "debt portfolio", "loan watchlist", "maturity wall" | `/debt-portfolio-monitor` |
 | "development proforma", "construction budget", "draw schedule" | `/dev-proforma-engine` |
@@ -41,6 +44,8 @@
 | "sell vs hold", "disposition strategy", "exit analysis" | `/disposition-strategy-engine` |
 | "distressed", "special servicing", "note purchase", "REO" | `/distressed-acquisition-playbook` |
 | "distribution notice", "capital distribution", "distribution waterfall letter" | `/distribution-notice-generator` |
+| "extract the data room", "build the fact table", "index this deal package" | `/document-to-data-room-extractor` |
+| "turn these documents into a database", "ingest this data room to our schema" | `/document-to-database` |
 | "build the warehouse dataset", "assemble these extractions", "validate the data room for the model", "make this deck-ready", "stage extracted data for the warehouse" | `/document-to-warehouse-pipeline` |
 | "emerging manager", "first-time fund", "emerging GP evaluation", "seed allocation" | `/emerging-manager-evaluator` |
 | "zoning", "entitlement", "rezoning", "variance" | `/entitlement-feasibility` |
@@ -53,6 +58,8 @@
 | "evaluate GP performance", "assess GP track record", "GP evaluation", "manager due diligence" | `/gp-performance-evaluator` |
 | "build the IC deck", "compose the committee deck", "valuation committee deck", "quarterly asset review deck", "annual business plan deck" | `/ic-deck-composer` |
 | "IC memo", "investment committee", "deal presentation" | `/ic-memo-generator` |
+| "red team this deal", "pressure-test the recommendation", "play devil's advocate" | `/ic-red-team-challenger` |
+| "build the IC Q&A pack", "prep for committee questions", "what will IC ask" | `/icomm-context-builder` |
 | "insurance renewal", "coverage adequacy", "builder's risk" | `/insurance-risk-manager` |
 | "investor meeting", "audit coordination", "GIPS composite" | `/investor-lifecycle-manager` |
 | "waterfall", "promote", "preferred return", "GP/LP split" | `/jv-waterfall-architect` |
@@ -73,12 +80,15 @@
 | "generate LP data request", "LP questionnaire", "DDQ", "LP information request" | `/lp-data-request-generator` |
 | "pitch deck", "LP presentation", "track record" | `/lp-pitch-deck-builder` |
 | "market cycle", "where are we in the cycle", "Mueller" | `/market-cycle-positioner` |
+| "write a market memo", "market update" | `/market-memo-generator` |
 | "mezz", "preferred equity", "subordinate capital" | `/mezz-pref-structurer` |
 | "Monte Carlo", "return simulation", "probability distribution", "stochastic model" | `/monte-carlo-return-simulator` |
 | "NOI sprint", "90-day plan", "stabilize NOI" | `/noi-sprint-plan` |
 | "reverse price this OM", "what should I pay" | `/om-reverse-pricing` |
+| "load this operating statement", "normalize the P&L to our accounts" | `/operating-statement-to-database` |
 | "opportunity zone", "OZ", "QOZB" | `/opportunity-zone-underwriter` |
 | "partnership allocation", "704(b)", "UBIT", "K-1" | `/partnership-allocation-engine` |
+| "PCA", "property condition assessment", "reserve adequacy" | `/pca-reserve-analyzer` |
 | "performance attribution", "alpha", "NCREIF benchmark" | `/performance-attribution` |
 | "portfolio allocation", "concentration risk", "rebalancing" | `/portfolio-allocator` |
 | "post-close onboarding", "PM transition", "asset handoff" | `/post-close-onboarding-transition` |
@@ -89,9 +99,12 @@
 | "review this PSA", "redline strategy" | `/psa-redline-strategy` |
 | "investor update", "quarterly report", "LP letter" | `/quarterly-investor-update` |
 | "refinance", "refi", "loan maturity" | `/refi-decision-analyzer` |
+| "REIT profile", "build a REIT comp", "REIT ticker" | `/reit-profile-builder` |
 | "rent optimization", "loss-to-lease", "rent increase plan" | `/rent-optimization-planner` |
 | "analyze this rent roll", "clean up this rent roll" | `/rent-roll-analyzer` |
 | "standardize rent roll", "format rent roll" | `/rent-roll-formatter` |
+| "tie out the rent roll to the T-12", "reconcile contractual rent to actuals", "revenue leakage check" | `/rent-roll-t12-tieout` |
+| "load this rent roll into the database", "normalize the rent roll to our schema", "rent roll to warehouse" | `/rent-roll-to-database` |
 | "Reg D", "506(b)", "506(c)", "accredited investor verification", "blue sky filing" | `/sec-reg-d-compliance` |
 | "stress test", "sensitivity analysis", "where does it break" | `/sensitivity-stress-test` |
 | "small operator PM", "self-manage", "landlord operations", "1-50 units" | `/small-operator-pm` |
@@ -100,6 +113,7 @@
 | "submarket analysis", "market reality check" | `/submarket-truth-serum` |
 | "supply pipeline", "absorption forecast" | `/supply-demand-forecast` |
 | "normalize T-12", "trailing twelve", "one-time items" | `/t12-normalizer` |
+| "load this T-12", "normalize the trailing twelve into the database", "T-12 to warehouse" | `/t12-to-database` |
 | "analyze tenant credit", "tenant financials", "tenant creditworthiness", "guarantor strength" | `/tenant-credit-analyzer` |
 | "delinquent tenant", "eviction", "tenant workout" | `/tenant-delinquency-workout` |
 | "tenant event", "appreciation event", "holiday party" | `/tenant-event-planner` |
