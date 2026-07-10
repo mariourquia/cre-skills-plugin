@@ -212,7 +212,7 @@ def update_hooks(counts: dict, dry_run: bool = False) -> bool:
         f"{counts['agents']} expert agents, {counts['workflows']} workflow chains, "
         f"and {counts['orchestrators']} orchestrator pipelines. "
         f"For any CRE task, read the routing index at "
-        f"${{CLAUDE_PLUGIN_ROOT}}/routing/CRE-ROUTING.md to find the right skill. "
+        f"${{CLAUDE_PLUGIN_ROOT}}/src/routing/CRE-ROUTING.md to find the right skill. "
         f"Do NOT load all SKILL.md files -- use the routing index to identify the "
         f"correct one, then load only that skill's SKILL.md and references/. "
         f"Available commands: /cre-skills:cre-route (find a skill), "
