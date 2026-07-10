@@ -36,7 +36,7 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/performance-attribution.md"
+            "skills/performance-attribution/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -84,7 +84,7 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/fund-operations-compliance-dashboard.md"
+            "skills/fund-operations-compliance-dashboard/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -139,7 +139,7 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/fund-formation-toolkit.md"
+            "skills/fund-formation-toolkit/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -186,7 +186,7 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/jv-waterfall-architect.md"
+            "skills/jv-waterfall-architect/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -244,8 +244,8 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/performance-attribution.md",
-            "skills/quarterly-investor-update.md"
+            "skills/performance-attribution/SKILL.md",
+            "skills/quarterly-investor-update/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -292,7 +292,7 @@
           "critical": false,
           "dependencies": [],
           "skillRefs": [
-            "skills/portfolio-allocator.md"
+            "skills/portfolio-allocator/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -335,7 +335,7 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/fund-operations-compliance-dashboard.md"
+            "skills/fund-operations-compliance-dashboard/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -386,7 +386,7 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/fund-operations-compliance-dashboard.md"
+            "skills/fund-operations-compliance-dashboard/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -434,8 +434,8 @@
           "critical": false,
           "dependencies": [],
           "skillRefs": [
-            "skills/carbon-audit-compliance.md",
-            "skills/climate-risk-assessment.md"
+            "skills/carbon-audit-compliance/SKILL.md",
+            "skills/climate-risk-assessment/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -488,8 +488,8 @@
           "critical": true,
           "dependencies": ["gp-track-record-analyst", "fee-transparency-auditor", "terms-comparator", "waterfall-modeler", "lp-performance-tracker", "denominator-effect-analyst", "liquidity-analyst", "operational-dd-analyst", "esg-compliance-reviewer"],
           "skillRefs": [
-            "skills/investor-lifecycle-manager.md",
-            "skills/performance-attribution.md"
+            "skills/investor-lifecycle-manager/SKILL.md",
+            "skills/performance-attribution/SKILL.md"
           ],
           "maxTimeoutMinutes": 50,
           "validationRules": [
@@ -544,7 +544,7 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/performance-attribution.md"
+            "skills/performance-attribution/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [

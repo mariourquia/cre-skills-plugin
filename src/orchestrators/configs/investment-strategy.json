@@ -35,8 +35,8 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/market-memo-generator.md",
-            "skills/supply-demand-forecast.md"
+            "skills/market-memo-generator/SKILL.md",
+            "skills/supply-demand-forecast/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -78,8 +78,8 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/submarket-truth-serum.md",
-            "skills/market-cycle-positioner.md"
+            "skills/submarket-truth-serum/SKILL.md",
+            "skills/market-cycle-positioner/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -158,7 +158,7 @@
           "critical": true,
           "dependencies": ["macro-analyst", "submarket-screener"],
           "skillRefs": [
-            "skills/portfolio-allocator.md"
+            "skills/portfolio-allocator/SKILL.md"
           ],
           "maxTimeoutMinutes": 50,
           "validationRules": [
@@ -203,7 +203,6 @@
           "critical": true,
           "dependencies": ["strategy-architect"],
           "skillRefs": [
-            "skills/memo-investment-drafter.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -273,8 +272,8 @@
           "critical": true,
           "dependencies": ["strategy-architect", "submarket-screener"],
           "skillRefs": [
-            "skills/sourcing-outreach-system.md",
-            "skills/deal-quick-screen.md"
+            "skills/sourcing-outreach-system/SKILL.md",
+            "skills/deal-quick-screen/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -315,7 +314,7 @@
           "critical": false,
           "dependencies": ["deal-sourcing-engine"],
           "skillRefs": [
-            "skills/sourcing-outreach-system.md"
+            "skills/sourcing-outreach-system/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -375,7 +374,7 @@
           "critical": true,
           "dependencies": ["deal-sourcing-engine", "quick-screen-operator"],
           "skillRefs": [
-            "skills/deal-quick-screen.md"
+            "skills/deal-quick-screen/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -412,8 +411,8 @@
           "critical": true,
           "dependencies": ["deal-sourcing-engine"],
           "skillRefs": [
-            "skills/deal-quick-screen.md",
-            "skills/om-reverse-pricing.md"
+            "skills/deal-quick-screen/SKILL.md",
+            "skills/om-reverse-pricing/SKILL.md"
           ],
           "maxTimeoutMinutes": 30,
           "validationRules": [
@@ -482,8 +481,8 @@
           "critical": true,
           "dependencies": ["allocation-drift-analyst"],
           "skillRefs": [
-            "skills/market-cycle-positioner.md",
-            "skills/supply-demand-forecast.md"
+            "skills/market-cycle-positioner/SKILL.md",
+            "skills/supply-demand-forecast/SKILL.md"
           ],
           "maxTimeoutMinutes": 50,
           "validationRules": [
@@ -526,7 +525,7 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/portfolio-allocator.md"
+            "skills/portfolio-allocator/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [

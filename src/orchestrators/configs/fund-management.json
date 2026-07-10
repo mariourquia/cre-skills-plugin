@@ -33,8 +33,8 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/fund-formation-toolkit.md",
-            "skills/jv-waterfall-architect.md"
+            "skills/fund-formation-toolkit/SKILL.md",
+            "skills/jv-waterfall-architect/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -76,7 +76,7 @@
           "critical": true,
           "dependencies": ["fund-structure-designer"],
           "skillRefs": [
-            "skills/fund-formation-toolkit.md"
+            "skills/fund-formation-toolkit/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -118,8 +118,8 @@
           "critical": true,
           "dependencies": ["fund-structure-designer"],
           "skillRefs": [
-            "skills/portfolio-allocator.md",
-            "skills/sensitivity-stress-test.md"
+            "skills/portfolio-allocator/SKILL.md",
+            "skills/sensitivity-stress-test/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -161,7 +161,7 @@
           "critical": true,
           "dependencies": ["fund-structure-designer"],
           "skillRefs": [
-            "skills/fund-formation-toolkit.md"
+            "skills/fund-formation-toolkit/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -203,8 +203,8 @@
           "critical": false,
           "dependencies": ["fund-structure-designer"],
           "skillRefs": [
-            "skills/cost-segregation-analyzer.md",
-            "skills/1031-exchange-executor.md"
+            "skills/cost-segregation-analyzer/SKILL.md",
+            "skills/1031-exchange-executor/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -389,8 +389,8 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/lp-pitch-deck-builder.md",
-            "skills/quarterly-investor-update.md"
+            "skills/lp-pitch-deck-builder/SKILL.md",
+            "skills/quarterly-investor-update/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -432,8 +432,8 @@
           "critical": true,
           "dependencies": ["pitch-deck-builder"],
           "skillRefs": [
-            "skills/capital-raise-machine.md",
-            "skills/investor-lifecycle-manager.md"
+            "skills/capital-raise-machine/SKILL.md",
+            "skills/investor-lifecycle-manager/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -475,7 +475,7 @@
           "critical": true,
           "dependencies": ["pitch-deck-builder"],
           "skillRefs": [
-            "skills/investor-lifecycle-manager.md"
+            "skills/investor-lifecycle-manager/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -512,7 +512,7 @@
           "critical": true,
           "dependencies": ["capital-raise-ops-manager"],
           "skillRefs": [
-            "skills/capital-raise-machine.md"
+            "skills/capital-raise-machine/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -710,9 +710,9 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/portfolio-allocator.md",
-            "skills/market-cycle-positioner.md",
-            "skills/sensitivity-stress-test.md"
+            "skills/portfolio-allocator/SKILL.md",
+            "skills/market-cycle-positioner/SKILL.md",
+            "skills/sensitivity-stress-test/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -760,8 +760,8 @@
           "critical": true,
           "dependencies": ["deployment-strategist"],
           "skillRefs": [
-            "skills/portfolio-allocator.md",
-            "skills/acquisition-underwriting-engine.md"
+            "skills/portfolio-allocator/SKILL.md",
+            "skills/acquisition-underwriting-engine/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -803,8 +803,8 @@
           "critical": false,
           "dependencies": ["allocation-analyst"],
           "skillRefs": [
-            "skills/jv-waterfall-architect.md",
-            "skills/investor-lifecycle-manager.md"
+            "skills/jv-waterfall-architect/SKILL.md",
+            "skills/investor-lifecycle-manager/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -1000,9 +1000,9 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/performance-attribution.md",
-            "skills/property-performance-dashboard.md",
-            "skills/quarterly-investor-update.md"
+            "skills/performance-attribution/SKILL.md",
+            "skills/property-performance-dashboard/SKILL.md",
+            "skills/quarterly-investor-update/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -1053,8 +1053,8 @@
           "critical": true,
           "dependencies": ["portfolio-performance-analyst"],
           "skillRefs": [
-            "skills/jv-waterfall-architect.md",
-            "skills/partnership-allocation-engine.md"
+            "skills/jv-waterfall-architect/SKILL.md",
+            "skills/partnership-allocation-engine/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -1109,7 +1109,7 @@
           "critical": true,
           "dependencies": ["portfolio-performance-analyst"],
           "skillRefs": [
-            "skills/fund-operations-compliance-dashboard.md"
+            "skills/fund-operations-compliance-dashboard/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -1160,9 +1160,9 @@
           "critical": true,
           "dependencies": ["portfolio-performance-analyst", "fee-calculator", "compliance-officer"],
           "skillRefs": [
-            "skills/quarterly-investor-update.md",
-            "skills/investor-lifecycle-manager.md",
-            "skills/partnership-allocation-engine.md"
+            "skills/quarterly-investor-update/SKILL.md",
+            "skills/investor-lifecycle-manager/SKILL.md",
+            "skills/partnership-allocation-engine/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -1384,8 +1384,8 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/jv-waterfall-architect.md",
-            "skills/partnership-allocation-engine.md"
+            "skills/jv-waterfall-architect/SKILL.md",
+            "skills/partnership-allocation-engine/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -1437,7 +1437,7 @@
           "critical": true,
           "dependencies": ["waterfall-calculator"],
           "skillRefs": [
-            "skills/investor-lifecycle-manager.md"
+            "skills/investor-lifecycle-manager/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -1481,8 +1481,8 @@
           "critical": true,
           "dependencies": ["waterfall-calculator"],
           "skillRefs": [
-            "skills/cost-segregation-analyzer.md",
-            "skills/partnership-allocation-engine.md"
+            "skills/cost-segregation-analyzer/SKILL.md",
+            "skills/partnership-allocation-engine/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -1659,9 +1659,9 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/disposition-strategy-engine.md",
-            "skills/market-cycle-positioner.md",
-            "skills/performance-attribution.md"
+            "skills/disposition-strategy-engine/SKILL.md",
+            "skills/market-cycle-positioner/SKILL.md",
+            "skills/performance-attribution/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -1711,8 +1711,8 @@
           "critical": true,
           "dependencies": ["exit-sequencer"],
           "skillRefs": [
-            "skills/fund-operations-compliance-dashboard.md",
-            "skills/closing-checklist-tracker.md"
+            "skills/fund-operations-compliance-dashboard/SKILL.md",
+            "skills/closing-checklist-tracker/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -1761,8 +1761,8 @@
           "critical": true,
           "dependencies": ["wind-down-coordinator"],
           "skillRefs": [
-            "skills/partnership-allocation-engine.md",
-            "skills/quarterly-investor-update.md"
+            "skills/partnership-allocation-engine/SKILL.md",
+            "skills/quarterly-investor-update/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [

@@ -20,8 +20,6 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/underwriting-calc.md",
-            "skills/asset-class-benchmarks.md"
           ],
           "maxTimeoutMinutes": 30,
           "validationRules": [
@@ -46,8 +44,6 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/asset-class-benchmarks.md",
-            "skills/underwriting-calc.md"
           ],
           "maxTimeoutMinutes": 30
         },
@@ -93,7 +89,6 @@
           "critical": true,
           "dependencies": ["market-study", "rent-roll-analyst"],
           "skillRefs": [
-            "skills/legal-checklist.md"
           ],
           "maxTimeoutMinutes": 30
         },
@@ -249,8 +244,6 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/underwriting-calc.md",
-            "skills/asset-class-benchmarks.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -275,8 +268,6 @@
           "critical": true,
           "dependencies": ["financial-model-builder"],
           "skillRefs": [
-            "skills/underwriting-calc.md",
-            "skills/risk-scoring.md"
           ],
           "maxTimeoutMinutes": 60,
           "retryPolicy": {
@@ -444,7 +435,6 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/lender-criteria.md"
           ],
           "maxTimeoutMinutes": 30
         },
@@ -457,8 +447,6 @@
           "critical": true,
           "dependencies": ["lender-outreach"],
           "skillRefs": [
-            "skills/underwriting-calc.md",
-            "skills/lender-criteria.md"
           ],
           "maxTimeoutMinutes": 30
         },
@@ -569,7 +557,6 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/legal-checklist.md"
           ],
           "maxTimeoutMinutes": 45
         },
@@ -582,7 +569,6 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/legal-checklist.md"
           ],
           "maxTimeoutMinutes": 30
         },
@@ -606,7 +592,6 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/legal-checklist.md"
           ],
           "maxTimeoutMinutes": 45
         },
@@ -749,7 +734,6 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/legal-checklist.md"
           ],
           "maxTimeoutMinutes": 45
         },
@@ -762,7 +746,6 @@
           "critical": true,
           "dependencies": ["closing-coordinator"],
           "skillRefs": [
-            "skills/underwriting-calc.md"
           ],
           "maxTimeoutMinutes": 30
         }
