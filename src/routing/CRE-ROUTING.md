@@ -109,7 +109,6 @@
 | "stress test", "sensitivity analysis", "where does it break" | `/sensitivity-stress-test` |
 | "small operator PM", "self-manage", "landlord operations", "1-50 units" | `/small-operator-pm` |
 | "deal sourcing", "off-market", "outreach", "broker network" | `/sourcing-outreach-system` |
-| "space planning", "redesign", "repositioning", "amenity addition" | `/space-planning-redesign-orchestrator` |
 | "stacking plan", "floor plan", "space layout" | `/stacking-plan-builder` |
 | "submarket analysis", "market reality check" | `/submarket-truth-serum` |
 | "supply pipeline", "absorption forecast" | `/supply-demand-forecast` |

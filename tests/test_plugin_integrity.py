@@ -111,10 +111,14 @@ class TestPluginStructure(unittest.TestCase):
         self.assertTrue(os.path.exists(os.path.join(SRC_DIR, 'routing/CRE-ROUTING.md')))
 
     def test_routing_index_covers_previously_unrouted_reit_cre_skills(self):
-        """Regression guard for 15 reit-cre skills found missing a routing row
-        during a 2026-07-09 audit (23 unrouted total; the other 8 -- 7
-        workspace-category skills plus residential_multifamily -- are
-        deliberately not asserted here pending a product decision)."""
+        """Regression guard for 14 reit-cre skills found missing a routing row
+        during a 2026-07-09 audit (23 unrouted total). The other 9 are
+        deliberately not asserted here: 7 workspace-category skills plus
+        residential_multifamily are pending a product decision, and
+        space-planning-redesign-orchestrator is correctly excluded --
+        status: stub, so catalog-generate.py's routing-table regeneration
+        (hidden_from_default_catalog = status in stub/deprecated) strips any
+        row for it, confirmed by reproducing that exact regeneration."""
         with open(os.path.join(SRC_DIR, 'routing/CRE-ROUTING.md')) as f:
             routing_text = f.read()
         previously_unrouted = [
@@ -123,8 +127,7 @@ class TestPluginStructure(unittest.TestCase):
             'document-to-database', 'ic-red-team-challenger', 'icomm-context-builder',
             'market-memo-generator', 'operating-statement-to-database',
             'pca-reserve-analyzer', 'reit-profile-builder', 'rent-roll-t12-tieout',
-            'rent-roll-to-database', 'space-planning-redesign-orchestrator',
-            't12-to-database',
+            'rent-roll-to-database', 't12-to-database',
         ]
         for slug in previously_unrouted:
             self.assertIn(f'`/{slug}`', routing_text, f'{slug} still missing a routing row')
