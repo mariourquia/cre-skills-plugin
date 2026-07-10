@@ -45,6 +45,21 @@ export function normalizeManifest(target: TargetName, profile: TargetProfile): N
     }
   }
 
+  // The source manifest's skills/commands/hooks fields are src/-prefixed to match
+  // this repo's layout, but every build target flattens src/skills -> skills/,
+  // src/commands -> commands/, src/hooks -> hooks/ (see build-target.ts / the
+  // normalizeHooks src/ rewrite) -- so the shipped manifest must point at the
+  // flat layout too, or a plugin loader that resolves paths from these fields
+  // would 404 against every target, not just portable.
+  for (const field of ["skills", "commands", "hooks"] as const) {
+    if (typeof manifest[field] === "string") {
+      manifest[field] = manifest[field]
+        .replace("src/skills/", "skills/")
+        .replace("src/commands/", "commands/")
+        .replace("src/hooks/", "hooks/");
+    }
+  }
+
   writeFileSync(resolve(outDir, "plugin.json"), JSON.stringify(manifest, null, 2) + "\n");
   return { stripped, warnings };
 }

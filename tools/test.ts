@@ -217,6 +217,23 @@ test("cowork manifest retains name, version, description, author", () => {
   assert(data.author?.name, "missing author.name");
 });
 
+test("manifest skills/commands/hooks paths match the flattened build layout", () => {
+  // Source plugin.json points at src/skills, src/commands, src/hooks -- every
+  // target flattens those directories (build-target.ts), so a manifest that
+  // still says src/ would 404 for any consumer that resolves paths from it.
+  // Bug affected all four targets equally, not just portable -- check two.
+  for (const target of ["cowork", "claude-code"] as const) {
+    const file = resolve(buildDir(target), ".claude-plugin/plugin.json");
+    const data = JSON.parse(readFileSync(file, "utf-8"));
+    for (const field of ["skills", "commands", "hooks"]) {
+      assert(
+        typeof data[field] === "string" && !data[field].includes("src/"),
+        `${target} manifest field ${field} still points at src/: ${data[field]}`,
+      );
+    }
+  }
+});
+
 // ── Golden: Claude Code Full Frontmatter ───────────────────────────────
 
 console.log("\nGOLDEN: Claude Code preserves everything");
