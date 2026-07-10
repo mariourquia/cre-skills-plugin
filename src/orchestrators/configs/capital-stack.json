@@ -33,7 +33,7 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/loan-sizing-engine.md"
+            "skills/loan-sizing-engine/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -74,8 +74,8 @@
           "critical": true,
           "dependencies": ["debt-sizer"],
           "skillRefs": [
-            "skills/loan-sizing-engine.md",
-            "skills/capital-stack-optimizer.md"
+            "skills/loan-sizing-engine/SKILL.md",
+            "skills/capital-stack-optimizer/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -224,7 +224,7 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/loan-sizing-engine.md"
+            "skills/loan-sizing-engine/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -416,8 +416,8 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/loan-sizing-engine.md",
-            "skills/capital-stack-optimizer.md"
+            "skills/loan-sizing-engine/SKILL.md",
+            "skills/capital-stack-optimizer/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -619,7 +619,7 @@
           "critical": false,
           "dependencies": [],
           "skillRefs": [
-            "skills/mezz-pref-structurer.md"
+            "skills/mezz-pref-structurer/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -655,7 +655,7 @@
           "critical": false,
           "dependencies": [],
           "skillRefs": [
-            "skills/jv-waterfall-architect.md"
+            "skills/jv-waterfall-architect/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -816,7 +816,7 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/capital-stack-optimizer.md"
+            "skills/capital-stack-optimizer/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -857,7 +857,7 @@
           "critical": true,
           "dependencies": ["wacc-optimizer"],
           "skillRefs": [
-            "skills/debt-covenant-monitor.md"
+            "skills/debt-covenant-monitor/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -1095,7 +1095,7 @@
           "critical": true,
           "dependencies": ["term-sheet-negotiator"],
           "skillRefs": [
-            "skills/closing-checklist-tracker.md"
+            "skills/closing-checklist-tracker/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [

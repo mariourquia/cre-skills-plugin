@@ -32,7 +32,7 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/post-close-onboarding-transition.md"
+            "skills/post-close-onboarding-transition/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -69,8 +69,8 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/post-close-onboarding-transition.md",
-            "skills/coi-compliance-checker.md"
+            "skills/post-close-onboarding-transition/SKILL.md",
+            "skills/coi-compliance-checker/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -105,8 +105,8 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/insurance-risk-manager.md",
-            "skills/coi-compliance-checker.md"
+            "skills/insurance-risk-manager/SKILL.md",
+            "skills/coi-compliance-checker/SKILL.md"
           ],
           "maxTimeoutMinutes": 30,
           "validationRules": [
@@ -141,7 +141,7 @@
           "critical": false,
           "dependencies": [],
           "skillRefs": [
-            "skills/building-systems-maintenance-manager.md"
+            "skills/building-systems-maintenance-manager/SKILL.md"
           ],
           "maxTimeoutMinutes": 30,
           "validationRules": [
@@ -290,7 +290,7 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/annual-budget-engine.md"
+            "skills/annual-budget-engine/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -325,7 +325,7 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/capex-prioritizer.md"
+            "skills/capex-prioritizer/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -361,8 +361,8 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/rent-optimization-planner.md",
-            "skills/rent-roll-analyzer.md"
+            "skills/rent-optimization-planner/SKILL.md",
+            "skills/rent-roll-analyzer/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -397,8 +397,8 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/debt-covenant-monitor.md",
-            "skills/loan-sizing-engine.md"
+            "skills/debt-covenant-monitor/SKILL.md",
+            "skills/loan-sizing-engine/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -594,8 +594,8 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/property-performance-dashboard.md",
-            "skills/variance-narrative-generator.md"
+            "skills/property-performance-dashboard/SKILL.md",
+            "skills/variance-narrative-generator/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -636,8 +636,8 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/tenant-delinquency-workout.md",
-            "skills/tenant-retention-engine.md"
+            "skills/tenant-delinquency-workout/SKILL.md",
+            "skills/tenant-retention-engine/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -672,9 +672,9 @@
           "critical": false,
           "dependencies": [],
           "skillRefs": [
-            "skills/submarket-truth-serum.md",
-            "skills/supply-demand-forecast.md",
-            "skills/comp-snapshot.md"
+            "skills/submarket-truth-serum/SKILL.md",
+            "skills/supply-demand-forecast/SKILL.md",
+            "skills/comp-snapshot/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -705,8 +705,8 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/debt-covenant-monitor.md",
-            "skills/lender-compliance-certificate.md"
+            "skills/debt-covenant-monitor/SKILL.md",
+            "skills/lender-compliance-certificate/SKILL.md"
           ],
           "maxTimeoutMinutes": 30,
           "validationRules": [
@@ -929,9 +929,9 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/lease-up-war-room.md",
-            "skills/rent-optimization-planner.md",
-            "skills/leasing-strategy-marketing-planner.md"
+            "skills/lease-up-war-room/SKILL.md",
+            "skills/rent-optimization-planner/SKILL.md",
+            "skills/leasing-strategy-marketing-planner/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -967,8 +967,8 @@
           "critical": true,
           "dependencies": ["leasing-strategist"],
           "skillRefs": [
-            "skills/lease-negotiation-analyzer.md",
-            "skills/lease-document-factory.md"
+            "skills/lease-negotiation-analyzer/SKILL.md",
+            "skills/lease-document-factory/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -1004,8 +1004,8 @@
           "critical": false,
           "dependencies": [],
           "skillRefs": [
-            "skills/cam-reconciliation-calculator.md",
-            "skills/lease-compliance-auditor.md"
+            "skills/cam-reconciliation-calculator/SKILL.md",
+            "skills/lease-compliance-auditor/SKILL.md"
           ],
           "maxTimeoutMinutes": 30,
           "validationRules": [
@@ -1175,8 +1175,8 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/capex-prioritizer.md",
-            "skills/construction-budget-gc-analyzer.md"
+            "skills/capex-prioritizer/SKILL.md",
+            "skills/construction-budget-gc-analyzer/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -1212,8 +1212,8 @@
           "critical": false,
           "dependencies": [],
           "skillRefs": [
-            "skills/carbon-audit-compliance.md",
-            "skills/climate-risk-assessment.md"
+            "skills/carbon-audit-compliance/SKILL.md",
+            "skills/climate-risk-assessment/SKILL.md"
           ],
           "maxTimeoutMinutes": 30,
           "validationRules": [
@@ -1350,8 +1350,8 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/tenant-retention-engine.md",
-            "skills/cpi-escalation-calculator.md"
+            "skills/tenant-retention-engine/SKILL.md",
+            "skills/cpi-escalation-calculator/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -1387,9 +1387,9 @@
           "critical": false,
           "dependencies": [],
           "skillRefs": [
-            "skills/work-order-triage.md",
-            "skills/property-operations-admin-toolkit.md",
-            "skills/vendor-invoice-validator.md"
+            "skills/work-order-triage/SKILL.md",
+            "skills/property-operations-admin-toolkit/SKILL.md",
+            "skills/vendor-invoice-validator/SKILL.md"
           ],
           "maxTimeoutMinutes": 30,
           "validationRules": [
@@ -1555,9 +1555,9 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/disposition-strategy-engine.md",
-            "skills/market-cycle-positioner.md",
-            "skills/refi-decision-analyzer.md"
+            "skills/disposition-strategy-engine/SKILL.md",
+            "skills/market-cycle-positioner/SKILL.md",
+            "skills/refi-decision-analyzer/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -1599,7 +1599,7 @@
           "critical": true,
           "dependencies": ["exit-trigger-evaluator"],
           "skillRefs": [
-            "skills/noi-sprint-plan.md"
+            "skills/noi-sprint-plan/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [

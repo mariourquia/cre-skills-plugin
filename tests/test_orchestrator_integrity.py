@@ -101,6 +101,55 @@ class TestOrchestratorConfigReferences(unittest.TestCase):
         self.assertEqual(broken, {}, f"Orchestrator configs reference missing skills: {broken}")
 
 
+class TestOrchestratorAgentFilesExist(unittest.TestCase):
+    """Every agent referenced by an orchestrator config must exist on disk.
+
+    Regression guard: a 2026-07-09 audit found all 150 agent files referenced
+    by the 10 orchestrator configs were missing -- src/orchestrators/engine/
+    agent-loader.mjs does not error on a missing file, it silently substitutes
+    a placeholder string as that agent's prompt and the pipeline continues
+    degraded. Nothing caught this because no test exercised agent loading at
+    all, only skill loading (see test_all_config_skill_refs_are_deployed
+    above). All 150 were authored in the same session; this test exists so a
+    future config referencing a not-yet-written agent fails loudly instead of
+    silently degrading in production.
+    """
+
+    def test_all_config_agent_refs_resolve_to_real_files(self):
+        missing = {}
+        for f in os.listdir(CONFIG_DIR):
+            if not f.endswith('.json'):
+                continue
+            with open(os.path.join(CONFIG_DIR, f)) as fh:
+                cfg = json.load(fh)
+            broken_in_file = []
+            for phase in cfg.get('phases', []):
+                for a in phase.get('agents', []):
+                    rel = a.get('file')
+                    if rel and not os.path.exists(os.path.join(PLUGIN_ROOT, 'src', rel)):
+                        broken_in_file.append(f"{a.get('agentId')}: {rel}")
+            if broken_in_file:
+                missing[f] = broken_in_file
+        self.assertEqual(missing, {}, f"Orchestrator configs reference agent files that don't exist: {missing}")
+
+    def test_all_config_agent_skillrefs_resolve_to_real_files(self):
+        missing = {}
+        for f in os.listdir(CONFIG_DIR):
+            if not f.endswith('.json'):
+                continue
+            with open(os.path.join(CONFIG_DIR, f)) as fh:
+                cfg = json.load(fh)
+            broken_in_file = []
+            for phase in cfg.get('phases', []):
+                for a in phase.get('agents', []):
+                    for ref in a.get('skillRefs', []) or []:
+                        if not os.path.exists(os.path.join(PLUGIN_ROOT, 'src', ref)):
+                            broken_in_file.append(f"{a.get('agentId')}: {ref}")
+            if broken_in_file:
+                missing[f] = broken_in_file
+        self.assertEqual(missing, {}, f"Orchestrator configs reference agent skillRefs that don't exist: {missing}")
+
+
 class TestPromptConfigConsistency(unittest.TestCase):
     """Every wired prompt must have a matching config; no orphans allowed.
 

@@ -33,7 +33,7 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/portfolio-allocator.md"
+            "skills/portfolio-allocator/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -75,7 +75,7 @@
           "critical": true,
           "dependencies": ["allocation-modeler"],
           "skillRefs": [
-            "skills/portfolio-allocator.md"
+            "skills/portfolio-allocator/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -125,7 +125,7 @@
           "critical": true,
           "dependencies": ["allocation-modeler"],
           "skillRefs": [
-            "skills/performance-attribution.md"
+            "skills/performance-attribution/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -167,7 +167,7 @@
           "critical": true,
           "dependencies": ["return-decomposer"],
           "skillRefs": [
-            "skills/performance-attribution.md"
+            "skills/performance-attribution/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -215,7 +215,7 @@
           "critical": true,
           "dependencies": ["concentration-analyst"],
           "skillRefs": [
-            "skills/debt-portfolio-monitor.md"
+            "skills/debt-portfolio-monitor/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -252,7 +252,7 @@
           "critical": false,
           "dependencies": ["allocation-modeler"],
           "skillRefs": [
-            "skills/climate-risk-assessment.md"
+            "skills/climate-risk-assessment/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -289,8 +289,8 @@
           "critical": true,
           "dependencies": ["allocation-modeler"],
           "skillRefs": [
-            "skills/supply-demand-forecast.md",
-            "skills/market-cycle-positioner.md"
+            "skills/supply-demand-forecast/SKILL.md",
+            "skills/market-cycle-positioner/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -339,8 +339,8 @@
           "critical": true,
           "dependencies": ["allocation-modeler", "concentration-analyst", "return-decomposer", "benchmark-analyst", "debt-portfolio-monitor", "market-exposure-analyst"],
           "skillRefs": [
-            "skills/portfolio-allocator.md",
-            "skills/disposition-strategy-engine.md"
+            "skills/portfolio-allocator/SKILL.md",
+            "skills/disposition-strategy-engine/SKILL.md"
           ],
           "maxTimeoutMinutes": 50,
           "validationRules": [
@@ -383,7 +383,7 @@
           "critical": true,
           "dependencies": ["rebalancing-planner", "debt-portfolio-monitor"],
           "skillRefs": [
-            "skills/fund-operations-compliance-dashboard.md"
+            "skills/fund-operations-compliance-dashboard/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -432,8 +432,8 @@
           "critical": true,
           "dependencies": ["allocation-modeler", "concentration-analyst", "return-decomposer", "benchmark-analyst", "debt-portfolio-monitor", "climate-risk-aggregator", "market-exposure-analyst", "rebalancing-planner", "liquidity-manager"],
           "skillRefs": [
-            "skills/property-performance-dashboard.md",
-            "skills/quarterly-investor-update.md"
+            "skills/property-performance-dashboard/SKILL.md",
+            "skills/quarterly-investor-update/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -473,7 +473,7 @@
           "critical": false,
           "dependencies": ["allocation-modeler"],
           "skillRefs": [
-            "skills/stacking-plan-builder.md"
+            "skills/stacking-plan-builder/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [

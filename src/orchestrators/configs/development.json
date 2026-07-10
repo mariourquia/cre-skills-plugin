@@ -19,7 +19,7 @@
           "outputs": ["residual land value (3 methods)", "HBU analysis", "site capacity matrix", "sensitivity analysis"],
           "critical": true,
           "dependencies": [],
-          "skillRefs": ["skills/land-residual-hbu-analyzer.md", "skills/entitlement-feasibility.md"],
+          "skillRefs": ["skills/land-residual-hbu-analyzer/SKILL.md", "skills/entitlement-feasibility/SKILL.md"],
           "maxTimeoutMinutes": 45,
           "validationRules": [
             {"ruleId": "min-two-programs", "description": "Residual must be calculated for at least two candidate use types.", "actionOnFailure": "retry_agent"},
@@ -35,7 +35,7 @@
           "outputs": ["zoning conformance analysis", "approval pathway", "NIMBY assessment", "entitlement timeline & cost", "feasibility verdict"],
           "critical": true,
           "dependencies": ["land-residual-analyst"],
-          "skillRefs": ["skills/entitlement-feasibility.md", "skills/compliance-regulatory-response-kit.md"],
+          "skillRefs": ["skills/entitlement-feasibility/SKILL.md", "skills/compliance-regulatory-response-kit/SKILL.md"],
           "maxTimeoutMinutes": 40,
           "validationRules": [
             {"ruleId": "zoning-analyzed", "description": "Every dimensional standard must be evaluated for conformance.", "actionOnFailure": "retry_agent"},
@@ -51,7 +51,7 @@
           "outputs": ["stakeholder map", "engagement strategy", "opposition response framework", "community benefits package"],
           "critical": false,
           "dependencies": ["entitlement-risk-assessor"],
-          "skillRefs": ["skills/compliance-regulatory-response-kit.md"],
+          "skillRefs": ["skills/compliance-regulatory-response-kit/SKILL.md"],
           "maxTimeoutMinutes": 35,
           "validationRules": [
             {"ruleId": "stakeholders-mapped", "description": "All Tier 1 stakeholders (adjacent owners) must be identified.", "actionOnFailure": "flag_data_gap"},
@@ -95,7 +95,7 @@
           "outputs": ["development pro forma (monthly)", "TDC budget", "draw schedule", "return metrics", "go/no-go verdict"],
           "critical": true,
           "dependencies": [],
-          "skillRefs": ["skills/dev-proforma-engine.md"],
+          "skillRefs": ["skills/dev-proforma-engine/SKILL.md"],
           "maxTimeoutMinutes": 45,
           "validationRules": [
             {"ruleId": "tdc-complete", "description": "All five TDC categories must be quantified.", "actionOnFailure": "halt_phase"},
@@ -111,7 +111,7 @@
           "outputs": ["design team evaluation matrix", "selection recommendation", "contract terms", "design schedule"],
           "critical": true,
           "dependencies": ["proforma-builder"],
-          "skillRefs": ["skills/construction-procurement-contracts-engine.md"],
+          "skillRefs": ["skills/construction-procurement-contracts-engine/SKILL.md"],
           "maxTimeoutMinutes": 35,
           "validationRules": [
             {"ruleId": "min-candidates", "description": "At least two architect candidates evaluated.", "actionOnFailure": "flag_data_gap"},
@@ -126,7 +126,7 @@
           "outputs": ["VE register", "savings quantification", "prioritized recommendations"],
           "critical": false,
           "dependencies": ["proforma-builder"],
-          "skillRefs": ["skills/construction-budget-gc-analyzer.md"],
+          "skillRefs": ["skills/construction-budget-gc-analyzer/SKILL.md"],
           "maxTimeoutMinutes": 35,
           "validationRules": [
             {"ruleId": "min-ve-items", "description": "At least 10 VE items evaluated across 4+ categories.", "actionOnFailure": "flag_data_gap"},
@@ -167,7 +167,7 @@
           "outputs": ["construction loan sizing", "lender comparison", "draw alignment", "covenant framework", "conversion path"],
           "critical": true,
           "dependencies": [],
-          "skillRefs": ["skills/loan-sizing-engine.md", "skills/capital-stack-optimizer.md"],
+          "skillRefs": ["skills/loan-sizing-engine/SKILL.md", "skills/capital-stack-optimizer/SKILL.md"],
           "maxTimeoutMinutes": 40,
           "validationRules": [
             {"ruleId": "multi-constraint-sizing", "description": "Loan sized against LTC, LTV, DSCR, and debt yield.", "actionOnFailure": "retry_agent"},
@@ -183,7 +183,7 @@
           "outputs": ["JV structure", "promote waterfall", "capital call schedule", "subordinate capital analysis", "term sheet"],
           "critical": true,
           "dependencies": ["construction-lender-analyst"],
-          "skillRefs": ["skills/jv-waterfall-architect.md", "skills/mezz-pref-structurer.md"],
+          "skillRefs": ["skills/jv-waterfall-architect/SKILL.md", "skills/mezz-pref-structurer/SKILL.md"],
           "maxTimeoutMinutes": 40,
           "validationRules": [
             {"ruleId": "equity-balanced", "description": "GP + LP + subordinate capital must equal total equity requirement.", "actionOnFailure": "halt_phase"},
@@ -224,7 +224,7 @@
           "outputs": ["RFI log", "submittal tracking", "schedule status", "GMP budget tracking", "quality metrics", "monthly report"],
           "critical": true,
           "dependencies": [],
-          "skillRefs": ["skills/construction-project-command-center.md"],
+          "skillRefs": ["skills/construction-project-command-center/SKILL.md"],
           "maxTimeoutMinutes": 45,
           "validationRules": [
             {"ruleId": "schedule-tracked", "description": "Critical path activities must have actual dates and variance.", "actionOnFailure": "retry_agent"},
@@ -240,7 +240,7 @@
           "outputs": ["draw review", "lender draw package", "retainage tracking", "compliance report"],
           "critical": true,
           "dependencies": ["construction-commander"],
-          "skillRefs": ["skills/construction-project-command-center.md", "skills/vendor-invoice-validator.md"],
+          "skillRefs": ["skills/construction-project-command-center/SKILL.md", "skills/vendor-invoice-validator/SKILL.md"],
           "maxTimeoutMinutes": 35,
           "validationRules": [
             {"ruleId": "aia-verified", "description": "G702/G703 arithmetic verified.", "actionOnFailure": "retry_agent"},
@@ -255,7 +255,7 @@
           "outputs": ["CO evaluation", "budget impact analysis", "contingency tracking", "schedule impact", "approval recommendations"],
           "critical": true,
           "dependencies": ["construction-commander"],
-          "skillRefs": ["skills/construction-project-command-center.md", "skills/construction-budget-gc-analyzer.md"],
+          "skillRefs": ["skills/construction-project-command-center/SKILL.md", "skills/construction-budget-gc-analyzer/SKILL.md"],
           "maxTimeoutMinutes": 35,
           "validationRules": [
             {"ruleId": "co-classified", "description": "Every CO must be classified by type with cost responsibility.", "actionOnFailure": "retry_agent"},
@@ -270,7 +270,7 @@
           "outputs": ["OSHA compliance status", "incident tracking (TRIR/DART)", "insurance monitoring", "inspection log", "compliance report"],
           "critical": false,
           "dependencies": ["construction-commander"],
-          "skillRefs": ["skills/compliance-regulatory-response-kit.md", "skills/insurance-risk-manager.md"],
+          "skillRefs": ["skills/compliance-regulatory-response-kit/SKILL.md", "skills/insurance-risk-manager/SKILL.md"],
           "maxTimeoutMinutes": 30,
           "validationRules": [
             {"ruleId": "osha-reviewed", "description": "All applicable OSHA standards reviewed and status documented.", "actionOnFailure": "flag_data_gap"},
@@ -312,7 +312,7 @@
           "outputs": ["absorption forecast", "pricing matrix", "concession schedule", "weekly leasing report"],
           "critical": true,
           "dependencies": [],
-          "skillRefs": ["skills/lease-up-war-room.md", "skills/rent-optimization-planner.md"],
+          "skillRefs": ["skills/lease-up-war-room/SKILL.md", "skills/rent-optimization-planner/SKILL.md"],
           "maxTimeoutMinutes": 40,
           "validationRules": [
             {"ruleId": "absorption-modeled", "description": "Monthly absorption forecast with occupancy curve from CO to stabilization.", "actionOnFailure": "retry_agent"},
@@ -327,7 +327,7 @@
           "outputs": ["marketing plan", "channel performance", "funnel diagnostics", "marketing ROI"],
           "critical": true,
           "dependencies": ["lease-up-strategist"],
-          "skillRefs": ["skills/leasing-strategy-marketing-planner.md", "skills/leasing-operations-engine.md"],
+          "skillRefs": ["skills/leasing-strategy-marketing-planner/SKILL.md", "skills/leasing-operations-engine/SKILL.md"],
           "maxTimeoutMinutes": 35,
           "validationRules": [
             {"ruleId": "funnel-tracked", "description": "All funnel stages tracked with conversion rates.", "actionOnFailure": "retry_agent"},
@@ -342,7 +342,7 @@
           "outputs": ["occupancy tracking", "NOI performance", "reserve stress tests", "maturity monitoring", "stabilization certification"],
           "critical": true,
           "dependencies": ["lease-up-strategist"],
-          "skillRefs": ["skills/lease-up-war-room.md", "skills/property-performance-dashboard.md"],
+          "skillRefs": ["skills/lease-up-war-room/SKILL.md", "skills/property-performance-dashboard/SKILL.md"],
           "maxTimeoutMinutes": 40,
           "validationRules": [
             {"ruleId": "occupancy-tracked", "description": "Physical and economic occupancy tracked monthly against pro forma.", "actionOnFailure": "retry_agent"},
@@ -384,7 +384,7 @@
           "outputs": ["permanent loan sizing", "lender comparison", "conversion timeline", "term sheet", "rate sensitivity"],
           "critical": true,
           "dependencies": [],
-          "skillRefs": ["skills/loan-sizing-engine.md", "skills/capital-stack-optimizer.md"],
+          "skillRefs": ["skills/loan-sizing-engine/SKILL.md", "skills/capital-stack-optimizer/SKILL.md"],
           "maxTimeoutMinutes": 40,
           "validationRules": [
             {"ruleId": "noi-validated", "description": "Lender-adjusted NOI calculated with standard adjustments.", "actionOnFailure": "retry_agent"},
@@ -423,7 +423,7 @@
           "outputs": ["closeout checklist", "warranty register", "PM transition plan", "project archive", "hold-period handoff"],
           "critical": true,
           "dependencies": [],
-          "skillRefs": ["skills/post-close-onboarding-transition.md"],
+          "skillRefs": ["skills/post-close-onboarding-transition/SKILL.md"],
           "maxTimeoutMinutes": 40,
           "validationRules": [
             {"ruleId": "closeout-tracked", "description": "All GC deliverables logged with receipt status.", "actionOnFailure": "retry_agent"},
@@ -439,7 +439,7 @@
           "outputs": ["TDC reconciliation", "contingency closeout", "final return metrics", "sources/uses reconciliation", "LP cost report"],
           "critical": true,
           "dependencies": [],
-          "skillRefs": ["skills/dev-proforma-engine.md", "skills/construction-budget-gc-analyzer.md"],
+          "skillRefs": ["skills/dev-proforma-engine/SKILL.md", "skills/construction-budget-gc-analyzer/SKILL.md"],
           "maxTimeoutMinutes": 45,
           "validationRules": [
             {"ruleId": "all-categories-reconciled", "description": "All 5 TDC categories must show budget vs actual.", "actionOnFailure": "retry_agent"},

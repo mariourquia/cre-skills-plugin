@@ -31,7 +31,7 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/market-memo-generator.md"
+            "skills/market-memo-generator/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -72,8 +72,8 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/market-memo-generator.md",
-            "skills/market-cycle-positioner.md"
+            "skills/market-memo-generator/SKILL.md",
+            "skills/market-cycle-positioner/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -195,8 +195,8 @@
           "critical": true,
           "dependencies": ["macro-economist", "capital-markets-analyst"],
           "skillRefs": [
-            "skills/supply-demand-forecast.md",
-            "skills/market-memo-generator.md"
+            "skills/supply-demand-forecast/SKILL.md",
+            "skills/market-memo-generator/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -230,7 +230,7 @@
           "critical": false,
           "dependencies": ["capital-markets-analyst"],
           "skillRefs": [
-            "skills/reit-profile-builder.md"
+            "skills/reit-profile-builder/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -320,8 +320,8 @@
           "critical": true,
           "dependencies": ["macro-economist", "capital-markets-analyst", "sector-specialist"],
           "skillRefs": [
-            "skills/submarket-truth-serum.md",
-            "skills/comp-snapshot.md"
+            "skills/submarket-truth-serum/SKILL.md",
+            "skills/comp-snapshot/SKILL.md"
           ],
           "maxTimeoutMinutes": 50,
           "validationRules": [
@@ -360,7 +360,7 @@
           "critical": false,
           "dependencies": ["macro-economist"],
           "skillRefs": [
-            "skills/supply-demand-forecast.md"
+            "skills/supply-demand-forecast/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -448,8 +448,8 @@
           "critical": true,
           "dependencies": ["submarket-researcher"],
           "skillRefs": [
-            "skills/carbon-audit-compliance.md",
-            "skills/compliance-regulatory-response-kit.md"
+            "skills/carbon-audit-compliance/SKILL.md",
+            "skills/compliance-regulatory-response-kit/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -482,8 +482,8 @@
           "critical": false,
           "dependencies": [],
           "skillRefs": [
-            "skills/opportunity-zone-underwriter.md",
-            "skills/1031-exchange-executor.md"
+            "skills/opportunity-zone-underwriter/SKILL.md",
+            "skills/1031-exchange-executor/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -580,7 +580,7 @@
           "critical": true,
           "dependencies": ["macro-economist", "capital-markets-analyst", "sector-specialist", "submarket-researcher", "regulatory-monitor"],
           "skillRefs": [
-            "skills/market-memo-generator.md"
+            "skills/market-memo-generator/SKILL.md"
           ],
           "maxTimeoutMinutes": 60,
           "validationRules": [
@@ -625,7 +625,6 @@
           "critical": true,
           "dependencies": ["research-synthesizer"],
           "skillRefs": [
-            "skills/research-rigor-enforcer.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [

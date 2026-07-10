@@ -234,13 +234,22 @@ class TestCatalogConsistency(unittest.TestCase):
                         f'Catalog has {len(catalog_skills)} skills but filesystem has {len(fs_skills)}')
 
     def test_agent_count_matches_filesystem(self):
+        """Catalog "type: agent" entries are the flat, user-invocable persona
+        agents at agents/*.md only (54: aggressive-gp, titan-zell, etc. --
+        catalog-build.py's own scan is agents_dir.glob("*.md"), non-recursive).
+        The 150 nested agents/<category>/*.md files added 2026-07-09 are a
+        different, internal category: orchestrator pipeline specialists read
+        directly by src/orchestrators/engine/agent-loader.mjs, never listed in
+        the public skills/agents catalog or invoked by name -- counting them
+        here would conflate two unrelated things the SessionStart prompt's
+        "N expert agents" claim was never meant to include."""
         if not self.catalog:
             self.skipTest('No catalog')
         catalog_agents = [i for i in self.catalog['items'] if i['type'] == 'agent']
-        fs_agents = []
-        for md in glob.glob(os.path.join(SRC_DIR, 'agents/**/*.md'), recursive=True):
-            if os.path.basename(md) != '_index.md':
-                fs_agents.append(md)
+        fs_agents = [
+            md for md in glob.glob(os.path.join(SRC_DIR, 'agents/*.md'))
+            if os.path.basename(md) != '_index.md'
+        ]
         self.assertEqual(len(catalog_agents), len(fs_agents),
                         f'Catalog has {len(catalog_agents)} agents but filesystem has {len(fs_agents)}')
 

@@ -6,6 +6,8 @@
 
 ## Quick Routing Table
 
+> This table routes to **specialist** skills only. The 7 `category: workspace` skills (`navigator`, `deal-intake`, `lease-strategy-papering`, `asset-ops-cockpit`, `capital-projects-development`, `fund-lp-reporting`, `plugin-admin`) are intentionally excluded: they are top-level entry points / orchestration routers that dispatch *to* the specialists below (and among themselves via `navigator`), so they carry no trigger-phrase row. Their absence here is by design, not a coverage gap. The `residential_multifamily` domain subsystem is likewise excluded and is documented in its own section below.
+
 | User says... | Invoke this skill |
 |---|---|
 | "1031", "like-kind exchange", "tax deferral" | `/1031-exchange-executor` |
@@ -127,9 +129,19 @@
 | "work order", "maintenance request", "triage" | `/work-order-triage` |
 | "workout", "loan modification", "forbearance", "DPO" | `/workout-playbook` |
 
+## Residential Multifamily subsystem (not a trigger-phrase skill)
+
+`residential_multifamily` is intentionally absent from the table above and is **not** a flat `/<slug>` skill. It is a self-contained **subsystem router** (`classification: workspace`, `runtime_role: workspace_router`, `category: cross-cutting`) that ships its own `_core/` taxonomy, `roles/`, `workflows/`, `overlays/`, `templates/`, and a `tailoring/` interview. Its catalog `intent_triggers` are empty by design, so the dispatcher never phrase-routes to it. How it is actually invoked:
+
+- **Signal-based activation, not a phrase match.** It engages when the request concerns a U.S. residential multifamily property/portfolio/development -- a property tagged multifamily, an asker in a multifamily role (property/regional/asset/portfolio manager, development/construction manager, COO/CFO/CEO over MF), or one of its workflows (`delinquency_collections`, `renewal_retention`, `monthly_asset_management_review`, `draw_package_review`, `executive_operating_summary_generation`, ...).
+- **It classifies and dispatches; it does not answer directly.** The router resolves 10 taxonomy axes (asset_class, segment, form_factor, lifecycle_stage, management_mode, role/workflow, market, org), asks **one** focused question when a required axis is unresolved, layers overlays, loads the matching role/workflow packs plus their references, and executes inside `_core/guardrails.md` + `_core/approval_matrix.md`.
+- **Decision-grade output needs org tailoring first.** Every reference figure ships tagged `sample | starter | illustrative | placeholder`. An operator runs the interactive `tailoring/` interview (terminal TUI) to produce an `overlays/org/<org_id>/` overlay before output is operational; final-marked and period-grade workflows **fail closed** on missing required inputs or an insufficient close status (see `_core/final_marked_workflows.yaml`).
+
+Entry point: read `src/skills/residential_multifamily/SKILL.md`, then `src/skills/residential_multifamily/_core/README.md`. Let the router load packs, overlays, and references progressively -- do not eagerly read them.
+
 ## Workflow Chains
 
-When a task spans multiple skills, use these chains (detailed docs in `plans/reit-cre/_workflows/`):
+When a task spans multiple skills, use these chains (detailed docs in `src/routing/workflows/`):
 
 1. **Acquisition Pipeline**: sourcing -> quick-screen -> [KEEP] -> om-reverse -> rent-roll-analyzer -> underwriting-engine -> sensitivity -> ic-memo -> loi -> psa-redline -> dd-command-center -> close
 2. **Capital Stack**: underwriting-engine -> loan-sizing -> mezz-pref -> jv-waterfall -> capital-stack-optimizer -> refi-decision (at maturity)
@@ -140,8 +152,8 @@ When a task spans multiple skills, use these chains (detailed docs in `plans/rei
 
 ## Skill Locations
 
-All skills: `~/.claude/skills-lab/skills/<slug>/SKILL.md`
-Reference files: `~/.claude/skills-lab/skills/<slug>/references/`
-Commands: `~/.claude/commands/<slug>.md`
-Workflow docs: `~/.claude/skills-lab/plans/reit-cre/_workflows/`
-Registry: `~/.claude/skills-lab/plans/reit-cre/_registry.yaml`
+All skills: `src/skills/<slug>/SKILL.md`
+Reference files: `src/skills/<slug>/references/`
+Commands: `src/commands/` (shared orchestration commands only -- each skill is invoked directly via `/<slug>`, not a per-skill command file)
+Workflow docs: `src/routing/workflows/`
+Registry: `registry.yaml` (repo root)
