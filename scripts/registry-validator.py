@@ -272,13 +272,13 @@ def validate_asset_type_neutrality() -> list[str]:
                 )
 
     # Also check handoff registry
-    handoff_file = SRC_DIR / "orchestrators" / "engine" / "handoff-registry.json"
+    handoff_file = SRC_DIR / "orchestrators" / "handoff-registry.json"
     if handoff_file.is_file():
         content = handoff_file.read_text(encoding="utf-8")
         for pattern in banned_patterns:
             if pattern in content:
                 failures.append(
-                    f"FAIL  orchestrators/engine/handoff-registry.json: "
+                    f"FAIL  orchestrators/handoff-registry.json: "
                     f"contains hardcoded '{pattern}'"
                 )
 

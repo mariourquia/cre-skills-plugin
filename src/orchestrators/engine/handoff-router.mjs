@@ -32,7 +32,7 @@ function resolvePluginRoot(options) {
 // ---------------------------------------------------------------------------
 
 async function loadRegistry(pluginRoot) {
-  const filePath = join(pluginRoot, 'orchestrators', 'engine', 'handoff-registry.json');
+  const filePath = join(pluginRoot, 'orchestrators', 'handoff-registry.json');
   if (!existsSync(filePath)) {
     throw new Error(`Handoff registry not found: ${filePath}`);
   }
