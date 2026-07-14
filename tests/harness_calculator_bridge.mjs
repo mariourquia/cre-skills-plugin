@@ -31,14 +31,16 @@ function main() {
   const args = parseArgs(process.argv);
   if (!args.slug) {
     console.error('Usage: harness_calculator_bridge.mjs --slug <slug> --inputs <json>');
-    process.exit(2);
+    process.exitCode = 2;
+    return;
   }
   let inputs;
   try {
     inputs = JSON.parse(args.inputsJson);
   } catch (err) {
     console.error(`bad --inputs JSON: ${err.message}`);
-    process.exit(2);
+    process.exitCode = 2;
+    return;
   }
 
   const here = dirname(fileURLToPath(import.meta.url));
@@ -55,14 +57,15 @@ function main() {
         message: err.message,
         context: err.context,
       }));
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
     console.log(JSON.stringify({
       ok: false,
       error_name: err.name || 'Error',
       message: err.message,
     }));
-    process.exit(3);
+    process.exitCode = 3;
   }
 }
 

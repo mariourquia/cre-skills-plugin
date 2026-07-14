@@ -84,6 +84,9 @@ function extractSlugFromInput(hookData) {
 }
 
 function main() {
+  // Drain first. If telemetry is disabled, returning before consuming stdin
+  // can race the harness writer and surface as a Broken pipe hook failure.
+  const stdinData = readStdinSync();
   const config = readConfig();
 
   // If config is missing or telemetry is disabled, exit silently.
@@ -91,7 +94,6 @@ function main() {
     process.exit(0);
   }
 
-  const stdinData = readStdinSync();
   if (!stdinData.trim()) {
     process.exit(0);
   }

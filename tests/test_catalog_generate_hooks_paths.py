@@ -1,14 +1,4 @@
-"""Regression guard for scripts/catalog-generate.py's hooks.json template.
-
-catalog-generate.py regenerates src/hooks/hooks.json's SessionStart prompt on
-every CI run (the "Build catalog" step runs before tests). Its template
-hardcoded the routing index path as ${CLAUDE_PLUGIN_ROOT}/routing/CRE-ROUTING.md
-(the flattened, build-output-only form), silently overwriting the correct
-${CLAUDE_PLUGIN_ROOT}/src/routing/CRE-ROUTING.md (the primary/repo-root install
-form that tests/test_plugin_integrity.py::test_hook_paths_resolve_in_repo_layout
-checks) every time it ran -- a repeat of the exact class of bug that test was
-added to catch, just one step upstream where nothing exercised it directly.
-"""
+"""Regression guards for the generated SessionStart hook surface."""
 from __future__ import annotations
 
 import importlib.util
@@ -27,7 +17,7 @@ def _load_catalog_generate():
     return mod
 
 
-def test_update_hooks_prompt_uses_primary_install_routing_path(tmp_path, monkeypatch):
+def test_update_hooks_preserves_command_session_context(tmp_path, monkeypatch):
     mod = _load_catalog_generate()
 
     tmp_hooks_dir = tmp_path / "src" / "hooks"
@@ -35,12 +25,21 @@ def test_update_hooks_prompt_uses_primary_install_routing_path(tmp_path, monkeyp
     shutil.copy(REPO_ROOT / "src" / "hooks" / "hooks.json", tmp_hooks_dir / "hooks.json")
     monkeypatch.setattr(mod, "SRC_DIR", tmp_path / "src")
 
-    mod.update_hooks({"skills": 127, "agents": 55, "workflows": 6, "orchestrators": 10}, dry_run=False)
+    changed = mod.update_hooks(
+        {"skills": 127, "agents": 55, "workflows": 6, "orchestrators": 10},
+        dry_run=False,
+    )
 
     data = json.loads((tmp_hooks_dir / "hooks.json").read_text(encoding="utf-8"))
-    prompt = data["hooks"]["SessionStart"][0]["hooks"][0]["prompt"]
-    assert "${CLAUDE_PLUGIN_ROOT}/src/routing/CRE-ROUTING.md" in prompt, (
-        "catalog-generate.py's hooks.json template regressed to the flattened "
-        "routing/ path -- this breaks the primary (repo-root) install, where "
-        "CRE-ROUTING.md only exists at src/routing/, not routing/."
+    hooks = data["hooks"]["SessionStart"][0]["hooks"]
+    assert changed is False
+    assert all(hook["type"] == "command" for hook in hooks)
+    assert hooks[0]["command"] == (
+        'node "${CLAUDE_PLUGIN_ROOT}/src/hooks/session-context.mjs"'
     )
+
+    context_script = (REPO_ROOT / "src" / "hooks" / "session-context.mjs").read_text(
+        encoding="utf-8"
+    )
+    assert "resolve(pluginRoot, 'src', 'routing', 'CRE-ROUTING.md')" in context_script
+    assert "resolve(pluginRoot, 'routing', 'CRE-ROUTING.md')" in context_script
