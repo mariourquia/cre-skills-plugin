@@ -48,7 +48,19 @@ function writeConfig(config) {
   }
 }
 
+function drainHookInput() {
+  try {
+    // SessionStart hook payloads are delivered on stdin. Always consume the
+    // payload before any early return so the parent never writes into a pipe
+    // this process has already closed.
+    readFileSync(0, 'utf8');
+  } catch {
+    // A missing/closed stdin is harmless for manual invocations and tests.
+  }
+}
+
 function main() {
+  drainHookInput();
   let config = readConfig();
 
   if (!config) {

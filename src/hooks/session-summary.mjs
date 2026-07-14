@@ -70,7 +70,19 @@ function appendRecord(record) {
   }
 }
 
+function drainHookInput() {
+  try {
+    // Every command hook receives a JSON object on stdin. Consume it even
+    // when this hook does not need the payload; exiting early while the
+    // harness is still writing produces a noisy Broken pipe failure.
+    readFileSync(0, 'utf8');
+  } catch {
+    // A missing/closed stdin is harmless for manual invocations and tests.
+  }
+}
+
 function main() {
+  drainHookInput();
   const config = readConfig();
   if (!config) {
     process.exit(0);

@@ -1,7 +1,7 @@
 /**
  * Hooks normalizer: emits full or portable hooks.json depending on target variant.
  *
- * Portable (Cowork): SessionStart prompt only, no command-type hooks.
+ * Portable (Cowork): synthesized SessionStart prompt, no command-type hooks.
  * Full (Claude Code): Copy hooks/ as-is.
  */
 import { readFileSync, writeFileSync, mkdirSync, cpSync } from "node:fs";
@@ -28,6 +28,12 @@ interface HooksJson {
   hooks: Record<string, HookMatcher[]>;
 }
 
+const PORTABLE_SESSION_CONTEXT =
+  "CRE Skills is active. For CRE tasks, use " +
+  "${CLAUDE_PLUGIN_ROOT}/src/routing/CRE-ROUTING.md to select one skill, " +
+  "then load only that skill and its references. Use /cre-skills:cre-route " +
+  "when routing is unclear.";
+
 export function normalizeHooks(target: TargetName, profile: TargetProfile): NormalizeResult {
   const srcHooks = resolve(SRC_DIR, "hooks");
   const outHooks = resolve(buildDir(target), "hooks");
@@ -51,37 +57,22 @@ export function normalizeHooks(target: TargetName, profile: TargetProfile): Norm
     return { variant: "full", warnings };
   }
 
-  // Portable variant: only prompt-type hooks from SessionStart
-  const hooksJson: HooksJson = JSON.parse(
-    readFileSync(resolve(srcHooks, "hooks.json"), "utf-8"),
-  );
+  // Portable targets cannot execute command hooks. Synthesize the same concise
+  // SessionStart guidance as a prompt without putting an unsupported prompt
+  // handler in the source manifest consumed by Codex and Claude Code.
+  const portable: HooksJson = {
+    hooks: {
+      SessionStart: [
+        {
+          matcher: "",
+          hooks: [{ type: "prompt", prompt: PORTABLE_SESSION_CONTEXT }],
+        },
+      ],
+    },
+  };
 
-  const portable: HooksJson = { hooks: {} };
-
-  for (const [event, matchers] of Object.entries(hooksJson.hooks)) {
-    const filteredMatchers: HookMatcher[] = [];
-
-    for (const matcher of matchers) {
-      const promptHooks = matcher.hooks.filter((h) => h.type === "prompt");
-      if (promptHooks.length > 0) {
-        filteredMatchers.push({ matcher: matcher.matcher, hooks: promptHooks });
-      } else {
-        warnings.push(`${event}: dropped all hooks (no prompt-type hooks in matcher)`);
-      }
-    }
-
-    if (filteredMatchers.length > 0) {
-      portable.hooks[event] = filteredMatchers;
-    } else {
-      warnings.push(`${event}: entire event removed (no portable hooks)`);
-    }
-  }
-
-  // Prompt-type hooks carry ${CLAUDE_PLUGIN_ROOT}-relative paths in their prompt TEXT (e.g.
-  // the SessionStart prompt telling the reader where to find CRE-ROUTING.md), not just in
-  // command fields -- build-target.ts flattens src/routing -> routing/ for every target
-  // (portable included), so this needs the same rewrite the full branch applies, or the
-  // portable prompt keeps pointing at a src/-prefixed path that doesn't exist in this layout.
+  // The synthesized prompt still uses the source-layout path, while portable
+  // packages flatten src/routing -> routing.
   const rewritten = JSON.stringify(portable, null, 2)
     .replaceAll("${CLAUDE_PLUGIN_ROOT}/src/hooks/", "${CLAUDE_PLUGIN_ROOT}/hooks/")
     .replaceAll("${CLAUDE_PLUGIN_ROOT}/src/routing/", "${CLAUDE_PLUGIN_ROOT}/routing/");
