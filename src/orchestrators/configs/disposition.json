@@ -36,8 +36,8 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/disposition-strategy-engine.md",
-            "skills/market-cycle-positioner.md"
+            "skills/disposition-strategy-engine/SKILL.md",
+            "skills/market-cycle-positioner/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -82,8 +82,8 @@
           "critical": false,
           "dependencies": [],
           "skillRefs": [
-            "skills/1031-exchange-executor.md",
-            "skills/cost-segregation-analyzer.md"
+            "skills/1031-exchange-executor/SKILL.md",
+            "skills/cost-segregation-analyzer/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -122,8 +122,8 @@
           "critical": false,
           "dependencies": [],
           "skillRefs": [
-            "skills/refi-decision-analyzer.md",
-            "skills/loan-sizing-engine.md"
+            "skills/refi-decision-analyzer/SKILL.md",
+            "skills/loan-sizing-engine/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -289,9 +289,9 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/comp-snapshot.md",
-            "skills/om-reverse-pricing.md",
-            "skills/market-cycle-positioner.md"
+            "skills/comp-snapshot/SKILL.md",
+            "skills/om-reverse-pricing/SKILL.md",
+            "skills/market-cycle-positioner/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -334,7 +334,7 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/sourcing-outreach-system.md"
+            "skills/sourcing-outreach-system/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -503,9 +503,9 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/disposition-prep-kit.md",
-            "skills/t12-normalizer.md",
-            "skills/rent-roll-formatter.md"
+            "skills/disposition-prep-kit/SKILL.md",
+            "skills/t12-normalizer/SKILL.md",
+            "skills/rent-roll-formatter/SKILL.md"
           ],
           "maxTimeoutMinutes": 45,
           "validationRules": [
@@ -548,8 +548,8 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/disposition-prep-kit.md",
-            "skills/leasing-strategy-marketing-planner.md"
+            "skills/disposition-prep-kit/SKILL.md",
+            "skills/leasing-strategy-marketing-planner/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -712,7 +712,7 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/sourcing-outreach-system.md"
+            "skills/sourcing-outreach-system/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -856,8 +856,8 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/loi-offer-builder.md",
-            "skills/om-reverse-pricing.md"
+            "skills/loi-offer-builder/SKILL.md",
+            "skills/om-reverse-pricing/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -901,7 +901,7 @@
           "critical": true,
           "dependencies": ["offer-comparator"],
           "skillRefs": [
-            "skills/psa-redline-strategy.md"
+            "skills/psa-redline-strategy/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -1058,8 +1058,8 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/dd-command-center.md",
-            "skills/estoppel-certificate-generator.md"
+            "skills/dd-command-center/SKILL.md",
+            "skills/estoppel-certificate-generator/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -1103,8 +1103,8 @@
           "critical": true,
           "dependencies": ["seller-dd-coordinator"],
           "skillRefs": [
-            "skills/sensitivity-stress-test.md",
-            "skills/comp-snapshot.md"
+            "skills/sensitivity-stress-test/SKILL.md",
+            "skills/comp-snapshot/SKILL.md"
           ],
           "maxTimeoutMinutes": 35,
           "validationRules": [
@@ -1272,7 +1272,7 @@
           "critical": true,
           "dependencies": [],
           "skillRefs": [
-            "skills/closing-checklist-tracker.md"
+            "skills/closing-checklist-tracker/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [
@@ -1317,8 +1317,8 @@
           "critical": true,
           "dependencies": ["disposition-closing-coordinator"],
           "skillRefs": [
-            "skills/jv-waterfall-architect.md",
-            "skills/1031-exchange-executor.md"
+            "skills/jv-waterfall-architect/SKILL.md",
+            "skills/1031-exchange-executor/SKILL.md"
           ],
           "maxTimeoutMinutes": 40,
           "validationRules": [

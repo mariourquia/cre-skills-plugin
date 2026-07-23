@@ -1,5 +1,5 @@
 version: 1.0.0
-generated_at: '2026-06-04T06:35:56.256975+00:00'
+generated_at: '2026-07-10T01:12:31.854689+00:00'
 plugin_version: 5.2.1
 items:
 - id: 1031-exchange-executor
@@ -160,7 +160,11 @@ items:
     Reconciles each quote's DSCR/LTV/LTPP sizing constraints, prices rate buy-downs a
   lifecycle_phase: cross-cutting
   aliases: []
-  intent_triggers: []
+  intent_triggers:
+  - analyze this agency quote
+  - compare Freddie vs Fannie
+  - DUS quote
+  - Optigo quote
   input_artifacts:
   - OM
   - Lease
@@ -197,7 +201,10 @@ items:
     workflow: data-room intake, document extraction, rent-roll analysis, T-12 normalization,'
   lifecycle_phase: cross-cutting
   aliases: []
-  intent_triggers: []
+  intent_triggers:
+  - run the IC workflow
+  - take this deal from data room to IC
+  - orchestrate the acquisition
   input_artifacts:
   - OM
   - T-12
@@ -1364,7 +1371,10 @@ items:
     return, DSCR, levered/unlevered IRR, equity multiple, and breakeven occupancy. Runs 2-w
   lifecycle_phase: cross-cutting
   aliases: []
-  intent_triggers: []
+  intent_triggers:
+  - quick underwrite
+  - deal analysis
+  - go/no-go scorecard
   input_artifacts:
   - OM
   outputs: []
@@ -1718,7 +1728,10 @@ items:
     typed fact table with per-fact sourceRefs, extraction confidence scores, and human review
   lifecycle_phase: cross-cutting
   aliases: []
-  intent_triggers: []
+  intent_triggers:
+  - extract the data room
+  - build the fact table
+  - index this deal package
   input_artifacts:
   - OM
   - Rent Roll
@@ -1756,7 +1769,9 @@ items:
     Prose Frontier narrative artifacts) into validated, typed, auditable, target-model
   lifecycle_phase: cross-cutting
   aliases: []
-  intent_triggers: []
+  intent_triggers:
+  - turn these documents into a database
+  - ingest this data room to our schema
   input_artifacts:
   - OM
   - Rent Roll
@@ -2405,7 +2420,10 @@ items:
     outputs and produces a structured adversarial review: known risks (quantified), know'
   lifecycle_phase: cross-cutting
   aliases: []
-  intent_triggers: []
+  intent_triggers:
+  - red team this deal
+  - pressure-test the recommendation
+  - play devil's advocate
   input_artifacts:
   - OM
   outputs:
@@ -2441,7 +2459,10 @@ items:
     and risk outputs. Indexes every deal fact to a citable sourceRef, builds a question-and-a
   lifecycle_phase: cross-cutting
   aliases: []
-  intent_triggers: []
+  intent_triggers:
+  - build the IC Q&A pack
+  - prep for committee questions
+  - what will IC ask
   input_artifacts:
   - OM
   outputs: []
@@ -3379,7 +3400,9 @@ items:
     supply/demand fundamentals, rent trends, cap rate movements, capital markets conditions
   lifecycle_phase: cross-cutting
   aliases: []
-  intent_triggers: []
+  intent_triggers:
+  - write a market memo
+  - market update
   input_artifacts:
   - OM
   outputs:
@@ -3623,7 +3646,9 @@ items:
     period grain; monthly, quarterly, annual-summary, or multi-scenario) into validated, ac'
   lifecycle_phase: cross-cutting
   aliases: []
-  intent_triggers: []
+  intent_triggers:
+  - load this operating statement
+  - normalize the P&L to our accounts
   input_artifacts:
   - OM
   - Budget
@@ -3751,7 +3776,10 @@ items:
     costs, a 10-year replacement-reserve schedule by building component, an implied per-un'
   lifecycle_phase: cross-cutting
   aliases: []
-  intent_triggers: []
+  intent_triggers:
+  - PCA
+  - property condition assessment
+  - reserve adequacy
   input_artifacts:
   - OM
   outputs: []
@@ -4256,7 +4284,10 @@ items:
     transcripts, and investor presentations. Produces standardized property-type profiles c
   lifecycle_phase: cross-cutting
   aliases: []
-  intent_triggers: []
+  intent_triggers:
+  - REIT profile
+  - build a REIT comp
+  - REIT ticker
   input_artifacts:
   - OM
   outputs:
@@ -4426,7 +4457,10 @@ items:
     vs recognized accrual; collected cash out of scope) and never forces a tie. Reconciles
   lifecycle_phase: cross-cutting
   aliases: []
-  intent_triggers: []
+  intent_triggers:
+  - tie out the rent roll to the T-12
+  - reconcile contractual rent to actuals
+  - revenue leakage check
   input_artifacts:
   - OM
   - Rent Roll
@@ -4463,7 +4497,10 @@ items:
     charge schedule (base rent, CAM/tax/insurance recoveries, percentage rent, parking, st'
   lifecycle_phase: cross-cutting
   aliases: []
-  intent_triggers: []
+  intent_triggers:
+  - load this rent roll into the database
+  - normalize the rent roll to our schema
+  - rent roll to warehouse
   input_artifacts:
   - OM
   - Rent Roll
@@ -4927,7 +4964,10 @@ items:
     records. A constrained preset over operating-statement-to-database: it asserts line_type'
   lifecycle_phase: cross-cutting
   aliases: []
-  intent_triggers: []
+  intent_triggers:
+  - load this T-12
+  - normalize the trailing twelve into the database
+  - T-12 to warehouse
   input_artifacts:
   - Lease
   - T-12

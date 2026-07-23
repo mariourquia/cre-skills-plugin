@@ -110,6 +110,28 @@ class TestPluginStructure(unittest.TestCase):
     def test_routing_index_exists(self):
         self.assertTrue(os.path.exists(os.path.join(SRC_DIR, 'routing/CRE-ROUTING.md')))
 
+    def test_routing_index_covers_previously_unrouted_reit_cre_skills(self):
+        """Regression guard for 14 reit-cre skills found missing a routing row
+        during a 2026-07-09 audit (23 unrouted total). The other 9 are
+        deliberately not asserted here: 7 workspace-category skills plus
+        residential_multifamily are pending a product decision, and
+        space-planning-redesign-orchestrator is correctly excluded --
+        status: stub, so catalog-generate.py's routing-table regeneration
+        (hidden_from_default_catalog = status in stub/deprecated) strips any
+        row for it, confirmed by reproducing that exact regeneration."""
+        with open(os.path.join(SRC_DIR, 'routing/CRE-ROUTING.md')) as f:
+            routing_text = f.read()
+        previously_unrouted = [
+            'agency-loan-quote-analyzer', 'amos-icomm-demo-orchestrator',
+            'deal-underwriting-assistant', 'document-to-data-room-extractor',
+            'document-to-database', 'ic-red-team-challenger', 'icomm-context-builder',
+            'market-memo-generator', 'operating-statement-to-database',
+            'pca-reserve-analyzer', 'reit-profile-builder', 'rent-roll-t12-tieout',
+            'rent-roll-to-database', 't12-to-database',
+        ]
+        for slug in previously_unrouted:
+            self.assertIn(f'`/{slug}`', routing_text, f'{slug} still missing a routing row')
+
     def test_feedback_schemas_valid(self):
         for name in ['feedback-submission.schema.json', 'feedback-config.schema.json']:
             path = os.path.join(SRC_DIR, 'schemas', name)
@@ -212,13 +234,22 @@ class TestCatalogConsistency(unittest.TestCase):
                         f'Catalog has {len(catalog_skills)} skills but filesystem has {len(fs_skills)}')
 
     def test_agent_count_matches_filesystem(self):
+        """Catalog "type: agent" entries are the flat, user-invocable persona
+        agents at agents/*.md only (54: aggressive-gp, titan-zell, etc. --
+        catalog-build.py's own scan is agents_dir.glob("*.md"), non-recursive).
+        The 150 nested agents/<category>/*.md files added 2026-07-09 are a
+        different, internal category: orchestrator pipeline specialists read
+        directly by src/orchestrators/engine/agent-loader.mjs, never listed in
+        the public skills/agents catalog or invoked by name -- counting them
+        here would conflate two unrelated things the SessionStart prompt's
+        "N expert agents" claim was never meant to include."""
         if not self.catalog:
             self.skipTest('No catalog')
         catalog_agents = [i for i in self.catalog['items'] if i['type'] == 'agent']
-        fs_agents = []
-        for md in glob.glob(os.path.join(SRC_DIR, 'agents/**/*.md'), recursive=True):
-            if os.path.basename(md) != '_index.md':
-                fs_agents.append(md)
+        fs_agents = [
+            md for md in glob.glob(os.path.join(SRC_DIR, 'agents/*.md'))
+            if os.path.basename(md) != '_index.md'
+        ]
         self.assertEqual(len(catalog_agents), len(fs_agents),
                         f'Catalog has {len(catalog_agents)} agents but filesystem has {len(fs_agents)}')
 

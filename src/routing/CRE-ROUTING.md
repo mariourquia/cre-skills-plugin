@@ -6,11 +6,15 @@
 
 ## Quick Routing Table
 
+> This table routes to **specialist** skills only. The 7 `category: workspace` skills (`navigator`, `deal-intake`, `lease-strategy-papering`, `asset-ops-cockpit`, `capital-projects-development`, `fund-lp-reporting`, `plugin-admin`) are intentionally excluded: they are top-level entry points / orchestration routers that dispatch *to* the specialists below (and among themselves via `navigator`), so they carry no trigger-phrase row. Their absence here is by design, not a coverage gap. The `residential_multifamily` domain subsystem is likewise excluded and is documented in its own section below.
+
 | User says... | Invoke this skill |
 |---|---|
 | "1031", "like-kind exchange", "tax deferral" | `/1031-exchange-executor` |
 | "1031 pipeline", "replacement property pipeline", "exchange timeline", "1031 ID deadline" | `/1031-pipeline-manager` |
 | "underwrite this deal", "run the numbers", "model this property" | `/acquisition-underwriting-engine` |
+| "analyze this agency quote", "compare Freddie vs Fannie", "DUS quote", "Optigo quote" | `/agency-loan-quote-analyzer` |
+| "run the IC workflow", "take this deal from data room to IC", "orchestrate the acquisition" | `/amos-icomm-demo-orchestrator` |
 | "annual budget", "operating budget", "IREM benchmark" | `/annual-budget-engine` |
 | "PM schedule", "HVAC maintenance", "elevator inspection" | `/building-systems-maintenance-manager` |
 | "CAM reconciliation", "tenant billing", "common area maintenance" | `/cam-reconciliation-calculator` |
@@ -34,6 +38,7 @@
 | "due diligence", "DD period", "inspection period" | `/dd-command-center` |
 | "deal attribution", "deal-level P&L", "track record attribution", "realized/unrealized" | `/deal-attribution-tracker` |
 | "screen this deal", "should I look at this", "new OM/listing" | `/deal-quick-screen` |
+| "quick underwrite", "deal analysis", "go/no-go scorecard" | `/deal-underwriting-assistant` |
 | "debt covenant", "DSCR compliance", "covenant breach" | `/debt-covenant-monitor` |
 | "debt portfolio", "loan watchlist", "maturity wall" | `/debt-portfolio-monitor` |
 | "development proforma", "construction budget", "draw schedule" | `/dev-proforma-engine` |
@@ -41,6 +46,8 @@
 | "sell vs hold", "disposition strategy", "exit analysis" | `/disposition-strategy-engine` |
 | "distressed", "special servicing", "note purchase", "REO" | `/distressed-acquisition-playbook` |
 | "distribution notice", "capital distribution", "distribution waterfall letter" | `/distribution-notice-generator` |
+| "extract the data room", "build the fact table", "index this deal package" | `/document-to-data-room-extractor` |
+| "turn these documents into a database", "ingest this data room to our schema" | `/document-to-database` |
 | "build the warehouse dataset", "assemble these extractions", "validate the data room for the model", "make this deck-ready", "stage extracted data for the warehouse" | `/document-to-warehouse-pipeline` |
 | "emerging manager", "first-time fund", "emerging GP evaluation", "seed allocation" | `/emerging-manager-evaluator` |
 | "zoning", "entitlement", "rezoning", "variance" | `/entitlement-feasibility` |
@@ -53,6 +60,8 @@
 | "evaluate GP performance", "assess GP track record", "GP evaluation", "manager due diligence" | `/gp-performance-evaluator` |
 | "build the IC deck", "compose the committee deck", "valuation committee deck", "quarterly asset review deck", "annual business plan deck" | `/ic-deck-composer` |
 | "IC memo", "investment committee", "deal presentation" | `/ic-memo-generator` |
+| "red team this deal", "pressure-test the recommendation", "play devil's advocate" | `/ic-red-team-challenger` |
+| "build the IC Q&A pack", "prep for committee questions", "what will IC ask" | `/icomm-context-builder` |
 | "insurance renewal", "coverage adequacy", "builder's risk" | `/insurance-risk-manager` |
 | "investor meeting", "audit coordination", "GIPS composite" | `/investor-lifecycle-manager` |
 | "waterfall", "promote", "preferred return", "GP/LP split" | `/jv-waterfall-architect` |
@@ -73,12 +82,15 @@
 | "generate LP data request", "LP questionnaire", "DDQ", "LP information request" | `/lp-data-request-generator` |
 | "pitch deck", "LP presentation", "track record" | `/lp-pitch-deck-builder` |
 | "market cycle", "where are we in the cycle", "Mueller" | `/market-cycle-positioner` |
+| "write a market memo", "market update" | `/market-memo-generator` |
 | "mezz", "preferred equity", "subordinate capital" | `/mezz-pref-structurer` |
 | "Monte Carlo", "return simulation", "probability distribution", "stochastic model" | `/monte-carlo-return-simulator` |
 | "NOI sprint", "90-day plan", "stabilize NOI" | `/noi-sprint-plan` |
 | "reverse price this OM", "what should I pay" | `/om-reverse-pricing` |
+| "load this operating statement", "normalize the P&L to our accounts" | `/operating-statement-to-database` |
 | "opportunity zone", "OZ", "QOZB" | `/opportunity-zone-underwriter` |
 | "partnership allocation", "704(b)", "UBIT", "K-1" | `/partnership-allocation-engine` |
+| "PCA", "property condition assessment", "reserve adequacy" | `/pca-reserve-analyzer` |
 | "performance attribution", "alpha", "NCREIF benchmark" | `/performance-attribution` |
 | "portfolio allocation", "concentration risk", "rebalancing" | `/portfolio-allocator` |
 | "post-close onboarding", "PM transition", "asset handoff" | `/post-close-onboarding-transition` |
@@ -89,9 +101,12 @@
 | "review this PSA", "redline strategy" | `/psa-redline-strategy` |
 | "investor update", "quarterly report", "LP letter" | `/quarterly-investor-update` |
 | "refinance", "refi", "loan maturity" | `/refi-decision-analyzer` |
+| "REIT profile", "build a REIT comp", "REIT ticker" | `/reit-profile-builder` |
 | "rent optimization", "loss-to-lease", "rent increase plan" | `/rent-optimization-planner` |
 | "analyze this rent roll", "clean up this rent roll" | `/rent-roll-analyzer` |
 | "standardize rent roll", "format rent roll" | `/rent-roll-formatter` |
+| "tie out the rent roll to the T-12", "reconcile contractual rent to actuals", "revenue leakage check" | `/rent-roll-t12-tieout` |
+| "load this rent roll into the database", "normalize the rent roll to our schema", "rent roll to warehouse" | `/rent-roll-to-database` |
 | "Reg D", "506(b)", "506(c)", "accredited investor verification", "blue sky filing" | `/sec-reg-d-compliance` |
 | "stress test", "sensitivity analysis", "where does it break" | `/sensitivity-stress-test` |
 | "small operator PM", "self-manage", "landlord operations", "1-50 units" | `/small-operator-pm` |
@@ -100,6 +115,7 @@
 | "submarket analysis", "market reality check" | `/submarket-truth-serum` |
 | "supply pipeline", "absorption forecast" | `/supply-demand-forecast` |
 | "normalize T-12", "trailing twelve", "one-time items" | `/t12-normalizer` |
+| "load this T-12", "normalize the trailing twelve into the database", "T-12 to warehouse" | `/t12-to-database` |
 | "analyze tenant credit", "tenant financials", "tenant creditworthiness", "guarantor strength" | `/tenant-credit-analyzer` |
 | "delinquent tenant", "eviction", "tenant workout" | `/tenant-delinquency-workout` |
 | "tenant event", "appreciation event", "holiday party" | `/tenant-event-planner` |
@@ -113,9 +129,19 @@
 | "work order", "maintenance request", "triage" | `/work-order-triage` |
 | "workout", "loan modification", "forbearance", "DPO" | `/workout-playbook` |
 
+## Residential Multifamily subsystem (not a trigger-phrase skill)
+
+`residential_multifamily` is intentionally absent from the table above and is **not** a flat `/<slug>` skill. It is a self-contained **subsystem router** (`classification: workspace`, `runtime_role: workspace_router`, `category: cross-cutting`) that ships its own `_core/` taxonomy, `roles/`, `workflows/`, `overlays/`, `templates/`, and a `tailoring/` interview. Its catalog `intent_triggers` are empty by design, so the dispatcher never phrase-routes to it. How it is actually invoked:
+
+- **Signal-based activation, not a phrase match.** It engages when the request concerns a U.S. residential multifamily property/portfolio/development -- a property tagged multifamily, an asker in a multifamily role (property/regional/asset/portfolio manager, development/construction manager, COO/CFO/CEO over MF), or one of its workflows (`delinquency_collections`, `renewal_retention`, `monthly_asset_management_review`, `draw_package_review`, `executive_operating_summary_generation`, ...).
+- **It classifies and dispatches; it does not answer directly.** The router resolves 10 taxonomy axes (asset_class, segment, form_factor, lifecycle_stage, management_mode, role/workflow, market, org), asks **one** focused question when a required axis is unresolved, layers overlays, loads the matching role/workflow packs plus their references, and executes inside `_core/guardrails.md` + `_core/approval_matrix.md`.
+- **Decision-grade output needs org tailoring first.** Every reference figure ships tagged `sample | starter | illustrative | placeholder`. An operator runs the interactive `tailoring/` interview (terminal TUI) to produce an `overlays/org/<org_id>/` overlay before output is operational; final-marked and period-grade workflows **fail closed** on missing required inputs or an insufficient close status (see `_core/final_marked_workflows.yaml`).
+
+Entry point: read `src/skills/residential_multifamily/SKILL.md`, then `src/skills/residential_multifamily/_core/README.md`. Let the router load packs, overlays, and references progressively -- do not eagerly read them.
+
 ## Workflow Chains
 
-When a task spans multiple skills, use these chains (detailed docs in `plans/reit-cre/_workflows/`):
+When a task spans multiple skills, use these chains (detailed docs in `src/routing/workflows/`):
 
 1. **Acquisition Pipeline**: sourcing -> quick-screen -> [KEEP] -> om-reverse -> rent-roll-analyzer -> underwriting-engine -> sensitivity -> ic-memo -> loi -> psa-redline -> dd-command-center -> close
 2. **Capital Stack**: underwriting-engine -> loan-sizing -> mezz-pref -> jv-waterfall -> capital-stack-optimizer -> refi-decision (at maturity)
@@ -126,8 +152,8 @@ When a task spans multiple skills, use these chains (detailed docs in `plans/rei
 
 ## Skill Locations
 
-All skills: `~/.claude/skills-lab/skills/<slug>/SKILL.md`
-Reference files: `~/.claude/skills-lab/skills/<slug>/references/`
-Commands: `~/.claude/commands/<slug>.md`
-Workflow docs: `~/.claude/skills-lab/plans/reit-cre/_workflows/`
-Registry: `~/.claude/skills-lab/plans/reit-cre/_registry.yaml`
+All skills: `src/skills/<slug>/SKILL.md`
+Reference files: `src/skills/<slug>/references/`
+Commands: `src/commands/` (shared orchestration commands only -- each skill is invoked directly via `/<slug>`, not a per-skill command file)
+Workflow docs: `src/routing/workflows/`
+Registry: `registry.yaml` (repo root)

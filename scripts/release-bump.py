@@ -11,7 +11,10 @@ tests/test_amos_manifest.py on every fresh checkout).
 
 Mechanical rewrites (exact current-version literals, counted and verified):
   - .claude-plugin/plugin.json        "version" field (the source of truth)
+  - .claude-plugin/marketplace.json   plugins[0].version (nested, own bump fn)
   - scripts/install.sh                banner / comment / fallback literals
+  - Install.command                   INSTALLER_VERSION_CONST + banner + fallback
+  - scripts/Install.ps1               $InstallerVersionConst
   - docs/INSTALL.md                   binary asset filenames
   - docs/install-desktop.md           binary asset filenames
   - docs/install-guide.md             "Version X.Y.Z |" line
@@ -43,6 +46,8 @@ SEMVER = re.compile(r"^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$")
 # replace-all of the old literal is safe there (enforced by the tripwire test).
 LITERAL_TARGETS = (
     "scripts/install.sh",
+    "Install.command",
+    "scripts/Install.ps1",
     "docs/INSTALL.md",
     "docs/install-desktop.md",
     "docs/install-guide.md",
@@ -71,6 +76,20 @@ def bump_plugin_json(path: Path, old: str, new: str) -> None:
     parsed = json.loads(path.read_text(encoding="utf-8"))
     if parsed.get("version") != new:
         sys.exit(f"FAIL: {path} did not parse back with version {new}")
+
+
+def bump_marketplace_json(path: Path, old: str, new: str) -> None:
+    """Rewrite plugins[0].version in place; unlike plugin.json the version is
+    nested, so verify against that path rather than a top-level key."""
+    text = path.read_text(encoding="utf-8")
+    needle = f'"version": "{old}"'
+    if text.count(needle) != 1:
+        sys.exit(f"FAIL: expected exactly one {needle!r} in {path}")
+    path.write_text(text.replace(needle, f'"version": "{new}"'), encoding="utf-8")
+    parsed = json.loads(path.read_text(encoding="utf-8"))
+    plugins = parsed.get("plugins") or []
+    if not plugins or plugins[0].get("version") != new:
+        sys.exit(f"FAIL: {path} did not parse back with plugins[0].version {new}")
 
 
 def bump_literals(path: Path, old: str, new: str) -> int:
@@ -118,6 +137,11 @@ def main() -> None:
 
     bump_plugin_json(plugin_json, old, new)
     print(f"{plugin_json.relative_to(root)}: {old} -> {new}")
+
+    marketplace_json = root / ".claude-plugin" / "marketplace.json"
+    bump_marketplace_json(marketplace_json, old, new)
+    print(f"{marketplace_json.relative_to(root)}: {old} -> {new}")
+
     for rel in LITERAL_TARGETS:
         count = bump_literals(root / rel, old, new)
         print(f"{rel}: {count} literal(s) updated")

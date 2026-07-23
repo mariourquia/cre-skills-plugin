@@ -847,4 +847,7 @@ rl.on("line", (line) => {
   }
 });
 
-rl.on("close", () => process.exit(0));
+// Do not call process.exit() here. The final JSON-RPC response may still be
+// buffered when stdin closes; forcing exit can truncate a valid response at
+// the pipe boundary. With readline closed, Node exits naturally after stdout
+// drains.

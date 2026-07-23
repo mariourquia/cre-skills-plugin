@@ -495,7 +495,8 @@ async function main() {
     console.error('  --resume <sessionId>       Legacy checkpoint-only resume');
     console.error('  --skip-challenge           Skip the challenge layer');
     console.error('  --no-handoff               Skip cross-chain handoffs');
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   const pluginRoot = resolvePluginRoot();
@@ -508,7 +509,8 @@ async function main() {
     : join(pluginRoot, 'orchestrators', 'configs', `${args.pipeline}.json`);
   if (!existsSync(configPath)) {
     console.error(`Pipeline config not found: ${configPath}`);
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
   let config = loadJSON(configPath);
   console.log(`Loaded pipeline: ${config.orchestratorId} v${config.version}`);
@@ -560,7 +562,8 @@ async function main() {
       if (mergedThresholds.excluded) {
         console.error(`Strategy "${args.strategy}" is not allowed for investor type "${args.investorType}".`);
         console.error(`Allowed strategies: ${mergedThresholds.excluded.allowedStrategies?.join(', ')}`);
-        process.exit(1);
+        process.exitCode = 1;
+        return;
       }
       console.log(`Merged thresholds for ${args.investorType}/${args.strategy || 'default'}`);
     }
@@ -575,7 +578,8 @@ async function main() {
   // Dry run: print plan and exit
   if (args.dryRun) {
     printDryRunPlan(config, sortedPhases, mergedThresholds, args);
-    process.exit(0);
+    process.exitCode = 0;
+    return;
   }
 
   // Session setup
@@ -597,7 +601,8 @@ async function main() {
           `[ERROR] Deal "${args.dealId}" was initialized with pipeline "${existing.pipeline}" ` +
           `but --pipeline ${args.pipeline} was passed. Refusing to mix pipelines for one deal.`,
         );
-        process.exit(3);
+        process.exitCode = 3;
+        return;
       }
       dealState = existing;
       console.log(`[RESUME] Loaded existing deal state (run_id=${dealState.run_id}).`);
@@ -855,11 +860,11 @@ async function main() {
 
   // Exit 0 on PROCEED / CONDITIONAL / AWAITING_APPROVAL, 1 on KILL.
   // AWAITING_APPROVAL is a pause, not a failure.
-  process.exit(pipelineVerdict.verdict === 'KILL' ? 1 : 0);
+  process.exitCode = pipelineVerdict.verdict === 'KILL' ? 1 : 0;
 }
 
 main().catch(err => {
   console.error(`[FATAL] ${err.message}`);
   console.error(err.stack);
-  process.exit(2);
+  process.exitCode = 2;
 });

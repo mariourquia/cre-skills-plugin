@@ -272,13 +272,13 @@ def validate_asset_type_neutrality() -> list[str]:
                 )
 
     # Also check handoff registry
-    handoff_file = SRC_DIR / "orchestrators" / "engine" / "handoff-registry.json"
+    handoff_file = SRC_DIR / "orchestrators" / "handoff-registry.json"
     if handoff_file.is_file():
         content = handoff_file.read_text(encoding="utf-8")
         for pattern in banned_patterns:
             if pattern in content:
                 failures.append(
-                    f"FAIL  orchestrators/engine/handoff-registry.json: "
+                    f"FAIL  orchestrators/handoff-registry.json: "
                     f"contains hardcoded '{pattern}'"
                 )
 
@@ -450,10 +450,9 @@ def validate_full_counts() -> list[str]:
     if (SRC_DIR / "agents" / "_index.md").is_file():
         counts["agents"] -= 1
 
-    # Also count agents in subdirectories
-    for subdir in (SRC_DIR / "agents").iterdir() if (SRC_DIR / "agents").is_dir() else []:
-        if subdir.is_dir():
-            counts["agents"] += len(list(subdir.glob("*.md")))
+    # Nested agents are internal orchestrator specialists loaded directly by
+    # the engine. The public catalog and documentation count only the flat,
+    # user-invocable personas under agents/*.md.
 
     # Files to check and what to look for
     # (base_dir, relative_path, patterns) -- README at PLUGIN_ROOT, hooks under SRC_DIR

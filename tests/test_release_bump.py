@@ -16,12 +16,29 @@ def make_fixture(root: Path, version: str = "1.0.0") -> None:
         json.dumps({"name": "cre-skills", "version": version}, indent=2) + "\n",
         encoding="utf-8",
     )
+    (root / ".claude-plugin" / "marketplace.json").write_text(
+        json.dumps(
+            {"name": "cre-skills", "plugins": [{"name": "cre-skills", "version": version}]},
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     (root / "scripts").mkdir()
     (root / "scripts" / "install.sh").write_text(
         f"# installer for Plugin v{version}\n"
         f'plugin_version="$(true || echo "{version}")"\n'
         f"echo 'Plugin v{version} -- Installed'\n",
         encoding="utf-8",
+    )
+    (root / "Install.command").write_text(
+        f'INSTALLER_VERSION_CONST="{version}"\n'
+        f'printf "Plugin Installer v{version}\\n"\n'
+        f'PLUGIN_VERSION="$(true || echo "{version}")"\n',
+        encoding="utf-8",
+    )
+    (root / "scripts" / "Install.ps1").write_text(
+        f'$InstallerVersionConst = "{version}"\n', encoding="utf-8"
     )
     (root / "docs").mkdir()
     (root / "docs" / "INSTALL.md").write_text(
@@ -51,8 +68,12 @@ def test_bump_rewrites_every_pin(tmp_path):
     result = run_bump(tmp_path, "1.1.0")
     assert result.returncode == 0, result.stderr
     assert json.loads((tmp_path / ".claude-plugin" / "plugin.json").read_text())["version"] == "1.1.0"
+    marketplace = json.loads((tmp_path / ".claude-plugin" / "marketplace.json").read_text())
+    assert marketplace["plugins"][0]["version"] == "1.1.0"
     for rel in (
         "scripts/install.sh",
+        "Install.command",
+        "scripts/Install.ps1",
         "docs/INSTALL.md",
         "docs/install-desktop.md",
         "docs/install-guide.md",
@@ -62,6 +83,17 @@ def test_bump_rewrites_every_pin(tmp_path):
         assert "1.0.0" not in text, f"{rel} kept a stale literal"
         assert "1.1.0" in text, f"{rel} was not bumped"
     assert "Manual follow-ups" in result.stdout
+
+
+def test_bump_fails_loudly_when_marketplace_json_disagrees(tmp_path):
+    make_fixture(tmp_path)
+    (tmp_path / ".claude-plugin" / "marketplace.json").write_text(
+        json.dumps({"name": "cre-skills", "plugins": [{"name": "cre-skills", "version": "9.9.9"}]}),
+        encoding="utf-8",
+    )
+    result = run_bump(tmp_path, "1.1.0")
+    assert result.returncode != 0
+    assert "marketplace.json" in (result.stderr + result.stdout)
 
 
 def test_bump_refuses_same_version(tmp_path):

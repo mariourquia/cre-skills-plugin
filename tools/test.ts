@@ -198,6 +198,19 @@ test("cowork hooks/ has no .mjs files", () => {
   assertEqual(mjsFiles.length, 0, "mjs files in cowork hooks");
 });
 
+test("cowork hooks.json has no unrewritten src/-prefixed paths", () => {
+  // Prompt-type hooks carry ${CLAUDE_PLUGIN_ROOT}-relative paths in their prompt
+  // TEXT (e.g. SessionStart pointing at CRE-ROUTING.md), not just in command
+  // fields. build-target.ts flattens src/routing -> routing/ and src/hooks ->
+  // hooks/ for every target, so a leftover "src/" path here would 404 at runtime.
+  const file = resolve(buildDir("cowork"), "hooks/hooks.json");
+  const text = readFileSync(file, "utf-8");
+  assert(
+    !text.includes("${CLAUDE_PLUGIN_ROOT}/src/"),
+    "cowork hooks.json still contains an unrewritten src/-prefixed path",
+  );
+});
+
 // ── Golden: Cowork Manifest ────────────────────────────────────────────
 
 console.log("\nGOLDEN: Cowork manifest normalization");
@@ -215,6 +228,23 @@ test("cowork manifest retains name, version, description, author", () => {
     assert(data[field], `missing ${field}`);
   }
   assert(data.author?.name, "missing author.name");
+});
+
+test("manifest skills/commands/hooks paths match the flattened build layout", () => {
+  // Source plugin.json points at src/skills, src/commands, src/hooks -- every
+  // target flattens those directories (build-target.ts), so a manifest that
+  // still says src/ would 404 for any consumer that resolves paths from it.
+  // Bug affected all four targets equally, not just portable -- check two.
+  for (const target of ["cowork", "claude-code"] as const) {
+    const file = resolve(buildDir(target), ".claude-plugin/plugin.json");
+    const data = JSON.parse(readFileSync(file, "utf-8"));
+    for (const field of ["skills", "commands", "hooks"]) {
+      assert(
+        typeof data[field] === "string" && !data[field].includes("src/"),
+        `${target} manifest field ${field} still points at src/: ${data[field]}`,
+      );
+    }
+  }
 });
 
 // ── Golden: Claude Code Full Frontmatter ───────────────────────────────

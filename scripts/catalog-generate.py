@@ -5,7 +5,7 @@ catalog-generate.py — Generate all public surfaces from the canonical catalog.
 Reads catalog/catalog.yaml (or dist/catalog.json) and generates:
   1. README.md count sections (between markers)
   2. registry.yaml (compatibility layer)
-  3. hooks.json SessionStart prompt (with accurate counts)
+  3. hooks.json compatibility check (SessionStart context is command-based)
   4. plugin.json description (with accurate counts)
   5. routing/CRE-ROUTING.md quick routing table (from intent_triggers)
 
@@ -236,6 +236,15 @@ def update_hooks(counts: dict, dry_run: bool = False) -> bool:
     if changed and not dry_run:
         hooks_path.write_text(updated + "\n", encoding="utf-8")
     return changed
+    """Retain the generated-surface API without rewriting command hooks.
+
+    SessionStart context is emitted by ``session-context.mjs``. Keeping the
+    source manifest command-only avoids unsupported prompt-hook warnings in
+    Codex while remaining compatible with Claude Code. Portable targets that
+    cannot execute commands synthesize their prompt during packaging.
+    """
+    del counts, dry_run
+    return False
 
 
 # ---------------------------------------------------------------------------
