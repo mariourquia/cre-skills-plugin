@@ -202,6 +202,40 @@ def update_readme(catalog: dict, counts: dict, dry_run: bool = False) -> bool:
 # ---------------------------------------------------------------------------
 
 def update_hooks(counts: dict, dry_run: bool = False) -> bool:
+    """Update hooks.json SessionStart prompt with accurate counts."""
+    hooks_path = SRC_DIR / "hooks" / "hooks.json"
+    data = json.loads(hooks_path.read_text(encoding="utf-8"))
+    original = json.dumps(data, indent=2)
+
+    prompt = (
+        f"The CRE Skills plugin is active with {counts['skills']} CRE skills, "
+        f"{counts['agents']} expert agents, {counts['workflows']} workflow chains, "
+        f"and {counts['orchestrators']} orchestrator pipelines. "
+        f"For any CRE task, read the routing index at "
+        f"${{CLAUDE_PLUGIN_ROOT}}/src/routing/CRE-ROUTING.md to find the right skill. "
+        f"Do NOT load all SKILL.md files -- use the routing index to identify the "
+        f"correct one, then load only that skill's SKILL.md and references/. "
+        f"Available commands: /cre-skills:cre-route (find a skill), "
+        f"/cre-skills:cre-workflows (workflow chains), "
+        f"/cre-skills:cre-agents (expert agents), "
+        f"/cre-skills:orchestrate (run a pipeline), "
+        f"/cre-skills:usage-stats (telemetry summary), "
+        f"/cre-skills:feedback-summary (skill feedback log), "
+        f"/cre-skills:send-feedback (share feedback), "
+        f"/cre-skills:report-problem (report a bug). "
+        f"Telemetry and feedback are opt-in. Configure at ~/.cre-skills/config.json."
+    )
+
+    for hook_group in data.get("hooks", {}).get("SessionStart", []):
+        for hook in hook_group.get("hooks", []):
+            if hook.get("type") == "prompt":
+                hook["prompt"] = prompt
+
+    updated = json.dumps(data, indent=2)
+    changed = updated != original
+    if changed and not dry_run:
+        hooks_path.write_text(updated + "\n", encoding="utf-8")
+    return changed
     """Retain the generated-surface API without rewriting command hooks.
 
     SessionStart context is emitted by ``session-context.mjs``. Keeping the
