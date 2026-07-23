@@ -26,6 +26,20 @@
   "commands": "./src/commands/",
   "hooks": "./src/hooks/hooks.json",
   "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "CRE Skills",
+    "shortDescription": "AI agent skills for commercial real estate.",
+    "category": "Real Estate",
+    "developerName": "Mario Urquia",
+    "websiteURL": "https://skills.mariourquia.com",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/icon.png",
+    "defaultPrompt": [
+      "Underwrite this multifamily acquisition and build the base-case model",
+      "Analyze this rent roll and flag lease-up risk",
+      "Build a disposition strategy for this asset"
+    ]
+  },
   "userConfig": {
     "primary_asset_types": {
       "type": "string",
