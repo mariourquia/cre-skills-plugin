@@ -261,7 +261,7 @@ Install and verify also ensure `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP` is at least 100
 **MCP tools don't appear (Chat tab):**
 1. Restart Claude Desktop completely
 2. Check Settings > Developer > MCP Servers for `cre-skills`
-3. Verify Node.js 18+ is installed (`node --version`)
+3. Verify Node.js 22+ is installed (`node --version`)
 4. Re-run the installer if the MCP entry is missing
 
 **Cowork tab:**

@@ -255,7 +255,7 @@ cosign verify-blob --certificate cre-skills-*.cert \
 
 1. Restart Claude Desktop after installation.
 2. Check **Settings > Developer > MCP Servers** for a `cre-skills` entry.
-3. Verify Node.js 18+ is installed: open Terminal and run `node --version`.
+3. Verify Node.js 22+ is installed: open Terminal and run `node --version`.
 4. Check that the config file contains the MCP entry:
    - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
    - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
@@ -284,16 +284,16 @@ npm update -g @anthropic-ai/claude-code
 
 ### Node.js hook errors
 
-Hooks require Node.js 18+. Check:
+Hooks require Node.js 22+. Check:
 
 ```bash
 node --version
 ```
 
-If below 18, upgrade from [nodejs.org](https://nodejs.org/) or via nvm:
+If below 22, upgrade from [nodejs.org](https://nodejs.org/) or via nvm:
 
 ```bash
-nvm install 20 && nvm use 20
+nvm install 22 && nvm use 22
 ```
 
 ### Python calculators fail to run

@@ -116,7 +116,7 @@ Download the latest DMG or EXE from the [releases page](https://github.com/mario
 **MCP tools not showing up:**
 - Restart Claude Desktop after installation
 - Check that `cre-skills` appears in Claude Desktop's MCP server list (Settings > Developer > MCP Servers)
-- Verify Node.js 18+ is installed: open Terminal and run `node --version`
+- Verify Node.js 22+ is installed: open Terminal and run `node --version`
 
 **"cre-skills" not in MCP list:**
 - The installer writes to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows)
@@ -143,5 +143,5 @@ Download the latest DMG or EXE from the [releases page](https://github.com/mario
 - The installer is not code-signed yet. You can verify integrity by comparing the SHA256 checksum from the release page
 
 **Node.js not found:**
-- Download Node.js 18+ from https://nodejs.org
+- Download Node.js 22+ from https://nodejs.org
 - After installing Node.js, re-run the CRE Skills installer

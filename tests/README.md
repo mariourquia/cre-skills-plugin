@@ -5,7 +5,7 @@ Structural and functional integrity tests for the CRE Skills Plugin. Most tests 
 ## Requirements
 
 - Python 3.10+
-- Node.js 18+ (for hook script syntax checks and calculator-bridge smoke tests)
+- Node.js 22+ (for hook script syntax checks and calculator-bridge smoke tests)
 - `pytest` (`pip install pytest`)
 
 No other runtime dependencies. The Python suite uses only the standard library plus `pytest`; the Node test harnesses used by a few orchestrator tests live under `tests/harness_*.mjs` and require no npm install.
@@ -51,4 +51,4 @@ The suite covers (non-exhaustive; regenerate this list with `ls tests/test_*.py`
 
 ## CI
 
-The same suite runs on every push and pull request to `main` via `.github/workflows/ci.yml`, across Python 3.10/3.11/3.12 and Node 18/20/22.
+The same suite runs on every push and pull request to `main` via `.github/workflows/ci.yml`, across Python 3.10/3.11/3.12 and Node 22/24.

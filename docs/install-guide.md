@@ -57,7 +57,7 @@ Changes to `src/skills/` and `src/commands/` take effect immediately without rei
 |-------------|---------|-------|
 | Claude Code CLI | any | `claude --version` |
 | git | any | `git --version` |
-| Node.js | 18+ | `node --version` |
+| Node.js | 22+ | `node --version` |
 | Python | 3.10+ | `python3 --version` |
 
 Install Claude Code CLI if not present:
@@ -68,11 +68,11 @@ npm install -g @anthropic-ai/claude-code
 
 ### Linux (Ubuntu/Debian, Fedora, Arch)
 
-Same requirements as macOS. Node.js 18+ and Python 3.10+ may need manual installation:
+Same requirements as macOS. Node.js 22+ and Python 3.10+ may need manual installation:
 
 ```bash
 # Ubuntu/Debian
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get install -y nodejs python3.11
 
 # Fedora
@@ -87,7 +87,7 @@ sudo pacman -S nodejs python
 | Requirement | Minimum | Check |
 |-------------|---------|-------|
 | Claude Code CLI or Claude Desktop | any | `claude --version` or check Start Menu |
-| Node.js | 18+ | `node --version` |
+| Node.js | 22+ | `node --version` |
 | Python | 3.10+ (optional, for calculators) | `python --version` |
 
 Install Claude Code CLI if not present:
@@ -367,16 +367,16 @@ npm update -g @anthropic-ai/claude-code
 
 ### Node.js hook errors
 
-Hooks require Node.js 18+. Check:
+Hooks require Node.js 22+. Check:
 
 ```bash
 node --version
 ```
 
-If below 18, upgrade from [nodejs.org](https://nodejs.org/) or via nvm:
+If below 22, upgrade from [nodejs.org](https://nodejs.org/) or via nvm:
 
 ```bash
-nvm install 20 && nvm use 20
+nvm install 22 && nvm use 22
 ```
 
 ### Python calculators fail to run
