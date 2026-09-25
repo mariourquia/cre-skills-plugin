@@ -92,13 +92,13 @@ check_node() {
     node_ver="$(node --version 2>/dev/null | tr -d 'v')"
     local node_major
     node_major="$(printf '%s' "$node_ver" | cut -d. -f1)"
-    if [ "${node_major:-0}" -ge 18 ]; then
+    if [ "${node_major:-0}" -ge 22 ]; then
       success "Node.js found: v$node_ver"
     else
-      warn "Node.js v$node_ver found but v18+ is required for hooks. The plugin will work but hook scripts may fail."
+      warn "Node.js v$node_ver found but v22+ is required for hooks. The plugin will work but hook scripts may fail."
     fi
   else
-    warn "Node.js not found. Hooks (telemetry, session summary) require Node.js 18+."
+    warn "Node.js not found. Hooks (telemetry, session summary) require Node.js 22+."
     warn "Install from https://nodejs.org/"
   fi
 }

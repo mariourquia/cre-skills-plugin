@@ -242,8 +242,8 @@ else
   # Check Node.js version
   node_ver="$(node --version 2>/dev/null | tr -d 'v')"
   node_major="$(printf '%s' "$node_ver" | cut -d. -f1)"
-  if [ "${node_major:-0}" -lt 18 ]; then
-    warn_check "Node.js v$node_ver detected. Hooks require v18+. Upgrade: https://nodejs.org/"
+  if [ "${node_major:-0}" -lt 22 ]; then
+    warn_check "Node.js v$node_ver detected. Hooks require v22+. Upgrade: https://nodejs.org/"
   fi
 fi
 

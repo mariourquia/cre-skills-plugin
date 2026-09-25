@@ -13,12 +13,12 @@ Legend:
 
 | Surface | Fresh install | Upgrade | Uninstall / reinstall | Corrupted-config recovery | Missing prereqs detected | Platform notes |
 |---|---|---|---|---|---|---|
-| **Claude Code marketplace (CLI)** | covered — `scripts/verify-install.sh`, `tests/test_plugin_integrity.py` | manual | manual | gap | partial (Node 18+ warning only) | relies on `claude plugin install` — the Claude Desktop "Add marketplace" dialog is intentionally not supported |
+| **Claude Code marketplace (CLI)** | covered — `scripts/verify-install.sh`, `tests/test_plugin_integrity.py` | manual | manual | gap | partial (Node 22+ warning only) | relies on `claude plugin install` — the Claude Desktop "Add marketplace" dialog is intentionally not supported |
 | **macOS DMG (`Install.command`)** | covered — `scripts/installer_smoke_test.py` | manual | manual | gap | partial (detects BOM via `utf-8-sig`; no remediation) | code-signed via Developer ID |
 | **Windows EXE (`Install.ps1`)** | covered — `tests/test_installer_hardening.py` (BOM, argv, hooks scope) + `scripts/installer_smoke_test.py` | manual | manual | gap | gap (PowerShell logs versions but does not halt on missing Node/Python/npm) | defends against PowerShell 5.1 UTF-8 BOM footgun |
 | **Cowork ZIP import** | manual | manual | manual | manual | n/a | ships `dist/cre-skills-cowork.zip` with skills + agents + commands only (no hooks, MCP, orchestrators, calculators); no automated Cowork simulator in the suite |
 | **Manual MCP config (Claude Desktop Chat tab)** | covered — `test_plugin_integrity.py::TestMcpServer` (initialize, tools list, routing) + `node --check` on `mcp-server.mjs` | manual | manual | gap | partial (JSON parse check only) | `claude_desktop_config.json` hand-edit; 19 operational tools + 2 aliases |
-| **`install.sh` one-liner** | partial — platform detection + dep checks run but no post-install assertion | gap | gap | gap | partial (checks Python 3, Node 18+, npm, git) | Darwin / Linux / WSL |
+| **`install.sh` one-liner** | partial — platform detection + dep checks run but no post-install assertion | gap | gap | gap | partial (checks Python 3, Node 22+, npm, git) | Darwin / Linux / WSL |
 | **Local dev via `claude --plugin-dir`** | covered (implicit via `verify-install.sh`) | n/a (just re-pull) | n/a | n/a | n/a | symlink resolution |
 | **Portable ZIP for Codex / Gemini / Grok / Manus** | structural — `tests/install_smoke/test_portable_zip.py` + `.github/workflows/portable-zip-smoke.yml` | gap | gap | gap | gap | structural coverage only: ZIP opens, skills tree matches source (minus the portable-excluded `residential_multifamily` subsystem), frontmatter contract is honored, and MCP / orchestrator / Python-calculator runtime files are absent. Cross-runtime invocation (a CLI like Codex / Gemini / Grok / Manus actually loading and running a skill from the extracted ZIP) remains a **gap** until a cross-CLI harness lands — see the Known Gaps section below. |
 
