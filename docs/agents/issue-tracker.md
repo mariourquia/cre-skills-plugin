@@ -33,7 +33,7 @@ Use GitHub pull requests for source review and release evidence.
 
 ## How agents use it
 
-The Linear MCP server (`https://mcp.linear.app/mcp`) is configured in Claude Code, Codex, and OpenCode. A harness can add a prefix to the tool names below. Where a tool takes a `team`, pass the team name (`CRE Skills`) or its ID. The key `CRE` is the prefix of the issue identifiers (`CRE-<n>`). Linear assigns them. A bare `#<n>` in a skill, for example `#42`, means the issue `CRE-<n>`. In this tracker it is never a pull request.
+The Linear MCP server (`https://mcp.linear.app/mcp`) is configured in Claude Code, Codex, and OpenCode. A harness can add a prefix to the tool names below. Where a tool takes a `team`, pass the team name (`CRE Skills`) or its ID. The key `CRE` is the prefix of the issue identifiers (`CRE-<n>`). Linear assigns them. A bare `#<n>` in a skill means the issue `CRE-<n>`. For example, `#42` means `CRE-42`. In this tracker it is never a pull request.
 
 - Check the current owner and dependencies before work.
 - **Create an issue**: `save_issue` with `team`, `title`, a Markdown `description`, and `labels`. On a new issue, `labels` is the whole label set. Give a new issue a plain title.
@@ -69,7 +69,7 @@ Use these five labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-f
 - The reporter is the creator of the issue (ask for `createdBy` in `fields`). Mention a user with `@displayName`.
 - To point at a repo file such as `.out-of-scope/<concept>.md` in a comment, give its path. Build a GitHub link from `git remote get-url origin` only if a link helps.
 
-To show what needs attention, call `list_issues` for the team with `fields` that include `labels`, `statusType`, and `createdAt`. Follow `cursor` until `hasNextPage` is false. Drop each issue whose `statusType` is `completed`, `canceled`, or `duplicate`. Make three lists of the rest, oldest first:
+To show what needs attention, call `list_issues` for the team with `fields` that include `labels`, `statusType`, `createdAt`, and `createdBy`. Follow `cursor` until `hasNextPage` is false. Drop each issue whose `statusType` is `completed`, `canceled`, or `duplicate`. Make three lists of the rest, oldest first:
 
 1. Unlabeled: issues that hold none of the five triage labels (see `triage-labels.md`) and no `wayfinder:*` label.
 2. `needs-triage`: issues that hold this label.
@@ -86,21 +86,21 @@ To find the queue of `ready-for-agent`, call `list_issues` for the team with `la
 Used by `wayfinder`. The **map** is a parent issue. Its tickets are sub-issues of the map. On a new map or ticket, `labels` holds the `wayfinder:*` label named here and, when the work belongs to one repository alone, `repo:cre-skills-plugin`.
 
 - **One-time setup**: the `wayfinder:*` labels are not part of the five triage labels. Before the first wayfinder run, call `list_issue_labels` for the team. Create each missing label with `save_issue_label`: `wayfinder:map`, `wayfinder:research`, `wayfinder:prototype`, `wayfinder:grilling`, `wayfinder:task`. Create only the missing ones.
-- **Names and links**: refer to a ticket by its title. Wrap the title in the issue `url` (`[Title](url)`). `list_issues` and `get_issue` return `url` only when you name it in `fields`. With `get_issue`, name `relations` too, because `fields` overrides `includeRelations`.
-- **Map**: create an issue with `save_issue`: `team`, a `title`, and `labels: ["wayfinder:map"]`. The description holds Destination, Notes, Decisions so far, Not yet specified, and Out of scope, as `wayfinder` lays them out.
-- **Child ticket**: create an issue with `save_issue`: `team`, a `title`, the question as `description`, `parentId` set to the map, and `labels: ["wayfinder:<research|prototype|grilling|task>"]`. Create all the tickets first. Wire the blocking edges in a second pass, because a ticket needs an identifier before another ticket can name it.
+- **Names and links**: refer to a ticket by its title. Write the title as a Markdown link. Put the title in square brackets. Put the issue `url` in round brackets right after it, with no space between. `list_issues` and `get_issue` return `url` only when you name it in `fields`. With `get_issue`, name `relations` too, because `fields` overrides `includeRelations`.
+- **Map**: create an issue with `save_issue`: `team`, a `title`, and `labels: ["wayfinder:map"]`. Add `"repo:cre-skills-plugin"` to that array when the work belongs to this repository alone. The description holds Destination, Notes, Decisions so far, Not yet specified, and Out of scope, as `wayfinder` lays them out.
+- **Child ticket**: create an issue with `save_issue`: `team`, a `title`, the question as `description`, `parentId` set to the map, and `labels: ["wayfinder:<research|prototype|grilling|task>"]`. Add `"repo:cre-skills-plugin"` to that array when the work belongs to this repository alone. Create all the tickets first. Wire the blocking edges in a second pass, because a ticket needs an identifier before another ticket can name it.
 - **Blocking**: the native relation. Call `save_issue` on the blocked ticket with `blockedBy` set to the identifiers of its blockers. Linear shows the blocked state in its own UI, so the human sees the frontier without opening the map.
-- **Frontier query**: find the next ticket. It is the first open, unblocked, unclaimed child of the map, in map order.
+- **Frontier query**: find the next ticket. It is the first open, not started, unblocked, unclaimed child of the map, in map order.
   1. Call `list_issues` with `parentId` set to the map and `fields` set to `["title", "status", "statusType", "assignee", "createdAt", "url"]`. Follow `cursor` until `hasNextPage` is false.
-  2. Drop each child whose `statusType` is `completed`, `canceled`, or `duplicate`.
+  2. Drop each child whose `statusType` is `started`, `completed`, `canceled`, or `duplicate`.
   3. Drop each child that has an assignee.
   4. For each child that is left, call `get_issue` with `includeRelations: true`. For each blocker it lists, call `get_issue` for the blocker with `fields: ["statusType"]`. Drop the child if one blocker has a `statusType` other than `completed`, `canceled`, or `duplicate`.
   5. Sort the rest by `createdAt`, oldest first. That is map order. The first one is next.
 - **Claim**: `save_issue` with `id` and `assignee: "me"`, before any other work. The assignee is the claim.
 - **Resolve**: record the answer, close the ticket, and add a pointer to the map.
-  1. Call `save_comment` with the answer.
-  2. Call `save_issue` with `state: "Done"`. This is the `completed` state of the team, so check `list_issue_statuses` if the name differs.
-  3. Add a one-line context pointer to the map's Decisions so far. Use a `patch` operation on the map description. Its `op` is `insert_before`, and its `anchor` is the heading `## Not yet specified`. Its `text` is the new line, then a blank line: `- [Title](url): <context>` followed by two newline characters. The blank line keeps the heading on its own line.
+  1. Call `save_comment` with `issueId` set to the ticket and the answer as `body`.
+  2. Call `save_issue` with `id` set to the ticket and `state: "Done"`. This is the `completed` state of the team, so check `list_issue_statuses` if the name differs.
+  3. Add a one-line context pointer to the map's Decisions so far. Call `save_issue` with `id` set to the map and a `patch` in place of `description`. The patch has one operation: its `op` is `insert_before`, and its `anchor` is the heading `## Not yet specified`. Set `text` to the new line. The new line is a hyphen, a space, the link to the ticket, a colon, a space, and the context. End `text` with two newline characters, so that the heading stays on its own line.
   A `research` ticket is resolved by its subagent with these same steps. Put the pointer to its `research/<name>` branch in the resolution comment.
 
 ## Language
