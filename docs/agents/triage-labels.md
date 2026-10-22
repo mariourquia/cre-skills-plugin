@@ -35,7 +35,7 @@ These three labels are workspace labels that Linear provides to every team.
 ## How to apply them
 
 - When a skill names a role (for example, "apply the AFK-ready triage label"), use the label in the second column.
-- Give a triaged issue one category label and one state label. A new issue that `to-spec` or `to-tickets` publishes needs only the state label.
+- Give a triaged issue one category label and one state label. A new issue that `to-spec` or `to-tickets` publishes needs only the state label from this file. Also add the label `repo:cre-skills-plugin`.
 - A label does not replace the Linear state. The issue keeps its state (`Backlog`, `Todo`, and so on) while it holds a label.
 - A `wontfix` issue also moves to the `Canceled` state of the team.
 - If a state label is missing in the team, create it with `save_issue_label`. Never rename a label that already exists.
