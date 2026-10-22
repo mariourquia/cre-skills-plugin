@@ -49,8 +49,10 @@ python3 -m pytest tests/     # top-level integration suite (catalog, manifests, 
 
 ### Issue tracker
 
-Issues live in the Linear team **CRE Skills** (`CRE`) in workspace `mariourquia`, through the Linear MCP server. See `docs/agents/issue-tracker.md`.
+Issues live in the Linear team **CRE Skills** (`CRE`) in workspace `mariourquia`, through the Linear
+MCP server. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
-The five canonical triage roles map to Linear labels. See `docs/agents/triage-labels.md`.
+The seven canonical triage roles (five states, two categories) map to Linear labels. See
+`docs/agents/triage-labels.md`.
