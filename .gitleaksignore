@@ -1,0 +1,47 @@
+# Historical gitleaks findings from the 2026-10-26 secrets-scan
+# (actions run 40354230402). Each fingerprint is one false positive.
+# Commit-qualified lines cover `gitleaks detect` (full history, what CI runs).
+# Path-only lines cover `gitleaks detect --no-git` on the working tree.
+# None of these are credentials. Do not widen this file to a whole directory.
+
+# Release-note example of `claude plugin validate` using a local checkout path.
+# Rule local-filesystem-path (/Users/<name>/). Not a credential.
+e07f839444b1c5f6571f9dfce06fe303956555e3:docs/releases/v5.2.1-release-notes.md:local-filesystem-path:30
+docs/releases/v5.2.1-release-notes.md:local-filesystem-path:30
+
+# Comment example in the redaction CLI. Placeholder home path, not a credential.
+9d2ff83f8ab4a4f4570a87f1772a801c91434be6:scripts/redact-feedback.mjs:local-filesystem-path:9
+scripts/redact-feedback.mjs:local-filesystem-path:9
+
+# Redaction-test fixtures: fake home paths and a fake API_KEY assignment the
+# test asserts is scrubbed. Not a live credential.
+9d2ff83f8ab4a4f4570a87f1772a801c91434be6:tests/test-redaction.mjs:local-filesystem-path:47
+9d2ff83f8ab4a4f4570a87f1772a801c91434be6:tests/test-redaction.mjs:local-filesystem-path:167
+9d2ff83f8ab4a4f4570a87f1772a801c91434be6:tests/test-redaction.mjs:local-filesystem-path:174
+9d2ff83f8ab4a4f4570a87f1772a801c91434be6:tests/test-redaction.mjs:generic-api-key:119
+tests/test-redaction.mjs:local-filesystem-path:47
+tests/test-redaction.mjs:local-filesystem-path:194
+tests/test-redaction.mjs:local-filesystem-path:201
+tests/test-redaction.mjs:generic-api-key:146
+
+# Orchestrator prose. generic-api-key matched `outputKey: <snake_case id>`
+# (low-entropy workflow output names, not API keys). The file later moved to
+# docs/orchestrator-references/.
+4a161a817e989d63eaa5916e78f01c92728efbbb:orchestrators/prompts/challenge-layer-orchestrator.md:generic-api-key:275
+4a161a817e989d63eaa5916e78f01c92728efbbb:orchestrators/prompts/challenge-layer-orchestrator.md:generic-api-key:286
+4a161a817e989d63eaa5916e78f01c92728efbbb:orchestrators/prompts/challenge-layer-orchestrator.md:generic-api-key:335
+docs/orchestrator-references/challenge-layer-orchestrator.md:generic-api-key:281
+docs/orchestrator-references/challenge-layer-orchestrator.md:generic-api-key:292
+docs/orchestrator-references/challenge-layer-orchestrator.md:generic-api-key:341
+
+# Historical SECURITY.md contact line. personal-email matched the public
+# security-contact address this repo's own rule flags. HEAD already uses the
+# GitHub noreply address, so the working tree is clean. Not a credential;
+# nothing to rotate. History still contains the old line.
+8ed00bcc91779eaa2bede60e899399e3bf429711:SECURITY.md:personal-email:7
+
+# Vendor-booking copy. generic-api-key matched the phrase "delivery/pickup"
+# on a line that also says "access instructions". English, not a key.
+# The file later moved under src/skills/.
+fb9ca07d30b9ad2dfa3b3653b82cac5efb423f5c:skills/tenant-event-planner/references/vendor-booking-schemas.yaml:generic-api-key:721
+src/skills/tenant-event-planner/references/vendor-booking-schemas.yaml:generic-api-key:721
