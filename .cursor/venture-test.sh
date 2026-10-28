@@ -3,4 +3,4 @@
 # Secret values do not belong in this file.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-.venv/bin/pytest
+.venv/bin/python -m pytest tests/ -v

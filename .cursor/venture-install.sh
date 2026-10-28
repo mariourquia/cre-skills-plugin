@@ -6,10 +6,10 @@ cd "$(dirname "$0")/.."
 # The base image has Python but not python3-venv, so ensurepip is missing
 # until the distro package is installed.
 if ! python3 -c 'import ensurepip' >/dev/null 2>&1; then
-  sudo apt-get update
-  sudo apt-get install -y python3-venv
+  sudo -n env DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a apt-get update
+  sudo -n env DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a apt-get install -y python3-venv
 fi
 python3 -m venv .venv
-.venv/bin/pip install pytest pyyaml
+.venv/bin/pip install --require-hashes -r .cursor/requirements.txt
 cd tools
 npm ci
