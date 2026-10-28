@@ -21,6 +21,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import unittest
 from pathlib import Path
 
@@ -54,7 +55,7 @@ def _calculator_for_skill(slug: str) -> str | None:
 
 def _invoke_calculator(slug: str, inputs: dict) -> dict:
     result = subprocess.run(
-        ["python3", str(INVOKER), slug, "--json", json.dumps(inputs)],
+        [sys.executable, str(INVOKER), slug, "--json", json.dumps(inputs)],
         capture_output=True, text=True, timeout=30,
     )
     if result.returncode != 0:

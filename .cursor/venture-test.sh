@@ -3,4 +3,9 @@
 # Secret values do not belong in this file.
 set -euo pipefail
 cd "$(dirname "$0")/.."
+# Same catalog pre-steps as .github/workflows/ci.yml before the integrity suite.
+.venv/bin/python scripts/catalog-build.py
+.venv/bin/python scripts/catalog-generate.py
 .venv/bin/python -m pytest tests/ -v
+# Scoped suite from pyproject testpaths. Not collected by `pytest tests/`.
+.venv/bin/python -m pytest

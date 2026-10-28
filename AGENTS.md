@@ -18,8 +18,10 @@ python3 -m pytest tests/     # top-level integration suite (catalog, manifests, 
   consumes `dist/catalog.json`, which is gitignored.
 - `src/skills/residential_multifamily/workflows/implementation_intake_signoff_builder`
   is excluded from the scoped run (see pyproject comment) — known Wave-5 gap.
-- GitHub Actions billing is OFF for this account. These local suites are the
-  only gate; never claim CI will catch anything.
+- GitHub Actions runs the integration suite (`python -m pytest tests/`) in
+  `.github/workflows/ci.yml`, after `scripts/catalog-build.py` and
+  `scripts/catalog-generate.py`. The scoped suite is not in that workflow;
+  run both locally before a release.
 
 ## Generated artifacts (never hand-edit)
 
