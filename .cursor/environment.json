@@ -1,0 +1,18 @@
+{
+  "name": "CRE Skills / cre-skills-plugin",
+  "user": "ubuntu",
+  "install": "bash .cursor/venture-install-all.sh",
+  "repositoryDependencies": [
+    "github.com/mariourquia/cre-skills-site",
+    "github.com/mariourquia/cre-skills-feedback-api",
+    "github.com/CRE-Intelligence/cre-skills-pro",
+    "github.com/CRE-Intelligence/cre-skills-marketplace",
+    "github.com/mariourquia/capodagli-pm-skills-plugin"
+  ],
+  "terminals": [
+    {
+      "name": "cre-skills-site dev",
+      "command": "cd ../cre-skills-site 2>/dev/null || cd /workspace/cre-skills-site; npm run dev"
+    }
+  ]
+}
