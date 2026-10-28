@@ -1,0 +1,5 @@
+# Cloud-env test dependencies. Same set as .github/workflows/ci.yml
+# (Install test dependencies). The hashed lock is .cursor/requirements.txt.
+pytest
+pyyaml
+jsonschema

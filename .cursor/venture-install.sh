@@ -3,6 +3,13 @@
 # Secret values do not belong in this file.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-python3 -m pip install --user pytest pyyaml
+# The base image has Python but not python3-venv, so ensurepip is missing
+# until the distro package is installed.
+if ! python3 -c 'import ensurepip' >/dev/null 2>&1; then
+  sudo -n env DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a apt-get update
+  sudo -n env DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a apt-get install -y python3-venv
+fi
+python3 -m venv .venv
+.venv/bin/pip install --require-hashes -r .cursor/requirements.txt
 cd tools
 npm ci
