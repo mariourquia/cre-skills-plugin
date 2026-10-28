@@ -16,6 +16,7 @@ credentials.json
 serviceAccountKey.json
 __pycache__/
 *.pyc
+.venv/
 .vscode/
 .idea/
 dist/
